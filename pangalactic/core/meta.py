@@ -1,0 +1,514 @@
+# -*- coding: utf-8 -*-
+"""
+Pan Galactic meta characteristics
+"""
+# NOTE:  As a "simplest thing that works", this module adds interface default
+# settings that reference the classes of the PGEF ontology (which is not an
+# appropriate vehicle to specify interface characteristics).
+#
+# Ultimately both aspects will be loosely coupled via a "master model", but
+# that architecture is still being worked out.
+
+from collections import OrderedDict
+from pangalactic.core.units import in_si
+
+# PGXN_REQD:  Properties that are validated by PgxnObject to be non-empty
+# SEE ALSO:  PGXN_HIDE and PGXN_MASK (fields never shown for a class -- defined
+# below)
+IDENTITY = ['id', 'name', 'description']
+PGXN_REQD = dict(
+    HardwareProduct=(IDENTITY + ['product_type']),
+    ParameterDefinition=['id', 'name', 'description', 'dimensions',
+                         'range_datatype'],
+    Project=IDENTITY,
+    ProductType=IDENTITY,
+    Requirement=(IDENTITY + ['rationale', 'comment']),
+    Test=(IDENTITY + ['verifies', 'purpose', 'comment'])
+    )
+
+# MAIN_VIEWS:  Class-specific default fields for the PgxnObject "main" tab and
+# ObjectTable.  This dictionary is intended to be added to and/or overridden by
+# app-specific settings defined in the 'pangalactic.config' module-level
+# dictionary.
+# TODO:  support for field "aliases" (a.k.a. "display names")
+VERSIONED = ['owner', 'version', 'version_sequence', 'frozen', 'iteration',
+             'components', 'where_used', 'projects_using_system', 'ports',
+             'has_models', 'derived_from']
+MAIN_VIEWS = dict(
+    Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
+         'assembly_level', 'product_type_hint'],
+    Discipline=IDENTITY,
+    DisciplineProductType=['used_in_discipline', 'relevant_product_type'],
+    DisciplineRole=['related_to_discipline', 'related_role'],
+    HardwareProduct=(PGXN_REQD['HardwareProduct'] + ['public'] + VERSIONED),
+    Model=(IDENTITY + ['type_of_model', 'of_thing']),
+    ModelFamily=IDENTITY,
+    ModelType=(IDENTITY + ['model_type_family']),
+    ObjectAccess=['accessible_object', 'grantee'],
+    Organization=(IDENTITY + ['name_code', 'cage_code', 'parent_organization',
+                              'sub_organizations', 'street_address', 'city',
+                              'state_or_province', 'zip_or_postal_zone']),
+    Person=(IDENTITY + ['last_name', 'mi_or_name', 'first_name',
+                        'preferred_name', 'employer', 'org', 'work_email',
+                        'work_phone']),
+    ParameterDefinition=(IDENTITY + ['range_datatype', 'dimensions']),
+    ParameterRelation=['referenced_relation', 'correlates_parameter'],
+    Port=['id', 'name', 'of_product', 'type_of_port'],
+    Product=(IDENTITY + ['product_type'] + VERSIONED),
+    ProductRequirement=['allocated_requirement', 'satisfied_by'],
+    ProductType=IDENTITY,
+    ProductTypeParameterDefinition=['used_in_product_type',
+                                    'parameter_definition'],
+    Project=(IDENTITY + ['parent_organization']),
+    ProjectSystemUsage=['id', 'project', 'system', 'system_role'],
+    Representation=(IDENTITY + ['of_object', 'representation_purpose']),
+    RepresentationFile=(IDENTITY + ['of_representation']),
+    Requirement=(IDENTITY + ['rationale', 'comment', 'purpose']),
+    RoleAssignment=['assigned_role', 'assigned_to', 'role_assignment_context'],
+    Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
+    )
+
+# PGXN_VIEWS:  Default fields for the PgxnObject "info", "narrative" and
+# "admin" tabs
+PGXN_VIEWS = dict(
+    info=['purpose'],
+    narrative=['comment', 'rationale'],
+    admin=['oid', 'creator', 'create_datetime', 'modifier', 'mod_datetime',
+           'url'])
+
+# PGXN_PARAMETERS:  preferred ordering for parameters in PgxnObject parameter
+# forms
+PGXN_PARAMETERS = ['m', 'm_ctgcy', 'm_NTE', 'P', 'P_ctgcy', 'P_NTE', 'R_D',
+                   'R_ctgcy', 'R_NTE', 'Vendor', 'Cost', 'TRL', 'height',
+                   'width', 'depth', 'CoM_X', 'CoM_Y', 'CoM_Z', 'm_CBE',
+                   'm_MEV', 'm_margin', 'P_CBE', 'P_MEV', 'P_margin', 'R_CBE',
+                   'R_MEV', 'R_margin']
+
+# PGXN_PLACEHOLDERS:  Placeholder text for fields in PgxnObject forms
+PGXN_PLACEHOLDERS = {'id': 'abbreviated name; no spaces',
+                     'id_ns': 'namespace for id',
+                     'name': 'verbose name; spaces ok'
+                     }
+
+# PGXN_OBJECT_MENU:  Classes that Pangalaxian "New Object" dialog offers to
+# create [NOT IMPLEMENTED YET]
+PGXN_OBJECT_MENU = [
+                    'Activity',
+                    'Document',
+                    'EeePart',
+                    'Model',
+                    'Mission',
+                    'ParameterDefinition',
+                    'Product',
+                    'ProductInstance',
+                    'HardwareProduct',
+                    'Software',
+                    'PartsList',
+                    'Project',
+                    'Requirement'
+                    ]
+
+# PGXN_ADMIN_MENU:  Classes for which Pangalaxian has ADMIN menu items
+# [NOT IMPLEMENTED YET]
+PGXN_ADMIN_MENU = [
+                    'Organization',
+                    'Person',
+                    'Project',
+                    'RoleAssignment',
+                    'Role',
+                    ]
+
+# M2M:  Reified many-to-many relationships ("join classes")
+#       computed inverse (non-functional) properties
+# format is {
+       # *** M2M:  m2m relationship join class name
+#      property name : {'domain' : class name,
+#                       'range'  : m2m relationship join class name},
+#            ...}
+M2M = {
+       # *** M2M:  Acu (Assembly Component Usage)
+       # inverse of 'assembly'
+       'components' :           {'domain' : 'Product',
+                                 'range'  : 'Acu'},
+       # inverse of 'component'
+       # complementary to 'components'
+       'where_used' :           {'domain' : 'Product',
+                                 'range'  : 'Acu'},
+
+       # *** M2M:  RoleAssignment
+       # inverse of 'assigned_to'
+       'roles' :                {'domain' : 'Person',
+                                 'range'  : 'RoleAssignment'},
+       # inverse of 'assigned_role'
+       # complementary to 'roles'
+       'assignments_of_role' :  {'domain' : 'Role',
+                                 'range'  : 'RoleAssignment'},
+
+       # *** M2M:  ProjectRequirement
+       # inverse of 'implementing_project'
+       'requirements' :         {'domain' : 'Project',
+                                 'range'  : 'ProjectRequirement'},
+       # inverse of 'assigned_requirement'
+       # complementary to 'requirements'
+       'assigned_to_projects' : {'domain' : 'Requirement',
+                                 'range'  : 'ProjectRequirement'},
+
+       # *** M2M:  ProductRequirement
+       # inverse of 'satisfied_by'
+       # complementary to 'allocated_to_products'
+       'satisfies' :              {'domain' : 'Product',
+                                   'range'  : 'ProductRequirement'},
+       # inverse of 'allocated_requirement'
+       # complementary to 'satisfies'
+       'allocated_to_products' :  {'domain' : 'Requirement',
+                                   'range'  : 'ProductRequirement'},
+
+       # *** M2M:  ProjectSystemUsage
+       # inverse of 'system'
+       # complementary to 'systems'
+       'projects_using_system': {'domain' : 'Product',
+                                 'range'  : 'ProjectSystemUsage'},
+       # inverse of 'project'
+       # complementary to 'projects_using_system'
+       'systems':               {'domain' : 'Project',
+                                 'range'  : 'ProjectSystemUsage'},
+
+       # *** M2M:  ParameterRelation
+       # inverse of 'correlates_parameter'
+       # complementary to 'correlates_parameters'
+       'is_correlated_by':         {'domain' : 'ParameterDefinition',
+                                    'range'  : 'ParameterRelation'},
+       # inverse of 'referenced_relation'
+       # complementary to 'is_correlated_by'
+       'correlates_parameters':    {'domain' : 'Relation',
+                                    'range'  : 'ParameterRelation'},
+
+       # *** M2M:  DisciplineProductType
+       # inverse of 'relevant_product_type'
+       # complementary to 'used_in_discipline'
+       'used_in_disciplines' : {
+                     'domain' : 'ProductType',
+                     'range'  : 'DisciplineProductType'},
+       # inverse of 'used_in_discipline'
+       # complementary to 'relevant_product_type'
+       'relevant_product_types' : {
+                     'domain' : 'Discipline',
+                     'range'  : 'DisciplineProductType'},
+
+       # *** M2M:  ProductTypeParameterDefinition
+       # inverse of 'used_in_product_type'
+       # complementary to 'used_in_product_types'
+       'parameter_definitions' : {
+                     'domain' : 'ProductType',
+                     'range'  : 'ProductTypeParameterDefinition'},
+       # inverse of 'parameter_definition'
+       # complementary to 'parameter_definitions'
+       'used_in_product_types' : {
+                     'domain' : 'ParameterDefinition',
+                     'range'  : 'ProductTypeParameterDefinition'},
+
+       # *** M2M:  ObjectAccess
+       # inverse of 'accessible_object'
+       # complementary to 'accessible_objects'
+       'grantees' : {
+                     'domain' : 'ManagedObject',
+                     'range'  : 'ObjectAccess'},
+       # inverse of 'grantee'
+       # complementary to 'grantees'
+       'accessible_objects' : {
+                     'domain' : 'Actor',
+                     'range'  : 'ObjectAccess'}
+       }
+
+# Special properties that get a customized droppable interface to enable
+# populating a one-to-many relationship with objects.
+# Format is {property name : one2m relationship range class name}
+ONE2M = {
+         # inverse of 'creator'
+         'created_objects' :      {'domain' : 'ManagedObject',
+                                   'range'  : 'ManagedObject'},
+         # inverse of 'of_thing'
+         'has_models' :           {'domain' : 'Identifiable',
+                                   'range'  : 'Model'},
+         # inverse of 'of_object'
+         'has_representations' :  {'domain' : 'DigitalProduct',
+                                   'range'  : 'Representation'},
+         # inverse of 'of_representation'
+         'has_files' :            {'domain' : 'Representation',
+                                   'range'  : 'RepresentationFile'},
+         # inverse of 'role_assignment_context'
+         'organizational_role_assignments' : {'domain' :
+                                              'Organization',
+                                   'range' :  'RoleAssignment'},
+         # inverse of 'owner'
+         'owned_objects' :        {'domain' : 'ManagedObject',
+                                   'range'  : 'ManagedObject'},
+         # inverse of 'product_type'
+         'products_of_type' :     {'domain' : 'ProductType',
+                                   'range'  : 'Product'},
+         # inverse of 'parent_parts_list'
+         'parts_list_items' :     {'domain' : 'PartsList',
+                                   'range'  : 'PartsListItem'},
+         # inverse of 'parent_organization'
+         'sub_organizations' :    {'domain' : 'Organization',
+                                   'range'  : 'Organization'},
+         # inverse of 'verifies'
+         'verified_by' :          {'domain' : 'Requirement',
+                                   'range'  : 'Test'}
+         }
+
+# PGXN_HIDE:  Fields not to be shown for any object
+PGXN_HIDE = ONE2M.keys() + M2M.keys()
+
+# PGXN_MASK:  Fields that are not applicable to specified classes
+PGXN_MASK = dict(
+    ParameterDefinition=(PGXN_HIDE + ['base_parameters', 'computed_by_default',
+                         'generating_function', 'used_in_disciplines']),
+    Requirement=(PGXN_HIDE + ['components', 'computable_form', 'fsc_code',
+                 'has_models', 'ports', 'product_type', 'satisfies',
+                 'specification_number']),
+    Test=(PGXN_HIDE + ['components', 'computable_form', 'fsc_code',
+                 'product_type'])
+    )
+
+# PGXN_HIDE_PARMS:  Subclasses of Modelable for which 'parameters' panel should
+# be hidden
+PGXN_HIDE_PARMS = [
+                   'Actor',
+                   'Acu',
+                   'Organization',
+                   'ParameterDefinition',
+                   'ParameterRelation',
+                   'Person',
+                   'ProductRequirement',
+                   'ProductTypeParameterDefinition',
+                   'Project',
+                   'ProjectSystemUsage',
+                   'Representation'
+                   ]
+
+# DESERIALIZATION_ORDER:  order in which to deserialize classes so that
+# relationships are populated properly
+DESERIALIZATION_ORDER = [
+                    'Relation',
+                    'Discipline',
+                    'Role',
+                    'Organization',
+                    'Project',
+                    'Person',
+                    'ParameterDefinition',
+                    'PortType',
+                    'ProductType',
+                    'Product',
+                    'HardwareProduct',
+                    'SoftwareProduct',
+                    'DigitalProduct',
+                    'Acu',
+                    'ProjectSystemUsage',
+                    'Model',
+                    'Port',
+                    'Flow',
+                    'Representation',
+                    'RepresentationFile',
+                    'Requirement'
+                    ]
+
+# MODEL_TYPE_PREFS:  preferred model types
+# (for now, the only ones we can render ... ;)
+MODEL_TYPE_PREFS = ['step:203', 'step:214', 'step:242', 'pgefobjects:Block']
+
+# SELECTION_VIEWS:  Class-specific default sets of columns for tabular display
+# of objects in the foreign key object selection dialog for PgxnObject
+SELECTION_VIEWS = dict(
+    Domain=['id', 'description']
+    )
+
+# SELECTION_FILTERS:  Field-specific filters for valid objects to be included
+# in the tabular display of objects in the foreign key object selection dialog
+# for PgxnObject in format:
+#   {field: {class_name_1: filter1,
+#            class_name_2: filter2}, ...}
+# ... where a filter is a dict or None, which means "all".
+SELECTION_FILTERS = dict(
+    owner={'Project': None,
+           'Organization': None},
+    product_type_hint={'ProductType': None},
+    product_type={'ProductType': None}
+    )
+
+def intconv(val):
+    """
+    Return supplied value cast to an integer. This is a workaround for int()
+    not liking exponential notation, so for example '1e6' can be converted to
+    an int.
+    """
+    return int(float(val or 0))
+
+# SELECTABLE_VALUES:  Dictionaries of values for Properties with a finite range
+# of selectable values -- the form is:  {[combo-box string value] : value}
+SELECTABLE_VALUES = dict(
+    range_datatype=OrderedDict([
+        ('float', float),
+        ('int', intconv),
+        ('text', str),
+        ('boolean', bool)]),
+    dimensions=OrderedDict(
+        [(dim, dim) for dim in in_si])
+        )
+
+# TEXT_PROPERTIES:  Properties that get a TextWidget interface
+TEXT_PROPERTIES = ['comment', 'description', 'rationale', 'purpose']
+
+# NUMERIC_FORMATS:  Formatting used to display numbers in UI
+NUMERIC_FORMATS = ['Thousands Commas', 'No Commas', 'Scientific Notation']
+
+# NUMERIC_PRECISION:  Maximum precision assumed for parameter values
+NUMERIC_PRECISION = ['3', '4', '5', '6', '7', '8', '9']
+
+# Special external names of PGEF classes
+EXT_NAMES = {
+    'Acu'                 : 'Assembly Component Usage',
+    'EeePart'             : 'EEE Part',
+    'Mime'                : 'MIME Type',
+    'ParameterDefinition' : 'Parameter Definition',
+    }
+
+# Special plurals of external names of PGEF classes
+EXT_NAMES_PLURAL = {
+    'Activity'            : 'Activities',
+    'Acu'                 : 'Assembly Component Usages',
+    'EeePart'             : 'EEE Parts',
+    'HardwareProduct'     : 'Hardware Products',
+    'Mime'                : 'MIME Types',
+    'ParameterDefinition' : 'Parameter Definitions',
+    'Port'                : 'Ports',
+    'Property'            : 'Properties',
+    }
+
+# Default ordering of the important ManagedObject properties
+PGEF_PROPS_ORDER = [
+            'oid',
+            'id',
+            'id_ns',
+            'name',
+            'description',
+            'version',
+            'iteration',
+            'version_sequence',
+            'owner',
+            'creator',
+            'comment',
+            'create_datetime',
+            'modifier',
+            'mod_datetime',
+            'url',
+            'representations',
+            'abbreviation'
+            ]
+
+# Default column widths (in pixels) for specified properties
+PGEF_COL_WIDTHS = {
+            'abbreviation': 100,
+            'creator': 100,
+            'create_datetime': 100,
+            'comment': 250,
+            'description': 250,
+            'frozen': 50,
+            'id': 200,
+            'id_ns': 100,
+            'iteration': 50,
+            'modifier': 100,
+            'mod_datetime': 100,
+            'name': 200,
+            'owner': 100,
+            'oid': 100,
+            'product_type': 200,
+            'purpose': 250,
+            'range_datatype': 50,
+            'rationale': 250,
+            'representations': 100,
+            'url': 100,
+            'version': 50,
+            'version_sequence': 50
+            }
+
+# Column names to use for specified properties
+PGEF_COL_NAMES = {
+            'version': 'ver.',
+            'iteration': 'iter.',
+            'version_sequence': 'seq.',
+            'range_datatype': 'range',
+            'abbreviation': 'abbrev.'
+            }
+
+# Properties specified as READ-ONLY by PanGalactic
+# TODO:  do this in a configurable way, as part of the Schemas
+READONLY = [
+            'allocated_to_products', # m2m (Requirement:ProductRequirement)
+            'components',       # m2m (ACU)
+            'creator',          #  "   "    "   "
+            'create_datetime',  # tds
+            'has_models',       # inverse of 'of_thing' property of Model
+            'id_ns',            # derive from 'owner'; might be YAGNI ...
+            'iteration',
+            'modifier',         # set from user id
+            'mod_datetime',     # tds
+            'of_thing',         # inverse of 'of_thing' property of Model
+            'oid',              # generated (uuid) at creation-time
+            'ports',            # fk (inv. of Port.of_product)
+            # 'product_type',     # fk (property of Product -- set when created)
+            'projects_using_system', # m2m (ProjectSystemUsage)
+            'satisfies',        # m2m (Product:ProductRequirement)
+            'version_sequence',
+            'where_used'        # m2m (ACU)
+            ]
+
+# This is a temporary way of filtering namespaces, just until a more rational
+# way is implemented
+
+READONLYNS = [
+              'pgef',
+              'pgefobjects',
+              'pgeftest',
+              'pgeftesttmp',
+              'owl',
+              'rdf',
+              'rdfs',
+              'dc',
+              'dcterms',
+              'daml',
+              'xml',
+              'xsd'
+              ]
+
+# "Internal" plurals of PGEF class names, particularly for use in "back
+# references" in a foreign key relationship
+
+PLURALS = {
+    'Activity'           : 'Activities',
+    'Acu'                : 'Acus',
+    'DataPackage'        : 'DataPackages',
+    'DataSet'            : 'DataSets',
+    'DigitalProduct'     : 'DigitalProducts',
+    'DigitalFile'        : 'DigitalFiles',
+    'Document'           : 'Documents',
+    'EeePart'            : 'EeeParts',
+    'Identifiable'       : 'Identifiables',
+    'Mime'               : 'Mimes',
+    'Model'              : 'Models',
+    'Organization'       : 'Organizations',
+    'ManagedObject'      : 'ManagedObjects',
+    'ProductInstance'    : 'ProductInstances',
+    'Product'            : 'Products',
+    'PartModel'          : 'PartModels',
+    'PartsListItem'      : 'PartsListItems',
+    'PartsList'          : 'PartsLists',
+    'Person'             : 'Persons',
+    'Product'            : 'Products',
+    'Project'            : 'Projects',
+    'Property'           : 'Properties',
+    'Representation'     : 'Representations',
+    'RoleAssignment'     : 'RoleAssignments',
+    'Role'               : 'Roles'
+    }
+

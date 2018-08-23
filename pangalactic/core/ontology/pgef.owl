@@ -1,0 +1,2392 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY pgef "http://pangalactic.us/pgef/" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY swrl "http://www.w3.org/2003/11/swrl#" >
+    <!ENTITY swrlb "http://www.w3.org/2003/11/swrlb#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY protege "http://protege.stanford.edu/plugins/owl/protege#" >
+    <!ENTITY xsp "http://www.owl-ontologies.com/2005/08/07/xsp.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://pangalactic.us/pgef/"
+     xml:base="http://pangalactic.us/pgef/"
+     xmlns:xsp="http://www.owl-ontologies.com/2005/08/07/xsp.owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:swrlb="http://www.w3.org/2003/11/swrlb#"
+     xmlns:protege="http://protege.stanford.edu/plugins/owl/protege#"
+     xmlns:swrl="http://www.w3.org/2003/11/swrl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:pgef="http://pangalactic.us/pgef/">
+    <owl:Ontology rdf:about="http://pangalactic.us/pgef/"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+    <!-- http://pangalactic.us/pgef/assembly -->
+
+    <owl:ObjectProperty rdf:about="&pgef;assembly">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The assembly to which an assembly component usage (Acu) points.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Acu"/>
+        <rdfs:range rdf:resource="&pgef;Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/components -->
+
+    <owl:ObjectProperty rdf:about="&pgef;components">
+        <owl:inverseOf rdf:resource="&pgef;assembly"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The slots or roles (assembly component usages [Acu]) of the products used to assemble this product.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&pgef;Acu"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/component -->
+
+    <owl:ObjectProperty rdf:about="&pgef;component">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The component product in an assembly component usage (Acu).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Acu"/>
+        <rdfs:range rdf:resource="&pgef;Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/where_used -->
+
+    <owl:ObjectProperty rdf:about="&pgef;where_used">
+        <owl:inverseOf rdf:resource="&pgef;component"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Where this product is used (assembly component usages) in any assemblies.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&pgef;Acu"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/product_type_hint -->
+
+    <owl:ObjectProperty rdf:about="&pgef;product_type_hint">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A suggested product type for the component to use in an assembly position.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Acu"/>
+        <rdfs:range rdf:resource="&pgef;ProductType"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/related_role -->
+
+    <owl:ObjectProperty rdf:about="&pgef;related_role">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The role referenced by a DisciplineRole relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DisciplineRole"/>
+        <rdfs:range rdf:resource="&pgef;Role"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/related_to_disciplines -->
+
+    <owl:ObjectProperty rdf:about="&pgef;related_to_disciplines">
+        <owl:inverseOf rdf:resource="&pgef;related_role"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The DisciplineRole relationships in which a role is referenced.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Role"/>
+        <rdfs:range rdf:resource="&pgef;DisciplineRole"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/related_to_discipline -->
+
+    <owl:ObjectProperty rdf:about="&pgef;related_to_discipline">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Discipline to which a role is related by a DisciplineRole relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DisciplineRole"/>
+        <rdfs:range rdf:resource="&pgef;Discipline"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/related_roles -->
+
+    <owl:ObjectProperty rdf:about="&pgef;related_roles">
+        <owl:inverseOf rdf:resource="&pgef;related_to_discipline"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The roles related to a Discipline.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Discipline"/>
+        <rdfs:range rdf:resource="&pgef;DisciplineRole"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/assigned_role -->
+
+    <owl:ObjectProperty rdf:about="&pgef;assigned_role">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The role assigned in a RoleAssignment relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RoleAssignment"/>
+        <rdfs:range rdf:resource="&pgef;Role"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/assignments_of_role -->
+
+    <owl:ObjectProperty rdf:about="&pgef;assignments_of_role">
+        <owl:inverseOf rdf:resource="&pgef;assigned_role"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The RoleAssignment relationships in which a role has been assigned.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Role"/>
+        <rdfs:range rdf:resource="&pgef;RoleAssignment"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/assigned_to -->
+
+    <owl:ObjectProperty rdf:about="&pgef;assigned_to">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The person to whom a role is assigned in a RoleAssignment relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RoleAssignment"/>
+        <rdfs:range rdf:resource="&pgef;Person"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/roles -->
+
+    <owl:ObjectProperty rdf:about="&pgef;roles">
+        <owl:inverseOf rdf:resource="&pgef;assigned_to"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The roles assigned to a person.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&pgef;RoleAssignment"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/system -->
+
+    <owl:ObjectProperty rdf:about="&pgef;system">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The system referenced in a ProjectSystemUsage relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
+        <rdfs:range rdf:resource="&pgef;Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/projects_using_system -->
+
+    <owl:ObjectProperty rdf:about="&pgef;projects_using_system">
+        <owl:inverseOf rdf:resource="&pgef;system"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The projects that are using or developing a system.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&pgef;ProjectSystemUsage"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/project -->
+
+    <owl:ObjectProperty rdf:about="&pgef;project">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The project referenced in a ProjectSystemUsage relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
+        <rdfs:range rdf:resource="&pgef;Project"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/systems -->
+
+    <owl:ObjectProperty rdf:about="&pgef;systems">
+        <owl:inverseOf rdf:resource="&pgef;project"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The top-level systems that are used or developed by a project.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Project"/>
+        <rdfs:range rdf:resource="&pgef;ProjectSystemUsage"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/content_mime_type -->
+
+    <owl:ObjectProperty rdf:about="&pgef;content_mime_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The MIME type of the value of the &apos;content&apos; attribute.  (This does not imply that a document has an intrinsic MIME type.  In general, each representation of a document will have a MIME type, and they may all be different.)
+</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Document"/>
+        <rdfs:range rdf:resource="&pgef;Mime"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/creator -->
+
+    <owl:ObjectProperty rdf:about="&pgef;creator">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The actor (person, AI, android, gremlin, hobbit, or other agent) that created an object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Modelable"/>
+        <rdfs:range rdf:resource="&pgef;Actor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/created_objects -->
+
+    <owl:ObjectProperty rdf:about="&pgef;created_objects">
+        <owl:inverseOf rdf:resource="&pgef;creator"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Objects created by this agent.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Actor"/>
+        <rdfs:range rdf:resource="&pgef;Modelable"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/data_sets -->
+
+    <owl:ObjectProperty rdf:about="&pgef;data_sets">
+        <rdfs:comment rdf:datatype="&xsd;string">The data sets contained in a data package.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DataPackage"/>
+        <rdfs:range rdf:resource="&pgef;DataSet"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/derived_from -->
+
+    <owl:ObjectProperty rdf:about="&pgef;derived_from">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Product from which another Product is derived. This will usually mean the derived Product was created by copying and modifying the original Product.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&pgef;Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/port_type-->
+
+    <owl:ObjectProperty rdf:about="&pgef;port_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of port (if any) associated with a parameter definition.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&pgef;PortType"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/variable -->
+
+    <owl:ObjectProperty rdf:about="&pgef;variable">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The variable associated with a state-related parameter.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&pgef;ParameterDefinition"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/state -->
+
+    <owl:ObjectProperty rdf:about="&pgef;state">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The state associated with a state-related parameter.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&pgef;State"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/employer -->
+
+    <owl:ObjectProperty rdf:about="&pgef;employer">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The primary organization for which a person works.</rdfs:comment>
+        <rdfs:range rdf:resource="&pgef;Organization"/>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/instance_of -->
+
+    <owl:ObjectProperty rdf:about="&pgef;instance_of">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The product of which a specific physical object is a realization.</rdfs:comment>
+        <rdfs:range rdf:resource="&pgef;Product"/>
+        <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/mime_type -->
+
+    <owl:ObjectProperty rdf:about="&pgef;mime_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The MIME type/subtype of a file&apos;s content, specifying the format of a file and aiding an application in choosing an appropriate tool to process its content.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
+        <rdfs:range rdf:resource="&pgef;Mime"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/model_type_family -->
+
+    <owl:ObjectProperty rdf:about="&pgef;model_type_family">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The model family to which a type of model belongs.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ModelType"/>
+        <rdfs:range rdf:resource="&pgef;ModelFamily"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/model_definition_context --> 
+
+    <owl:ObjectProperty rdf:about="&pgef;model_definition_context">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The discipline context within which a model is being used. (In the engineering domain, this property maps to STEP product definition context.)</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Model"/>
+        <rdfs:range rdf:resource="&pgef;Discipline"/>
+    </owl:ObjectProperty>
+
+
+    <!-- http://pangalactic.us/pgef/of_product -->
+
+    <owl:ObjectProperty rdf:about="&pgef;of_product">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Product that owns a Port.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Port"/>
+        <rdfs:range rdf:resource="&pgef;Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ports -->
+
+    <owl:ObjectProperty rdf:about="&pgef;ports">
+        <owl:inverseOf rdf:resource="&pgef;of_product"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Ports owned by a Product.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&pgef;Port"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/flow_context -->
+
+    <owl:ObjectProperty rdf:about="&pgef;flow_context">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The context (higher-level object) within which a Flow is defined. For example, a Flow that represents an electrical connection between the ports of two components in an assembled product is defined within the context of the assembled product, so the assembled product is the flow_context for that Flow; conversely, the Flow belongs to the internal (white box) model of that assembled product.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Flow"/>
+        <rdfs:range rdf:resource="&pgef;ManagedObject"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/start_port -->
+
+    <owl:ObjectProperty rdf:about="&pgef;start_port">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Port from which a Flow originates.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Flow"/>
+        <rdfs:range rdf:resource="&pgef;Port"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/end_port -->
+
+    <owl:ObjectProperty rdf:about="&pgef;end_port">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Port to which a Flow flows.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Flow"/>
+        <rdfs:range rdf:resource="&pgef;Port"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/type_of_model -->
+
+    <owl:ObjectProperty rdf:about="&pgef;type_of_model">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of a model (for example, a SysML Block Definition Diagram, or a STEP 3D mechanical model).  Types of models will typically have associated tools and file formats.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Model"/>
+        <rdfs:range rdf:resource="&pgef;ModelType"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/type_of_port -->
+
+    <owl:ObjectProperty rdf:about="&pgef;type_of_port">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The characterization of a port by what flows through it (e.g., power, control, communications, analog or digital data, etc.).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Port"/>
+        <rdfs:range rdf:resource="&pgef;PortType"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/modifier -->
+
+    <owl:ObjectProperty rdf:about="&pgef;modifier">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The actor (person, AI, android, gremlin, hobbit, or other agent) that last modified an object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Modelable"/>
+        <rdfs:range rdf:resource="&pgef;Actor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/of_object -->
+
+    <owl:ObjectProperty rdf:about="&pgef;of_object">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The object (a digital product) that a representation represents.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Representation"/>
+        <rdfs:range rdf:resource="&pgef;DigitalProduct"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/has_representations -->
+
+    <owl:ObjectProperty rdf:about="&pgef;has_representations">
+        <owl:inverseOf rdf:resource="&pgef;of_object"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Representations of a digital product.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:range rdf:resource="&pgef;Representation"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/of_representation -->
+
+    <owl:ObjectProperty rdf:about="&pgef;of_representation">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The representation that a representation file is related to.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RepresentationFile"/>
+        <rdfs:range rdf:resource="&pgef;Representation"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/has_files -->
+
+    <owl:ObjectProperty rdf:about="&pgef;has_files">
+        <owl:inverseOf rdf:resource="&pgef;of_representation"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Constituent files of a representation.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Representation"/>
+        <rdfs:range rdf:resource="&pgef;RepresentationFile"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/of_thing -->
+
+    <owl:ObjectProperty rdf:about="&pgef;of_thing">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The thing that a model is intended to describe or simulate.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Model"/>
+        <rdfs:range rdf:resource="&pgef;Modelable"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/has_models -->
+
+    <owl:ObjectProperty rdf:about="&pgef;has_models">
+        <owl:inverseOf rdf:resource="&pgef;of_thing"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The known models that exist for this object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Modelable"/>
+        <rdfs:range rdf:resource="&pgef;Model"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/org -->
+    <!-- inverse property is unnecessary-->
+
+    <owl:ObjectProperty rdf:about="&pgef;org">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The primary organizational affiliation of a person.</rdfs:comment>
+        <rdfs:range rdf:resource="&pgef;Organization"/>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/organizational_role_assignments -->
+
+    <owl:ObjectProperty rdf:about="&pgef;organizational_role_assignments">
+        <owl:inverseOf rdf:resource="&pgef;role_assignment_context"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Role assignments of a person in the context of an organization.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+        <rdfs:range rdf:resource="&pgef;RoleAssignment"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/owner -->
+
+    <owl:ObjectProperty rdf:about="&pgef;owner">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The organizational entity (e.g., a project or a commecial entity) that creates and manages the information about an object.  This is an important property for products, specifying the entity that controls it, and especially for systems, which are generally owned by projects that control their specification and versioning.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:range rdf:resource="&pgef;Organization"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/owned_objects -->
+
+    <owl:ObjectProperty rdf:about="&pgef;owned_objects">
+        <owl:inverseOf rdf:resource="&pgef;owner"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The objects whose information or specification is managed by an organization.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+        <rdfs:range rdf:resource="&pgef;ManagedObject"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/accessible_object -->
+
+    <owl:ObjectProperty rdf:about="&pgef;accessible_object">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The object to which an Object Access relationship has granted access.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ObjectAccess"/>
+        <rdfs:range rdf:resource="&pgef;Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/grantees -->
+
+    <owl:ObjectProperty rdf:about="&pgef;grantees">
+        <owl:inverseOf rdf:resource="&pgef;accessible_object"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Object Access relationships granting access to an object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&pgef;ObjectAccess"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/grantee -->
+
+    <owl:ObjectProperty rdf:about="&pgef;grantee">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Actor to which an Object Access relationship has granted access to an object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ObjectAccess"/>
+        <rdfs:range rdf:resource="&pgef;Actor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/grants -->
+
+    <owl:ObjectProperty rdf:about="&pgef;grants">
+        <owl:inverseOf rdf:resource="&pgef;grantee"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Object Access relationships granting an Actor access to the objects to which it has access.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Actor"/>
+        <rdfs:range rdf:resource="&pgef;ObjectAccess"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/correlates_parameter -->
+
+    <owl:ObjectProperty rdf:about="&pgef;correlates_parameter">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The ParameterDefinitions correlated by the Relation to which a ParameterRelation relationship points.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterRelation"/>
+        <rdfs:range rdf:resource="&pgef;ParameterDefinition"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/is_correlated_by -->
+
+    <owl:ObjectProperty rdf:about="&pgef;is_correlated_by">
+        <owl:inverseOf rdf:resource="&pgef;correlates_parameter"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The relationships that a ParameterDefinition has to its correlative Relations.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&pgef;ParameterRelation"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/referenced_relation -->
+
+    <owl:ObjectProperty rdf:about="&pgef;referenced_relation">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Relation to which a ParameterRelation relationship points.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterRelation"/>
+        <rdfs:range rdf:resource="&pgef;Relation"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/correlates_parameters -->
+
+    <owl:ObjectProperty rdf:about="&pgef;correlates_parameters">
+        <owl:inverseOf rdf:resource="&pgef;referenced_relation"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The ParameterRelation relationships that a Relation has to the parameters it correlates.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Relation"/>
+        <rdfs:range rdf:resource="&pgef;ParameterRelation"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/product_type -->
+
+    <owl:ObjectProperty rdf:about="&pgef;product_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The functional category in which a product has been classified.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&pgef;ProductType"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/products_of_type -->
+
+    <owl:ObjectProperty rdf:about="&pgef;products_of_type">
+        <owl:inverseOf rdf:resource="&pgef;product_type"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The products classified as being in a functional category.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProductType"/>
+        <rdfs:range rdf:resource="&pgef;Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/used_in_discipline -->
+
+    <owl:ObjectProperty rdf:about="&pgef;used_in_discipline">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Discipline to which a DisciplineProductType relationship points.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DisciplineProductType"/>
+        <rdfs:range rdf:resource="&pgef;Discipline"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/relevant_product_types -->
+
+    <owl:ObjectProperty rdf:about="&pgef;relevant_product_types">
+        <owl:inverseOf rdf:resource="&pgef;used_in_discipline"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The relationships that a Discipline has to its ProductTypes.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Discipline"/>
+        <rdfs:range rdf:resource="&pgef;DisciplineProductType"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/relevant_product_type -->
+
+    <owl:ObjectProperty rdf:about="&pgef;relevant_product_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The ProductType to which a DisciplineProductType relationship points.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DisciplineProductType"/>
+        <rdfs:range rdf:resource="&pgef;ProductType"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/used_in_disciplines -->
+
+    <owl:ObjectProperty rdf:about="&pgef;used_in_disciplines">
+        <owl:inverseOf rdf:resource="&pgef;relevant_product_type"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The relationships that a ProductType has to the Disciplines that use it.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProductType"/>
+        <rdfs:range rdf:resource="&pgef;DisciplineProductType"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/parameter_definition -->
+
+    <owl:ObjectProperty rdf:about="&pgef;parameter_definition">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The ParameterDefinition to which a ProductTypeParameterDefinition relationship points.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProductTypeParameterDefinition"/>
+        <rdfs:range rdf:resource="&pgef;ParameterDefinition"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/used_in_product_types -->
+
+    <owl:ObjectProperty rdf:about="&pgef;used_in_product_types">
+        <owl:inverseOf rdf:resource="&pgef;parameter_definition"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The relationships that a ParameterDefinition has to the ProductTypes that use it.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&pgef;ProductTypeParameterDefinition"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/used_in_product_type -->
+
+    <owl:ObjectProperty rdf:about="&pgef;used_in_product_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The ProductType to which a ProductTypeParameterDefinition relationship points.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProductTypeParameterDefinition"/>
+        <rdfs:range rdf:resource="&pgef;ProductType"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/parameter_definitions -->
+
+    <owl:ObjectProperty rdf:about="&pgef;parameter_definitions">
+        <owl:inverseOf rdf:resource="&pgef;used_in_product_type"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The relationships that a ProductType has to the ParameterDefinitions that use it.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProductType"/>
+        <rdfs:range rdf:resource="&pgef;ProductTypeParameterDefinition"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/parent_organization -->
+
+    <owl:ObjectProperty rdf:about="&pgef;parent_organization">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The parent organization of an organization.</rdfs:comment>
+        <rdfs:range rdf:resource="&pgef;Organization"/>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/part_manufacturer -->
+    <!-- inverse property is unnecessary-->
+
+    <owl:ObjectProperty rdf:about="&pgef;part_manufacturer">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The organization that was primarily responsible for producing a physical part.</rdfs:comment>
+        <rdfs:range rdf:resource="&pgef;Organization"/>
+        <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/part_vendor -->
+    <!-- inverse property is unnecessary-->
+
+    <owl:ObjectProperty rdf:about="&pgef;part_vendor">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The organization from which a part instance was procured.</rdfs:comment>
+        <rdfs:range rdf:resource="&pgef;Organization"/>
+        <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/parent_parts_list -->
+
+    <owl:ObjectProperty rdf:about="&pgef;parent_parts_list">
+        <rdfs:comment rdf:datatype="&xsd;string">The parts list that contains this parts list item.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;PartsListItem"/>
+        <rdfs:range rdf:resource="&pgef;PartsList"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/parts_list_items -->
+
+    <owl:ObjectProperty rdf:about="&pgef;parts_list_items">
+        <owl:inverseOf rdf:resource="&pgef;parent_parts_list"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The parts list items contained in this parts list.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;PartsList"/>
+        <rdfs:range rdf:resource="&pgef;PartsListItem"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/pli_component_usage -->
+    <!-- inverse property is unnecessary-->
+
+    <owl:ObjectProperty rdf:about="&pgef;pli_component_usage">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The assembly role or position (and possibly reference designator referenced by a parts list item.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;PartsListItem"/>
+        <rdfs:range rdf:resource="&pgef;Acu"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/role_assignment_context -->
+
+    <owl:ObjectProperty rdf:about="&pgef;role_assignment_context">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The context in which a role is assigned, usually an organization or project.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RoleAssignment"/>
+        <rdfs:range rdf:resource="&pgef;Organization"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/satisfied_by -->
+
+    <owl:ObjectProperty rdf:about="&pgef;satisfied_by">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The function or component receiving a RequirementAllocation.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RequirementAllocation"/>
+        <rdfs:range rdf:resource="&pgef;Acu"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/satisfies -->
+
+    <owl:ObjectProperty rdf:about="&pgef;satisfies">
+        <owl:inverseOf rdf:resource="&pgef;satisfied_by"/>
+        <rdfs:comment rdf:datatype="&xsd;string">RequirementAllocation relationships that reference requirements allocated to this function or component.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Acu"/>
+        <rdfs:range rdf:resource="&pgef;RequirementAllocation"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/allocated_requirement -->
+
+    <owl:ObjectProperty rdf:about="&pgef;allocated_requirement">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The requirement allocated in a RequirementAllocation.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RequirementAllocation"/>
+        <rdfs:range rdf:resource="&pgef;Requirement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/allocated_to_products -->
+
+    <owl:ObjectProperty rdf:about="&pgef;allocated_to_products">
+        <owl:inverseOf rdf:resource="&pgef;allocated_requirement"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The RequirementAllocation relationships that allocate this requirement to functions or components.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&pgef;RequirementAllocation"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/supported_by -->
+
+    <owl:ObjectProperty rdf:about="&pgef;supported_by">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The system receiving a SystemRequirement.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;SystemRequirement"/>
+        <rdfs:range rdf:resource="&pgef;ProjectSystemUsage"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/supports -->
+
+    <owl:ObjectProperty rdf:about="&pgef;supports">
+        <owl:inverseOf rdf:resource="&pgef;supported_by"/>
+        <rdfs:comment rdf:datatype="&xsd;string">SystemRequirement relationships that reference requirements allocated to this system.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
+        <rdfs:range rdf:resource="&pgef;SystemRequirement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/requirement -->
+
+    <owl:ObjectProperty rdf:about="&pgef;requirement">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The requirement allocated in a SystemRequirement.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;SystemRequirement"/>
+        <rdfs:range rdf:resource="&pgef;Requirement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/allocated_to_systems -->
+
+    <owl:ObjectProperty rdf:about="&pgef;allocated_to_systems">
+        <owl:inverseOf rdf:resource="&pgef;requirement"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The SystemRequirement relationships that allocate this requirement to systems.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&pgef;SystemRequirement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/parent_requirement -->
+
+    <owl:ObjectProperty rdf:about="&pgef;parent_requirement">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The parent Requirement in a RequirementAncestry relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RequirementAncestry"/>
+        <rdfs:range rdf:resource="&pgef;Requirement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/child_requirements_of -->
+
+    <owl:ObjectProperty rdf:about="&pgef;child_requirements_of">
+        <owl:inverseOf rdf:resource="&pgef;parent_requirement"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The children of a parent Requirement in a RequirementAncestry relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&pgef;RequirementAncestry"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/child_requirement -->
+
+    <owl:ObjectProperty rdf:about="&pgef;child_requirement">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The child Requirement in a RequirementAncestry relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RequirementAncestry"/>
+        <rdfs:range rdf:resource="&pgef;Requirement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/parent_requirements_of -->
+
+    <owl:ObjectProperty rdf:about="&pgef;parent_requirements_of">
+        <owl:inverseOf rdf:resource="&pgef;child_requirement"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The parents of a child Requirement in a RequirementAncestry relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&pgef;RequirementAncestry"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/computable_form -->
+
+    <owl:ObjectProperty rdf:about="&pgef;computable_form">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The computable_form of a requirement is a Relation, which can usually be thought of as a mathematical constraint applied to a parameter or a set of parameters.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&pgef;Relation"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/sub_organizations -->
+
+    <owl:ObjectProperty rdf:about="&pgef;sub_organizations">
+        <owl:inverseOf rdf:resource="&pgef;parent_organization"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Organizations of which this organization is the parent.</rdfs:comment>
+        <rdfs:range rdf:resource="&pgef;Organization"/>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/verified_by -->
+
+    <owl:ObjectProperty rdf:about="&pgef;verified_by">
+        <owl:inverseOf rdf:resource="&pgef;verifies"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Tests that contribute to verifying this requirement.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&pgef;Test"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/verifies -->
+
+    <owl:ObjectProperty rdf:about="&pgef;verifies">
+        <rdfs:comment rdf:datatype="&xsd;string">Requirement that this test contributes to verifying.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Test"/>
+        <rdfs:range rdf:resource="&pgef;Requirement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://pangalactic.us/pgef/abstract -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;abstract">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A capsule summary of the content of a document.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Document"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/alt_email -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;alt_email">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Alternate email address of a person.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/city -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;city">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The city in which an organization or facility is located.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/public -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;public">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A flag indicating whether access to this object is restricted.  If true, the object is accessible to anyone.  If false, access to the object is governed by ObjectAccess relationships, which specify the Actors, Projects, and Organizations who can access the object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/comment -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;comment">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">General information about or views on an object.  The meaning of a comment is determined by the application context.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/quantity -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;quantity">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The number of instances or measured quantity of the component object(s) used.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Acu"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/condition -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;condition">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A mathematical expression (e.g. an inequality, an equation, a set of simultaneous equations, etc.) that defines the elements in the graph of a Relation.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Relation"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/content -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;content">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The content of a document in a text-based format (usually text/plain, but may be any format with a MIME type of &quot;text&quot;, such as text/html, text/xml, or text/tab-separated-values).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Document"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/country -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;country">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The country in which an organization or facility is located.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/create_datetime -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;create_datetime">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The date and time of creation of an object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/description -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;description">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A narrative about the characteristics and identifying features of an object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/drawing_number -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;drawing_number">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Identifier for a drawing (a type of specification).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/drawing_part_number -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;drawing_part_number">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">If a part (product) has a drawing (a type of specification), this is the part identifier specified in the drawing.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/email -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;email">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The primary email address of a person.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/file_role -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;file_role">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The purpose of a file relative to a representation to which it is related.  Example values are: attachment, content, stylesheet, DTD, etc.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/file_sequence -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;file_sequence">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An integer that can be used to specify the ordering of this file within an ordered set of files -- attachments, for example.  NOTE:  file_sequence is intepreted as applying within file_sequence_context (which see).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/file_sequence_context -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;file_sequence_context">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The name of the attribute within the context of which the file_sequence attribute is meaningful.  If the value of the file_sequence_context attribute is role, and the value of file_role is attachment, then file_sequence is the position of this file within the set of files that have a file role of attachment.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/first_name -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;first_name">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Given name of a person.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/preferred_name -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;preferred_name">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Preferred name of person.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/fsc_code -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;fsc_code">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Federal Supply Classification (FSC) code for a product (this is also the first four digits of the National Stock Number or NSN).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/generic_part_number -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;generic_part_number">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The generic identifier for a EEE part, which in some cases is specified by a standard (e.g., JEDEC for electronic parts).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;EeePart"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/id -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;id">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An identifier that is unique within a specified namespace.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/id_ns -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;id_ns">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The namespace within which an id is unique.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/is_composable -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;is_composable">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A flag, for which a true value indicates that a representation contains sufficient computationally accessible data to (re)create or edit the digital object it represents, and/or to create some other representation of that object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Representation"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/is_generable -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;is_generable">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A flag which, if true, indicates that a representation can be generated -- e.g., from a model.
+</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Representation"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/is_object_source -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;is_object_source">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Indicates whether this representation is the original source from which its parent object was instantiated in the repository or in the current application context.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Representation"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/iteration -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;iteration">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An identifier for incremental snapshots of working copies of a specific version of a product.  Iterations are a zero-based sequence of integers in which the unmodified version is itself the 0th iteration.
+
+Working copies of iterations can be used as parallel evolution threads toward the next version.  Iterations are used to identify and manage experimental configurations of a product that may never become a formal version but which need to be documented as part of the design and analysis process.  Since products cannot be changed once committed to a repository, the value of their iteration must be regarded as frozen. The policy for saving iterations in the repository can be set by the project or user: all iterations, all iterations since the last version, etc.  In early prototyping exercises, iterations may be used exclusively for CM (on, say, the 0th version of everything).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/last_name -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;last_name">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The surname of a person.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/level -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;level">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The level of a requirement within the hierarchy of a system's requirements.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/validated -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;validated">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Specifies whether a requirement is correct.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/lot_date_code -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;lot_date_code">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An alphanumeric string used by a manufacturer to identify the collection (lot) of part instances of which a specific part instance was a member.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/manufacturer_part_number -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;manufacturer_part_number">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The identifier assigned to a hardware product by its manufacturer.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/media_subtype -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;media_subtype">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The MIME Media Subtype per &lt;http://www.iana.org/assignments/media-types/&gt; (or a custom subtype).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Mime"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/media_type -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;media_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The MIME Media Type per &lt;http://www.iana.org/assignments/media-types/&gt; (or a custom type).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Mime"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/mi_or_name -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;mi_or_name">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The middle initial or middle name of a person.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/military_specification -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;military_specification">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The identifier of the military specification (a.k.a. MIL Spec) that applies to a EEE part.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;EeePart"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/mod_datetime -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;mod_datetime">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The date and time of last modification of an object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/name -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;name">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A human-readable identifier for an object -- usually the one by which the object is known to the end-user, but it may be used for any type of identification, including aliases and local nomenclatures.  Its meaning is dependent on the application context.  This concept is analogous to a given name.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/abbreviation -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;abbreviation">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A human-readable abbreviated name for an object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/nsn -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;nsn">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The National Stock Number (NSN) for a EEE part.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;EeePart"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/oid -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;oid">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Object ID (a globally unique identifier).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/name_code -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;name_code">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An abbreviated name for an organization, usually formalized.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/cage_code -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;cage_code">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Identifier for an organization in the DoD Commercial And Government Entity (CAGE) database.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/originating_system -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;originating_system">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The system from which the data in a data set originated.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DataSet"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/range_constraint -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;range_constraint">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A constraint on the range values of a parameter.  This may be, for example, a finite set of values or an expression.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/range_constraint_type -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;range_constraint_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of a constraint on the range values of a parameter.  This may be, for example, finite set or expression.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/range_datatype -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;range_datatype">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The datatype of the range of a parameter.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/generating_function -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;generating_function">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The name of a function (which may be opaque) that computes the value of a computed parameter.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/base_parameters -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;base_parameters">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A comma-delimited string containing the identifier(s) of the underlying parameter(s) used to compute the value of a computed parameter.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/computed_by_default -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;computed_by_default">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Specifies whether in the default context for the defined parameter is to have its value computed (i.e. whether in its default usage it is to be treated as a derived quantity).  This can be overridden in a parameter instance by setting the &quot;compute&quot; property.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/part_model_number -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;part_model_number">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The identifier for a part model, a somewhat arbitrary identifier usually specified by the manufacturer.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/purpose -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;purpose">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The reason for creating this artifact.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/phone -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;phone">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The primary phone number of a person.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/pl_status -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;pl_status">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The state of a parts list relative to some possibly extensible set of standard states, e.g. in-process, reviewed, etc.  The set of standard states should be agreed upon by the project(s) or organization(s) using the parts list.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;PartsList"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/pl_type -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;pl_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of a parts list, selected from a set of standard parts list types, such as &apos;as-designed&apos; (ADPL), &apos;as-built&apos; (ABPL), &apos;preliminary&apos; (PRPL), etc., which should be agreed upon by the Project(s) or Organization(s) using the parts list.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;PartsList"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/processor_version -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;processor_version">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The version of the software application that was used to produce a DataSet.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DataSet"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/publish_datetime -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;publish_datetime">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Date (and time, if relevant) a Document was published.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Document"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/rationale -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;rationale">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The reason behind a Requirement.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/requirement_text -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;requirement_text">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The statement of the Requirement.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/reference_designator -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;reference_designator">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The reference designator is a symbolic name that serves as an identifier for a component usage within the context of an assembly.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Acu"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/assembly_level -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;assembly_level">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The assembly level is a name selected from a customizable vocabulary for the naming of levels in an assembly architecture.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Acu"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/representation_purpose -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;representation_purpose">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The purpose or meaning of this Representation -- e.g.  &quot;publication&quot;, &quot;presentation&quot;, &quot;exchange&quot;, etc.  The semantics of this Property are heavily context-dependent.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Representation"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/screening_specification_number -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;screening_specification_number">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The identifier for a screening specification that applies to a EEE part.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;EeePart"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/serial_number -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;serial_number">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An identifier assigned by a manufacturer to a specific part instance.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/specification_number -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;specification_number">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The identifier of the specification document that applies to a product.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/specification_part_number -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;specification_part_number">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The identifier given to a hardware product by its specification.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/state_or_province -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;state_or_province">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An Organization&apos;s state (if in the U.S.) or province.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/street_address -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;street_address">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An Organization&apos;s Street Address.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/structural_role -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;structural_role">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An indicator of whether the document is intended to be (1) stand-alone, (2) the parent in an assembly of documents, or (3) a component in another document.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Document"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/system_role -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;system_role">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Role designation of a top-level System within the context of a Project.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/dimensions -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;dimensions">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The dimensional specification for a ParameterDefinition.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/url -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;url">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Universal Resource Locator for an object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Modelable"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/user_file_name -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;user_file_name">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The user&apos;s local name for the file.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/version -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;version">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A user-modifiable alphanumeric string used to identify one in a series of modifications of an object.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/version_sequence -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;version_sequence">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An integer indicating the sequence of versions (since the version attribute itself may not have a well-defined sort order).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/frozen -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;frozen">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A flag indicating that this version can have no further modifications or iterations. When a specified version of an object is frozen, a new version of the object can be created by cloning the specified version or another version, by cloning another object, or from a clean slate.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/work_email -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;work_email">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Person&apos;s email address at an Organization.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/work_phone -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;work_phone">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Person&apos;s telephone number at an Organization.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/zip_or_postal_zone -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;zip_or_postal_zone">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An Organization&apos;s zip code (if in the U.S.) or postal zone.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Organization"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+    
+
+
+    <!-- http://pangalactic.us/pgef/Acu -->
+
+    <owl:Class rdf:about="&pgef;Acu">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The relationship between a product (the component) and an assembled product (the assembly) of which it is a constituent; the Acu is a many-to-many relationship in that an assembly contains multiple products, and any given product may be used in many assemblies.  N.B.:  product here refers to a conceptual product, as opposed to a physical product (product instance) of a product specification -- the ACU relationship between physical products and assemblies, though related, is logically different, since a physical product can only be in one physical location in an assembly, whereas a conceptual product can be used at multiple locations (distinguished by reference designator, a property of the Acu) in an assembly.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Relation -->
+
+    <owl:Class rdf:about="&pgef;Relation">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A mathematical Relation that holds among two or more parameters.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/DataPackage -->
+
+    <owl:Class rdf:about="&pgef;DataPackage">
+        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A collection of one or more digital products.  The primary purpose of the DataPackage class is to enable the tracking and management of arbitrary collections of exchanged data.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/DataSet -->
+
+    <owl:Class rdf:about="&pgef;DataSet">
+        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A data set is a digital product whose purpose is to contain a serialized population of objects governed by a schema.  The content can be any representation, such as STEP (ISO 10303), HDF, JSON, CSV (comma-separated-values), or in general any data exchange or serialization format.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/DigitalProduct -->
+
+    <owl:Class rdf:about="&pgef;DigitalProduct">
+        <rdfs:subClassOf rdf:resource="&pgef;Product"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A digital product is a non-hardware product that is computer-sensible -- i.e., can be stored in a computer, written on a digital medium, and transmitted over a network link.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Software -->
+
+    <owl:Class rdf:about="&pgef;Software">
+        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Software is a digital product that can be executed within a hardware product.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Discipline -->
+
+    <owl:Class rdf:about="&pgef;Discipline">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A named subject matter area (e.g. a specific engineering discipline, such as Avionics or Flight Dynamics, or a scientific discipline, such as Solid State Physics, and may be even more specific, such as Surface Physics).  The intent of defining Disciplines in the context of a collaborative modeling activity is to define the roles and points of view of the participants and their models.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ModelFamily -->
+
+    <owl:Class rdf:about="&pgef;ModelFamily">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Model Family is intended to characterize a family of Model Types. Some Model Families are standardized, such as SysML, but a Model Family may also refer to a collection of custom or enterprise-specific Model Types. Examples:  The Systems Modeling Language (SysML) Model Family owns Model Types of Block, Internal Block, Parametric, etc.; the Mechanical Engineering Model Family owns the Model Type of Mechanical CAD, etc.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ModelType -->
+
+    <owl:Class rdf:about="&pgef;ModelType">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A type of Model -- e.g., "Block" (as would occur in a Systems block diagram -> SysML BDD), "Internal Block" (Block containing internal structure -> SysML "IBD"), Mechanical CAD (MCAD), Electrical CAD (ECAD), circuit schematic, etc.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Document -->
+
+    <owl:Class rdf:about="&pgef;Document">
+        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The digital (computer-sensible) representation of a human-readable document.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/EeePart -->
+
+    <owl:Class rdf:about="&pgef;EeePart">
+        <rdfs:subClassOf rdf:resource="&pgef;HardwareProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An Electrical, Electronic, or Electromechanical (EEE) part.
+</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/DigitalFile -->
+
+    <owl:Class rdf:about="&pgef;DigitalFile">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <owl:disjointWith rdf:resource="&pgef;Organization"/>
+        <owl:disjointWith rdf:resource="&pgef;Person"/>
+        <owl:disjointWith rdf:resource="&pgef;Project"/>
+        <owl:disjointWith rdf:resource="&pgef;Role"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The class of file-like objects.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Identifiable -->
+
+    <owl:Class rdf:about="&pgef;Identifiable">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The class of things able to be assigned a unique, persistent identifier (a.k.a. OID).  Objects that are used, but not created or managed, by an application must be members of subclasses of Identifiable so that their information can be accessed by an application and stored in a database; classes of objects whose information is managed by an Organization must be subclasses of ManagedObject, which identifies the organizational ownership of objects within an application.
+</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Modelable -->
+
+    <owl:Class rdf:about="&pgef;Modelable">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Modelable object is any object of sufficient domain interest to warrant being modeled: it has properties to indicate who created it (an Actor) and who last modified it.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Mime -->
+
+    <owl:Class rdf:about="&pgef;Mime">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Multi-purpose Internet Mail Extension (MIME) types.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Model -->
+
+    <owl:Class rdf:about="&pgef;Model">
+        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A constructed realization of the properties and/or behaviors of a concept or a real-world thing.  A pgef:Model instance can be used for analysis, simulation, description, specification, or presentation of some aspect(s) of a domain object.
+
+pgef:Model in the engineering domain generally maps to step:product_definition, but there may be other mappings for particular STEP Application Protocols and other types of models.
+
+(Note that the characteristics of any pgef:Model instance can be the subject of a pgef:Model at a higher level of abstraction.  The higher-level pgef:Model instance in this context is sometimes referred to as a &quot;meta-model&quot; relative to the pgef:Model instance whose characteristics it models.)</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/DisciplineProductType -->
+
+    <owl:Class rdf:about="&pgef;DisciplineProductType">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Discipline ProductType is a relationship between a Discipline and the a type of Product that is used by practitioners of that Discipline.  The two classes have a many-to-many relationship:  one Discipline will typically use many ProductTypes, and one ProductType can be used by many Disciplines.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ProductTypeParameterDefinition -->
+
+    <owl:Class rdf:about="&pgef;ProductTypeParameterDefinition">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A ProductType Parameter Definition is a relationship between a ProductType and the Definition of a Parameter that is used to characterize Products of that type.  The two classes have a many-to-many relationship:  one ProductType will typically be characterized using several Parameter Definitions, and one Parameter Definition can be involved in the characterization of multiple ProductTypes.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Actor -->
+
+    <owl:Class rdf:about="&pgef;Actor">
+        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A well-defined, persistent, and identifiable entity that can create and modify Identifiable things.  Subclasses include Person, Organization, and Project.  (Other subclasses may be added, such as Application or ArtificialLifeForm.)</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Organization -->
+
+    <owl:Class rdf:about="&pgef;Organization">
+        <rdfs:subClassOf rdf:resource="&pgef;Actor"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A well-defined, persistent, and identifiable collection of Person instances.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ManagedObject -->
+
+    <owl:Class rdf:about="&pgef;ManagedObject">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Managed Objects are those whose information is maintained by an Organization (the &quot;owner&quot;).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ObjectAccess -->
+
+    <owl:Class rdf:about="&pgef;ObjectAccess">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Object Access is a many-to-many relationship between Managed Objects and Actors that indicates which Actors have access to which Managed Objects.  An Object Access relationship is created when a Managed Object is released to an Actor (usually to a Project, Organization, or Person).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ParameterRelation -->
+
+    <owl:Class rdf:about="&pgef;ParameterRelation">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A ParameterRelation specifies a mathematical Relation that holds among one or more parameters, as specified in their definitions (ParameterDefinition).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ParameterDefinition -->
+
+    <owl:Class rdf:about="&pgef;ParameterDefinition">
+        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A parameter definition specifies the datatype, dimensions (if applicable), and textual description of a parameter.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ProductInstance -->
+
+    <owl:Class rdf:about="&pgef;ProductInstance">
+        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A physical object that is purported to be a physical realization of a part concept, or, formally, of a part specification.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/PartsList -->
+
+    <owl:Class rdf:about="&pgef;PartsList">
+        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A documented collection of parts and related information.  Parts lists occur in various contexts in the product life cycle, e.g.: to document component technology research, to document candidate parts for assemblies, to document parts used in model development, to track parts procurement information, to document part stocks and inventory, etc.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/PartsListItem -->
+
+    <owl:Class rdf:about="&pgef;PartsListItem">
+        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A parts list item is a document that is a component of a parts list, and represents a single line or item on its parent parts list.  The parts list item may reference an assembly role or position (assembly component usage, with associated reference designator.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ProductType -->
+
+    <owl:Class rdf:about="&pgef;ProductType">
+        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A functional category or classification of a product.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/RequirementAllocation -->
+
+    <owl:Class rdf:about="&pgef;RequirementAllocation">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Requirement Allocation relationship is the allocates-to / satisfies relationship between a requirement and a function (or subsystem/component usage) to which it is allocated.  The Requirement Allocation relationship is many-to-many: a requirement can be allocated to several functions and/or components, and a function or component usage can contribute to satisfying multiple requirements.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/SystemRequirement -->
+
+    <owl:Class rdf:about="&pgef;SystemRequirement">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A System Requirement relationship is the allocates-to / satisfies relationship between a Requirement and a top-level Project System Usage to which it is allocated.  The System Requirement relationship is many-to-many: a Requirement can be allocated to several Systems, and a System can contribute to satisfying multiple Requirements.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/RequirementAncestry -->
+
+    <owl:Class rdf:about="&pgef;RequirementAncestry">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A RequirementAncestry relationship is a parent / child relationship between two Requirements. A Requirement can, and often does, beget multiple child Requirements, and a Requirement that has parent Requirements can have more than one parent; hence, this is a many-to-many relationship.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Template -->
+
+    <owl:Class rdf:about="&pgef;Template">
+        <rdfs:subClassOf rdf:resource="&pgef;Product"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A template is a named, reusable pattern or example to use in creating a type of product, document, or model. A template may contain parameter definitions and component products.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Person -->
+
+    <owl:Class rdf:about="&pgef;Person">
+        <rdfs:subClassOf rdf:resource="&pgef;Actor"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A human being.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Activity -->
+
+    <owl:Class rdf:about="&pgef;Activity">
+        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A named, structured procedural concept which is realized and applied systematically to achieve an objective.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Mission -->
+
+    <owl:Class rdf:about="&pgef;Mission">
+        <rdfs:subClassOf rdf:resource="&pgef;Activity"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Mission is an activity which is defined by a project, takes place in an environment, and is accomplished by means of a collection of systems.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Flow -->
+
+    <owl:Class rdf:about="&pgef;Flow">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A flow represents the stuff (e.g. energy, electrons, water, data, etc.) that a port is designed to accommodate.</rdfs:comment>
+    </owl:Class>
+
+
+    <!-- http://pangalactic.us/pgef/Port -->
+
+    <owl:Class rdf:about="&pgef;Port">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A port is the abstraction of a product interface (as opposed to the component that implements the interface, such as a connector, etc.) through which some stuff (e.g. energy, electrons, water, data, etc.) flows into and/or out of the product.</rdfs:comment>
+    </owl:Class>
+
+
+    <!-- http://pangalactic.us/pgef/PortTemplate -->
+
+    <owl:Class rdf:about="&pgef;PortTemplate">
+        <rdfs:subClassOf rdf:resource="&pgef;Port"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Port Template is a reusable Port definition that includes a set of parameters and parameter values which will be replicated when the Port Template is used to create a new Port instance.</rdfs:comment>
+    </owl:Class>
+
+
+    <!-- http://pangalactic.us/pgef/PortType -->
+
+    <owl:Class rdf:about="&pgef;PortType">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Port Type defines a family of Ports by the type of Flow that they accommodate, e.g. electrical power. A PortType may also have an associated set of Parameters.</rdfs:comment>
+    </owl:Class>
+
+
+    <!-- http://pangalactic.us/pgef/Product -->
+
+    <owl:Class rdf:about="&pgef;Product">
+        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Product objects represent either black box entities, such as vendor parts, knowledge of whose internal components and characteristics may or may not be available to a Project that is using them, or white box entities, such as systems, whose internals may be known. The intent of the Product class is to contain all designed artifacts whose evolution is explicitly tracked in specifiable increments that are managed by the owner of the subject knowledgebase. The versions of a Product may all share the same identifier (id) and be differentiated by their version attribute. Note that the Product class also contains objects that may have evolved in a version structure, but whose version structure is regarded as opaque and is not represented explicitly in the subject knowledgebase. E.g., a Product that is purchased from a vendor will often have versions or models but the owner of the subject knowledgebase does not control the versioning or create new versions; the versions do not share a common identifier (id) but may be related by other attributes, such as a generic part number or a common root string in the manufacturer part number.
+</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/HardwareProduct -->
+
+    <owl:Class rdf:about="&pgef;HardwareProduct">
+        <rdfs:subClassOf rdf:resource="&pgef;Product"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A hardware product represents a design concept or specification that when realized (manufactured) in a physically sensible and measurable instance (i.e., product instance) manifests some specified functionality. Note that a hardware product may contain digital product elements (non-hardware), such as software and firmware, etc.
+</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Project -->
+
+    <owl:Class rdf:about="&pgef;Project">
+        <rdfs:subClassOf rdf:resource="&pgef;Organization"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An activity that has the purpose of producing and/or maintaining something, and which involves contributions from Persons and Organizations.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/ProjectSystemUsage -->
+
+    <owl:Class rdf:about="&pgef;ProjectSystemUsage">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The relationship between a project and a top-level system. The role of the System in the context of the project is captured in the system_role property of the ProjectSystemUsage relationship. The ProjectSystemUsage relationship is a many-to-many relationship in that, in general, a project will have multiple top-level systems, and a given system may occur at the top level in multiple projects, albeit with possibly different configurations.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Representation -->
+
+    <owl:Class rdf:about="&pgef;Representation">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Representation is a collection of one or more digital artifacts that implement a digital product (e.g., a mechanical model, a data set, a document) and can be thought of as a reified relationship between an object and one or more digital files. Representations include both presentations, such as PDF or HTML for a document, and more general representations such as exchange data (e.g., for an engineering model, e.g. STEP, SysML, etc.).  A representation references one or more file-like objects (representation files) that are used in publishing, displaying, serializing, exporting, importing, or transmitting a digital product.  The concept is general and can apply to serialization, presentation, or data exchange use-cases, among others.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/RepresentationFile -->
+
+    <owl:Class rdf:about="&pgef;RepresentationFile">
+        <rdfs:subClassOf rdf:resource="&pgef;DigitalFile"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A file-like object that contains all or part of a digital representation of some object.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Requirement -->
+
+    <owl:Class rdf:about="&pgef;Requirement">
+        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A requirement is the specification of a goal or constraint to be satisfied by a product.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Role -->
+
+    <owl:Class rdf:about="&pgef;Role">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A function or position that can be assigned to a person within a context.  The context will typically be an organization or a project.  A role will typically have an associated set of privileges.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/DisciplineRole -->
+
+    <owl:Class rdf:about="&pgef;DisciplineRole">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A DisciplineRole is the relationship between a Role and a Discipline. DisciplineRole is a many-to-many relationship in that a Role may be associated with multiple Disciplines and a Discipline may have several Roles related to it.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/RoleAssignment -->
+
+    <owl:Class rdf:about="&pgef;RoleAssignment">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A RoleAssignment is the relationship between a role and a person to which the role has been assigned. RoleAssignment is a many-to-many relationship in that a role may be assigned to multiple persons and a person may have several roles assigned to them.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/Mission -->
+
+    <owl:Class rdf:about="&pgef;Mission">
+        <rdfs:subClassOf rdf:resource="&pgef;Activity"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A Mission is a type of activity undertaken to accomplish a specified goal.  It will typically be decomposed into a set of phases for which the Mission concept of operations specification will associate sets of parameter values with the states of the physical systems and components used to accomplish the Mission goal.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://pangalactic.us/pgef/State -->
+
+    <owl:Class rdf:about="&pgef;State">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A significant condition or phase in the life of a system (SysML: State, in the context of SysML State Machine).</rdfs:comment>
+    </owl:Class>
+    
+
+    <!-- http://pangalactic.us/pgef/Test -->
+
+    <owl:Class rdf:about="&pgef;Test">
+        <rdfs:subClassOf rdf:resource="&pgef;Activity"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A test is a type of activity consisting of a specified environment, specified inputs and measurable expected results (synonymous to SysML: testCase, modeled by a SysML Interaction).</rdfs:comment>
+    </owl:Class>
+    
+
+</rdf:RDF>
+
+<!-- Generated by the OWL API (version 3.5.1) http://owlapi.sourceforge.net -->
+

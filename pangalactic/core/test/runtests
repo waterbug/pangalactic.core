@@ -1,0 +1,67 @@
+#!/bin/sh
+
+for x in \
+test_datetimes.py \
+test_cook.py \
+test_uncook.py \
+test_names.py \
+test_kb.py \
+test_registry.py \
+test_orb.py
+# test_objectcache.py \
+# test_remember.py \
+# test_vger_changePassword.py \
+# test_vger_getObjectsByOids.py \
+# test_vger_getObjectsE.py \
+# test_vger_getObjectsO.py \
+# test_vger_search.py \
+# test_vger_searchWithSpec.py \
+# test_vger_getCount.py \
+# test_vger_getNames.py \
+# test_vger_addObjectsE.py \
+# test_vger_addObjectsO.py \
+# test_vger_updateObjects.py \
+# test_vger_addFile.py \
+# test_vger_addVersions.py
+do
+    echo '==============================================='
+    echo
+    echo -n "run $x ? (y/n) [y]"
+    response=y
+    read response
+    if [ "$response" != 'n' ]; then
+        # trial $x;
+        pytest $x;
+    fi
+done
+
+# echo
+# trial test_datetimes.py
+# echo
+# trial test_cook.py
+# echo
+# trial test_uncook.py
+# echo
+# trial test_names.py
+# echo
+# trial test_kb.py
+# echo
+# trial test_registry.py
+# echo
+# trial test_orb.py
+# echo
+# trial test_reports.py
+# echo
+# trial test_parametrics.py
+
+# clean up home directory used in tests
+
+if [ -d pangalaxian_test ]; then
+    echo '\nremoving test home dir (pangalaxian_test) ...\n'
+    rm -r ./pangalaxian_test
+fi
+
+# TESTS TO SKIP:
+
+# test_map_203_vger.sh
+

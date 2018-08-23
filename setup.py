@@ -1,0 +1,50 @@
+"""
+Setup script for pangalactic.core
+"""
+import os, site
+from setuptools import setup, find_packages
+
+VERSION = open('VERSION').read()[:-1]
+
+onto_mod_path = os.path.join('pangalactic', 'core', 'ontology')
+test_mod_path = os.path.join('pangalactic', 'core', 'test', 'data')
+test_data_paths = [os.path.join(test_mod_path, p)
+                   for p in os.listdir(test_mod_path)
+                   if not p.startswith('__init__')]
+vault_mod_path = os.path.join('pangalactic', 'core', 'test', 'vault')
+vault_data_paths = [os.path.join(vault_mod_path, p)
+                   for p in os.listdir(vault_mod_path)
+                   if not p.startswith('__init__')]
+sitepkg_dir = [p for p in site.getsitepackages()
+               if p.endswith('site-packages')][0]
+
+long_description = (
+    "An open-source, open-architecture, standards-based application "
+    "framework for the development of tools and systems for engineering "
+    "data and model integration, collaborative systems engineering, and "
+    "multi-disciplinary engineering knowledge capture, integration, "
+    "synthesis, and transformation.")
+
+setup(
+    name='pangalactic.core',
+    version=VERSION,
+    description="The Pan Galactic Engineering Framework Core Package",
+    long_description=long_description,
+    author='Stephen Waterbury',
+    author_email='stephen.c.waterbury@nasa.gov',
+    maintainer="Stephen Waterbury",
+    maintainer_email='waterbug@pangalactic.us',
+    license='TBD',
+    packages=find_packages(),
+    data_files=[
+        # ontology (OWL file)
+        (os.path.join(sitepkg_dir, onto_mod_path),
+         [os.path.join(onto_mod_path, 'pgef.owl')]),
+        # test data files
+        (os.path.join(sitepkg_dir, test_mod_path), test_data_paths),
+        # test vault files
+        (os.path.join(sitepkg_dir, vault_mod_path), vault_data_paths)
+        ],
+    zip_safe=False
+)
+

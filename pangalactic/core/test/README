@@ -1,0 +1,61 @@
+$Id$
+
+Pan Galactic Engineering Framework Test Scripts
+===============================================
+
+TODO:
+    1. convert all tests into real unittest-type unit tests so
+    they can be run automatically by the twisted "trial" script.
+
+        status:  test_sql.py converted.
+
+    2. combine all unit tests for each module into a single test
+    module called 'test_[module name].py'.
+
+Package:  pangalactic.repo
+Prep:     These tests require the test data to be
+          loaded into pgerdb -- run the script:
+          Pangalactic/src/sql/populate_pgerdb.sh
+
+Sequence of tests by module dependencies:
+
+
+test_kb.py
+test_registry.py   test_sql.py
+         |         [usage:  trial -v test_sql.py]
+test_extract.py          |
+test_remember.py         |
+         |               |
+    test_chronosynclastic_extracts2Records.py
+    test_chronosynclastic_record2RowKey.py
+    test_chronosynclastic_getRefdRowKeys.py
+    test_chronosynclastic_getResultByRowKey.py
+    test_chronosynclastic_runQueryMapped.py
+    test_chronosynclastic_runQueryMapped-sequence.py
+    test_chronosynclastic_search.py
+    test_chronosynclastic_searchWithSpec.py
+    test_chronosynclastic_addRecords.py
+    test_chronosynclastic_addObjects.py
+    test_chronosynclastic_updateObjects.py
+             |
+    test_pger_changePasswd.py
+    test_pger_getObjectsE.py
+    test_pger_getObjectsO.py
+    test_pger_search.py
+    test_pger_addObjectsE.py
+    test_pger_addObjectsO.py
+    test_pger_addFile.py
+             |
+    test_xmlrpc_changePasswd.py
+    test_xmlrpc_getObjects.py
+    test_xmlrpc_search.py
+    test_xmlrpc_addObjects.py
+
+------------------------------------------------
+
+    TESTS TO SKIP:
+
+    test_glimpse_getfulltext.py
+    test_pger_gettuplers.py
+    test_pger_addVersions.py
+

@@ -1,0 +1,1207 @@
+# -*- coding: utf-8 -*-
+"""
+Create PGEF test data.
+"""
+import random
+from pangalactic.core.utils.meta import (get_port_abbr, get_port_id,
+                                         get_port_name)
+from pangalactic.core.utils.datetimes import dtstamp
+
+NOW = str(dtstamp())
+
+def gen_test_pvals(parms):
+    """
+    Generate random values for the non-computed float and int types in a set of
+    Parameters.
+
+    Args:
+        parms (dict):  parameters dict of the form
+            {parameter id: {standard parameter dict},
+             ...}
+            where the standard parameter dict is defined in p.node.parametrics
+            and is the value of parameterz[obj.oid] for any object that has
+            parameters.
+    """
+    for pid, parm in parms.items():
+        if parm['computed']:
+            # ignore computed parameters
+            continue
+        if pid.endswith('ctgcy'):
+            parm['value'] = 0.30
+        elif parm['range_datatype'] == 'float':
+            # make sure no non-zero default has been set
+            if not parm['value']:
+                if pid == 'P':
+                    # special case for Power parameters
+                    # (can be positive or negative)
+                    parm['value'] = float(random.randint(-500, 500))
+                else:
+                    parm['value'] = float(random.randint(1, 1000))
+        # special cases for Data Rate parameters
+        elif pid == 'R_D':
+            parm['value'] = random.randint(10000, 100000)
+        elif pid == 'R_NTE':  # make NTE bigger
+            parm['value'] = random.randint(100000, 1000000)
+        elif parm['range_datatype'] == 'int':
+            # make sure no non-zero default has been set
+            if not parm['value']:
+                parm['value'] = random.randint(1, 10)
+        elif parm['range_datatype'] == 'text':
+            parm['value'] = 'testing...'
+
+def create_test_users():
+    """
+    Return standard test objects for 2 Organizations (yoyodyne and banzai) and
+    4 Persons (steve, zaphod, buckaroo, and whorfin).
+    """
+    objs = [
+        dict(
+             _cname='Organization', oid='test:yoyodyne', id='yoyodyne',
+             id_ns='pangalactic', name=u'Yoyodyne Propulsion Systems',
+             name_code='YPS', city='Grovers Mill',
+             state_or_province='NJ'),
+        dict(
+             _cname='Organization', oid='test:banzai', id='BANZAI',
+             id_ns='pangalactic',
+             name=u'Banzai Aerospace', name_code='BA',
+             city='White Sands', state_or_province='NM'),
+        dict(
+            _cname='Person',
+            oid='test:steve', id='steve', name=u'Steve',
+            id_ns='pangalactic',
+            org='test:banzai'),
+        dict(
+            _cname='Person',
+            oid='test:zaphod', id='zaphod',
+            id_ns='pangalactic', name=u'Zaphod Z. Beeblebrox',
+            org='test:banzai', create_datetime=NOW, mod_datetime=NOW,
+            email='zaphod@hog.univ', first_name='Zaphod',
+            mi_or_name='Z', last_name='Beeblebrox',
+            phone='1-800-ZAPHOD'),
+        dict(
+            _cname='Person',
+            oid='test:buckaroo', id='buckaroo',
+            id_ns='pangalactic', name=u'Buckaroo Banzai',
+            org='test:banzai', create_datetime=NOW, mod_datetime=NOW,
+            email='buckaroo@banzai.earth.milkyway.univ',
+            first_name='Buckaroo', mi_or_name='', last_name='Banzai',
+            phone='1-800-BANZAI'),
+        dict(
+            _cname='Person',
+            oid='test:whorfin', id='whorfin',
+            id_ns='pangalactic', name=u'John Whorfin (Dr. Emilio Lizardo)',
+            org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
+            email='whorfin@redlectroids.planet10.univ',
+            first_name='John', mi_or_name='', last_name='Whorfin',
+            phone='1-Z00-WHORFIN')
+            ]
+    return objs
+
+def create_test_project():
+    """
+    Return a serialized test project, H2G2.
+
+    NOTE:  if this project is loaded in the client, all of its objects will be
+    deleted when the user logs in (since they are all created by other [test]
+    users) unless the user logs in as one of the test users.
+    """
+    test_project = [
+        dict(
+            _cname='Project', oid='H2G2', id='H2G2',
+            id_ns='test',
+            creator='test:steve', modifier='test:steve',
+            create_datetime=NOW, mod_datetime=NOW,
+            name=u'Hitchhikers Guide to the Galaxy',
+            name_code='H2G2'),
+        dict(
+            _cname='RoleAssignment',
+            oid='test:RA.zaphod_se',
+            id='zaphod_se',
+            id_ns='test',
+            assigned_role='gsfc:Role.systems_engineer',
+            assigned_to='test:zaphod',
+            role_assignment_context='H2G2'),
+        dict(
+            _cname='RoleAssignment',
+            oid='test:RA.steve_le',
+            id='steve_le',
+            id_ns='test',
+            assigned_role='gsfc:Role.lead_engineer',
+            assigned_to='test:steve',
+            role_assignment_context='H2G2'),
+        dict(
+            _cname='RoleAssignment',
+            oid='test:RA.steve_h2g2_admin',
+            id='steve_h2g2_admin',
+            id_ns='test',
+            assigned_role='pgefobjects:Role.Administrator',
+            assigned_to='test:steve',
+            role_assignment_context='H2G2'),
+        dict(
+            _cname='RoleAssignment',
+            oid='test:RA.steve_admin',
+            id='steve_admin',
+            id_ns='test',
+            assigned_role='pgefobjects:Role.Administrator',
+            assigned_to='test:steve'),
+        dict(
+            _cname='RoleAssignment',
+            oid='test:RA.buckaroo_propulsion',
+            id='buckaroo_propulsion',
+            id_ns='test',
+            assigned_role='gsfc:Role.propulsion_engineer',
+            assigned_to='test:buckaroo',
+            role_assignment_context='H2G2'),
+        dict(
+            _cname='RoleAssignment',
+            oid='test:RA.whorfin_pi',
+            id='whorfin_pi',
+            id_ns='test',
+            assigned_role='gsfc:Role.pi',
+            assigned_to='test:whorfin',
+            role_assignment_context='H2G2'),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:hog0',
+            id='HOG',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.spacecraft',
+            owner='H2G2',
+            name='Heart of Gold Spacecraft',
+            description=u'Really Huge Spacecraft',
+            comment=u'Prototype',
+            public=True,
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW,
+            iteration=0,
+            version='0',
+            version_sequence=0),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:hog1',
+            id='HOG',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.spacecraft',
+            owner='H2G2',
+            name='Heart of Gold Spacecraft',
+            description=u'Really Huge Spacecraft',
+            comment=u'Prototype',
+            public=True,
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW,
+            iteration=0,
+            version='1',
+            version_sequence=1),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:hog2',
+            id='HOG',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.spacecraft',
+            version='2',
+            iteration=0,
+            version_sequence=2,
+            frozen=True,
+            owner='H2G2',
+            name='Heart of Gold Spacecraft',
+            description=u'Really Huge Spacecraft',
+            comment=u'Prototype',
+            public=True,
+            creator='test:zaphod',
+            create_datetime=NOW,
+            modifier='test:zaphod',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:inst0',
+            id='Inst-v0',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.instrument',
+            owner='test:yoyodyne',
+            name='Instrument, v.0',
+            description=u'Instrument, Advanced',
+            comment=u'This instrument is quite advanced.',
+            public=True,
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW,
+            iteration=0,
+            version='0',
+            version_sequence=0),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:inst1',
+            id='Inst-v1',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.instrument',
+            owner='test:yoyodyne',
+            name='Instrument v.1',
+            description=u'Instrument, Advanced',
+            comment=u'This instrument is quite advanced.',
+            public=True,
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW,
+            iteration=1,
+            version='1',
+            version_sequence=1),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:twanger',
+            id='GMT',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.communications_system',
+            owner='test:yoyodyne',
+            name='Gigawatt Magic Twanger',
+            description=u'Twanger, Magic, Heavy-Duty',
+            comment=u'Prototype Plasma-Drive Magic Twanger',
+            public=True,
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:photon_drive',
+            id='PDrive',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.propulsion_system',
+            owner='test:yoyodyne',
+            name='Photon Drive v1',
+            description=u'Photon Drive, v1',
+            comment=u'Propagate! Propagate!',
+            public=True,
+            creator='test:zaphod',
+            create_datetime=NOW,
+            modifier='test:zaphod',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:iidrive',
+            id='IIDrive',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.propulsion_system',
+            owner='test:yoyodyne',
+            name='Infinite Improbability Drive',
+            description=u'Infinite Improbability Drive',
+            comment=u'VROOM! VROOM!',
+            public=True,
+            creator='test:zaphod',
+            create_datetime=NOW,
+            modifier='test:zaphod',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:computer',
+            id='B52SMB',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.computer',
+            owner='test:yoyodyne',
+            name='Bambleweeny 52 Sub-Meson Brain',
+            description=u'Computer, Hyper-Quantum, Subfemto',
+            comment=u'Ridiculously powerful microscopic computer',
+            public=True,
+            creator='test:zaphod',
+            create_datetime=NOW,
+            modifier='test:zaphod',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:flux_capacitor',
+            id='FX-CAP-1.21',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.power_system',
+            owner='test:yoyodyne',
+            name='Flux Capacitor, 1.21 GW',
+            description=u'Capacitor, Flux, 1.21 GW',
+            comment=u'Quantum Chromolytic Flux Capacitor',
+            public=True,
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:mr_fusion',
+            id='MF-A',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.power_system',
+            owner='test:yoyodyne',
+            name='Mr. Fusion Series A',
+            description=u'Power Generator, Fusion, Blender-Style',
+            comment=u'Fuels: banana peels, orange rinds, coffee grounds',
+            public=True,
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:overthruster',
+            id='OO',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.propulsion_system',
+            owner='test:banzai',
+            name='Oscillation Overthruster',
+            description=u'Overthruster, Oscillation',
+            comment=u'Extreme overthrust levels are untested',
+            public=True,
+            creator='test:buckaroo',
+            create_datetime=NOW,
+            modifier='test:buckaroo',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:overthruster_b',
+            id='OO-B',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.propulsion_system',
+            owner='test:yoyodyne',
+            name='Oscillation Overthruster B',
+            description=u'Overthruster, Oscillation (B Movie)',
+            comment=u'DO NOT USE THIS PART -- EXPLOSION RISK!',
+            public=True,
+            creator='test:whorfin',
+            create_datetime=NOW,
+            modifier='test:whorfin',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='HardwareProduct',
+            oid='test:esm0',
+            id='ESM',
+            id_ns='test',
+            product_type='pgefobjects:ProductType.propulsion_system',
+            owner='test:yoyodyne',
+            name='Illudium Q-36 Explosive Space Modulator',
+            description=u'Space Modulator, Explosive, Illudium',
+            comment=u'Capable of clearing obstructed view of Venus.',
+            public=True,
+            creator='test:whorfin',
+            create_datetime=NOW,
+            modifier='test:whorfin',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Port',
+            oid='test:port.twanger.0',
+            id=get_port_id('GMT', 'electrical_power', 0),
+            id_ns='test',
+            abbreviation=get_port_abbr('Electrical Power', 0),
+            owner='test:yoyodyne',
+            name=get_port_name('Gigawatt Magic Twanger',
+                               'Electrical Power', 0),
+            of_product='test:twanger',
+            type_of_port='pgefobjects:PortType.electrical_power',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Port',
+            oid='test:port.overthruster.0',
+            id=get_port_id('OO', 'electrical_power', 0),
+            id_ns='test',
+            abbreviation=get_port_abbr('Electrical Power', 0),
+            owner='test:banzai',
+            name=get_port_name('Oscillation Overthruster',
+                               'Electrical Power', 0),
+            of_product='test:overthruster',
+            type_of_port='pgefobjects:PortType.electrical_power',
+            creator='test:buckaroo',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Port',
+            oid='test:port.iidrive.0',
+            id=get_port_id('IIDrive', 'electrical_power', 0),
+            id_ns='test',
+            abbreviation=get_port_abbr('Electrical Power', 0),
+            owner='test:yoyodyne',
+            name=get_port_name('Infinite Improbability Drive',
+                               'Electrical Power', 0),
+            of_product='test:iidrive',
+            type_of_port='pgefobjects:PortType.electrical_power',
+            creator='test:zaphod',
+            create_datetime=NOW,
+            modifier='test:zaphod',
+            mod_datetime=NOW
+            ),
+        dict(
+            # using a CAX-IF STEP model for test purposes
+            _cname='Model',
+            oid='test:HOG.0.MCAD.Model.0',
+            id='HOG.0.MCAD.Model',
+            id_ns='test',
+            iteration=0,
+            version='0',
+            version_sequence=0,
+            owner='H2G2',
+            name='MCAD Model of Heart of Gold Spacecraft',
+            of_thing='test:hog0',
+            model_definition_context='gsfc:Discipline.mechanical',
+            type_of_model='step:203',
+            description=u'MCAD Model, v0, of Heart of Gold Spacecraft, v0',
+            public=True,
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Representation',
+            oid='test:HOG.0.MCAD.0.Representation',
+            id='HOG.0.MCAD.0.Representation',
+            id_ns='test',
+            name='HOG v0 MCAD v0 Representation',
+            description=u'HOG v0 MCAD v0 Representation',
+            of_object='test:HOG.0.MCAD.Model.0',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='RepresentationFile',
+            oid='test:HOG.0.MCAD.0.RepresentationFile.0',
+            id='HOG.0.MCAD.0.RepresentationFile.0',
+            id_ns='test',
+            name='HOG v0 MCAD v0 Representation File 0',
+            description=u'HOG v0 MCAD v0 Representation File 0',
+            of_representation='test:HOG.0.MCAD.0.Representation',
+            mime_type='application/step',
+            url='vault://HOG_0_MCAD_0_R0_File0.step',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW),
+        dict(
+            _cname='ProjectSystemUsage',
+            oid='test:H2G2:system-1',
+            id='system-1',
+            id_ns='test',
+            name='H2G2 Spacecraft',
+            project='H2G2',
+            system='test:hog0',
+            system_role='Spacecraft',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='ParameterDefinition',
+            oid='test:ParameterDefinition.X_y',
+            id='X_y',
+            id_ns='test',
+            name='X y',
+            description='X y parameter',
+            dimensions='mass',
+            range_datatype='float',
+            public=True,
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Acu',
+            oid='test:H2G2:acu-1',
+            id='acu-1',
+            id_ns='test',
+            name='Oscillation Overthruster Component Usage',
+            assembly='test:hog0',
+            component='test:overthruster',
+            reference_designator='Prop-1',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Acu',
+            oid='test:H2G2:acu-2',
+            id='acu-2',
+            id_ns='test',
+            name='Infinite Improbability Drive in HOG Spacecraft',
+            assembly='test:hog0',
+            component='test:iidrive',
+            reference_designator='Prop-2',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Acu',
+            oid='test:H2G2:acu-3',
+            id='acu-3',
+            id_ns='test',
+            name='Photon Drive in HOG Spacecraft',
+            assembly='test:hog0',
+            component='test:photon_drive',
+            reference_designator='Prop-3',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Acu',
+            oid='test:H2G2:acu-4',
+            id='acu-4',
+            id_ns='test',
+            name='Bambleweeny Sub-Meson Brain in HOG Spacecraft',
+            assembly='test:hog0',
+            component='test:computer',
+            reference_designator='Comp-1',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Acu',
+            oid='test:H2G2:acu-5',
+            id='acu-5',
+            id_ns='test',
+            name='Magic Twanger in HOG Spacecraft',
+            assembly='test:hog0',
+            component='test:twanger',
+            reference_designator='Comm-1',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Acu',
+            oid='test:BOZO:acu-1',
+            id='acu-5',
+            id_ns='test',
+            name='Flux Capacitor in Magic Twanger',
+            assembly='test:twanger',
+            component='test:flux_capacitor',
+            reference_designator='Elec-1',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Acu',
+            oid='test:BOZO:acu-2',
+            id='acu-6',
+            id_ns='test',
+            name='Fusion energy source in Magic Twanger',
+            assembly='test:twanger',
+            component='test:mr_fusion',
+            reference_designator='Elec-2',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            )
+        ]
+    return test_project
+
+parametrized_test_objects = [
+    dict(
+       _cname='HardwareProduct',
+       oid='test:inst2',
+       id='Inst-v2',
+       id_ns='test',
+       owner='test:yoyodyne',
+       name='Instrument v.2',
+       description=u'Instrument, version 2, Advanced',
+       comment=u'This instrument is quite advanced.',
+       creator='test:steve',
+       create_datetime=NOW,
+       modifier='test:steve',
+       mod_datetime=NOW,
+       parameters={
+       'm_total':
+         {'name': 'Mass (Assembly)',
+          'description': 'Sum of the masses of components in an assembly',
+          'computed': True,
+          'mod_datetime': NOW,
+          'units': 'kg'},
+       'm':
+         {'name': 'Mass',
+          'description': 'Quantity of matter.',
+          'computed': False,
+          'mod_datetime': NOW,
+          'units': 'kg',
+          'value': '1000.0'}
+       },
+       iteration=1,
+       version='2',
+       version_sequence=2),
+     ]
+
+parametrized_summary_test_object = [
+    dict(
+       _cname='HardwareProduct',
+       oid='test:inst3',
+       id='Inst-v3',
+       id_ns='test',
+       owner='test:yoyodyne',
+       name='Instrument v.3',
+       description=u'Instrument, version 3, Advanced',
+       comment=u'This instrument is quite advanced.',
+       creator='test:steve',
+       create_datetime=NOW,
+       modifier='test:steve',
+       mod_datetime=NOW,
+       parameters={'m' : (50.0, u'kg'),
+                   'p' : (10.0, u'W')},
+       iteration=2,
+       version='3',
+       version_sequence=3),
+     ]
+
+# A collection of related serialized test objects to be used for unit testing.
+# The main purpose in having a separate set of serialized objects is so that
+# they will not collide with the objects created by 'create_test_project()'
+# when deserialized and saved to the db.
+related_test_objects = [
+    dict(
+        _cname='Project',
+        oid='test:OTHER', id='OTHER', id_ns='test',
+        owner='pgefobjects:PGANA', creator='pgefobjects:system',
+        modifier='pgefobjects:system', create_datetime=NOW,
+        mod_datetime=NOW, name=u'The Other Project',
+        name_code='OTHER'),
+    dict(
+        _cname='Project',
+        oid='test:OTHEROTHER', id='OTHEROTHER', id_ns='test',
+        owner='pgefobjects:PGANA', creator='pgefobjects:system',
+        modifier='pgefobjects:system', create_datetime=NOW,
+        mod_datetime=NOW, name=u'The Other Other Project',
+        name_code='OTHEROTHER'),
+    dict(
+        _cname='Person',
+        oid='test:bigboote', id='john.bigboote',
+        id_ns='test', name=u'John Bigboote',
+        owner='pgefobjects:PGANA', creator='pgefobjects:system',
+        modifier='pgefobjects:system', org='test:yoyodyne',
+        create_datetime=NOW, mod_datetime=NOW,
+        email='jbigboote@redlectroids.planet10.univ',
+        first_name='John', mi_or_name='', last_name='Bigboote',
+        phone='1-Z00-BIGBOO'),
+    dict(
+        _cname='Person',
+        oid='test:smallberries', id='john.smallberries',
+        id_ns='test', name=u'John Smallberries',
+        owner='pgefobjects:PGANA', creator='pgefobjects:system',
+        modifier='pgefobjects:system', org='test:yoyodyne',
+        create_datetime=NOW, mod_datetime=NOW,
+        email='jsmallberries@redlectroids.planet10.univ',
+        first_name='John', mi_or_name='', last_name='Smallberries',
+        phone='1-Z00-SMALLB'),
+    dict(
+        _cname='Person',
+        oid='test:fester', id='fester',
+        id_ns='test', name=u'Fester D. Bestertester',
+        org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
+        email='Fester.Bestertester@bozonics.univ',
+        first_name='Fester', mi_or_name='D',
+        last_name='Bestertester', phone='1-800-FESTER'),
+    dict(
+        _cname='Person',
+        oid='test:thornystick', id='thornystick',
+        id_ns='test', name=u'John Thornystick',
+        org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
+        email='thornystick@redlectroids.planet10.univ',
+        first_name='John', mi_or_name='', last_name='Thornystick',
+        phone='1-Z00-THORNY'),
+    dict(
+        _cname='Person',
+        oid='test:manyjars', id='manyjars',
+        id_ns='test', name=u'John Manyjars',
+        org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
+        email='manyjars@redlectroids.planet10.univ',
+        first_name='John', mi_or_name='', last_name='Manyjars',
+        phone='1-Z00-MANYJA'),
+    dict(
+        _cname='RoleAssignment',
+        oid='test:RA.bigboote_me',
+        id='steve_me',
+        assigned_role='gsfc:Role.mechanical_engineer',
+        assigned_to='test:bigboote',
+        role_assignment_context='H2G2'),
+    dict(
+        _cname='RoleAssignment',
+        oid='test:RA.smallberries_thermal',
+        id='smallberries_thermal',
+        assigned_role='gsfc:Role.thermal_engineer',
+        assigned_to='test:smallberries',
+        role_assignment_context='H2G2'),
+    dict(
+        _cname='RoleAssignment',
+        oid='test:RA.fester_fsw',
+        id='fester_fsw',
+        assigned_role='gsfc:Role.fsw_engineer',
+        assigned_to='test:fester',
+        role_assignment_context='H2G2'),
+    dict(
+        _cname='HardwareProduct',
+        oid='test:hog3',
+        id='HOG',
+        id_ns='test',
+        version='3',
+        iteration=0,
+        version_sequence=3,
+        frozen=True,
+        owner='test:OTHER',
+        name='Heart of Gold Spacecraft',
+        description=u'Really Huge Spacecraft',
+        comment=u'Prototype',
+        creator='test:bigboote',
+        create_datetime=NOW,
+        modifier='test:bigboote',
+        mod_datetime=NOW
+        ),
+    dict(
+        _cname='ProjectSystemUsage',
+        oid='test:OTHER:system-1',
+        id='system-1',
+        id_ns='test',
+        name='OTHER Spacecraft',
+        project='test:OTHER',
+        system='test:hog3',
+        system_role='Spacecraft',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW
+        ),
+
+     # using a CAX-IF STEP model for test purposes
+     dict(
+        _cname='Model',
+        oid='test:hog3.mcad.model.0',
+        id='hog3.mcad.model.0',
+        id_ns='test',
+        iteration=0,
+        version='0',
+        version_sequence=0,
+        owner='test:OTHER',
+        name='MCAD Model of Heart of Gold Spacecraft',
+        of_thing='test:hog3',
+        model_definition_context='gsfc:Discipline.mechanical',
+        type_of_model='step:203',
+        description=u'MCAD Model, v0, of Heart of Gold Spacecraft',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW
+        ),
+     dict(
+        _cname='Representation',
+        oid='test:hog3.mcad.0.representation',
+        id='hog3.mcad.0.representation',
+        id_ns='test',
+        name='HOG v3 MCAD v0 Representation',
+        description=u'HOG v3 MCAD v0 Representation',
+        of_object='test:hog3.mcad.model.0',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW
+        ),
+     dict(
+        _cname='RepresentationFile',
+        oid='test:hog3.mcad.0.representationfile.0',
+        id='hog3.mcad.0.representationfile.0',
+        id_ns='test',
+        name='HOG v3 MCAD v0 Representation File 0',
+        description=u'HOG v3 MCAD v0 Representation File 0',
+        of_representation='test:hog3.mcad.0.representation',
+        mime_type='application/step',
+        # (same file as used for 'test:hog0')
+        url='vault://HOG_0_MCAD_0_R0_File0.step',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW),
+    dict(
+        _cname='Acu',
+        oid='test:hog3-acu-1',
+        id='hog3-acu-1',
+        id_ns='test',
+        name='Oscillation Overthruster Component Usage',
+        assembly='test:hog3',
+        component='test:overthruster',
+        reference_designator='Propulsion-1',
+        creator='test:whorfin',
+        create_datetime=NOW,
+        modifier='test:whorfin',
+        mod_datetime=NOW
+        ),
+    dict(
+        _cname='Acu',
+        oid='test:hog3-acu-2',
+        id='hog3-acu-2',
+        id_ns='test',
+        name='Infinite Improbability Drive in HOG Spacecraft',
+        assembly='test:hog3',
+        component='test:iidrive',
+        reference_designator='Propulsion-2',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW
+        ),
+    dict(
+        _cname='Acu',
+        oid='test:hog3-acu-3',
+        id='hog3-acu-3',
+        id_ns='test',
+        name='Photon Drive in HOG Spacecraft',
+        assembly='test:hog3',
+        component='test:photon_drive',
+        reference_designator='Propulsion-3',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW
+        ),
+    dict(
+        _cname='Acu',
+        oid='test:hog3-acu-4',
+        id='hog3-acu-4',
+        id_ns='test',
+        name='Bambleweeny Sub-Meson Brain in HOG Spacecraft',
+        assembly='test:hog3',
+        component='test:computer',
+        reference_designator='Computer-1',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW
+        ),
+    dict(
+        _cname='Acu',
+        oid='test:hog3-acu-5',
+        id='hog3-acu-5',
+        id_ns='test',
+        name='Magic Twanger in HOG Spacecraft',
+        assembly='test:hog3',
+        component='test:twanger',
+        reference_designator='Comm-1',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW
+        )
+        ]
+
+test_parms = {
+    "Cost":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Unit cost of an item",
+        "dimensions":"money",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Cost",
+        "range_datatype":"float",
+        "units":"$",
+        "value":0.0
+    },
+    "P":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Specified Power requirement for a component",
+        "dimensions":"power",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Power",
+        "range_datatype":"float",
+        "units":"W",
+        "value":0.0
+    },
+    "P_CBE":{
+        "base_parameters":"P",
+        "computed":True,
+        "description":"Current Best Estimate of Power requirement computed as the sum of the power requirements of known components in an assembled part",
+        "dimensions":"power",
+        "generating_function":"pangalactic.node.parametrics.get_assembly_parameter",
+        "mod_datetime":NOW,
+        "name":"Power CBE",
+        "range_datatype":"float",
+        "units":"W",
+        "value":0.0
+    },
+    "P_MEV":{
+        "base_parameters":"P_CBE, P_ctgcy",
+        "computed":True,
+        "description":"Maximum Expected Value of Power (CBE * [1 + Ctgcy])",
+        "dimensions":"power",
+        "generating_function":"pangalactic.node.parametrics.get_mev",
+        "mod_datetime":NOW,
+        "name":"Power MEV",
+        "range_datatype":"float",
+        "units":"W",
+        "value":0
+    },
+    "P_NTE":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Not To Exceed (NTE) value for Power:  the Maximum Expected Value (MEV) of Power should not exceed this value",
+        "dimensions":"power",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Power NTE",
+        "range_datatype":"float",
+        "units":"W",
+        "value":0.0
+    },
+    "P_ctgcy":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Power Contingency: percentage of Current Best Estimate of Power designated to cover contingencies",
+        "dimensions":"percent",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Power Ctgcy",
+        "range_datatype":"float",
+        "units":"%",
+        "value":0.3
+    },
+    "P_margin":{
+        "base_parameters":"P_NTE, P_CBE",
+        "computed":True,
+        "description":"Power Margin ([NTE-CBE]/NTE)",
+        "dimensions":"percent",
+        "generating_function":"pangalactic.node.parametrics.get_margin",
+        "mod_datetime":NOW,
+        "name":"Power Margin",
+        "range_datatype":"float",
+        "units":"%",
+        "value":0.0
+    },
+    "R_CBE":{
+        "base_parameters":"R_D",
+        "computed":True,
+        "description":"Current Best Estimate of data rate requirement computed as the sum of the data rate requirements of known components in an assembled part",
+        "dimensions":"bitrate",
+        "generating_function":"pangalactic.node.parametrics.get_assembly_parameter",
+        "mod_datetime":NOW,
+        "name":"Data Rate CBE",
+        "range_datatype":"int",
+        "units":"bit/s",
+        "value":0
+    },
+    "R_D":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Flow of bits per unit time through a data port.",
+        "dimensions":"bitrate",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Data Rate",
+        "range_datatype":"int",
+        "units":"bit/s",
+        "value":0
+    },
+    "R_MEV":{
+        "base_parameters":"R_CBE, R_ctgcy",
+        "computed":True,
+        "description":"Maximum Expected Value of Data Rate (CBE * [1 + Ctgcy])",
+        "dimensions":"bitrate",
+        "generating_function":"pangalactic.node.parametrics.get_mev",
+        "mod_datetime":NOW,
+        "name":"Data Rate MEV",
+        "range_datatype":"int",
+        "units":"bit/s",
+        "value":0
+    },
+    "R_NTE":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Not To Exceed (NTE) value for Data Rate:  the Maximum Expected Value (MEV) of Data Rate should not exceed this value",
+        "dimensions":"bitrate",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Data Rate NTE",
+        "range_datatype":"int",
+        "units":"bit/s",
+        "value":0
+    },
+    "R_ctgcy":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Data Rate Contingency: percentage of Current Best Estimate of data rate designated to cover contingencies",
+        "dimensions":"percent",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Data Rate Ctgcy",
+        "range_datatype":"float",
+        "units":"%",
+        "value":0.3
+    },
+    "R_margin":{
+        "base_parameters":"R_NTE, R_CBE",
+        "computed":True,
+        "description":"Data Rate Margin ([NTE-CBE]/NTE)",
+        "dimensions":"percent",
+        "generating_function":"pangalactic.node.parametrics.get_margin",
+        "mod_datetime":NOW,
+        "name":"Data Rate Margin",
+        "range_datatype":"float",
+        "units":"%",
+        "value":0.0
+    },
+    "TRL":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Technology Readiness Level (TRL)",
+        "dimensions":None,
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"TRL",
+        "range_datatype":"int",
+        "units":"",
+        "value":4
+    },
+    "Vendor":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Entity from which a thing is procured.",
+        "dimensions":None,
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Vendor",
+        "range_datatype":"text",
+        "units":"",
+        "value":""
+    },
+    "depth":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Length in z direction",
+        "dimensions":"length",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Depth",
+        "range_datatype":"float",
+        "units":"m",
+        "value":0.0
+    },
+    "height":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Length in y direction",
+        "dimensions":"length",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Height",
+        "range_datatype":"float",
+        "units":"m",
+        "value":0.0
+    },
+    "m":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Quantity of matter",
+        "dimensions":"mass",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Mass",
+        "range_datatype":"float",
+        "units":"kg",
+        "value":0.0
+    },
+    "m_CBE":{
+        "base_parameters":"m",
+        "computed":True,
+        "description":"Current Best Estimate of Mass, computed as the sum of the masses of known components in an assembled part",
+        "dimensions":"mass",
+        "generating_function":"pangalactic.node.parametrics.get_assembly_parameter",
+        "mod_datetime":NOW,
+        "name":"Mass CBE",
+        "range_datatype":"float",
+        "units":"kg",
+        "value":0.0
+    },
+    "m_MEV":{
+        "base_parameters":"m_CBE, m_ctgcy",
+        "computed":True,
+        "description":"Maximum Expected Value of Mass (CBE * [1 + Ctgcy])",
+        "dimensions":"mass",
+        "generating_function":"pangalactic.node.parametrics.get_mev",
+        "mod_datetime":NOW,
+        "name":"Mass MEV",
+        "range_datatype":"float",
+        "units":"kg",
+        "value":0
+    },
+    "m_NTE":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Not To Exceed (NTE) value for Mass:  the Maximum Expected Value (MEV) of Mass should not exceed this value",
+        "dimensions":"mass",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Mass NTE",
+        "range_datatype":"float",
+        "units":"kg",
+        "value":0.0
+    },
+    "m_ctgcy":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Mass Contingency: percentage of Current Best Estimate of Mass designated to cover contingencies",
+        "dimensions":"percent",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Mass Ctgcy",
+        "range_datatype":"float",
+        "units":"%",
+        "value":0.3
+    },
+    "m_margin":{
+        "base_parameters":"m_NTE, m_CBE",
+        "computed":True,
+        "description":"Mass Margin ([NTE-CBE]/NTE)",
+        "dimensions":"percent",
+        "generating_function":"pangalactic.node.parametrics.get_margin",
+        "mod_datetime":NOW,
+        "name":"Mass Margin",
+        "range_datatype":"float",
+        "units":"%",
+        "value":0.0
+    },
+    "width":{
+        "base_parameters":None,
+        "computed":False,
+        "description":"Length in x direction",
+        "dimensions":"length",
+        "generating_function":None,
+        "mod_datetime":NOW,
+        "name":"Width",
+        "range_datatype":"float",
+        "units":"m",
+        "value":0.0
+    }
+}
+

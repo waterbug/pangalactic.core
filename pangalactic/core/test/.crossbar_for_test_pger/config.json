@@ -1,0 +1,125 @@
+{
+    "version": 2,
+    "workers": [
+        {
+            "type": "router",
+            "options": {
+                "pythonpath": [
+                    "../../node"
+                ]
+            },
+            "realms": [
+                {
+                    "name": "realm-auth",
+                    "roles": [
+                        {
+                            "name": "authenticator",
+                            "permissions": [
+                                {
+                                    "uri": "omb.authenticate",
+                                    "match": "exact",
+                                    "allow": {
+                                        "call": true,
+                                        "register": true,
+                                        "publish": true,
+                                        "subscribe": true 
+                                    },
+                                    "disclose": {
+                                        "caller": false,
+                                        "publisher": false
+                                    },
+                                    "cache": true
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "services",
+                    "roles": [
+                        {
+                            "name": "user",
+                            "allow-by-default": true,
+                            "permissions": [
+                                {
+                                    "uri": "",
+                                    "match": "prefix",
+                                    "allow": {
+                                        "call": true,
+                                        "register": false,
+                                        "publish": true,
+                                        "subscribe": true
+                                    },
+                                    "disclose": {
+                                        "caller": true,
+                                        "publisher": true
+                                    },
+                                    "cache": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "service",
+                            "allow-by-default": true,
+                            "permissions": [
+                                {
+                                    "uri": "",
+                                    "match": "prefix",
+                                    "allow": {
+                                        "call": true,
+                                        "register": true,
+                                        "publish": true,
+                                        "subscribe": true
+                                    },
+                                    "disclose": {
+                                        "caller": true,
+                                        "publisher": true
+                                    },
+                                    "cache": true
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "transports": [
+                {
+                    "type": "web",
+                    "endpoint": {
+                        "type": "tcp",
+                        "port": 8080,
+                        "tls": {
+                            "key": "server_key.pem",
+                            "certificate": "server_cert.pem"
+                        }
+                    },
+                    "paths": {
+                        "/": {
+                            "type": "static",
+                            "directory": "../web"
+                        },
+                        "ws": {
+                            "type": "websocket",
+                            "auth": {
+                                "ticket": {
+                                    "type": "dynamic",
+                                    "authenticator": "omb.authenticate",
+                                    "authenticator-realm": "realm-auth"
+                                }
+                            },
+                            "url": "wss://localhost:8080/ws"
+                        }
+                    }
+                }
+            ],
+            "components": [
+                {
+                    "type": "class",
+                    "classname": "authenticator.AuthenticatorSession",
+                    "realm": "realm-auth",
+                    "role": "authenticator"
+                }
+            ]
+        }
+    ]
+}
