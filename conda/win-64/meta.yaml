@@ -1,0 +1,57 @@
+package:
+  name: pangalactic
+  version: "0.1.dev91"
+
+source:
+        path: C:\Users\swaterbu\clones\pgef
+
+build:
+  entry_points:
+    - pangalaxian = pangalactic.node.pangalaxian:run
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  run:
+    - autobahn          # conda-forge
+    - conda
+    - binaryornot       # conda-forge
+    # - hdf5 <=1.8.18
+    - matplotlib
+    - u-msgpack-python
+    # - pandas
+    - pillow
+    - pint
+    - pyqt >=5.6
+    - python >=2.7
+    # - pytables
+    - pythonocc-core    # dlr-sc
+    - pytz
+    - rdflib            # conda-forge
+    - ruamel_yaml
+    - service_identity
+    - sqlalchemy
+    - twisted <=16.6
+    - tzlocal
+    - unidecode
+    - xlrd
+    - xlwt
+    - xlsxwriter
+    - zope
+    - zope.interface
+    # locally created conda packages
+    - inflect
+    - louie
+    - qt5reactor
+
+# test:
+  # imports:
+    # - sometestpackage
+
+about:
+  # home: https://pangalactic.us
+  license: NASA
+  # license_file: LICENSE
+

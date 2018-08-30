@@ -17,7 +17,6 @@ syntax: glob
 *.pprj
 build
 bump_version.sh
-.glimpse*
 ipython.*
 key.priv
 key.pub
