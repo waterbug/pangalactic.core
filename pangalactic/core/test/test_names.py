@@ -14,7 +14,7 @@ from rdflib.term import URIRef
 from pangalactic.core                import names
 from pangalactic.core.datastructures import OrderedSet
 
-xmlds = pkgutil.get_data('pangalactic.test.data', 'test_data.owl')
+xmlds = pkgutil.get_data('pangalactic.core.test.data', 'test_data.owl')
 
 
 class NamesTests(unittest.TestCase):

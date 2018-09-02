@@ -68,6 +68,7 @@ files are simply added to the `vault` directory.
     app_package_name:   (str)  app package name
     dashboards:         (dict) named dashboards (lists of parameter ids)
     dashboard_names:    (list) ordering of keys in `dashboards`
+    db_url:             (str)  sqlalchemy-style db url (only used by vger)
     default_parms:      (list) ids of default parameters to assign to objs
     host:               (list) fqdn of message bus host
     local_admin:        (bool) if `true`, user can edit any item locally
