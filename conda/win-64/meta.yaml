@@ -1,13 +1,9 @@
 package:
-  name: pangalactic
-  version: "0.1.dev91"
+  name: pangalactic.core
+  version: "0.1.dev92"
 
 source:
-        path: C:\Users\swaterbu\clones\pgef
-
-build:
-  entry_points:
-    - pangalaxian = pangalactic.node.pangalaxian:run
+  path: # [path to source]
 
 requirements:
   build:
@@ -15,25 +11,12 @@ requirements:
     - setuptools
 
   run:
-    - autobahn          # conda-forge
-    - conda
-    - binaryornot       # conda-forge
-    # - hdf5 <=1.8.18
-    - matplotlib
-    - u-msgpack-python
-    # - pandas
-    - pillow
-    - pint
-    - pyqt >=5.6
     - python >=2.7
-    # - pytables
-    - pythonocc-core    # dlr-sc
     - pytz
-    - rdflib            # conda-forge
-    - ruamel_yaml
+    - ruamel_yaml <=0.15
     - service_identity
     - sqlalchemy
-    - twisted <=16.6
+    - twisted
     - tzlocal
     - unidecode
     - xlrd
@@ -41,10 +24,20 @@ requirements:
     - xlsxwriter
     - zope
     - zope.interface
-    # locally created conda packages
+    # -----------------------------------------------------
+    # packages installed from local repo (copied)
+    - numpy >=1.13.3
+    # service_identity (reqd. by autobahn)
+    # txaio (reqd. by autobahn)
+    # -----------------------------------------------------
+    # packages installed from local repo (locally built)
     - inflect
-    - louie
-    - qt5reactor
+    # - louie [not used now but might be in the future]
+    - pint
+    - python-dateutil
+    - rdflib
+    # - isodate (required by rdflib)
+    # -----------------------------------------------------
 
 # test:
   # imports:

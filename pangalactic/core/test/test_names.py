@@ -1,11 +1,10 @@
+# -*- coding: utf-8 -*-
 """
-Unit tests for pangalactic.meta.names
+Unit tests for 'names' module
 """
-from StringIO import StringIO
 import pkgutil
-
-# Twisted
-from twisted.trial import unittest
+import unittest
+from StringIO import StringIO
 
 # rdflib
 from rdflib.term import URIRef

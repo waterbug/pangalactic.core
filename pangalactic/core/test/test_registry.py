@@ -1,22 +1,9 @@
+# -*- coding: utf-8 -*-
 """
-Functional test for pangalactic.meta.registry module
+Functional tests for pangalactic.core.registry module
   - builds registry from kb .owl and .rdf files
-  - outputs result of registry.report()
 """
-# TODO:  test caching
-#
-# Things that *should* be tested explicitly (and aren't yet):
-#
-# * owlport (separate test module)
-#   - picks up all Classes, Properties, and Namespaces in an OWL file
-#   - getPropertyNames, getPropertyAttrs, getBaseNames, work
-#   - getSchemaAttrs works
-#
-# * registry
-#   - functions besides constructing itself
-
-# Twisted
-from twisted.trial import unittest
+import unittest
 
 # PanGalactic
 from pangalactic.core.registry import PanGalacticRegistry

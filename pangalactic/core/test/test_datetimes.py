@@ -1,12 +1,12 @@
-# $Id$
-
+# -*- coding: utf-8 -*-
 """
-Unit tests for pangalactic.core.kb
+Unit tests for date/time related functions
 """
-
-from twisted.trial import unittest
-from pangalactic.core.utils import datetimes
+import unittest
 from datetime import datetime, date, time
+
+# pangalactic
+from pangalactic.core.utils import datetimes
 
 
 class DatetimesTests(unittest.TestCase):

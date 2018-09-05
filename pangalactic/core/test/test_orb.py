@@ -1,9 +1,9 @@
+# -*- coding: utf-8 -*-
 """
-Unit tests for pangalactic.node.uberorb.orb
+Unit tests for pangalactic.core.uberorb.orb
 """
 import os
-# Twisted test system
-from twisted.trial import unittest
+import unittest
 
 # python-dateutil
 import dateutil.parser as dtparser

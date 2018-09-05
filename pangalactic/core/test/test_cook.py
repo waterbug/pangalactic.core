@@ -1,11 +1,11 @@
-# $Id: test_cook.py,v da39ea7970bd 2007/07/27 18:02:33 waterbug $
-
+# -*- coding: utf-8 -*-
 """
-Unit tests for pangalactic.meta.pgefdatatype.cook
+Unit tests for "cook" (serialize) functions
 """
+import unittest
+from datetime import date, datetime
 
-from datetime                    import date, datetime
-from twisted.trial               import unittest
+# pangalactic
 from pangalactic.core.utils.meta import cookers
 
 

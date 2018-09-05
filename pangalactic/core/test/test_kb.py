@@ -1,18 +1,14 @@
-# $Id$
-
+# -*- coding: utf-8 -*-
 """
 Unit tests for pangalactic.core.kb
 """
-# Python
 import os
+import unittest
 
-# Twisted
-from twisted.trial import unittest
-
-# PanGalactic
+# pangalactic
 from pangalactic.core import kb
 
-# RDFlib
+# rdflib
 import rdflib
 
 cwd = os.getcwd()
