@@ -1254,6 +1254,11 @@ dict(
        'R_D':
          {'name': 'Data Rate',
           'description': 'Data Rate',
+          'base_parameters': None,
+          'generating_function': None,
+          'computed': False,
+          'range_datatype': 'float',
+          'dimensions': 'bitrate',
           'value': 655e6,
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
@@ -1273,6 +1278,11 @@ dict(
        'R_D':
          {'name': 'Data Rate',
           'description': 'Data Rate',
+          'base_parameters': None,
+          'generating_function': None,
+          'computed': False,
+          'range_datatype': 'float',
+          'dimensions': 'bitrate',
           'value': 1e7,  # per Wikipedia: 10 Mbit/s
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
@@ -1292,6 +1302,11 @@ dict(
        'R_D':
          {'name': 'Data Rate',
           'description': 'Data Rate',
+          'base_parameters': None,
+          'generating_function': None,
+          'computed': False,
+          'range_datatype': 'float',
+          'dimensions': 'bitrate',
           'value': 4e8,  # per Wikipedia: 400 Mbit/s
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
@@ -1310,6 +1325,11 @@ dict(
        'R_D':
          {'name': 'Data Rate',
           'description': 'Data Rate',
+          'base_parameters': None,
+          'generating_function': None,
+          'computed': False,
+          'range_datatype': 'float',
+          'dimensions': 'bitrate',
           'value': 0,  # TBD
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
@@ -1330,6 +1350,11 @@ dict(
        'V':
          {'name': 'Voltage',
           'description': 'Voltage',
+          'base_parameters': None,
+          'generating_function': None,
+          'computed': False,
+          'range_datatype': 'float',
+          'dimensions': 'electrical potential',
           'value': 28,
           'mod_datetime': epoch,
           'units': 'V'}
@@ -1349,6 +1374,11 @@ dict(
        'V':
          {'name': 'Voltage',
           'description': 'Voltage',
+          'base_parameters': None,
+          'generating_function': None,
+          'computed': False,
+          'range_datatype': 'float',
+          'dimensions': 'electrical potential',
           'value': 12,
           'mod_datetime': epoch,
           'units': 'V'}
@@ -1368,6 +1398,11 @@ dict(
        'V':
          {'name': 'Voltage',
           'description': 'Voltage',
+          'base_parameters': None,
+          'generating_function': None,
+          'computed': False,
+          'range_datatype': 'float',
+          'dimensions': 'electrical potential',
           'value': 5,
           'mod_datetime': epoch,
           'units': 'V'}
@@ -1387,6 +1422,11 @@ dict(
        'V':
          {'name': 'Voltage',
           'description': 'Voltage',
+          'base_parameters': None,
+          'generating_function': None,
+          'computed': False,
+          'range_datatype': 'float',
+          'dimensions': 'electrical potential',
           'value': 3.3,
           'mod_datetime': epoch,
           'units': 'V'}
