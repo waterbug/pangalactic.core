@@ -16,11 +16,11 @@ from pangalactic.core.utils.meta      import get_parameter_definition_oid
 from pangalactic.core.utils.datetimes import dtstamp
 
 # numpy
-import numpy as np
+# import numpy as np
 
 
 DATATYPES = SELECTABLE_VALUES['range_datatype']
-NULL = {True: np.nan, False: 0.0}
+# NULL = {True: np.nan, False: 0.0}
 TWOPLACES = Decimal('0.01')
 
 # CACHES ##################################################################
@@ -294,7 +294,8 @@ def get_pval(orb, oid, pid, allow_nan=False):
         # orb.log.debug('  value of {} is {} ({})'.format(pid, val, type(val)))
         return parameterz[oid][pid]['value']
     except:
-        return NULL[allow_nan]
+        # return NULL[allow_nan]
+        return 0.0
 
 def get_pval_as_str(orb, oid, pid, units=None, allow_nan=False):
     """
@@ -418,14 +419,17 @@ def _compute_pval(orb, oid, pid, allow_nan=False):
                     # orb.log.debug('  value is {}'.format(value))
                     return value
                 else:
-                    return NULL[allow_nan]
-            return NULL[allow_nan]
+                    # return NULL[allow_nan]
+                    return 0.0
+            # return NULL[allow_nan]
+            return 0.0
         # msg = '  "{}" is not computed; calling get_pval() ...'.format(pid)
         # orb.log.debug(msg)
         return get_pval(orb, oid, pid, allow_nan=allow_nan)
     else:
         # orb.log.debug('  this object has no parameters defined yet.')
-        return NULL[allow_nan]
+        # return NULL[allow_nan]
+        return 0.0
 
 def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
     """
