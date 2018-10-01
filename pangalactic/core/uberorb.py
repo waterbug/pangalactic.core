@@ -189,9 +189,6 @@ class UberORB(object):
                           % str(vault_files_copied))
         else:
             self.log.info('  - all test vault files already installed.')
-        # NOTE:  registry 'debug' is set to False regardless of the client's
-        # log level because its debug logging is INSANELY verbose ...  if the
-        # registry needs debugging, just hack this ... ;)
         self.cache_path = os.path.join(pgx_home, 'cache')
         if not db_url:
             # if no db_url is specified, create a local sqlite db
@@ -217,6 +214,9 @@ class UberORB(object):
         # else:
             # if there were no schema mods, just initialize the registry with
             # the current schema
+        # NOTE:  registry 'debug' is set to False regardless of the client's
+        # log level because its debug logging is INSANELY verbose ...  if the
+        # registry needs debugging, just hack this.
         self.init_registry(pgx_home, db_url, version=schema_version,
                            log=self.log, debug=False, console=console)
         self.versionables = [cname for cname in self.classes if 'version' in

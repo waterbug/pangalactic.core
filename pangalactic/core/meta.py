@@ -153,15 +153,25 @@ M2M = {
        'assigned_to_projects' : {'domain' : 'Requirement',
                                  'range'  : 'ProjectRequirement'},
 
-       # *** M2M:  ProductRequirement
-       # inverse of 'satisfied_by'
-       # complementary to 'allocated_to_products'
-       'satisfies' :              {'domain' : 'Product',
-                                   'range'  : 'ProductRequirement'},
-       # inverse of 'allocated_requirement'
-       # complementary to 'satisfies'
-       'allocated_to_products' :  {'domain' : 'Requirement',
-                                   'range'  : 'ProductRequirement'},
+       # *** M2M:  RequirementAllocation
+       # inverse of 'allocated_to_products'
+       # complementary to 'satisfied_by'
+       'allocated_requirement' :  {'domain' : 'RequirementAllocation',
+                                   'range'  : 'Requirement'},
+       # inverse of 'satisfies'
+       # complementary to 'allocated_requirement'
+       'satisfied_by' :           {'domain' : 'RequirementAllocation',
+                                   'range'  : 'Acu'},
+
+       # *** M2M:  SystemRequirement
+       # inverse of 'allocated_to_systems'
+       # complementary to 'supported_by'
+       'requirement' :            {'domain' : 'SystemRequirement',
+                                   'range'  : 'Requirement'},
+       # inverse of 'supports'
+       # complementary to 'requirement'
+       'supported_by' :           {'domain' : 'SystemRequirement',
+                                   'range'  : 'ProjectSystemUsage'},
 
        # *** M2M:  ProjectSystemUsage
        # inverse of 'system'
@@ -258,9 +268,10 @@ ONE2M = {
          }
 
 # PGXN_HIDE:  Fields not to be shown for any object
+# [TODO:  implement support for these in PgxnObject editor]
 PGXN_HIDE = ONE2M.keys() + M2M.keys()
 
-# PGXN_MASK:  Fields that are not applicable to specified classes
+# PGXN_MASK:  Fields should not be displayed for specified classes
 PGXN_MASK = dict(
     ParameterDefinition=(PGXN_HIDE + ['base_parameters', 'computed_by_default',
                          'generating_function', 'used_in_disciplines']),
