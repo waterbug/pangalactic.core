@@ -877,11 +877,11 @@
     
 
 
-    <!-- http://pangalactic.us/pgef/allocated_to_products -->
+    <!-- http://pangalactic.us/pgef/allocated_to_functions -->
 
-    <owl:ObjectProperty rdf:about="&pgef;allocated_to_products">
+    <owl:ObjectProperty rdf:about="&pgef;allocated_to_functions">
         <owl:inverseOf rdf:resource="&pgef;allocated_requirement"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The RequirementAllocation relationships that allocate this requirement to functions or components.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The RequirementAllocation relationships that allocate this requirement to functions (component roles).</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&pgef;RequirementAllocation"/>
     </owl:ObjectProperty>
@@ -925,7 +925,7 @@
 
     <owl:ObjectProperty rdf:about="&pgef;allocated_to_systems">
         <owl:inverseOf rdf:resource="&pgef;requirement"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The SystemRequirement relationships that allocate this requirement to systems.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The SystemRequirement relationships that allocate this requirement to system usages on a project.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&pgef;SystemRequirement"/>
     </owl:ObjectProperty>

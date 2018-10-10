@@ -154,7 +154,7 @@ M2M = {
                                  'range'  : 'ProjectRequirement'},
 
        # *** M2M:  RequirementAllocation
-       # inverse of 'allocated_to_products'
+       # inverse of 'allocated_to_functions'
        # complementary to 'satisfied_by'
        'allocated_requirement' :  {'domain' : 'RequirementAllocation',
                                    'range'  : 'Requirement'},
@@ -454,9 +454,12 @@ PGEF_COL_NAMES = {
 
 # Properties specified as READ-ONLY by PanGalactic
 # TODO:  do this in a configurable way, as part of the Schemas
+# TODO:  for m2m attributes, these may eventually become editable, when
+# PgxnObject implements that capability
 READONLY = [
-            'allocated_to_products', # m2m (Requirement:ProductRequirement)
-            'components',       # m2m (ACU)
+            'allocated_to_functions', # m2m (Requirement:Acu)
+            'allocated_to_systems', # m2m (Requirement:ProjectSystemUsage)
+            'components',       # m2m (Acu)
             'creator',          #  "   "    "   "
             'create_datetime',  # tds
             'has_models',       # inverse of 'of_thing' property of Model
@@ -471,7 +474,7 @@ READONLY = [
             'projects_using_system', # m2m (ProjectSystemUsage)
             'satisfies',        # m2m (Product:ProductRequirement)
             'version_sequence',
-            'where_used'        # m2m (ACU)
+            'where_used'        # m2m (Acu)
             ]
 
 # This is a temporary way of filtering namespaces, just until a more rational
