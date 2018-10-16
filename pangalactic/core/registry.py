@@ -799,6 +799,8 @@ class PanGalacticRegistry(object):
         output += '<ul>'
         for name in self.metaobject_build_order():
             schema = self.schemas[name]
+            field_names = schema['field_names']
+            field_names.sort()
             if schema['base_names']:
                 base_names = ', '.join(schema['base_names'])
             else:
@@ -812,9 +814,9 @@ class PanGalacticRegistry(object):
             output += '<dd>'
             output += schema.get('definition', '[none]')
             output += '</dd></dl>'
-            local_properties = [p for p in schema['field_names']
+            local_properties = [p for p in field_names
                                 if schema['fields'][p]['local']]
-            inherited_properties = [p for p in schema['field_names']
+            inherited_properties = [p for p in field_names
                                     if not schema['fields'][p]['local']]
             if local_properties:
                 output += '<b>Local Properties:</b>'

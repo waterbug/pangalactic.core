@@ -63,16 +63,20 @@ MAIN_VIEWS = dict(
     ProjectSystemUsage=['id', 'project', 'system', 'system_role'],
     Representation=(IDENTITY + ['of_object', 'representation_purpose']),
     RepresentationFile=(IDENTITY + ['of_representation']),
-    Requirement=(IDENTITY + ['rationale', 'comment', 'purpose']),
+    Requirement=['id', 'id_ns', 'abbreviation', 'name', 'owner',
+                 'requirement_type', 'level', 'validated', 'public', 'frozen',
+                 'description', 'rationale'],
     RoleAssignment=['assigned_role', 'assigned_to', 'role_assignment_context'],
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
     )
 
-# PGXN_VIEWS:  Default fields for the PgxnObject "info", "narrative" and
-# "admin" tabs
+# PGXN_VIEWS:  Default fields/ordering for the PgxnObject "info", "narrative"
+# and "admin" tabs
 PGXN_VIEWS = dict(
-    info=['purpose'],
-    narrative=['comment', 'rationale'],
+    info=['public', 'verification_method', 'constraint_type', 'parameter_dimensions',
+          'constraint_tolerance', 'minimum_value', 'maximum_value',
+          'constraint_tolerance_lower', 'constraint_tolerance_upper'],
+    narrative=['comment', 'rationale', 'purpose'],
     admin=['oid', 'creator', 'create_datetime', 'modifier', 'mod_datetime',
            'url'])
 
@@ -144,34 +148,45 @@ M2M = {
        'assignments_of_role' :  {'domain' : 'Role',
                                  'range'  : 'RoleAssignment'},
 
-       # *** M2M:  ProjectRequirement
-       # inverse of 'implementing_project'
-       'requirements' :         {'domain' : 'Project',
-                                 'range'  : 'ProjectRequirement'},
-       # inverse of 'assigned_requirement'
-       # complementary to 'requirements'
-       'assigned_to_projects' : {'domain' : 'Requirement',
-                                 'range'  : 'ProjectRequirement'},
+       # *** M2M:  RequirementAncestry
+       # inverse of 'parent_requirement'
+       # complementary to 'parent_requirements'
+       'child_requirements' :     {'domain' : 'Requirement',
+                                   'range'  : 'RequirementAncestry'},
+       # inverse of 'child_requirement'
+       # complementary to 'child_requirements'
+       'parent_requirements' :    {'domain' : 'Requirement',
+                                   'range'  : 'RequirementAncestry'},
 
        # *** M2M:  RequirementAllocation
-       # inverse of 'allocated_to_functions'
-       # complementary to 'satisfied_by'
-       'allocated_requirement' :  {'domain' : 'RequirementAllocation',
-                                   'range'  : 'Requirement'},
-       # inverse of 'satisfies'
-       # complementary to 'allocated_requirement'
-       'satisfied_by' :           {'domain' : 'RequirementAllocation',
-                                   'range'  : 'Acu'},
+       # inverse of 'satisfied_by'
+       # complementary to 'allocated_to_functions'
+       'satisfies' :              {'domain' : 'Acu',
+                                   'range'  : 'RequirementAllocation'},
+       # inverse of 'allocated_requirement'
+       # complementary to 'satisfies'
+       'allocated_to_functions' : {'domain' : 'Requirement',
+                                   'range'  : 'RequirementAllocation'},
 
        # *** M2M:  SystemRequirement
-       # inverse of 'allocated_to_systems'
-       # complementary to 'supported_by'
-       'requirement' :            {'domain' : 'SystemRequirement',
-                                   'range'  : 'Requirement'},
-       # inverse of 'supports'
-       # complementary to 'requirement'
-       'supported_by' :           {'domain' : 'SystemRequirement',
-                                   'range'  : 'ProjectSystemUsage'},
+       # inverse of 'supported_by'
+       # complementary to 'allocated_to_systems'
+       'supports' :               {'domain' : 'ProjectSystemUsage',
+                                   'range'  : 'SystemRequirement'},
+       # inverse of 'requirement'
+       # complementary to 'supports'
+       'allocated_to_systems' :   {'domain' : 'Requirement',
+                                   'range'  : 'SystemRequirement'},
+
+       # *** M2M:  VerificationTest
+       # inverse of 'test'
+       # complementary to 'verification_tests'
+       'verifies_requirements' :  {'domain' : 'Test',
+                                   'range'  : 'VerificationTest'},
+       # inverse of 'verifies'
+       # complementary to 'verifies_requirements'
+       'verification_tests' :     {'domain' : 'Requirement',
+                                   'range'  : 'VerificationTest'},
 
        # *** M2M:  ProjectSystemUsage
        # inverse of 'system'
@@ -221,7 +236,7 @@ M2M = {
        # inverse of 'accessible_object'
        # complementary to 'accessible_objects'
        'grantees' : {
-                     'domain' : 'ManagedObject',
+                     'domain' : 'Product',
                      'range'  : 'ObjectAccess'},
        # inverse of 'grantee'
        # complementary to 'grantees'
@@ -235,10 +250,10 @@ M2M = {
 # Format is {property name : one2m relationship range class name}
 ONE2M = {
          # inverse of 'creator'
-         'created_objects' :      {'domain' : 'ManagedObject',
-                                   'range'  : 'ManagedObject'},
+         'created_objects' :      {'domain' : 'Actor',
+                                   'range'  : 'Modelable'},
          # inverse of 'of_thing'
-         'has_models' :           {'domain' : 'Identifiable',
+         'has_models' :           {'domain' : 'Modelable',
                                    'range'  : 'Model'},
          # inverse of 'of_object'
          'has_representations' :  {'domain' : 'DigitalProduct',
@@ -251,7 +266,7 @@ ONE2M = {
                                               'Organization',
                                    'range' :  'RoleAssignment'},
          # inverse of 'owner'
-         'owned_objects' :        {'domain' : 'ManagedObject',
+         'owned_objects' :        {'domain' : 'Organization',
                                    'range'  : 'ManagedObject'},
          # inverse of 'product_type'
          'products_of_type' :     {'domain' : 'ProductType',
@@ -261,10 +276,7 @@ ONE2M = {
                                    'range'  : 'PartsListItem'},
          # inverse of 'parent_organization'
          'sub_organizations' :    {'domain' : 'Organization',
-                                   'range'  : 'Organization'},
-         # inverse of 'verifies'
-         'verified_by' :          {'domain' : 'Requirement',
-                                   'range'  : 'Test'}
+                                   'range'  : 'Organization'}
          }
 
 # PGXN_HIDE:  Fields not to be shown for any object
@@ -277,7 +289,7 @@ PGXN_MASK = dict(
                          'generating_function', 'used_in_disciplines']),
     Requirement=(PGXN_HIDE + ['components', 'computable_form', 'fsc_code',
                  'has_models', 'ports', 'product_type', 'satisfies',
-                 'specification_number']),
+                 'specification_number', 'shall_text', 'min_max_text']),
     Test=(PGXN_HIDE + ['components', 'computable_form', 'fsc_code',
                  'product_type'])
     )
@@ -399,7 +411,16 @@ EXT_NAMES_PLURAL = {
 # Special external names of attributes of PGEF classes
 ATTR_EXT_NAMES = {
     'Requirement' :
-        {'description' : 'requirement text'}
+        {
+         'description' : 'text',
+         'requirement_type' : 'type',
+         'parameter_dimensions' : 'dimensions',
+         'maximum_value' : 'maximum',
+         'minimum_value' : 'minimum',
+         'constraint_tolerance': 'tolerance',
+         'constraint_tolerance_lower': 'lower tol.',
+         'constraint_tolerance_upper': 'upper tol.'
+        }
     }
 
 # Default ordering of the important ManagedObject properties
@@ -444,6 +465,7 @@ PGEF_COL_WIDTHS = {
             'range_datatype': 50,
             'rationale': 250,
             'representations': 100,
+            'requirement_type': 50,
             'url': 100,
             'version': 50,
             'version_sequence': 50

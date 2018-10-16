@@ -943,9 +943,9 @@
     
 
 
-    <!-- http://pangalactic.us/pgef/child_requirements_of -->
+    <!-- http://pangalactic.us/pgef/child_requirements -->
 
-    <owl:ObjectProperty rdf:about="&pgef;child_requirements_of">
+    <owl:ObjectProperty rdf:about="&pgef;child_requirements">
         <owl:inverseOf rdf:resource="&pgef;parent_requirement"/>
         <rdfs:comment rdf:datatype="&xsd;string">The children of a parent Requirement in a RequirementAncestry relationship.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -965,9 +965,9 @@
     
 
 
-    <!-- http://pangalactic.us/pgef/parent_requirements_of -->
+    <!-- http://pangalactic.us/pgef/parent_requirements -->
 
-    <owl:ObjectProperty rdf:about="&pgef;parent_requirements_of">
+    <owl:ObjectProperty rdf:about="&pgef;parent_requirements">
         <owl:inverseOf rdf:resource="&pgef;child_requirement"/>
         <rdfs:comment rdf:datatype="&xsd;string">The parents of a child Requirement in a RequirementAncestry relationship.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -998,13 +998,24 @@
     
 
 
-    <!-- http://pangalactic.us/pgef/verified_by -->
+    <!-- http://pangalactic.us/pgef/test -->
 
-    <owl:ObjectProperty rdf:about="&pgef;verified_by">
-        <owl:inverseOf rdf:resource="&pgef;verifies"/>
-        <rdfs:comment rdf:datatype="&xsd;string">Tests that contribute to verifying this requirement.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+    <owl:ObjectProperty rdf:about="&pgef;test">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Test used in this Verification Test.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;VerificationTest"/>
         <rdfs:range rdf:resource="&pgef;Test"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/verifies_requirements -->
+
+    <owl:ObjectProperty rdf:about="&pgef;verifies_requirements">
+        <owl:inverseOf rdf:resource="&pgef;test"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Requirements this Verification Test contributes to verifying.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Test"/>
+        <rdfs:range rdf:resource="&pgef;VerificationTest"/>
     </owl:ObjectProperty>
     
 
@@ -1012,9 +1023,21 @@
     <!-- http://pangalactic.us/pgef/verifies -->
 
     <owl:ObjectProperty rdf:about="&pgef;verifies">
-        <rdfs:comment rdf:datatype="&xsd;string">Requirement that this test contributes to verifying.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Test"/>
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Requirement that this Verification Test is intended to verify.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;VerificationTest"/>
         <rdfs:range rdf:resource="&pgef;Requirement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/verification_tests -->
+
+    <owl:ObjectProperty rdf:about="&pgef;verification_tests">
+        <owl:inverseOf rdf:resource="&pgef;verifies"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Verification Tests that contribute to verifying this requirement.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&pgef;VerificationTest"/>
     </owl:ObjectProperty>
     
 
@@ -1363,6 +1386,127 @@ Working copies of iterations can be used as parallel evolution threads toward th
     
 
 
+    <!-- http://pangalactic.us/pgef/verification_method -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;verification_method">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The method used to verify a Requirement: test, analysis, or inspection.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/requirement_type -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;requirement_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of a Requirement: functional or performance.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/constraint_type -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;constraint_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of constraint specified by a Requirement: a specified maximum or minimum, a specified value with a tolerance, or an allowable range specified by a pair of maximum and minimum values.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/constraint_tolerance -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;constraint_tolerance">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is a specified value with a symmetric tolerance, the value of the tolerance.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/constraint_tolerance_lower -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;constraint_tolerance_lower">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">For a requirement whose constraint is a specified value with an asymmetric tolerance, the value of the lower tolerance limit.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/constraint_tolerance_upper -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;constraint_tolerance_upper">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is a specified value with an asymmetric tolerance, the value of the upper tolerance limit.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/minimum_value -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;minimum_value">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is expressed as a range with minimum and maximum, the value of the minimum.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/maximum_value -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;maximum_value">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is expressed as a range with minimum and maximum, the value of the maximum.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/shall_text -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;shall_text">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The shall phrase of a Requirement.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/min_max_text -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;min_max_text">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The phrase of a Requirement expressing a relationship to a maximum or minimum value.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://pangalactic.us/pgef/parameter_dimensions -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;parameter_dimensions">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The dimensions of the parameter constrained by a Requirement, which of course also applies to the values of any minimum, maximum, or tolerances specified.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
     <!-- http://pangalactic.us/pgef/lot_date_code -->
 
     <owl:DatatypeProperty rdf:about="&pgef;lot_date_code">
@@ -1665,17 +1809,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <owl:DatatypeProperty rdf:about="&pgef;rationale">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The reason behind a Requirement.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://pangalactic.us/pgef/requirement_text -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;requirement_text">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The statement of the Requirement.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
@@ -2382,7 +2515,15 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
     <owl:Class rdf:about="&pgef;Test">
         <rdfs:subClassOf rdf:resource="&pgef;Activity"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A test is a type of activity consisting of a specified environment, specified inputs and measurable expected results (synonymous to SysML: testCase, modeled by a SysML Interaction).</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">A Test is a type of activity consisting of a specified environment, specified inputs and measurable expected results (synonymous to SysML: testCase, modeled by a SysML Interaction).</rdfs:comment>
+    </owl:Class>
+    
+
+    <!-- http://pangalactic.us/pgef/VerificationTest -->
+
+    <owl:Class rdf:about="&pgef;VerificationTest">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A VerificationTest is a many-to-many relationship between Tests and Requirements.</rdfs:comment>
     </owl:Class>
     
 
