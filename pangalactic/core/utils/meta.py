@@ -19,8 +19,8 @@ import dateutil.parser as dtparser
 
 # PanGalactic
 from pangalactic.core      import datatypes
-from pangalactic.core.meta import (PLURALS, EXT_NAMES, EXT_NAMES_PLURAL,
-                                   READONLY)
+from pangalactic.core.meta import (PLURALS, ATTR_EXT_NAMES, EXT_NAMES,
+                                   EXT_NAMES_PLURAL, READONLY)
 
 _inf = inflect.engine()
 
@@ -96,6 +96,9 @@ def get_external_name(cname):
 def get_external_name_plural(cname):
     return EXT_NAMES_PLURAL.get(cname,
                                 to_external_name(cname)+'s')
+
+def get_attr_ext_name(cname, aname):
+    return ATTR_EXT_NAMES.get(cname, {}).get(aname, ' '.join(aname.split('_')))
 
 def to_external_name(cname):
     """

@@ -396,6 +396,12 @@ EXT_NAMES_PLURAL = {
     'Property'            : 'Properties',
     }
 
+# Special external names of attributes of PGEF classes
+ATTR_EXT_NAMES = {
+    'Requirement' :
+        {'description' : 'requirement text'}
+    }
+
 # Default ordering of the important ManagedObject properties
 PGEF_PROPS_ORDER = [
             'oid',
