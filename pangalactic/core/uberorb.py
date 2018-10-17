@@ -659,6 +659,9 @@ class UberORB(object):
 
           [1] with no arguments:  all oids in the db
           [2] with 'cname':  all oids for objects of the specified class
+
+        Keyword Args:
+            cname (str):  class name of the objects to be used
         """
         Identifiable = self.classes['Identifiable']
         query = self.db.query(Identifiable.oid)
@@ -672,6 +675,9 @@ class UberORB(object):
 
           [1] with no arguments:  for all objects in the db
           [2] with 'cname':  for all objects of the specified class
+
+        Keyword Args:
+            cname (str):  class name of the objects to be used
         """
         if cname in self.versionables:
             return [(o.id, o.version) for o in self.get_by_type(cname)]
@@ -685,12 +691,20 @@ class UberORB(object):
 
     def get_mod_dts(self, cname=None, oids=None):
         """
-        Return a dict that maps oids to 'mod_datetime' strings:
+        Get a dict that maps oids of objects to their 'mod_datetime' stamps as
+        strings:
 
           [1] with no arguments:  for all objects in the db for which
               'mod_datetime' is not None.
           [2] with 'cname':  for all objects of the specified class
           [3] with 'oids':   for all objects whose oids are in the 'oids' list
+
+        Keyword Args:
+            cname (str):  class name of the objects to be used
+            oids (list):  oids of objects to be used
+
+        Returns:
+            dict:  mapping of oids to 'mod_datetime' strings.
         """
         ident = self.classes['Identifiable'].__table__
         if not cname and not oids:
@@ -715,7 +729,7 @@ class UberORB(object):
         query results in multiple items, select returns the first item.)
 
         Args:
-            cname (str):  the class name of the object to be retrieved 
+            cname (str):  class name of the object to be retrieved 
 
         Returns:
             obj (Identifiable or subtype) or None
@@ -726,15 +740,18 @@ class UberORB(object):
 
     def search_exact(self, **kw):
         """
-        Search for instances by exact match on a set of search parameters.
-        The result will include all instances of classes that match all the
-        requested attribute values.
+        Search for instances that exactly match a set of attribute values.  The
+        result will include all matching instances of any classes that contain
+        all the requested attributes.
 
         A special keyword 'cname' can be used to specify that the search should
-        be restricted to the specified class.
+        be restricted to the named class specified by 'cname'.
 
-        @return: results list
-        @rtype:  list of objects
+        Keyword Args:
+            kw (dict of kw args):  special key 'cname' specifies a class name
+
+        Returns:
+            list:  a list of objects
         """
         self.log.debug('* search_exact(**(%s))' % (str(kw)))
         # only allow search parameters that occur in schemas
