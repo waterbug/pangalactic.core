@@ -501,6 +501,7 @@ READONLY = [
             # 'product_type',     # fk (property of Product -- set when created)
             'projects_using_system', # m2m (ProjectSystemUsage)
             'satisfies',        # m2m (Product:ProductRequirement)
+            'type_of_port',     # PortType (can't be changed once Port created)
             'version_sequence',
             'where_used'        # m2m (Acu)
             ]
