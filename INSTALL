@@ -75,7 +75,7 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install ruamel_yaml'
 
-    - Twisted <= 16.6
+    - Twisted
       Asynchronous networking framework
       <http://twistedmatrix.com>
       * NOTE: is in the 'default' conda channel
@@ -83,9 +83,9 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
           Configuration:  'conda install twisted'
 
     - service_identity
-      Support for TLS client hostname verification (recommended for use with
-      Twisted)
-      * NOTE: is in the 'default' conda channel
+      Support for TLS client hostname verification
+      * NOTE: Twisted will install it as a dependency
+      * NOTE: it is in the 'default' conda channel
 
           Configuration:  'conda install service_identity'
 
@@ -141,10 +141,8 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install pillow'
 
-    - autobahn <=17.9.3
+    - autobahn
       * NOTE: use 'conda-forge' channel
-      * NOTE: pinned at 17.9.3 to avoid "noarch" packages on
-        conda-forge, which are death to conda-constructor!
 
           Configuration:  'conda install autobahn'
 
