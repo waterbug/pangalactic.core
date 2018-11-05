@@ -292,9 +292,9 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
     if dictify:
         output = dict(new=[], modified=[], unmodified=[], error=[])
     if not include_refdata:
-        # ignore ref data objects
+        # ignore reference data objects
         serialized = [so for so in serialized
-                      if not so.get('oid', '').startswith('pgefobjects:')]
+                  if not asciify(so.get('oid', '')).startswith('pgefobjects:')]
     if len(serialized) < new_len:
         orb.log.info('  {} ref data object(s) found, ignored.'.format(
                                                new_len - len(serialized)))
