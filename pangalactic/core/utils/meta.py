@@ -32,12 +32,14 @@ def asciify(u):
     are going to be used in Python identifiers ... so they can be typed on an
     en-us encoded keyboard!
 
+    NOTE: this will also coerce u to be a string (bytes, i.e.)
+
     Credit: http://code.activestate.com/recipes/251871/ (this is not that
     recipe but an elegant one-liner from one of the comments on the recipe).
     """
     if type(u) == unicode:
         return unicodedata.normalize('NFKD', u).encode('ASCII', 'ignore')
-    return u
+    return str(u)
 
 def property_to_field(name, pe):
     """
