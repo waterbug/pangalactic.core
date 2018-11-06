@@ -5,6 +5,7 @@ Pan Galactic hub for object metadata and storage operations.
 NOTE:  Only the `orb` instance created in this module should be imported (it is
 intended to be a singleton).
 """
+from __future__ import absolute_import
 import json, os, shutil, sys, traceback
 
 # ruamel_yaml
@@ -114,7 +115,7 @@ class UberORB(object):
                     # current fallback is just to use the current directory
                     pgx_home = os.path.join(os.getcwd(), 'pangalaxian')
         if not os.path.exists(pgx_home):
-            os.makedirs(pgx_home, mode=0755)
+            os.makedirs(pgx_home, mode=0o755)
         pgx_home = os.path.abspath(pgx_home)
         # If config values have been edited, they will take precedence over any
         # config set by app start-up defaults.
@@ -133,11 +134,11 @@ class UberORB(object):
         # create "file vault"
         self.vault = os.path.join(pgx_home, 'vault')
         if not os.path.exists(self.vault):
-            os.makedirs(self.vault, mode=0755)
+            os.makedirs(self.vault, mode=0o755)
         self.start_logging(home=pgx_home, console=console, debug=debug)
         self.log.info('* prefs read: {}'.format(str(prefs)))
         self.log.info('* state read: {}'.format(str(state)))
-        self.log.info('* trash read ({} objects).'.format(len(trash.keys())))
+        self.log.info('* trash read ({} objects).'.format(len(trash)))
         if not prefs.get('units'):
             prefs['units'] = {}
         # * copy test data files from 'p.test.data' module to test_data_dir
@@ -175,7 +176,7 @@ class UberORB(object):
                 self.log.debug('    {}'.format(fpath))
         vault_mod_path = test_vault_mod.__path__[0]
         test_vault_files = set([s for s in os.listdir(vault_mod_path)
-                                   if not s.startswith('__init__')])
+                                if not s.startswith('__init__')])
         vault_files_to_copy = test_vault_files - current_vault_files
         self.log.debug('  - new test vault files to be installed: %i'
                        % len(vault_files_to_copy))
@@ -262,7 +263,7 @@ class UberORB(object):
             # NOTE:  DO NOT *EVER* USE 'expire_on_commit = False' here!!!
             #        -> it causes VERY weird behavior ...
 
-    def dump_db(self, fmt='json'):
+    def dump_db(self, fmt='yaml'):
         """
         Serialize the entire db and dump to `vault/db.yaml`.
         """
@@ -270,16 +271,14 @@ class UberORB(object):
         if fmt == 'json':
             f = open(os.path.join(self.vault, 'db.json'), 'w')
             f.write(json.dumps(serialize(
-                                    self,
-                                    self.get_all_subtypes('Identifiable')),
-                               separators=(',', ':'),
-                               indent=4, sort_keys=True))
+                    self, self.get_all_subtypes('Identifiable')),
+                    separators=(',', ':'),
+                    indent=4, sort_keys=True))
             f.close()
         elif fmt == 'yaml':
             f = open(os.path.join(self.vault, 'db.yaml'), 'w')
             f.write(yaml.safe_dump(serialize(
-                                    self,
-                                    self.get_all_subtypes('Identifiable'))))
+                    self, self.get_all_subtypes('Identifiable'))))
             f.close()
         self.log.info('  dump to {} completed.'.format(fmt))
 
@@ -756,7 +755,7 @@ class UberORB(object):
         self.log.debug('* search_exact(**(%s))' % (str(kw)))
         # only allow search parameters that occur in schemas
         cname = kw.get('cname')
-        attrs = [a for a in kw.keys() if a in self.registry.pes.keys()]
+        attrs = [a for a in kw if a in self.registry.pes]
         if attrs:
             domains = [self.registry.pes[a]['domain'] for a in attrs]
             idx = max([self.mbo.index(d) for d in domains])
