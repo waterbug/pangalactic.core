@@ -3,9 +3,9 @@
 """
 Script to read multiple Excel spreadsheets and "join" them.
 """
+from __future__ import print_function
 import argparse
 import xlrd
-from pprint import pprint
 from collections import OrderedDict
 
 
@@ -31,17 +31,16 @@ def get_raw_excel_data(file_path, clear_empty_rows=True):
                     datasets[names[s]].append([x for x in sheet.row_values(i)])
     except IOError:
         # TODO: use log here
-        print("\n  Could not find file '%s' -- did you misspell it?\n"
-              % file_path)
+        print("\n  Could not find file '{}' -- did you misspell it?\n".format(
+              file_path))
         return None
-    # print "\ncolumn names:", column_names
-    # print "\nfirst row of data:", dict(data[0])
-    # print
+    # print('\ncolumn names:  {}'.format(column_names))
+    # print('\nfirst row of data:  {}\n'.format(dict(data[0])))
     # for name, value in data[0].items():
         # print('{name:.<40} {value}'.format(name=name, value=value))
     clean_datasets = OrderedDict()
     if clear_empty_rows:
-        # print 'total rows: %i' % len(data)
+        # print('total rows: {}'.format(len(data))
         for ds_name in datasets:
             clean_datasets[ds_name] = []
             for i, row in enumerate(datasets[ds_name]):
@@ -49,9 +48,9 @@ def get_raw_excel_data(file_path, clear_empty_rows=True):
                     clean_datasets[ds_name].append(row)
     else:
         clean_datasets = datasets
-    # print 'clean data sets:'
+    # print('clean data sets:')
     # for name in clean_datasets:
-        # print '%s: %i rows' % (name, len(datasets[name]))
+        # print('{}: {} rows'.format(name, len(datasets[name])))
     return clean_datasets
 
 
@@ -97,12 +96,12 @@ def get_excel_data(file_path, header_pos=None, header_rows=None,
     # for LQMS, default key type for "Lab ID" is int
     key_type = key_type or 'integer'
     if key_type not in KEY_TYPES:
-        # print '\n  key type "%s" is not allowed;' % key_type
-        # print '  key values will be converted to strings.'
+        # print('\n  key type "{}" is not allowed;'.format(key_type)
+        # print('  key values will be converted to strings.')
         key_type = str
     else:
         key_type = KEY_TYPES[key_type]
-    # print 'key_type is %s' % str(key_type)
+    # print('key_type is %s'.format(str(key_type)))
     try:
         with xlrd.open_workbook(file_path) as book:
             for sheet in book.sheets():
@@ -129,33 +128,33 @@ def get_excel_data(file_path, header_pos=None, header_rows=None,
                                                             dictified_row[key])
                                     data.append(dictified_row)
                                 except ValueError:
-                                    # print ' - key value "%s"' % str(
-                                                            # dictified_row[key])
-                                    # print '   cannot be "%s";' % key_type
-                                    # print '   row %i will be ignored.\n' % row
+                                    # print(' - key value "{}"'.format(str(
+                                            # dictified_row[key])))
+                                    # print('   cannot be "{}";'.format(
+                                            # key_type))
+                                    # print('   row {} is ignored.\n'.format(
+                                            # row))
                                     pass
                         except:
                             break
     except IOError:
         # TODO: use log here
-        print("\n  Could not find file '%s' -- did you misspell it?\n"
-              % file_path)
-    # print "\ncolumn names:", column_names
-    # print "\nfirst row of data:", dict(data[0])
-    # print
+        print("\n  Could not find file '{}' -- did you misspell it?\n".format(
+              file_path))
+    # print("\ncolumn names: {}".format(column_names))
+    # print("\nfirst row of data: {}".format(str(dict(data[0]))))
     # for name, value in data[0].items():
         # print('{name:.<40} {value}'.format(name=name, value=value))
     clean_data = []
-    emptyrows = []
     if clear_empty_rows:
-        # print 'total rows: %i' % len(data)
-        # print 'clearing empty rows ...'
+        # print('total rows: {}'.format(len(data)))
+        # print('clearing empty rows ...')
         for i, row in enumerate(data):
             if not set(row.values()).issubset([0, 0.0, '0', '', None]):
                 clean_data.append(row)
     else:
         clean_data = data
-    # print 'remaining rows: %i' % len(data)
+    # print('remaining rows: {}'.format(len(data)))
     return column_names, clean_data
 
 
@@ -186,7 +185,8 @@ def get_column_names(sheet, header_pos=None, header_rows=None):
                 name = sheet.cell_value(row, 0)
                 if name:
                     found = True
-                    # print '  - first non-empty row found:', row + 1
+                    # print('  - first non-empty row found: {}'.format(
+                            # row + 1))
                     column_names = row_to_list(sheet, row)
                     break
                 else:
@@ -198,7 +198,7 @@ def get_column_names(sheet, header_pos=None, header_rows=None):
                     continue
     else:
         row = header_pos - 1
-        # print("* header row specified: %s" % str(header_pos))
+        # print("* header row specified: {}".format(str(header_pos)))
         column_names = row_to_list(sheet, row)
     header_pos = row + 1
     return header_pos, column_names
@@ -238,9 +238,9 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--test", action="store_true",
                         help="test mode [not yet implemented]")
     args = parser.parse_args()
-    # print " - supplied args:"
+    # print(" - supplied args:")
     # for arg, val in vars(args).items():
-        # print "   + %s: %s" % (str(arg), str(val))
+        # print("   + {}: {}".format(str(arg), str(val)))
     c = None
     r = None
     if args.required_column:

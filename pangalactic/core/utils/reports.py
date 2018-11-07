@@ -2,6 +2,7 @@
 """
 Pan Galactic Report Writer
 """
+from __future__ import print_function
 import xlsxwriter
 
 from pangalactic.core.parametrics import get_pval
@@ -48,7 +49,7 @@ def product_type_report(output=None):
         for col in range(len(headers)):
             cell_widths.append([len(rec[col]) for rec in headers + records])
         col_widths = [max(widths) for widths in cell_widths]
-        print 'col_widths = ', str(col_widths)
+        print('col_widths = {}'.format(str(col_widths)))
         for i, width in enumerate(col_widths):
             worksheet.set_column(i, i, width)
         worksheet.write('A1', 'Discipline', bold)
@@ -334,7 +335,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts, level,
     #  13: Power Contingency (Margin)
     #  14: Power MEV
     row += 1
-    print('writing %s in row %i' % (component.name, row))
+    print('writing {} in row {}'.format(component.name, row))
     # first write the formatting to the whole row to set the bg color
     sheet.write_row(row, 0, [' ']*48, level_fmts.get(level, level_fmts[3]))
     # then write the "LEVEL" cell
@@ -638,7 +639,7 @@ mel_columns = ['level', 'name', 'unit_mass', 'cold_units', 'hot_units',
     # #  13: Power Contingency (Margin)
     # #  14: Power MEV
     # row += 1
-    # print('writing %s in row %i' % (component.name, row))
+    # print('writing {} in row {}'.format(component.name, row))
     # sheet.write(row, 0, level, style=level_style)
     # # level-based indentation
     # spaces = '   ' * level

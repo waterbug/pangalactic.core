@@ -102,8 +102,6 @@ def str2dt(s):
     # just in case something weird happened, like str(datetime)
     retval = None
     if s:
-        # print 'str2dt'
-        # print ' - trying to convert: "%s" (%s)' % (s, type(s))
         if '+' in s:
             s = s.split('+')[0]
         try:

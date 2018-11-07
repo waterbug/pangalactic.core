@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# $Id$
 """
 Upload from the local path either the specified file, or all
 files in the specified directory, as MIME multipart/form-data
@@ -13,11 +12,8 @@ Usage: httpupload.py localpath userid:passwd@url [oid]
 Options:
     -h / --help
         Print this message and exit.
-
-@version: $Revision$
 """
-__version__ = "$Revision$"[11:-2]
-
+from __future__ import print_function
 import base64
 import getopt
 from httplib import HTTPConnection, HTTPException
@@ -38,9 +34,9 @@ from email.MIMEText import MIMEText
 
 
 def usage(code, msg=''):
-    print >> sys.stderr, __doc__
+    print(__doc__, file=sys.stderr)
     if msg:
-        print >> sys.stderr, msg
+        print(msg, file=sys.stderr)
     sys.exit(code)
 
 def enclose(lpath):
@@ -215,7 +211,7 @@ if __name__ == '__main__':
     try:
         oid = args[2]
     except:
-        print 'An oid (or target file name) must be supplied.'
+        print('An oid (or target file name) must be supplied.')
         sys.exit()
     userpass, url = uri.split('@')
     userid, passwd = userpass.split(':')

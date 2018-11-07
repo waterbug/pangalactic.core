@@ -1,6 +1,5 @@
 import os, sys, time
 from optparse import OptionParser
-from pprint import pprint
 from pangalactic.core.uberorb import orb
 # TODO:  rewrite to use part21.py
 from pangalactic.core.utils import part21
@@ -74,7 +73,7 @@ from pangalactic.core.utils import part21
         # children.add(child)
     # # product_definitions
     # pdset = parents | children
-    # print 'pdset =', pdset
+    # print('pdset ='.format(pdset))
     # pd = {}
     # for pdref in pdset:
         # pdfref = data['contents'][pdref].split(',')[2].strip(" \n\r#'")
@@ -107,16 +106,16 @@ from pangalactic.core.utils import part21
                    # help="run the parser's unit tests")
     # (options, args) = opt.parse_args(args=sys.argv)
     # # debugging:
-    # # print "options:  %s" % str(options)
-    # # print "args:     %s" % str(args)
+    # # print("options:  {}".format(str(options)))
+    # # print("args:     {}".format(str(args)))
     # if len(args) > 1:
         # if options.performance:
             # start = time.clock()
         # project, nauo, pdset = getAssemblies(f=args[1])
         # if options.performance:
             # end = time.clock()
-            # print "\nTotal time: %6.2f sec" % (end - start)
-        # print len(list(nauo))," assemblies\n"
+            # print("\nTotal time: %6.2f sec" % (end - start))
+        # print(len(list(nauo)), {}".format(assemblies\n"))
     # else:
         # opt.print_help()
 

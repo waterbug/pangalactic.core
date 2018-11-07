@@ -5,7 +5,8 @@ Pan Galactic hub for object metadata and storage operations.
 NOTE:  Only the `orb` instance created in this module should be imported (it is
 intended to be a singleton).
 """
-from __future__ import absolute_import
+from builtins import str
+from builtins import object
 import json, os, shutil, sys, traceback
 
 # ruamel_yaml
@@ -38,6 +39,7 @@ from pangalactic.core.test        import vault as test_vault_mod
 from pangalactic.core.test.utils  import gen_test_pvals
 from pangalactic.core.log         import get_loggers
 from pangalactic.core.validation  import get_assembly
+from functools import reduce
 
 
 class UberORB(object):
@@ -355,7 +357,7 @@ class UberORB(object):
         if os.path.exists(json_path):
             with open(json_path) as f:
                 serialized_parms = json.loads(f.read())
-            for oid, ser_parms in serialized_parms.items():
+            for oid, ser_parms in list(serialized_parms.items()):
                 deserialize_parms(oid, ser_parms)
             self.recompute_parms()
 
@@ -366,7 +368,7 @@ class UberORB(object):
         self.log.info('* [orb] _save_parms() ...')
         parms_path = os.path.join(self.home, 'parameters.json')
         serialized_parameterz = {}
-        for oid, obj_parms in parameterz.items():
+        for oid, obj_parms in list(parameterz.items()):
             # NOTE: serialize_parms() uses deepcopy()
             serialized_parameterz[oid] = serialize_parms(obj_parms)
         with open(parms_path, 'w') as f:
@@ -380,8 +382,8 @@ class UberORB(object):
         a parameter is created, modified, or deleted.
         """
         self.log.info('* [orb] recompute_parms()')
-        for oid, parms in parameterz.items():
-            for pid, p in parms.items():
+        for oid, parms in list(parameterz.items()):
+            for pid, p in list(parms.items()):
                 parameterz[oid][pid]['value'] = _compute_pval(self, oid,
                                                               pid)
         self._save_parms()
@@ -760,7 +762,6 @@ class UberORB(object):
             domains = [self.registry.pes[a]['domain'] for a in attrs]
             idx = max([self.mbo.index(d) for d in domains])
             domain = self.mbo[idx]
-            # print('  - domain: {}'.format(domain))
             ok_kw = {a : kw[a] for a in attrs}
             if cname:
                 # if cname is supplied, check that it contains all attrs

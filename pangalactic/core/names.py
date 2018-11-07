@@ -178,8 +178,6 @@ def register_namespaces(rdfdataset):
     localnames = set()
     root = None
     rdfdataset_nsdict = {}
-    # TODO:  implement logging, make this a debug-level message
-    # print 'rdfdataset is %s' % str(rdfdataset)
     for event, elem in ET.iterparse(rdfdataset, events):
         if event == 'start-ns':
             if elem[0] == '':

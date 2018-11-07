@@ -1,17 +1,13 @@
 #!/usr/bin/env python
-# $Id$
 """
 A generic (no dependencies on the rest of PanGalactic) reader/writer for
 "Part 21 files" (ISO 10303-21, STEP "Clear Text Encoding", a serialization
 format).
-
-@version: $Revision$
 """
-__version__ = "$Revision$"[11:-2]
 
 import sys, string
 from optparse import OptionParser
-from pprint import pprint
+# from pprint import pprint
 from pyparsing import Word, Optional, Forward, ZeroOrMore
 from pyparsing import delimitedList
 
