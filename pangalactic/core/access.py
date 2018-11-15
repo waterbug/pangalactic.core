@@ -1,8 +1,10 @@
 """
 Functions related to object access permissions
 """
+from builtins import str
 from pangalactic.core         import state, config
 from pangalactic.core.uberorb import orb
+from functools import reduce
 
 
 def get_perms(obj, user=None):

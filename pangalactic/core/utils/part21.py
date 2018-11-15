@@ -4,7 +4,9 @@ A generic (no dependencies on the rest of PanGalactic) reader/writer for
 "Part 21 files" (ISO 10303-21, STEP "Clear Text Encoding", a serialization
 format).
 """
+from __future__ import print_function
 
+from builtins import range
 import sys, string
 from optparse import OptionParser
 # from pprint import pprint
@@ -95,16 +97,16 @@ if __name__ == '__main__':
         if options.show_time:
             endTime = time.clock()
             totalTime = endTime - startTime
-            print "\nTotal parse time: %6.2f sec" % totalTime
-            print len(data.split("\n"))," lines\n"
+            print("\nTotal parse time: %6.2f sec" % totalTime)
+            print(len(data.split("\n"))," lines\n")
         # pprint( res.asList() )
-        print res.HEADER
+        print(res.HEADER)
         keylist = list(res.DATA.keys())
         # print '\nitem IDs are:', keylist
-        print '\nfirst 10 items are:'
+        print('\nfirst 10 items are:')
         for k in range(10):
-            print keylist[k], res.DATA[keylist[k]][1], res.DATA[keylist[k]][2]
-        print '\nlast 10 items are:'
+            print(keylist[k], res.DATA[keylist[k]][1], res.DATA[keylist[k]][2])
+        print('\nlast 10 items are:')
         for k in range(11)[1:]:
-            print keylist[(-1)*k], res.DATA[keylist[(-1)*k]][1], res.DATA[keylist[(-1)*k]][2]
+            print(keylist[(-1)*k], res.DATA[keylist[(-1)*k]][1], res.DATA[keylist[(-1)*k]][2])
 

@@ -2,16 +2,20 @@
 """
 HTTP get.
 """
+from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import os
-import httplib
+import http.client
 import string
 import base64
 
 from whrandom import randint
 from time import time
 
-class FileRequest:
+class FileRequest(object):
     """
     HTTP file download.  Forces binary mode for a single file.
     """
@@ -25,7 +29,7 @@ class FileRequest:
         self.tmpdir = tmpdir
         
     def request(self):
-        h = httplib.HTTP()
+        h = http.client.HTTP()
         h.connect(self.host, self.port)
         h.putrequest('GET', self.uri)
         h.putheader('Accept', 'text/html')
@@ -37,7 +41,7 @@ class FileRequest:
         rcode, rmsg, headers = h.getreply()
         if rcode != 200:
             msg = "error: %s, %s\n%s" % (rcode, self.uri, rmsg)
-            raise httplib.HTTPException, msg
+            raise http.client.HTTPException(msg)
         f = h.getfile()
         data = f.read() 
         f.close()
@@ -68,7 +72,7 @@ def httpGet(tmpdir, filename, user, host, port, subdir):
         #traceback.print_exc()
         return retval
     
-    except Exception, e:
+    except Exception as e:
         #print "Get failed."
         #import traceback
         #traceback.print_exc()
@@ -92,5 +96,5 @@ def test():
 
     
 if __name__ == '__main__':
-    print "else test"
+    print("else test")
     test()

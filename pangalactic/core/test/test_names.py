@@ -4,7 +4,7 @@ Unit tests for 'names' module
 """
 import pkgutil
 import unittest
-from StringIO import StringIO
+from io import StringIO
 
 # rdflib
 from rdflib.term import URIRef
@@ -13,7 +13,8 @@ from rdflib.term import URIRef
 from pangalactic.core                import names
 from pangalactic.core.datastructures import OrderedSet
 
-xmlds = pkgutil.get_data('pangalactic.core.test.data', 'test_data.owl')
+xmlds = pkgutil.get_data('pangalactic.core.test.data',
+                         'test_data.owl').decode('utf-8')
 
 
 class NamesTests(unittest.TestCase):
@@ -51,10 +52,10 @@ class NamesTests(unittest.TestCase):
         a = ('pgef' in names.namespaces)
         b = ('space_mission' in names.namespaces)
         c = names.namespaces['space_mission'].prefix
-        d = names.namespaces['space_mission'].names
+        d = set(names.namespaces['space_mission'].names)
         value = [a, b, c, d]
         expected = [True, True, 'space_mission',
-                    OrderedSet(['', 'part_number', 'payload_instruments',
+                    set(['', 'part_number', 'payload_instruments',
                     'Instrument', 'Spacecraft', 'mass'])]
         self.assertEqual(expected, value)
 
@@ -104,12 +105,12 @@ class NamesTests(unittest.TestCase):
         q2u_d = URIRef(u"http://www.w3.org/2002/07/owl#Class")
         try:
             error = names.q2u("#foo")
-        except ValueError, err:
+        except ValueError as err:
             e = str(err)
         q2u_e = "invalid qname"
         try:
             error = names.q2u("ni:knightswhosay")
-        except ValueError, err:
+        except ValueError as err:
             f = str(err)
         q2u_f = "unknown prefix: ni"
         value = [a, b, c, d, e, f]
@@ -132,7 +133,7 @@ class NamesTests(unittest.TestCase):
         ga_f = URIRef("http://www.w3.org/2002/07/owl#Class")
         try:
             error = names.get_uri("ni:knightswhosay")
-        except ValueError, err:
+        except ValueError as err:
             g = str(err)
         ga_g = "unknown prefix: ni"
         value = [a, b, c, d, e, f, g]

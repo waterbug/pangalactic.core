@@ -2,11 +2,17 @@
 """
 Utilities for doing meta stuff
 """
+try:
+    # Python 2
+    from __builtin__ import str as builtin_str
+except ImportError:
+    # Python 3
+    from builtins import str as builtin_str
+from builtins import map
 import codecs
 import inflect
 import json
 import re
-import string
 import unicodedata
 from datetime import date, datetime
 from textwrap import wrap
@@ -32,14 +38,30 @@ def asciify(u):
     are going to be used in Python identifiers ... so they can be typed on an
     en-us encoded keyboard!
 
-    NOTE: this will also coerce u to be a string (bytes, i.e.)
-
     Credit: http://code.activestate.com/recipes/251871/ (this is not that
     recipe but an elegant one-liner from one of the comments on the recipe).
+
+    Args:
+        u (str, unicode, or bytes): input value
+
+    Returns:
+        unicode (python2) or str (python3)
     """
-    if type(u) == unicode:
-        return unicodedata.normalize('NFKD', u).encode('ASCII', 'ignore')
-    return str(u)
+    try:
+        # Python 2 (return python2 'str', i.e. bytes
+        if type(u) == unicode:
+            return unicodedata.normalize('NFKD', u).encode('ASCII', 'ignore')
+        elif isinstance(u, bytes):
+            return u.decode('utf-8')
+        return u
+    except:
+        # Python 3 (return utf-8 string)
+        if isinstance(u, str):
+            return unicodedata.normalize('NFKD', u).encode(
+                                    'ASCII', 'ignore').decode('utf-8')
+        elif isinstance(u, bytes):
+            return u.decode('utf-8')
+        return u
 
 def property_to_field(name, pe):
     """
@@ -143,7 +165,7 @@ def to_table_name(cname):
     l = re.split(patt, cname)
     parts = l[1:]
     if 0 < len(parts) < 3:
-        tname = string.lower(parts[0] + parts[1])
+        tname = (parts[0] + parts[1]).lower()
     elif len(parts) > 2:
         tname = parts[0] + parts[1]
         i = 2
@@ -184,7 +206,7 @@ def to_media_name(cname):
     l = re.split(patt, cname)
     parts = l[1:]
     if 0 < len(parts) < 3:
-        tname = string.lower(parts[0] + parts[1])
+        tname = (parts[0] + parts[1]).lower()
     elif len(parts) > 2:
         tname = parts[0] + parts[1]
         i = 2
@@ -208,8 +230,8 @@ def to_collection_name(cname):
     @return: a table name
     @rtype:  L{str}
     """
-    return str(to_table_name(PLURALS.get(
-                        cname, _inf.plural(cname)))[:-1])
+    return builtin_str(to_table_name(PLURALS.get(
+                       cname, _inf.plural(cname)))[:-1])
 
 def to_class_name(table_name):
     """
@@ -229,7 +251,7 @@ def to_class_name(table_name):
     while i < len(parts):
         metaobject_name += parts[i].capitalize()
         i += 1
-    return str(metaobject_name)
+    return builtin_str(metaobject_name)
 
 def classnamify(base, tablename, table):
     """
@@ -311,7 +333,7 @@ def get_port_name(obj_name, port_type_name, seq):
         port_type_name (str):  the name of the port's type_of_port (PortType)
         seq (int):  the sequence number assigned to the port
     """
-    return ' '.join([obj_name, port_type_name, str(seq)])
+    return ' '.join([obj_name, port_type_name, builtin_str(seq)])
 
 def get_port_abbr(port_type_name, seq):
     """
@@ -321,7 +343,7 @@ def get_port_abbr(port_type_name, seq):
         port_type_name (str):  the name of the port's type_of_port (PortType)
         seq (int):  the sequence number assigned to the port
     """
-    return ' '.join([port_type_name, str(seq)])
+    return ' '.join([port_type_name, builtin_str(seq)])
 
 def get_flow_id(start_port_id, end_port_id):
     """
@@ -398,53 +420,53 @@ def get_block_model_file_name(obj):
 
 def dump_metadata(extr, fpath):
     """
-    JSON-serialize an extract and write it ascii-encoded into file.
+    JSON-serialize an extract and write it utf-8-encoded into file.
     """
-    f = codecs.open(fpath, 'w', 'ascii')
+    f = codecs.open(fpath, 'w', 'utf-8')
     json.dump(extr, f, sort_keys=True, indent=4, ensure_ascii=True)
     f.close()
 
 def ascii_encode_dict(data):
-    ascii_encode = lambda x: x.encode('ascii') if isinstance(x, unicode) else x
-    return dict(map(ascii_encode, pair) for pair in data.items())
+    ascii_encode = lambda x: x.encode('utf-8') if isinstance(x, str) else x
+    return dict(list(map(ascii_encode, pair)) for pair in list(data.items()))
 
 def load_metadata(fpath):
     """
-    Read and deserialize an ascii-encoded JSON-serialized extract from a file.
+    Read and deserialize a utf-8-encoded JSON-serialized extract from a file.
     """
-    
-    f = codecs.open(fpath, 'r', 'ascii')
+    f = codecs.open(fpath, 'r', 'utf-8')
     data = f.read()
     f.close()
-    return json.loads(data, object_hook=ascii_encode_dict)
+    # return json.loads(data, object_hook=ascii_encode_dict)
+    return json.loads(data)
 
 def cook_string(value):
     return asciify(value)
 
 def cook_unicode(value):
-    return value.encode('utf-8')
+    return value
 
 def cook_int(value):
     return value
 
 def cook_float(value):
-    return str(value)
+    return builtin_str(value)
 
 def cook_bool(value):
     return value
 
 def cook_date(value):
-    return str(value)
+    return builtin_str(value)
 
 def cook_time(value):
-    return str(value)
+    return builtin_str(value)
 
 def cook_datetime(value):
-    return str(value)
+    return builtin_str(value)
 
 # python 2 strings, obviously
 cookers = {
-           'bytes'    : cook_string,
+           # 'bytes'    : cook_string,
            'str'      : cook_string,
            'unicode'  : cook_unicode,
            'int'      : cook_int,
@@ -455,22 +477,21 @@ cookers = {
            'datetime' : cook_datetime
            }
 
-
 # * "uncookers" are deserializing functions
 #
-# * they cast a "cooked" [serialized value to the specified range type
+# * they cast a "cooked" [serialized] value to the specified range type
 #
 # * the uncookers dictionary is an optimization to enable quick look-up of
 #   deserialization functions
 
 def uncook_string(value):
     """
-    Deserialize a string field.
+    Deserialize a string or bytes field.
 
     Args:
-        value (str or None):  the value being "uncooked"
+        value (str, bytes, or None):  the value being "uncooked"
     """
-    return str(value) if value is not None else None
+    return asciify(value) if value is not None else None
 
 def uncook_strings(value):
     """
@@ -480,8 +501,8 @@ def uncook_strings(value):
         value (set or list of strs):  the value being "uncooked"
     """
     if type(value) is set:
-        return set(value)
-    return list(value)
+        return set(asciify(s) for s in value)
+    return list(asciify(s) for s in value)
 
 def uncook_unicode(value):
     """
@@ -490,7 +511,7 @@ def uncook_unicode(value):
     Args:
         value (unicode or None):  the value being "uncooked"
     """
-    return unicode(value).decode('utf-8') if value is not None else None
+    return asciify(value)
 
 def uncook_unicodes(value):
     """
@@ -501,8 +522,8 @@ def uncook_unicodes(value):
         value (set or list of strs):  the value being "uncooked"
     """
     if type(value) is set:
-        return set(value)
-    return list(value)
+        return set(asciify(s) for s in value)
+    return list(asciify(s) for s in value)
 
 def uncook_int(value):
     """
@@ -629,8 +650,8 @@ def uncook_datetimes(value):
 # (range, functional)
 
 uncookers = {
-             ('bytes', True)     : uncook_string,
-             ('bytes', False)    : uncook_strings,
+             # ('bytes', True)     : uncook_string,
+             # ('bytes', False)    : uncook_strings,
              ('str', True)       : uncook_string,
              ('str', False)      : uncook_strings,
              ('unicode', True)   : uncook_unicode,

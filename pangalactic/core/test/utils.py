@@ -2,6 +2,7 @@
 """
 Create PGEF test data.
 """
+from builtins import str
 import random
 from pangalactic.core.utils.meta import (get_port_abbr, get_port_id,
                                          get_port_name)
@@ -22,7 +23,7 @@ def gen_test_pvals(parms):
             and is the value of parameterz[obj.oid] for any object that has
             parameters.
     """
-    for pid, parm in parms.items():
+    for pid, parm in list(parms.items()):
         if parm['computed']:
             # ignore computed parameters
             continue

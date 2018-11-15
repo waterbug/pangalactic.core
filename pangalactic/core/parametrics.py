@@ -1,6 +1,9 @@
 """
 Functions to support Parameters and Relations
 """
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 import operator
 from collections  import namedtuple
 from decimal      import Decimal
@@ -702,7 +705,7 @@ def get_margin(orb, oid, parameter_id, base_parameters, default=0.0):
     if nte_val == 0.0:
         return default  # not defined (division by zero)
     else:
-        margin = round_to((nte_val - cbe_val) / nte_val)
+        margin = round_to(old_div((nte_val - cbe_val), nte_val))
         # uncomment only for intense debugging
         # orb.log.debug('  ... margin is {}'.format(margin))
         return margin

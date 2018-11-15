@@ -2,6 +2,7 @@
 """
 Serializers / deserializers for pangalactic domain objects and parameters.
 """
+from builtins import str
 from copy import deepcopy
 
 # SQLAlchemy
@@ -31,7 +32,7 @@ def serialize_parms(obj_parms):
     """
     if obj_parms:
         ser_parms = deepcopy(obj_parms)
-        for parm in ser_parms.values():
+        for parm in list(ser_parms.values()):
             parm['mod_datetime'] = cook_datetime(parm['mod_datetime'])
         return ser_parms
     else:
@@ -119,7 +120,7 @@ def serialize(orb, objs, view=None, include_components=False,
     product_type_objs = set()
     for obj in objs:
         if not obj:
-            orb.log.debug('  - null object "{}"'.format(str(obj)))
+            orb.log.debug('  - null object "{}"'.format(obj))
             # don't include the null object in serialized
             # serialized.append(obj)
             continue
@@ -210,7 +211,7 @@ def serialize(orb, objs, view=None, include_components=False,
     orb.log.info('  returning {} objects.'.format(len(serialized)))
     # make sure there is only 1 serialized object per oid ...
     so_by_oid = {so['oid'] : so for so in serialized}
-    return so_by_oid.values()
+    return list(so_by_oid.values())
 
 def deserialize_parms(oid, ser_parms):
     """
@@ -219,7 +220,7 @@ def deserialize_parms(oid, ser_parms):
     Args:
         ser_parms (dict):  the serialized parms dictionary
     """
-    for parm in ser_parms.values():
+    for parm in list(ser_parms.values()):
         parm['mod_datetime'] = uncook_datetime(parm['mod_datetime'])
     parameterz[oid] = ser_parms
 
@@ -327,7 +328,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
             schema = orb.schemas[cname]
             field_names = schema['field_names']
             if not cname:
-                raise TypeError, 'class name not specified'
+                raise TypeError('class name not specified')
             orb.log.debug('* deserializing serialized object:')
             orb.log.debug('  %s' % str(d))
             oid = d['oid']
@@ -366,7 +367,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
             # include 'unicode' in case string (byte) serialization used
             specials = [name for name in field_names
                         if schema['fields'][name]['range']
-                        in ['date', 'datetime', 'unicode']]
+                        in ['date', 'datetime']]
             for name in specials:
                 kw[name] = uncookers[
                                     (schema['fields'][name]['range'],
@@ -388,14 +389,14 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
                         and (schema['fields'][a].get('related_cname')
                              in orb.classes))]
             if fks:
-                orb.log.debug('    fk fields found: %s' % str(fks))
+                orb.log.debug('    fk fields found: {}'.format(asciify(fks)))
                 for fk in fks:
                     # get the related object by its oid (i.e. d[fk])
-                    orb.log.debug('    * rel obj oid: "%s"' %
-                                   str(d.get(str(fk))))
-                    if d.get(str(fk)):
+                    orb.log.debug('    * rel obj oid: "{}"'.format(
+                                   asciify(d.get(asciify(fk)))))
+                    if d.get(asciify(fk)):
                         orb.log.debug('      rel obj found.')
-                        kw[str(fk)] = orb.get(str(d[str(fk)]))
+                        kw[asciify(fk)] = orb.get(asciify(d[asciify(fk)]))
                     else:
                         orb.log.debug('      rel obj NOT found.')
             cls = orb.classes[cname]
@@ -403,7 +404,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
                 orb.log.debug('* updating existing object {}'.format(
                                                                 d['oid']))
                 obj = updates[d['oid']]
-                for a, val in kw.items():
+                for a, val in list(kw.items()):
                     setattr(obj, a, val)
                 objs.append(obj)
                 if cname == 'Acu':
@@ -428,7 +429,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
                         recompute_parms_required = True
                 else:
                     orb.log.debug('  object creation failed:')
-                    orb.log.debug('    obj: {}'.format(str(obj)))
+                    orb.log.debug('    obj: {}'.format(obj))
             if refresh_componentz_required:
                 refresh_componentz(orb, obj.assembly)
                 refresh_componentz_required = False

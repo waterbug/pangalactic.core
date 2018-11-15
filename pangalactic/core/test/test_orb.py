@@ -2,6 +2,8 @@
 """
 Unit tests for pangalactic.core.uberorb.orb
 """
+from builtins import str
+from builtins import range
 import os
 import unittest
 
@@ -27,6 +29,7 @@ serialized_test_objects = create_test_users()
 serialized_test_objects += create_test_project()
 
 class OrbTest(unittest.TestCase):
+    maxDiff = None
 
     def test_00_home_dir_created(self):
         """CASE:  home directory is created"""
@@ -135,12 +138,12 @@ class OrbTest(unittest.TestCase):
         expected = [{
             '_cname': obj.__class__.__name__,
             'create_datetime': str(obj.create_datetime),
-            'id': obj.id.encode('utf-8'),
-            'id_ns': obj.id_ns.encode('utf-8'),
+            'id': obj.id,
+            'id_ns': obj.id_ns,
             'mod_datetime': str(obj.mod_datetime),
-            'name': obj.name.encode('utf-8'),
-            'name_code': obj.name_code.encode('utf-8'),
-            'oid': obj.oid.encode('utf-8')}]
+            'name': obj.name,
+            'name_code': obj.name_code,
+            'oid': obj.oid}]
         self.assertEqual(expected, value)
 
     def test_12_serialize_with_parameters_no_components(self):
@@ -162,12 +165,12 @@ class OrbTest(unittest.TestCase):
                 value['type_of_port'] = 'pgefobjects:PortType.electrical_power'
         expected = dict(
             length=5,
-            twanger_id=obj.id.encode('utf-8'),
+            twanger_id=obj.id,
             twanger_parameters=serialize_parms(parameterz.get(obj.oid, {})),
-            twanger_product_type=obj.product_type.oid.encode('utf-8'),
-            port_oid=obj.ports[0].oid.encode('utf-8'),
-            port_of_product=obj.ports[0].of_product.oid.encode('utf-8'),
-            type_of_port=obj.ports[0].type_of_port.oid.encode('utf-8')
+            twanger_product_type=obj.product_type.oid,
+            port_oid=obj.ports[0].oid,
+            port_of_product=obj.ports[0].of_product.oid,
+            type_of_port=obj.ports[0].type_of_port.oid
             )
         self.assertEqual(expected, value)
 
@@ -189,22 +192,22 @@ class OrbTest(unittest.TestCase):
         value = (main_object, products, acus)
         expected = ({
             '_cname': obj.__class__.__name__,
-            'comment': obj.comment.encode('utf-8'),
+            'comment': obj.comment,
             'create_datetime': str(obj.create_datetime),
-            'creator': obj.creator.oid.encode('utf-8'),
-            'description': obj.description.encode('utf-8'),
-            'id': obj.id.encode('utf-8'),
-            'id_ns': obj.id_ns.encode('utf-8'),
+            'creator': obj.creator.oid,
+            'description': obj.description,
+            'id': obj.id,
+            'id_ns': obj.id_ns,
             'iteration': obj.iteration,
             'mod_datetime': str(obj.mod_datetime),
-            'modifier': obj.modifier.oid.encode('utf-8'),
-            'name': obj.name.encode('utf-8'),
-            'oid': obj.oid.encode('utf-8'),
-            'owner': obj.owner.oid.encode('utf-8'),
+            'modifier': obj.modifier.oid,
+            'name': obj.name,
+            'oid': obj.oid,
+            'owner': obj.owner.oid,
             'parameters': serialize_parms(parameterz.get(obj.oid, {})),
-            'product_type': obj.product_type.oid.encode('utf-8'),
+            'product_type': obj.product_type.oid,
             'public': True,
-            'version': obj.version.encode('utf-8'),
+            'version': obj.version,
             'version_sequence': obj.version_sequence
             },
             6, 5)
@@ -239,8 +242,8 @@ class OrbTest(unittest.TestCase):
                     serialized_obj['id'],
                     serialized_obj['id_ns'],
                     dtparser.parse(serialized_obj['mod_datetime']),
-                    unicode(serialized_obj['name']),
-                    unicode(serialized_obj['name_code']),
+                    str(serialized_obj['name']),
+                    str(serialized_obj['name_code']),
                     serialized_obj['oid']
                     ]
         self.assertEqual(expected, value)
@@ -274,8 +277,8 @@ class OrbTest(unittest.TestCase):
                     serialized_obj['id'],
                     serialized_obj['id_ns'],
                     dtparser.parse(serialized_obj['mod_datetime']),
-                    unicode(serialized_obj['name']),
-                    unicode(serialized_obj['name_code']),
+                    serialized_obj['name'],
+                    serialized_obj['name_code'],
                     serialized_obj['oid']
                     ]
         self.assertEqual(expected, value)
@@ -300,7 +303,7 @@ class OrbTest(unittest.TestCase):
         # entire project.  :)
         objs = deserialize(orb, related_test_objects)
         by_oid = {o.oid : o for o in objs}
-        acu_oids = ['test:hog3-acu-'+str(n) for n in range(1, 6)]
+        acu_oids = ['test:hog3-acu-{}'.format(n) for n in range(1, 6)]
         value = [
             by_oid['test:OTHER:system-1'].project,
             by_oid['test:OTHER:system-1'].system,

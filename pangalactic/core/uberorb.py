@@ -5,7 +5,12 @@ Pan Galactic hub for object metadata and storage operations.
 NOTE:  Only the `orb` instance created in this module should be imported (it is
 intended to be a singleton).
 """
-from builtins import str
+try:
+    # Python 2
+    from __builtin__ import str as builtin_str
+except ImportError:
+    # Python 3
+    from builtins import str as builtin_str
 from builtins import object
 import json, os, shutil, sys, traceback
 
@@ -154,7 +159,9 @@ class UberORB(object):
         self.log.debug('  - found %i data files' % len(current_test_files))
         test_data_mod_path = test_data_mod.__path__[0]
         test_data_files = set([s for s in os.listdir(test_data_mod_path)
-                               if not s.startswith('__init__')])
+                               if (not s.startswith('__init__')
+                               and not s.startswith('__pycache__'))
+                               ])
         test_data_to_copy = test_data_files - current_test_files
         self.log.debug('  - data files to be installed: %i'
                        % len(test_data_to_copy))
@@ -178,7 +185,9 @@ class UberORB(object):
                 self.log.debug('    {}'.format(fpath))
         vault_mod_path = test_vault_mod.__path__[0]
         test_vault_files = set([s for s in os.listdir(vault_mod_path)
-                                if not s.startswith('__init__')])
+                               if (not s.startswith('__init__')
+                               and not s.startswith('__pycache__'))
+                               ])
         vault_files_to_copy = test_vault_files - current_vault_files
         self.log.debug('  - new test vault files to be installed: %i'
                        % len(vault_files_to_copy))
@@ -541,7 +550,7 @@ class UberORB(object):
             new = bool(oid in self.new_oids) or not self.get(oid)
             if new:
                 self.log.info('  orb.save: %s is a new %s, saving it ...' % (
-                                                        str(oid), cname))
+                                                        oid, cname))
                 self.db.add(obj)
                 self.log.info('  orb.save: adding object with oid "%s" ...' % (
                                                                 obj.oid))
@@ -551,7 +560,7 @@ class UberORB(object):
                 # updating an existing object
                 self.log.info(
                     '  orb.save: oid "%s" is existing %s, updating ...' % (
-                                                        str(oid), cname))
+                                                        oid, cname))
                 # NOTE:  in new paradigm, obj is versioned iff
                 # [1] it has a 'version' attr and
                 # [2] a non-null version has been assigned to it (i.e. neither
@@ -668,7 +677,7 @@ class UberORB(object):
         query = self.db.query(Identifiable.oid)
         if cname:
             query = query.filter(Identifiable.pgef_type == cname)
-        return [str(row[0]) for row in query.all()]
+        return [row[0] for row in query.all()]
 
     def get_idvs(self, cname=None):
         """
@@ -688,7 +697,7 @@ class UberORB(object):
                 s = sql.select([ident])
             elif cname:
                 s = sql.select([ident]).where(ident.c.pgef_type == cname)
-            return [(str(row['id']), '') for row in self.db.execute(s)]
+            return [(row['id'], '') for row in self.db.execute(s)]
 
     def get_mod_dts(self, cname=None, oids=None):
         """
@@ -720,7 +729,7 @@ class UberORB(object):
                                         ident.c.mod_datetime != None,
                                         ident.c.oid.in_(oids)
                                         ))
-        return {str(row['oid']) : str(row['mod_datetime'])
+        return {row['oid'] : str(row['mod_datetime'])
                 for row in self.db.execute(s)}
 
     def select(self, cname, **kw):
@@ -779,7 +788,7 @@ class UberORB(object):
                 # no cname specified -- use the most general class that
                 # contains all specified parameters
                 cname = domain
-                self.log.debug('  - no cname kw, using: {}'.format(str(cname)))
+                self.log.debug('  - no cname kw, using: {}'.format(cname))
             # self.log.debug('  - ok_kw: {}'.format(str(ok_kw)))
             return list(self.db.query(self.classes[cname]).filter_by(**ok_kw))
         else:

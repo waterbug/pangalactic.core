@@ -10,6 +10,7 @@ Date downloaded:  2006/01/09
 
 @version: $Revision$
 """
+from builtins import object
 __version__ = "$Revision$"[11:-2]
 
 
@@ -98,10 +99,10 @@ def safe_eval(source, fail_on_error=True):
     walker = fail_on_error and SafeEvalWithErrors() or SafeEval()
     try:
         ast = compiler.parse(source,"eval")
-    except SyntaxError, err:
+    except SyntaxError as err:
         raise
     try:
         return walker.visit(ast)
-    except UnsafeSourceError, err:
+    except UnsafeSourceError as err:
         raise
 

@@ -14,16 +14,18 @@ Options:
         Print this message and exit.
 """
 from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
 import base64
 import getopt
-from httplib import HTTPConnection, HTTPException
-from httplib import HTTPSConnection
+from http.client import HTTPConnection, HTTPException
+from http.client import HTTPSConnection
 # For guessing MIME type based on file name extension
 import mimetypes
 import os
 import string
 import sys
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from email import Encoders
 from email.MIMEAudio import MIMEAudio
@@ -190,13 +192,13 @@ def upload(localpath='', host='', port='', srvpath='/', userid='',
                                          host+':'+port+srvpath,
                                          response.reason,
                                          response.msg) #.as_string())
-        raise HTTPException, msg
+        raise HTTPException(msg)
     return response.read()
 
 if __name__ == '__main__':
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'h:', ['help'])
-    except getopt.error, msg:
+    except getopt.error as msg:
         usage(1, msg)
 
     for opt, arg in opts:

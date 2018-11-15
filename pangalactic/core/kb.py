@@ -13,8 +13,6 @@ constraints.
 import os
 import re
 from collections import OrderedDict
-# from StringIO import StringIO
-# from zope.interface import implements
 
 # ElementTree
 import xml.etree.ElementTree as ET
@@ -53,11 +51,12 @@ def get_ontology_prefix(source):
     (meaning the ontology is defined in the local namespace) or must contain
     the full uri of the ontology.
 
-    @param source:  a path or string buffer containing RDF/XML encoded OWL data
-    @type  source:  L{str}
+    Args:
+        source (str):  a path or string buffer containing RDF/XML encoded OWL
+            data
 
-    @return:  the uri of the Ontology defined in the source
-    @rtype:   C{str}
+    Returns:
+        str:  the uri of the Ontology defined in the source
     """
     root = ET.parse(source)
     onode = root.find('{http://www.w3.org/2002/07/owl#}Ontology')
@@ -73,12 +72,16 @@ def find_nodes_by_type(graph, typeqn):
     """
     Find nodes in a graph which have the value of C{typeqn} as their type.
 
-    @param typeqn:  qname of the type of nodes to be sought
-    @type  typeqn:  string
+    Args:
+        graph (Graph):  the subject graph
+        typeqn (str):  qname of the type of nodes to be sought
+
+    Returns:
+        OrderedDict:  dict mapping type qnames to matching nodes
     """
     nodes = OrderedDict()
     for node in graph.subjects(RDF.type, q2u(typeqn)):
-        for ns in namespaces.values():
+        for ns in list(namespaces.values()):
             # 'if ns.uri' eliminates blank Class nodes (if it doesn't
             # have an ID, we're nagonna use it)
             if ns.uri and ns.uri in node:
@@ -146,7 +149,7 @@ class PanGalacticKnowledgeBase(Graph):
         """
         Graph.__init__(self)
         if pgef_path and not os.path.exists(pgef_path):
-            raise ValueError, 'pgef.owl path given does not exist.'
+            raise ValueError('pgef.owl path given does not exist.')
         self.import_ontology(pgef_path)
 
     def import_ontology(self, kbpath):
@@ -157,7 +160,9 @@ class PanGalacticKnowledgeBase(Graph):
             kbpath (str):  path to an OWL file
         """
         if kbpath.endswith('.owl'):
+            print('* KB: registering namespaces from owl file ...')
             register_namespaces(kbpath)
+            print('* KB: beginning parse of owl ...')
             self.parse(kbpath)
 
     def _get_class_nodes_by_type(self):
@@ -200,14 +205,14 @@ class PanGalacticKnowledgeBase(Graph):
 
     def get_class_node_names(self):
         return OrderedSet([qname
-                           for node_dict in self.class_nodes_by_type.values()
+                           for node_dict in list(self.class_nodes_by_type.values())
                            for qname in node_dict])
 
     def set_class_node_names(self, val):
-        raise TypeError, 'class_node_names attribute is read-only'
+        raise TypeError('class_node_names attribute is read-only')
 
     def del_class_node_names(self):
-        raise TypeError, 'class_node_names attribute cannot be removed'
+        raise TypeError('class_node_names attribute cannot be removed')
 
     class_node_names = property(get_class_node_names,
                                 set_class_node_names,
@@ -218,14 +223,14 @@ class PanGalacticKnowledgeBase(Graph):
 
     def get_property_node_names(self):
         return OrderedSet([qname
-                        for node_dict in self.property_nodes_by_type.values()
+                        for node_dict in list(self.property_nodes_by_type.values())
                         for qname in node_dict])
 
     def set_property_node_names(self, val):
-        raise TypeError, 'property_node_names attribute is read-only'
+        raise TypeError('property_node_names attribute is read-only')
 
     def del_property_node_names(self):
-        raise TypeError, 'property_node_names attribute cannot be removed'
+        raise TypeError('property_node_names attribute cannot be removed')
 
     property_node_names = property(get_property_node_names,
                                    set_property_node_names,
@@ -236,15 +241,15 @@ class PanGalacticKnowledgeBase(Graph):
 
     def get_node_names(self):
         return OrderedSet([qname
-                    for node_dict in (self.class_nodes_by_type.values() +
-                                      self.property_nodes_by_type.values())
+                    for node_dict in (list(self.class_nodes_by_type.values()) +
+                                      list(self.property_nodes_by_type.values()))
                     for qname in node_dict])
 
     def set_node_names(self, val):
-        raise TypeError, 'node_names attribute is read-only'
+        raise TypeError('node_names attribute is read-only')
 
     def del_node_names(self):
-        raise TypeError, 'node_names attribute cannot be removed'
+        raise TypeError('node_names attribute cannot be removed')
 
     node_names = property(get_node_names, set_node_names, del_node_names,
                           'node_names')
@@ -291,14 +296,13 @@ class PanGalacticKnowledgeBase(Graph):
         Within the specified namespace, get the names of all Classes to which
         the named Class has a `subClassOf` relationship, excluding 'owl'
         Classes (such as "Thing").  If a scope is specified, only get base names
-        within the namespaces in scope.  Names will be forced to `str` type for
-        use as Python identifiers (names).
+        within the namespaces in scope.
 
         @param nsprefix:  the name (a.k.a. "prefix") of a namespace
-        @type  nsprefix:  C{str} or C{unicode}
+        @type  nsprefix:  C{str}
 
         @param name:  the local name of a Class in the specified namespace
-        @type  name:  C{str} or C{unicode}
+        @type  name:  C{str}
 
         @param scope:  if not None, only get base names within the namespaces
             specified
@@ -330,7 +334,7 @@ class PanGalacticKnowledgeBase(Graph):
         identifiers (names).
 
         @param nsprefix:  the name (a.k.a. "prefix") of a namespace
-        @type  nsprefix:  C{str} or C{unicode}
+        @type  nsprefix:  C{str}
 
         @return:  the set of local names of all Properties in the knowledgebase
         @rtype:   L{set} of L{str}
@@ -348,10 +352,10 @@ class PanGalacticKnowledgeBase(Graph):
         return a dictionary that maps them to their values.
 
         @param nsprefix:  the name (a.k.a. "prefix") of a namespace
-        @type  nsprefix:  C{str} or C{unicode}
+        @type  nsprefix:  C{str}
 
         @param pname:  the local name of a Property
-        @type  pname:  C{str} or C{unicode}
+        @type  pname:  C{str}
 
         @param unicode:  if True, return names as C{unicode} instances;
             otherwise, return them as C{str}s
@@ -421,7 +425,7 @@ class PanGalacticKnowledgeBase(Graph):
         # subpropertyof = self.get_triple_objects(pnode_qn,
         #                                         'rdfs:subPropertyOf')
         # if subpropertyof:
-            # base = str(subpropertyof[0])
+            # base = str(subpropertyof[0])  # this should not be necessary
         # else:
             # base = ''
         # owl:inverseOf identifies defined inverses of Object Properties
@@ -453,10 +457,10 @@ class PanGalacticKnowledgeBase(Graph):
         operating in an "OWL Full" context.)
 
         @param nsprefix:  the name (a.k.a. "prefix") of a namespace
-        @type  nsprefix:  C{str} or C{unicode}
+        @type  nsprefix:  C{str}
 
         @param name:  the local name of a Class node in KB
-        @type  name:  C{str} or C{unicode}
+        @type  name:  C{str}
 
         @param unicode:  if True, return names as C{unicode} instances;
             otherwise, return them as C{str}s
@@ -477,7 +481,9 @@ class PanGalacticKnowledgeBase(Graph):
         if labels:
             cdict['name'] = labels[0]
         else:
-            cdict['name'] = unicode(cdict['id'])
+            # cdict['name'] = str(cdict['id'])  # python 2: force identifiers
+            # to be python 2 str (i.e. bytes)
+            cdict['name'] = cdict['id']
         abbrevs = self.get_triple_objects(cnode_qn, 'pgef:abbreviation')
         if abbrevs:
             cdict['abbreviation'] = abbrevs[0]
@@ -487,12 +493,16 @@ class PanGalacticKnowledgeBase(Graph):
         # rdfs:comment maps to pgef:definition
         definitions = self.get_triple_objects(cnode_qn, 'rdfs:comment')
         if definitions:
-            cdict['definition'] = definitions[0].decode()
+            # definitions[0] is rdflib.Literal object (has no decode() method)
+            # cdict['definition'] = definitions[0].decode()
+            cdict['definition'] = definitions[0]
         else:
             cdict['definition'] = u''
         comments = self.get_triple_objects(cnode_qn, 'pgef:comment')
         if comments:
-            cdict['comment'] = comments[0].decode()
+            # comments[0] is rdflib.Literal object (has no decode() method)
+            # cdict['comment'] = comments[0].decode()
+            cdict['comment'] = comments[0]
         else:
             cdict['comment'] = u''
         return cdict
@@ -506,7 +516,7 @@ class PanGalacticKnowledgeBase(Graph):
             output += '=========='
             output += '\nNamespaces'
             output += '\n=========='
-            for ns in namespaces.values():
+            for ns in list(namespaces.values()):
                 output += '\n- %s:  %s' % (ns.prefix, ns.uri)
                 if ns:
                     for name in ns.names:

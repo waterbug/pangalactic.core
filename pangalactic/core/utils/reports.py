@@ -3,6 +3,8 @@
 Pan Galactic Report Writer
 """
 from __future__ import print_function
+from builtins import str
+from builtins import range
 import xlsxwriter
 
 from pangalactic.core.parametrics import get_pval
@@ -23,7 +25,7 @@ def product_type_report(output=None):
     # product_types = orb.get_by_type('ProductType')
     disciplines = orb.get_by_type('Discipline')
     d_by_name = {d.name : d for d in disciplines}
-    d_names = d_by_name.keys()
+    d_names = list(d_by_name.keys())
     d_names.sort()
     headers = ['Discipline', 'Product Type', 'Abbrev', 'Description']
     records = []
@@ -132,7 +134,7 @@ def write_mel_xlsx(context, is_project=True,
         worksheet.set_column(i, i, width)
 
     fmts = {name : book.add_format(style) for name, style in
-            xlsx_styles.items()}
+            list(xlsx_styles.items())}
 
     # Set position of title
     title_row = 0
@@ -288,7 +290,7 @@ def write_mel_xlsx(context, is_project=True,
                  2: fmts['right_gray_bold_12'],
                  3: fmts['right_12']
                  }
-    for fmt in data_fmts.values():
+    for fmt in list(data_fmts.values()):
         fmt.set_num_format('#,##0.00')
     # system level
     # (note that system.name overwrites the template "NAME..." placeholder)

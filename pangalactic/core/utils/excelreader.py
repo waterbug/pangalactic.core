@@ -4,6 +4,7 @@
 Script to read multiple Excel spreadsheets and "join" them.
 """
 from __future__ import print_function
+from builtins import range
 import argparse
 import xlrd
 from collections import OrderedDict

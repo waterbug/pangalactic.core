@@ -1,6 +1,7 @@
 """
 PGEF date-time convenience functions.
 """
+from builtins import str
 from time import strptime
 from datetime import timedelta, datetime, date, time
 
@@ -68,7 +69,7 @@ def str2date(s):
                     try:
                         t = strptime(s, "%m/%d/%Y")
                     except:
-                        raise ValueError, 'unknown date format'
+                        raise ValueError('unknown date format')
         retval = date(t.tm_year, t.tm_mon, t.tm_mday)
     return retval
 

@@ -3,6 +3,7 @@
 The Pan Galactic Engineering Framework (PGEF) core package.
 """
 from __future__ import unicode_literals  # to support dump of unicode
+from builtins import str
 import os
 
 # RDFLib
@@ -81,41 +82,41 @@ datatypes = {
 # SOFTWARE.
 
 xsd_datatypes = {  #  (schema->python, python->schema)  Does not validate.
-    URIRef('http://www.w3.org/2001/XMLSchema#string') : ('unicode', unicode),
+    URIRef('http://www.w3.org/2001/XMLSchema#string') : ('unicode', str),
     URIRef('http://www.w3.org/2001/XMLSchema#normalizedString') : ('unicode',
-                                                                   unicode),
+                                                                   str),
     # 'token' added -- maps to single-word text values
-    URIRef('http://www.w3.org/2001/XMLSchema#token') : ('str', unicode),
-    URIRef('http://www.w3.org/2001/XMLSchema#language') : ('unicode', unicode),
+    URIRef('http://www.w3.org/2001/XMLSchema#token') : ('str', str),
+    URIRef('http://www.w3.org/2001/XMLSchema#language') : ('unicode', str),
     URIRef('http://www.w3.org/2001/XMLSchema#boolean') : ('bool', 
-                                                lambda i:unicode(i).lower()),
-    URIRef('http://www.w3.org/2001/XMLSchema#decimal') : ('float', unicode), 
-    URIRef('http://www.w3.org/2001/XMLSchema#integer') : ('long', unicode), 
+                                                lambda i:str(i).lower()),
+    URIRef('http://www.w3.org/2001/XMLSchema#decimal') : ('float', str),
+    URIRef('http://www.w3.org/2001/XMLSchema#integer') : ('long', str),
     URIRef('http://www.w3.org/2001/XMLSchema#nonPositiveInteger') : ('int',
-                                                                     unicode),
-    URIRef('http://www.w3.org/2001/XMLSchema#long') : ('long', unicode),
+                                                                     str),
+    URIRef('http://www.w3.org/2001/XMLSchema#long') : ('long', str),
     URIRef('http://www.w3.org/2001/XMLSchema#nonNegativeInteger') : ('int',
-                                                                     unicode),
+                                                                     str),
     URIRef('http://www.w3.org/2001/XMLSchema#negativeInteger') : ('int',
-                                                                  unicode),
-    URIRef('http://www.w3.org/2001/XMLSchema#int') : ('int', unicode),
+                                                                  str),
+    URIRef('http://www.w3.org/2001/XMLSchema#int') : ('int', str),
     URIRef('http://www.w3.org/2001/XMLSchema#unsignedLong') : ('long',
-                                                               unicode),
+                                                               str),
     URIRef('http://www.w3.org/2001/XMLSchema#positiveInteger') : ('int',
-                                                                  unicode),
-    URIRef('http://www.w3.org/2001/XMLSchema#short') : ('int', unicode),
-    URIRef('http://www.w3.org/2001/XMLSchema#unsignedInt') : ('long', unicode),
-    URIRef('http://www.w3.org/2001/XMLSchema#byte') : ('bytes', unicode),
+                                                                  str),
+    URIRef('http://www.w3.org/2001/XMLSchema#short') : ('int', str),
+    URIRef('http://www.w3.org/2001/XMLSchema#unsignedInt') : ('long', str),
+    URIRef('http://www.w3.org/2001/XMLSchema#byte') : ('bytes', str),
     URIRef('http://www.w3.org/2001/XMLSchema#unsignedShort') : ('int',
-                                                                unicode),
-    URIRef('http://www.w3.org/2001/XMLSchema#unsignedByte') : ('int', unicode),
-    URIRef('http://www.w3.org/2001/XMLSchema#float') : ('float', unicode),
+                                                                str),
+    URIRef('http://www.w3.org/2001/XMLSchema#unsignedByte') : ('int', str),
+    URIRef('http://www.w3.org/2001/XMLSchema#float') : ('float', str),
     # doesn't do the whole range:
-    URIRef('http://www.w3.org/2001/XMLSchema#double') : ('float', unicode),
-    URIRef('http://www.w3.org/2001/XMLSchema#dateTime') : ('datetime', unicode),
+    URIRef('http://www.w3.org/2001/XMLSchema#double') : ('float', str),
+    URIRef('http://www.w3.org/2001/XMLSchema#dateTime') : ('datetime', str),
     # base64Binary modified for use in PGEF
     URIRef('http://www.w3.org/2001/XMLSchema#base64Binary') : (
-                                        'bytes', unicode),
+                                        'bytes', str),
                                         # base64.decodestring,
                                         # lambda i:base64.encodestring(i)[:-1]),
     URIRef('http://www.w3.org/2001/XMLSchema#anyURI') : ('str', str),
@@ -135,7 +136,7 @@ def my_unicode_repr(self, data):
     """
     return self.represent_str(data.encode('utf-8'))
 
-yaml.representer.Representer.add_representer(unicode, my_unicode_repr)
+yaml.representer.Representer.add_representer(str, my_unicode_repr)
 
 def read_config(configpath):
     """

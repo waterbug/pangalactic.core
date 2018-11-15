@@ -281,7 +281,7 @@ ONE2M = {
 
 # PGXN_HIDE:  Fields not to be shown for any object
 # [TODO:  implement support for these in PgxnObject editor]
-PGXN_HIDE = ONE2M.keys() + M2M.keys()
+PGXN_HIDE = list(ONE2M.keys()) + list(M2M.keys())
 
 # PGXN_MASK:  Fields should not be displayed for specified classes
 PGXN_MASK = dict(

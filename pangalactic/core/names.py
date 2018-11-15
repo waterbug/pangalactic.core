@@ -2,9 +2,11 @@
 """
 Objects and services for handling identifiers, addresses, and namespaces.
 """
+from future import standard_library
+standard_library.install_aliases()
 from collections import OrderedDict
 from unidecode import unidecode
-from urlparse import urlparse
+from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
 from rdflib.term import URIRef
 
@@ -71,7 +73,7 @@ class NS(OrderedSet):
         """
         OrderedSet.__init__(self, iterable=names)
         if not prefix and not uri:
-            raise NameError, 'At least one of prefix and uri must be non-empty.'
+            raise NameError('At least one of prefix and uri must be non-empty.')
         self.uri = uri
         if prefix:
             self.prefix  = prefix
@@ -145,12 +147,23 @@ def transliterate_unicode(s):
     """
     Transliterate a unicode string into a Python lexical name.
     """
-    if type(s) is unicode:
+    try:
         s = unidecode(s)
-    if s.istitle():
-        return ''.join(s.split(' '))
+        if s.istitle():
+            return unicode(''.join(s.split(' ')))
+        else:
+            return unicode('_'.join(s.split(' ')))
+    except:
+        # Python 3: str IS unicode
+        s = unidecode(s)
+        if s.istitle():
+            return ''.join(s.split(' '))
+        else:
+            return '_'.join(s.split(' '))
     else:
-        return '_'.join(s.split(' '))
+        # if it's not unicode, just return it as a str
+        # (python2 str=bytes or python3 unicode)
+        return str(s)
 
 
 def register_namespaces(rdfdataset):
@@ -178,6 +191,7 @@ def register_namespaces(rdfdataset):
     localnames = set()
     root = None
     rdfdataset_nsdict = {}
+    print('* names: calling iterparse() ...')
     for event, elem in ET.iterparse(rdfdataset, events):
         if event == 'start-ns':
             if elem[0] == '':
@@ -198,7 +212,7 @@ def register_namespaces(rdfdataset):
                 and about.startswith(localnsuri)):
                 # add the (transliterated) local name minus the local ns uri
                 localnames.add(transliterate_unicode(about[len(localnsuri):]))
-    for prefix, uri in rdfdataset_nsdict.items():
+    for prefix, uri in list(rdfdataset_nsdict.items()):
         ns = NS(prefix, uri)
         register_ns(ns)
     if localnsuri and not localns:
@@ -322,7 +336,7 @@ def u2q(uri):
             ns_uri = uri[:hash_+1]
             name = uri[hash_+1:]
         # TODO:  create 'reversible mapping' class to use for 'namespaces'
-        prefix_by_uri = {ns.uri : ns.prefix for ns in namespaces.values()}
+        prefix_by_uri = {ns.uri : ns.prefix for ns in list(namespaces.values())}
         # if prefix not found, use '' (local ns)
         prefix = prefix_by_uri.get(ns_uri, '')
         qname = ':'.join([prefix, name])
@@ -344,7 +358,7 @@ def q2u(qname):
         if not '#' in qname:
             uri = '#' + qname
         else:
-            raise ValueError, 'invalid qname'
+            raise ValueError('invalid qname')
     else:
         prefix, name = qname.split(':')
         if prefix in namespaces:
@@ -354,7 +368,7 @@ def q2u(qname):
             else:
                 uri = ''.join([ns.uri, '#', name])
         else:
-            raise ValueError, 'unknown prefix: %s' % prefix
+            raise ValueError('unknown prefix: {}'.format(prefix))
     return URIRef(uri)
 
 
@@ -369,14 +383,14 @@ def q2eturi(qname):
         if not '#' in qname:
             uri = '#' + qname
         else:
-            raise ValueError, 'invalid qname'
+            raise ValueError('invalid qname')
     else:
         prefix, name = qname.split(':')
         if prefix in namespaces:
             ns = namespaces[prefix]
             uri = ''.join(['{', ns.uri, '}', name])
         else:
-            raise ValueError, 'unknown prefix: %s' % prefix
+            raise ValueError('unknown prefix: {}'.format(prefix))
     return uri
 
 

@@ -4,6 +4,7 @@ Functional tests for pangalactic.core.registry module
   - builds registry from kb .owl and .rdf files
 """
 import unittest
+from functools import reduce
 
 # PanGalactic
 from pangalactic.core.registry import PanGalacticRegistry

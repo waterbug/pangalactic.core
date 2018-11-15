@@ -2,6 +2,7 @@
 """
 Unit tests for "cook" (serialize) functions
 """
+from builtins import str
 import unittest
 from datetime import date, datetime
 
@@ -13,8 +14,8 @@ class CookTestCases(unittest.TestCase):
 
     def test_01_cook_string(self):
         """CASE:  string (Functional)"""
-        value = cookers['str']('spam')
-        expected = 'spam'
+        value = cookers['str'](u'spam')
+        expected = u'spam'
         self.assertEqual(expected, value)
 
     def test_02_cook_int(self):
@@ -58,7 +59,7 @@ class CookTestCases(unittest.TestCase):
     def test_08_cook_unicode(self):
         """CASE:  unicode (Functional)"""
         value = cookers['unicode'](u'spam')
-        expected = value.encode('utf-8')
+        expected = value
         self.assertEqual(expected, value)
 
     # def test_11_cook_datetimes(self):

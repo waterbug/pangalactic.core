@@ -1070,7 +1070,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">Alternate email address of a person.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Person"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1081,7 +1081,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The city in which an organization or facility is located.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1125,7 +1125,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">A mathematical expression (e.g. an inequality, an equation, a set of simultaneous equations, etc.) that defines the elements in the graph of a Relation.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Relation"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1147,7 +1147,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The country in which an organization or facility is located.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1180,7 +1180,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">Identifier for a drawing (a type of specification).</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1191,7 +1191,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">If a part (product) has a drawing (a type of specification), this is the part identifier specified in the drawing.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1202,7 +1202,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The primary email address of a person.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Person"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1213,7 +1213,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The purpose of a file relative to a representation to which it is related.  Example values are: attachment, content, stylesheet, DTD, etc.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1235,7 +1235,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The name of the attribute within the context of which the file_sequence attribute is meaningful.  If the value of the file_sequence_context attribute is role, and the value of file_role is attachment, then file_sequence is the position of this file within the set of files that have a file role of attachment.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1246,7 +1246,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">Given name of a person.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Person"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1257,7 +1257,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">Preferred name of person.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Person"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1268,7 +1268,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The Federal Supply Classification (FSC) code for a product (this is also the first four digits of the National Stock Number or NSN).</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Product"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1279,7 +1279,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The generic identifier for a EEE part, which in some cases is specified by a standard (e.g., JEDEC for electronic parts).</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;EeePart"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1290,7 +1290,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">An identifier that is unique within a specified namespace.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1301,7 +1301,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The namespace within which an id is unique.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1359,7 +1359,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The surname of a person.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Person"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1392,7 +1392,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The method used to verify a Requirement: test, analysis, or inspection.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1403,7 +1403,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The type of a Requirement: functional or performance.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1414,7 +1414,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The type of constraint specified by a Requirement: a specified maximum or minimum, a specified value with a tolerance, or an allowable range specified by a pair of maximum and minimum values.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1480,7 +1480,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The shall phrase of a Requirement.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1491,7 +1491,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The phrase of a Requirement expressing a relationship to a maximum or minimum value.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1502,7 +1502,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The dimensions of the parameter constrained by a Requirement, which of course also applies to the values of any minimum, maximum, or tolerances specified.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1513,7 +1513,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">An alphanumeric string used by a manufacturer to identify the collection (lot) of part instances of which a specific part instance was a member.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1524,7 +1524,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The identifier assigned to a hardware product by its manufacturer.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1535,7 +1535,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The MIME Media Subtype per &lt;http://www.iana.org/assignments/media-types/&gt; (or a custom subtype).</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Mime"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1546,7 +1546,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The MIME Media Type per &lt;http://www.iana.org/assignments/media-types/&gt; (or a custom type).</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Mime"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1557,7 +1557,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The middle initial or middle name of a person.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Person"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1568,7 +1568,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The identifier of the military specification (a.k.a. MIL Spec) that applies to a EEE part.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;EeePart"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1590,7 +1590,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">A human-readable identifier for an object -- usually the one by which the object is known to the end-user, but it may be used for any type of identification, including aliases and local nomenclatures.  Its meaning is dependent on the application context.  This concept is analogous to a given name.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1601,7 +1601,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">A human-readable abbreviated name for an object.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1612,7 +1612,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The National Stock Number (NSN) for a EEE part.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;EeePart"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1623,7 +1623,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">Object ID (a globally unique identifier).</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1634,7 +1634,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">An abbreviated name for an organization, usually formalized.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1645,7 +1645,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">Identifier for an organization in the DoD Commercial And Government Entity (CAGE) database.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1656,7 +1656,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The system from which the data in a data set originated.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;DataSet"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1667,7 +1667,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">A constraint on the range values of a parameter.  This may be, for example, a finite set of values or an expression.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1678,7 +1678,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The type of a constraint on the range values of a parameter.  This may be, for example, finite set or expression.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1689,7 +1689,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The datatype of the range of a parameter.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1700,7 +1700,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The name of a function (which may be opaque) that computes the value of a computed parameter.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1711,7 +1711,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">A comma-delimited string containing the identifier(s) of the underlying parameter(s) used to compute the value of a computed parameter.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1733,7 +1733,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The identifier for a part model, a somewhat arbitrary identifier usually specified by the manufacturer.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1755,7 +1755,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The primary phone number of a person.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Person"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1766,7 +1766,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The state of a parts list relative to some possibly extensible set of standard states, e.g. in-process, reviewed, etc.  The set of standard states should be agreed upon by the project(s) or organization(s) using the parts list.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;PartsList"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1777,7 +1777,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The type of a parts list, selected from a set of standard parts list types, such as &apos;as-designed&apos; (ADPL), &apos;as-built&apos; (ABPL), &apos;preliminary&apos; (PRPL), etc., which should be agreed upon by the Project(s) or Organization(s) using the parts list.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;PartsList"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1788,7 +1788,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The version of the software application that was used to produce a DataSet.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;DataSet"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1821,7 +1821,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The reference designator is a symbolic name that serves as an identifier for a component usage within the context of an assembly.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Acu"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1832,7 +1832,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The assembly level is a name selected from a customizable vocabulary for the naming of levels in an assembly architecture.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Acu"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1843,7 +1843,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The purpose or meaning of this Representation -- e.g.  &quot;publication&quot;, &quot;presentation&quot;, &quot;exchange&quot;, etc.  The semantics of this Property are heavily context-dependent.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Representation"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1854,7 +1854,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The identifier for a screening specification that applies to a EEE part.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;EeePart"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1865,7 +1865,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">An identifier assigned by a manufacturer to a specific part instance.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1876,7 +1876,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The identifier of the specification document that applies to a product.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Product"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1887,7 +1887,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The identifier given to a hardware product by its specification.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1898,7 +1898,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">An Organization&apos;s state (if in the U.S.) or province.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1909,7 +1909,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">An Organization&apos;s Street Address.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1920,7 +1920,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">An indicator of whether the document is intended to be (1) stand-alone, (2) the parent in an assembly of documents, or (3) a component in another document.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Document"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1931,7 +1931,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">Role designation of a top-level System within the context of a Project.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1942,7 +1942,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The dimensional specification for a ParameterDefinition.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1953,7 +1953,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The Universal Resource Locator for an object.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Modelable"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1964,7 +1964,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The user&apos;s local name for the file.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -1975,7 +1975,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">A user-modifiable alphanumeric string used to identify one in a series of modifications of an object.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Product"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -2008,7 +2008,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Person&apos;s email address at an Organization.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Person"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -2019,7 +2019,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Person&apos;s telephone number at an Organization.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Person"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -2030,7 +2030,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">An Organization&apos;s zip code (if in the U.S.) or postal zone.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
-        <rdfs:range rdf:resource="&xsd;token"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 

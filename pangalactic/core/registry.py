@@ -14,6 +14,14 @@ The Pan Galactic Meta Object Registry
 
 # Python
 from __future__ import print_function
+try:
+    # Python 2
+    from __builtin__ import str as builtin_str
+except ImportError:
+    # Python 3
+    from builtins import str as builtin_str
+from builtins import range
+from builtins import object
 import glob, os, pkgutil, shutil
 from collections import OrderedDict
 
@@ -39,7 +47,7 @@ from pangalactic.core.log            import get_loggers
 # create SqlAlchemy declarative 'Base' class for MetaObject classes
 Base = declarative_base()
 
-class FakeLog:
+class FakeLog(object):
     """
     Fake logger to print log messages if we are run without a logger.
     """
@@ -48,7 +56,7 @@ class FakeLog:
     def debug(self, s):
         print(s)
 
-class AntiLog:
+class AntiLog(object):
     """
     Fake logger to NOT print log messages if we are run without a logger.
     """
@@ -132,7 +140,7 @@ class PanGalacticRegistry(object):
                                        os.path.abspath('pangalactic_home'))
         if not os.path.exists(self.home):
             os.mkdir(self.home)
-        self.log.info('* [registry] home directory: %s' % self.home)
+        self.log.info('* [registry] home directory: {}'.format(self.home))
         self.cache_path = os.path.join(self.home, cache_path)
         if not os.path.exists(self.cache_path):
             self.got_cache = False
@@ -149,10 +157,11 @@ class PanGalacticRegistry(object):
         self.onto_path = os.path.join(self.home, onto_path)
         if not os.path.exists(self.onto_path): 
             os.makedirs(self.onto_path)
-        pgef_owl_path = os.path.join(self.onto_path, 'pgef.owl')
+        pgef_owl_path = str(os.path.join(self.onto_path, 'pgef.owl'))
         if not os.path.exists(pgef_owl_path):
             f = open(pgef_owl_path, 'w')
-            f.write(pkgutil.get_data('pangalactic.core.ontology', 'pgef.owl'))
+            f.write(str(pkgutil.get_data('pangalactic.core.ontology',
+                                         'pgef.owl').decode('utf-8')))
             f.close()
         self.log.info('* not installed; using pgef.owl in home dir.')
         self.apps_dict = {}   # not currently used
@@ -163,7 +172,7 @@ class PanGalacticRegistry(object):
         self.pes = {}
         self.nses = {}
         if db_url:
-            self.log.info('* initializing db at "%s"' % db_url)
+            self.log.info('* initializing db at "{}"'.format(db_url))
             self.db_engine = create_engine(db_url)
         else:
             # if no db_url is specified, set up a local (sqlite) db in home
@@ -173,7 +182,8 @@ class PanGalacticRegistry(object):
         # create the KB (knowledgebase) and initialize the registry's schemas,
         # which will be used in generating the database and app classes
         self.log.info('* [registry] creating KB from pgef.owl source ...')
-        self.log.info('             (pgef.owl path: "%s")' % pgef_owl_path)
+        self.log.info('             (pgef.owl path: "{}")'.format(
+                                                            pgef_owl_path))
         self.kb = KB(pgef_owl_path)
         self._create_pgef_core_meta_objects(use_cache=(not force_new_core))
         # check for app ontologies -- if any are found, load them
@@ -286,7 +296,7 @@ class PanGalacticRegistry(object):
         # different prefixes, or else naming the extract files differently
         # (e.g. using the version).
         new_nses = dict([(n.prefix, n.extract())
-                          for n in namespaces.values() if n.prefix])
+                          for n in list(namespaces.values()) if n.prefix])
         # serialize the property and class extracts to the cache
         cache_path = os.path.join(self.cache_path, nsprefix)
         if not os.path.exists(cache_path):
@@ -300,13 +310,13 @@ class PanGalacticRegistry(object):
         class_cache_path = os.path.join(cache_path, 'classes')
         if not os.path.exists(class_cache_path):
             os.makedirs(class_cache_path)
-        for meta_id, ne in new_nses.items():
+        for meta_id, ne in list(new_nses.items()):
             dump_metadata(ne, os.path.join(
                                 ns_cache_path, meta_id + '.json'))
-        for meta_id, pe in new_pes.items():
+        for meta_id, pe in list(new_pes.items()):
             dump_metadata(pe, os.path.join(
                                 property_cache_path, meta_id + '.json'))
-        for meta_id, ce in new_ces.items():
+        for meta_id, ce in list(new_ces.items()):
             dump_metadata(ce, os.path.join(
                                 class_cache_path, meta_id + '.json'))
         # NOTE (CAVEAT!):  if there are any name collisions, new names will
@@ -533,7 +543,7 @@ class PanGalacticRegistry(object):
                                   field_name)
                     rel_schema = self.schemas[related_cname]
                     has_inverse = [name for name, f
-                                   in rel_schema['fields'].items()
+                                   in list(rel_schema['fields'].items())
                                    if f['inverse_of'] == field_name]
                     if has_inverse:
                         # if so, add the 'back_populates'
@@ -589,7 +599,8 @@ class PanGalacticRegistry(object):
             self.log.debug('    ->  base class: %s' % str(base_id))
             self.log.debug('    ->  class_dict: %s' % str(class_dict))
             # create class
-            self.classes[cname] = type(cname, (base_class,), class_dict)
+            self.classes[cname] = type(builtin_str(cname), (base_class,),
+                                       class_dict)
         # generate all tables ...
         Base.metadata.create_all(self.db_engine)
 
@@ -777,7 +788,7 @@ class PanGalacticRegistry(object):
             output += '<h3>version: <font color="red">'
             output += '{}</font></h3>'.format(self.version)
         output += '<hr>'
-        cnames = self.classes.keys()[:]
+        cnames = list(self.classes.keys())[:]
         cnames.sort()
         output += '<h3>Classes:</h3>'
         # index (arrange in 7 columns)

@@ -2,6 +2,7 @@
 """
 PanGalactic loggers
 """
+from builtins import object
 import logging
 from logging.handlers import RotatingFileHandler
 import os, sys
@@ -22,7 +23,7 @@ def get_loggers(home, name, console=False, debug=False):
     logdir = os.path.join(home, 'log')
     # make sure logdir exists ...
     if not os.path.exists(logdir):
-        os.makedirs(logdir, mode=0775)
+        os.makedirs(logdir, mode=0o775)
     log_filename = os.path.join(logdir, name+'_log')
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
@@ -53,7 +54,7 @@ def get_loggers(home, name, console=False, debug=False):
     return logger, error_logger
 
 
-class LoggerWriter:
+class LoggerWriter(object):
     def __init__(self, logger, level): 
         self.logger = logger
         self.level = level 

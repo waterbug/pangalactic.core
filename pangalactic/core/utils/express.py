@@ -5,9 +5,11 @@ metamodel.  This module reads an EXPRESS-XMI data file into a set of nested
 Python dictionaries.
 """
 # Python
+from future import standard_library
+standard_library.install_aliases()
 import sys
 from pprint import pprint
-from StringIO import StringIO
+from io import StringIO
 # ElementTree
 try:  # Python 2.5
     import xml.etree.ElementTree as ET
