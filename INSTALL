@@ -130,7 +130,11 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
     - pyqt >=5.6
       [PyQt5]
-      * NOTE: is in the 'default' conda channel
+      * NOTE: use the 'default' conda channel -- this is especially important
+        on Windows, where the 'conda-forge' channel versions of 'sip' do not
+        work with the default channel versions and will cause failures (this
+        may require commenting out the conda-forge channel in your .condarc
+        while installing pyqt)
 
           Configuration:  'conda install pyqt'
 
