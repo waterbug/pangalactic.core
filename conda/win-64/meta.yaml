@@ -1,6 +1,6 @@
 package:
   name: pangalactic.core
-  version: "0.1.dev97"
+  version: "0.1.dev98"
 
 source:
   path: # [path to source]
