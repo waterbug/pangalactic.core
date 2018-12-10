@@ -3,45 +3,29 @@ package:
   version: "0.1.dev98"
 
 source:
-  path: # [path to source]
+        path: C:\Users\swaterbu\clones\pangalactic.core
 
 requirements:
   build:
-    - python
+    - python {{PY_VER}}
     - setuptools
 
   run:
-    - python >=2.7
+    - future
+    - pint
+    - python {{PY_VER}}
+    - python-dateutil
     - pytz
-    - ruamel_yaml <=0.15
-    - service_identity
+    - ruamel_yaml
     - sqlalchemy
-    - twisted
     - tzlocal
     - unidecode
     - xlrd
     - xlwt
     - xlsxwriter
-    - zope
-    - zope.interface
-    # -----------------------------------------------------
-    # packages installed from local repo (copied)
-    - numpy >=1.13.3
-    # service_identity (reqd. by autobahn)
-    # txaio (reqd. by autobahn)
-    # -----------------------------------------------------
-    # packages installed from local repo (locally built)
+    # locally created conda packages
     - inflect
-    # - louie [not used now but might be in the future]
-    - pint
-    - python-dateutil
     - rdflib
-    # - isodate (required by rdflib)
-    # -----------------------------------------------------
-
-# test:
-  # imports:
-    # - sometestpackage
 
 about:
   # home: https://pangalactic.us
