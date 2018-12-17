@@ -33,10 +33,10 @@ _inf = inflect.engine()
 
 def asciify(u):
     """
-    "Intelligently" convert unicode to ascii -- a.k.a. "The Stupid American",
-    a.k.a. "The UNICODE Hammer".  Its main purpose is to convert things that
-    are going to be used in Python identifiers ... so they can be typed on an
-    en-us encoded keyboard!
+    "Intelligently" convert a unicode string to the ASCII character set --
+    a.k.a. "The Stupid American", a.k.a. "The UNICODE Hammer".  Its main
+    purpose is to convert things that are going to be used in Python
+    identifiers so they can be typed on an en-us encoded keyboard!
 
     Credit: http://code.activestate.com/recipes/251871/ (this is not that
     recipe but an elegant one-liner from one of the comments on the recipe).
