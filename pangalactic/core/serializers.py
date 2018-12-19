@@ -293,7 +293,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
     if dictify:
         output = dict(new=[], modified=[], unmodified=[], error=[])
     if not include_refdata:
-        # ignore reference data objects
+        # ignore reference data objects ('pgefobjects' namespace)
         serialized = [so for so in serialized
                   if not asciify(so.get('oid', '')).startswith('pgefobjects:')]
     if len(serialized) < new_len:
@@ -331,7 +331,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
                 raise TypeError('class name not specified')
             orb.log.debug('* deserializing serialized object:')
             orb.log.debug('  %s' % str(d))
-            oid = d['oid']
+            oid = str(d['oid'])
             # if oid:
             if oid in current_oids:
                 orb.log.debug('  - object exists in db ...')

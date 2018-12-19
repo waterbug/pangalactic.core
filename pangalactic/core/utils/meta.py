@@ -53,7 +53,7 @@ def asciify(u):
             return unicodedata.normalize('NFKD', u).encode('ASCII', 'ignore')
         elif isinstance(u, bytes):
             return u.decode('utf-8')
-        return u
+        return str(u)
     except:
         # Python 3 (return utf-8 string)
         if isinstance(u, str):
@@ -61,7 +61,7 @@ def asciify(u):
                                     'ASCII', 'ignore').decode('utf-8')
         elif isinstance(u, bytes):
             return u.decode('utf-8')
-        return u
+        return str(u)
 
 def property_to_field(name, pe):
     """
