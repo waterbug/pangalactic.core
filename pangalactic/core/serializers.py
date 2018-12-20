@@ -331,7 +331,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
                 raise TypeError('class name not specified')
             orb.log.debug('* deserializing serialized object:')
             orb.log.debug('  %s' % str(d))
-            oid = str(d['oid'])
+            oid = asciify(d['oid'])
             # if oid:
             if oid in current_oids:
                 orb.log.debug('  - object exists in db ...')
