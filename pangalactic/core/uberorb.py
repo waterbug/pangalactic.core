@@ -287,6 +287,7 @@ class UberORB(object):
                     indent=4, sort_keys=True))
             f.close()
         elif fmt == 'yaml':
+            self.log.info('  dumping database to yaml file ...')
             f = open(os.path.join(self.vault, 'db.yaml'), 'w')
             f.write(yaml.safe_dump(serialize(
                     self, self.get_all_subtypes('Identifiable'))))
