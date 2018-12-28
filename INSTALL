@@ -125,6 +125,21 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
 (2) Dependencies of pangalactic.node (the pangalactic GUI client package):
 
+    *** NOTE for Linux (linux-64) ****************************************
+    Use 'conda install pythonocc-core' to pull in pyqt5 and qt packages,
+    AND EXCLUDE the 'defaults' channel because otherwise conda will install
+    incompatible pyqt5 from 'defaults' channel with qt from conda-forge
+    channel.  Put the following channels in '.condarc' file for installing
+    pythonocc-core (i.e., DO NOT use 'defaults' channel for that!):
+
+    channels:
+        # - defaults  -> DO NOT USE!
+        - pythonocc
+        - dlr-sc
+        - oce
+        - conda-forge
+    *********************************************************************
+
     - autobahn
       * NOTE: use 'conda-forge' channel
 

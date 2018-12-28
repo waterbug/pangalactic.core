@@ -102,6 +102,7 @@ class OrbTest(unittest.TestCase):
                 oids.append(serialized_object['oid'])
         Identifiable = orb.classes['Identifiable']
         deserialize(orb, serialized_test_objects)
+        # assign test parameters to HWProducts for use in subsequent tests ...
         objs = orb.get_by_type('HardwareProduct')
         orb.assign_test_parameters(objs)
         value = orb.db.query(Identifiable).filter(
@@ -110,6 +111,7 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_07_get(self):
+        """CASE:  test orb.get()"""
         obj = orb.get('H2G2')   # Project 'H2G2' test object
         test_obj_attrs = dict(oid='H2G2', id='H2G2', id_ns='test',
                               name=u'Hitchhikers Guide to the Galaxy',

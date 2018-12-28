@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-A generic (no dependencies on the rest of PanGalactic) reader/writer for
-"Part 21 files" (ISO 10303-21, STEP "Clear Text Encoding", a serialization
+A generic (no dependencies on the rest of pangalactic) reader/writer for
+Part 21 files (ISO 10303-21, STEP "Clear Text Encoding" serialization
 format).
 """
 from __future__ import print_function
@@ -28,8 +28,8 @@ HEX = string.hexdigits
 BINARY = Word(pre, HEX)
 
 DIGIT = string.digits
-LOWER = string.lowercase
-UPPER = string.uppercase + '_'
+LOWER = string.ascii_lowercase
+UPPER = string.ascii_uppercase + '_'
 SPECIAL = '!"*$%&.#+,-()?/:;<=>@[]{|}^`~'
 REVERSE_SOLIDUS = '\\'
 APOSTROPHE = "'"
