@@ -32,7 +32,7 @@ def serialize_parms(obj_parms):
     """
     if obj_parms:
         ser_parms = deepcopy(obj_parms)
-        for parm in list(ser_parms.values()):
+        for parm in ser_parms.values():
             parm['mod_datetime'] = cook_datetime(parm['mod_datetime'])
         return ser_parms
     else:
@@ -220,7 +220,7 @@ def deserialize_parms(oid, ser_parms):
     Args:
         ser_parms (dict):  the serialized parms dictionary
     """
-    for parm in list(ser_parms.values()):
+    for parm in ser_parms.values():
         parm['mod_datetime'] = uncook_datetime(parm['mod_datetime'])
     parameterz[oid] = ser_parms
 
@@ -404,7 +404,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
                 orb.log.debug('* updating existing object {}'.format(
                                                                 d['oid']))
                 obj = updates[d['oid']]
-                for a, val in list(kw.items()):
+                for a, val in kw.items():
                     setattr(obj, a, val)
                 objs.append(obj)
                 if cname == 'Acu':

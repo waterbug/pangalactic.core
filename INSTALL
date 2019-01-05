@@ -220,6 +220,8 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
       <http://www.ca.postgresql.org>
       * NOTE: is in the 'default' conda channel
 
+          Configuration:  'conda install postgresql'
+
           Configuration Options:  see PostgreSQL documentation for detailed
           instructions.  Since PostgreSQL will only be accessed internally
           to the VGER server, security will be significantly improved on
@@ -236,7 +238,7 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
       (Note:  current development is using psycopg2-2.0.6)
       * NOTE: is in the 'default' conda channel
 
-          Configuration:  'python setup.py install'
+          Configuration:  'conda install psycopg2'
 
     - bcrypt
       [used by authenticator.py to hash passwords]

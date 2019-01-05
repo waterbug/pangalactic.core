@@ -83,7 +83,7 @@ EXCHANGE_FILE.ignore(cppStyleComment)
 
 
 if __name__ == '__main__':
-    usage = 'usage:  %prog [options] file.p21'
+    usage = 'usage:  %prog [options] file[.p21|.stp|.step]'
     optparser = OptionParser(usage)
     optparser.add_option("-t", "--time", action='store_true',
                          dest="show_time", default=False,

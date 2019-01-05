@@ -5,12 +5,6 @@ Pan Galactic hub for object metadata and storage operations.
 NOTE:  Only the `orb` instance created in this module should be imported (it is
 intended to be a singleton).
 """
-try:
-    # Python 2
-    from __builtin__ import str as builtin_str
-except ImportError:
-    # Python 3
-    from builtins import str as builtin_str
 from builtins import object
 import json, os, shutil, sys, traceback
 
@@ -367,7 +361,7 @@ class UberORB(object):
         if os.path.exists(json_path):
             with open(json_path) as f:
                 serialized_parms = json.loads(f.read())
-            for oid, ser_parms in list(serialized_parms.items()):
+            for oid, ser_parms in serialized_parms.items():
                 deserialize_parms(oid, ser_parms)
             self.recompute_parms()
 
@@ -378,7 +372,7 @@ class UberORB(object):
         self.log.info('* [orb] _save_parms() ...')
         parms_path = os.path.join(self.home, 'parameters.json')
         serialized_parameterz = {}
-        for oid, obj_parms in list(parameterz.items()):
+        for oid, obj_parms in parameterz.items():
             # NOTE: serialize_parms() uses deepcopy()
             serialized_parameterz[oid] = serialize_parms(obj_parms)
         with open(parms_path, 'w') as f:
@@ -392,8 +386,8 @@ class UberORB(object):
         a parameter is created, modified, or deleted.
         """
         self.log.info('* [orb] recompute_parms()')
-        for oid, parms in list(parameterz.items()):
-            for pid, p in list(parms.items()):
+        for oid, parms in parameterz.items():
+            for pid, p in parms.items():
                 parameterz[oid][pid]['value'] = _compute_pval(self, oid,
                                                               pid)
         self._save_parms()
@@ -456,7 +450,7 @@ class UberORB(object):
         data_path = os.path.join(self.vault, 'db.yaml')
         if os.path.exists(data_path):
             try:
-                f = open()
+                f = open(data_path)
                 sdata = yaml.safe_load(f.read())
                 if __version__ in schema_maps:
                     map_fn = schema_maps[__version__]
@@ -876,7 +870,7 @@ class UberORB(object):
                 objs += rep_files
         # TODO:  get the files too (fpath = rep_file.url)
         # use set() to eliminate dups
-        res = [o for o in list(set(objs)) if o]
+        res = [o for o in set(objs) if o]
         self.log.info('  returning {} object(s).'.format(len(res)))
         if res:
             for o in res:

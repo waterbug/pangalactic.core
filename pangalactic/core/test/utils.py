@@ -23,7 +23,7 @@ def gen_test_pvals(parms):
             and is the value of parameterz[obj.oid] for any object that has
             parameters.
     """
-    for pid, parm in list(parms.items()):
+    for pid, parm in parms.items():
         if parm['computed']:
             # ignore computed parameters
             continue

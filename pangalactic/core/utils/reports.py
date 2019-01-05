@@ -133,8 +133,8 @@ def write_mel_xlsx(context, is_project=True,
     for i, width in enumerate(col_widths):
         worksheet.set_column(i, i, width)
 
-    fmts = {name : book.add_format(style) for name, style in
-            list(xlsx_styles.items())}
+    fmts = {name : book.add_format(style)
+            for name, style in xlsx_styles.items()}
 
     # Set position of title
     title_row = 0
@@ -290,7 +290,7 @@ def write_mel_xlsx(context, is_project=True,
                  2: fmts['right_gray_bold_12'],
                  3: fmts['right_12']
                  }
-    for fmt in list(data_fmts.values()):
+    for fmt in data_fmts.values():
         fmt.set_num_format('#,##0.00')
     # system level
     # (note that system.name overwrites the template "NAME..." placeholder)

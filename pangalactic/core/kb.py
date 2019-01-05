@@ -81,7 +81,7 @@ def find_nodes_by_type(graph, typeqn):
     """
     nodes = OrderedDict()
     for node in graph.subjects(RDF.type, q2u(typeqn)):
-        for ns in list(namespaces.values()):
+        for ns in namespaces.values():
             # 'if ns.uri' eliminates blank Class nodes (if it doesn't
             # have an ID, we're nagonna use it)
             if ns.uri and ns.uri in node:
@@ -205,7 +205,7 @@ class PanGalacticKnowledgeBase(Graph):
 
     def get_class_node_names(self):
         return OrderedSet([qname
-                           for node_dict in list(self.class_nodes_by_type.values())
+                           for node_dict in self.class_nodes_by_type.values()
                            for qname in node_dict])
 
     def set_class_node_names(self, val):
@@ -223,7 +223,7 @@ class PanGalacticKnowledgeBase(Graph):
 
     def get_property_node_names(self):
         return OrderedSet([qname
-                        for node_dict in list(self.property_nodes_by_type.values())
+                        for node_dict in self.property_nodes_by_type.values()
                         for qname in node_dict])
 
     def set_property_node_names(self, val):
@@ -516,7 +516,7 @@ class PanGalacticKnowledgeBase(Graph):
             output += '=========='
             output += '\nNamespaces'
             output += '\n=========='
-            for ns in list(namespaces.values()):
+            for ns in namespaces.values():
                 output += '\n- %s:  %s' % (ns.prefix, ns.uri)
                 if ns:
                     for name in ns.names:

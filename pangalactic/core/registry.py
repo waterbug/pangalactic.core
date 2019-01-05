@@ -296,7 +296,7 @@ class PanGalacticRegistry(object):
         # different prefixes, or else naming the extract files differently
         # (e.g. using the version).
         new_nses = dict([(n.prefix, n.extract())
-                          for n in list(namespaces.values()) if n.prefix])
+                          for n in namespaces.values() if n.prefix])
         # serialize the property and class extracts to the cache
         cache_path = os.path.join(self.cache_path, nsprefix)
         if not os.path.exists(cache_path):
@@ -310,13 +310,13 @@ class PanGalacticRegistry(object):
         class_cache_path = os.path.join(cache_path, 'classes')
         if not os.path.exists(class_cache_path):
             os.makedirs(class_cache_path)
-        for meta_id, ne in list(new_nses.items()):
+        for meta_id, ne in new_nses.items():
             dump_metadata(ne, os.path.join(
                                 ns_cache_path, meta_id + '.json'))
-        for meta_id, pe in list(new_pes.items()):
+        for meta_id, pe in new_pes.items():
             dump_metadata(pe, os.path.join(
                                 property_cache_path, meta_id + '.json'))
-        for meta_id, ce in list(new_ces.items()):
+        for meta_id, ce in new_ces.items():
             dump_metadata(ce, os.path.join(
                                 class_cache_path, meta_id + '.json'))
         # NOTE (CAVEAT!):  if there are any name collisions, new names will
@@ -543,7 +543,7 @@ class PanGalacticRegistry(object):
                                   field_name)
                     rel_schema = self.schemas[related_cname]
                     has_inverse = [name for name, f
-                                   in list(rel_schema['fields'].items())
+                                   in rel_schema['fields'].items()
                                    if f['inverse_of'] == field_name]
                     if has_inverse:
                         # if so, add the 'back_populates'
