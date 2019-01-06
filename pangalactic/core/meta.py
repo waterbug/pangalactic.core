@@ -158,26 +158,6 @@ M2M = {
        'parent_requirements' :    {'domain' : 'Requirement',
                                    'range'  : 'RequirementAncestry'},
 
-       # *** M2M:  RequirementAllocation
-       # inverse of 'satisfied_by'
-       # complementary to 'allocated_to_functions'
-       'satisfies' :              {'domain' : 'Acu',
-                                   'range'  : 'RequirementAllocation'},
-       # inverse of 'allocated_requirement'
-       # complementary to 'satisfies'
-       'allocated_to_functions' : {'domain' : 'Requirement',
-                                   'range'  : 'RequirementAllocation'},
-
-       # *** M2M:  SystemRequirement
-       # inverse of 'supported_by'
-       # complementary to 'allocated_to_systems'
-       'supports' :               {'domain' : 'ProjectSystemUsage',
-                                   'range'  : 'SystemRequirement'},
-       # inverse of 'requirement'
-       # complementary to 'supports'
-       'allocated_to_systems' :   {'domain' : 'Requirement',
-                                   'range'  : 'SystemRequirement'},
-
        # *** M2M:  VerificationTest
        # inverse of 'test'
        # complementary to 'verification_tests'
@@ -261,6 +241,12 @@ ONE2M = {
          # inverse of 'of_representation'
          'has_files' :            {'domain' : 'Representation',
                                    'range'  : 'RepresentationFile'},
+         # inverse of 'allocated_to_function'
+         'allocated_requirements' : {'domain' : 'Acu',
+                                   'range'  : 'Requirement'},
+         # inverse of 'allocated_to_system'
+         'system_requirements' :  {'domain' : 'ProjectSystemUsage',
+                                   'range'  : 'Requirement'},
          # inverse of 'role_assignment_context'
          'organizational_role_assignments' : {'domain' :
                                               'Organization',
@@ -278,6 +264,7 @@ ONE2M = {
          'sub_organizations' :    {'domain' : 'Organization',
                                    'range'  : 'Organization'}
          }
+
 
 # PGXN_HIDE:  Fields not to be shown for any object
 # [TODO:  implement support for these in PgxnObject editor]

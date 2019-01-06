@@ -844,90 +844,46 @@
     
 
 
-    <!-- http://pangalactic.us/pgef/satisfied_by -->
+    <!-- http://pangalactic.us/pgef/allocated_to_function -->
 
-    <owl:ObjectProperty rdf:about="&pgef;satisfied_by">
+    <owl:ObjectProperty rdf:about="&pgef;allocated_to_function">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The function or component receiving a RequirementAllocation.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;RequirementAllocation"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Assembly Component Usage (Acu) relationship (functional role) to which this requirement is allocated.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&pgef;Acu"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://pangalactic.us/pgef/satisfies -->
+    <!-- http://pangalactic.us/pgef/allocated_requirements -->
 
-    <owl:ObjectProperty rdf:about="&pgef;satisfies">
-        <owl:inverseOf rdf:resource="&pgef;satisfied_by"/>
-        <rdfs:comment rdf:datatype="&xsd;string">RequirementAllocation relationships that reference requirements allocated to this function or component.</rdfs:comment>
+    <owl:ObjectProperty rdf:about="&pgef;allocated_requirements">
+        <owl:inverseOf rdf:resource="&pgef;allocated_to_function"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The requirements that have been allocated to this function (Acu).</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Acu"/>
-        <rdfs:range rdf:resource="&pgef;RequirementAllocation"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://pangalactic.us/pgef/allocated_requirement -->
-
-    <owl:ObjectProperty rdf:about="&pgef;allocated_requirement">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The requirement allocated in a RequirementAllocation.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;RequirementAllocation"/>
         <rdfs:range rdf:resource="&pgef;Requirement"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://pangalactic.us/pgef/allocated_to_functions -->
+    <!-- http://pangalactic.us/pgef/allocated_to_system -->
 
-    <owl:ObjectProperty rdf:about="&pgef;allocated_to_functions">
-        <owl:inverseOf rdf:resource="&pgef;allocated_requirement"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The RequirementAllocation relationships that allocate this requirement to functions (component roles).</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&pgef;RequirementAllocation"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://pangalactic.us/pgef/supported_by -->
-
-    <owl:ObjectProperty rdf:about="&pgef;supported_by">
+    <owl:ObjectProperty rdf:about="&pgef;allocated_to_system">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The system receiving a SystemRequirement.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;SystemRequirement"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The ProjectSystemUsage relationship (system role in a project) to which this requirement is allocated.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&pgef;ProjectSystemUsage"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://pangalactic.us/pgef/supports -->
+    <!-- http://pangalactic.us/pgef/system_requirements -->
 
-    <owl:ObjectProperty rdf:about="&pgef;supports">
-        <owl:inverseOf rdf:resource="&pgef;supported_by"/>
-        <rdfs:comment rdf:datatype="&xsd;string">SystemRequirement relationships that reference requirements allocated to this system.</rdfs:comment>
+    <owl:ObjectProperty rdf:about="&pgef;system_requirements">
+        <owl:inverseOf rdf:resource="&pgef;allocated_to_system"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The requirements that have been allocated to this ProjectSystemUsage relationship.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
-        <rdfs:range rdf:resource="&pgef;SystemRequirement"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://pangalactic.us/pgef/requirement -->
-
-    <owl:ObjectProperty rdf:about="&pgef;requirement">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The requirement allocated in a SystemRequirement.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;SystemRequirement"/>
         <rdfs:range rdf:resource="&pgef;Requirement"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://pangalactic.us/pgef/allocated_to_systems -->
-
-    <owl:ObjectProperty rdf:about="&pgef;allocated_to_systems">
-        <owl:inverseOf rdf:resource="&pgef;requirement"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The SystemRequirement relationships that allocate this requirement to system usages on a project.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&pgef;SystemRequirement"/>
     </owl:ObjectProperty>
     
 
@@ -2303,24 +2259,6 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <owl:Class rdf:about="&pgef;ProductType">
         <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
         <rdfs:comment rdf:datatype="&xsd;string">A functional category or classification of a product.</rdfs:comment>
-    </owl:Class>
-    
-
-
-    <!-- http://pangalactic.us/pgef/RequirementAllocation -->
-
-    <owl:Class rdf:about="&pgef;RequirementAllocation">
-        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A Requirement Allocation relationship is the allocates-to / satisfies relationship between a requirement and a function (or subsystem/component usage) to which it is allocated.  The Requirement Allocation relationship is many-to-many: a requirement can be allocated to several functions and/or components, and a function or component usage can contribute to satisfying multiple requirements.</rdfs:comment>
-    </owl:Class>
-    
-
-
-    <!-- http://pangalactic.us/pgef/SystemRequirement -->
-
-    <owl:Class rdf:about="&pgef;SystemRequirement">
-        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A System Requirement relationship is the allocates-to / satisfies relationship between a Requirement and a top-level Project System Usage to which it is allocated.  The System Requirement relationship is many-to-many: a Requirement can be allocated to several Systems, and a System can contribute to satisfying multiple Requirements.</rdfs:comment>
     </owl:Class>
     
 
