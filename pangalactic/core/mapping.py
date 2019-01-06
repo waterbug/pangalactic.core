@@ -21,7 +21,7 @@ Examples of schema mods that require a conversion function include:
 `fns`: a dictionary that maps release numbers to the data conversion functions
 they require
 """
-schema_version = '0.1.dev93'
+schema_version = '0.1.dev102'
 
 def to_01devXX(sos):
     """
