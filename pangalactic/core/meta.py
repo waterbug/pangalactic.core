@@ -22,8 +22,8 @@ PGXN_REQD = dict(
                          'range_datatype'],
     Project=IDENTITY,
     ProductType=IDENTITY,
-    Requirement=(IDENTITY + ['rationale', 'comment']),
-    Test=(IDENTITY + ['verifies', 'purpose', 'comment'])
+    Requirement=(IDENTITY + ['rationale']),
+    Test=(IDENTITY + ['verifies', 'purpose'])
     )
 
 # MAIN_VIEWS:  Class-specific default fields for the PgxnObject "main" tab and
@@ -55,7 +55,6 @@ MAIN_VIEWS = dict(
     ParameterRelation=['referenced_relation', 'correlates_parameter'],
     Port=['id', 'name', 'of_product', 'type_of_port'],
     Product=(IDENTITY + ['product_type'] + VERSIONED),
-    ProductRequirement=['allocated_requirement', 'satisfied_by'],
     ProductType=IDENTITY,
     ProductTypeParameterDefinition=['used_in_product_type',
                                     'parameter_definition'],
@@ -63,9 +62,9 @@ MAIN_VIEWS = dict(
     ProjectSystemUsage=['id', 'project', 'system', 'system_role'],
     Representation=(IDENTITY + ['of_object', 'representation_purpose']),
     RepresentationFile=(IDENTITY + ['of_representation']),
-    Requirement=['id', 'id_ns', 'abbreviation', 'name', 'owner',
+    Requirement=(IDENTITY + ['abbreviation', 'name', 'owner',
                  'requirement_type', 'level', 'validated', 'public', 'frozen',
-                 'description', 'rationale'],
+                 'rationale']),
     RoleAssignment=['assigned_role', 'assigned_to', 'role_assignment_context'],
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
     )
@@ -73,9 +72,11 @@ MAIN_VIEWS = dict(
 # PGXN_VIEWS:  Default fields/ordering for the PgxnObject "info", "narrative"
 # and "admin" tabs
 PGXN_VIEWS = dict(
-    info=['public', 'verification_method', 'constraint_type', 'parameter_dimensions',
-          'constraint_tolerance', 'minimum_value', 'maximum_value',
-          'constraint_tolerance_lower', 'constraint_tolerance_upper'],
+    info=['public', 'requirement_type', 'constraint_type',
+          'parameter_dimensions', 'specified_value', 'constraint_tolerance',
+          'tolerance_type', 'constraint_tolerance_lower',
+          'constraint_tolerance_upper', 'maximum_value', 'minimum_value',
+          'validated', 'verification_method'],
     narrative=['comment', 'rationale', 'purpose'],
     admin=['oid', 'creator', 'create_datetime', 'modifier', 'mod_datetime',
            'url'])
@@ -108,8 +109,7 @@ PGXN_OBJECT_MENU = [
                     'HardwareProduct',
                     'Software',
                     'PartsList',
-                    'Project',
-                    'Requirement'
+                    'Project'
                     ]
 
 # PGXN_ADMIN_MENU:  Classes for which Pangalaxian has ADMIN menu items
@@ -270,15 +270,16 @@ ONE2M = {
 # [TODO:  implement support for these in PgxnObject editor]
 PGXN_HIDE = list(ONE2M.keys()) + list(M2M.keys())
 
-# PGXN_MASK:  Fields should not be displayed for specified classes
+# PGXN_MASK:  Fields that should not be displayed for the specified classes in
+# the pangalaxian object editor
 PGXN_MASK = dict(
     ParameterDefinition=(PGXN_HIDE + ['base_parameters', 'computed_by_default',
                          'generating_function', 'used_in_disciplines']),
-    Requirement=(PGXN_HIDE + ['components', 'computable_form', 'fsc_code',
-                 'has_models', 'ports', 'product_type', 'satisfies',
+    Requirement=(PGXN_HIDE + ['components', 'computable_form', 'derived_from',
+                 'fsc_code', 'has_models', 'ports', 'product_type',
                  'specification_number', 'shall_text', 'min_max_text']),
     Test=(PGXN_HIDE + ['components', 'computable_form', 'fsc_code',
-                 'product_type'])
+          'product_type'])
     )
 
 # PGXN_HIDE_PARMS:  Subclasses of Modelable for which 'parameters' panel should
@@ -404,9 +405,9 @@ ATTR_EXT_NAMES = {
          'parameter_dimensions' : 'dimensions',
          'maximum_value' : 'maximum',
          'minimum_value' : 'minimum',
-         'constraint_tolerance': 'tolerance',
-         'constraint_tolerance_lower': 'lower tol.',
-         'constraint_tolerance_upper': 'upper tol.'
+         'constraint_tolerance': 'tolerance (+/-)',
+         'constraint_tolerance_lower': 'lower tolerance',
+         'constraint_tolerance_upper': 'upper tolerance'
         }
     }
 
@@ -467,7 +468,7 @@ PGEF_COL_NAMES = {
             'abbreviation': 'abbrev.'
             }
 
-# Properties specified as READ-ONLY by PanGalactic
+# Properties displayed as READ-ONLY by the PgxnObject viewer/editor
 # TODO:  do this in a configurable way, as part of the Schemas
 # TODO:  for m2m attributes, these may eventually become editable, when
 # PgxnObject implements that capability

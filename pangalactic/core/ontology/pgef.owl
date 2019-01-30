@@ -26,7 +26,7 @@
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:pgef="http://pangalactic.us/pgef/">
     <owl:Ontology rdf:about="http://pangalactic.us/pgef/"/>
-    
+
 
 
     <!-- 
@@ -37,7 +37,7 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-    
+
 
     <!-- http://pangalactic.us/pgef/assembly -->
 
@@ -47,7 +47,7 @@
         <rdfs:domain rdf:resource="&pgef;Acu"/>
         <rdfs:range rdf:resource="&pgef;Product"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/components -->
@@ -58,7 +58,7 @@
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&pgef;Acu"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/component -->
@@ -69,7 +69,7 @@
         <rdfs:domain rdf:resource="&pgef;Acu"/>
         <rdfs:range rdf:resource="&pgef;Product"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/where_used -->
@@ -80,7 +80,7 @@
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&pgef;Acu"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/product_type_hint -->
@@ -91,7 +91,7 @@
         <rdfs:domain rdf:resource="&pgef;Acu"/>
         <rdfs:range rdf:resource="&pgef;ProductType"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/related_role -->
@@ -102,7 +102,7 @@
         <rdfs:domain rdf:resource="&pgef;DisciplineRole"/>
         <rdfs:range rdf:resource="&pgef;Role"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/related_to_disciplines -->
@@ -113,7 +113,7 @@
         <rdfs:domain rdf:resource="&pgef;Role"/>
         <rdfs:range rdf:resource="&pgef;DisciplineRole"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/related_to_discipline -->
@@ -124,7 +124,7 @@
         <rdfs:domain rdf:resource="&pgef;DisciplineRole"/>
         <rdfs:range rdf:resource="&pgef;Discipline"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/related_roles -->
@@ -135,7 +135,7 @@
         <rdfs:domain rdf:resource="&pgef;Discipline"/>
         <rdfs:range rdf:resource="&pgef;DisciplineRole"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/assigned_role -->
@@ -146,7 +146,7 @@
         <rdfs:domain rdf:resource="&pgef;RoleAssignment"/>
         <rdfs:range rdf:resource="&pgef;Role"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/assignments_of_role -->
@@ -157,7 +157,7 @@
         <rdfs:domain rdf:resource="&pgef;Role"/>
         <rdfs:range rdf:resource="&pgef;RoleAssignment"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/assigned_to -->
@@ -168,7 +168,7 @@
         <rdfs:domain rdf:resource="&pgef;RoleAssignment"/>
         <rdfs:range rdf:resource="&pgef;Person"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/roles -->
@@ -179,7 +179,7 @@
         <rdfs:domain rdf:resource="&pgef;Person"/>
         <rdfs:range rdf:resource="&pgef;RoleAssignment"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/system -->
@@ -190,7 +190,7 @@
         <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
         <rdfs:range rdf:resource="&pgef;Product"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/projects_using_system -->
@@ -201,7 +201,7 @@
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&pgef;ProjectSystemUsage"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/project -->
@@ -212,7 +212,7 @@
         <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
         <rdfs:range rdf:resource="&pgef;Project"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/systems -->
@@ -223,7 +223,7 @@
         <rdfs:domain rdf:resource="&pgef;Project"/>
         <rdfs:range rdf:resource="&pgef;ProjectSystemUsage"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/content_mime_type -->
@@ -235,7 +235,7 @@
         <rdfs:domain rdf:resource="&pgef;Document"/>
         <rdfs:range rdf:resource="&pgef;Mime"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/creator -->
@@ -246,7 +246,7 @@
         <rdfs:domain rdf:resource="&pgef;Modelable"/>
         <rdfs:range rdf:resource="&pgef;Actor"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/created_objects -->
@@ -257,7 +257,7 @@
         <rdfs:domain rdf:resource="&pgef;Actor"/>
         <rdfs:range rdf:resource="&pgef;Modelable"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/data_sets -->
@@ -267,7 +267,7 @@
         <rdfs:domain rdf:resource="&pgef;DataPackage"/>
         <rdfs:range rdf:resource="&pgef;DataSet"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/derived_from -->
@@ -278,7 +278,7 @@
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&pgef;Product"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/port_type-->
@@ -289,7 +289,7 @@
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&pgef;PortType"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/variable -->
@@ -300,7 +300,7 @@
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&pgef;ParameterDefinition"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/state -->
@@ -311,7 +311,7 @@
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&pgef;State"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/employer -->
@@ -322,7 +322,7 @@
         <rdfs:range rdf:resource="&pgef;Organization"/>
         <rdfs:domain rdf:resource="&pgef;Person"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/instance_of -->
@@ -333,7 +333,7 @@
         <rdfs:range rdf:resource="&pgef;Product"/>
         <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/mime_type -->
@@ -344,7 +344,7 @@
         <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
         <rdfs:range rdf:resource="&pgef;Mime"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/model_type_family -->
@@ -355,7 +355,7 @@
         <rdfs:domain rdf:resource="&pgef;ModelType"/>
         <rdfs:range rdf:resource="&pgef;ModelFamily"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/model_definition_context --> 
@@ -376,7 +376,7 @@
         <rdfs:domain rdf:resource="&pgef;Port"/>
         <rdfs:range rdf:resource="&pgef;Product"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ports -->
@@ -387,7 +387,7 @@
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&pgef;Port"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/flow_context -->
@@ -398,7 +398,7 @@
         <rdfs:domain rdf:resource="&pgef;Flow"/>
         <rdfs:range rdf:resource="&pgef;ManagedObject"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/start_port -->
@@ -409,7 +409,7 @@
         <rdfs:domain rdf:resource="&pgef;Flow"/>
         <rdfs:range rdf:resource="&pgef;Port"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/end_port -->
@@ -420,7 +420,7 @@
         <rdfs:domain rdf:resource="&pgef;Flow"/>
         <rdfs:range rdf:resource="&pgef;Port"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/type_of_model -->
@@ -431,7 +431,7 @@
         <rdfs:domain rdf:resource="&pgef;Model"/>
         <rdfs:range rdf:resource="&pgef;ModelType"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/type_of_port -->
@@ -442,7 +442,7 @@
         <rdfs:domain rdf:resource="&pgef;Port"/>
         <rdfs:range rdf:resource="&pgef;PortType"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/modifier -->
@@ -453,7 +453,7 @@
         <rdfs:domain rdf:resource="&pgef;Modelable"/>
         <rdfs:range rdf:resource="&pgef;Actor"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/of_object -->
@@ -464,7 +464,7 @@
         <rdfs:domain rdf:resource="&pgef;Representation"/>
         <rdfs:range rdf:resource="&pgef;DigitalProduct"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/has_representations -->
@@ -475,7 +475,7 @@
         <rdfs:domain rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:range rdf:resource="&pgef;Representation"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/of_representation -->
@@ -486,7 +486,7 @@
         <rdfs:domain rdf:resource="&pgef;RepresentationFile"/>
         <rdfs:range rdf:resource="&pgef;Representation"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/has_files -->
@@ -497,7 +497,7 @@
         <rdfs:domain rdf:resource="&pgef;Representation"/>
         <rdfs:range rdf:resource="&pgef;RepresentationFile"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/of_thing -->
@@ -508,7 +508,7 @@
         <rdfs:domain rdf:resource="&pgef;Model"/>
         <rdfs:range rdf:resource="&pgef;Modelable"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/has_models -->
@@ -519,7 +519,7 @@
         <rdfs:domain rdf:resource="&pgef;Modelable"/>
         <rdfs:range rdf:resource="&pgef;Model"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/org -->
@@ -531,7 +531,7 @@
         <rdfs:range rdf:resource="&pgef;Organization"/>
         <rdfs:domain rdf:resource="&pgef;Person"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/organizational_role_assignments -->
@@ -542,7 +542,7 @@
         <rdfs:domain rdf:resource="&pgef;Organization"/>
         <rdfs:range rdf:resource="&pgef;RoleAssignment"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/owner -->
@@ -553,7 +553,7 @@
         <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
         <rdfs:range rdf:resource="&pgef;Organization"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/owned_objects -->
@@ -564,7 +564,7 @@
         <rdfs:domain rdf:resource="&pgef;Organization"/>
         <rdfs:range rdf:resource="&pgef;ManagedObject"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/accessible_object -->
@@ -575,7 +575,7 @@
         <rdfs:domain rdf:resource="&pgef;ObjectAccess"/>
         <rdfs:range rdf:resource="&pgef;Product"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/grantees -->
@@ -586,7 +586,7 @@
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&pgef;ObjectAccess"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/grantee -->
@@ -597,7 +597,7 @@
         <rdfs:domain rdf:resource="&pgef;ObjectAccess"/>
         <rdfs:range rdf:resource="&pgef;Actor"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/grants -->
@@ -608,7 +608,7 @@
         <rdfs:domain rdf:resource="&pgef;Actor"/>
         <rdfs:range rdf:resource="&pgef;ObjectAccess"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/correlates_parameter -->
@@ -619,7 +619,7 @@
         <rdfs:domain rdf:resource="&pgef;ParameterRelation"/>
         <rdfs:range rdf:resource="&pgef;ParameterDefinition"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/is_correlated_by -->
@@ -630,7 +630,7 @@
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&pgef;ParameterRelation"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/referenced_relation -->
@@ -641,7 +641,7 @@
         <rdfs:domain rdf:resource="&pgef;ParameterRelation"/>
         <rdfs:range rdf:resource="&pgef;Relation"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/correlates_parameters -->
@@ -652,7 +652,7 @@
         <rdfs:domain rdf:resource="&pgef;Relation"/>
         <rdfs:range rdf:resource="&pgef;ParameterRelation"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/product_type -->
@@ -663,7 +663,7 @@
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&pgef;ProductType"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/products_of_type -->
@@ -674,7 +674,7 @@
         <rdfs:domain rdf:resource="&pgef;ProductType"/>
         <rdfs:range rdf:resource="&pgef;Product"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/used_in_discipline -->
@@ -685,7 +685,7 @@
         <rdfs:domain rdf:resource="&pgef;DisciplineProductType"/>
         <rdfs:range rdf:resource="&pgef;Discipline"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/relevant_product_types -->
@@ -696,7 +696,7 @@
         <rdfs:domain rdf:resource="&pgef;Discipline"/>
         <rdfs:range rdf:resource="&pgef;DisciplineProductType"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/relevant_product_type -->
@@ -707,7 +707,7 @@
         <rdfs:domain rdf:resource="&pgef;DisciplineProductType"/>
         <rdfs:range rdf:resource="&pgef;ProductType"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/used_in_disciplines -->
@@ -718,7 +718,7 @@
         <rdfs:domain rdf:resource="&pgef;ProductType"/>
         <rdfs:range rdf:resource="&pgef;DisciplineProductType"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/parameter_definition -->
@@ -729,7 +729,7 @@
         <rdfs:domain rdf:resource="&pgef;ProductTypeParameterDefinition"/>
         <rdfs:range rdf:resource="&pgef;ParameterDefinition"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/used_in_product_types -->
@@ -740,7 +740,7 @@
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&pgef;ProductTypeParameterDefinition"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/used_in_product_type -->
@@ -751,7 +751,7 @@
         <rdfs:domain rdf:resource="&pgef;ProductTypeParameterDefinition"/>
         <rdfs:range rdf:resource="&pgef;ProductType"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/parameter_definitions -->
@@ -762,7 +762,7 @@
         <rdfs:domain rdf:resource="&pgef;ProductType"/>
         <rdfs:range rdf:resource="&pgef;ProductTypeParameterDefinition"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/parent_organization -->
@@ -773,7 +773,7 @@
         <rdfs:range rdf:resource="&pgef;Organization"/>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/part_manufacturer -->
@@ -785,7 +785,7 @@
         <rdfs:range rdf:resource="&pgef;Organization"/>
         <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/part_vendor -->
@@ -797,7 +797,7 @@
         <rdfs:range rdf:resource="&pgef;Organization"/>
         <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/parent_parts_list -->
@@ -807,7 +807,7 @@
         <rdfs:domain rdf:resource="&pgef;PartsListItem"/>
         <rdfs:range rdf:resource="&pgef;PartsList"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/parts_list_items -->
@@ -818,7 +818,7 @@
         <rdfs:domain rdf:resource="&pgef;PartsList"/>
         <rdfs:range rdf:resource="&pgef;PartsListItem"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/pli_component_usage -->
@@ -830,7 +830,7 @@
         <rdfs:domain rdf:resource="&pgef;PartsListItem"/>
         <rdfs:range rdf:resource="&pgef;Acu"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/role_assignment_context -->
@@ -841,7 +841,7 @@
         <rdfs:domain rdf:resource="&pgef;RoleAssignment"/>
         <rdfs:range rdf:resource="&pgef;Organization"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/allocated_to_function -->
@@ -852,7 +852,7 @@
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&pgef;Acu"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/allocated_requirements -->
@@ -863,7 +863,7 @@
         <rdfs:domain rdf:resource="&pgef;Acu"/>
         <rdfs:range rdf:resource="&pgef;Requirement"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/allocated_to_system -->
@@ -874,7 +874,7 @@
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&pgef;ProjectSystemUsage"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/system_requirements -->
@@ -885,7 +885,7 @@
         <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
         <rdfs:range rdf:resource="&pgef;Requirement"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/parent_requirement -->
@@ -896,7 +896,7 @@
         <rdfs:domain rdf:resource="&pgef;RequirementAncestry"/>
         <rdfs:range rdf:resource="&pgef;Requirement"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/child_requirements -->
@@ -907,7 +907,7 @@
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&pgef;RequirementAncestry"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/child_requirement -->
@@ -918,7 +918,7 @@
         <rdfs:domain rdf:resource="&pgef;RequirementAncestry"/>
         <rdfs:range rdf:resource="&pgef;Requirement"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/parent_requirements -->
@@ -929,7 +929,7 @@
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&pgef;RequirementAncestry"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/computable_form -->
@@ -940,7 +940,7 @@
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&pgef;Relation"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/sub_organizations -->
@@ -951,7 +951,7 @@
         <rdfs:range rdf:resource="&pgef;Organization"/>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/test -->
@@ -962,7 +962,7 @@
         <rdfs:domain rdf:resource="&pgef;VerificationTest"/>
         <rdfs:range rdf:resource="&pgef;Test"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/verifies_requirements -->
@@ -973,7 +973,7 @@
         <rdfs:domain rdf:resource="&pgef;Test"/>
         <rdfs:range rdf:resource="&pgef;VerificationTest"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/verifies -->
@@ -984,7 +984,7 @@
         <rdfs:domain rdf:resource="&pgef;VerificationTest"/>
         <rdfs:range rdf:resource="&pgef;Requirement"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/verification_tests -->
@@ -995,7 +995,7 @@
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&pgef;VerificationTest"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- 
@@ -1006,7 +1006,7 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-    
+
 
 
     <!-- http://pangalactic.us/pgef/abstract -->
@@ -1017,7 +1017,7 @@
         <rdfs:domain rdf:resource="&pgef;Document"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/alt_email -->
@@ -1028,7 +1028,7 @@
         <rdfs:domain rdf:resource="&pgef;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/city -->
@@ -1039,7 +1039,7 @@
         <rdfs:domain rdf:resource="&pgef;Organization"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/public -->
@@ -1050,7 +1050,7 @@
         <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
         <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/comment -->
@@ -1061,7 +1061,7 @@
         <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/quantity -->
@@ -1072,7 +1072,7 @@
         <rdfs:domain rdf:resource="&pgef;Acu"/>
         <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/condition -->
@@ -1083,7 +1083,7 @@
         <rdfs:domain rdf:resource="&pgef;Relation"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/content -->
@@ -1094,7 +1094,7 @@
         <rdfs:domain rdf:resource="&pgef;Document"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/country -->
@@ -1105,7 +1105,7 @@
         <rdfs:domain rdf:resource="&pgef;Organization"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/create_datetime -->
@@ -1116,7 +1116,7 @@
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
         <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/description -->
@@ -1127,7 +1127,7 @@
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/drawing_number -->
@@ -1138,7 +1138,7 @@
         <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/drawing_part_number -->
@@ -1149,7 +1149,7 @@
         <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/email -->
@@ -1160,7 +1160,7 @@
         <rdfs:domain rdf:resource="&pgef;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/file_role -->
@@ -1171,7 +1171,7 @@
         <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/file_sequence -->
@@ -1182,7 +1182,7 @@
         <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
         <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/file_sequence_context -->
@@ -1193,7 +1193,7 @@
         <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/first_name -->
@@ -1204,7 +1204,7 @@
         <rdfs:domain rdf:resource="&pgef;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/preferred_name -->
@@ -1215,7 +1215,7 @@
         <rdfs:domain rdf:resource="&pgef;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/fsc_code -->
@@ -1226,7 +1226,7 @@
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/generic_part_number -->
@@ -1237,7 +1237,7 @@
         <rdfs:domain rdf:resource="&pgef;EeePart"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/id -->
@@ -1248,7 +1248,7 @@
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/id_ns -->
@@ -1259,7 +1259,7 @@
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/is_composable -->
@@ -1270,7 +1270,7 @@
         <rdfs:domain rdf:resource="&pgef;Representation"/>
         <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/is_generable -->
@@ -1282,7 +1282,7 @@
         <rdfs:domain rdf:resource="&pgef;Representation"/>
         <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/is_object_source -->
@@ -1293,7 +1293,7 @@
         <rdfs:domain rdf:resource="&pgef;Representation"/>
         <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/iteration -->
@@ -1306,7 +1306,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/last_name -->
@@ -1317,18 +1317,18 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
 
 
-    <!-- http://pangalactic.us/pgef/level -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;level">
+    <!-- http://pangalactic.us/pgef/req_level -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_level">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The level of a requirement within the hierarchy of a system's requirements.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/validated -->
@@ -1339,7 +1339,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/verification_method -->
@@ -1350,7 +1350,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/requirement_type -->
@@ -1361,73 +1361,95 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
 
 
-    <!-- http://pangalactic.us/pgef/constraint_type -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;constraint_type">
+    <!-- http://pangalactic.us/pgef/req_constraint_type -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_constraint_type">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The type of constraint specified by a Requirement: a specified maximum or minimum, a specified value with a tolerance, or an allowable range specified by a pair of maximum and minimum values.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
 
 
-    <!-- http://pangalactic.us/pgef/constraint_tolerance -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;constraint_tolerance">
+    <!-- http://pangalactic.us/pgef/req_tolerance_type -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_tolerance_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of tolerance (symmetric or asymmetric) specified for a Requirement with specified value.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/req_tolerance -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_tolerance">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is a specified value with a symmetric tolerance, the value of the tolerance.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;float"/>
     </owl:DatatypeProperty>
-    
 
 
-    <!-- http://pangalactic.us/pgef/constraint_tolerance_lower -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;constraint_tolerance_lower">
+    <!-- http://pangalactic.us/pgef/req_tolerance_lower -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_tolerance_lower">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">For a requirement whose constraint is a specified value with an asymmetric tolerance, the value of the lower tolerance limit.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;float"/>
     </owl:DatatypeProperty>
-    
 
 
-    <!-- http://pangalactic.us/pgef/constraint_tolerance_upper -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;constraint_tolerance_upper">
+    <!-- http://pangalactic.us/pgef/req_tolerance_upper -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_tolerance_upper">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is a specified value with an asymmetric tolerance, the value of the upper tolerance limit.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;float"/>
     </owl:DatatypeProperty>
-    
 
 
-    <!-- http://pangalactic.us/pgef/minimum_value -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;minimum_value">
+    <!-- http://pangalactic.us/pgef/req_minimum_value -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_minimum_value">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is expressed as a range with minimum and maximum, the value of the minimum.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint has a minimum, the value of the minimum.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;float"/>
     </owl:DatatypeProperty>
-    
 
 
-    <!-- http://pangalactic.us/pgef/maximum_value -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;maximum_value">
+    <!-- http://pangalactic.us/pgef/req_maximum_value -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_maximum_value">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is expressed as a range with minimum and maximum, the value of the maximum.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint has a maximum, the value of the maximum.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;float"/>
     </owl:DatatypeProperty>
-    
+
+
+
+    <!-- http://pangalactic.us/pgef/req_target_value -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_target_value">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is expressed as a specific value (possibly with a symmetric or asymmetric tolerance), the value.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
 
 
     <!-- http://pangalactic.us/pgef/shall_text -->
@@ -1438,7 +1460,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/min_max_text -->
@@ -1449,18 +1471,18 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
 
 
-    <!-- http://pangalactic.us/pgef/parameter_dimensions -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;parameter_dimensions">
+    <!-- http://pangalactic.us/pgef/req_dimensions -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_dimensions">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The dimensions of the parameter constrained by a Requirement, which of course also applies to the values of any minimum, maximum, or tolerances specified.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The dimensions of the parameter specified by a Requirement, which of course also applies to the values of any minimum, maximum, or tolerances specified.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/lot_date_code -->
@@ -1471,7 +1493,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/manufacturer_part_number -->
@@ -1482,7 +1504,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/media_subtype -->
@@ -1493,7 +1515,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Mime"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/media_type -->
@@ -1504,7 +1526,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Mime"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/mi_or_name -->
@@ -1515,7 +1537,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/military_specification -->
@@ -1526,7 +1548,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;EeePart"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/mod_datetime -->
@@ -1537,7 +1559,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
         <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/name -->
@@ -1548,7 +1570,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/abbreviation -->
@@ -1559,7 +1581,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/nsn -->
@@ -1570,7 +1592,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;EeePart"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/oid -->
@@ -1581,7 +1603,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/name_code -->
@@ -1592,7 +1614,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Organization"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/cage_code -->
@@ -1603,7 +1625,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Organization"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/originating_system -->
@@ -1614,7 +1636,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;DataSet"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/range_constraint -->
@@ -1625,7 +1647,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/range_constraint_type -->
@@ -1636,7 +1658,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/range_datatype -->
@@ -1647,7 +1669,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/generating_function -->
@@ -1658,7 +1680,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/base_parameters -->
@@ -1669,7 +1691,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/computed_by_default -->
@@ -1680,7 +1702,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/part_model_number -->
@@ -1691,7 +1713,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/purpose -->
@@ -1702,7 +1724,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/phone -->
@@ -1713,7 +1735,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/pl_status -->
@@ -1724,7 +1746,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;PartsList"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/pl_type -->
@@ -1735,7 +1757,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;PartsList"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/processor_version -->
@@ -1746,7 +1768,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;DataSet"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/publish_datetime -->
@@ -1757,7 +1779,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Document"/>
         <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/rationale -->
@@ -1768,7 +1790,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/reference_designator -->
@@ -1779,7 +1801,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Acu"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/assembly_level -->
@@ -1790,7 +1812,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Acu"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/representation_purpose -->
@@ -1801,7 +1823,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Representation"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/screening_specification_number -->
@@ -1812,7 +1834,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;EeePart"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/serial_number -->
@@ -1823,7 +1845,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/specification_number -->
@@ -1834,7 +1856,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/specification_part_number -->
@@ -1845,7 +1867,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/state_or_province -->
@@ -1856,7 +1878,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Organization"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/street_address -->
@@ -1867,7 +1889,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Organization"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/structural_role -->
@@ -1878,7 +1900,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Document"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/system_role -->
@@ -1889,7 +1911,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/dimensions -->
@@ -1900,7 +1922,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/url -->
@@ -1911,7 +1933,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Modelable"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/user_file_name -->
@@ -1922,7 +1944,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/version -->
@@ -1933,7 +1955,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/version_sequence -->
@@ -1944,7 +1966,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/frozen -->
@@ -1955,7 +1977,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/work_email -->
@@ -1966,7 +1988,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/work_phone -->
@@ -1977,7 +1999,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/zip_or_postal_zone -->
@@ -1988,7 +2010,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:domain rdf:resource="&pgef;Organization"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- 
@@ -1998,7 +2020,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
     //
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Acu -->
@@ -2007,7 +2029,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">The relationship between a product (the component) and an assembled product (the assembly) of which it is a constituent; the Acu is a many-to-many relationship in that an assembly contains multiple products, and any given product may be used in many assemblies.  N.B.:  product here refers to a conceptual product, as opposed to a physical product (product instance) of a product specification -- the ACU relationship between physical products and assemblies, though related, is logically different, since a physical product can only be in one physical location in an assembly, whereas a conceptual product can be used at multiple locations (distinguished by reference designator, a property of the Acu) in an assembly.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Relation -->
@@ -2016,7 +2038,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A mathematical Relation that holds among two or more parameters.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/DataPackage -->
@@ -2025,7 +2047,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:comment rdf:datatype="&xsd;string">A collection of one or more digital products.  The primary purpose of the DataPackage class is to enable the tracking and management of arbitrary collections of exchanged data.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/DataSet -->
@@ -2034,7 +2056,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:comment rdf:datatype="&xsd;string">A data set is a digital product whose purpose is to contain a serialized population of objects governed by a schema.  The content can be any representation, such as STEP (ISO 10303), HDF, JSON, CSV (comma-separated-values), or in general any data exchange or serialization format.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/DigitalProduct -->
@@ -2043,7 +2065,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;Product"/>
         <rdfs:comment rdf:datatype="&xsd;string">A digital product is a non-hardware product that is computer-sensible -- i.e., can be stored in a computer, written on a digital medium, and transmitted over a network link.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Software -->
@@ -2052,7 +2074,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:comment rdf:datatype="&xsd;string">Software is a digital product that can be executed within a hardware product.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Discipline -->
@@ -2061,7 +2083,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A named subject matter area (e.g. a specific engineering discipline, such as Avionics or Flight Dynamics, or a scientific discipline, such as Solid State Physics, and may be even more specific, such as Surface Physics).  The intent of defining Disciplines in the context of a collaborative modeling activity is to define the roles and points of view of the participants and their models.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ModelFamily -->
@@ -2070,7 +2092,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Model Family is intended to characterize a family of Model Types. Some Model Families are standardized, such as SysML, but a Model Family may also refer to a collection of custom or enterprise-specific Model Types. Examples:  The Systems Modeling Language (SysML) Model Family owns Model Types of Block, Internal Block, Parametric, etc.; the Mechanical Engineering Model Family owns the Model Type of Mechanical CAD, etc.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ModelType -->
@@ -2079,7 +2101,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A type of Model -- e.g., "Block" (as would occur in a Systems block diagram -> SysML BDD), "Internal Block" (Block containing internal structure -> SysML "IBD"), Mechanical CAD (MCAD), Electrical CAD (ECAD), circuit schematic, etc.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Document -->
@@ -2088,7 +2110,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:comment rdf:datatype="&xsd;string">The digital (computer-sensible) representation of a human-readable document.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/EeePart -->
@@ -2098,7 +2120,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:comment rdf:datatype="&xsd;string">An Electrical, Electronic, or Electromechanical (EEE) part.
 </rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/DigitalFile -->
@@ -2111,7 +2133,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <owl:disjointWith rdf:resource="&pgef;Role"/>
         <rdfs:comment rdf:datatype="&xsd;string">The class of file-like objects.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Identifiable -->
@@ -2121,7 +2143,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:comment rdf:datatype="&xsd;string">The class of things able to be assigned a unique, persistent identifier (a.k.a. OID).  Objects that are used, but not created or managed, by an application must be members of subclasses of Identifiable so that their information can be accessed by an application and stored in a database; classes of objects whose information is managed by an Organization must be subclasses of ManagedObject, which identifies the organizational ownership of objects within an application.
 </rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Modelable -->
@@ -2130,7 +2152,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Modelable object is any object of sufficient domain interest to warrant being modeled: it has properties to indicate who created it (an Actor) and who last modified it.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Mime -->
@@ -2139,7 +2161,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">Multi-purpose Internet Mail Extension (MIME) types.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Model -->
@@ -2152,7 +2174,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
 (Note that the characteristics of any pgef:Model instance can be the subject of a pgef:Model at a higher level of abstraction.  The higher-level pgef:Model instance in this context is sometimes referred to as a &quot;meta-model&quot; relative to the pgef:Model instance whose characteristics it models.)</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/DisciplineProductType -->
@@ -2161,7 +2183,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Discipline ProductType is a relationship between a Discipline and the a type of Product that is used by practitioners of that Discipline.  The two classes have a many-to-many relationship:  one Discipline will typically use many ProductTypes, and one ProductType can be used by many Disciplines.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ProductTypeParameterDefinition -->
@@ -2170,7 +2192,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A ProductType Parameter Definition is a relationship between a ProductType and the Definition of a Parameter that is used to characterize Products of that type.  The two classes have a many-to-many relationship:  one ProductType will typically be characterized using several Parameter Definitions, and one Parameter Definition can be involved in the characterization of multiple ProductTypes.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Actor -->
@@ -2179,7 +2201,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
         <rdfs:comment rdf:datatype="&xsd;string">A well-defined, persistent, and identifiable entity that can create and modify Identifiable things.  Subclasses include Person, Organization, and Project.  (Other subclasses may be added, such as Application or ArtificialLifeForm.)</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Organization -->
@@ -2188,7 +2210,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Actor"/>
         <rdfs:comment rdf:datatype="&xsd;string">A well-defined, persistent, and identifiable collection of Person instances.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ManagedObject -->
@@ -2197,7 +2219,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">Managed Objects are those whose information is maintained by an Organization (the &quot;owner&quot;).</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ObjectAccess -->
@@ -2206,7 +2228,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">Object Access is a many-to-many relationship between Managed Objects and Actors that indicates which Actors have access to which Managed Objects.  An Object Access relationship is created when a Managed Object is released to an Actor (usually to a Project, Organization, or Person).</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ParameterRelation -->
@@ -2215,7 +2237,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A ParameterRelation specifies a mathematical Relation that holds among one or more parameters, as specified in their definitions (ParameterDefinition).</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ParameterDefinition -->
@@ -2224,7 +2246,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
         <rdfs:comment rdf:datatype="&xsd;string">A parameter definition specifies the datatype, dimensions (if applicable), and textual description of a parameter.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ProductInstance -->
@@ -2233,7 +2255,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
         <rdfs:comment rdf:datatype="&xsd;string">A physical object that is purported to be a physical realization of a part concept, or, formally, of a part specification.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/PartsList -->
@@ -2242,7 +2264,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:comment rdf:datatype="&xsd;string">A documented collection of parts and related information.  Parts lists occur in various contexts in the product life cycle, e.g.: to document component technology research, to document candidate parts for assemblies, to document parts used in model development, to track parts procurement information, to document part stocks and inventory, etc.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/PartsListItem -->
@@ -2251,7 +2273,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:comment rdf:datatype="&xsd;string">A parts list item is a document that is a component of a parts list, and represents a single line or item on its parent parts list.  The parts list item may reference an assembly role or position (assembly component usage, with associated reference designator.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ProductType -->
@@ -2260,7 +2282,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
         <rdfs:comment rdf:datatype="&xsd;string">A functional category or classification of a product.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/RequirementAncestry -->
@@ -2269,7 +2291,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A RequirementAncestry relationship is a parent / child relationship between two Requirements. A Requirement can, and often does, beget multiple child Requirements, and a Requirement that has parent Requirements can have more than one parent; hence, this is a many-to-many relationship.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Template -->
@@ -2278,7 +2300,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Product"/>
         <rdfs:comment rdf:datatype="&xsd;string">A template is a named, reusable pattern or example to use in creating a type of product, document, or model. A template may contain parameter definitions and component products.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Person -->
@@ -2287,7 +2309,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Actor"/>
         <rdfs:comment rdf:datatype="&xsd;string">A human being.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Activity -->
@@ -2296,7 +2318,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:comment rdf:datatype="&xsd;string">A named, structured procedural concept which is realized and applied systematically to achieve an objective.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Mission -->
@@ -2305,7 +2327,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Activity"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Mission is an activity which is defined by a project, takes place in an environment, and is accomplished by means of a collection of systems.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Flow -->
@@ -2347,7 +2369,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:comment rdf:datatype="&xsd;string">Product objects represent either black box entities, such as vendor parts, knowledge of whose internal components and characteristics may or may not be available to a Project that is using them, or white box entities, such as systems, whose internals may be known. The intent of the Product class is to contain all designed artifacts whose evolution is explicitly tracked in specifiable increments that are managed by the owner of the subject knowledgebase. The versions of a Product may all share the same identifier (id) and be differentiated by their version attribute. Note that the Product class also contains objects that may have evolved in a version structure, but whose version structure is regarded as opaque and is not represented explicitly in the subject knowledgebase. E.g., a Product that is purchased from a vendor will often have versions or models but the owner of the subject knowledgebase does not control the versioning or create new versions; the versions do not share a common identifier (id) but may be related by other attributes, such as a generic part number or a common root string in the manufacturer part number.
 </rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/HardwareProduct -->
@@ -2357,7 +2379,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:comment rdf:datatype="&xsd;string">A hardware product represents a design concept or specification that when realized (manufactured) in a physically sensible and measurable instance (i.e., product instance) manifests some specified functionality. Note that a hardware product may contain digital product elements (non-hardware), such as software and firmware, etc.
 </rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Project -->
@@ -2366,7 +2388,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Organization"/>
         <rdfs:comment rdf:datatype="&xsd;string">An activity that has the purpose of producing and/or maintaining something, and which involves contributions from Persons and Organizations.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/ProjectSystemUsage -->
@@ -2375,7 +2397,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">The relationship between a project and a top-level system. The role of the System in the context of the project is captured in the system_role property of the ProjectSystemUsage relationship. The ProjectSystemUsage relationship is a many-to-many relationship in that, in general, a project will have multiple top-level systems, and a given system may occur at the top level in multiple projects, albeit with possibly different configurations.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Representation -->
@@ -2384,7 +2406,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Representation is a collection of one or more digital artifacts that implement a digital product (e.g., a mechanical model, a data set, a document) and can be thought of as a reified relationship between an object and one or more digital files. Representations include both presentations, such as PDF or HTML for a document, and more general representations such as exchange data (e.g., for an engineering model, e.g. STEP, SysML, etc.).  A representation references one or more file-like objects (representation files) that are used in publishing, displaying, serializing, exporting, importing, or transmitting a digital product.  The concept is general and can apply to serialization, presentation, or data exchange use-cases, among others.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/RepresentationFile -->
@@ -2393,7 +2415,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;DigitalFile"/>
         <rdfs:comment rdf:datatype="&xsd;string">A file-like object that contains all or part of a digital representation of some object.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Requirement -->
@@ -2402,7 +2424,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:comment rdf:datatype="&xsd;string">A requirement is the specification of a goal or constraint to be satisfied by a product.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Role -->
@@ -2411,7 +2433,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A function or position that can be assigned to a person within a context.  The context will typically be an organization or a project.  A role will typically have an associated set of privileges.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/DisciplineRole -->
@@ -2420,7 +2442,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A DisciplineRole is the relationship between a Role and a Discipline. DisciplineRole is a many-to-many relationship in that a Role may be associated with multiple Disciplines and a Discipline may have several Roles related to it.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/RoleAssignment -->
@@ -2429,7 +2451,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A RoleAssignment is the relationship between a role and a person to which the role has been assigned. RoleAssignment is a many-to-many relationship in that a role may be assigned to multiple persons and a person may have several roles assigned to them.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/Mission -->
@@ -2438,7 +2460,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Activity"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Mission is a type of activity undertaken to accomplish a specified goal.  It will typically be decomposed into a set of phases for which the Mission concept of operations specification will associate sets of parameter values with the states of the physical systems and components used to accomplish the Mission goal.</rdfs:comment>
     </owl:Class>
-    
+
 
 
     <!-- http://pangalactic.us/pgef/State -->
@@ -2447,7 +2469,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A significant condition or phase in the life of a system (SysML: State, in the context of SysML State Machine).</rdfs:comment>
     </owl:Class>
-    
+
 
     <!-- http://pangalactic.us/pgef/Test -->
 
@@ -2455,7 +2477,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Activity"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Test is a type of activity consisting of a specified environment, specified inputs and measurable expected results (synonymous to SysML: testCase, modeled by a SysML Interaction).</rdfs:comment>
     </owl:Class>
-    
+
 
     <!-- http://pangalactic.us/pgef/VerificationTest -->
 
@@ -2463,7 +2485,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A VerificationTest is a many-to-many relationship between Tests and Requirements.</rdfs:comment>
     </owl:Class>
-    
+
 
 </rdf:RDF>
 
