@@ -63,8 +63,8 @@ MAIN_VIEWS = dict(
     Representation=(IDENTITY + ['of_object', 'representation_purpose']),
     RepresentationFile=(IDENTITY + ['of_representation']),
     Requirement=(IDENTITY + ['abbreviation', 'name', 'owner',
-                 'requirement_type', 'level', 'validated', 'public', 'frozen',
-                 'rationale']),
+                 'requirement_type', 'req_level', 'validated', 'public',
+                 'frozen', 'rationale']),
     RoleAssignment=['assigned_role', 'assigned_to', 'role_assignment_context'],
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
     )
