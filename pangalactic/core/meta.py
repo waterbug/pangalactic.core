@@ -63,8 +63,10 @@ MAIN_VIEWS = dict(
     Representation=(IDENTITY + ['of_object', 'representation_purpose']),
     RepresentationFile=(IDENTITY + ['of_representation']),
     Requirement=(IDENTITY + ['abbreviation', 'name', 'owner',
-                 'requirement_type', 'req_level', 'validated', 'public',
-                 'frozen', 'rationale']),
+                 'requirement_type', 'allocated_to_function',
+                 'allocated_to_system', 'req_level', 'version',
+                 'version_sequence', 'iteration', 'validated', 'public',
+                 'frozen']),
     RoleAssignment=['assigned_role', 'assigned_to', 'role_assignment_context'],
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
     )
@@ -277,7 +279,7 @@ PGXN_MASK = dict(
                          'generating_function', 'used_in_disciplines']),
     Requirement=(PGXN_HIDE + ['components', 'computable_form', 'derived_from',
                  'fsc_code', 'has_models', 'ports', 'product_type',
-                 'specification_number', 'shall_text', 'min_max_text']),
+                 'specification_number']),
     Test=(PGXN_HIDE + ['components', 'computable_form', 'fsc_code',
           'product_type'])
     )
@@ -402,12 +404,14 @@ ATTR_EXT_NAMES = {
         {
          'description' : 'text',
          'requirement_type' : 'type',
-         'parameter_dimensions' : 'dimensions',
-         'maximum_value' : 'maximum',
-         'minimum_value' : 'minimum',
-         'constraint_tolerance': 'tolerance (+/-)',
-         'constraint_tolerance_lower': 'lower tolerance',
-         'constraint_tolerance_upper': 'upper tolerance'
+         'req_level' : 'level',
+         'req_constraint_type' : 'constraint type',
+         'req_dimensions' : 'dimensions',
+         'req_maximum_value' : 'maximum',
+         'req_minimum_value' : 'minimum',
+         'req_tolerance': 'tolerance (+/-)',
+         'req_tolerance_lower': 'lower tolerance',
+         'req_tolerance_upper': 'upper tolerance'
         }
     }
 

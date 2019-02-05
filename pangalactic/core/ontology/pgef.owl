@@ -1375,6 +1375,39 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
+    <!-- http://pangalactic.us/pgef/req_subject -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_subject">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The initial phrase of a Requirement description (shall statement).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/req_predicate -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_predicate">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The middle phrase of a Requirement description (shall statement).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/req_epilog -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_epilog">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The final phrase of a Requirement description (shall statement).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/req_tolerance_type -->
 
     <owl:DatatypeProperty rdf:about="&pgef;req_tolerance_type">
@@ -1452,22 +1485,22 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
-    <!-- http://pangalactic.us/pgef/shall_text -->
+    <!-- http://pangalactic.us/pgef/req_shall_phrase -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;shall_text">
+    <owl:DatatypeProperty rdf:about="&pgef;req_shall_phrase">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The shall phrase of a Requirement.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The verb phrase in a Requirement description containing the shall.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
 
 
-    <!-- http://pangalactic.us/pgef/min_max_text -->
+    <!-- http://pangalactic.us/pgef/req_min_max_phrase -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;min_max_text">
+    <owl:DatatypeProperty rdf:about="&pgef;req_min_max_phrase">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The phrase of a Requirement expressing a relationship to a maximum or minimum value.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The phrase in a Requirement description that expresses the relationship of a parameter to a maximum or minimum value.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
