@@ -927,17 +927,17 @@ class UberORB(object):
         # semantic ref designator algorithm)
         prefix = 'Generic'
         if component.product_type:
-            prefix = component.product_type.id
+            prefix = component.product_type.name
         acus = self.search_exact(cname='Acu', assembly=assembly)
         if acus:
             rds = [acu.reference_designator for acu in acus]
             # allow product_type to contain '-' (but it shouldn't)
-            all_prefixes = [('-'.join(rd.split('-')[:-1])) for rd in rds if rd]
+            all_prefixes = [(' '.join(rd.split(' ')[:-1])) for rd in rds if rd]
             these_prefixes = [p for p in all_prefixes if p == prefix]
             new_nbr = len(these_prefixes) + 1
-            return prefix + '-' + str(new_nbr)
+            return prefix + ' ' + str(new_nbr)
         else:
-            return prefix + '-1'
+            return prefix + ' 1'
 
     def delete(self, objs):
         """

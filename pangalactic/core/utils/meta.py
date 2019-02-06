@@ -280,7 +280,7 @@ def get_acu_id(assembly_id, ref_des):
         ref_des:  the reference_designator of the Acu, created using
             orb.get_next_ref_des()
     """
-    return 'acu-' + assembly_id + '-' + ref_des
+    return assembly_id + ':' + '-'.join(ref_des.split(' '))
 
 def get_acu_name(assembly_name, ref_des):
     """
@@ -291,7 +291,7 @@ def get_acu_name(assembly_name, ref_des):
         ref_des:  the reference_designator of the Acu, created using
             orb.get_next_ref_des()
     """
-    return 'acu: ' + ref_des + ' of ' + assembly_name
+    return assembly_name + ' : ' + ref_des
 
 def get_next_port_seq(obj, port_type):
     """
