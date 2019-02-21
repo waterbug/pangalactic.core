@@ -1672,28 +1672,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
-    <!-- http://pangalactic.us/pgef/mode_name -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;mode_name">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The identifier of the state or condition in which a Parameter Definition applies.  This always occurs in the second segment in the identifier of a modal parameter (the variable_id being the first segment). Examples for the Power variable are:  Average, Peak, Quiescent.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/parameter_context -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;parameter_context">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The name of the aspect of a system or artifact to which a Parameter Definition applies.  Examples are: CBE (Current Best Estimate), MEV (Maximum Estimated Value), NTE (Not To Exceed), Contingency (usually expressed as a percentage, to allow for unforeseen variances).</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/range_datatype -->
 
     <owl:DatatypeProperty rdf:about="&pgef;range_datatype">

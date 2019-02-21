@@ -12,27 +12,69 @@
   created parameter is only unique within its parent object's namespace.)
   -----------------------------------------------------------------------------
   - Special case: 'oid' attribute for ParameterDefinition
-    + a ParameterDefinition's oid is always:
-        'pgefobjects:ParameterDefinition.[id]'
+    + a ParameterDefinition's oid is **always**:
+        'pgef:ParameterDefinition.[id]'
+    + using the 'pgef:' namespace prefix here allows for other
+      namespaces of parameters, but that is not supported (yet)
   - a parameter can be thought of as an "instantiation" of a
     ParameterDefinition (in other words, the ParameterDefinition can be
     regarded as a kind of template for parameters)
   - NOTE:  all parameter metadata are READ-ONLY except `computed` **
-    - ** there are not yet any application functions that can define the
+    + ** there are not yet any application functions that can define the
       `generating_function` for a parameter whose `computed` value is set to
       True at runtime
-    - the parameter's `value` is only writable if `computed` is False)
+    + the parameter's `value` is only writable if `computed` is False)
   - FUTURE PLAN:  a parameter can be "specified", "computed", "correlated"
-      * specified:  "fixed" (within the context)
-      * computed:  generated from an opaque function (`generating_function`) or
-        derived from other properties within the context (e.g. volume = l*w*h,
-        mass = density*vol, etc.)
-      * correlated:  related to other properties by some mathematical model
-        (equation) [a la Modelica)
+    + specified:  "fixed" (within the context)
+    + computed:  generated from an opaque function (`generating_function`) or
+      derived from other properties within the context (e.g. volume = l*w*h,
+      mass = density*vol, etc.)
+    + correlated:  related to other properties by some mathematical model
+      (equation) [a la Modelica)
 
-## Quantities
+## Parameter "Families" and Identifier Structure
+  - When creating a new 'Parameter Instance', the ParameterDefinition is used
+    as a template from which metadata is copied into the Parameter Instance's
+    data structure in the `parameterz` dictionary (see below), in the format:
 
-  - parameters values are stored as mks base unit quantities
+    [id] : {
+            "base_parameters":,
+            "computed":,
+            "description":"",
+            "dimensions":"",
+            "generating_function":,
+            "mod_datetime":,
+            "name":[name],
+            "range_datatype":,
+            "units":[units],
+            "value":[value]
+            }
+
+  - Identifier structure
+    + first segment is `variable_name` (e.g. 'P' for electrical power)
+    + second segment (subscript) is "state" (id of related State object)
+      * generic states:  'Average', 'Peak', 'Quiescent', etc.
+      * custom states:  'Safe Hold', 'Slew', 'Data Transmit', etc.
+    + third segment (parens) is "context" (id of ParameterContext object)
+      * descriptive:  'CBE', 'MEV', 'Contingency'
+      * prescriptive: 'NTE', 'target', 'upper_tol', 'lower_tol', etc.
+    + there is no 4th segment!
+
+  - Filtering parameters via context:
+    + "specification" contexts: no suffix, "CBE", "total", ...
+      used in component or subsystem specifications
+    + "systems" contexts: "ctgcy", "NTE", "MEV", ...
+      used in managing requirements and evolving system designs
+
+  - so they can be used in perf. requirements and in ConOps
+    + Use parametric diagram to specify formula (Relation) for reqt.
+
+
+
+## Internal Storage Format
+
+  - parameter values are stored as pure floating point numbers that are
+    interpreted as quantities in mks base units
 
 ## Parameter Cache: `parameterz`
 
@@ -120,19 +162,15 @@ module from python code).
 
 ----------------------------------------------------------------------------------
 
-## Parameter Definition Editor
+## Parameter Definition Editor / Wizard
+
+  - identifier
+    + compare to existing identifiers to ensure uniqueness
+    + compare to existing PDs by dimensions to ensure it is not a synomym
 
   - selection lists (configurable)
     + datatypes  (float, integer, string, boolean, etc.)
     + dimensions (these become 'units' in a Parameter)
-
-  - future:  figure out how to do parameter symbols ...
-    + look at qtawesome -- "iconic fonts", etc.
-    + also astropy's treatment of units, etc.
-
-  - icons
-    + generated from 'id' attribute when new ParameterDefinition is created
-    + pixmap saved into [home dir]/icons/parameters
 
 ## GUI for Parameters
 
