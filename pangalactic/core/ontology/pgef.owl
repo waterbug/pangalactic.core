@@ -1661,17 +1661,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
-    <!-- http://pangalactic.us/pgef/variable_name -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;variable_name">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The identifier of the variable on which a Parameter Definition is based.  This is should be a very short string used to represent the variable uniquely (preferably from industry standard practice, if possible), and it is always used as the initial string in the identifiers of any parameters related to the variable.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/range_datatype -->
 
     <owl:DatatypeProperty rdf:about="&pgef;range_datatype">
@@ -2041,6 +2030,14 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:comment rdf:datatype="&xsd;string">The relationship between a product (the component) and an assembled product (the assembly) of which it is a constituent; the Acu is a many-to-many relationship in that an assembly contains multiple products, and any given product may be used in many assemblies.  N.B.:  product here refers to a conceptual product, as opposed to a physical product (product instance) of a product specification -- the ACU relationship between physical products and assemblies, though related, is logically different, since a physical product can only be in one physical location in an assembly, whereas a conceptual product can be used at multiple locations (distinguished by reference designator, a property of the Acu) in an assembly.</rdfs:comment>
     </owl:Class>
 
+
+
+    <!-- http://pangalactic.us/pgef/Context -->
+
+    <owl:Class rdf:about="&pgef;Context">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A metadata tag that defines a family of related parameters or other objects. When used for a family of parameters, a Context can also be used to identify their familial datatype and computation method or generating function, if applicable.</rdfs:comment>
+    </owl:Class>
 
 
     <!-- http://pangalactic.us/pgef/Relation -->
