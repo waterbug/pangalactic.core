@@ -11,6 +11,11 @@
   parameters that are created from that ParameterDefinition.  (The `id` of the
   created parameter is only unique within its parent object's namespace.)
   -----------------------------------------------------------------------------
+  - In Pangalactic, parameters can only be assigned to instances of "Modelable"
+    and its subclasses
+    + this cannot be enforced by normal python class management, since
+      parameters are not python attributes
+    + it is enforced at the application level, e.g. by PgxnObject
   - Special case: 'oid' attribute for ParameterDefinition
     + a ParameterDefinition's oid is **always**:
         'pgef:ParameterDefinition.[id]'

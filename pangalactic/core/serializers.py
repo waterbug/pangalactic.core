@@ -131,13 +131,16 @@ def serialize(orb, objs, view=None, include_components=False,
         d = {}
         d['_cname'] = cname
         # serialize parameters, if any
-        obj_parms = parameterz.get(obj.oid, {})
-        if obj_parms:
-            # NOTE:  serialize_parms() uses deepcopy()
-            d['parameters'] = serialize_parms(obj_parms)
-            orb.log.info('  - parameters found, serialized.')
-        else:
-            orb.log.info('  - no parameters found.')
+        # (parameters can only be assigned to subclasses of Modelable)
+        if isinstance(obj, orb.classes['Modelable']):
+            obj_parms = parameterz.get(obj.oid, {})
+            if obj_parms:
+                # NOTE:  serialize_parms() uses deepcopy()
+                d['parameters'] = serialize_parms(obj_parms)
+                orb.log.info('  - parameters found, serialized.')
+            else:
+                d['parameters'] = {}
+                orb.log.info('  - no parameters found.')
         for name in schema['fields']:
             if getattr(obj, name, None) is None:
                 # ignore None values

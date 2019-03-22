@@ -145,7 +145,8 @@ class OrbTest(unittest.TestCase):
             'mod_datetime': str(obj.mod_datetime),
             'name': obj.name,
             'name_code': obj.name_code,
-            'oid': obj.oid}]
+            'oid': obj.oid,
+            'parameters':{}}]
         self.assertEqual(expected, value)
 
     def test_12_serialize_with_parameters_no_components(self):

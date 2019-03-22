@@ -292,17 +292,6 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/state -->
-
-    <owl:ObjectProperty rdf:about="&pgef;state">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The state associated with a state-related parameter.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&pgef;State"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/employer -->
 
     <owl:ObjectProperty rdf:about="&pgef;employer">
@@ -1665,42 +1654,42 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
     <owl:DatatypeProperty rdf:about="&pgef;range_datatype">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The datatype of the range of a parameter.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The datatype of the range of a ParameterDefinition.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
 
 
-    <!-- http://pangalactic.us/pgef/generating_function -->
+    <!-- http://pangalactic.us/pgef/context_datatype -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;generating_function">
+    <owl:DatatypeProperty rdf:about="&pgef;context_datatype">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The name of a function (which may be opaque) that computes the value of a computed parameter.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The datatype of a ParameterContext.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterContext"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
 
 
-    <!-- http://pangalactic.us/pgef/base_parameters -->
+    <!-- http://pangalactic.us/pgef/computed -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;base_parameters">
+    <owl:DatatypeProperty rdf:about="&pgef;computed">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A comma-delimited string containing the identifier(s) of the underlying parameter(s) used to compute the value of a computed parameter.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/computed_by_default -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;computed_by_default">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">Specifies whether in the default context for the defined parameter is to have its value computed (i.e. whether in its default usage it is to be treated as a derived quantity).  This can be overridden in a parameter instance by setting the &quot;compute&quot; property.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Specifies whether a parameter in this ParameterContext is to have its value computed (and therefore treated as a derived quantity).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterContext"/>
         <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/context_type -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;context_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Specifies whether the context is prescriptive or descriptive. Prescriptive contexts apply to requirements and design constraints; descriptive contexts apply to test data, analysis results, and data sheets that provide attributes of vendor parts.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterContext"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
 
@@ -1925,6 +1914,17 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
+    <!-- http://pangalactic.us/pgef/context_dimensions -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;context_dimensions">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The dimensional specification for a ParameterContext.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ParameterContext"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/url -->
 
     <owl:DatatypeProperty rdf:about="&pgef;url">
@@ -2030,14 +2030,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdfs:comment rdf:datatype="&xsd;string">The relationship between a product (the component) and an assembled product (the assembly) of which it is a constituent; the Acu is a many-to-many relationship in that an assembly contains multiple products, and any given product may be used in many assemblies.  N.B.:  product here refers to a conceptual product, as opposed to a physical product (product instance) of a product specification -- the ACU relationship between physical products and assemblies, though related, is logically different, since a physical product can only be in one physical location in an assembly, whereas a conceptual product can be used at multiple locations (distinguished by reference designator, a property of the Acu) in an assembly.</rdfs:comment>
     </owl:Class>
 
-
-
-    <!-- http://pangalactic.us/pgef/Context -->
-
-    <owl:Class rdf:about="&pgef;Context">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A metadata tag that defines a family of related parameters or other objects. When used for a family of parameters, a Context can also be used to identify their familial datatype and computation method or generating function, if applicable.</rdfs:comment>
-    </owl:Class>
 
 
     <!-- http://pangalactic.us/pgef/Relation -->
@@ -2255,6 +2247,14 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:comment rdf:datatype="&xsd;string">A parameter definition specifies the datatype, dimensions (if applicable), and textual description of a parameter.</rdfs:comment>
     </owl:Class>
 
+
+
+    <!-- http://pangalactic.us/pgef/ParameterContext -->
+
+    <owl:Class rdf:about="&pgef;ParameterContext">
+        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A metadata tag that defines a family of related parameters. A Parameter Context has an associated range datatype and may define a computation method or generating function, if applicable.</rdfs:comment>
+    </owl:Class>
 
 
     <!-- http://pangalactic.us/pgef/ProductInstance -->

@@ -262,14 +262,14 @@ def classnamify(base, tablename, table):
     """
     return to_class_name(tablename)
 
-def get_parameter_definition_oid(parameter_id):
+def get_parameter_definition_oid(variable):
     """
-    Return the oid of a ParameterDefinition instance based on its `id`.
+    Return the oid of the ParameterDefinition for the specified variable.
 
     Args:
-        parameter_id (str): the ParameterDefinition `id` value
+        variable (str): the variable defined by the ParameterDefinition
     """
-    return 'pgef:ParameterDefinition.' + parameter_id
+    return 'pgef:ParameterDefinition.' + variable
 
 def get_acu_id(assembly_id, ref_des):
     """

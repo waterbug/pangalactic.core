@@ -4,11 +4,8 @@ Functions to support Parameters and Relations
 from __future__ import division
 from builtins import str
 from past.utils import old_div
-import operator
 from collections  import namedtuple
 from decimal      import Decimal
-from functools    import reduce
-from importlib    import import_module
 from math         import floor, fsum, log10
 
 # pangalactic
@@ -37,8 +34,8 @@ Comp = namedtuple('Comp', 'oid quantity')
 # format:  {product.oid : {'parameter_id': {parameter properties}
 #                              ...}}
 # ... where parameter properties are:
-# name, description, value, units, dimensions, range_datatype, computed,
-# generating_function, base_parameters, state_id, variable_id, mod_datetime
+# name, variable, state, context, description, value, units, dimensions,
+# range_datatype, computed, mod_datetime
 parameterz = {}
 
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
@@ -140,42 +137,82 @@ def update_parmz_by_dimz(orb, pd):
     else:
         parmz_by_dimz[pd.dimensions] = [pd.id]
 
-def add_parameter(orb, oid, pid):
+def get_parameter_id(variable, state=None, context=None):
+    pid = variable
+    if state:
+        pid += '_' + state.id
+        if context:
+            pid += '_' + context.id
+    elif context:
+        pid += '__' + context.id
+    return pid
+
+def add_parameter(orb, oid, variable, state=None, context=None):
     """
     Add a new parameter to an object, which really means adding a parameter
     data structure to the `p.node.parametrics.parameterz` dictionary under that
     objects's oid.  The parameter data structure format is a dict with the
     following keys:
 
-        name, description, value, units, dimensions, range_datatype, computed,
-        generating_function, base_parameters, state_id, variable_id,
-        mod_datetime
+        variable, state, context, name, computed, description, dimensions,
+        range_datatype, generating_function, mod_datetime, value, units
 
-    ... where items `dimensions`, `range_datatype`, `computed`,
-    `generating_function`, `base_parameters`, `state_id`, and `variable_id`
-    come from the associated ParameterDefinition.
+    ... where `variable` is the id of the associated ParameterDefinition and
+    the parameter id, description, name, dimensions, range_datatype, and
+    generating_function are derived from the ParameterDefinition in combination
+    with the state and context.
 
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
         oid (str):  oid of the object that owns the parameter
-        pid (str):  `id` attribute of the parameter
+        variable (str):  `id` attribute of the parameter
+
+    Keyword Args:
+        state (State):  a State object
+        context (Context):  a Context object
     """
-    orb.log.info('[orb] add_parameter({})'.format(pid))
+    orb.log.info('[orb] add_parameter for:')
+    orb.log.info('        - variable: {!s}'.format(variable))
+    orb.log.info('        - state:    {!s}'.format(state))
+    orb.log.info('        - context:  {!s}'.format(context))
     global parameterz
+    pid = get_parameter_id(variable, state, context)
     if oid not in parameterz:
         parameterz[oid] = {}
     elif pid in parameterz[oid]:
         # if the object already has that parameter, do nothing
         return
-    pd = orb.get(get_parameter_definition_oid(pid))
+    pd = orb.get(get_parameter_definition_oid(variable))
     if pd:
         name = pd.name
         desc = pd.description
         dims = pd.dimensions
         radt = pd.range_datatype
-        comp = pd.computed_by_default
-        genf = pd.generating_function
-        basp = pd.base_parameters
+        state_id = None
+        context_id = None
+        context_type = 'descriptive'  # default context is "descriptive"
+        if state:
+            name += ' (' + state.name + ')'
+            desc +=  ' (' + state.desc + ')'
+            state_id = state.id
+            if context:
+                name += ' [' + context.name + ']'
+                desc +=  ' [' + context.desc + ']'
+                context_id = context.id
+                context_type = context.context_type
+                # context_datatype, if not None, overrides PD
+                radt = context.context_datatype or radt
+                dims = context.context_dimensions
+        elif context:
+            name += ' [' + context.name + ']'
+            desc +=  ' [' + context.desc + ']'
+            context_id = context.id
+            context_type = context.context_type
+            # Context context_dimensions, if not None, overrides dimensions
+            dims = context.context_dimensions
+            # Context context_datatype, if not None, overrides range_datatype
+            radt = context.context_datatype or radt
+        comp = pd.computed
     else:
         # for now, if no ParameterDefinition exists for pid, pass
         # (maybe eventually raise TypeError)
@@ -198,14 +235,16 @@ def add_parameter(orb, oid, pid):
     parameterz[oid][pid] = dict(
         name=name,
         description=desc,
+        variable=variable,
+        state=state_id,
+        context=context_id,
+        context_type=context_type,
         value=value,   # consistent with datatype defined in `range_datatype`
         units=in_si.get(dims),   # SI units consistent with `dimensions`
         mod_datetime=dtstamp(),
         dimensions=dims,
         range_datatype=radt,
-        computed=comp,
-        generating_function=genf,
-        base_parameters=basp)
+        computed=comp)
 
 def add_default_parameters(orb, obj):
     """
@@ -405,25 +444,19 @@ def _compute_pval(orb, oid, pid, allow_nan=False):
             # orb.log.debug('  "{}" is computed ...'.format(pid))
             # use generating_function -- in the future, there may be a Relation
             # expression, found using the ParameterRelation relationship
-            gen_fn_name = parm.get('generating_function')
-            # orb.log.debug('  generating function is {}'.format(gen_fn_name))
-            base_parms = parm.get('base_parameters')
-            # orb.log.debug('  base_parameters: "{}"'.format(base_parms))
-            if gen_fn_name and base_parms:
-                # TODO:  this is WAY too cumbersome ...
-                mod_fn_name = gen_fn_name.split('.')
-                mod_name = '.'.join(mod_fn_name[:-1])
-                fn_name = mod_fn_name[-1]
-                module = import_module(mod_name)
-                if hasattr(module, fn_name):
-                    gen_fn = getattr(module, fn_name)
-                    # the generating function's first arg is now 'orb'
-                    value = gen_fn(orb, oid, pid, base_parms)
-                    # orb.log.debug('  value is {}'.format(value))
-                    return value
-                else:
-                    # return NULL[allow_nan]
-                    return 0.0
+            gen_fn = GEN_FNS.get(parm.get('context'))
+            variable = parm.get('variable')
+            state = parm.get('state')
+            base_pid = get_parameter_id(variable, state=state)
+            orb.log.debug('  generating function is {!s}'.format(getattr(
+                                                    gen_fn, '__name__', None)))
+            if gen_fn:
+                value = gen_fn(orb, oid, base_pid)
+                # orb.log.debug('  value is {}'.format(value))
+                return value
+            else:
+                # return NULL[allow_nan]
+                return 0.0
             # return NULL[allow_nan]
             return 0.0
         # msg = '  "{}" is not computed; calling get_pval() ...'.format(pid)
@@ -608,7 +641,7 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
         orb.log.info('  could not convert string "{}" ...'.format(str_val))
         orb.log.info('  bailing out.')
 
-def get_assembly_parameter(orb, product_oid, parameter_id, base_parameters):
+def get_assembly_parameter(orb, product_oid, base_parameter_id):
     """
     Return the total value of an assembly parameter for a product based on the
     summed values of the base parameter over all of the product's known
@@ -623,15 +656,15 @@ def get_assembly_parameter(orb, product_oid, parameter_id, base_parameters):
         orb (Uberorb): the orb (see p.node.uberorb)
         product_oid (str): the oid of the Product whose total parameter is
             being estimated
-        parameter_id (str): the `id` of the parameter
-        base_parameters (str): the `id` of the base parameter
+        base_parameter_id (str): `id` of the parameter for which the assembly
+            value is being computed
     """
     # VERY verbose, even for debugging!
     # orb.log.debug('[parametrics] get_assembly_parameter()')
     global parameterz
-    if product_oid in parameterz and parameter_id in parameterz[product_oid]:
-        base_pid = base_parameters 
-        radt = parameterz[product_oid][parameter_id].get('range_datatype')
+    if (product_oid in parameterz and
+        base_parameter_id in parameterz[product_oid]):
+        radt = parameterz[product_oid][base_parameter_id].get('range_datatype')
         dtype = DATATYPES[radt]
         # cz, if it exists, will be a list of namedtuples ...
         cz = componentz.get(product_oid)
@@ -639,35 +672,31 @@ def get_assembly_parameter(orb, product_oid, parameter_id, base_parameters):
             # dtype cast is used here in case some component didn't have this
             # parameter or didn't exist and we got a 0.0 value for it ...
             summation = fsum([dtype(get_assembly_parameter(
-                              orb, c.oid, parameter_id, base_pid) * c.quantity)
+                              orb, c.oid, base_parameter_id) * c.quantity)
                               for c in cz])
             return round_to(summation)
         else:
             # if the product has no known components, return its specified base
             # parameter value (note that the default here is 0.0)
-            return _compute_pval(orb, product_oid, base_pid)
+            return _compute_pval(orb, product_oid, base_parameter_id)
     else:
         return 0.0
 
-def get_mev(orb, oid, parameter_id, base_parameters, default=0.0):
+def get_mev(orb, oid, parameter_id, default=0.0):
     """
-    Find the Maximum Expected Value based on the percent contingency specified
-    for the specified base parameter.  Assumes that base_parameters contains
-    the ids for the base parameter and contingency factor, in that order.
+    Find a parameter's Maximum Expected Value based on its Current Best
+    Estimate (CBE) value and the percent contingency specified for it.
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Modelable containing the parameters
         parameter_id (str): the `id` of the parameter
-        base_parameters (str): a comma-delimited string containing the ids of
-            the base parameter and contingency factor.
 
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
-    base, contingency = [p.strip() for p in base_parameters.split(',')]
-    factor = _compute_pval(orb, oid, contingency) + 1.0
-    base_val = _compute_pval(orb, oid, base)
+    factor = _compute_pval(orb, oid, parameter_id + '_Ctgcy') + 1.0
+    base_val = _compute_pval(orb, oid, parameter_id + '_CBE')
     # extremely verbose logging -- uncomment only for intense debugging
     # orb.log.debug('* get_mev: base parameter value is {}'.format(base_val))
     # orb.log.debug('           base parameter type is {}'.format(
@@ -679,26 +708,21 @@ def get_mev(orb, oid, parameter_id, base_parameters, default=0.0):
     else:
         return default
 
-def get_margin(orb, oid, parameter_id, base_parameters, default=0.0):
+def get_margin(orb, oid, parameter_id, default=0.0):
     """
-    Find the "Margin", (NTE-CBE)/CBE, for the specified base parameter.
-    Assumes that `base_parameters` contains the ids for the NTE (Not To Exceed)
-    and CBE (Current Best Estimate), in that order.
+    Find the "Margin", (NTE-CBE)/CBE, for the specified parameter.
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Modelable containing the parameters
         parameter_id (str): the `id` of the parameter
-        base_parameters (str): a comma-delimited string containing the ids of
-            the NTE and CBE parameters.
 
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
-    nte, cbe = [p.strip() for p in base_parameters.split(',')]
     # in case these are integers, cast to float
-    nte_val = float(get_pval(orb, oid, nte))
-    cbe_val = float(_compute_pval(orb, oid, cbe))
+    nte_val = float(get_pval(orb, oid, parameter_id + '_NTE'))
+    cbe_val = float(_compute_pval(orb, oid, parameter_id + '_CBE'))
     # extremely verbose logging -- uncomment only for intense debugging
     # orb.log.debug('* get_margin: nte is {}'.format(nte_val))
     # orb.log.debug('              cbe is {}'.format(cbe_val))
@@ -710,25 +734,15 @@ def get_margin(orb, oid, parameter_id, base_parameters, default=0.0):
         # orb.log.debug('  ... margin is {}'.format(margin))
         return margin
 
-def get_product_parameter(orb, oid, parameter_id, base_parameters,
-                          default=0.0):
-    """
-    Find the product of the base parameters for the specified object.
+# the GEN_FNS dict maps Context id to applicable generating functions
+GEN_FNS = {'CBE': get_assembly_parameter,
+           'Total': get_assembly_parameter,
+           'MEV': get_mev,
+           'Margin': get_margin}
 
-    Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
-        oid (str): the oid of the Modelable containing the parameters
-        parameter_id (str): the `id` of the parameter
-        base_parameters (str): a comma-delimited string containing the ids of
-            the parameters to be multiplied
-
-    Keyword Args:
-        default (any): a value to be returned of the parameter is not found
-    """
-    pids = [p.strip() for p in base_parameters.split(',')]
-    vals = [_compute_pval(orb, oid, pid) for pid in pids]
-    return round_to(reduce(operator.mul, vals, 1.0))
-
+################################################
+# CODE BELOW THIS LINE IS DEPRECATED ...
+################################################
 
 # NOTE: this may not be needed
 # flow_parmz:  runtime cache that maps parameters to port types
@@ -760,7 +774,7 @@ def get_product_parameter(orb, oid, parameter_id, base_parameters,
         # if port_type:
             # flow_parmz[pd.id] = port_type
 
-# OBSOLETE CODE:  original version of get_assembly_parameter(), using db
+# OBSOLETE:  original version of get_assembly_parameter(), using db
 # lookups for components (rather than the "componentz" cache)
 
 # def get_assembly_parameter(orb, product, base_parameters):
@@ -799,4 +813,25 @@ def get_product_parameter(orb, oid, parameter_id, base_parameters,
             # return _compute_pval(orb, product, base_parameter_id)
     # else:
         # return 0.0
+
+# def get_product_parameter(orb, oid, parameter_id, base_parameters,
+                          # default=0.0):
+    # """
+    # Find the product of the base parameters for the specified object.
+
+    # Args:
+        # orb (Uberorb): the orb (see p.node.uberorb)
+        # oid (str): the oid of the Modelable containing the parameters
+        # parameter_id (str): the `id` of the parameter
+        # base_parameters (str): a comma-delimited string containing the ids of
+            # the parameters to be multiplied
+
+    # Keyword Args:
+        # default (any): a value to be returned of the parameter is not found
+    # """
+    # import operator
+    # from functools    import reduce
+    # pids = [p.strip() for p in base_parameters.split(',')]
+    # vals = [_compute_pval(orb, oid, pid) for pid in pids]
+    # return round_to(reduce(operator.mul, vals, 1.0))
 
