@@ -17,6 +17,7 @@
   - Launch
 3.  New functions:  get_context(context_id), get_state(state_id)
 
+4.  ADD MORE TESTS!!!!
 
 
 ## General notes on the new paradigm

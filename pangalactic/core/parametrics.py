@@ -191,19 +191,12 @@ def add_parameter(orb, oid, variable, state=None, context=None):
         state_id = None
         context_id = None
         context_type = 'descriptive'  # default context is "descriptive"
+        comp = False
         if state:
             name += ' (' + state.name + ')'
             desc +=  ' (' + state.desc + ')'
             state_id = state.id
-            if context:
-                name += ' [' + context.name + ']'
-                desc +=  ' [' + context.desc + ']'
-                context_id = context.id
-                context_type = context.context_type
-                # context_datatype, if not None, overrides PD
-                radt = context.context_datatype or radt
-                dims = context.context_dimensions
-        elif context:
+        if context:
             name += ' [' + context.name + ']'
             desc +=  ' [' + context.desc + ']'
             context_id = context.id
@@ -212,7 +205,7 @@ def add_parameter(orb, oid, variable, state=None, context=None):
             dims = context.context_dimensions
             # Context context_datatype, if not None, overrides range_datatype
             radt = context.context_datatype or radt
-        comp = pd.computed
+            comp = context.computed
     else:
         # for now, if no ParameterDefinition exists for pid, pass
         # (maybe eventually raise TypeError)
