@@ -271,6 +271,24 @@ def get_parameter_definition_oid(variable):
     """
     return 'pgef:ParameterDefinition.' + variable
 
+def get_parameter_context_oid(pcid):
+    """
+    Return the oid of the ParameterContext with the specified 'id'.
+
+    Args:
+        pcid (str): the ParameterContext 'id'
+    """
+    return 'pgef:ParameterContext.' + pcid
+
+def get_state_oid(sid):
+    """
+    Return the oid of the State with the specified 'id'.
+
+    Args:
+        sid (str): the State 'id'
+    """
+    return 'pgef:State.' + sid
+
 def get_acu_id(assembly_id, ref_des):
     """
     Create an 'id' for a new Acu.

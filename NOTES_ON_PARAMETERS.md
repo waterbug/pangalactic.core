@@ -16,7 +16,8 @@
     + this cannot be enforced by normal python class management, since
       parameters are not python attributes
     + it is enforced at the application level, e.g. by PgxnObject
-  - Special case: 'oid' attribute for ParameterDefinition
+  - The 'id' and 'oid' attributes of ParameterDefinition have a special
+    relationship (also true for State and Context objects):
     + a ParameterDefinition's oid is **always**:
         'pgef:ParameterDefinition.[id]'
     + using the 'pgef:' namespace prefix here allows for other

@@ -2,7 +2,7 @@
 
 ## STEPS
 
-DONE = +
+DONE = [+]
 [+] 1.  Add ParameterContext objects to reference data for:
 [+]   - "prescriptive" contexts:
 [+]     + NTE: Not To Exceed (max. allowed value)
@@ -16,9 +16,16 @@ DONE = +
 [+]   - Quiescent
 [+]   - Nominal
 [+]   - Launch
-[ ] 3.  New functions:  `get_context(context_id)`, `get_state(state_id)`
-
-[ ] 4.  ADD MORE TESTS!!!!
+[+] 3.  Fix PgxnObject to display only base ("variable") parameters
+[+] 3.  New functions:  `get_parameter_context_oid(pcid)`,
+        `get_state_oid(sid)`
+[ ] 4.  Fix Contexts:  need to specify variables a generating fn supports
+        (e.g., "get_assembly_parameter" works for m, P, R_D)
+[ ] 5.  Fix Dashboards:
+[ ]   - config will now have "variables" + "contexts" -- for example:
+        variables:  mass, Power, Data Rate
+        contexts:   CBE, MEV, Contingency, Margin
+[ ] 6.  ADD MORE TESTS!!!!
 
 
 ## General notes on the new paradigm

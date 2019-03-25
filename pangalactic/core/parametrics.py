@@ -437,10 +437,10 @@ def _compute_pval(orb, oid, pid, allow_nan=False):
             # orb.log.debug('  "{}" is computed ...'.format(pid))
             # use generating_function -- in the future, there may be a Relation
             # expression, found using the ParameterRelation relationship
-            gen_fn = GEN_FNS.get(parm.get('context'))
             variable = parm.get('variable')
             state = parm.get('state')
             base_pid = get_parameter_id(variable, state=state)
+            gen_fn = GEN_FNS.get((variable, parm.get('context')))
             orb.log.debug('  generating function is {!s}'.format(getattr(
                                                     gen_fn, '__name__', None)))
             if gen_fn:
@@ -727,11 +727,22 @@ def get_margin(orb, oid, parameter_id, default=0.0):
         # orb.log.debug('  ... margin is {}'.format(margin))
         return margin
 
-# the GEN_FNS dict maps Context id to applicable generating functions
-GEN_FNS = {'CBE': get_assembly_parameter,
-           'Total': get_assembly_parameter,
-           'MEV': get_mev,
-           'Margin': get_margin}
+# the GEN_FNS dict maps tuples of (variable, Context.id) to applicable
+# generating functions
+GEN_FNS = {
+    ('m', 'CBE'):    get_assembly_parameter,
+    ('m', 'Total'):  get_assembly_parameter,
+    ('m', 'MEV'):    get_mev,
+    ('m', 'Margin'): get_margin,
+    ('P', 'CBE'):    get_assembly_parameter,
+    ('P', 'Total'):  get_assembly_parameter,
+    ('P', 'MEV'):    get_mev,
+    ('P', 'Margin'): get_margin,
+    ('R', 'CBE'):    get_assembly_parameter,
+    ('R', 'Total'):  get_assembly_parameter,
+    ('R', 'MEV'):    get_mev,
+    ('R', 'Margin'): get_margin,
+    }
 
 ################################################
 # CODE BELOW THIS LINE IS DEPRECATED ...
