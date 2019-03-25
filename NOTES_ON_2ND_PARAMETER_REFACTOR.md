@@ -2,22 +2,23 @@
 
 ## STEPS
 
-1.  Add Context objects to reference data for:
-  - "prescriptive" contexts:
-    + NTE: Not To Exceed (max. allowed value)
-    + Margin: (NTE - MEV) / NTE
-  - "descriptive" contexts:
-    + CBE (Current Best Estimate
-    + Contingency:  % tolerance for CBE (represents uncertainty)
-    + MEV (Maximum Estimated Value) = CBE * (1 + Contingency)
-2.  Add State objects to reference data for:
-  - Peak
-  - Quiescent
-  - Nominal
-  - Launch
-3.  New functions:  get_context(context_id), get_state(state_id)
+DONE = +
+[+] 1.  Add ParameterContext objects to reference data for:
+[+]   - "prescriptive" contexts:
+[+]     + NTE: Not To Exceed (max. allowed value)
+[+]     + Margin: (NTE - MEV) / NTE
+[+]   - "descriptive" contexts:
+[+]     + CBE (Current Best Estimate
+[+]     + Contingency:  % tolerance for CBE (represents uncertainty)
+[+]     + MEV (Maximum Estimated Value) = CBE * (1 + Contingency)
+[+] 2.  Add State objects to reference data for:
+[+]   - Peak
+[+]   - Quiescent
+[+]   - Nominal
+[+]   - Launch
+[ ] 3.  New functions:  `get_context(context_id)`, `get_state(state_id)`
 
-4.  ADD MORE TESTS!!!!
+[ ] 4.  ADD MORE TESTS!!!!
 
 
 ## General notes on the new paradigm

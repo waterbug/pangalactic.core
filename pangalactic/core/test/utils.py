@@ -638,18 +638,19 @@ parametrized_test_objects = [
        modifier='test:steve',
        mod_datetime=NOW,
        parameters={
-       'm__Total':
-         {'name': 'Mass [Total]',
-          'variable': 'm',
+       'P':
+         {'name': 'Power',
+          'variable': 'P',
           'state': None,
-          'context': 'Total',
+          'context': None,
           'context_type': 'descriptive',
-          'description': 'Mass [Total value summed over assembly]',
-          'computed': True,
+          'description': 'Nominal electrical power consumption.',
+          'computed': False,
           'mod_datetime': NOW,
           'range_datatype': 'float',
-          'dimensions': 'mass',
-          'units': 'kg'},
+          'dimensions': 'power',
+          'units': 'W',
+          'value': '100.0'},
        'm':
          {'name': 'Mass',
           'variable': 'm',
