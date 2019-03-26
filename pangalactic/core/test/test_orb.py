@@ -181,14 +181,14 @@ class OrbTest(unittest.TestCase):
         """CASE:  serialize an object using include_components=True"""
         # This test verifies that the values in the serialized
         # object match the "cooked" values of the object attributes.
-        obj = orb.get('test:hog0')   # HardwareProduct 'HOG' test object
+        obj = orb.get('test:spacecraft0')   # HardwareProduct test object
         serialized = serialize(orb, [obj], include_components=True)
         acus = 0
         products = 0
         for so in serialized:
             if so['_cname'] == 'HardwareProduct':
                 products += 1
-            if so['oid'] == 'test:hog0':
+            if so['oid'] == 'test:spacecraft0':
                 main_object = so
             elif so['_cname'] == 'Acu':
                 acus += 1
@@ -286,8 +286,8 @@ class OrbTest(unittest.TestCase):
                     ]
         self.assertEqual(expected, value)
 
-    def test_16_deserialize_object_with_parameters(self):
-        """CASE:  deserialize an object with parameters in object form"""
+    def test_16_deserialize_object_with_simple_parameters(self):
+        """CASE:  deserialize a object with simple parameters"""
         objs = deserialize(orb, parametrized_test_objects)
         parameters = parametrized_test_objects[0]['parameters']
         for o in objs:
@@ -306,30 +306,31 @@ class OrbTest(unittest.TestCase):
         # entire project.  :)
         objs = deserialize(orb, related_test_objects)
         by_oid = {o.oid : o for o in objs}
-        acu_oids = ['test:hog3-acu-{}'.format(n) for n in range(1, 6)]
+        acu_oids = ['test:spacecraft3-acu-{}'.format(n) for n in range(1, 6)]
         value = [
             by_oid['test:OTHER:system-1'].project,
             by_oid['test:OTHER:system-1'].system,
-            by_oid['test:hog3'].components,
-            by_oid['test:hog3'].has_models,
-            by_oid['test:hog3.mcad.model.0'].of_thing,
-            by_oid['test:hog3.mcad.model.0'].has_representations,
-            by_oid['test:hog3.mcad.0.representation'].of_object,
-            by_oid['test:hog3.mcad.0.representation'].has_files,
-            by_oid['test:hog3.mcad.0.representationfile.0'].of_representation,
-            by_oid['test:hog3.mcad.0.representationfile.0'].url
+            by_oid['test:spacecraft3'].components,
+            by_oid['test:spacecraft3'].has_models,
+            by_oid['test:spacecraft3.mcad.model.0'].of_thing,
+            by_oid['test:spacecraft3.mcad.model.0'].has_representations,
+            by_oid['test:spacecraft3.mcad.0.representation'].of_object,
+            by_oid['test:spacecraft3.mcad.0.representation'].has_files,
+            by_oid['test:spacecraft3.mcad.0.representationfile.0'
+                   ].of_representation,
+            by_oid['test:spacecraft3.mcad.0.representationfile.0'].url
             ]
         expected = [
             by_oid['test:OTHER'],
-            by_oid['test:hog3'],
+            by_oid['test:spacecraft3'],
             [by_oid[acu_oid] for acu_oid in acu_oids],
-            [by_oid['test:hog3.mcad.model.0']],
-            by_oid['test:hog3'],
-            [by_oid['test:hog3.mcad.0.representation']],
-            by_oid['test:hog3.mcad.model.0'],
-            [by_oid['test:hog3.mcad.0.representationfile.0']],
-            by_oid['test:hog3.mcad.0.representation'],
-            'vault://HOG_0_MCAD_0_R0_File0.step'
+            [by_oid['test:spacecraft3.mcad.model.0']],
+            by_oid['test:spacecraft3'],
+            [by_oid['test:spacecraft3.mcad.0.representation']],
+            by_oid['test:spacecraft3.mcad.model.0'],
+            [by_oid['test:spacecraft3.mcad.0.representationfile.0']],
+            by_oid['test:spacecraft3.mcad.0.representation'],
+            'vault://Rocinante_0_MCAD_0_R0_File0.step'
             ]
         self.assertEqual(expected, value)
 

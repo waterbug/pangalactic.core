@@ -3,7 +3,6 @@ Functions to support Parameters and Relations
 """
 from __future__ import division
 from builtins import str
-from past.utils import old_div
 from collections  import namedtuple
 from decimal      import Decimal
 from math         import floor, fsum, log10
@@ -439,12 +438,12 @@ def _compute_pval(orb, oid, pid, allow_nan=False):
             # expression, found using the ParameterRelation relationship
             variable = parm.get('variable')
             state = parm.get('state')
-            base_pid = get_parameter_id(variable, state=state)
-            gen_fn = GEN_FNS.get((variable, parm.get('context')))
-            orb.log.debug('  generating function is {!s}'.format(getattr(
-                                                    gen_fn, '__name__', None)))
-            if gen_fn:
-                value = gen_fn(orb, oid, base_pid)
+            context = parm.get('context')
+            compute = COMPUTES.get((variable, context))
+            orb.log.debug('  compute function is {!s}'.format(getattr(
+                                            compute, '__name__', None)))
+            if compute:
+                value = compute(orb, oid, variable, state)
                 # orb.log.debug('  value is {}'.format(value))
                 return value
             else:
@@ -634,13 +633,13 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
         orb.log.info('  could not convert string "{}" ...'.format(str_val))
         orb.log.info('  bailing out.')
 
-def get_assembly_parameter(orb, product_oid, base_parameter_id):
+def get_assembly_parameter(orb, product_oid, variable, state):
     """
-    Return the total value of an assembly parameter for a product based on the
-    summed values of the base parameter over all of the product's known
-    components.  If no components are defined for the product, simply return
-    the value of the base parameter as specified for the product, or the
-    default.
+    Return the total value of a linearly additive assembly parameter (e.g.,
+    mass, power consumption, data rate) for a product based on the summed
+    values of the parameter over all of the product's known components.  If no
+    components are defined for the product, simply return the value of the
+    parameter as specified for the product, or the default.
 
     CAUTION: this may return a wildly inaccurate value for an incompletely
     specified assembly.
@@ -649,15 +648,18 @@ def get_assembly_parameter(orb, product_oid, base_parameter_id):
         orb (Uberorb): the orb (see p.node.uberorb)
         product_oid (str): the oid of the Product whose total parameter is
             being estimated
-        base_parameter_id (str): `id` of the parameter for which the assembly
+        variable (str): `variable` of the parameter for which the assembly
+            value is being computed
+        state (str): `state` of the parameter for which the assembly
             value is being computed
     """
     # VERY verbose, even for debugging!
     # orb.log.debug('[parametrics] get_assembly_parameter()')
     global parameterz
+    base_parameter_id = get_parameter_id(variable, state=state)
     if (product_oid in parameterz and
         base_parameter_id in parameterz[product_oid]):
-        radt = parameterz[product_oid][base_parameter_id].get('range_datatype')
+        radt = parameterz[product_oid][variable].get('range_datatype')
         dtype = DATATYPES[radt]
         # cz, if it exists, will be a list of namedtuples ...
         cz = componentz.get(product_oid)
@@ -675,6 +677,9 @@ def get_assembly_parameter(orb, product_oid, base_parameter_id):
     else:
         return 0.0
 
+# NOTE: SERIOUSLY BROKEN!
+# NOTE: in the new parameter paradigm, the CBE and Contingency are context
+# parameters -- this function must be rewritten!
 def get_mev(orb, oid, parameter_id, default=0.0):
     """
     Find a parameter's Maximum Expected Value based on its Current Best
@@ -701,6 +706,9 @@ def get_mev(orb, oid, parameter_id, default=0.0):
     else:
         return default
 
+# NOTE: SERIOUSLY BROKEN!
+# NOTE: in the new parameter paradigm, CBE applies to a Product, but NTE
+# applies to a *usage* (Acu or PSU) -- this function must be rewritten!
 def get_margin(orb, oid, parameter_id, default=0.0):
     """
     Find the "Margin", (NTE-CBE)/CBE, for the specified parameter.
@@ -713,23 +721,24 @@ def get_margin(orb, oid, parameter_id, default=0.0):
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
-    # in case these are integers, cast to float
-    nte_val = float(get_pval(orb, oid, parameter_id + '_NTE'))
-    cbe_val = float(_compute_pval(orb, oid, parameter_id + '_CBE'))
+    # float cast is unnec. because python 3 division will do the right thing
+    nte_val = get_pval(orb, oid, parameter_id + '_NTE')
+    cbe_val = _compute_pval(orb, oid, parameter_id + '_CBE')
     # extremely verbose logging -- uncomment only for intense debugging
     # orb.log.debug('* get_margin: nte is {}'.format(nte_val))
     # orb.log.debug('              cbe is {}'.format(cbe_val))
-    if nte_val == 0.0:
+    if nte_val == 0:   # NOTE: 0 == 0.0 evals to True
+        # TODO:  implement a NaN or "Undefined" ...
         return default  # not defined (division by zero)
     else:
-        margin = round_to(old_div((nte_val - cbe_val), nte_val))
+        margin = round_to((nte_val - cbe_val) / nte_val)
         # uncomment only for intense debugging
         # orb.log.debug('  ... margin is {}'.format(margin))
         return margin
 
-# the GEN_FNS dict maps tuples of (variable, Context.id) to applicable
+# the COMPUTES dict maps tuples of (variable, Context.id) to applicable
 # generating functions
-GEN_FNS = {
+COMPUTES = {
     ('m', 'CBE'):    get_assembly_parameter,
     ('m', 'Total'):  get_assembly_parameter,
     ('m', 'MEV'):    get_mev,

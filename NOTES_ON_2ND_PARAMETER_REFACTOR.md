@@ -19,13 +19,14 @@ DONE = [+]
 [+] 3.  Fix PgxnObject to display only base ("variable") parameters
 [+] 3.  New functions:  `get_parameter_context_oid(pcid)`,
         `get_state_oid(sid)`
-[ ] 4.  Fix Contexts:  need to specify variables a generating fn supports
+[+] 4.  Fix Contexts:  need to specify variables a generating fn supports
         (e.g., "get_assembly_parameter" works for m, P, R_D)
 [ ] 5.  Fix Dashboards:
 [ ]   - config will now have "variables" + "contexts" -- for example:
         variables:  mass, Power, Data Rate
         contexts:   CBE, MEV, Contingency, Margin
-[ ] 6.  ADD MORE TESTS!!!!
+[ ] 6.  Fix Reqts Wizard to use parameters / prescriptive contexts
+[ ] 7.  ADD MORE TESTS!!!!
 
 
 ## General notes on the new paradigm
