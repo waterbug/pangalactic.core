@@ -27,8 +27,11 @@ from pangalactic.core.utils.meta  import uncook_datetime
 from pangalactic.core.mapping     import schema_maps, schema_version
 from pangalactic.core.parametrics import (add_default_parameters,
                                           _compute_pval, componentz,
-                                          create_parmz_by_dimz, parameterz,
+                                          create_parm_defz,
+                                          create_parmz_by_dimz,
+                                          parm_defz, parameterz,
                                           refresh_componentz,
+                                          update_parm_defz,
                                           update_parmz_by_dimz)
 from pangalactic.core.serializers import (deserialize, deserialize_parms,
                                           serialize, serialize_parms)
@@ -228,10 +231,13 @@ class UberORB(object):
         self.versionables = [cname for cname in self.classes if 'version' in
                              self.schemas[cname]['field_names']]
         self.load_reference_data()
-        self.build_componentz_cache()
-        self._load_parms()
+        # reload or create the parameter definitions cache ('parm_defz')
+        self._load_parm_defz()
+        # build the 'componentz' runtime cache ...
+        self._build_componentz_cache()
+        self._load_parmz()
         self._load_diagramz()
-        # populate the parmz_by_dimz cache ...
+        # populate the 'parmz_by_dimz' runtime cache ...
         create_parmz_by_dimz(self)
         # get the hdf5 store or create a new one ...
         # self.store_path = os.path.join(self.home, 'datasets.h5')
@@ -353,23 +359,59 @@ class UberORB(object):
                                indent=4, sort_keys=True))
         self.log.info('        ... diagrams.json file written.')
 
-    def _load_parms(self):
+    def _load_parm_defz(self):
+        """
+        Load the parameter definitions cache (`parm_defz` dict) from a saved
+        parameter_defs.json file; if the file is not found, create the cache
+        from the ParameterDefinition, State, and Context objects in the
+        database.
+        """
+        self.log.info('* [orb] _load_parm_defz() ...')
+        global parm_defz
+        json_path = os.path.join(self.home, 'parameter_defs.json')
+        if os.path.exists(json_path):
+            with open(json_path) as f:
+                parm_defz = json.loads(f.read())
+            self.log.info('        parm_defz cache is loaded.')
+        else:
+            self.log.info('        "parameter_defs.json" was not found.')
+            self.log.info('        creating "parm_defz" cache ...')
+            create_parm_defz(self)
+            self._save_parm_defz()
+
+    def _save_parm_defz(self):
+        """
+        Save the parameter definitions cache (`parm_defz` dict) to
+        parameter_defs.json.
+        """
+        self.log.info('* [orb] _save_parm_defz() ...')
+        json_path = os.path.join(self.home, 'parameter_defs.json')
+        with open(json_path, 'w') as f:
+            f.write(json.dumps(parm_defz, separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        self.log.info('        ... parameter_defs.json written.')
+
+    def _load_parmz(self):
         """
         Load `parameterz` dict from json file.
         """
+        self.log.info('* [orb] _load_parmz() ...')
         json_path = os.path.join(self.home, 'parameters.json')
         if os.path.exists(json_path):
             with open(json_path) as f:
                 serialized_parms = json.loads(f.read())
             for oid, ser_parms in serialized_parms.items():
                 deserialize_parms(oid, ser_parms)
-            self.recompute_parms()
+            self.recompute_parmz()
+            self.log.info('        parameterz cache loaded and recomputed.')
+        else:
+            self.log.info('        "parameters.json" was not found.')
 
-    def _save_parms(self):
+    def _save_parmz(self):
         """
         Save `parameterz` dict to a json file.
         """
-        self.log.info('* [orb] _save_parms() ...')
+        self.log.info('* [orb] _save_parmz() ...')
         parms_path = os.path.join(self.home, 'parameters.json')
         serialized_parameterz = {}
         for oid, obj_parms in parameterz.items():
@@ -380,17 +422,29 @@ class UberORB(object):
                                indent=4, sort_keys=True))
         self.log.info('        ... parameters.json file written.')
 
-    def recompute_parms(self):
+    def recompute_parmz(self):
         """
-        Recompute any computed parameters.  This is required at startup or when
-        a parameter is created, modified, or deleted.
+        Recompute any computed parameters for the configured variables and
+        contexts.  This is required at startup or when a parameter is created,
+        modified, or deleted.
         """
-        self.log.info('* [orb] recompute_parms()')
-        for oid, parms in parameterz.items():
-            for pid, p in parms.items():
-                parameterz[oid][pid]['value'] = _compute_pval(self, oid,
-                                                              pid)
-        self._save_parms()
+        self.log.info('* [orb] recompute_parmz()')
+        contexts = config.get('contexts', ['CBE'])
+        variables = config.get('variables', ['m', 'P', 'R_D'])
+        if not contexts:
+            return
+        # TODO:  make this more efficient by iterating over only the "top
+        # level" assembly oids, since _compute_pval is recursive and will
+        # recompute all lower-level component/subassembly values in each pass
+        for context in contexts:
+            for variable in variables:
+                for oid in parameterz:
+                    _compute_pval(self, oid, variable, context)
+        # for oid, parms in parameterz.items():
+            # for pid, p in parms.items():
+                # parameterz[oid][pid]['value'] = _compute_pval(self, oid,
+                                                              # pid)
+        self._save_parmz()
 
     def assign_test_parameters(self, objs):
         """
@@ -406,17 +460,17 @@ class UberORB(object):
             for o in objs:
                 add_default_parameters(self, o)
                 gen_test_pvals(parameterz[o.oid])
-            self.recompute_parms()
+            self.recompute_parmz()
             self.log.info('        ... done.')
         except:
             self.log.info('        ... failed.')
 
-    def build_componentz_cache(self):
+    def _build_componentz_cache(self):
         """
         Build the `componentz` cache (which maps Product oids to the oids of
         their components) at startup.
         """
-        self.log.info('* [orb] build_componentz_cache()')
+        self.log.info('* [orb] _build_componentz_cache()')
         for product in self.get_all_subtypes('Product'):
             if product.components:
                 refresh_componentz(self, product)
@@ -479,7 +533,8 @@ class UberORB(object):
             self.log.info('  + missing some initial reference data:')
             self.log.info('  {}'.format([so['oid'] for so in missing_i]))
             i_objs = deserialize(self, [so for so in missing_i],
-                                 include_refdata=True)
+                                 include_refdata=True,
+                                 force_no_recompute=True)
             for o in i_objs:
                 self.db.add(o)
         admin = self.get('pgefobjects:admin')
@@ -492,7 +547,8 @@ class UberORB(object):
             self.log.info('  + missing some core reference data:')
             self.log.info('  {}'.format([so['oid'] for so in missing_c]))
             objs = deserialize(self, [so for so in missing_c],
-                               include_refdata=True)
+                               include_refdata=True,
+                               force_no_recompute=True)
         for o in objs:
             if hasattr(o, 'owner'):
                 o.owner = pgana
@@ -512,7 +568,7 @@ class UberORB(object):
                          uncook_datetime(mod_dts.get(so['oid']))))] 
         if updated_r:
             self.log.info('    updates found ...')
-            deserialize(self, updated_r)
+            deserialize(self, updated_r, force_no_recompute=True)
             self.log.info('    updates completed.')
         else:
             self.log.info('    no updates found.')
@@ -574,9 +630,13 @@ class UberORB(object):
                 # NOTE:  all Parameter Definitions are public
                 obj.public = True
                 update_parmz_by_dimz(self, obj)
+                pd_context = getattr(obj, 'context', None)
+                if pd_context:
+                    update_parm_defz(self, obj, pd_context)
+                self._save_parm_defz()
         self.log.info('  orb.save:  committing db session.')
         self.db.commit()
-        self.recompute_parms()
+        self.recompute_parmz()
         return True
 
     def get(self, *oid, **kw):
@@ -1008,7 +1068,7 @@ class UberORB(object):
             for assembly in refresh_assemblies:
                 refresh_componentz(self, assembly)
         if refresh_parameterz:
-            self.recompute_parms()
+            self.recompute_parmz()
 
     def is_versioned(self, obj):
         """

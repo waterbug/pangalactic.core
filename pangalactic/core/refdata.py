@@ -1252,15 +1252,7 @@ dict(
     'type_of_port': 'pgefobjects:PortType.digital_data',
     'parameters': {
        'R_D':
-         {'name': 'Data Rate',
-          'variable': 'R_D',
-          'state': None,
-          'context': None,
-          'description': 'Data Rate',
-          'computed': False,
-          'range_datatype': 'float',
-          'dimensions': 'bitrate',
-          'value': 655e6,
+         {'value': 655e6,
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
           },
@@ -1277,15 +1269,7 @@ dict(
     'type_of_port': 'pgefobjects:PortType.digital_data',
     'parameters': {
        'R_D':
-         {'name': 'Data Rate',
-          'variable': 'R_D',
-          'state': None,
-          'context': None,
-          'description': 'Data Rate',
-          'computed': False,
-          'range_datatype': 'float',
-          'dimensions': 'bitrate',
-          'value': 1e7,  # per Wikipedia: 10 Mbit/s
+         {'value': 1e7,  # per Wikipedia: 10 Mbit/s
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
           },
@@ -1302,15 +1286,7 @@ dict(
     'type_of_port': 'pgefobjects:PortType.digital_data',
     'parameters': {
        'R_D':
-         {'name': 'Data Rate',
-          'variable': 'R_D',
-          'state': None,
-          'context': None,
-          'description': 'Data Rate',
-          'computed': False,
-          'range_datatype': 'float',
-          'dimensions': 'bitrate',
-          'value': 4e8,  # per Wikipedia: 400 Mbit/s
+         {'value': 4e8,  # per Wikipedia: 400 Mbit/s
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
           },
@@ -1326,15 +1302,7 @@ dict(
     'abbreviation': 'GPIO',
     'parameters': {
        'R_D':
-         {'name': 'Data Rate',
-          'variable': 'R_D',
-          'state': None,
-          'context': None,
-          'description': 'Data Rate',
-          'computed': False,
-          'range_datatype': 'float',
-          'dimensions': 'bitrate',
-          'value': 0,  # TBD
+         {'value': 0,  # TBD
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
           },
@@ -1352,15 +1320,7 @@ dict(
     'type_of_port': 'pgefobjects:PortType.electrical_power',
     'parameters': {
        'V':
-         {'name': 'Voltage',
-          'variable': 'V',
-          'state': None,
-          'context': None,
-          'description': 'Voltage',
-          'computed': False,
-          'range_datatype': 'float',
-          'dimensions': 'electrical potential',
-          'value': 28,
+         {'value': 28,
           'mod_datetime': epoch,
           'units': 'V'}
           },
@@ -1377,15 +1337,7 @@ dict(
     'type_of_port': 'pgefobjects:PortType.electrical_power',
     'parameters': {
        'V':
-         {'name': 'Voltage',
-          'variable': 'V',
-          'state': None,
-          'context': None,
-          'description': 'Voltage',
-          'computed': False,
-          'range_datatype': 'float',
-          'dimensions': 'electrical potential',
-          'value': 12,
+         {'value': 12,
           'mod_datetime': epoch,
           'units': 'V'}
           },
@@ -1402,15 +1354,7 @@ dict(
     'type_of_port': 'pgefobjects:PortType.electrical_power',
     'parameters': {
        'V':
-         {'name': 'Voltage',
-          'variable': 'V',
-          'state': None,
-          'context': None,
-          'description': 'Voltage',
-          'computed': False,
-          'range_datatype': 'float',
-          'dimensions': 'electrical potential',
-          'value': 5,
+         {'value': 5,
           'mod_datetime': epoch,
           'units': 'V'}
           },
@@ -1427,15 +1371,7 @@ dict(
     'type_of_port': 'pgefobjects:PortType.electrical_power',
     'parameters': {
        'V':
-         {'name': 'Voltage',
-          'variable': 'V',
-          'state': None,
-          'context': None,
-          'description': 'Voltage',
-          'computed': False,
-          'range_datatype': 'float',
-          'dimensions': 'electrical potential',
-          'value': 3.3,
+         {'value': 3.3,
           'mod_datetime': epoch,
           'units': 'V'}
           },
@@ -1453,7 +1389,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'mass',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'Quantity of matter'
     },
 
@@ -1467,7 +1402,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'Length in y direction'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1480,7 +1414,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'Length in x direction'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1493,7 +1426,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'Length in z direction'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1506,7 +1438,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'X coordinate of the Center of Mass'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1519,7 +1450,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'Y coordinate of the Center of Mass'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1532,7 +1462,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'Z coordinate of the Center of Mass'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1545,7 +1474,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'money',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'Unit cost of an item'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1558,7 +1486,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'data',
     'range_datatype': 'int',
-    'computed_by_default': False,
     'description': u'Data storage capacity'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1572,7 +1499,6 @@ dict(
     'dimensions': 'bitrate',
     'port_type': 'pgefobjects:PortType.digital_data',
     'range_datatype': 'int',
-    'computed_by_default': False,
     'description': u'Flow of bits per unit time through a data port.'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1586,7 +1512,6 @@ dict(
     'dimensions': 'power',
     'port_type': 'pgefobjects:PortType.electrical_power',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'Nominal electrical power consumption.'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1600,7 +1525,6 @@ dict(
     'dimensions': 'electrical potential',
     'port_type': 'pgefobjects:PortType.digital_data',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'Voltage'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1613,7 +1537,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'area',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'The active area of a product, such as a solar panel, for which that is a well-defined functional property. For a solar panel, this is the exposed area that takes part in collecting energy from the Sun.  Generally it is the solar cell area though there is some top side conductor area that exists on each cell.'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1626,7 +1549,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': 'area',
     'range_datatype': 'float',
-    'computed_by_default': False,
     'description': u'On a solar panel, Substrate Area includes the Active Area plus the mounting substrate or mesh area, including all stiffeners, areas for mounting sensors, wiring harnesses (if on the top side, facing the Sun), expansion/contraction relief areas around the solar cells, hold down or pre-deployed clamping areas, and other top side mounted equipment areas.'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1639,7 +1561,6 @@ dict(
     'mod_datetime': epoch,
     'dimensions': None,
     'range_datatype': 'int',
-    'computed_by_default': False,
     'description': u'Technology Readiness Level (TRL)'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1652,35 +1573,7 @@ dict(
     'mod_datetime': epoch,
     'dimensions': None,
     'range_datatype': 'text',
-    'computed_by_default': False,
     'description': u'Entity from which a thing is procured.'},
-
-{   '_cname': 'State',
-    'oid': 'pgef:State.Peak',
-    'id': 'Peak',
-    'name': 'Peak',
-    'creator': 'pgefobjects:admin',
-    'create_datetime': epoch,
-    'mod_datetime': epoch,
-    'description': u'Peak value of a parameter.'},
-
-{   '_cname': 'State',
-    'oid': 'pgef:State.Nominal',
-    'id': 'Nominal',
-    'name': 'Nominal',
-    'creator': 'pgefobjects:admin',
-    'create_datetime': epoch,
-    'mod_datetime': epoch,
-    'description': u'Nominal value of a parameter.'},
-
-{   '_cname': 'State',
-    'oid': 'pgef:State.Quiescent',
-    'id': 'Quiescent',
-    'name': 'Quiescent',
-    'creator': 'pgefobjects:admin',
-    'create_datetime': epoch,
-    'mod_datetime': epoch,
-    'description': u'Value of a parameter when item is Quiescent'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.CBE',
@@ -1697,9 +1590,9 @@ dict(
     'description': u'Current Best Estimate'},
 
 {   '_cname': 'ParameterContext',
-    'oid': 'pgef:ParameterContext.Total',
-    'id': 'Total',
-    'name': 'Total',
+    'oid': 'pgef:ParameterContext.Assembly',
+    'id': 'Assembly',
+    'name': 'Assembly',
     'context_type': 'descriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
@@ -1721,7 +1614,7 @@ dict(
     'mod_datetime': epoch,
     'context_dimensions': 'percent',
     'context_datatype': 'float',
-    'computed': True,
+    'computed': False,
     'description': u'Contingency'},
 
 {   '_cname': 'ParameterContext',
@@ -1750,7 +1643,7 @@ dict(
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Maximum allowable value.'},
+    'description': u'Maximum allowable value'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.NLT',
@@ -1764,7 +1657,7 @@ dict(
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Minimum allowable value.'},
+    'description': u'Minimum allowable value'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Target',
@@ -1778,7 +1671,7 @@ dict(
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Target value associated with a tolerance.'},
+    'description': u'Target value associated with a tolerance'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Tolerance',
@@ -1806,7 +1699,7 @@ dict(
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Upper value in an asymmetric tolerance'},
+    'description': u'Upper value in asymmetric tolerance'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Tolerance_Lower',
@@ -1820,7 +1713,7 @@ dict(
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Lower value in an asymmetric tolerance'},
+    'description': u'Lower value in asymmetric tolerance'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Limit_Max',
@@ -1834,7 +1727,7 @@ dict(
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Maximum limiting value in a range'},
+    'description': u'Maximum value of range'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Limit_Min',
@@ -1848,7 +1741,7 @@ dict(
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Minimum limiting value in a range'},
+    'description': u'Minimum value of range'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Margin',
@@ -1862,7 +1755,7 @@ dict(
     'context_dimensions': 'percent',
     'context_datatype': 'float',
     'computed': True,
-    'description': u'(NTE-CBE)/NTE.'}
+    'description': u'(NTE-CBE)/NTE'}
 ]
 
 core_objs = {so['oid'] : so for so in core}

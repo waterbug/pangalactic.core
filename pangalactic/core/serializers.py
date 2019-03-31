@@ -227,7 +227,8 @@ def deserialize_parms(oid, ser_parms):
         parm['mod_datetime'] = uncook_datetime(parm['mod_datetime'])
     parameterz[oid] = ser_parms
 
-def deserialize(orb, serialized, include_refdata=False, dictify=False):
+def deserialize(orb, serialized, include_refdata=False, dictify=False,
+                force_no_recompute=False):
     """
     Args:
         orb (UberORB): the (singleton) `orb` instance
@@ -286,7 +287,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
     if new_len == 0:
         orb.log.info('  all objects were empty -- returning []')
         return []
-    recompute_parms_required = False
+    recompute_parmz_required = False
     refresh_componentz_required = False
     objs = []
     updates = {}
@@ -379,7 +380,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
             # special case:  'parameters' key
             parm_dict = d.get('parameters')
             if parm_dict:
-                recompute_parms_required = True
+                recompute_parmz_required = True
                 orb.log.debug('  + parameters found, deserializing ...')
                 deserialize_parms(d['oid'], parm_dict)
             else:
@@ -412,7 +413,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
                 objs.append(obj)
                 if cname == 'Acu':
                     refresh_componentz_required = True
-                    recompute_parms_required = True
+                    recompute_parmz_required = True
             elif d['oid'] not in ignores:
                 orb.log.debug('* creating new object ...')
                 obj = cls(**kw)
@@ -429,7 +430,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
                         output['new'].append(obj)
                     if cname == 'Acu':
                         refresh_componentz_required = True
-                        recompute_parms_required = True
+                        recompute_parmz_required = True
                 else:
                     orb.log.debug('  object creation failed:')
                     orb.log.debug('    obj: {}'.format(obj))
@@ -442,8 +443,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False):
     orb.log.debug('    {} objects created'.format(created))
     orb.log.debug('    {} objects updated'.format(len(updates)))
     orb.log.debug('***************************')
-    if recompute_parms_required:
-        orb.recompute_parms()
+    if recompute_parmz_required and not force_no_recompute:
+        orb.recompute_parmz()
     if dictify:
         return output
     else:

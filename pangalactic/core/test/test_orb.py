@@ -4,6 +4,7 @@ Unit tests for pangalactic.core.uberorb.orb
 """
 from builtins import str
 from builtins import range
+from math     import fsum
 import os
 import unittest
 
@@ -11,7 +12,7 @@ import unittest
 import dateutil.parser as dtparser
 
 # pangalactic
-from pangalactic.core.parametrics import parameterz
+from pangalactic.core.parametrics import get_pval, parameterz
 from pangalactic.core.serializers import (deserialize, serialize,
                                           serialize_parms)
 from pangalactic.core.uberorb     import orb
@@ -332,6 +333,20 @@ class OrbTest(unittest.TestCase):
             by_oid['test:spacecraft3.mcad.0.representation'],
             'vault://Rocinante_0_MCAD_0_R0_File0.step'
             ]
+        self.assertEqual(expected, value)
+
+    def test_18_compute_CBE(self):
+        """CASE:  compute the mass CBE (Current Best Estimate)"""
+        orb.recompute_parmz()
+        value = get_pval(orb, 'test:spacecraft3', 'm[CBE]')
+        sc = orb.get('test:spacecraft3')
+        expected = fsum([get_pval(orb, acu.component.oid, 'm')
+                         for acu in sc.components])
+        # but the Magic Twanger has components Flux Capacitor and Mr. Fusion,
+        # so ...
+        expected -= get_pval(orb, 'test:twanger', 'm')
+        expected += get_pval(orb, 'test:flux_capacitor', 'm')
+        expected += get_pval(orb, 'test:mr_fusion', 'm')
         self.assertEqual(expected, value)
 
     def test_50_write_mel(self):

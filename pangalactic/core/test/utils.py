@@ -3,7 +3,9 @@
 Create PGEF test data.
 """
 from builtins import str
+from copy     import deepcopy
 import random
+from pangalactic.core.parametrics import parm_defz
 from pangalactic.core.utils.meta import (get_port_abbr, get_port_id,
                                          get_port_name)
 from pangalactic.core.utils.datetimes import dtstamp
@@ -24,30 +26,28 @@ def gen_test_pvals(parms):
             parameters.
     """
     for pid, parm in parms.items():
-        if parm['computed']:
+        pdz = parm_defz.get(pid, {})
+        if pdz.get('computed'):
             # ignore computed parameters
             continue
-        if pid.endswith('ctgcy'):
+        if '[Ctgcy]' in pid:
             parm['value'] = 0.30
-        elif parm['range_datatype'] == 'float':
-            # make sure no non-zero default has been set
+        elif pdz.get('range_datatype') == 'float':
             if not parm['value']:
-                if pid == 'P':
+                if pdz.get('variable') == 'P':
                     # special case for Power parameters
                     # (can be positive or negative)
                     parm['value'] = float(random.randint(-500, 500))
                 else:
                     parm['value'] = float(random.randint(1, 1000))
         # special cases for Data Rate parameters
-        elif pid == 'R_D':
+        elif pdz.get('variable') == 'R_D':
             parm['value'] = random.randint(10000, 100000)
-        elif pid == 'R_NTE':  # make NTE bigger
-            parm['value'] = random.randint(100000, 1000000)
-        elif parm['range_datatype'] == 'int':
+        elif pdz.get('range_datatype') == 'int':
             # make sure no non-zero default has been set
             if not parm['value']:
                 parm['value'] = random.randint(1, 10)
-        elif parm['range_datatype'] == 'text':
+        elif pdz.get('range_datatype') == 'text':
             parm['value'] = 'testing...'
 
 def create_test_users():
@@ -100,7 +100,7 @@ def create_test_users():
 
 def create_test_project():
     """
-    Return a serialized test project, H2G2.
+    Return a set of objects in a serialized test project, H2G2.
 
     NOTE:  if this project is loaded in the client, all of its objects will be
     deleted when the user logs in (since they are all created by other [test]
@@ -639,29 +639,11 @@ parametrized_test_objects = [
        mod_datetime=NOW,
        parameters={
        'P':
-         {'name': 'Power',
-          'variable': 'P',
-          'state': None,
-          'context': None,
-          'context_type': 'descriptive',
-          'description': 'Nominal electrical power consumption.',
-          'computed': False,
-          'mod_datetime': NOW,
-          'range_datatype': 'float',
-          'dimensions': 'power',
+         {'mod_datetime': NOW,
           'units': 'W',
           'value': '100.0'},
        'm':
-         {'name': 'Mass',
-          'variable': 'm',
-          'state': None,
-          'context': None,
-          'context_type': 'descriptive',
-          'description': 'Quantity of matter.',
-          'computed': False,
-          'mod_datetime': NOW,
-          'dimensions': 'mass',
-          'range_datatype': 'float',
+         {'mod_datetime': NOW,
           'units': 'kg',
           'value': '1000.0'}
        },
@@ -670,6 +652,7 @@ parametrized_test_objects = [
        version_sequence=2),
      ]
 
+# TODO:  use this to test exporting of simplified parameters ...
 parametrized_summary_test_object = [
     dict(
        _cname='HardwareProduct',
@@ -691,10 +674,74 @@ parametrized_summary_test_object = [
        version_sequence=3),
      ]
 
+test_parms = {
+    "Cost":{
+        "mod_datetime":NOW,
+        "units":"$",
+        "value":0.0
+    },
+    "P":{
+        "mod_datetime":NOW,
+        "units":"W",
+        "value":0.0
+    },
+    "R_D":{
+        "mod_datetime":NOW,
+        "units":"bit/s",
+        "value":0
+    },
+    "TRL":{
+        "mod_datetime":NOW,
+        "units":"",
+        "value":4
+    },
+    "Vendor":{
+        "mod_datetime":NOW,
+        "units":"",
+        "value":""
+    },
+    "depth":{
+        "mod_datetime":NOW,
+        "units":"m",
+        "value":0.0
+    },
+    "height":{
+        "mod_datetime":NOW,
+        "units":"m",
+        "value":0.0
+    },
+    "m":{
+        "mod_datetime":NOW,
+        "units":"kg",
+        "value":0.0
+    },
+    "P[Ctgcy]":{
+        "mod_datetime":NOW,
+        "units":"%",
+        "value":0.3
+    },
+    "m[Ctgcy]":{
+        "mod_datetime":NOW,
+        "units":"%",
+        "value":0.3
+    },
+    "R_D[Ctgcy]":{
+        "mod_datetime":NOW,
+        "units":"%",
+        "value":0.3
+    },
+    "width":{
+        "mod_datetime":NOW,
+        "units":"m",
+        "value":0.0
+    }
+}
+
 # A collection of related serialized test objects to be used for unit testing.
-# The main purpose in having a separate set of serialized objects is so that
-# they will not collide with the objects created by 'create_test_project()'
-# when deserialized and saved to the db.
+# The main purposes in having a separate set of serialized objects are:
+# (1) they will not collide with the objects created by 'create_test_project()'
+#     when deserialized and saved to the db.
+# (2) for testing of parameter operations
 related_test_objects = [
     dict(
         _cname='Project',
@@ -787,6 +834,7 @@ related_test_objects = [
         owner='test:OTHER',
         name='Rocinante Spacecraft',
         description=u'A Martian Navy gunship',
+        parameters=deepcopy(test_parms),
         comment=u'Prototype',
         creator='test:bigboote',
         create_datetime=NOW,
@@ -927,344 +975,4 @@ related_test_objects = [
         mod_datetime=NOW
         )
         ]
-
-test_parms = {
-    "Cost":{
-        "variable":"Cost",
-        "state":None,
-        "context":None,
-        "context_type":None,
-        "computed":False,
-        "description":"Unit cost of an item",
-        "dimensions":"money",
-        "mod_datetime":NOW,
-        "name":"Cost",
-        "range_datatype":"float",
-        "units":"$",
-        "value":0.0
-    },
-    "P":{
-        "variable":"P",
-        "state":None,
-        "context":None,
-        "context_type":None,
-        "computed":False,
-        "description":"Specified Power requirement for a component",
-        "dimensions":"power",
-        "mod_datetime":NOW,
-        "name":"Power",
-        "range_datatype":"float",
-        "units":"W",
-        "value":0.0
-    },
-    "P__CBE":{
-        "variable":"P",
-        "state":None,
-        "state":None,
-        "context":"CBE",
-        "context_type":"descriptive",
-        "computed":True,
-        "description":"Power [Current Best Estimate]",
-        "dimensions":"power",
-        "mod_datetime":NOW,
-        "name":"Power [CBE]",
-        "range_datatype":"float",
-        "units":"W",
-        "value":0.0
-    },
-    "P__MEV":{
-        "variable":"P",
-        "state":None,
-        "context":"MEV",
-        "context_type":"descriptive",
-        "computed":True,
-        "description":"Maximum Expected Value of Power (CBE * [1 + Ctgcy])",
-        "dimensions":"power",
-        "mod_datetime":NOW,
-        "name":"Power MEV",
-        "range_datatype":"float",
-        "units":"W",
-        "value":0
-    },
-    "P__NTE":{
-        "variable":"P",
-        "state":None,
-        "context":"NTE",
-        "context_type":"prescriptive",
-        "computed":False,
-        "description":"Not To Exceed (NTE) value for Power:  the Maximum Expected Value (MEV) of Power should not exceed this value",
-        "dimensions":"power",
-        "mod_datetime":NOW,
-        "name":"Power NTE",
-        "range_datatype":"float",
-        "units":"W",
-        "value":0.0
-    },
-    "P__Ctgcy":{
-        "variable":"P",
-        "state":None,
-        "context":"Ctgcy",
-        "context_type":"descriptive",
-        "computed":False,
-        "description":"Power Contingency: percentage of Current Best Estimate of Power designated to cover contingencies",
-        "dimensions":"percent",
-        "mod_datetime":NOW,
-        "name":"Power Ctgcy",
-        "range_datatype":"float",
-        "units":"%",
-        "value":0.3
-    },
-    "P__Margin":{
-        "variable":"P",
-        "state":None,
-        "context":"Margin",
-        "context_type":"prescriptive",
-        "computed":True,
-        "description":"Power Margin ([NTE-CBE]/NTE)",
-        "dimensions":"percent",
-        "mod_datetime":NOW,
-        "name":"Power Margin",
-        "range_datatype":"float",
-        "units":"%",
-        "value":0.0
-    },
-    "R__CBE":{
-        "variable":"R",
-        "state":None,
-        "context":"CBE",
-        "context_type":"descriptive",
-        "computed":True,
-        "description":"Current Best Estimate of data rate requirement computed as the sum of the data rate requirements of known components in an assembled part",
-        "dimensions":"bitrate",
-        "mod_datetime":NOW,
-        "name":"Data Rate CBE",
-        "range_datatype":"int",
-        "units":"bit/s",
-        "value":0
-    },
-    "R_D":{
-        "variable":"R_D",
-        "state":None,
-        "context":None,
-        "context_type":None,
-        "computed":False,
-        "description":"Flow of bits per unit time through a data port.",
-        "dimensions":"bitrate",
-        "mod_datetime":NOW,
-        "name":"Data Rate",
-        "range_datatype":"int",
-        "units":"bit/s",
-        "value":0
-    },
-    "R__MEV":{
-        "variable":"R",
-        "state":None,
-        "context":"MEV",
-        "context_type":"descriptive",
-        "computed":True,
-        "description":"Maximum Expected Value of Data Rate (CBE * [1 + Ctgcy])",
-        "dimensions":"bitrate",
-        "mod_datetime":NOW,
-        "name":"Data Rate MEV",
-        "range_datatype":"int",
-        "units":"bit/s",
-        "value":0
-    },
-    "R__NTE":{
-        "variable":"R",
-        "state":None,
-        "context":"NTE",
-        "context_type":"prescriptive",
-        "computed":False,
-        "description":"Not To Exceed (NTE) value for Data Rate:  the Maximum Expected Value (MEV) of Data Rate should not exceed this value",
-        "dimensions":"bitrate",
-        "mod_datetime":NOW,
-        "name":"Data Rate NTE",
-        "range_datatype":"int",
-        "units":"bit/s",
-        "value":0
-    },
-    "R__Ctgcy":{
-        "variable":"R",
-        "state":None,
-        "context":"Ctgcy",
-        "context_type":"descriptive",
-        "computed":False,
-        "description":"Data Rate Contingency: percentage of Current Best Estimate of data rate designated to cover contingencies",
-        "dimensions":"percent",
-        "mod_datetime":NOW,
-        "name":"Data Rate Ctgcy",
-        "range_datatype":"float",
-        "units":"%",
-        "value":0.3
-    },
-    "R__Margin":{
-        "variable":"R",
-        "state":None,
-        "context":"Margin",
-        "context_type":"prescriptive",
-        "computed":True,
-        "description":"Data Rate Margin ([NTE-CBE]/NTE)",
-        "dimensions":"percent",
-        "mod_datetime":NOW,
-        "name":"Data Rate Margin",
-        "range_datatype":"float",
-        "units":"%",
-        "value":0.0
-    },
-    "TRL":{
-        "variable":"TRL",
-        "state":None,
-        "context":None,
-        "context_type":None,
-        "computed":False,
-        "description":"Technology Readiness Level (TRL)",
-        "dimensions":None,
-        "mod_datetime":NOW,
-        "name":"TRL",
-        "range_datatype":"int",
-        "units":"",
-        "value":4
-    },
-    "Vendor":{
-        "variable":"Vendor",
-        "state":None,
-        "context":None,
-        "context_type":None,
-        "computed":False,
-        "description":"Entity from which a thing is procured.",
-        "dimensions":None,
-        "mod_datetime":NOW,
-        "name":"Vendor",
-        "range_datatype":"text",
-        "units":"",
-        "value":""
-    },
-    "depth":{
-        "variable":"depth",
-        "state":None,
-        "context":None,
-        "context_type":None,
-        "computed":False,
-        "description":"Length in z direction",
-        "dimensions":"length",
-        "mod_datetime":NOW,
-        "name":"Depth",
-        "range_datatype":"float",
-        "units":"m",
-        "value":0.0
-    },
-    "height":{
-        "variable":"height",
-        "state":None,
-        "context":None,
-        "context_type":None,
-        "computed":False,
-        "description":"Length in y direction",
-        "dimensions":"length",
-        "mod_datetime":NOW,
-        "name":"Height",
-        "range_datatype":"float",
-        "units":"m",
-        "value":0.0
-    },
-    "m":{
-        "variable":"m",
-        "state":None,
-        "context":None,
-        "context_type":None,
-        "computed":False,
-        "description":"Quantity of matter",
-        "dimensions":"mass",
-        "mod_datetime":NOW,
-        "name":"Mass",
-        "range_datatype":"float",
-        "units":"kg",
-        "value":0.0
-    },
-    "m__CBE":{
-        "variable":"m",
-        "state":None,
-        "context":"CBE",
-        "context_type":"descriptive",
-        "computed":True,
-        "description":"Current Best Estimate of Mass, computed as the sum of the masses of known components in an assembled part",
-        "dimensions":"mass",
-        "mod_datetime":NOW,
-        "name":"Mass CBE",
-        "range_datatype":"float",
-        "units":"kg",
-        "value":0.0
-    },
-    "m__MEV":{
-        "variable":"m",
-        "state":None,
-        "context":"MEV",
-        "context_type":"descriptive",
-        "computed":True,
-        "description":"Maximum Expected Value of Mass (CBE * [1 + Ctgcy])",
-        "dimensions":"mass",
-        "mod_datetime":NOW,
-        "name":"Mass MEV",
-        "range_datatype":"float",
-        "units":"kg",
-        "value":0
-    },
-    "m__NTE":{
-        "variable":"m",
-        "state":None,
-        "context":"NTE",
-        "context_type":"prescriptive",
-        "computed":False,
-        "description":"Not To Exceed (NTE) value for Mass:  the Maximum Expected Value (MEV) of Mass should not exceed this value",
-        "dimensions":"mass",
-        "mod_datetime":NOW,
-        "name":"Mass NTE",
-        "range_datatype":"float",
-        "units":"kg",
-        "value":0.0
-    },
-    "m__Ctgcy":{
-        "variable":"m",
-        "state":None,
-        "context":"Ctgcy",
-        "context_type":"descriptive",
-        "computed":False,
-        "description":"Mass Contingency: percentage of Current Best Estimate of Mass designated to cover contingencies",
-        "dimensions":"percent",
-        "mod_datetime":NOW,
-        "name":"Mass Ctgcy",
-        "range_datatype":"float",
-        "units":"%",
-        "value":0.3
-    },
-    "m__Margin":{
-        "variable":"m",
-        "state":None,
-        "context":"Margin",
-        "context_type":"prescriptive",
-        "computed":True,
-        "description":"Mass [(NTE-CBE)/NTE]",
-        "dimensions":"percent",
-        "mod_datetime":NOW,
-        "name":"Mass [Margin]",
-        "range_datatype":"float",
-        "units":"%",
-        "value":0.0
-    },
-    "width":{
-        "variable":"width",
-        "state":None,
-        "context":None,
-        "context_type":None,
-        "computed":False,
-        "description":"Length in x direction",
-        "dimensions":"length",
-        "mod_datetime":NOW,
-        "name":"Width",
-        "range_datatype":"float",
-        "units":"m",
-        "value":0.0
-    }
-}
 

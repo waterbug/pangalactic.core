@@ -29,13 +29,20 @@ TWOPLACES = Decimal('0.01')
 componentz = {}
 Comp = namedtuple('Comp', 'oid quantity')
 
-# parameterz:  persistent parameter cache
-# format:  {product.oid : {'parameter_id': {parameter properties}
-#                              ...}}
+# parameterz:  persistent cache of assigned parameter values
+# format:  {object.oid : {'parameter_id': {parameter properties}
+#                         ...}}
 # ... where parameter properties are:
-# name, variable, state, context, description, value, units, dimensions,
-# range_datatype, computed, mod_datetime
+# value, units, mod_datetime
 parameterz = {}
+
+# parm_defz:  persistent cache of parameter definitions
+# format:  {'parameter_id': {parameter properties}
+#                            ...}}
+# ... where parameter definition properties are:
+# name, variable, context, description, dimensions, range_datatype, computed,
+# mod_datetime
+parm_defz = {}
 
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
 # format:  {dimension : [ids of ParameterDefinitions having that dimension]}
@@ -64,7 +71,7 @@ def round_to(x, n=4):
 def refresh_componentz(orb, product):
     """
     Refresh the `componentz` cache for a Product instance. This must be called
-    before calling orb.recompute_parms() whenever a new Acu is created,
+    before calling orb.recompute_parmz() whenever a new Acu is created,
     deleted, or modified.  The 'componentz' dictionary has the form
 
         {product.oid : list of Comp('oid', 'quantity') namedtuples}
@@ -102,6 +109,97 @@ def node_count(product_oid):
                 count += node_count(c.oid)
     return count
 
+def get_parameter_id(variable, context_id):
+    pid = variable
+    if context_id:
+        pid += '[' + context_id + ']'
+    return pid
+
+def get_parameter_name(variable_name, context_name):
+    name = variable_name
+    if context_name:
+        name += ' [' + context_name + ']'
+    return name
+
+def get_parameter_description(variable_desc, context_desc):
+    desc = variable_desc
+    if context_desc:
+        desc += ' [' + context_desc + ']'
+    return desc
+
+def create_parm_defz(orb):
+    """
+    Create the baseline `parm_defz` cache, where the cache has the form
+
+        {parameter_id : {name, variable, context, context_type, description,
+                         dimensions, range_datatype, computed, mod_datetime},
+         ...}
+
+    Args:
+        orb (Uberorb):  singleton imported from p.node.uberorb
+    """
+    orb.log.info('[orb] create_parmz_by_dimz')
+    global parm_defz
+    pds = orb.get_by_type('ParameterDefinition')
+    # first, the "simple variable" parameters ...
+    parm_defz.update(
+        {pd.id :
+         {'name': pd.name,
+          'variable': pd.id,
+          'context': None,
+          'context_type': None,
+          'description': pd.description,
+          'dimensions': pd.dimensions,
+          'range_datatype': pd.range_datatype,
+          'computed': False,
+          'mod_datetime':
+              str(getattr(pd, 'mod_datetime', '') or dtstamp())
+          } for pd in pds}
+          )
+    # create descriptive contextual PDs for baseline parameters (Mass, Power,
+    # Datarate)
+    all_contexts = orb.get_by_type('ParameterContext')
+    descriptive_contexts = [c for c in all_contexts
+                            if c.context_type == 'descriptive']
+    parm_defz.update(
+        {get_parameter_id(pd.id, c.id) :
+         {'name': get_parameter_name(pd.name, c.name),
+          'variable': pd.id,
+          'context': c.id,
+          'context_type': c.context_type,
+          'description':
+                get_parameter_description(pd.description, c.description),
+          'dimensions': c.context_dimensions or pd.dimensions,
+          'range_datatype': c.context_datatype or pd.range_datatype,
+          'computed': c.computed,
+          'mod_datetime': str(dtstamp())
+          } for pd in pds for c in descriptive_contexts
+            if pd.id in ['m', 'P', 'R_D']}
+          )
+
+def update_parm_defz(orb, pd):
+    """
+    Update the `parm_defz` cache when a new ParameterDefinition is created.
+
+    Args:
+        orb (Uberorb):  singleton imported from p.node.uberorb
+        pd (ParameterDefinition):  ParameterDefinition for which a new context
+            is being added
+        context (ParameterContext):  context of the new parameter
+    """
+    orb.log.info('[orb] update_parm_defz')
+    global parm_defz
+    parm_defz[pd.id] = {
+        'name': pd.name,
+        'variable': pd.id,
+        'context': None,
+        'context_type': None,
+        'description': pd.description,
+        'dimensions': pd.dimensions,
+        'range_datatype': pd.range_datatype,
+        'computed': False,
+        'mod_datetime': str(dtstamp())}
+
 def create_parmz_by_dimz(orb):
     """
     Create the `parmz_by_dimz` cache, where the cache has the form
@@ -136,81 +234,63 @@ def update_parmz_by_dimz(orb, pd):
     else:
         parmz_by_dimz[pd.dimensions] = [pd.id]
 
-def get_parameter_id(variable, state=None, context=None):
-    pid = variable
-    if state:
-        pid += '_' + state.id
-        if context:
-            pid += '_' + context.id
-    elif context:
-        pid += '__' + context.id
-    return pid
-
-def add_parameter(orb, oid, variable, state=None, context=None):
+def add_parameter(orb, oid, pid):
     """
     Add a new parameter to an object, which really means adding a parameter
     data structure to the `p.node.parametrics.parameterz` dictionary under that
     objects's oid.  The parameter data structure format is a dict with the
     following keys:
 
-        variable, state, context, name, computed, description, dimensions,
-        range_datatype, generating_function, mod_datetime, value, units
+        value, units, mod_datetime
 
-    ... where `variable` is the id of the associated ParameterDefinition and
-    the parameter id, description, name, dimensions, range_datatype, and
-    generating_function are derived from the ParameterDefinition in combination
-    with the state and context.
+    NOTE:  'units' here refers to the preferred units in which to *display* the
+    parameter's value, not the units of the 'value', which are *always* mks
+    base units.
+
+    NOTE:  the 'pid' cannot be the pid of a "context parameter" -- context
+    parameters are never "added" to an object; they are only *computed* for a
+    context.  They are considered analytical quantities, rather than intrinsic
+    attributes.
 
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
         oid (str):  oid of the object that owns the parameter
-        variable (str):  `id` attribute of the parameter
-
-    Keyword Args:
-        state (State):  a State object
-        context (Context):  a Context object
+        pid (str):  `id` attribute of the parameter
     """
-    orb.log.info('[orb] add_parameter for:')
-    orb.log.info('        - variable: {!s}'.format(variable))
-    orb.log.info('        - state:    {!s}'.format(state))
-    orb.log.info('        - context:  {!s}'.format(context))
+    orb.log.info('[orb] add_parameter "{!s}"'.format(pid))
     global parameterz
-    pid = get_parameter_id(variable, state, context)
     if oid not in parameterz:
         parameterz[oid] = {}
     elif pid in parameterz[oid]:
         # if the object already has that parameter, do nothing
         return
-    pd = orb.get(get_parameter_definition_oid(variable))
-    if pd:
-        name = pd.name
-        desc = pd.description
-        dims = pd.dimensions
-        radt = pd.range_datatype
-        state_id = None
-        context_id = None
-        context_type = 'descriptive'  # default context is "descriptive"
-        comp = False
-        if state:
-            name += ' (' + state.name + ')'
-            desc +=  ' (' + state.desc + ')'
-            state_id = state.id
-        if context:
-            name += ' [' + context.name + ']'
-            desc +=  ' [' + context.desc + ']'
-            context_id = context.id
-            context_type = context.context_type
-            # Context context_dimensions, if not None, overrides dimensions
-            dims = context.context_dimensions
-            # Context context_datatype, if not None, overrides range_datatype
-            radt = context.context_datatype or radt
-            comp = context.computed
-    else:
+    # check for pid ParameterDefinition in db and cache
+    pd = orb.get(get_parameter_definition_oid(pid))
+    if not pd:
         # for now, if no ParameterDefinition exists for pid, pass
         # (maybe eventually raise TypeError)
+        orb.log.info('        - pid {!s} is not defined.'.format(pid))
         return
+    pdz = parm_defz.get(pid)
+    if not pdz:
+        # if not in parm_defz, add it:
+        pdz = {pd.id :
+               {'name': pd.name,
+                'variable': pd.id,
+                'context': None,
+                'context_type': None,
+                'description': pd.description,
+                'dimensions': pd.dimensions,
+                'range_datatype': pd.range_datatype,
+                'computed': False,
+                'mod_datetime':
+                    str(getattr(pd, 'mod_datetime', '') or dtstamp())
+                }}
+        parm_defz.update(pdz)
     # NOTE:  setting the parameter's value is a separate operation -- when a
     # parameter is created, its value is initialized to the appropriate "null"
+    radt = pdz.get('range_datatype', 'float')
+    dims = pdz.get('dimensions')
     p_defaults = config.get('p_defaults') or {}
     if p_defaults.get(pid):
         # if a default value is configured for this pid, override null
@@ -225,18 +305,9 @@ def add_parameter(orb, oid, variable, state=None, context=None):
     else:  # 'text'
         value = ''
     parameterz[oid][pid] = dict(
-        name=name,
-        description=desc,
-        variable=variable,
-        state=state_id,
-        context=context_id,
-        context_type=context_type,
         value=value,   # consistent with datatype defined in `range_datatype`
         units=in_si.get(dims),   # SI units consistent with `dimensions`
-        mod_datetime=dtstamp(),
-        dimensions=dims,
-        range_datatype=radt,
-        computed=comp)
+        mod_datetime=str(dtstamp()))
 
 def add_default_parameters(orb, obj):
     """
@@ -246,6 +317,8 @@ def add_default_parameters(orb, obj):
         orb (Uberorb):  the orb (singleton)
         obj (Identifiable):  the object to receive parameters
     """
+    orb.log.info('[orb] add default parameters to object "{!s}"'.format(
+                                                                obj.oid))
     # Configured Parameters are currently defined by the 'dashboard'
     # configuration (in future that may be augmented by Parameters
     # referenced by, e.g., a ProductType and/or a ModelTemplate, both of
@@ -266,6 +339,7 @@ def add_default_parameters(orb, obj):
         pids = (prefs.get('default_parms') or config.get('default_parms')
                 or ['m', 'P', 'R_D'])
     # add default parameters first ...
+    orb.log.info('      adding parameters {!s} ...'.format(str(pids)))
     for pid in pids:
         add_parameter(orb, obj.oid, pid)
 
@@ -287,8 +361,8 @@ def add_product_type_parameters(orb, obj, pt):
         pt_parmz = parameterz.get(pt.oid)
         if pt_parmz:
             # if so, replicate them directly (with values)
-            for parm_id in pt_parmz:
-                parameterz[obj.oid][parm_id] = pt_parmz[parm_id].copy()
+            for pid in pt_parmz:
+                parameterz[obj.oid][pid] = pt_parmz[pid].copy()
 
 def delete_parameter(orb, oid, pid):
     """
@@ -322,14 +396,14 @@ def get_pval(orb, oid, pid, allow_nan=False):
     """
     # Too verbose -- only for extreme debugging ...
     # orb.log.debug('* get_pval() ...')
-    global parameterz
+    # global parameterz
     try:
         # for extreme debugging only ...
         # orb.log.debug('  value of {} is {} ({})'.format(pid, val, type(val)))
         return parameterz[oid][pid]['value']
     except:
         # return NULL[allow_nan]
-        return 0.0
+        return 0
 
 def get_pval_as_str(orb, oid, pid, units=None, allow_nan=False):
     """
@@ -348,16 +422,14 @@ def get_pval_as_str(orb, oid, pid, units=None, allow_nan=False):
     """
     # Too verbose -- only for extreme debugging ...
     # orb.log.debug('* get_pval_as_str(orb, {}, {})'.format(oid, pid))
-    global parameterz
-    try:
-        parm = parameterz[oid][pid]
-    except:
-        # orb.log.debug('* get_pval_as_str failed for oid "{}"'.format(oid))
-        # orb.log.debug('  - obj does not have "{}" parameter.'.format(pid))
+    global parm_defz
+    pdz = parm_defz.get(pid)
+    if not pdz:
+        # orb.log.debug('  - "{}" does not have a definition.'.format(pid))
         return '-'
     try:
         # convert based on dimensions/units ...
-        dims = parm.get('dimensions')
+        dims = pdz.get('dimensions')
         # special cases for 'percent' and 'money'
         if dims == 'percent':
             # show percentage values in interface -- they will
@@ -381,7 +453,7 @@ def get_pval_as_str(orb, oid, pid, units=None, allow_nan=False):
                 val = quan_converted.magnitude
             else:
                 val = base_val
-        radt = parm.get('range_datatype')
+        radt = pdz.get('range_datatype')
         if radt in ['int', 'float']:
             dtype = DATATYPES.get(radt)
             numfmt = prefs.get('numeric_format')
@@ -406,7 +478,7 @@ def get_pval_as_str(orb, oid, pid, units=None, allow_nan=False):
         # if the value causes error, return '-'
         return '-'
 
-def _compute_pval(orb, oid, pid, allow_nan=False):
+def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
     """
     Get the value of a parameter of the specified object, computing it if it is
     'computed'; otherwise, returning its value from parameterz.
@@ -419,7 +491,8 @@ def _compute_pval(orb, oid, pid, allow_nan=False):
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Identifiable that has the parameter
-        pid (str): the parameter 'id' value
+        variable (str): the variable whose context value is to be computed
+        context_id (str): id of the context
 
     Keyword Args:
         allow_nan (bool): allow NaN as a value for cases in which the
@@ -427,37 +500,39 @@ def _compute_pval(orb, oid, pid, allow_nan=False):
             not set
     """
     # TODO:  astropy-style value with units
-    # orb.log.debug('* _compute_pval() ...')
-    # orb.log.debug('  {}.{}'.format(oid, pid))
+    orb.log.debug('* _compute_pval() for variable "{}"'.format(variable))
+    orb.log.debug('                  of item with oid "{}"'.format(oid))
+    orb.log.debug('                  in context "{}"'.format(context_id))
     global parameterz
-    if oid in parameterz:
-        parm = parameterz[oid].get(pid) or {}
-        if parm.get('computed'):
-            # orb.log.debug('  "{}" is computed ...'.format(pid))
-            # use generating_function -- in the future, there may be a Relation
-            # expression, found using the ParameterRelation relationship
-            variable = parm.get('variable')
-            state = parm.get('state')
-            context = parm.get('context')
-            compute = COMPUTES.get((variable, context))
+    val = 0.0
+    # object must have the variable as a parameter; if not, 0.0 is returned and
+    # nothing is updated in parameterz
+    if oid not in parameterz or not parameterz[oid].get(variable):
+        return val
+    pid = get_parameter_id(variable, context_id)
+    parm = parameterz[oid].get(pid) or {}
+    pdz = parm_defz[pid]
+    if pdz.get('computed'):
+        orb.log.debug('  "{}" is computed ...'.format(pid))
+        # look up compute function -- in the future, there may be a Relation
+        # expression, found using the ParameterRelation relationship
+        compute = COMPUTES.get((variable, context_id))
+        if compute:
             orb.log.debug('  compute function is {!s}'.format(getattr(
-                                            compute, '__name__', None)))
-            if compute:
-                value = compute(orb, oid, variable, state)
-                # orb.log.debug('  value is {}'.format(value))
-                return value
-            else:
-                # return NULL[allow_nan]
-                return 0.0
-            # return NULL[allow_nan]
-            return 0.0
-        # msg = '  "{}" is not computed; calling get_pval() ...'.format(pid)
-        # orb.log.debug(msg)
-        return get_pval(orb, oid, pid, allow_nan=allow_nan)
-    else:
-        # orb.log.debug('  this object has no parameters defined yet.')
-        # return NULL[allow_nan]
-        return 0.0
+                                        compute, '__name__', None)))
+            val = compute(orb, oid, variable) or 0.0
+            orb.log.debug('  value is {}'.format(val))
+        else:
+            orb.log.debug('  compute function not found.')
+        dims = pdz.get('dimensions')
+        units = in_si.get(dims)
+        parameterz[oid][pid] = dict(value=val, units=units,
+                                    mod_datetime=str(dtstamp()))
+    elif parm:
+        msg = '  "{}" is not computed; getting value ...'.format(pid)
+        orb.log.debug(msg)
+        val = parm.get('value') or 0.0
+    return val
 
 def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
     """
@@ -500,7 +575,11 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         return
     try:
         # cast value to range_datatype before setting
-        dt_name = parameterz[oid][pid]['range_datatype']
+        pdz = parm_defz.get(pid)
+        if not pdz:
+            # orb.log.debug('  parameter definition not found.')
+            return
+        dt_name = pdz['range_datatype']
         dtype = DATATYPES[dt_name]
         value = dtype(value)
         if units is not None:
@@ -520,12 +599,12 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
             converted_value = value
         parameterz[oid][pid]['value'] = converted_value
         if local or mod_datetime is None:
-            mod_datetime = dtstamp()
+            mod_datetime = str(dtstamp())
         parameterz[oid][pid]['mod_datetime'] = mod_datetime
         # dts = str(mod_datetime)
         # orb.log.debug('  setting value: {}'.format(value))
         # orb.log.debug('  setting mod_datetime: "{}"'.format(dts))
-        orb.recompute_parms()
+        orb.recompute_parmz()
     except:
         msg = '  value {} of datatype {} '.format(value, type(value))
         msg += 'not compatible with parameter datatype `{}`'.format(dt_name)
@@ -559,9 +638,8 @@ def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     # called at the end and will log essentially the same information ...
     # orb.log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
                                                            # str(str_val)))
-    global parameterz
-    radt = parameterz[oid][pid].get('range_datatype')
     try:
+        radt = parm_defz[pid].get('range_datatype')
         if radt in ['int', 'float']:
             dtype = DATATYPES.get(radt)
             num_fmt = prefs.get('numeric_format')
@@ -573,7 +651,7 @@ def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
                 val = dtype(str_val)
         else:
             val = str_val
-        if parameterz[oid][pid].get('dimensions') == 'percent':
+        if parm_defz[pid].get('dimensions') == 'percent':
             val = 0.01 * float(val)
         return val
     except:
@@ -609,9 +687,8 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     # called at the end and will log essentially the same information ...
     # orb.log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
                                                            # str(str_val)))
-    global parameterz
-    radt = parameterz[oid][pid].get('range_datatype')
     try:
+        radt = parm_defz[pid].get('range_datatype')
         if radt in ['int', 'float']:
             dtype = DATATYPES.get(radt)
             num_fmt = prefs.get('numeric_format')
@@ -623,7 +700,7 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
                 val = dtype(str_val)
         else:
             val = str_val
-        if parameterz[oid][pid].get('dimensions') == 'percent':
+        if parm_defz[pid].get('dimensions') == 'percent':
             val = 0.01 * float(val)
         set_pval(orb, oid, pid, val, units=units, mod_datetime=mod_datetime,
                  local=local)
@@ -633,13 +710,13 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
         orb.log.info('  could not convert string "{}" ...'.format(str_val))
         orb.log.info('  bailing out.')
 
-def get_assembly_parameter(orb, product_oid, variable, state):
+def get_assembly_parameter(orb, product_oid, variable):
     """
-    Return the total value of a linearly additive assembly parameter (e.g.,
-    mass, power consumption, data rate) for a product based on the summed
-    values of the parameter over all of the product's known components.  If no
-    components are defined for the product, simply return the value of the
-    parameter as specified for the product, or the default.
+    Return the total assembly value of a linearly additive variable (e.g.,
+    mass, power consumption, data rate) for a product based on the recursively
+    summed values of the parameter over all of the product's known components.
+    If no components are defined for the product, simply return the value of
+    the parameter as specified for the product, or the default (usually 0).
 
     CAUTION: this may return a wildly inaccurate value for an incompletely
     specified assembly.
@@ -648,32 +725,26 @@ def get_assembly_parameter(orb, product_oid, variable, state):
         orb (Uberorb): the orb (see p.node.uberorb)
         product_oid (str): the oid of the Product whose total parameter is
             being estimated
-        variable (str): `variable` of the parameter for which the assembly
-            value is being computed
-        state (str): `state` of the parameter for which the assembly
-            value is being computed
+        variable (str): variable for which the assembly value is being computed
     """
     # VERY verbose, even for debugging!
     # orb.log.debug('[parametrics] get_assembly_parameter()')
-    global parameterz
-    base_parameter_id = get_parameter_id(variable, state=state)
-    if (product_oid in parameterz and
-        base_parameter_id in parameterz[product_oid]):
-        radt = parameterz[product_oid][variable].get('range_datatype')
+    if (product_oid in parameterz and variable in parameterz[product_oid]):
+        radt = parm_defz[variable]['range_datatype']
         dtype = DATATYPES[radt]
         # cz, if it exists, will be a list of namedtuples ...
         cz = componentz.get(product_oid)
         if cz:
             # dtype cast is used here in case some component didn't have this
             # parameter or didn't exist and we got a 0.0 value for it ...
-            summation = fsum([dtype(get_assembly_parameter(
-                              orb, c.oid, base_parameter_id) * c.quantity)
-                              for c in cz])
+            summation = fsum(
+              [dtype(get_assembly_parameter(orb, c.oid, variable) * c.quantity)
+               for c in cz])
             return round_to(summation)
         else:
-            # if the product has no known components, return its specified base
-            # parameter value (note that the default here is 0.0)
-            return _compute_pval(orb, product_oid, base_parameter_id)
+            # if the product has no known components, return its specified
+            # value for the variable (note that the default here is 0.0)
+            return get_pval(orb, product_oid, variable)
     else:
         return 0.0
 
@@ -739,18 +810,18 @@ def get_margin(orb, oid, parameter_id, default=0.0):
 # the COMPUTES dict maps tuples of (variable, Context.id) to applicable
 # generating functions
 COMPUTES = {
-    ('m', 'CBE'):    get_assembly_parameter,
-    ('m', 'Total'):  get_assembly_parameter,
-    ('m', 'MEV'):    get_mev,
-    ('m', 'Margin'): get_margin,
-    ('P', 'CBE'):    get_assembly_parameter,
-    ('P', 'Total'):  get_assembly_parameter,
-    ('P', 'MEV'):    get_mev,
-    ('P', 'Margin'): get_margin,
-    ('R', 'CBE'):    get_assembly_parameter,
-    ('R', 'Total'):  get_assembly_parameter,
-    ('R', 'MEV'):    get_mev,
-    ('R', 'Margin'): get_margin,
+    ('m', 'CBE'):      get_assembly_parameter,
+    ('m', 'Total'):    get_assembly_parameter,
+    ('m', 'MEV'):      get_mev,
+    ('m', 'Margin'):   get_margin,
+    ('P', 'CBE'):      get_assembly_parameter,
+    ('P', 'Total'):    get_assembly_parameter,
+    ('P', 'MEV'):      get_mev,
+    ('P', 'Margin'):   get_margin,
+    ('R_D', 'CBE'):    get_assembly_parameter,
+    ('R_D', 'Total'):  get_assembly_parameter,
+    ('R_D', 'MEV'):    get_mev,
+    ('R_D', 'Margin'): get_margin,
     }
 
 ################################################

@@ -155,13 +155,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install future'
 
-    - jpeg >=9b
-      * NOTE: version 9b is in the 'default' conda channel
-
-    - ** openjpeg >=2.3.0
-      * NOTE: version 2.3.0 is in the 'conda-forge' channel
-      ** NOTE: openjpeg appears to be unnecessary in python 3 versions
-
     - pyqt =5.6.0
       [until we figure out why 5.9 causes diagram double-click problem]
       * NOTE: use the 'default' conda channel -- this is especially important
@@ -171,18 +164,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
         while installing pyqt)
 
           Configuration:  'conda install pyqt=5.6.0'
-
-    - pillow <=4.1.1   # 4.2.x is broken
-      Python Imaging Library (PIL) (latest released version)
-      * NOTE: implemented as "pillow"
-      * NOTE: is in the 'default' conda channel
-
-          Configuration:  'conda install pillow'
-
-    - matplotlib
-      * NOTE: is in the 'default' conda channel
-
-          Configuration:  'conda install matplotlib'
 
     - Twisted
       Asynchronous networking framework
