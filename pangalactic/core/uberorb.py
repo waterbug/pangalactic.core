@@ -430,22 +430,22 @@ class UberORB(object):
         """
         self.log.info('* [orb] recompute_parmz()')
         # TODO:  preferred contexts should override defaults
-        # default contexts:  CBE, MEV
-        contexts = config.get('contexts', ['CBE', 'MEV'])
-        variables = config.get('variables', ['m', 'P', 'R_D'])
-        if not contexts:
-            return
+        # default descriptive contexts:  CBE, MEV
+        d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or []
+        variables = config.get('variables', ['m', 'P', 'R_D']) or []
         # TODO:  make this more efficient by iterating over only the "top
         # level" assembly oids, since _compute_pval is recursive and will
         # recompute all lower-level component/subassembly values in each pass
-        for context in contexts:
+        for context in d_contexts:
             for variable in variables:
                 for oid in parameterz:
                     _compute_pval(self, oid, variable, context)
-        # for oid, parms in parameterz.items():
-            # for pid, p in parms.items():
-                # parameterz[oid][pid]['value'] = _compute_pval(self, oid,
-                                                              # pid)
+        # prescriptive contexts (performance requirements)
+        p_contexts = config.get('prescriptive_contexts', ['Margin']) or []
+        for context in p_contexts:
+            for variable in variables:
+                for oid in parameterz:
+                    _compute_pval(self, oid, variable, context)
         self._save_parmz()
 
     def assign_test_parameters(self, objs):

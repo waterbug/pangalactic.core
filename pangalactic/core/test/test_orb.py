@@ -364,6 +364,21 @@ class OrbTest(unittest.TestCase):
         expected = round_to(1.3 * expected)
         self.assertEqual(expected, value)
 
+    def test_20_compute_margin(self):
+        """CASE:  compute the mass margin ((NTE - CBE) / CBE)"""
+        orb.recompute_parmz()
+        value = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
+        sc = orb.get('test:spacecraft3')
+        expected = fsum([get_pval(orb, acu.component.oid, 'm')
+                         for acu in sc.components])
+        # but the Magic Twanger has components Flux Capacitor and Mr. Fusion,
+        # so ...
+        expected -= get_pval(orb, 'test:twanger', 'm')
+        expected += get_pval(orb, 'test:flux_capacitor', 'm')
+        expected += get_pval(orb, 'test:mr_fusion', 'm')
+        expected = round_to(1.3 * expected)
+        self.assertEqual(expected, value)
+
     def test_50_write_mel(self):
         """CASE:  test output of mel_writer"""
         # This test verifies that the `write_mel_xlsx` function succeeds

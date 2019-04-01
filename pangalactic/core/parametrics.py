@@ -129,7 +129,7 @@ def get_parameter_description(variable_desc, context_desc):
 
 def create_parm_defz(orb):
     """
-    Create the baseline `parm_defz` cache, where the cache has the form
+    Create the `parm_defz` cache of ParameterDefinitions, in the format:
 
         {parameter_id : {name, variable, context, context_type, description,
                          dimensions, range_datatype, computed, mod_datetime},
@@ -156,8 +156,9 @@ def create_parm_defz(orb):
               str(getattr(pd, 'mod_datetime', '') or dtstamp())
           } for pd in pds}
           )
-    # create descriptive contextual PDs for baseline parameters (Mass, Power,
-    # Datarate)
+    # add PDs for the descriptive contexts (CBE, Contingency, MEV) for the
+    # variables (Mass, Power, Datarate) for which functions have been defined
+    # to compute the CBE and MEV values
     all_contexts = orb.get_by_type('ParameterContext')
     descriptive_contexts = [c for c in all_contexts
                             if c.context_type == 'descriptive']
@@ -183,9 +184,7 @@ def update_parm_defz(orb, pd):
 
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
-        pd (ParameterDefinition):  ParameterDefinition for which a new context
-            is being added
-        context (ParameterContext):  context of the new parameter
+        pd (ParameterDefinition):  ParameterDefinition being added
     """
     orb.log.info('[orb] update_parm_defz')
     global parm_defz
@@ -778,30 +777,45 @@ def get_mev(orb, oid, variable):
     else:
         return 0.0
 
-# NOTE: SERIOUSLY BROKEN!
 # NOTE: in the new parameter paradigm, CBE applies to a Product, but NTE
 # applies to a *usage* (Acu or PSU) -- this function must be rewritten!
-def get_margin(orb, oid, parameter_id, default=0.0):
+def get_margin(orb, oid, variable, context, default=0):
     """
     Find the "Margin", (NTE-CBE)/CBE, for the specified parameter.
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
-        oid (str): the oid of the Modelable containing the parameters
-        parameter_id (str): the `id` of the parameter
+        oid (str): the oid of the Acu or PSU to which the NTE value is assigned
+        variable (str): the variable for which the margin is to be computed
+        context (str): the context that defines the margin
 
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
     # float cast is unnec. because python 3 division will do the right thing
-    nte_val = get_pval(orb, oid, parameter_id + '_NTE')
-    cbe_val = _compute_pval(orb, oid, parameter_id + '_CBE')
+    nte_val = get_pval(orb, oid, variable + '[NTE]')
+    nte_node = orb.get(oid)
+    if not nte_node:
+        # TODO: notify user that NTE node was not valid
+        return default
+    if hasattr(nte_node, 'component'):
+        # node is Acu
+        system_oid = nte_node.component.oid
+    elif hasattr(nte_node, 'system'):
+        # node is PSU
+        system_oid = nte_node.system.oid
+    else:
+        # Error: node is neither Acu nor PSU
+        # TODO: notify user that NTE node was not valid
+        return default
+    cbe_val = _compute_pval(orb, system_oid, variable, 'CBE')
     # extremely verbose logging -- uncomment only for intense debugging
     # orb.log.debug('* get_margin: nte is {}'.format(nte_val))
     # orb.log.debug('              cbe is {}'.format(cbe_val))
     if nte_val == 0:   # NOTE: 0 == 0.0 evals to True
+        # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
-        return default  # not defined (division by zero)
+        return default
     else:
         margin = round_to((nte_val - cbe_val) / nte_val)
         # uncomment only for intense debugging
