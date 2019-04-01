@@ -429,7 +429,9 @@ class UberORB(object):
         modified, or deleted.
         """
         self.log.info('* [orb] recompute_parmz()')
-        contexts = config.get('contexts', ['CBE'])
+        # TODO:  preferred contexts should override defaults
+        # default contexts:  CBE, MEV
+        contexts = config.get('contexts', ['CBE', 'MEV'])
         variables = config.get('variables', ['m', 'P', 'R_D'])
         if not contexts:
             return

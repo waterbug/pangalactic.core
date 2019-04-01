@@ -748,10 +748,9 @@ def get_assembly_parameter(orb, product_oid, variable):
     else:
         return 0.0
 
-# NOTE: SERIOUSLY BROKEN!
 # NOTE: in the new parameter paradigm, the CBE and Contingency are context
 # parameters -- this function must be rewritten!
-def get_mev(orb, oid, parameter_id, default=0.0):
+def get_mev(orb, oid, variable):
     """
     Find a parameter's Maximum Expected Value based on its Current Best
     Estimate (CBE) value and the percent contingency specified for it.
@@ -764,8 +763,10 @@ def get_mev(orb, oid, parameter_id, default=0.0):
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
-    factor = _compute_pval(orb, oid, parameter_id + '_Ctgcy') + 1.0
-    base_val = _compute_pval(orb, oid, parameter_id + '_CBE')
+    # use a default value of 30%
+    ctgcy_val = get_pval(orb, oid, variable + '[Ctgcy]') or .3
+    factor = ctgcy_val + 1.0
+    base_val = _compute_pval(orb, oid, variable, 'CBE')
     # extremely verbose logging -- uncomment only for intense debugging
     # orb.log.debug('* get_mev: base parameter value is {}'.format(base_val))
     # orb.log.debug('           base parameter type is {}'.format(
@@ -775,7 +776,7 @@ def get_mev(orb, oid, parameter_id, default=0.0):
     elif isinstance(base_val, float):
         return round_to(factor * base_val)
     else:
-        return default
+        return 0.0
 
 # NOTE: SERIOUSLY BROKEN!
 # NOTE: in the new parameter paradigm, CBE applies to a Product, but NTE

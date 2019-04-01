@@ -12,7 +12,7 @@ import unittest
 import dateutil.parser as dtparser
 
 # pangalactic
-from pangalactic.core.parametrics import get_pval, parameterz
+from pangalactic.core.parametrics import get_pval, parameterz, round_to
 from pangalactic.core.serializers import (deserialize, serialize,
                                           serialize_parms)
 from pangalactic.core.uberorb     import orb
@@ -347,6 +347,21 @@ class OrbTest(unittest.TestCase):
         expected -= get_pval(orb, 'test:twanger', 'm')
         expected += get_pval(orb, 'test:flux_capacitor', 'm')
         expected += get_pval(orb, 'test:mr_fusion', 'm')
+        self.assertEqual(expected, value)
+
+    def test_19_compute_MEV(self):
+        """CASE:  compute the mass MEV (Maximum Estimated Value)"""
+        orb.recompute_parmz()
+        value = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
+        sc = orb.get('test:spacecraft3')
+        expected = fsum([get_pval(orb, acu.component.oid, 'm')
+                         for acu in sc.components])
+        # but the Magic Twanger has components Flux Capacitor and Mr. Fusion,
+        # so ...
+        expected -= get_pval(orb, 'test:twanger', 'm')
+        expected += get_pval(orb, 'test:flux_capacitor', 'm')
+        expected += get_pval(orb, 'test:mr_fusion', 'm')
+        expected = round_to(1.3 * expected)
         self.assertEqual(expected, value)
 
     def test_50_write_mel(self):

@@ -24,7 +24,6 @@ test_orb.py
 # test_vger_addFile.py \
 # test_vger_addVersions.py
 do
-    echo '==============================================='
     echo
     echo -n "run $x ? (y/n) [y]"
     response=y
