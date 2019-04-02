@@ -367,11 +367,11 @@ class UberORB(object):
         database.
         """
         self.log.info('* [orb] _load_parm_defz() ...')
-        global parm_defz
         json_path = os.path.join(self.home, 'parameter_defs.json')
         if os.path.exists(json_path):
             with open(json_path) as f:
-                parm_defz = json.loads(f.read())
+                saved_parm_defs = json.loads(f.read())
+                parm_defz.update(saved_parm_defs)
             self.log.info('        parm_defz cache is loaded.')
         else:
             self.log.info('        "parameter_defs.json" was not found.')
@@ -441,11 +441,13 @@ class UberORB(object):
                 for oid in parameterz:
                     _compute_pval(self, oid, variable, context)
         # prescriptive contexts (performance requirements)
-        p_contexts = config.get('prescriptive_contexts', ['Margin']) or []
+        # for now, only 'Margin' (for nodes that have an NTE value)
+        p_contexts = ['Margin']
         for context in p_contexts:
-            for variable in variables:
+            for variable in ['m', 'P', 'R_D']:
                 for oid in parameterz:
-                    _compute_pval(self, oid, variable, context)
+                    if parameterz[oid].get(variable + '[NTE]'):
+                        _compute_pval(self, oid, variable, context)
         self._save_parmz()
 
     def assign_test_parameters(self, objs):

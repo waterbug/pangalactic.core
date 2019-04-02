@@ -12,7 +12,8 @@ import unittest
 import dateutil.parser as dtparser
 
 # pangalactic
-from pangalactic.core.parametrics import get_pval, parameterz, round_to
+from pangalactic.core.parametrics import (_compute_pval, get_pval, parameterz,
+                                          round_to)
 from pangalactic.core.serializers import (deserialize, serialize,
                                           serialize_parms)
 from pangalactic.core.uberorb     import orb
@@ -335,7 +336,7 @@ class OrbTest(unittest.TestCase):
             ]
         self.assertEqual(expected, value)
 
-    def test_18_compute_CBE(self):
+    def test_18_compute_cbe(self):
         """CASE:  compute the mass CBE (Current Best Estimate)"""
         orb.recompute_parmz()
         value = get_pval(orb, 'test:spacecraft3', 'm[CBE]')
@@ -349,7 +350,7 @@ class OrbTest(unittest.TestCase):
         expected += get_pval(orb, 'test:mr_fusion', 'm')
         self.assertEqual(expected, value)
 
-    def test_19_compute_MEV(self):
+    def test_19_compute_mev(self):
         """CASE:  compute the mass MEV (Maximum Estimated Value)"""
         orb.recompute_parmz()
         value = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
@@ -367,16 +368,11 @@ class OrbTest(unittest.TestCase):
     def test_20_compute_margin(self):
         """CASE:  compute the mass margin ((NTE - CBE) / CBE)"""
         orb.recompute_parmz()
-        value = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
-        sc = orb.get('test:spacecraft3')
-        expected = fsum([get_pval(orb, acu.component.oid, 'm')
-                         for acu in sc.components])
-        # but the Magic Twanger has components Flux Capacitor and Mr. Fusion,
-        # so ...
-        expected -= get_pval(orb, 'test:twanger', 'm')
-        expected += get_pval(orb, 'test:flux_capacitor', 'm')
-        expected += get_pval(orb, 'test:mr_fusion', 'm')
-        expected = round_to(1.3 * expected)
+        # compute mass margin at ProjectSystemUsage for spacecraft3
+        value = get_pval(orb, 'test:OTHER:system-1', 'm[Margin]')
+        cbe = get_pval(orb, 'test:spacecraft3', 'm[CBE]')
+        nte = get_pval(orb, 'test:OTHER:system-1', 'm[NTE]')
+        expected = round_to(((nte - cbe) / cbe) * 100.0)
         self.assertEqual(expected, value)
 
     def test_50_write_mel(self):

@@ -641,11 +641,11 @@ parametrized_test_objects = [
        'P':
          {'mod_datetime': NOW,
           'units': 'W',
-          'value': '100.0'},
+          'value': 100.0},
        'm':
          {'mod_datetime': NOW,
           'units': 'kg',
-          'value': '1000.0'}
+          'value': 1000.0}
        },
        iteration=1,
        version='2',
@@ -850,6 +850,12 @@ related_test_objects = [
         project='test:OTHER',
         system='test:spacecraft3',
         system_role='Spacecraft',
+        parameters={
+          'm[NTE]':
+            {'mod_datetime': NOW,
+             'units': 'kg',
+             'value': 3000.0}
+        },
         creator='test:steve',
         create_datetime=NOW,
         modifier='test:steve',
