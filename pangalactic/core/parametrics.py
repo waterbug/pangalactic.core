@@ -491,12 +491,13 @@ def get_pval_as_str(orb, oid, pid, units=None, allow_nan=False):
 def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
     """
     Get the value of a parameter of the specified object, computing it if it is
-    'computed'; otherwise, returning its value from parameterz.
+    'computed' and caching the computed value in parameterz; otherwise,
+    returning its value from parameterz.
 
-    NOTE: this function is intended to be private, used only by the `orb`
-    or within `parametrics` module itself.  The "public" `get_pval` function
-    should always be used by other modules (which will access pre-computed
-    parameter values).
+    NOTE: this function is intended to be private, called only by the orb's
+    `recompute_parmz` method or within `parametrics` module itself.  The
+    "public" `get_pval` function should always be used by other modules (which
+    will access the cached pre-computed parameter values).
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
@@ -531,6 +532,7 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
             orb.log.debug('  value is {}'.format(val))
         else:
             orb.log.debug('  compute function not found.')
+            # val = 'undefined'
         dims = pdz.get('dimensions')
         units = in_si.get(dims)
         if val != 'undefined':
@@ -596,12 +598,15 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
                 quan = value * ureg.parse_expression(units)
                 quan_base = quan.to_base_units()
                 converted_value = quan_base.magnitude
-                parameterz[oid][pid]['units'] = units
             except:
-                # if problem with units, do nothing
+                # TODO: notify end user if units could not be parsed!
+                # ... for now, use base units
                 orb.log.info('  could not parse units "{}" ...'.format(units))
-                orb.log.info('  bailing out.')
-                return
+                dims = pdz.get('dimensions')
+                units = in_si.get(dims)
+                orb.log.info('  setting units to base units: {}'.format(units))
+            finally:
+                parameterz[oid][pid]['units'] = units
         else:
             # None for units -> value is already in base units
             converted_value = value
@@ -771,8 +776,16 @@ def compute_mev(orb, oid, variable):
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
-    # use a default value of 30%
-    ctgcy_val = get_pval(orb, oid, variable + '[Ctgcy]') or .3
+    orb.log.info('* compute_mev "{}": "{}"'.format(oid, variable))
+    ctgcy_val = get_pval(orb, oid, variable + '[Ctgcy]')
+    if not ctgcy_val:
+        orb.log.info('  contingency not set --')
+        orb.log.info('  setting default value (30%) ...')
+        # if Contingency value is 0 or not set, set to default value of 30%
+        ctgcy_val = 0.3
+        pid = variable + '[Ctgcy]'
+        parameterz[oid][pid] = {'value': ctgcy_val, 'units': '%',
+                                'mod_datetime': str(dtstamp())}
     factor = ctgcy_val + 1.0
     base_val = _compute_pval(orb, oid, variable, 'CBE')
     # extremely verbose logging -- uncomment only for intense debugging
@@ -790,7 +803,7 @@ def compute_mev(orb, oid, variable):
 # applies to a *usage* (Acu or PSU) -- this function must be rewritten!
 def compute_margin(orb, oid, variable, context=None, default=0):
     """
-    Compute the "Margin", (NTE-CBE)/CBE, for the specified parameter.
+    setting default value (30%)Compute the "Margin", (NTE-CBE)/CBE, for the specified parameter.
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
