@@ -85,11 +85,11 @@ PGXN_VIEWS = dict(
 
 # PGXN_PARAMETERS:  preferred ordering for parameters in PgxnObject parameter
 # forms
-PGXN_PARAMETERS = ['m', 'm_ctgcy', 'm_NTE', 'P', 'P_ctgcy', 'P_NTE', 'R_D',
-                   'R_ctgcy', 'R_NTE', 'Vendor', 'Cost', 'TRL', 'height',
-                   'width', 'depth', 'CoM_X', 'CoM_Y', 'CoM_Z', 'm_CBE',
-                   'm_MEV', 'm_margin', 'P_CBE', 'P_MEV', 'P_margin', 'R_CBE',
-                   'R_MEV', 'R_margin']
+PGXN_PARAMETERS = ['m', 'm[Ctgcy]', 'm[NTE]', 'P', 'P[Ctgcy]', 'P[NTE]', 'R_D',
+                   'R_D[Ctgcy]', 'R_D[NTE]', 'Vendor', 'Cost', 'TRL', 'height',
+                   'width', 'depth', 'CoM_X', 'CoM_Y', 'CoM_Z', 'm[CBE]',
+                   'm[MEV]', 'm[Margin]', 'P[CBE]', 'P[MEV]', 'P[Margin]',
+                   'R_D[CBE]', 'R_D[MEV]', 'R_D[Margin]']
 
 # PGXN_PLACEHOLDERS:  Placeholder text for fields in PgxnObject forms
 PGXN_PLACEHOLDERS = {'id': 'abbreviated name; no spaces',

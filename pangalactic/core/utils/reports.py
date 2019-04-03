@@ -320,12 +320,12 @@ def write_mel_xlsx(context, is_project=True,
 
 def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts, level,
                               row, component, qty=1):
-    mcbe = get_pval(orb, component.oid, 'm_CBE')
-    ctgcy_m = str(100 * get_pval(orb, component.oid, 'm_ctgcy')) + ' %'
-    mmev = get_pval(orb, component.oid, 'm_MEV')
-    pcbe = get_pval(orb, component.oid, 'P_CBE')
-    ctgcy_P = str(100 * get_pval(orb, component.oid, 'P_ctgcy')) + ' %'
-    pmev = get_pval(orb, component.oid, 'P_MEV')
+    mcbe = get_pval(orb, component.oid, 'm[CBE]')
+    ctgcy_m = str(100 * get_pval(orb, component.oid, 'm[Ctgcy]')) + ' %'
+    mmev = get_pval(orb, component.oid, 'm[MEV]')
+    pcbe = get_pval(orb, component.oid, 'P[CBE]')
+    ctgcy_P = str(100 * get_pval(orb, component.oid, 'P[Ctgcy]')) + ' %'
+    pmev = get_pval(orb, component.oid, 'P[MEV]')
     # columns:
     #   0: Level
     #   1: Name
@@ -613,12 +613,12 @@ mel_columns = ['level', 'name', 'unit_mass', 'cold_units', 'hot_units',
     # book.save(file_path)   # export to an EXCEL file
 
 # def write_component_rows(sheet, level, row, component):
-    # mcbe = get_pval(orb, component.oid, 'm_CBE')
-    # ctgcy_m = str(100 * get_pval(orb, component.oid, 'm_ctgcy')) + ' %'
-    # mmev = get_pval(orb, component.oid, 'm_MEV')
-    # pcbe = get_pval(orb, component.oid, 'P_CBE')
-    # ctgcy_P = str(100 * get_pval(orb, component.oid, 'P_ctgcy')) + ' %'
-    # pmev = get_pval(orb, component.oid, 'P_MEV')
+    # mcbe = get_pval(orb, component.oid, 'm[CBE]')
+    # ctgcy_m = str(100 * get_pval(orb, component.oid, 'm[Ctgcy]')) + ' %'
+    # mmev = get_pval(orb, component.oid, 'm[MEV]')
+    # pcbe = get_pval(orb, component.oid, 'P[CBE]')
+    # ctgcy_P = str(100 * get_pval(orb, component.oid, 'P[Ctgcy]')) + ' %'
+    # pmev = get_pval(orb, component.oid, 'P[MEV]')
     # if level == 1:
         # level_style = ctr_black_bg_12
         # name_style = left_black_bg_12
