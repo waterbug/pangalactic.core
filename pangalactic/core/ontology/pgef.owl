@@ -1053,11 +1053,11 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/condition -->
+    <!-- http://pangalactic.us/pgef/formulation -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;condition">
+    <owl:DatatypeProperty rdf:about="&pgef;formulation">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A mathematical expression (e.g. an inequality, an equation, a set of simultaneous equations, etc.) that defines the elements in the graph of a Relation.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The mathematical expression(s) (e.g. inequality, equation, set of simultaneous equations, etc.) that define the Relation.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Relation"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
@@ -1479,17 +1479,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <owl:DatatypeProperty rdf:about="&pgef;req_min_max_phrase">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The phrase in a Requirement description that expresses the relationship of a parameter to a maximum or minimum value.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/req_dimensions -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;req_dimensions">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The dimensions of the parameter specified by a Requirement, which of course also applies to the values of any minimum, maximum, or tolerances specified.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
@@ -2235,7 +2224,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
     <owl:Class rdf:about="&pgef;ParameterRelation">
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A ParameterRelation specifies a mathematical Relation that holds among one or more parameters, as specified in their definitions (ParameterDefinition).</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">A ParameterRelation links a Relation (that holds among one or more parameters) to the definitions of those parameters (ParameterDefinition). So a ParameterRelation is a many-to-many relationship between Relations and ParameterDefinitions. For a given Relation, its formulation (cf.) holds the mathematical expressions connecting the related parameters. Note that this model does not specify the context in which the Relation holds -- namely, the objects of which its parameters are attributes -- so this must be supplied as additional information in order to evaluate a Relation instance.</rdfs:comment>
     </owl:Class>
 
 
