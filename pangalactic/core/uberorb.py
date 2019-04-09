@@ -598,9 +598,12 @@ class UberORB(object):
         Args:
             objs (iterable of objects):  the objects to be saved
         """
+        recompute_required = False
         for obj in objs:
             cname = obj.__class__.__name__
             oid = getattr(obj, 'oid', None)
+            if oid in parameterz:
+                recompute_required = True
             self.log.info('* orb.save')
             new = bool(oid in self.new_oids) or not self.get(oid)
             if new:
@@ -640,7 +643,8 @@ class UberORB(object):
                 self._save_parm_defz()
         self.log.info('  orb.save:  committing db session.')
         self.db.commit()
-        self.recompute_parmz()
+        if recompute_required:
+            self.recompute_parmz()
         return True
 
     def get(self, *oid, **kw):
@@ -1014,7 +1018,7 @@ class UberORB(object):
         # TODO: make sure appropriate relationships in which these objects
         # are the parent or child are also deleted
         info = []
-        refresh_parameterz = False
+        recompute_required = False
         refresh_assemblies = []
         local_user = self.get(state.get('local_user_oid', 'me'))
         for obj in objs:
@@ -1054,11 +1058,11 @@ class UberORB(object):
             if parameterz.get(obj.oid):
                 # NOTE: very important:  remove oid from parameterz
                 del parameterz[obj.oid]
-                refresh_parameterz = True
+                recompute_required = True
             elif isinstance(obj, self.classes['Acu']):
                 if getattr(obj.assembly, 'oid') in componentz:
                     refresh_assemblies.append(obj.assembly)
-                refresh_parameterz = True
+                recompute_required = True
             creator = getattr(obj, 'creator', None)
             if creator == local_user:
                 # if local_user created obj, add it to trash
@@ -1071,7 +1075,7 @@ class UberORB(object):
         if refresh_assemblies:
             for assembly in refresh_assemblies:
                 refresh_componentz(self, assembly)
-        if refresh_parameterz:
+        if recompute_required:
             self.recompute_parmz()
 
     def is_versioned(self, obj):
