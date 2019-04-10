@@ -60,6 +60,7 @@ MAIN_VIEWS = dict(
                                     'parameter_definition'],
     Project=(IDENTITY + ['parent_organization']),
     ProjectSystemUsage=['id', 'project', 'system', 'system_role'],
+    Relation=(IDENTITY + ['formulation']),
     Representation=(IDENTITY + ['of_object', 'representation_purpose']),
     RepresentationFile=(IDENTITY + ['of_representation']),
     Requirement=(IDENTITY + ['abbreviation', 'name', 'owner',
@@ -79,7 +80,9 @@ PGXN_VIEWS = dict(
           'req_tolerance_type', 'req_tolerance_lower', 'req_tolerance_upper',
           'req_maximum_value', 'req_minimum_value', 'validated',
           'verification_method'],
-    narrative=['comment', 'rationale', 'purpose'],
+    narrative=['comment', 'rationale', 'purpose', 'computable_form',
+               'req_epilog', 'req_min_max_phrase', 'req_shall_phrase',
+               'req_subject'],
     admin=['oid', 'creator', 'create_datetime', 'modifier', 'mod_datetime',
            'url'])
 
@@ -277,11 +280,10 @@ PGXN_HIDE = list(ONE2M.keys()) + list(M2M.keys())
 PGXN_MASK = dict(
     ParameterDefinition=(PGXN_HIDE + ['base_parameters', 'computed_by_default',
                          'generating_function', 'used_in_disciplines']),
-    Requirement=(PGXN_HIDE + ['components', 'computable_form', 'derived_from',
-                 'fsc_code', 'has_models', 'ports', 'product_type',
+    Requirement=(PGXN_HIDE + ['components', 'derived_from', 'fsc_code',
+                 'has_models', 'ports', 'product_type',
                  'specification_number']),
-    Test=(PGXN_HIDE + ['components', 'computable_form', 'fsc_code',
-          'product_type'])
+    Test=(PGXN_HIDE + ['components', 'fsc_code', 'product_type'])
     )
 
 # PGXN_HIDE_PARMS:  Subclasses of Modelable for which 'parameters' panel should

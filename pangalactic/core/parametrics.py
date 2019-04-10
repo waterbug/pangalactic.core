@@ -510,10 +510,10 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
             object or the parameter doesn't exist or the parameter value is
             not set
     """
-    # TODO:  astropy-style value with units
-    orb.log.debug('* _compute_pval() for variable "{}"'.format(variable))
-    orb.log.debug('                  of item with oid "{}"'.format(oid))
-    orb.log.debug('                  in context "{}"'.format(context_id))
+    # NOTE: uncomment debug logging for EXTREMELY verbose debugging output
+    # orb.log.debug('* _compute_pval() for variable "{}"'.format(variable))
+    # orb.log.debug('                  of item with oid "{}"'.format(oid))
+    # orb.log.debug('                  in context "{}"'.format(context_id))
     val = 0.0
     # NOTE:  THE OBJECT DOES NOT ALWAYS HAVE TO HAVE THE VARIABLE
     # if oid not in parameterz or not parameterz[oid].get(variable):
@@ -521,17 +521,18 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
     pid = get_parameter_id(variable, context_id)
     pdz = parm_defz[pid]
     if pdz.get('computed'):
-        orb.log.debug('  "{}" is computed ...'.format(pid))
+        # orb.log.debug('  "{}" is computed ...'.format(pid))
         # look up compute function -- in the future, there may be a Relation
         # expression, found using the ParameterRelation relationship
         compute = COMPUTES.get((variable, context_id))
         if compute:
-            orb.log.debug('  compute function is {!s}'.format(getattr(
-                                        compute, '__name__', None)))
+            # orb.log.debug('  compute function is {!s}'.format(getattr(
+                                        # compute, '__name__', None)))
             val = compute(orb, oid, variable) or 0.0
-            orb.log.debug('  value is {}'.format(val))
+            # orb.log.debug('  value is {}'.format(val))
         else:
-            orb.log.debug('  compute function not found.')
+            pass
+            # orb.log.debug('  compute function not found.')
             # val = 'undefined'
         dims = pdz.get('dimensions')
         units = in_si.get(dims)
@@ -539,8 +540,8 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
             parameterz[oid][pid] = dict(value=val, units=units,
                                         mod_datetime=str(dtstamp()))
     else:
-        msg = '  "{}" is not computed; getting value ...'.format(pid)
-        orb.log.debug(msg)
+        # msg = '  "{}" is not computed; getting value ...'.format(pid)
+        # orb.log.debug(msg)
         parm = parameterz[oid].get(pid) or {}
         val = parm.get('value') or 0.0
     return val
@@ -569,6 +570,7 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         local (bool):  if False, we were called as a result of a remote event
             -- i.e., someone else set the value [default: True]
     """
+    # NOTE: uncomment debug logging for EXTREMELY verbose debugging output
     # orb.log.debug('* set_pval({}, {}, {})'.format(oid, pid, str(value)))
     if not oid:
         # orb.log.debug('  no oid provided; ignoring.')
@@ -601,10 +603,10 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
             except:
                 # TODO: notify end user if units could not be parsed!
                 # ... for now, use base units
-                orb.log.info('  could not parse units "{}" ...'.format(units))
+                orb.log.debug('  could not parse units "{}" ...'.format(units))
                 dims = pdz.get('dimensions')
                 units = in_si.get(dims)
-                orb.log.info('  setting units to base units: {}'.format(units))
+                orb.log.debug('  setting to base units: {}'.format(units))
             finally:
                 parameterz[oid][pid]['units'] = units
         else:
@@ -621,6 +623,7 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
     except:
         msg = '  value {} of datatype {} '.format(value, type(value))
         msg += 'not compatible with parameter datatype `{}`'.format(dt_name)
+        msg += ' ... parameter `{}` not set for oid `{}`'.format(pid, oid)
         orb.log.info(msg)
 
 def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
@@ -799,56 +802,58 @@ def compute_mev(orb, oid, variable):
     else:
         return 0.0
 
-# NOTE: in the new parameter paradigm, CBE applies to a Product, but NTE
-# applies to a *usage* (Acu or PSU) -- this function must be rewritten!
-def compute_margin(orb, oid, variable, context=None, default=0):
+# [WIP]
+def compute_margin(orb, oid, default=0):
     """
-    setting default value (30%)Compute the "Margin", (NTE-CBE)/CBE, for the specified parameter.
+    Compute the "Margin" for the specified performance requirement. So far,
+    "Margin" is only defined for performance requirements that specify a
+    maximum or "Not To Exceed" value, and is computed as (NTE-CBE)/CBE, where
+    CBE is the Current Best Estimate of the corresponding parameter of the
+    system or component to which the requirement is currently allocated.
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
-        oid (str): the oid of the Acu or PSU to which the NTE value is assigned
-        variable (str): the variable for which the margin is to be computed
+        oid (str): the oid of the performance requirement for which margin is
+            to be computed
 
     Keyword Args:
         context (str): the `id` of the context that defines the margin (for
             now, the only supported context is 'NTE', so context is ignored)
         default (any): a value to be returned if the parameter is not found
     """
+    req = orb.get(oid)
     # float cast is unnec. because python 3 division will do the right thing
-    nte_node = orb.get(oid)
-    if not nte_node:
+    if not isinstance(req, orb.classes['Requirement']):
         # TODO: notify user that NTE node was not valid
-        return 'undefined'
-    if (oid not in parameterz or
-        parameterz[oid].get(variable + '[NTE]') is None):
-        # if NTE for the oid is not set, nothing can be computed
-        return 'undefined'
-    nte_val = get_pval(orb, oid, variable + '[NTE]')
-    if hasattr(nte_node, 'component'):
-        # node is Acu
-        system_oid = nte_node.component.oid
-    elif hasattr(nte_node, 'system'):
-        # node is PSU
-        system_oid = nte_node.system.oid
-    else:
-        # Error: node is neither Acu nor PSU
-        # TODO: notify user that NTE node was not valid
-        return 'undefined'
-    cbe_val = _compute_pval(orb, system_oid, variable, 'CBE')
-    # extremely verbose logging -- uncomment only for intense debugging
-    # orb.log.debug('* compute_margin: nte is {}'.format(nte_val))
-    # orb.log.debug('              cbe is {}'.format(cbe_val))
-    if nte_val == 0:   # NOTE: 0 == 0.0 evals to True
-        # not defined (division by zero)
-        # TODO:  implement a NaN or "Undefined" ...
-        return 'undefined'
-    else:
-        # NOTE: margin is expressed as a percentage
-        margin = round_to(((nte_val - cbe_val) / cbe_val) * 100.0)
-        # uncomment only for intense debugging
-        # orb.log.debug('  ... margin is {}'.format(margin))
-        return margin
+        orb.log.info('  requirement with oid {} does not exist.'.format(oid))
+        # return 'undefined'
+        return 0
+    orb.log.info('* Computing margin for reqt "{}"'.format(req.name))
+    return 0
+    # nte_val = get_pval(orb, oid, variable + '[NTE]')
+    # if hasattr(nte_node, 'component'):
+        # # node is Acu
+        # system_oid = nte_node.component.oid
+    # elif hasattr(nte_node, 'system'):
+        # # node is PSU
+        # system_oid = nte_node.system.oid
+    # else:
+        # # Error: node is neither Acu nor PSU
+        # # TODO: notify user that NTE node was not valid
+        # return 'undefined'
+    # cbe_val = _compute_pval(orb, system_oid, variable, 'CBE')
+    # # orb.log.debug('  compute_margin: nte is {}'.format(nte_val))
+    # # orb.log.debug('              cbe is {}'.format(cbe_val))
+    # if nte_val == 0:   # NOTE: 0 == 0.0 evals to True
+        # # not defined (division by zero)
+        # # TODO:  implement a NaN or "Undefined" ...
+        # return 'undefined'
+    # else:
+        # # NOTE: margin is expressed as a percentage
+        # margin = round_to(((nte_val - cbe_val) / cbe_val) * 100.0)
+        # # uncomment only for intense debugging
+        # # orb.log.debug('  ... margin is {}'.format(margin))
+        # return margin
 
 # the COMPUTES dict maps variable and context id to applicable compute
 # functions

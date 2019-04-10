@@ -1463,6 +1463,17 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
+    <!-- http://pangalactic.us/pgef/req_units -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;req_units">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">For a performance Requirement, the units in which all related constraint values are expressed.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Requirement"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/req_shall_phrase -->
 
     <owl:DatatypeProperty rdf:about="&pgef;req_shall_phrase">
