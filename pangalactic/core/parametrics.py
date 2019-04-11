@@ -804,72 +804,86 @@ def compute_mev(orb, oid, variable):
 
 def compute_margin(orb, oid, variable, default=0):
     """
-    Compute the "Margin" for the specified performance requirement. So far,
-    "Margin" is only defined for performance requirements that specify a
-    maximum or "Not To Exceed" value, and is computed as (NTE-CBE)/CBE, where
-    CBE is the Current Best Estimate of the corresponding parameter of the
-    system or component to which the requirement is currently allocated.
+    Compute the "Margin" for the specified parameter (variable) at the
+    specified function or system role. So far, "Margin" is only defined for
+    performance requirements that specify a maximum or "Not To Exceed" value,
+    and is computed as (NTE-CBE)/CBE, where CBE is the Current Best Estimate of
+    the corresponding parameter of the system or component to which the
+    requirement is currently allocated.
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
-        oid (str): the oid of the function or system to which a performance
-            requirement for the specified variable is allocated
+        oid (str): the oid of the function (Acu) or system role
+            (ProjectSystemUsage) to which a performance requirement for the
+            specified variable is allocated
 
     Keyword Args:
         context (str): the `id` of the context that defines the margin (for
             now, the only supported context is 'NTE', so context is ignored)
         default (any): a value to be returned if the parameter is not found
     """
-    allocated_obj = orb.get(oid)
-    if hasattr(allocated_obj, 'component'):
-        obj_oid = getattr(allocated_obj.component, 'oid', None)
-    if hasattr(allocated_obj, 'system'):
-        obj_oid = getattr(allocated_obj.system, 'oid', None)
+    allocation_node = orb.get(oid)
+    allocated_to_system = False
+    if hasattr(allocation_node, 'component'):
+        obj_oid = getattr(allocation_node.component, 'oid', None)
+    if hasattr(allocation_node, 'system'):
+        obj_oid = getattr(allocation_node.system, 'oid', None)
+        allocated_to_system = True
     if not obj_oid or obj_oid == 'pgefobjects:TBD':
         orb.log.info('  allocation is to unknown or TBD system.')
         return 0
     cbe_val = _compute_pval(orb, obj_oid, variable, 'CBE')
     # find a performance requirement for the specified variable, allocated to
-    # the allocated_obj
-    # req = orb.search_exact()
-    # # float cast is unnec. because python 3 division will do the right thing
-    # if not isinstance(req, orb.classes['Requirement']):
-        # # TODO: notify user 
-        # orb.log.info('  requirement with oid {} does not exist.'.format(oid))
-        # # return 'undefined'
-        # return 0
-    # if getattr(req, 'requirement_type', None) != 'performance':
-        # # TODO: notify user
-        # orb.log.info('  reqt specified is not a performance reqt.'.format(oid))
-        # # return 'undefined'
-        # return 0
-    # orb.log.info('* Computing margin for reqt "{}"'.format(req.name))
-    # return 0
-    # rel = getattr(req, 'computable_form', None)
-    # prs = getattr(rel, 'correlates_parameters', None)
-    # if not prs:
-        # orb.log.info('  performance parameter could not be determined.')
-        # return 0
-    # pd = getattr(prs[0], 'correlates_parameter', None)
-    # parameter_id = getattr(pd, 'id', None)
-    # if not parameter_id:
-        # orb.log.info('  parameter identity is unknown.')
-        # return 0
-    # nte_val = req.maximum_value
-    # nte_units = req.req_units
-    # # convert NTE value to base units, if necessary
-    # quan = nte_val * ureg.parse_expression(nte_units)
-    # quan_base = quan.to_base_units()
-    # converted_nte_val = quan_base.magnitude
-    # orb.log.debug('  compute_margin: nte is {}'.format(converted_nte_val))
-    # orb.log.debug('                  cbe is {}'.format(cbe_val))
-    # if cbe_val == 0:   # NOTE: 0 == 0.0 evals to True
-        # # not defined (division by zero)
-        # # TODO:  implement a NaN or "Undefined" ...
-        # return 'undefined'
-    # margin = round_to(((converted_nte_val - cbe_val) / cbe_val) * 100.0)
-    # orb.log.debug('  ... margin is {}'.format(margin))
-    # return margin
+    # the allocation_node
+    pd = orb.get(get_parameter_definition_oid(variable))
+    if not pd:
+        orb.log.info('  parameter definition not found.')
+        return 0
+    # find all reqts allocated to the node
+    if allocated_to_system:
+        reqts = orb.search_exact(cname='Requirement',
+                                 allocated_to_system=allocation_node)
+    else:
+        reqts = orb.search_exact(cname='Requirement',
+                                 allocated_to_function=allocation_node)
+    if not reqts:
+        orb.log.info('  no reqts found with that allocation.')
+        return 0
+    # identify the relevant performance requirement
+    perf_reqt = None
+    for reqt in reqts:
+        rel = reqt.computable_form
+        if rel:
+            prs = rel.correlates_parameters
+            if prs:
+                pd = prs[0].correlates_parameter
+                if pd.id == variable:
+                    perf_reqt = reqt
+    if not perf_reqt:
+        orb.log.info('  relevant performance requirement not found.')
+        return 0
+    # TODO:  here we would identify the type of constraint, but currently we
+    # only support the NTE (maximum value) constraint
+    try:
+        nte_val = float(perf_reqt.req_maximum_value)
+    except:
+        # value was None or other non-numeric
+        orb.log.info('  NTE not specified by the relevant requirement.')
+        return 0
+    nte_units = perf_reqt.req_units
+    # convert NTE value to base units, if necessary
+    quan = nte_val * ureg.parse_expression(nte_units)
+    quan_base = quan.to_base_units()
+    converted_nte_val = quan_base.magnitude
+    orb.log.debug('  compute_margin: nte is {}'.format(converted_nte_val))
+    orb.log.debug('                  cbe is {}'.format(cbe_val))
+    if cbe_val == 0:   # NOTE: 0 == 0.0 evals to True
+        # not defined (division by zero)
+        # TODO:  implement a NaN or "Undefined" ...
+        return 'undefined'
+    margin = round_to(((converted_nte_val - cbe_val) / cbe_val) * 100.0)
+    orb.log.debug('  ... margin is {}'.format(margin))
+    return margin
 
 def compute_requirement_margin(orb, oid, default=0):
     """
