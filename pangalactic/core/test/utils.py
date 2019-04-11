@@ -861,6 +861,48 @@ related_test_objects = [
         modifier='test:steve',
         mod_datetime=NOW
         ),
+    dict(
+        _cname='ParameterRelation',
+        oid='test:OTHER:Spacecraft-Mass-Computable-Form-PR',
+        id='OTHER.1.0.Spacecraft-Mass-Computable-Form',
+        id_ns='test',
+        name='OTHER 1.0 Spacecraft Mass Computable Form',
+        referenced_relation='test:OTHER:Spacecraft-Mass-Computable-Form',
+        correlates_parameter='pgef:ParameterDefinition.m',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW
+        ),
+    dict(
+        _cname='Relation',
+        oid='test:OTHER:Spacecraft-Mass-Computable-Form',
+        id='OTHER.1.0.Spacecraft-Mass-Computable-Form',
+        id_ns='test',
+        name='OTHER 1.0 Spacecraft Mass Computable Form',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW
+        ),
+    dict(
+        _cname='Requirement',
+        oid='test:OTHER:Spacecraft-Mass',
+        id='OTHER.1.0.Spacecraft-Mass',
+        id_ns='test',
+        name='OTHER 1.0 Spacecraft Mass',
+        project='test:OTHER',
+        allocated_to_system='test:OTHER:system-1',
+        req_type='performance',
+        req_constraint_type='maximum',
+        req_maximum_value=4000.0,
+        req_units='kg',
+        computable_form='test:OTHER:Spacecraft-Mass-Computable-Form',
+        creator='test:steve',
+        create_datetime=NOW,
+        modifier='test:steve',
+        mod_datetime=NOW
+        ),
 
      # using a CAX-IF STEP model for test purposes
      dict(

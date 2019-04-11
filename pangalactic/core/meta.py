@@ -63,11 +63,10 @@ MAIN_VIEWS = dict(
     Relation=(IDENTITY + ['formulation']),
     Representation=(IDENTITY + ['of_object', 'representation_purpose']),
     RepresentationFile=(IDENTITY + ['of_representation']),
-    Requirement=(IDENTITY + ['abbreviation', 'name', 'owner',
-                 'requirement_type', 'allocated_to_function',
-                 'allocated_to_system', 'req_level', 'version',
-                 'version_sequence', 'iteration', 'validated', 'public',
-                 'frozen']),
+    Requirement=(IDENTITY + ['abbreviation', 'name', 'owner', 'req_type',
+                 'allocated_to_function', 'allocated_to_system', 'req_level',
+                 'version', 'version_sequence', 'iteration', 'validated',
+                 'public', 'frozen']),
     RoleAssignment=['assigned_role', 'assigned_to', 'role_assignment_context'],
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
     )
@@ -75,11 +74,10 @@ MAIN_VIEWS = dict(
 # PGXN_VIEWS:  Default fields/ordering for the PgxnObject "info", "narrative"
 # and "admin" tabs
 PGXN_VIEWS = dict(
-    info=['public', 'requirement_type', 'req_constraint_type',
-          'req_dimensions', 'req_target_value', 'req_tolerance',
-          'req_tolerance_type', 'req_tolerance_lower', 'req_tolerance_upper',
-          'req_maximum_value', 'req_minimum_value', 'validated',
-          'verification_method'],
+    info=['public', 'req_type', 'req_constraint_type', 'req_dimensions',
+          'req_target_value', 'req_tolerance', 'req_tolerance_type',
+          'req_tolerance_lower', 'req_tolerance_upper', 'req_maximum_value',
+          'req_minimum_value', 'validated', 'verification_method'],
     narrative=['comment', 'rationale', 'purpose', 'computable_form',
                'req_epilog', 'req_min_max_phrase', 'req_shall_phrase',
                'req_subject'],
@@ -405,7 +403,7 @@ ATTR_EXT_NAMES = {
     'Requirement' :
         {
          'description' : 'text',
-         'requirement_type' : 'type',
+         'req_type' : 'reqt type',
          'req_level' : 'level',
          'req_constraint_type' : 'constraint type',
          'req_dimensions' : 'dimensions',
@@ -459,7 +457,7 @@ PGEF_COL_WIDTHS = {
             'range_datatype': 50,
             'rationale': 250,
             'representations': 100,
-            'requirement_type': 50,
+            'req_type': 50,
             'url': 100,
             'version': 50,
             'version_sequence': 50

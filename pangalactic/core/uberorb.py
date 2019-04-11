@@ -27,8 +27,10 @@ from pangalactic.core.utils.meta  import uncook_datetime
 from pangalactic.core.mapping     import schema_maps, schema_version
 from pangalactic.core.parametrics import (add_default_parameters,
                                           _compute_pval, componentz,
+                                          compute_requirement_margin,
                                           create_parm_defz,
                                           create_parmz_by_dimz,
+                                          get_parameter_id,
                                           parm_defz, parameterz,
                                           refresh_componentz,
                                           update_parm_defz,
@@ -39,6 +41,7 @@ from pangalactic.core             import refdata
 from pangalactic.core.test        import data as test_data_mod
 from pangalactic.core.test        import vault as test_vault_mod
 from pangalactic.core.test.utils  import gen_test_pvals
+from pangalactic.core.utils.datetimes import dtstamp
 from pangalactic.core.log         import get_loggers
 from pangalactic.core.validation  import get_assembly
 from functools import reduce
@@ -440,14 +443,30 @@ class UberORB(object):
             for variable in variables:
                 for oid in parameterz:
                     _compute_pval(self, oid, variable, context)
-        # prescriptive contexts (performance requirements)
-        # for now, only 'Margin' (for nodes that have an NTE value)
-        p_contexts = ['Margin']
-        for context in p_contexts:
-            for variable in ['m', 'P', 'R_D']:
-                for oid in parameterz:
-                    if parameterz[oid].get(variable + '[NTE]'):
-                        _compute_pval(self, oid, variable, context)
+        # Margins all performance requirements
+        perf_reqt_oids = [r.oid for r in orb.get_by_type('Requirement')
+                          if r.req_type == 'performance']
+        for req_oid in perf_reqt_oids:
+            # compute_requirement_margin() returns a tuple:
+            # 0: oid of Acu or PSU to which reqt is allocated
+            # 1: id of performance parameter
+            # 2: margin [result] (expressed as a %)
+            oid, pid, result = compute_requirement_margin(orb, req_oid)
+            if oid:
+                margin_pid = get_parameter_id(pid, 'Margin')
+                self.log.info('        - {} at {}: {}'.format(pid, oid,
+                                                              result))
+                if not parameterz.get(oid):
+                    parameterz[oid] = {}
+                parameterz[oid][margin_pid] = dict(value=result,
+                                                   units='%',
+                                                   mod_datetime=str(dtstamp()))
+            else:
+                # if margin cannot be computed, None will be returned for oid
+                # and reason for failure will be in "result"
+                self.log.info('        - compute failed for {}:'.format(
+                                                                    req_oid))
+                self.log.info('          {}'.format(result))
         self._save_parmz()
 
     def assign_test_parameters(self, objs):

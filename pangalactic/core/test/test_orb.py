@@ -12,8 +12,9 @@ import unittest
 import dateutil.parser as dtparser
 
 # pangalactic
-from pangalactic.core.parametrics import (_compute_pval, get_pval, parameterz,
-                                          round_to)
+from pangalactic.core.parametrics import (_compute_pval, compute_margin,
+                                          compute_requirement_margin,
+                                          get_pval, parameterz, round_to)
 from pangalactic.core.serializers import (deserialize, serialize,
                                           serialize_parms)
 from pangalactic.core.uberorb     import orb
@@ -366,13 +367,30 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_20_compute_margin(self):
-        """CASE:  compute the mass margin ((NTE - CBE) / CBE)"""
-        orb.recompute_parmz()
+        """
+        CASE:  compute the mass margin ((NTE - CBE) / CBE) for a node to which
+        a performance requirement is allocated
+        """
         # compute mass margin at ProjectSystemUsage for spacecraft3
-        value = get_pval(orb, 'test:OTHER:system-1', 'm[Margin]')
+        value = compute_margin(orb, 'test:OTHER:system-1', 'm')
         cbe = get_pval(orb, 'test:spacecraft3', 'm[CBE]')
-        nte = get_pval(orb, 'test:OTHER:system-1', 'm[NTE]')
-        expected = round_to(((nte - cbe) / cbe) * 100.0)
+        perf_reqt = orb.get('test:OTHER:Spacecraft-Mass')
+        nte = perf_reqt.req_maximum_value
+        expected = round_to(((nte - cbe) / cbe))
+        self.assertEqual(expected, value)
+
+    def test_21_compute_requirement_margin(self):
+        """
+        CASE:  compute the margin associated with a performance requirement
+        """
+        # compute margin for the specified performance requirement
+        value = compute_requirement_margin(orb, 'test:OTHER:Spacecraft-Mass')
+        cbe = get_pval(orb, 'test:spacecraft3', 'm[CBE]')
+        perf_reqt = orb.get('test:OTHER:Spacecraft-Mass')
+        nte = perf_reqt.req_maximum_value
+        margin = round_to(((nte - cbe) / cbe))
+        # expected output is (oid of allocated node, parameter id, margin)
+        expected = ('test:OTHER:system-1', 'm', margin)
         self.assertEqual(expected, value)
 
     def test_50_write_mel(self):

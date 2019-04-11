@@ -881,7 +881,7 @@ def compute_margin(orb, oid, variable, default=0):
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
         return 'undefined'
-    margin = round_to(((converted_nte_val - cbe_val) / cbe_val) * 100.0)
+    margin = round_to(((converted_nte_val - cbe_val) / cbe_val))
     orb.log.debug('  ... margin is {}'.format(margin))
     return margin
 
@@ -902,43 +902,45 @@ def compute_requirement_margin(orb, oid, default=0):
         context (str): the `id` of the context that defines the margin (for
             now, the only supported context is 'NTE', so context is ignored)
         default (any): a value to be returned if the parameter is not found
+
+    Return:
+        allocated_to_oid, parameter_id, margin (tuple)
     """
     req = orb.get(oid)
     # float cast is unnec. because python 3 division will do the right thing
     if not isinstance(req, orb.classes['Requirement']):
         # TODO: notify user 
-        orb.log.info('  requirement with oid {} does not exist.'.format(oid))
-        # return 'undefined'
-        return 0
-    if getattr(req, 'requirement_type', None) != 'performance':
+        msg = 'Requirement with oid {} does not exist.'.format(oid)
+        return (None, None, msg)
+    if getattr(req, 'req_type', None) != 'performance':
         # TODO: notify user
-        orb.log.info('  reqt specified is not a performance reqt.'.format(oid))
-        # return 'undefined'
-        return 0
+        msg = 'Requirement with oid {} is not a performance reqt.'.format(oid)
+        return (None, None, msg)
     orb.log.info('* Computing margin for reqt "{}"'.format(req.name))
-    return 0
     rel = getattr(req, 'computable_form', None)
     prs = getattr(rel, 'correlates_parameters', None)
     if not prs:
-        orb.log.info('  performance parameter could not be determined.')
-        return 0
+        msg = 'Performance parameter could not be determined.'
+        return (None, None, msg)
     pd = getattr(prs[0], 'correlates_parameter', None)
     parameter_id = getattr(pd, 'id', None)
     if not parameter_id:
-        orb.log.info('  parameter identity is unknown.')
-        return 0
-    nte_val = req.maximum_value
+        msg = 'Parameter identity is unknown.'
+        return (None, None, msg)
+    nte_val = req.req_maximum_value
     nte_units = req.req_units
     acu = req.allocated_to_function
-    psu = req.allocated_to_function
+    psu = req.allocated_to_system
     if acu:
-        allocated_oid = getattr(acu.component, 'oid', None)
+        allocated_to_oid = acu.oid
+        object_oid = getattr(acu.component, 'oid', None)
     elif psu:
-        allocated_oid = getattr(psu.system, 'oid', None)
-    if not allocated_oid or allocated_oid == 'pgefobjects:TBD':
-        orb.log.info('  reqt allocated to unknown or TBD system.')
-        return 0
-    cbe_val = _compute_pval(orb, allocated_oid, parameter_id, 'CBE')
+        allocated_to_oid = psu.oid
+        object_oid = getattr(psu.system, 'oid', None)
+    if not object_oid or object_oid == 'pgefobjects:TBD':
+        msg = 'Requirement allocation points to unknown or TBD object.'
+        return (None, None, msg)
+    cbe_val = _compute_pval(orb, object_oid, parameter_id, 'CBE')
     # convert NTE value to base units, if necessary
     quan = nte_val * ureg.parse_expression(nte_units)
     quan_base = quan.to_base_units()
@@ -948,10 +950,12 @@ def compute_requirement_margin(orb, oid, default=0):
     if cbe_val == 0:   # NOTE: 0 == 0.0 evals to True
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
-        return 'undefined'
-    margin = round_to(((converted_nte_val - cbe_val) / cbe_val) * 100.0)
+        msg = 'CBE value for {} is 0; cannot compute margin.'.format(
+                                                        parameter_id)
+        return (None, None, msg)
+    margin = round_to(((converted_nte_val - cbe_val) / cbe_val))
     orb.log.debug('  ... margin is {}'.format(margin))
-    return margin
+    return allocated_to_oid, parameter_id, margin
 
 # the COMPUTES dict maps variable and context id to applicable compute
 # functions

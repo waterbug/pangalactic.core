@@ -1331,9 +1331,9 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
-    <!-- http://pangalactic.us/pgef/requirement_type -->
+    <!-- http://pangalactic.us/pgef/req_type -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;requirement_type">
+    <owl:DatatypeProperty rdf:about="&pgef;req_type">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The type of a Requirement: functional or performance.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
