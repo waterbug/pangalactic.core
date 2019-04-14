@@ -188,7 +188,7 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
     - pythonocc-core
       (for CAD viewer functionality)
-      * NOTE: not in the default conda channel, use 'dlr-sc' channel
+      * NOTE: not in the default conda channel, use 'pythonocc' channel
 
           Configuration: 'conda install pythonocc-core'
 

@@ -816,6 +816,8 @@ def compute_margin(orb, oid, variable, default=0):
         oid (str): the oid of the function (Acu) or system role
             (ProjectSystemUsage) to which a performance requirement for the
             specified variable is allocated
+        variable (str): name of the variable associated with parameter
+            constrained by the performance requirement
 
     Keyword Args:
         context (str): the `id` of the context that defines the margin (for
@@ -955,7 +957,7 @@ def compute_requirement_margin(orb, oid, default=0):
         return (None, None, msg)
     margin = round_to(((converted_nte_val - cbe_val) / cbe_val))
     orb.log.debug('  ... margin is {}'.format(margin))
-    return allocated_to_oid, parameter_id, margin
+    return allocated_to_oid, parameter_id, nte_val, nte_units, margin
 
 # the COMPUTES dict maps variable and context id to applicable compute
 # functions

@@ -451,9 +451,11 @@ class UberORB(object):
             # 0: oid of Acu or PSU to which reqt is allocated
             # 1: id of performance parameter
             # 2: margin [result] (expressed as a %)
-            oid, pid, result = compute_requirement_margin(orb, req_oid)
+            oid, pid, nte, nte_units, result = compute_requirement_margin(
+                                                                orb, req_oid)
             if oid:
                 margin_pid = get_parameter_id(pid, 'Margin')
+                nte_pid = get_parameter_id(pid, 'NTE')
                 self.log.info('        - {} at {}: {}'.format(pid, oid,
                                                               result))
                 if not parameterz.get(oid):
@@ -461,6 +463,9 @@ class UberORB(object):
                 parameterz[oid][margin_pid] = dict(value=result,
                                                    units='%',
                                                    mod_datetime=str(dtstamp()))
+                parameterz[oid][nte_pid] = dict(value=nte,
+                                                units=nte_units,
+                                                mod_datetime=str(dtstamp()))
             else:
                 # if margin cannot be computed, None will be returned for oid
                 # and reason for failure will be in "result"
