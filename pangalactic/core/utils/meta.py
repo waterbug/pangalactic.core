@@ -391,7 +391,7 @@ def display_id(obj):
     Args:
         obj (Identifiable):  object whose id is to be displayed
     """
-    if getattr(obj, 'version', None):
+    if getattr(obj, 'version', '0'):
         return obj.id + '.v' + obj.version
     else:
         return getattr(obj, 'id', 'TBD')
@@ -404,7 +404,7 @@ def display_name(obj):
     Args:
         obj (Identifiable):  object whose name is to be displayed
     """
-    if getattr(obj, 'version', None):
+    if getattr(obj, 'version', '0'):
         return ' v. '.join([obj.name, obj.version])
     else:
         return getattr(obj, 'name', 'TBD')
