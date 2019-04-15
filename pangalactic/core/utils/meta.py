@@ -391,11 +391,12 @@ def display_id(obj):
     Args:
         obj (Identifiable):  object whose id is to be displayed
     """
-    version = getattr(obj, 'version', None):
+    version = getattr(obj, 'version', None)
+    obj_id = getattr(obj, 'id', None) or 'unknown'
     if version:
-        return obj.id + '.v' + version
+        return obj_id + '.v' + version
     else:
-        return getattr(obj, 'id', 'TBD')
+        return obj_id
 
 def display_name(obj):
     """
@@ -405,11 +406,12 @@ def display_name(obj):
     Args:
         obj (Identifiable):  object whose name is to be displayed
     """
-    version = getattr(obj, 'version', None):
+    version = getattr(obj, 'version', None)
+    name = getattr(obj, 'name', None) or 'Unidentified'
     if version:
-        return ' v. '.join([obj.name, version])
+        return ' v. '.join([name, version])
     else:
-        return getattr(obj, 'name', 'TBD')
+        return name
 
 def get_block_model_id(obj):
     """
