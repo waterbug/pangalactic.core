@@ -62,8 +62,7 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
           Configuration:  'conda install pint'
 
     - python-dateutil
-      Date utilities (also is a dependency of matplotlib, which is used in
-      pangalactic.node)
+      Date utilities
 
           Configuration:  'conda install python-dateutil'
 
@@ -191,6 +190,18 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
       * NOTE: not in the default conda channel, use 'pythonocc' channel
 
           Configuration: 'conda install pythonocc-core'
+
+    - freetype >= 2.7
+      freetype is a dependency of pythonocc-core but pythonocc-core package
+      does not require the correct freetype version to be installed -- in which
+      case a failure will be seen on Windows that is attributed to AIS.py and a
+      "DLL load failed" (the issue is described in tpaviot/pythonocc-core issue
+      #413).
+
+      This install should be done *AFTER* all other dependencies have been
+      installed, if 'conda list freetype' shows a version lower than 2.7.
+
+          Configuration: 'conda install freetype=2.7'
 
 
 (3) Required for VGER (repository service):
