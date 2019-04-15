@@ -913,23 +913,26 @@ def compute_requirement_margin(orb, oid, default=0):
     if not isinstance(req, orb.classes['Requirement']):
         # TODO: notify user 
         msg = 'Requirement with oid {} does not exist.'.format(oid)
-        return (None, None, msg)
+        return (None, None, None, None, msg)
     if getattr(req, 'req_type', None) != 'performance':
         # TODO: notify user
         msg = 'Requirement with oid {} is not a performance reqt.'.format(oid)
-        return (None, None, msg)
+        return (None, None, None, None, msg)
     orb.log.info('* Computing margin for reqt "{}"'.format(req.name))
     rel = getattr(req, 'computable_form', None)
     prs = getattr(rel, 'correlates_parameters', None)
     if not prs:
         msg = 'Performance parameter could not be determined.'
-        return (None, None, msg)
+        return (None, None, None, None, msg)
     pd = getattr(prs[0], 'correlates_parameter', None)
     parameter_id = getattr(pd, 'id', None)
     if not parameter_id:
         msg = 'Parameter identity is unknown.'
-        return (None, None, msg)
+        return (None, None, None, None, msg)
     nte_val = req.req_maximum_value
+    if not nte_val:
+        msg = 'Requirement is not a "Not To Exceed" (max) type.'
+        return (None, None, None, None, msg)
     nte_units = req.req_units
     acu = req.allocated_to_function
     psu = req.allocated_to_system
@@ -941,7 +944,7 @@ def compute_requirement_margin(orb, oid, default=0):
         object_oid = getattr(psu.system, 'oid', None)
     if not object_oid or object_oid == 'pgefobjects:TBD':
         msg = 'Requirement allocation points to unknown or TBD object.'
-        return (None, None, msg)
+        return (None, None, None, None, msg)
     cbe_val = _compute_pval(orb, object_oid, parameter_id, 'CBE')
     # convert NTE value to base units, if necessary
     quan = nte_val * ureg.parse_expression(nte_units)
@@ -954,7 +957,7 @@ def compute_requirement_margin(orb, oid, default=0):
         # TODO:  implement a NaN or "Undefined" ...
         msg = 'CBE value for {} is 0; cannot compute margin.'.format(
                                                         parameter_id)
-        return (None, None, msg)
+        return (None, None, None, None, msg)
     margin = round_to(((converted_nte_val - cbe_val) / cbe_val))
     orb.log.debug('  ... margin is {}'.format(margin))
     return allocated_to_oid, parameter_id, nte_val, nte_units, margin

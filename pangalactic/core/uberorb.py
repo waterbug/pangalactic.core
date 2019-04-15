@@ -443,7 +443,23 @@ class UberORB(object):
             for variable in variables:
                 for oid in parameterz:
                     _compute_pval(self, oid, variable, context)
-        # Margins all performance requirements
+        # Margins for all performance requirements
+        # [0] Remove any previously computed performance requirements (NTEs and
+        #     Margins) in case any requirements have been deleted or
+        #     re-allocated
+        pid_deletions = []
+        oid_deletions = []
+        for oid in parameterz:
+            for pid in parameterz[oid]:
+                if 'Margin' in pid or 'NTE' in pid:
+                    pid_deletions.append((oid, pid))
+        for oid, pid in pid_deletions:
+            del parameterz[oid][pid]
+            if not parameterz[oid]:
+                oid_deletions.append(oid)
+        for oid in oid_deletions:
+            del parameterz[oid]
+        # [1] iterate over current set of performance requirements
         perf_reqt_oids = [r.oid for r in orb.get_by_type('Requirement')
                           if r.req_type == 'performance']
         for req_oid in perf_reqt_oids:
@@ -626,7 +642,7 @@ class UberORB(object):
         for obj in objs:
             cname = obj.__class__.__name__
             oid = getattr(obj, 'oid', None)
-            if oid in parameterz:
+            if isinstance(obj, self.classes['Modelable']):
                 recompute_required = True
             self.log.info('* orb.save')
             new = bool(oid in self.new_oids) or not self.get(oid)
