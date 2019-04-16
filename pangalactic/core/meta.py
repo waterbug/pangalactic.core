@@ -31,16 +31,16 @@ PGXN_REQD = dict(
 # app-specific settings defined in the 'pangalactic.config' module-level
 # dictionary.
 # TODO:  support for field "aliases" (a.k.a. "display names")
-VERSIONED = ['owner', 'version', 'version_sequence', 'frozen', 'iteration',
-             'components', 'where_used', 'projects_using_system', 'ports',
-             'has_models', 'derived_from']
+SYSTEM = ['components', 'where_used', 'projects_using_system',
+          'ports', 'has_models', 'frozen', 'version',
+          'version_sequence', 'iteration']
 MAIN_VIEWS = dict(
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
          'assembly_level', 'product_type_hint'],
     Discipline=IDENTITY,
     DisciplineProductType=['used_in_discipline', 'relevant_product_type'],
     DisciplineRole=['related_to_discipline', 'related_role'],
-    HardwareProduct=(PGXN_REQD['HardwareProduct'] + ['public'] + VERSIONED),
+    HardwareProduct=(PGXN_REQD['HardwareProduct'] + ['public'] + SYSTEM),
     Model=(IDENTITY + ['type_of_model', 'of_thing']),
     ModelFamily=IDENTITY,
     ModelType=(IDENTITY + ['model_type_family']),
@@ -54,7 +54,7 @@ MAIN_VIEWS = dict(
     ParameterDefinition=(IDENTITY + ['range_datatype', 'dimensions']),
     ParameterRelation=['referenced_relation', 'correlates_parameter'],
     Port=['id', 'name', 'of_product', 'type_of_port'],
-    Product=(IDENTITY + ['product_type'] + VERSIONED),
+    Product=(IDENTITY + ['product_type'] + SYSTEM),
     ProductType=IDENTITY,
     ProductTypeParameterDefinition=['used_in_product_type',
                                     'parameter_definition'],
@@ -74,10 +74,11 @@ MAIN_VIEWS = dict(
 # PGXN_VIEWS:  Default fields/ordering for the PgxnObject "info", "narrative"
 # and "admin" tabs
 PGXN_VIEWS = dict(
-    info=['public', 'req_type', 'req_constraint_type', 'req_dimensions',
-          'req_target_value', 'req_tolerance', 'req_tolerance_type',
-          'req_tolerance_lower', 'req_tolerance_upper', 'req_maximum_value',
-          'req_minimum_value', 'validated', 'verification_method'],
+    info=['derived_from', 'owner', 'public', 'req_type', 'req_constraint_type',
+          'req_dimensions', 'req_target_value', 'req_tolerance',
+          'req_tolerance_type', 'req_tolerance_lower', 'req_tolerance_upper',
+          'req_maximum_value', 'req_minimum_value', 'validated',
+          'verification_method'],
     narrative=['comment', 'rationale', 'purpose', 'computable_form',
                'req_epilog', 'req_min_max_phrase', 'req_shall_phrase',
                'req_subject'],
@@ -86,11 +87,10 @@ PGXN_VIEWS = dict(
 
 # PGXN_PARAMETERS:  preferred ordering for parameters in PgxnObject parameter
 # forms
-PGXN_PARAMETERS = ['m', 'm[Ctgcy]', 'm[NTE]', 'P', 'P[Ctgcy]', 'P[NTE]', 'R_D',
-                   'R_D[Ctgcy]', 'R_D[NTE]', 'Vendor', 'Cost', 'TRL', 'height',
-                   'width', 'depth', 'CoM_X', 'CoM_Y', 'CoM_Z', 'm[CBE]',
-                   'm[MEV]', 'm[Margin]', 'P[CBE]', 'P[MEV]', 'P[Margin]',
-                   'R_D[CBE]', 'R_D[MEV]', 'R_D[Margin]']
+PGXN_PARAMETERS = ['m', 'm[Ctgcy]', 'P', 'P[Ctgcy]', 'R_D', 'R_D[Ctgcy]',
+                   'Vendor', 'Cost', 'TRL', 'height', 'width', 'depth',
+                   'CoM_X', 'CoM_Y', 'CoM_Z', 'm[CBE]', 'm[MEV]', 'P[CBE]',
+                   'P[MEV]', 'R_D[CBE]', 'R_D[MEV]']
 
 # PGXN_PLACEHOLDERS:  Placeholder text for fields in PgxnObject forms
 PGXN_PLACEHOLDERS = {'id': 'abbreviated name; no spaces',
