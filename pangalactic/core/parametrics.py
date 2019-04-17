@@ -576,13 +576,14 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         # orb.log.debug('  no oid provided; ignoring.')
         return
     parm = parameterz.get(oid, {}).get(pid, {})
+    pd = parm_defz.get(pid, {})
     if not parm:
         # NOTE:  this is the case if
         # (1) that oid is not in parameterz or
         # (2) the object with that oid doesn't have that parameter
         # orb.log.debug('  parameter not found; ignoring.')
         return
-    if parm['computed']:
+    if pd['computed']:
         # orb.log.debug('  parameter is computed -- not setting.')
         return
     try:
@@ -704,7 +705,8 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     # orb.log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
                                                            # str(str_val)))
     try:
-        radt = parm_defz[pid].get('range_datatype')
+        pd = parm_defz.get(pid, {})
+        radt = pd.get('range_datatype')
         if radt in ['int', 'float']:
             dtype = DATATYPES.get(radt)
             num_fmt = prefs.get('numeric_format')
@@ -716,7 +718,7 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
                 val = dtype(str_val)
         else:
             val = str_val
-        if parm_defz[pid].get('dimensions') == 'percent':
+        if pd.get('dimensions') == 'percent':
             val = 0.01 * float(val)
         set_pval(orb, oid, pid, val, units=units, mod_datetime=mod_datetime,
                  local=local)
