@@ -31,7 +31,7 @@ from pangalactic.core.parametrics import (add_default_parameters,
                                           create_parm_defz,
                                           create_parmz_by_dimz,
                                           get_parameter_id,
-                                          parm_defz, parameterz,
+                                          parameterz,
                                           refresh_componentz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
@@ -234,11 +234,8 @@ class UberORB(object):
         self.versionables = [cname for cname in self.classes if 'version' in
                              self.schemas[cname]['field_names']]
         self.load_reference_data()
-        # reload or create the parameter definitions cache ('parm_defz')
-        self._load_parm_defz()
         # build the 'componentz' runtime cache ...
         self._build_componentz_cache()
-        self._load_parmz()
         self._load_diagramz()
         # populate the 'parmz_by_dimz' runtime cache ...
         create_parmz_by_dimz(self)
@@ -361,38 +358,6 @@ class UberORB(object):
             f.write(json.dumps(diagramz, separators=(',', ':'),
                                indent=4, sort_keys=True))
         self.log.info('        ... diagrams.json file written.')
-
-    def _load_parm_defz(self):
-        """
-        Load the parameter definitions cache (`parm_defz` dict) from a saved
-        parameter_defs.json file; if the file is not found, create the cache
-        from the ParameterDefinition, State, and Context objects in the
-        database.
-        """
-        self.log.info('* [orb] _load_parm_defz() ...')
-        json_path = os.path.join(self.home, 'parameter_defs.json')
-        if os.path.exists(json_path):
-            with open(json_path) as f:
-                saved_parm_defs = json.loads(f.read())
-                parm_defz.update(saved_parm_defs)
-            self.log.info('        parm_defz cache is loaded.')
-        else:
-            self.log.info('        "parameter_defs.json" was not found.')
-            self.log.info('        creating "parm_defz" cache ...')
-            create_parm_defz(self)
-            self._save_parm_defz()
-
-    def _save_parm_defz(self):
-        """
-        Save the parameter definitions cache (`parm_defz` dict) to
-        parameter_defs.json.
-        """
-        self.log.info('* [orb] _save_parm_defz() ...')
-        json_path = os.path.join(self.home, 'parameter_defs.json')
-        with open(json_path, 'w') as f:
-            f.write(json.dumps(parm_defz, separators=(',', ':'),
-                               indent=4, sort_keys=True))
-        self.log.info('        ... parameter_defs.json written.')
 
     def _load_parmz(self):
         """
@@ -584,7 +549,19 @@ class UberORB(object):
         admin = self.get('pgefobjects:admin')
         pgana = self.get('pgefobjects:PGANA')
         self.log.info('  + initial reference data loaded.')
-        # 1:  load balance of reference data
+        # 1:  load parameter definitions and contexts
+        missing_p = [so for so in refdata.pdc if so['oid'] not in oids]
+        if missing_p:
+            self.log.info('  + missing some reference parameters/contexts:')
+            self.log.info('  {}'.format([so['oid'] for so in missing_p]))
+            i_objs = deserialize(self, [so for so in missing_p],
+                                 include_refdata=True,
+                                 force_no_recompute=True)
+            for o in i_objs:
+                self.db.add(o)
+        # XXX IMPORTANT!  Create the parameter definitions cache ('parm_defz')
+        create_parm_defz(self)
+        # 2:  load balance of reference data
         missing_c = [so for so in refdata.core if so['oid'] not in oids]
         objs = []
         if missing_c:
@@ -598,7 +575,7 @@ class UberORB(object):
                 o.owner = pgana
                 o.creator = o.modifier = admin
             self.db.add(o)
-        # 2:  check for updates to reference data
+        # 3:  check for updates to reference data
         self.log.info('  + checking for updates to reference data ...')
         all_ref = refdata.initial + refdata.core
         all_ref_oids = [so['oid'] for so in all_ref]
@@ -616,7 +593,7 @@ class UberORB(object):
             self.log.info('    updates completed.')
         else:
             self.log.info('    no updates found.')
-        # 3:  delete deprecated reference data
+        # 4:  delete deprecated reference data
         # NOTE:  don't do this step until the deprecated data has been removed
         # from the current database
         # oids = self.get_oids()
@@ -628,7 +605,7 @@ class UberORB(object):
                 # self.delete([self.get(oid) for oid in deprecated])
         self.log.info('  + all reference data loaded.')
 
-    # begin db operations
+    # begin db functions
 
     def save(self, objs):
         """
@@ -680,7 +657,6 @@ class UberORB(object):
                 pd_context = getattr(obj, 'context', None)
                 if pd_context:
                     update_parm_defz(self, obj, pd_context)
-                self._save_parm_defz()
         self.log.info('  orb.save:  committing db session.')
         self.db.commit()
         if recompute_required:

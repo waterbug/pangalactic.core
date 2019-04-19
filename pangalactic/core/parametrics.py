@@ -25,9 +25,20 @@ TWOPLACES = Decimal('0.01')
 # CACHES ##################################################################
 
 # componentz:  runtime component cache
+# purpose:  enable fast computation of assembly parameters
 # format:  {product.oid : list of Comp('oid', 'quantity') namedtuples}
 componentz = {}
 Comp = namedtuple('Comp', 'oid quantity')
+
+# parm_defz:  runtime cache of parameter definitions
+# purpose:  enable fast lookup of parameter metadata & compact representation
+#           of parameters as (value, units, mod_datetime)
+# format:  {'parameter_id': {parameter properties}
+#                            ...}}
+# ... where parameter definition properties are:
+# name, variable, context, description, dimensions, range_datatype, computed,
+# mod_datetime
+parm_defz = {}
 
 # parameterz:  persistent cache of assigned parameter values
 # format:  {object.oid : {'parameter_id': {parameter properties}
@@ -35,14 +46,6 @@ Comp = namedtuple('Comp', 'oid quantity')
 # ... where parameter properties are:
 # value, units, mod_datetime
 parameterz = {}
-
-# parm_defz:  persistent cache of parameter definitions
-# format:  {'parameter_id': {parameter properties}
-#                            ...}}
-# ... where parameter definition properties are:
-# name, variable, context, description, dimensions, range_datatype, computed,
-# mod_datetime
-parm_defz = {}
 
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
 # format:  {dimension : [ids of ParameterDefinitions having that dimension]}
