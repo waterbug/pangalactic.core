@@ -31,8 +31,7 @@ from pangalactic.core.parametrics import (add_default_parameters,
                                           create_parm_defz,
                                           create_parmz_by_dimz,
                                           get_parameter_id,
-                                          parameterz,
-                                          refresh_componentz,
+                                          parameterz, refresh_componentz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
 from pangalactic.core.serializers import (deserialize, deserialize_parms,
@@ -236,6 +235,7 @@ class UberORB(object):
         self.load_reference_data()
         # build the 'componentz' runtime cache ...
         self._build_componentz_cache()
+        self._load_parmz()
         self._load_diagramz()
         # populate the 'parmz_by_dimz' runtime cache ...
         create_parmz_by_dimz(self)
