@@ -522,7 +522,9 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
     # if oid not in parameterz or not parameterz[oid].get(variable):
         # return val
     pid = get_parameter_id(variable, context_id)
-    pdz = parm_defz[pid]
+    pdz = parm_defz.get(pid, {})
+    if not pdz:
+        orb.log.debug('  "{}" not found in parm_defz.'.format(pid))
     if pdz.get('computed'):
         # orb.log.debug('  "{}" is computed ...'.format(pid))
         # look up compute function -- in the future, there may be a Relation

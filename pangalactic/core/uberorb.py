@@ -546,6 +546,7 @@ class UberORB(object):
                                  force_no_recompute=True)
             for o in i_objs:
                 self.db.add(o)
+            self.db.commit()
         admin = self.get('pgefobjects:admin')
         pgana = self.get('pgefobjects:PGANA')
         self.log.info('  + initial reference data loaded.')
@@ -559,6 +560,7 @@ class UberORB(object):
                                  force_no_recompute=True)
             for o in i_objs:
                 self.db.add(o)
+            self.db.commit()
         # XXX IMPORTANT!  Create the parameter definitions cache ('parm_defz')
         create_parm_defz(self)
         # 2:  load balance of reference data
