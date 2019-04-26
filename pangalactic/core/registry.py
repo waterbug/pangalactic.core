@@ -158,11 +158,10 @@ class PanGalacticRegistry(object):
         if not os.path.exists(self.onto_path): 
             os.makedirs(self.onto_path)
         pgef_owl_path = str(os.path.join(self.onto_path, 'pgef.owl'))
-        if not os.path.exists(pgef_owl_path):
-            f = open(pgef_owl_path, 'w')
-            f.write(str(pkgutil.get_data('pangalactic.core.ontology',
-                                         'pgef.owl').decode('utf-8')))
-            f.close()
+        f = open(pgef_owl_path, 'w')
+        f.write(str(pkgutil.get_data('pangalactic.core.ontology',
+                                     'pgef.owl').decode('utf-8')))
+        f.close()
         self.log.info('* not installed; using pgef.owl in home dir.')
         self.apps_dict = {}   # not currently used
         self.apps = []

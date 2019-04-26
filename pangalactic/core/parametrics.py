@@ -139,7 +139,7 @@ def create_parm_defz(orb):
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
     """
-    orb.log.info('[orb] create_parmz_by_dimz')
+    orb.log.info('[orb] create_parm_defz')
     pds = orb.get_by_type('ParameterDefinition')
     # first, the "simple variable" parameters ...
     parm_defz.update(
