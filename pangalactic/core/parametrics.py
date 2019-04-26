@@ -524,7 +524,8 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
     pid = get_parameter_id(variable, context_id)
     pdz = parm_defz.get(pid, {})
     if not pdz:
-        orb.log.debug('  "{}" not found in parm_defz.'.format(pid))
+        orb.log.debug('  "{}" not found in parm_defz'.format(pid))
+        orb.log.debug('  in _compute_pval for oid "{}"'.format(oid))
     if pdz.get('computed'):
         # orb.log.debug('  "{}" is computed ...'.format(pid))
         # look up compute function -- in the future, there may be a Relation
@@ -841,7 +842,7 @@ def compute_margin(orb, oid, variable, default=0):
     if not obj_oid or obj_oid == 'pgefobjects:TBD':
         orb.log.info('  allocation is to unknown or TBD system.')
         return 0
-    cbe_val = _compute_pval(orb, obj_oid, variable, 'CBE')
+    mev = _compute_pval(orb, obj_oid, variable, 'MEV')
     # find a performance requirement for the specified variable, allocated to
     # the allocation_node
     pd = orb.get(get_parameter_definition_oid(variable))
@@ -874,23 +875,23 @@ def compute_margin(orb, oid, variable, default=0):
     # TODO:  here we would identify the type of constraint, but currently we
     # only support the NTE (maximum value) constraint
     try:
-        nte_val = float(perf_reqt.req_maximum_value)
+        nte = float(perf_reqt.req_maximum_value)
     except:
         # value was None or other non-numeric
         orb.log.info('  NTE not specified by the relevant requirement.')
         return 0
     nte_units = perf_reqt.req_units
     # convert NTE value to base units, if necessary
-    quan = nte_val * ureg.parse_expression(nte_units)
+    quan = nte * ureg.parse_expression(nte_units)
     quan_base = quan.to_base_units()
-    converted_nte_val = quan_base.magnitude
-    orb.log.debug('  compute_margin: nte is {}'.format(converted_nte_val))
-    orb.log.debug('                  cbe is {}'.format(cbe_val))
-    if cbe_val == 0:   # NOTE: 0 == 0.0 evals to True
+    converted_nte = quan_base.magnitude
+    orb.log.debug('  compute_margin: nte is {}'.format(converted_nte))
+    orb.log.debug('                  mev is {}'.format(mev))
+    if mev == 0:   # NOTE: 0 == 0.0 evals to True
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
         return 'undefined'
-    margin = round_to(((converted_nte_val - cbe_val) / cbe_val))
+    margin = round_to(((converted_nte - mev) / mev))
     orb.log.debug('  ... margin is {}'.format(margin))
     return margin
 
@@ -936,8 +937,8 @@ def compute_requirement_margin(orb, oid, default=0):
     if not parameter_id:
         msg = 'Parameter identity is unknown.'
         return (None, None, None, None, msg)
-    nte_val = req.req_maximum_value
-    if not nte_val:
+    nte = req.req_maximum_value
+    if not nte:
         msg = 'Requirement is not a "Not To Exceed" (max) type.'
         return (None, None, None, None, msg)
     nte_units = req.req_units
@@ -952,22 +953,22 @@ def compute_requirement_margin(orb, oid, default=0):
     if not object_oid or object_oid == 'pgefobjects:TBD':
         msg = 'Requirement allocation points to unknown or TBD object.'
         return (None, None, None, None, msg)
-    cbe_val = _compute_pval(orb, object_oid, parameter_id, 'CBE')
+    mev = _compute_pval(orb, object_oid, parameter_id, 'MEV')
     # convert NTE value to base units, if necessary
-    quan = nte_val * ureg.parse_expression(nte_units)
+    quan = nte * ureg.parse_expression(nte_units)
     quan_base = quan.to_base_units()
-    converted_nte_val = quan_base.magnitude
-    orb.log.debug('  compute_margin: nte is {}'.format(converted_nte_val))
-    orb.log.debug('                  cbe is {}'.format(cbe_val))
-    if cbe_val == 0:   # NOTE: 0 == 0.0 evals to True
+    converted_nte = quan_base.magnitude
+    orb.log.debug('  compute_margin: nte is {}'.format(converted_nte))
+    orb.log.debug('                  mev is {}'.format(mev))
+    if mev == 0:   # NOTE: 0 == 0.0 evals to True
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
-        msg = 'CBE value for {} is 0; cannot compute margin.'.format(
+        msg = 'MEV value for {} is 0; cannot compute margin.'.format(
                                                         parameter_id)
         return (None, None, None, None, msg)
-    margin = round_to(((converted_nte_val - cbe_val) / cbe_val))
+    margin = round_to(((converted_nte - mev) / mev))
     orb.log.debug('  ... margin is {}'.format(margin))
-    return allocated_to_oid, parameter_id, nte_val, nte_units, margin
+    return allocated_to_oid, parameter_id, nte, nte_units, margin
 
 # the COMPUTES dict maps variable and context id to applicable compute
 # functions

@@ -439,7 +439,7 @@ pdc = [
     'context_dimensions': 'percent',
     'context_datatype': 'float',
     'computed': True,
-    'description': u'(NTE-CBE)/NTE'}
+    'description': u'(NTE-MEV)/NTE'}
 ]
 
 core = [
