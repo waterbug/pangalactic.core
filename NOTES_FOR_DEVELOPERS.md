@@ -267,7 +267,9 @@ Note that in pangalactic, `louie` is used *only* on the client side
     * any awareness of the network or network-related events
 
 [1] orb.save() *NEVER* changes the `mod_datetime` of objects, because it
-    saves both local objects and those received from remote sources
+    saves both local objects and those received from remote sources --
+    therefore, locally created or modified objects must be time-stamped before
+    they are passed to orb.save().
 
 [2] orb.clone() *ALWAYS* sets the `mod_datetime` of the clone
 

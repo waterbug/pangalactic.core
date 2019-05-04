@@ -614,6 +614,13 @@ class UberORB(object):
         Save the specified objects to the local db.  (CAVEAT: this will
         update ["merge"] any object that already exists in the db.)
 
+        NOTE:  alteration of the 'mod_datetime' of objects is *NOT* a
+        side-effect of the orb save() function, because the orb.save() is used
+        for both local objects and objects received from remote (network)
+        sources, whose 'mod_datetime' must be preserved when saving locally.
+        Therefore, locally created or modified objects must be time-stamped
+        *before* they are passed to orb.save().
+
         Args:
             objs (iterable of objects):  the objects to be saved
         """
