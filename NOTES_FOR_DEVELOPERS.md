@@ -242,10 +242,10 @@ etc.]
 
 Note that in pangalactic, `louie` is used *only* on the client side
 
-* register a signal  
-  define `orb.register_signal(handler, signal_name)`, where `handler` is a
-  callable and `signal_name` is a string -- e.g.:  
-  `orb.register_signal(self.on_deleted_object_signal, 'deleted object')`
+* define a signal:
+    dispatcher.connect(handler, signal_name)`,
+  where `handler` is a callable and `signal_name` is a string -- e.g.:  
+  `dispatcher.connect(self.on_deleted_object_signal, 'deleted object')`
 
 * create senders for signals in context of item events  
   e.g., `deleted object` (of some type):  
