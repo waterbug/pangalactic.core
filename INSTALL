@@ -42,7 +42,17 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
           is used by pangalactic (see instructions included with the Python
           distribution -- if you install from source, OpenSSL is required).
 
-(1) Dependencies of pangalactic.core (base package):
+(1) pangalactic.core (base package of pangalactic)
+
+    (1.1) Put the following channels in your '.condarc' file to install
+          pangalactic.core (pangalactic.node will require more channels -- see
+          below):
+
+          channels:
+            - conda-forge
+            - defaults
+
+    (1.2) Install the following dependencies of pangalactic.core:
 
     - future
       Python 2 / 3 compatibility functions / aliases
@@ -116,24 +126,28 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
           Configuration:  'conda install xlwt'
 
 
-(2) Dependencies of pangalactic.node (the pangalactic GUI client package):
+(2) pangalactic.node (the pangalactic GUI client package):
 
-    *** NOTE for Linux (linux-64) ****************************************
+    *** NOTE for Linux (linux-64) *****************************************
     Use 'conda install pythonocc-core' to pull in pyqt5 and qt packages,
     AND EXCLUDE the 'defaults' channel because otherwise conda will install
     incompatible pyqt5 from 'defaults' channel with qt from conda-forge
-    channel.  Put the following channels in '.condarc' file for installing
-    pythonocc-core (i.e., DO NOT use 'defaults' channel for that!):
+    channel.
+    ***********************************************************************
 
-    channels:
-        # 'cadquery' channel is required for pythonocc 0.18.2
-        - cadquery
-        - pythonocc
-        - dlr-sc
-        - oce
-        - conda-forge
-        - defaults
-    *********************************************************************
+    (2.1) Put the following channels in your '.condarc' file to install
+          pangalactic.node:
+
+          channels:
+            # 'cadquery' channel is required for pythonocc 0.18.2
+            - cadquery
+            - pythonocc
+            - dlr-sc
+            - oce
+            - conda-forge
+            - defaults
+
+    (2.2) Install the following dependencies of pangalactic.node:
 
     - autobahn
       * NOTE: requires 'conda-forge' channel
