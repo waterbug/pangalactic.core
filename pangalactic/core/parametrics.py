@@ -116,10 +116,10 @@ def get_parameter_id(variable, context_id):
         pid += '[' + context_id + ']'
     return pid
 
-def get_parameter_name(variable_name, context_name):
+def get_parameter_name(variable_name, context_abbr):
     name = variable_name
-    if context_name:
-        name += ' [' + context_name + ']'
+    if context_abbr:
+        name += ' [' + context_abbr + ']'
     return name
 
 def get_parameter_description(variable_desc, context_desc):
@@ -164,7 +164,7 @@ def create_parm_defz(orb):
                             if c.context_type == 'descriptive']
     parm_defz.update(
         {get_parameter_id(pd.id, c.id) :
-         {'name': get_parameter_name(pd.name, c.name),
+         {'name': get_parameter_name(pd.name, c.abbreviation or c.id),
           'variable': pd.id,
           'context': c.id,
           'context_type': c.context_type,
@@ -185,7 +185,7 @@ def create_parm_defz(orb):
                              if c.context_type == 'prescriptive']
     parm_defz.update(
         {get_parameter_id(pd.id, c.id) :
-         {'name': get_parameter_name(pd.name, c.name),
+         {'name': get_parameter_name(pd.name, c.abbreviation or c.id),
           'variable': pd.id,
           'context': c.id,
           'context_type': c.context_type,
