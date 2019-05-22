@@ -26,9 +26,22 @@ initial = [
 
 {   '_cname': 'Person',
     'oid': 'pgefobjects:admin',
-    'description': u'Oz the Great and Powerful',
+    'description': u'Pan Galactic Administrator',
     'id': 'admin',
-    'name': 'Pan Galactic Administrator',
+    'first_name': 'TheGreatAndPowerful',
+    'last_name': 'Oz',
+    'name': 'The Great And Powerful Oz',
+    'create_datetime': epoch,
+    'mod_datetime': epoch
+    },
+
+{   '_cname': 'Person',
+    'oid': 'pgefobjects:Person.TBD',
+    'description': u'TBD',
+    'id': 'TBD',
+    'first_name': 'TBD',
+    'last_name': 'Person',
+    'name': 'TBD Person',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
