@@ -289,6 +289,38 @@ def get_state_oid(sid):
     """
     return 'pgef:State.' + sid
 
+def get_ra_id(ra_context_id, role_id, fname, mi, lname):
+    """
+    Create an 'id' for a new RoleAssignment.
+
+    Args:
+        ra_context_id: 'id' of the role_assignment_context (Org)
+        role_id:  the 'id' of the Role
+        fname:  first name of the Person
+        mi:  middle name or initial of the Person
+        lname:  last name of the Person
+    """
+    if ra_context_id:
+        return ':'.join([ra_context_id, role_id,
+                         '_'.join([lname, fname, mi])])
+    else:
+        return ':'.join([role_id, '_'.join([lname, fname, mi])])
+
+def get_ra_name(ra_context_id, role_id, fname, mi, lname):
+    """
+    Create a 'name' for a new Acu.
+
+    Args:
+        assembly_name:  the 'name' of the assembly (Product)
+        ref_des:  the reference_designator of the Acu, created using
+            orb.get_next_ref_des()
+    """
+    if ra_context_id:
+        return ': '.join([ra_context_id, role_id,
+                         ' '.join([lname, fname, mi])])
+    else:
+        return ': '.join([role_id, ' '.join([lname, fname, mi])])
+
 def get_acu_id(assembly_id, ref_des):
     """
     Create an 'id' for a new Acu.
