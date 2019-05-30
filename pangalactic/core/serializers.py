@@ -211,11 +211,11 @@ def serialize(orb, objs, view=None, include_components=False,
                 serialized += s_flows
         if isinstance(obj, orb.classes['RoleAssignment']):
             # include Role object
-            serialized += serialize(orb, obj.assigned_role)
+            serialized += serialize(orb, [obj.assigned_role])
             # include Person object
-            serialized += serialize(orb, obj.assigned_to)
+            serialized += serialize(orb, [obj.assigned_to])
             # include Organization object
-            serialized += serialize(orb, obj.role_assignment_context)
+            serialized += serialize(orb, [obj.role_assignment_context])
     if person_objs:
         orb.log.debug('  including {} Person objects.'.format(
                                                     len(person_objs)))
