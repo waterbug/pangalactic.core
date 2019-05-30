@@ -368,15 +368,15 @@ class OrbTest(unittest.TestCase):
 
     def test_20_compute_margin(self):
         """
-        CASE:  compute the mass margin ((NTE - CBE) / CBE) for a node to which
+        CASE:  compute the mass margin ((NTE - MEV) / MEV) for a node to which
         a performance requirement is allocated
         """
         # compute mass margin at ProjectSystemUsage for spacecraft3
         value = compute_margin(orb, 'test:OTHER:system-1', 'm')
-        cbe = get_pval(orb, 'test:spacecraft3', 'm[CBE]')
+        mev = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
         perf_reqt = orb.get('test:OTHER:Spacecraft-Mass')
         nte = perf_reqt.req_maximum_value
-        expected = round_to(((nte - cbe) / cbe))
+        expected = round_to(((nte - mev) / mev))
         self.assertEqual(expected, value)
 
     def test_21_compute_requirement_margin(self):
@@ -385,12 +385,12 @@ class OrbTest(unittest.TestCase):
         """
         # compute margin for the specified performance requirement
         value = compute_requirement_margin(orb, 'test:OTHER:Spacecraft-Mass')
-        cbe = get_pval(orb, 'test:spacecraft3', 'm[CBE]')
+        mev = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
         perf_reqt = orb.get('test:OTHER:Spacecraft-Mass')
         nte = perf_reqt.req_maximum_value
-        margin = round_to(((nte - cbe) / cbe))
+        margin = round_to(((nte - mev) / mev))
         # expected output is (oid of allocated node, parameter id, margin)
-        expected = ('test:OTHER:system-1', 'm', margin)
+        expected = ('test:OTHER:system-1', 'm', nte, perf_reqt.req_units, margin)
         self.assertEqual(expected, value)
 
     def test_50_write_mel(self):

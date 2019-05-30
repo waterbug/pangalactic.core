@@ -309,6 +309,7 @@ DESERIALIZATION_ORDER = [
                     'Organization',
                     'Project',
                     'Person',
+                    'RoleAssignment',
                     'ParameterDefinition',
                     'PortType',
                     'ProductType',

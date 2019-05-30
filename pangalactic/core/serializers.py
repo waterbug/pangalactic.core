@@ -53,13 +53,19 @@ def serialize(orb, objs, view=None, include_components=False,
               Usage relationships), ports, and internal flows (connections
               among components) will be included in the serialization -- i.e.,
               a "white box" representation
-            **********************************************************
+            ******************************************************************
             *** NOTE that for Acus and PSUs, the following behavior is
             *NOT* dependent on `include_components`:
             * for Acus, assembly and component objects will always be
               included
             * for PSUs, system object will always be included
-            **********************************************************
+            ******************************************************************
+            *** NOTE also, for RoleAssignments, the following behavior is
+            *NOT* dependent on `include_components`:
+            * 'assigned_role' (Role) object will always be included
+            * 'assigned_to' (Person) object will always be included
+            * 'role_assignment_context' (Org) object will always be included
+            ******************************************************************
 
     Serialize a collection or iterable of objects into a data structure
     consisting of primitive types; specifically, into a list of canonical
@@ -203,6 +209,13 @@ def serialize(orb, objs, view=None, include_components=False,
             if flows:
                 s_flows = serialize(orb, flows)
                 serialized += s_flows
+        if isinstance(obj, orb.classes['RoleAssignment']):
+            # include Role object
+            serialized += serialize(orb, obj.assigned_role)
+            # include Person object
+            serialized += serialize(orb, obj.assigned_to)
+            # include Organization object
+            serialized += serialize(orb, obj.role_assignment_context)
     if person_objs:
         orb.log.debug('  including {} Person objects.'.format(
                                                     len(person_objs)))

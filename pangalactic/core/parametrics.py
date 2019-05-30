@@ -787,7 +787,7 @@ def compute_mev(orb, oid, variable):
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
-    orb.log.info('* compute_mev "{}": "{}"'.format(oid, variable))
+    # orb.log.info('* compute_mev "{}": "{}"'.format(oid, variable))
     ctgcy_val = get_pval(orb, oid, variable + '[Ctgcy]')
     if not ctgcy_val:
         orb.log.info('  contingency not set --')
