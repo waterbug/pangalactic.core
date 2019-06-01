@@ -41,8 +41,37 @@ PGEF_FANCY_DATE_FMT = '%a %d %b %Y'
 PGEF_FANCY_DATETIME_FMT = '%a %d %b %Y %H:%M:%S %Z'
 PGEF_FANCY_DATETIME_FMT_NO_TZ = '%a %d %b %Y %H:%M:%S'
 
+# datetime constants
 ZERO = timedelta(0)
 HOUR = timedelta(hours=1)
+EPOCH_DATE = date(1970, 1, 1)
+EPOCH = datetime(1970, 1, 1)
+
+def earlier(t1, t2):
+    """
+    Failure-proof version of 't1 < t2' -- works even if one of them is a
+    datetime and the other is a date (use min time of date).  NOTE:  `None` is
+    earlier than *anything* (including itself! :).
+
+    Args:
+        t1 (date or datetime):  to be determined if earlier
+        t2 (date or datetime):  to be determined if later
+    """
+    if t1 is None:
+        return True
+    try:
+        return t1 < t2
+    except:
+        if type(t1) is date:
+            try:
+                return datetime.combine(t1, time(0, 0)) < t2
+            except:
+                return False
+        else:
+            try:
+                return t1 < datetime.combine(t2, time(0, 0))
+            except:
+                return False
 
 def str2date(s):
     """

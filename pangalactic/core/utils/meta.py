@@ -27,6 +27,7 @@ import dateutil.parser as dtparser
 from pangalactic.core      import datatypes
 from pangalactic.core.meta import (PLURALS, ATTR_EXT_NAMES, EXT_NAMES,
                                    EXT_NAMES_PLURAL, READONLY)
+from pangalactic.core.utils.datetimes import EPOCH, EPOCH_DATE
 
 _inf = inflect.engine()
 
@@ -35,33 +36,25 @@ def asciify(u):
     """
     "Intelligently" convert a unicode string to the ASCII character set --
     a.k.a. "The Stupid American", a.k.a. "The UNICODE Hammer".  Its main
-    purpose is to convert things that are going to be used in Python
-    identifiers so they can be typed on an en-us encoded keyboard!
+    purpose is to convert things that might be used in Python identifiers so
+    they can be typed on an en-us encoded keyboard!
 
     Credit: http://code.activestate.com/recipes/251871/ (this is not that
     recipe but an elegant one-liner from one of the comments on the recipe).
 
     Args:
-        u (str, unicode, or bytes): input value
+        u (str or bytes): input value
 
     Returns:
-        unicode (python2) or str (python3)
+        str
     """
-    try:
-        # Python 2 (return python2 'str', i.e. bytes
-        if type(u) == unicode:
-            return unicodedata.normalize('NFKD', u).encode('ASCII', 'ignore')
-        elif isinstance(u, bytes):
-            return u.decode('utf-8')
-        return str(u)
-    except:
-        # Python 3 (return utf-8 string)
-        if isinstance(u, str):
-            return unicodedata.normalize('NFKD', u).encode(
-                                    'ASCII', 'ignore').decode('utf-8')
-        elif isinstance(u, bytes):
-            return u.decode('utf-8')
-        return str(u)
+    # Python 3: return utf-8 string
+    if isinstance(u, str):
+        return unicodedata.normalize('NFKD', u).encode(
+                                'ASCII', 'ignore').decode('utf-8')
+    elif isinstance(u, bytes):
+        return u.decode('utf-8')
+    return str(u)
 
 def property_to_field(name, pe):
     """
@@ -652,7 +645,8 @@ def uncook_bools(value):
 
 def uncook_date(value):
     """
-    Deserialize a string that represents a date.
+    Deserialize a string value that represents a date.  If value *is* a date,
+    return it; otherwise try to parse it; if that fails, return EPOCH_DATE.
 
     Args:
         value (str):  the value being "uncooked"
@@ -661,7 +655,10 @@ def uncook_date(value):
         return value
     elif value is None:
         return None
-    return dtparser.parse(value).date()
+    try:
+        return dtparser.parse(value).date()
+    except:
+        return EPOCH_DATE
 
 def uncook_dates(value):
     """
@@ -677,7 +674,9 @@ def uncook_dates(value):
 
 def uncook_datetime(value):
     """
-    Deserialize a string that represents a datetime.
+    Deserialize a string value that represents a datetime.  If value *is* a
+    datetime, return it; otherwise try to parse it; if that fails, return
+    EPOCH.
 
     Args:
         value (str):  the value being "uncooked"
@@ -686,7 +685,10 @@ def uncook_datetime(value):
         return value
     elif value is None:
         return None
-    return dtparser.parse(value)
+    try:
+        return dtparser.parse(value)
+    except:
+        return EPOCH
 
 def uncook_datetimes(value):
     """

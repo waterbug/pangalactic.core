@@ -12,6 +12,7 @@ from sqlalchemy import ForeignKey
 from pangalactic.core.meta        import DESERIALIZATION_ORDER
 from pangalactic.core.utils.meta  import (asciify, cookers, uncookers,
                                           cook_datetime, uncook_datetime)
+from pangalactic.core.utils.datetimes import earlier
 from pangalactic.core.parametrics import parameterz, refresh_componentz
 
 
@@ -356,8 +357,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 db_obj = orb.get(oid)
                 # check against db object's mod_datetime
                 so_datetime = uncook_datetime(d.get('mod_datetime'))
-                if so_datetime and so_datetime > db_obj.mod_datetime:
-                    orb.log.debug('    serialized obj has newer '
+                if so_datetime and earlier(db_obj.mod_datetime, so_datetime):
+                    orb.log.debug('    serialized obj has later '
                                    'mod_datetime, saving it.')
                     # if it is newer, update the object
                     updates[oid] = db_obj
