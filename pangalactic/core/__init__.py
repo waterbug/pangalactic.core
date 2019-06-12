@@ -2,8 +2,6 @@
 """
 The Pan Galactic Engineering Framework (PGEF) core package.
 """
-from __future__ import unicode_literals  # to support dump of unicode
-from builtins import str
 import os
 
 # RDFLib

@@ -217,6 +217,17 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
     The items in (1) *plus* the following packages ...
 
+    - autobahn
+      * NOTE: requires 'conda-forge' channel
+
+          Configuration:  'conda install autobahn'
+
+    - Twisted
+      Asynchronous networking framework
+      <http://twistedmatrix.com>
+
+          Configuration:  'conda install twisted'
+
     - PostgreSQL 7.4.x or later (8.x is recommended)
       <http://www.ca.postgresql.org>
       * NOTE: is in the 'default' conda channel
