@@ -124,7 +124,8 @@ def get_orgs_with_access(obj):
         return set()
     if (getattr(obj, 'public', False)
         or obj.__class__.__name__ == 'ParameterDefinition'):
-        # NOTE: Parameter Definitions are always public
+        # NOTE: Parameter Definitions are always public, even though they are
+        # ManagedObjects
         orb.log.debug('  object is public')
         return set()
     if isinstance(obj, orb.classes['ManagedObject']):
