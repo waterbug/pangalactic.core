@@ -31,9 +31,7 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
 (0) Python requirements:
 
-    - Python == 3.6
-      [some of pangalactic's dependencies are not yet compatible with Python
-      3.7.]
+    - Python == 3.7
 
           Configuration:  Python has binary installers for several platforms
           and can also be compiled and installed from source, but the
@@ -139,8 +137,7 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
           pangalactic.node:
 
           channels:
-            # 'cadquery' channel is required for pythonocc 0.18.2
-            - cadquery
+            - tpaviot
             - pythonocc
             - dlr-sc
             - oce
