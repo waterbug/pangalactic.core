@@ -210,7 +210,7 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
           Configuration: 'conda install freetype=2.7'
 
 
-(3) Required for VGER (repository service):
+(3) Required for pangalactic.vger (repository service):
 
     The items in (1) *plus* the following packages ...
 
@@ -253,6 +253,12 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
       [used by authenticator.py to hash passwords]
 
         Configuration: 'conda install bcrypt'
+
+    - python-ldap
+      [to enable LDAP searches of enterprise directories, as part of
+      administration of users]
+
+        Configuration: 'conda install python-ldap'
 
 (4) Optional
 
