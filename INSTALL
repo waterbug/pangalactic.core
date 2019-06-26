@@ -134,11 +134,13 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
     ***********************************************************************
 
     (2.1) Put the following channels in your '.condarc' file to install
-          pangalactic.node:
+          pangalactic.node (channel '3dhubs' is not needed on Linux but may be
+          needed on Windows for some pythonocc-core dependencies):
 
           channels:
             - tpaviot
             - pythonocc
+            - 3dhubs
             - dlr-sc
             - oce
             - conda-forge
