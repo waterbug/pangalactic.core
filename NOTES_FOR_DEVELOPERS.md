@@ -2,21 +2,23 @@
 
 ## Structure of the `pangalactic` Namespace Packages
 
-* `core` ......... base pangalactic package: ontology, registry, orb, ref. data
-  - `ontology` ... pgef.owl [file in OWL format]
-  - `test` ....... unit tests
-    + `data` ..... test data files
-    + `vault` .... test data files [copied to `app_home`/vault]
-  - `utils` ...... general utility modules]
+### `core`: base pangalactic package: ontology, registry, orb, reference data
+  - `ontology ... pgef.owl [file in OWL format]`
+  - `test ....... unit tests`
+    + `data ..... test data files`
+    + `vault .... test data files [copied to app_home/vault]`
+  - `utils ...... general utility modules`
 
-* `node` ......... GUI client package
-  - `cad` ........ CAD modules
-  - `diagrams` ... block diagram modules
-  - `icons` ...... app icons [copied to `app_home`/icons]
-  - `images` ..... app images [copied to `app_home`/images]
-  - `test` ....... GUI test client
+### `node`: GUI client package
+  - `cad ........ CAD modules`
+  - `diagrams ... block diagram modules`
+  - `icons ...... app icons [copied to app_home/icons]`
+  - `images ..... app images [copied to app_home/images]`
+  - `test ....... GUI test client`
 
-* `vger` ......... network repository service
+### `vger`: network repository service
+  - `vger ........ repository service interface`
+  - `userdir ..... LDAP directory search interface`
 
 ## Contents of App Home Directory (`[app]_home`) created at start-up
 
@@ -26,37 +28,41 @@
 * note that if schemas change between versions, some of this data may need
   to be modified to conform to the new schemas
 
-`cache/` ............ internal metadata structures (used by registry)
-`config` ............ config file (yaml) -- see *Settings* section below
-`diagrams.json` ..... diagram geometry storage
-`icons/`[1] ......... "built-in" icons
-`images/` ........... images  (application-specific images)
-`local.db` .......... node local object store (sqlite db)
-`log/` .............. logs
-`onto/` ............. contains pgef.owl (OWL ontology file)
-`parameters.json` ... parameter storage
-`prefs` ............. saved preferences (yaml) -- see *Settings* section below
-`server_cert.pem` ... certificate for message bus host (enables TLS connection)
-`state` ............. saved state (yaml) -- see *Settings* section below
-`test_data/` ........ files for user access in testing of data importing, etc.
-`trash`[2] .......... trash file (yaml) containing serialized deleted objects
-`vault/` ............ files created/accessed internally by pangalactic
-                      applications (includes icons generated at runtime and
-                      files referenced by the database, e.g. files
-                      corresponding to DigitalFile objects)
+    `cache/ ............ internal metadata structures (used by registry)`
 
-[1]: icons generated at runtime are saved in `vault/icons`; all other data
-files are simply added to the `vault` directory.
+    `config ............ config file (yaml) -- see *Settings* section below`
 
-[2]: format of the "trash" dictionary:
+    `diagrams.json ..... diagram geometry storage`
 
-        {obj.oid : orb.serialize([obj]),
-         ...}
+    `icons/ ............ "built-in" icons (icons generated at runtime are saved
+                         in vault/icons; all other data files are simply
+                         added to the `vault` directory`)
 
-     Note that the output of orb.serialize([obj]) is a *list* of serialized
-     objects that includes "obj" itself and some of its related objects, such
-     as the Person object for obj.creator and the ProductType object for
-     obj.product_type (if obj is a subclass of Product).
+    `images/ ........... images  (application-specific images)`
+
+    `local.db .......... node local object store (sqlite db)`
+
+    `log/ .............. logs`
+
+    `onto/ ............. contains pgef.owl (OWL ontology file)`
+
+    `parameters.json ... parameter storage`
+
+    `prefs ............. saved preferences (yaml) -- see *Settings* section below`
+
+    `server_cert.pem ... certificate for message bus host (enables TLS connection)`
+
+    `state ............. saved state (yaml) -- see *Settings* section below`
+
+    `test_data/ ........ files for user access in testing of data importing, etc.`
+
+    `trash ............. trash file (yaml) containing serialized deleted objects
+                         {obj.oid : orb.serialize([obj]), ...}`
+
+    `vault/ ............ files created/accessed internally by pangalactic
+                         applications (includes icons generated at runtime and
+                         files referenced by the database, e.g. files
+                         corresponding to DigitalFile objects)`
 
 ## Settings
 
@@ -88,7 +94,7 @@ files are simply added to the `vault` directory.
 
 * state
     admin_of:         (list) oids of Projects in which user has admin role
-    assigned_roles[1]: (dict) maps proj/org oids to assigned role names for user
+    assigned_roles[3]: (dict) maps proj/org oids to assigned role names for user
     cloaked:          (list) oids of local cloaked objects
     connected:        (bool) true if logged in to message bus
     current_cname:    (str)  name of currently selected db table class
@@ -105,38 +111,38 @@ files are simply added to the `vault` directory.
     mode:             (str)  current Pangalaxian gui mode (e.g. 'system')
     product:          (str)  oid of currently selected Product
     project:          (str)  oid of currently selected Project
-    role_oids[2]:     (dict) maps names of Roles to their oids
-    synced[3]:        (bool) keeps track of whether session has been synced
-    synced_oids[4]:   (list) oids of user-created objects that have been synced
-    sys_trees[5]:     (dict) maps project ids to system tree attributes
+    role_oids[4]:     (dict) maps names of Roles to their oids
+    synced[5]:        (bool) keeps track of whether session has been synced
+    synced_oids[6]:   (list) oids of user-created objects that have been synced
+    sys_trees[7]:     (dict) maps project ids to system tree attributes
     userid:           (str)  most recent userid used in login
     version:          (str)  version of client
     width:            (int)  current pixel width of pangalaxian gui
 
-    [1] `assigned_roles` data structure:
+    [3]: `assigned_roles` data structure:
     {project oid: [list of names of assigned roles on the project]}
 
         NOTE:  for project-independent role assignments, 'global' is used in
         place of a project oid.
 
-    [2] `role_oids` data structure:
+    [4]: `role_oids` data structure:
 
         {role name : role oid}
 
-    [3]: `synced` is set to False when the mbus is first joined upon login, and
+    [5]: `synced` is set to False when the mbus is first joined upon login, and
          set to True when initial sync operations are completed.  (This enabled
          sync operations to be factored into a separate `sync_with_services`
          method so it could be called by `check_version`, which is only done on
          Windows [the `win32` platform] for now.)
 
-    [4]: the "synced_oids" list is used in determining whether an object may be
+    [6]: the "synced_oids" list is used in determining whether an object may be
          deleted while the client is offline (not connected to the repository):
          any object that has been synced to the repository *cannot* be deleted
          while offline, because it may be used in an assembly by another user
          and deleting it before removing it from the assembly would break
          referential integrity.
 
-    [5] `sys_trees` data structure:
+    [7]: `sys_trees` data structure:
 
         {project id : {nodes : (int) # of nodes in sys tree (used in
                                calculating progress bar for tree rebuilds)
@@ -260,18 +266,18 @@ Note that in pangalactic, `louie` is used *only* on the client side
 
 ## Random notes on the orb
 
-[0] the orb is used on both the client and server sides, so it must be kept
+(0) the orb is used on both the client and server sides, so it must be kept
     free of:
     * 'louie' events -- they are used *only* in the client gui environment
     * `local_user` -- exists solely in the client environment
     * any awareness of the network or network-related events
 
-[1] orb.save() *NEVER* changes the `mod_datetime` of objects, because it
+(1) orb.save() *NEVER* changes the `mod_datetime` of objects, because it
     saves both local objects and those received from remote sources --
     therefore, locally created or modified objects must be time-stamped before
     they are passed to orb.save().
 
-[2] orb.clone() *ALWAYS* sets the `mod_datetime` of the clone
+(2) orb.clone() *ALWAYS* sets the `mod_datetime` of the clone
 
 ## Behavior of Project and System selector states
 
@@ -388,10 +394,10 @@ everyone.
 Read access to `ManagedObject` instances and objects related to a
 `ManagedObject` is determined by
 
-[1] the `public` attribute:
+(1) the `public` attribute:
     - if True, read access is granted to the world
     - if False, read access is controlled by `ObjectAccess` relationships
-[2] `ObjectAccess` relationships:
+(2) `ObjectAccess` relationships:
     - an ObjectAccess instance reifies the relationship between a
       ManagedObject and the Actors (Organizations, Projects, etc.) that have
       been granted read access to the ManagedObject.
@@ -488,14 +494,14 @@ The `Pangalaxian` desktop application can be tested using a local crossbar
 server and repository service (`pangalactic.repo.pger`) by configuring it as
 follows:
 
-[0] start up the client (which creates its home directory)
-[1] stop the client and cd to its home directory
-[2] copy or link the local crossbar server's `server_cert.pem` file to the
+0. start up the client (which creates its home directory)
+1. stop the client and cd to its home directory
+2. copy or link the local crossbar server's `server_cert.pem` file to the
     client's home directory, replacing any `server_cert.pem` that was there.
-[3] edit the `config` file:
+3. edit the `config` file:
     - set 'host' to 'localhost'
     - set 'port' to the port that crossbar is running on
-[4] start up the client again using the flags:
+4. start up the client again using the flags:
     - '-t' (test mode)
     - '-d' (debug level logging)
     - '-n' ('pger' will stand in for the admin service)
@@ -521,18 +527,18 @@ pre-configured `conda` repository.  The client update process works as follows:
 
 #### Server-Initiated
 
-[0] upon login, client issues rpc checking for new version release
-[1] server response includes new release metadata with `schema_changed` flag
-[2] if schema changed:
+0.  upon login, client issues rpc checking for new version release
+1.  server response includes new release metadata with `schema_changed` flag
+2.  if schema changed:
     - serialize all objects (db-independent form)
     - backup the serialized objects (old schema) into yaml file(s)
-[3] install new version
-[4] restart cattens (i.e. tell user to restart; offer to exit now)
-[5] at startup, the client compares its `state['schema_version']` to the
+3.  install new version
+4.  restart cattens (i.e. tell user to restart; offer to exit now)
+5.  at startup, the client compares its `state['schema_version']` to the
     package version and, if different, it checks whether the schema has been
     modified (same as step 1); if it has, the client looks for a serialized
     data file.
-[6] if a serialized data file is found, the client checks to see if the current
+6.  if a serialized data file is found, the client checks to see if the current
     version is found in the `mappings.fns` dictionary; if it is, the client
     imports the serialized data and runs the conversion function
     `mappings.fns[version]` on the data, then deserializes it; if the version
@@ -542,15 +548,15 @@ pre-configured `conda` repository.  The client update process works as follows:
 
 #### Client-Initiated
 
-[0] the client package is updated, either by:
+0.  the client package is updated, either by:
     [a] the client's menu item "Tools/Update <client name>..." or
     [b] by using `conda update <client name>..." at the command line
-[1] the client reloads the `mapping` module and checks whether the package
+1.  the client reloads the `mapping` module and checks whether the package
     version is in the `mappings.schema_mods` version list -- if so, its schema
     has been modified
-[2] if the schema changed, the client serializes all db data to a file
-[3] restart cattens (i.e. tell user to restart; offer to exit now)
-[4] replicate steps [5] and [6] above.
+2.  if the schema changed, the client serializes all db data to a file
+3.  restart cattens (i.e. tell user to restart; offer to exit now)
+4.  replicate steps [5] and [6] above.
 
 ### Repository Service Installation and Updates
 
