@@ -609,7 +609,7 @@ class UberORB(object):
 
     # begin db functions
 
-    def save(self, objs):
+    def save(self, objs, recompute=True):
         """
         Save the specified objects to the local db.  (CAVEAT: this will
         update ["merge"] any object that already exists in the db.)
@@ -668,7 +668,7 @@ class UberORB(object):
                     update_parm_defz(self, obj, pd_context)
         self.log.info('  orb.save:  committing db session.')
         self.db.commit()
-        if recompute_required:
+        if recompute_required and recompute:
             self.recompute_parmz()
         return True
 

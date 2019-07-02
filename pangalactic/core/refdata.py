@@ -479,6 +479,24 @@ core = [
     'mod_datetime': epoch
     },
 
+{   '_cname': 'ActivityType',
+    'oid': 'pgefobjects:ActivityType.Operation',
+    'id': 'operation',
+    'name': 'Operation',
+    'abbreviation': 'Op',
+    'create_datetime': epoch,
+    'mod_datetime': epoch
+    },
+
+{   '_cname': 'ActivityType',
+    'oid': 'pgefobjects:ActivityType.Event',
+    'id': 'event',
+    'name': 'Event',
+    'abbreviation': 'Evt',
+    'create_datetime': epoch,
+    'mod_datetime': epoch
+    },
+
 {   '_cname': 'Product',
     'oid': 'pgefobjects:TBD',
     'id': 'TBD',

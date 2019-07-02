@@ -2,21 +2,21 @@
 
 ## Structure of the `pangalactic` Namespace Packages
 
-### `core`: base pangalactic package: ontology, registry, orb, reference data
+### `core`: base pangalactic package (ontology, registry, orb, reference data)
   - `ontology ... pgef.owl [file in OWL format]`
   - `test ....... unit tests`
     + `data ..... test data files`
     + `vault .... test data files [copied to app_home/vault]`
   - `utils ...... general utility modules`
 
-### `node`: GUI client package
+### `node`: GUI client package (can be adapted for specific apps)
   - `cad ........ CAD modules`
   - `diagrams ... block diagram modules`
   - `icons ...... app icons [copied to app_home/icons]`
   - `images ..... app images [copied to app_home/images]`
   - `test ....... GUI test client`
 
-### `vger`: network repository service
+### `vger`: network repository service (rpc and pub/sub interfaces)
   - `vger ........ repository service interface`
   - `userdir ..... LDAP directory search interface`
 
@@ -96,6 +96,7 @@
     last_path:        (str)  most recent path in file selections
     local_user_oid:   (str)  oid of Person object for local user 
     mode:             (str)  current Pangalaxian gui mode (e.g. 'system')
+    model_window_size:(list) width, height of current model window
     product:          (str)  oid of currently selected Product
     project:          (str)  oid of currently selected Project
     role_oids:        (dict) maps names of Roles to their oids
@@ -104,16 +105,16 @@
                              `synced` is set to False when the mbus is first
                              joined upon login, and set to True when initial
                              sync operations are completed.
-    synced_oids:      (list) oids of user-created objects that have been synced
-                             the "synced_oids" list is used in determining
-                             whether an object may be deleted while the client
-                             is offline (not connected to the repository): any
-                             object that has been synced to the repository
-                             *cannot* be deleted while offline, because it may
-                             be used in an assembly by another user and
-                             deleting it before removing it from the assembly
-                             would break referential integrity.
-    sys_trees[7]:     (dict) maps project ids to system tree attributes:
+    synced_oids:      (list) oids of user-created objects that have been
+                             synced: the "synced_oids" list is used in
+                             determining whether an object can be deleted while
+                             the client is offline (not connected to the
+                             repository): any object that has been synced to
+                             the repository *cannot* be deleted while offline,
+                             because it may be used in an assembly by another
+                             user and deleting it before removing it from the
+                             assembly would break referential integrity.
+    sys_trees:        (dict) maps project ids to system tree attributes:
                              {project id :
                                  {nodes : (int) # of nodes in sys tree
                                           (used in calculating progress

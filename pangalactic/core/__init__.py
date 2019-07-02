@@ -204,6 +204,10 @@ def write_state(statepath):
     # TODO:  create checksum for security
     # try:
     f = open(statepath, 'w')
+    # remove "sys_trees" item from state before writing (it contains binary
+    # data this is not supported by yaml)
+    if state.get('sys_trees'):
+        del state['sys_trees']
     f.write(yaml.safe_dump(state, allow_unicode=True,
                            default_flow_style=False))
     f.close()

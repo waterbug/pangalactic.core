@@ -633,6 +633,28 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/activity_type -->
+
+    <owl:ObjectProperty rdf:about="&pgef;activity_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of an Activity.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Activity"/>
+        <rdfs:range rdf:resource="&pgef;ActivityType"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/activities_of_type -->
+
+    <owl:ObjectProperty rdf:about="&pgef;activities_of_type">
+        <owl:inverseOf rdf:resource="&pgef;activity_type"/>
+        <rdfs:comment rdf:datatype="&xsd;string">All Activities of this type.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ActivityType"/>
+        <rdfs:range rdf:resource="&pgef;Activity"/>
+    </owl:ObjectProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/product_type -->
 
     <owl:ObjectProperty rdf:about="&pgef;product_type">
@@ -2325,6 +2347,15 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <owl:Class rdf:about="&pgef;Activity">
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:comment rdf:datatype="&xsd;string">A named, structured procedural concept which is realized and applied systematically to achieve an objective.</rdfs:comment>
+    </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/ActivityType -->
+
+    <owl:Class rdf:about="&pgef;ActivityType">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of an Activity.</rdfs:comment>
     </owl:Class>
 
 
