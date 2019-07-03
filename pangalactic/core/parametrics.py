@@ -1,11 +1,9 @@
 """
 Functions to support Parameters and Relations
 """
-from __future__ import division
-from builtins import str
-from collections  import namedtuple
-from decimal      import Decimal
-from math         import floor, fsum, log10
+from collections import namedtuple
+from decimal     import Decimal
+from math        import floor, fsum, log10
 
 # pangalactic
 from pangalactic.core                 import config, prefs
@@ -13,9 +11,6 @@ from pangalactic.core.meta            import SELECTABLE_VALUES
 from pangalactic.core.units           import in_si, ureg
 from pangalactic.core.utils.meta      import get_parameter_definition_oid
 from pangalactic.core.utils.datetimes import dtstamp
-
-# numpy
-# import numpy as np
 
 
 DATATYPES = SELECTABLE_VALUES['range_datatype']

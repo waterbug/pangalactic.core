@@ -2,8 +2,6 @@
 """
 Objects and services for handling identifiers, addresses, and namespaces.
 """
-from future import standard_library
-standard_library.install_aliases()
 from collections import OrderedDict
 from unidecode import unidecode
 from urllib.parse import urlparse

@@ -13,9 +13,6 @@ Options:
     -h / --help
         Print this message and exit.
 """
-from __future__ import print_function
-from future import standard_library
-standard_library.install_aliases()
 import base64
 import getopt
 from http.client import HTTPConnection, HTTPException

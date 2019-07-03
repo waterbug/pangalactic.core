@@ -1,10 +1,10 @@
 """
 Structures for data.
 """
-import collections
+from collections.abc import MutableSet
 
 
-class OrderedSet(collections.MutableSet):
+class OrderedSet(MutableSet):
     """
     Set that remembers original insertion order.
 
