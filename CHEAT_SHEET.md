@@ -53,15 +53,13 @@
 
 ## settings -- contents of the files 'config', 'prefs', and 'state'
 
-* config: these settings can be edited by the user
+* config: these settings can be edited by the user or local administrator
 ```
-    app_channel:        (str)  app channel url or name
     app_name:           (str)  app name
-    app_package_name:   (str)  app package name
     dashboards:         (dict) named dashboards (lists of parameter ids)
     dashboard_names:    (list) ordering of keys in `dashboards`
     db_url:             (str)  sqlalchemy-style db url (only used by vger)
-    default_parms:      (list) ids of default parameters to assign to objs
+    default_parms:      (list) ids of default parameters to assign to objects
     host:               (list) fqdn of message bus host
     local_admin:        (bool) if `true`, user can edit any item locally
     logo:               (str)  logo icon file name
@@ -75,7 +73,7 @@
 ```
     dashboards:         (dict) named dashboards (lists of parameter ids)
     dashboard_names:    (list) ordering of keys in `dashboards`
-    default_parms:      (list) ids of default parameters to assign to objs
+    default_parms:      (list) ids of default parameters to assign to objects
     editor:
         parameters:     (list) [ids] order of parameters in pgxnobject panels
     model_types:        (list) oids of ModelTypes that pangalaxian can "render"

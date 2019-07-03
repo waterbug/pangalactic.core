@@ -721,50 +721,6 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/parameter_definition -->
-
-    <owl:ObjectProperty rdf:about="&pgef;parameter_definition">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The ParameterDefinition to which a ProductTypeParameterDefinition relationship points.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ProductTypeParameterDefinition"/>
-        <rdfs:range rdf:resource="&pgef;ParameterDefinition"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/used_in_product_types -->
-
-    <owl:ObjectProperty rdf:about="&pgef;used_in_product_types">
-        <owl:inverseOf rdf:resource="&pgef;parameter_definition"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The relationships that a ParameterDefinition has to the ProductTypes that use it.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
-        <rdfs:range rdf:resource="&pgef;ProductTypeParameterDefinition"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/used_in_product_type -->
-
-    <owl:ObjectProperty rdf:about="&pgef;used_in_product_type">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The ProductType to which a ProductTypeParameterDefinition relationship points.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ProductTypeParameterDefinition"/>
-        <rdfs:range rdf:resource="&pgef;ProductType"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/parameter_definitions -->
-
-    <owl:ObjectProperty rdf:about="&pgef;parameter_definitions">
-        <owl:inverseOf rdf:resource="&pgef;used_in_product_type"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The relationships that a ProductType has to the ParameterDefinitions that use it.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ProductType"/>
-        <rdfs:range rdf:resource="&pgef;ProductTypeParameterDefinition"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/parent_organization -->
 
     <owl:ObjectProperty rdf:about="&pgef;parent_organization">
@@ -2204,15 +2160,6 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <owl:Class rdf:about="&pgef;DisciplineProductType">
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Discipline ProductType is a relationship between a Discipline and the a type of Product that is used by practitioners of that Discipline.  The two classes have a many-to-many relationship:  one Discipline will typically use many ProductTypes, and one ProductType can be used by many Disciplines.</rdfs:comment>
-    </owl:Class>
-
-
-
-    <!-- http://pangalactic.us/pgef/ProductTypeParameterDefinition -->
-
-    <owl:Class rdf:about="&pgef;ProductTypeParameterDefinition">
-        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A ProductType Parameter Definition is a relationship between a ProductType and the Definition of a Parameter that is used to characterize Products of that type.  The two classes have a many-to-many relationship:  one ProductType will typically be characterized using several Parameter Definitions, and one Parameter Definition can be involved in the characterization of multiple ProductTypes.</rdfs:comment>
     </owl:Class>
 
 
