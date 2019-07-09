@@ -533,6 +533,15 @@ core = [
     'mod_datetime': epoch
     },
 
+{   '_cname': 'ActivityType',
+    'oid': 'pgefobjects:ActivityType.Cycle',
+    'id': 'cycle',
+    'name': 'Cycle',
+    'abbreviation': 'Cyc',
+    'create_datetime': epoch,
+    'mod_datetime': epoch
+    },
+
 {   '_cname': 'Product',
     'oid': 'pgefobjects:TBD',
     'id': 'TBD',

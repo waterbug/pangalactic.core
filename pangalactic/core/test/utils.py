@@ -115,6 +115,12 @@ def create_test_project():
             name=u'Hitchhikers Guide to the Galaxy',
             name_code='H2G2'),
         dict(
+            _cname='Mission', oid='test:Mission.H2G2',
+            id='h2g2_mission', id_ns='test',
+            creator='test:steve', modifier='test:steve',
+            create_datetime=NOW, mod_datetime=NOW,
+            name=u'Hitchhike the Galaxy'),
+        dict(
             _cname='RoleAssignment',
             oid='test:RA.zaphod_se',
             id='zaphod_se',
