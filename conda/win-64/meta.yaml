@@ -13,6 +13,7 @@ requirements:
   run:
     - future
     - pint
+    - pynacl
     - python {{PY_VER}}
     - python-dateutil
     - pytz

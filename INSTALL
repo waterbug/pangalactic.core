@@ -153,6 +153,20 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install autobahn'
 
+    - Twisted
+      Asynchronous networking framework
+      <http://twistedmatrix.com>
+      NOTE:  autobahn can be used with asyncio or twisted -- pangalactic uses
+      it with twisted.
+
+          Configuration:  'conda install twisted'
+
+    - PyNaCl
+      Cryptography library required for autobahn to be able to use
+      WAMP-Cryptosign (public key authentication).
+
+          Configuration:  'conda install pynacl'
+
     - binaryornot (conda-forge)
       Detects whether a file is binary, and certain types of files
 
@@ -172,12 +186,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
         while installing pyqt)
 
           Configuration:  'conda install pyqt=5.6.0'
-
-    - Twisted
-      Asynchronous networking framework
-      <http://twistedmatrix.com>
-
-          Configuration:  'conda install twisted'
 
     - qt5reactor
       Integration of twisted reactor with PyQt5 event loop
@@ -224,8 +232,16 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
     - Twisted
       Asynchronous networking framework
       <http://twistedmatrix.com>
+      NOTE:  autobahn can be used with asyncio or twisted -- pangalactic uses
+      it with twisted.
 
           Configuration:  'conda install twisted'
+
+    - PyNaCl
+      Cryptography library required for autobahn to be able to use
+      WAMP-Cryptosign (public key authentication).
+
+          Configuration:  'conda install pynacl'
 
     - PostgreSQL 7.4.x or later (8.x is recommended)
       <http://www.ca.postgresql.org>
