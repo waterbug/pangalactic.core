@@ -1,0 +1,434 @@
+<h1 id="the-pan-galactic-cheat-sheet">THE PAN GALACTIC CHEAT SHEET</h1>
+<h2 id="parameter-operations-import-from-p.core.parametrics">Parameter Operations (import from p.core.parametrics)</h2>
+<ul>
+<li><p>getting:</p>
+<ul>
+<li><p><code>get_pval(orb, oid, pid)</code> gets the value (int, float, etc.)</p></li>
+<li><p><code>get_pval_as_str(orb, oid, pid, units=None)</code> gets the value as a string (for display in a GUI widget)</p></li>
+</ul></li>
+<li><p>setting:</p>
+<ul>
+<li><p><code>set_pval(orb, oid, pid, value, units=None)</code> sets the value (int, float, etc.)</p></li>
+<li><p><code>set_pval_from_str(orb, oid, pid, str_val, units=None)</code> sets the value from a string (for input from GUI widget)</p></li>
+</ul></li>
+</ul>
+<h2 id="structure-of-the-pangalactic-namespace-packages">Structure of the <code>pangalactic</code> Namespace Packages</h2>
+<h3 id="core-base-pangalactic-package-ontology-registry-orb-reference-data"><code>core</code>: base pangalactic package (ontology, registry, orb, reference data)</h3>
+<ul>
+<li><code>ontology ... pgef.owl [file in OWL format]</code></li>
+<li><code>test ....... unit tests</code>
+<ul>
+<li><code>data ..... test data files</code></li>
+<li><code>vault .... test data files [copied to app_home/vault]</code></li>
+</ul></li>
+<li><code>utils ...... general utility modules</code></li>
+</ul>
+<h3 id="node-gui-client-package-can-be-adapted-for-specific-apps"><code>node</code>: GUI client package (can be adapted for specific apps)</h3>
+<ul>
+<li><code>cad ........ CAD modules</code></li>
+<li><code>diagrams ... block diagram modules</code></li>
+<li><code>icons ...... app icons [copied to app_home/icons]</code></li>
+<li><code>images ..... app images [copied to app_home/images]</code></li>
+<li><code>test ....... GUI test client</code></li>
+</ul>
+<h3 id="vger-network-repository-service-rpc-and-pubsub-interfaces"><code>vger</code>: network repository service (rpc and pub/sub interfaces)</h3>
+<ul>
+<li><code>vger ........ repository service interface</code></li>
+<li><code>userdir ..... LDAP directory search interface</code></li>
+</ul>
+<h2 id="contents-of-app-home-directory-app_home-created-at-start-up">Contents of App Home Directory (<code>[app]_home</code>) created at start-up</h2>
+<ul>
+<li><p>holds configuration data (some of which may be user-specific) that persists when a new version of the app is installed</p></li>
+<li><p>note that if schemas change between versions, some of this data may need to be modified to conform to the new schemas</p>
+<pre><code>cache/ ............ internal metadata structures (used by registry)
+config ............ config file (yaml) -- see *settings* section below
+diagrams.json ..... diagram geometry storage
+icons/ ............ &quot;built-in&quot; icons (icons generated at runtime are saved
+                     in vault/icons; all other data files are simply
+                     added to the &quot;vault&quot; directory`)
+images/ ........... images  (application-specific images)
+local.db .......... node local object store (sqlite db)
+log/ .............. logs
+onto/ ............. contains pgef.owl (OWL ontology file)
+parameters.json ... parameter storage
+prefs ............. saved preferences (yaml) -- see *settings* section below
+server_cert.pem ... certificate for message bus host (enables TLS connection)
+state ............. saved state (yaml) -- see *settings* section below
+test_data/ ........ files for user access in testing of data importing, etc.
+trash ............. trash file (yaml) containing serialized deleted objects
+                     {obj.oid : orb.serialize([obj]), ...}
+   vault/ ............. files created/accessed internally by pangalactic
+                    applications (includes icons generated at runtime and
+                    files referenced by the database, e.g. files
+                    corresponding to DigitalFile objects)</code></pre></li>
+</ul>
+<h2 id="settings----contents-of-the-files-config-prefs-and-state">settings -- contents of the files 'config', 'prefs', and 'state'</h2>
+<ul>
+<li><p>config: these settings can be edited by the user or local administrator</p>
+<pre><code>app_name:           (str)  app name
+dashboards:         (dict) named dashboards (lists of parameter ids)
+dashboard_names:    (list) ordering of keys in `dashboards`
+db_url:             (str)  sqlalchemy-style db url (only used by vger)
+default_parms:      (list) ids of default parameters to assign to objects
+host:               (list) fqdn of message bus host
+local_admin:        (bool) if `true`, user can edit any item locally
+logo:               (str)  logo icon file name
+p_defaults:         (dict) default parameter values {id: val (string)}
+port:               (str)  port to use for message bus host connection
+tall_logo:          (str)  &quot;tall&quot; logo icon file name
+units:              (str)  unit system (default: &#39;mks&#39;)</code></pre></li>
+<li><p>prefs: these settings are written by the application 'preferences' dialog</p>
+<pre><code>dashboards:         (dict) named dashboards (lists of parameter ids)
+dashboard_names:    (list) ordering of keys in `dashboards`
+default_parms:      (list) ids of default parameters to assign to objects
+editor:
+    parameters:     (list) [ids] order of parameters in pgxnobject panels
+model_types:        (list) oids of ModelTypes that pangalaxian can &quot;render&quot;</code></pre></li>
+<li><p>state: these settings are written by the application (user edits will be ignored and overwritten)</p>
+<pre><code>cloaked:          (list) oids of local cloaked objects
+connected:        (bool) true if logged in to message bus
+current_cname:    (str)  name of currently selected db table class
+dashboard_name:   (str)  name of currently selected dashboard
+height:           (int)  pixel height of pangalaxian gui
+width:            (int)  pixel width of pangalaxian gui
+height:           (int)  current pixel height of pangalaxian gui
+icon_dir:         (str)  path to the &quot;icons&quot; directory
+icon_type:        (str)  suffix for platform-specific icons [e.g., &#39;.ico&#39;]
+last_path:        (str)  most recent path in file selections
+local_user_oid:   (str)  oid of Person object for local user 
+mode:             (str)  current Pangalaxian gui mode (e.g. &#39;system&#39;)
+model_window_size:(list) width, height of current model window
+product:          (str)  oid of currently selected Product
+project:          (str)  oid of currently selected Project
+role_oids:        (dict) maps names of Roles to their oids
+                         {role name : role oid}
+synced:           (bool) keeps track of whether session has been synced.
+                         `synced` is set to False when the mbus is first
+                         joined upon login, and set to True when initial
+                         sync operations are completed.
+synced_oids:      (list) oids of user-created objects that have been
+                         synced: the &quot;synced_oids&quot; list is used in
+                         determining whether an object can be deleted while
+                         the client is offline (not connected to the
+                         repository): any object that has been synced to
+                         the repository *cannot* be deleted while offline,
+                         because it may be used in an assembly by another
+                         user and deleting it before removing it from the
+                         assembly would break referential integrity.
+sys_trees:        (dict) maps project ids to system tree attributes:
+                         {project id :
+                             {nodes : (int) # of nodes in sys tree
+                                      (used in calculating progress
+                                      bar for tree rebuilds),
+                              expanded : (list) indexes of expanded nodes
+                                         in sys tree (used in restoring
+                                         state when tree is rebuilt)}}
+userid:           (str)  most recent userid used in login
+version:          (str)  version of client
+width:            (int)  current pixel width of pangalaxian gui</code></pre></li>
+</ul>
+<h2 id="modes-and-views">Modes and Views</h2>
+<ul>
+<li>Modes are set by selecting one of the mode icons at top right corner of the main window</li>
+<li><code>mode</code> is a state of the main pangalaxian main window</li>
+<li><code>view</code> [not implemented yet] is orthogonal to <code>mode</code>, set using <code>view</code> combo</li>
+</ul>
+<h3 id="modes">Modes</h3>
+<table>
+<thead>
+<tr class="header">
+<th>mode</th>
+<th>context</th>
+<th>types</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>System</td>
+<td>system modeler</td>
+<td>Mission, System</td>
+</tr>
+<tr class="even">
+<td>Component</td>
+<td>component modeler, library</td>
+<td>Part, etc.</td>
+</tr>
+<tr class="odd">
+<td>Data</td>
+<td>datasets</td>
+<td>DataSet</td>
+</tr>
+<tr class="even">
+<td>DB</td>
+<td>database</td>
+<td>All Types</td>
+</tr>
+<tr class="odd">
+<td>Admin</td>
+<td>admin</td>
+<td>Project, Mission Study, Role</td>
+</tr>
+</tbody>
+</table>
+<h4 id="mode-data">Mode: <code>data</code></h4>
+<ul>
+<li><p>Operates on flat <code>DataSet</code> instances</p></li>
+<li>MainWindow layout:
+<ul>
+<li>if no datasets ... left: <code>No Data</code>, center: empty</li>
+<li>if 1 dataset ..... left: metadata, center: data table</li>
+<li>if &gt; 1 dataset ... left: metadata of selected ds, center: data table</li>
+</ul></li>
+<li><p><code>DataSet</code>: data that is typically imported from some external source -- usually from a file.</p></li>
+<li><p>represented internally as pandas DataFrame (hdf5) or xray DataSet (multi-dimensional with units, etc.)</p></li>
+<li><p>saved as HDF5</p></li>
+<li><p>To be implemented:</p></li>
+<li><p>[possibly] use <code>xray</code> <code>Dataset</code> to represent <code>pgef</code> <code>DataSet</code></p></li>
+<li><p>unit conversion</p></li>
+<li><p>have a DataSet reference object in db, referencing its serialized form (can this be queried using Blaze?)</p></li>
+<li><p>operations on DataSets, to be supported by wizards:</p>
+<ul>
+<li>join datasets</li>
+<li>map a dataset into a type (i.e. collection of objects of a specified type -- e.g. Requirement)</li>
+</ul></li>
+<li><p>DataSet Properties:</p>
+<ul>
+<li>name: string identifier</li>
+<li>source: file name/path or other url / location identifier</li>
+<li>target: serialized file or db name / table / file (.db)</li>
+<li>sheet: for excel files, the sheet name</li>
+<li>mapping: [fk] names of fields/columns in file mapped to table name/column(s) and types</li>
+<li>key: (optional) primary key column</li>
+<li>dtstamp: date/time imported</li>
+</ul></li>
+</ul>
+<h4 id="mode-db">Mode: <code>db</code></h4>
+<ul>
+<li>View/edit objects in local db</li>
+</ul>
+<h4 id="modes-system-and-component">Modes: <code>system</code> and <code>component</code></h4>
+<ul>
+<li><p>Component Modeler and System Modeler</p></li>
+<li>Create/modify systems and component models</li>
+<li>MainWindow layout:
+<ul>
+<li>if no models ... left: <code>No Model</code>, center: empty</li>
+<li>if 1 model ..... left: tree structure + metadata, center: diagram</li>
+<li>if &gt; 1 model ... left: tree structure + metadata of selected model, center: diagram</li>
+</ul></li>
+</ul>
+<h3 id="views-not-implemented-yet">Views [not implemented yet]</h3>
+<table>
+<thead>
+<tr class="header">
+<th>view</th>
+<th>context</th>
+<th>types</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Documentation</td>
+<td>docs</td>
+<td>Document + subtypes</td>
+</tr>
+<tr class="even">
+<td>Requirements</td>
+<td>reqt mgt</td>
+<td>Requirement</td>
+</tr>
+<tr class="odd">
+<td>Models</td>
+<td>models</td>
+<td>Model</td>
+</tr>
+<tr class="even">
+<td>DataSets</td>
+<td>data</td>
+<td>DataSet</td>
+</tr>
+</tbody>
+</table>
+<h2 id="diagrams-used-in-system-and-component-modes">Diagrams (used in <code>system</code> and <code>component</code> modes)</h2>
+<ul>
+<li>See <code>NOTES_ON_DIAGRAMS</code></li>
+</ul>
+<h2 id="application-level-signals-louie">Application-level Signals (louie)</h2>
+<p>The <code>louie</code> package provides the capability to broadcast signals among any objects active within a python application. This mechanism can be used, e.g., for propagating events related to context items [<code>mode</code>, <code>project</code>, <code>system</code>, etc.]</p>
+<p>Note that in pangalactic, <code>louie</code> is used <em>only</em> on the client side</p>
+<ul>
+<li><p>define a signal: dispatcher.connect(handler, signal_name)<code>,   where</code>handler<code>is a callable and</code>signal_name<code>is a string -- e.g.:</code>dispatcher.connect(self.on_deleted_object_signal, 'deleted object')`</p></li>
+<li><p>create senders for signals in context of item events<br />
+e.g., <code>deleted object</code> (of some type):<br />
+<code>dispatcher.send(signal='deleted object', [kwargs for signal content])</code></p></li>
+<li><p>create handler functions to trigger respons(es) to the signal<br />
+e.g., <code>on_deleted_object_signal([kwargs for signal content])</code></p></li>
+<li>NOTE: signals are used in some <code>pangalaxian.Main</code> <code>property</code> constructs:</li>
+<li>setter dispatches the signal <code>[item] changed</code></li>
+<li><p>getter gets the value from <code>state[&quot;item&quot;]</code></p></li>
+</ul>
+<h2 id="random-notes-on-the-orb">Random notes on the orb</h2>
+<ol start="0" style="list-style-type: decimal">
+<li>the orb is used on both the client and server sides, so it must be kept free of:
+<ul>
+<li>'louie' events -- they are used <em>only</em> in the client gui environment</li>
+<li><code>local_user</code> -- exists solely in the client environment</li>
+<li>any awareness of the network or network-related events</li>
+</ul></li>
+<li><p>orb.save() <em>NEVER</em> changes the <code>mod_datetime</code> of objects, because it saves both local objects and those received from remote sources -- therefore, locally created or modified objects must be time-stamped before they are passed to orb.save().</p></li>
+<li><p>orb.clone() <em>ALWAYS</em> sets the <code>mod_datetime</code> of the clone</p></li>
+</ol>
+<h2 id="behavior-of-project-and-system-selector-states">Behavior of Project and System selector states</h2>
+<ul>
+<li>Project selector</li>
+<li>component mode: any Parts or Models created will have the selected Project as their <code>owner</code> (person creating them will be <code>creator</code>)</li>
+<li><p>systems mode: left dock systems tree will be for the selected Project (if no system is selected -- see below)</p></li>
+<li>System selector</li>
+<li>component mode: not visible [may change if needed]</li>
+<li><p>systems mode: selected system will be shown as root of left dock systems tree</p></li>
+</ul>
+<h2 id="representation-of-many-to-many-relationships-in-the-ui">Representation of Many-to-Many Relationships in the UI</h2>
+<ul>
+<li>the PGEF ontology contains several m2m (many-to-many) relationships, which are represented using a &quot;reified&quot; relationship class (a.k.a. in database parlance a &quot;join object&quot;). For example, the <code>Acu</code> (Assembly Component Usage) class represents a many-to-many relationship between <code>Product</code> instances, in which the assembly <code>Product</code> is built from one or more component <code>Product</code> instances, and an <code>Acu</code> exists for each assembly-component relationship between 2 <code>Product</code> instances.</li>
+</ul>
+<p>For all many-to-many relationship classes in PGEF, once the m2m class is defined, 4 &quot;Object Properties&quot; are defined: 2 of the properties are from the relationship object to each of the related instances and the other 2 properties are the inverses of the first 2 properties.</p>
+<p>To make this more concrete, here are the 4 properties for <code>Acu</code>:</p>
+<pre><code>property/attribute      domain             range
+------------------      ------             -----</code></pre>
+<ul>
+<li><code>assembly</code>: Acu -&gt; Product (assembly) 1 to 1 (directly populated)</li>
+<li><code>component</code>: Acu -&gt; Product (used in assembly) 1 to 1 (directly populated)</li>
+<li><code>components</code>: Product -&gt; Acu 1 to many: inverse of <code>assembly</code> property (computed by sqlalchemy)</li>
+<li><p><code>where_used</code>: Product -&gt; Acu 1 to many: inverse of <code>component</code> property (computed by sqlalchemy)</p></li>
+<li><p>The two 1-to-1 attributes are simply the two &quot;sides&quot; of the Acu relationship, its <code>assembly</code> and <code>component</code> properties. The 1-to-many attributes are &quot;computed attributes&quot;, which are automatically implemented using SqlAlchemy when the <code>PanGalacticRegistry</code> and <code>KM</code> translate the ontology into runtime classes.</p></li>
+<li><p>Only one of the 1-to-many attributes should be used to implement the user interface through which the 1-to-1 &quot;join&quot; objects are created. Since it isn't possible to algorithmically determine which of the 1-to-many properties to use for the UI widget, those properties will be defined in <code>p.meta.defaults.M2M_PROPERTIES</code>, which will be used when constructing the UI elements.</p></li>
+<li><p>Note that the 1-to-many attribute <em>itself</em> will not be editable -- it is computed -- but rather the object editor will have a &quot;drop zone&quot; widget associated with the 1-to-many attribute. The default widget will be an editable list widget (QListWidget) into which object instances can be dropped, which triggers the creation of an instance of the m2m object that links the object being edited to the object that was dropped onto it.</p></li>
+</ul>
+<h2 id="parameters-parameterdefinitions">Parameters / ParameterDefinitions</h2>
+<p>The object dropped onto the <code>Parameters</code> list widget in the Component Modeler is a ParameterDefinition (not a Parameter), which will trigger the creation of a Parameter instance of the type specified by the ParameterDefinition, along with a ModelParameter object linking the Model with the new Parameter. The drop area will be a simple panel, on which the drop will trigger a data field widget to be created in which the Parameter value can be displayed and edited. It will also be possible to remove the data field widget (which will destroy the associated Parameter and ModelParameter objects) by a right-click menu option (or something else TBD).</p>
+<h2 id="domain-objects">Domain Objects</h2>
+<h3 id="versioning-scheme">Versioning Scheme</h3>
+<ul>
+<li><p>A canonical versioning scheme will be used by default but the user is allowed to customize it within limits</p></li>
+<li>If an object has a <code>version</code> attribute:</li>
+<li>its use is optional (if not populated the object is not versioned)</li>
+<li><p>if the object is to be versioned, its <code>id</code> attribute should remain the same across all versions</p></li>
+<li>Canonical versioning:</li>
+<li>the canonical scheme uses <code>0</code> as the initial version, and sequential integers for subsequent versions.</li>
+<li><p>the canonical scheme uses <code>0</code> as the initial iteration, and sequential integers for subsequent iterations.</p></li>
+<li>Customized versioning:</li>
+<li>the user can specify any string for the version attribute, and the system will set and increment the <code>version_sequence</code> attribute with an integer that tracks the sequence of versions</li>
+<li><p>iterations are numbered the same as in the &quot;canonical&quot; scheme</p></li>
+<li>&quot;Freezing&quot; versions and creating new versions:</li>
+<li>the object viewer/editor (PgxnObject) provides [TODO!] a <code>freeze</code> button that will put the object into a temporary <code>frozen</code> state.</li>
+<li><p>a <code>frozen</code> object can be <code>thawed</code> to make corrections but is otherwise not editable</p></li>
+</ul>
+<h3 id="authorization-object-access">Authorization / Object Access</h3>
+<h4 id="read-view-access">Read (View) Access</h4>
+<p>Read access is only controlled for <code>ManagedObject</code> instances and their related objects (<code>Model</code>, <code>DigitalFile</code>, etc.) -- all other objects are visible to everyone.</p>
+<p>Read access to <code>ManagedObject</code> instances and objects related to a <code>ManagedObject</code> is determined by</p>
+<ol style="list-style-type: decimal">
+<li>the <code>public</code> attribute:
+<ul>
+<li>if True, read access is granted to the world</li>
+<li>if False, read access is controlled by <code>ObjectAccess</code> relationships</li>
+</ul></li>
+<li><code>ObjectAccess</code> relationships:
+<ul>
+<li>an ObjectAccess instance reifies the relationship between a ManagedObject and the Actors (Organizations, Projects, etc.) that have been granted read access to the ManagedObject.</li>
+</ul></li>
+</ol>
+<p>If a Person has been assigned a Role in an Organization that has been granted access to a ManagedObject (i.e. via an ObjectAccess instance), then the Person has <em>read</em> access to the ManagedObject instance and its related objects.</p>
+<ul>
+<li><p>The <code>creator</code> of a <code>ManagedObject</code> instance can <code>decloak</code> the object to an <code>Organization</code> or to the world -- the <code>decloak</code> function creates an <code>ObjectAccess</code> instance for which the <code>grantee</code> is an Organization and the <code>accessible_object</code> is the object; if the <code>grantee</code> is <code>None</code>, read access to the object is granted to the world.</p></li>
+<li><p>A <code>Person</code> who has a <code>RoleAssignment</code> in the context of an <code>Organization</code> is granted read access to any <code>ManagedObject</code> that has been decloaked to that Organization and to any relationships (e.g. Acu) for which both related <code>ManagedObjects</code> are accessible.</p></li>
+</ul>
+<p>The authoritative source for data on roles and role assignments will typically be an administrative service, unless the repository is fulfilling the role of the administrative service. Therefore, because operations to sync such data are expensive, the data are cached in <code>state</code> variables rather than stored in the local db.</p>
+<h4 id="write-edit-access">Write (Edit) Access</h4>
+<p>The following conditions must be met for Person A to have permission to edit Object X:</p>
+<ul>
+<li>Person A is the <code>creator</code> of Object X</li>
+</ul>
+<p>OR</p>
+<ul>
+<li>Object X is owned by Organization Z</li>
+</ul>
+<p>AND EITHER</p>
+<ul>
+<li>Person A is assigned the Administrator Role in Organization Z</li>
+</ul>
+<p>OR</p>
+<ul>
+<li>Person A is assigned a Role in Organization Z that is associated with Discipline D that uses Products having the Product Type of Product X.</li>
+</ul>
+<h3 id="object-viewer-editor-pgxnobject">Object Viewer / Editor: PgxnObject</h3>
+<ul>
+<li><p>module: pangalactic.node.gui.pgxnobject</p></li>
+<li>Object editor that can view or edit any <code>PanGalactic</code> domain object</li>
+<li>the <code>Edit</code> button will only be visible if the user has <code>write</code> access (for now, that means the user must be the <code>creator</code> of the object)</li>
+<li>can be used as a dialog or an embedded widget -- e.g., the left dock panel in component (<code>Component Modeler</code>) mode.</li>
+<li><p>validation uses <code>p.meta.meta.PGXN_REQD</code> -- a dictionary that maps class names to lists of required fields (required -&gt; not allowed to be null)</p></li>
+<li><p>PgxnObject is highly configurable -- for more detail, see documentation within the p.n.g.pgxnobject module</p></li>
+</ul>
+<h3 id="object-deletions">Object Deletions</h3>
+<ul>
+<li><p>A user with <code>write</code> access to an object can use the Object Editor to delete the object if it is not used in any assemblies or projects.</p></li>
+<li><p>The deletion process removes the object from the session and the database (see below for details) after serializing the object and adding it to the <code>pangalactic</code> module-level list variable <code>trash</code>, which is managed by the orb. <code>trash</code> is managed in the same way as the module-level variables <code>config</code>, <code>prefs</code>, and <code>state</code>.</p></li>
+<li><p>The behavior of <code>Delete</code> differs for online and offline states:</p></li>
+<li><p>Offline: the object is serialized and appended to <code>trash</code>, an in-memory list of serialized objects, and deleted from the local db and the current session.</p></li>
+<li><p>Online: in addition to the offline behavior, the object is deleted from the repository.</p></li>
+<li><p>Upon login, when the local user's objects are synced, any objects in the repository that were created by the local user and neither exist locally nor are present in the user's trash are pushed to the client (i.e., any locally &quot;missing&quot; objects created by the user are &quot;restored&quot;).</p></li>
+</ul>
+<h2 id="installation-and-configuration-of-crossbar">Installation and Configuration of Crossbar</h2>
+<p>[TBD]</p>
+<h2 id="configuration-for-testing-the-client-with-a-local-crossbar-and-repo-service">Configuration for Testing the Client with a Local Crossbar and Repo Service</h2>
+<p>The <code>Pangalaxian</code> desktop application can be tested using a local crossbar server and repository service (<code>pangalactic.repo.pger</code>) by configuring it as follows:</p>
+<ol start="0" style="list-style-type: decimal">
+<li>start up the client (which creates its home directory)</li>
+<li>stop the client and cd to its home directory</li>
+<li>copy or link the local crossbar server's <code>server_cert.pem</code> file to the client's home directory, replacing any <code>server_cert.pem</code> that was there.</li>
+<li>edit the <code>config</code> file:
+<ul>
+<li>set 'host' to 'localhost'</li>
+<li>set 'port' to the port that crossbar is running on</li>
+</ul></li>
+<li>start up the client again using the flags:
+<ul>
+<li>'-t' (test mode)</li>
+<li>'-d' (debug level logging)</li>
+<li>'-n' ('pger' will stand in for the admin service)</li>
+</ul></li>
+</ol>
+<p>You should now be able to log in to your local crossbar and access your local repository service.</p>
+<h2 id="package-installation-and-management">Package Installation and Management</h2>
+<p>The <code>conda</code> package manager is used to manage the installation and updating of <code>pangalactic</code> for both the client and server.</p>
+<h3 id="client-installation-and-updates">Client Installation and Updates</h3>
+<p>For the Windows platform, <code>conda-constructor</code> is used to create an installer for the client package. When run, the installer creates a <code>conda</code> installation (which includes <code>conda</code> itself) in the user's home directory.</p>
+<p>The client includes a self-updating mechanism that can be invoked from the menu by the user and will use conda to check for updates to the package in the pre-configured <code>conda</code> repository. The client update process works as follows:</p>
+<h4 id="server-initiated">Server-Initiated</h4>
+<ol start="0" style="list-style-type: decimal">
+<li>upon login, client issues rpc checking for new version release</li>
+<li>server response includes new release metadata with <code>schema_changed</code> flag</li>
+<li>if schema changed:
+<ul>
+<li>serialize all objects (db-independent form)</li>
+<li>backup the serialized objects (old schema) into yaml file(s)</li>
+</ul></li>
+<li>install new version</li>
+<li>restart cattens (i.e. tell user to restart; offer to exit now)</li>
+<li>at startup, the client compares its <code>state['schema_version']</code> to the package version and, if different, it checks whether the schema has been modified (same as step 1); if it has, the client looks for a serialized data file.</li>
+<li>if a serialized data file is found, the client checks to see if the current version is found in the <code>mappings.fns</code> dictionary; if it is, the client imports the serialized data and runs the conversion function <code>mappings.fns[version]</code> on the data, then deserializes it; if the version is not found in the <code>mappings.fns</code> dictionary, it means that no conversion function is required for the schema mod, so the data is simply deserialized as is (which loads it into the db).</li>
+</ol>
+<h4 id="client-initiated">Client-Initiated</h4>
+<ol start="0" style="list-style-type: decimal">
+<li>the client package is updated, either by: [a] the client's menu item &quot;Tools/Update <client name>...&quot; or [b] by using `conda update <client name>...&quot; at the command line</li>
+<li>the client reloads the <code>mapping</code> module and checks whether the package version is in the <code>mappings.schema_mods</code> version list -- if so, its schema has been modified</li>
+<li>if the schema changed, the client serializes all db data to a file</li>
+<li>restart cattens (i.e. tell user to restart; offer to exit now)</li>
+<li>replicate steps [5] and [6] above.</li>
+</ol>
+<h3 id="repository-service-installation-and-updates">Repository Service Installation and Updates</h3>
+<p>Since the repository service is only supported on Linux and does not have a GUI, the server package is installed and updated using the <code>conda</code> command line interface.</p>
+<h3 id="notes-on-deserialization-profiling-and-optimization">Notes on Deserialization Profiling and Optimization</h3>
+<p>It would be great if 'deserialize()' performance could be improved, but it is a tough nut. Profiling shows that about 62% of its time is spent in sqlalchemy operations, which are not amenable to optimization, so even if everything else could be optimized to zero time (unlikely!) it would not even be a 50% improvement.</p>
+<p>A simple experiment with directly compiling 'deserialize()' using Cython yielded no noticeable gain (less than 1%), and it is difficult to see any operations within the function that could be formulated to compile into pure C, anyway.</p>

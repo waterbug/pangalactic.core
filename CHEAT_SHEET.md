@@ -1,5 +1,23 @@
 # THE PAN GALACTIC CHEAT SHEET
 
+## Parameter Operations (import from p.core.parametrics)
+
+  - getting:
+
+    + `get_pval(orb, oid, pid)`
+       gets the value (int, float, etc.)
+
+    + `get_pval_as_str(orb, oid, pid, units=None)`
+       gets the value as a string (for display in a GUI widget)
+
+  - setting:
+
+    + `set_pval(orb, oid, pid, value, units=None)`
+       sets the value (int, float, etc.)
+
+    + `set_pval_from_str(orb, oid, pid, str_val, units=None)`
+       sets the value from a string (for input from GUI widget)
+
 ## Structure of the `pangalactic` Namespace Packages
 
 ### `core`: base pangalactic package (ontology, registry, orb, reference data)
