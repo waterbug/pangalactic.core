@@ -7,7 +7,7 @@ epoch = '2017-01-01 00:00:00'
 initial = [
 {   '_cname': 'Actor',
     'oid': 'pgefobjects:system',
-    'description': u'A really huge infundibulum',
+    'description': 'A really huge infundibulum',
     'id': 'Infundibulum',
     'name': 'The Chronosynclastic Infundibulum',
     'create_datetime': epoch,
@@ -16,7 +16,7 @@ initial = [
 
 {   '_cname': 'Organization',
     'oid': 'pgefobjects:PGANA',
-    'description': u'The mysterious cabal behind it all',
+    'description': 'The mysterious cabal behind it all',
     'id': 'PGANA',
     'name': 'Pan Galactic Assigned Names Authority',
     'abbreviation': 'PGANA',
@@ -26,7 +26,7 @@ initial = [
 
 {   '_cname': 'Person',
     'oid': 'pgefobjects:admin',
-    'description': u'Pan Galactic Administrator',
+    'description': 'Pan Galactic Administrator',
     'id': 'admin',
     'first_name': 'TheGreatAndPowerful',
     'last_name': 'Oz',
@@ -37,7 +37,7 @@ initial = [
 
 {   '_cname': 'Person',
     'oid': 'pgefobjects:Person.TBD',
-    'description': u'TBD',
+    'description': 'TBD',
     'id': 'TBD',
     'first_name': 'TBD',
     'last_name': 'Person',
@@ -48,7 +48,7 @@ initial = [
 
 {   '_cname': 'Role',
     'oid': 'pgefobjects:Role.Disabled',
-    'description': u'Indicates that all assigned roles are inactive',
+    'description': 'Indicates that all assigned roles are inactive',
     'id': 'Disabled',
     'name': 'Disabled',
     'create_datetime': epoch,
@@ -57,7 +57,7 @@ initial = [
 
 {   '_cname': 'Role',
     'oid': 'pgefobjects:Role.Administrator',
-    'description': u'Administrator in an organizational context',
+    'description': 'Administrator in an organizational context',
     'id': 'Administrator',
     'name': 'Administrator',
     'create_datetime': epoch,
@@ -66,7 +66,7 @@ initial = [
 
 {   '_cname': 'Role',
     'oid': 'pgefobjects:Role.Observer',
-    'description': u'Read-only accesss in an organizational context',
+    'description': 'Read-only accesss in an organizational context',
     'id': 'Observer',
     'name': 'Observer',
     'create_datetime': epoch,
@@ -86,7 +86,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'mass',
     'range_datatype': 'float',
-    'description': u'Quantity of matter'
+    'description': 'Quantity of matter'
     },
 
 {   '_cname': 'ParameterDefinition',
@@ -99,7 +99,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'description': u'Length in y direction'},
+    'description': 'Length in y direction'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.width',
@@ -111,7 +111,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'description': u'Length in x direction'},
+    'description': 'Length in x direction'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.depth',
@@ -123,7 +123,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'description': u'Length in z direction'},
+    'description': 'Length in z direction'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.CoM_X',
@@ -135,7 +135,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'description': u'X coordinate of the Center of Mass'},
+    'description': 'X coordinate of the Center of Mass'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.CoM_Y',
@@ -147,7 +147,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'description': u'Y coordinate of the Center of Mass'},
+    'description': 'Y coordinate of the Center of Mass'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.CoM_Z',
@@ -159,7 +159,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'length',
     'range_datatype': 'float',
-    'description': u'Z coordinate of the Center of Mass'},
+    'description': 'Z coordinate of the Center of Mass'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.Cost',
@@ -171,7 +171,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'money',
     'range_datatype': 'float',
-    'description': u'Unit cost of an item'},
+    'description': 'Unit cost of an item'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.D_Capacity',
@@ -183,7 +183,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'data',
     'range_datatype': 'int',
-    'description': u'Data storage capacity'},
+    'description': 'Data storage capacity'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.R_D',
@@ -196,7 +196,7 @@ pdc = [
     'dimensions': 'bitrate',
     'port_type': 'pgefobjects:PortType.digital_data',
     'range_datatype': 'int',
-    'description': u'Flow of bits per unit time through a data port.'},
+    'description': 'Flow of bits per unit time through a data port.'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.P',
@@ -209,7 +209,7 @@ pdc = [
     'dimensions': 'power',
     'port_type': 'pgefobjects:PortType.electrical_power',
     'range_datatype': 'float',
-    'description': u'Nominal electrical power consumption.'},
+    'description': 'Nominal electrical power consumption.'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.V',
@@ -222,7 +222,7 @@ pdc = [
     'dimensions': 'electrical potential',
     'port_type': 'pgefobjects:PortType.digital_data',
     'range_datatype': 'float',
-    'description': u'Voltage'},
+    'description': 'Voltage'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.Area_active',
@@ -234,7 +234,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'area',
     'range_datatype': 'float',
-    'description': u'The active area of a product, such as a solar panel, for which that is a well-defined functional property. For a solar panel, this is the exposed area that takes part in collecting energy from the Sun.  Generally it is the solar cell area though there is some top side conductor area that exists on each cell.'},
+    'description': 'The active area of a product, such as a solar panel, for which that is a well-defined functional property. For a solar panel, this is the exposed area that takes part in collecting energy from the Sun.  Generally it is the solar cell area though there is some top side conductor area that exists on each cell.'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.Area_substrate',
@@ -246,7 +246,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'area',
     'range_datatype': 'float',
-    'description': u'On a solar panel, Substrate Area includes the Active Area plus the mounting substrate or mesh area, including all stiffeners, areas for mounting sensors, wiring harnesses (if on the top side, facing the Sun), expansion/contraction relief areas around the solar cells, hold down or pre-deployed clamping areas, and other top side mounted equipment areas.'},
+    'description': 'On a solar panel, Substrate Area includes the Active Area plus the mounting substrate or mesh area, including all stiffeners, areas for mounting sensors, wiring harnesses (if on the top side, facing the Sun), expansion/contraction relief areas around the solar cells, hold down or pre-deployed clamping areas, and other top side mounted equipment areas.'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.TRL',
@@ -258,7 +258,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': None,
     'range_datatype': 'int',
-    'description': u'Technology Readiness Level (TRL)'},
+    'description': 'Technology Readiness Level (TRL)'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.Vendor',
@@ -270,7 +270,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': None,
     'range_datatype': 'text',
-    'description': u'Entity from which a thing is procured.'},
+    'description': 'Entity from which a thing is procured.'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.duration',
@@ -282,7 +282,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'time',
     'range_datatype': 'float',
-    'description': u'Length of time during which an activity proceeds.'},
+    'description': 'Length of time during which an activity proceeds.'},
 
 {   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.start_time',
@@ -321,7 +321,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': True,
-    'description': u'Current Best Estimate'},
+    'description': 'Current Best Estimate'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Assembly',
@@ -336,7 +336,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': True,
-    'description': u'Total value summed over assembly'},
+    'description': 'Total value summed over assembly'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Ctgcy',
@@ -351,7 +351,7 @@ pdc = [
     'context_dimensions': 'percent',
     'context_datatype': 'float',
     'computed': False,
-    'description': u'Contingency'},
+    'description': 'Contingency'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.MEV',
@@ -366,7 +366,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': True,
-    'description': u'CBE * (1 + Ctgcy)'},
+    'description': 'CBE * (1 + Ctgcy)'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.NTE',
@@ -381,7 +381,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Maximum allowable value'},
+    'description': 'Maximum allowable value'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.NLT',
@@ -396,7 +396,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Minimum allowable value'},
+    'description': 'Minimum allowable value'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Target',
@@ -411,7 +411,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Target value associated with a tolerance'},
+    'description': 'Target value associated with a tolerance'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Tolerance',
@@ -426,7 +426,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Symmetric tolerance value'},
+    'description': 'Symmetric tolerance value'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Tolerance_Upper',
@@ -441,7 +441,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Upper value in asymmetric tolerance'},
+    'description': 'Upper value in asymmetric tolerance'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Tolerance_Lower',
@@ -456,7 +456,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Lower value in asymmetric tolerance'},
+    'description': 'Lower value in asymmetric tolerance'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Limit_Max',
@@ -471,7 +471,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Maximum value of range'},
+    'description': 'Maximum value of range'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Limit_Min',
@@ -486,7 +486,7 @@ pdc = [
     'context_dimensions': None,
     'context_datatype': None,
     'computed': False,
-    'description': u'Minimum value of range'},
+    'description': 'Minimum value of range'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.Margin',
@@ -501,7 +501,7 @@ pdc = [
     'context_dimensions': 'percent',
     'context_datatype': 'float',
     'computed': True,
-    'description': u'(NTE-MEV)/NTE'}
+    'description': '(NTE-MEV)/NTE'}
 ]
 
 core = [
@@ -510,7 +510,7 @@ core = [
     'id': 'SANDBOX',
     'name': 'Sandbox Project',
     'name_code': 'SANDBOX',
-    'description': u'Sandbox for experimentation',
+    'description': 'Sandbox for experimentation',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -556,7 +556,7 @@ core = [
     'id': 'science',
     'name': 'Science',
     'abbreviation': 'Sci',
-    'description': u'Science',
+    'description': 'Science',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -566,7 +566,7 @@ core = [
     'id': 'engineering',
     'name': 'Engineering',
     'abbreviation': 'Eng',
-    'description': u'Engineering',
+    'description': 'Engineering',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -576,7 +576,7 @@ core = [
     'id': 'acs',
     'name': 'Attitude Control Systems',
     'abbreviation': 'ACS',
-    'description': u'Design of Attitude Control Systems',
+    'description': 'Design of Attitude Control Systems',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -586,7 +586,7 @@ core = [
     'id': 'avionics',
     'name': 'Avionics',
     'abbreviation': 'Avionics',
-    'description': u'Avionics Engineering',
+    'description': 'Avionics Engineering',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -596,7 +596,7 @@ core = [
     'id': 'power',
     'name': 'Power Systems',
     'abbreviation': 'Power',
-    'description': u'Design of Electrical Power Systems',
+    'description': 'Design of Electrical Power Systems',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -606,7 +606,7 @@ core = [
     'id': 'fsw',
     'name': 'Flight Software',
     'abbreviation': 'FSW',
-    'description': u'Flight software methodology, reuse, estimate of labor, required test beds',
+    'description': 'Flight software methodology, reuse, estimate of labor, required test beds',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -616,7 +616,7 @@ core = [
     'id': 'flight_dynamics',
     'name': 'Flight Dynamics',
     'abbreviation': 'FD',
-    'description': u'Trajectory files and outputs from STK, EMTG, GMAT, or John Downings brain with required propulsion, eclipses, range to earth, angles for comm, etc.',
+    'description': 'Trajectory files and outputs from STK, EMTG, GMAT, or John Downings brain with required propulsion, eclipses, range to earth, angles for comm, etc.',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -626,7 +626,7 @@ core = [
     'id': 'mechanical',
     'name': 'Mechanical Systems',
     'abbreviation': 'Mechanical',
-    'description': u'Design of Mechanical Structures and Systems',
+    'description': 'Design of Mechanical Structures and Systems',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -636,7 +636,7 @@ core = [
     'id': 'mission_ops',
     'name': 'Mission Operations',
     'abbreviation': 'Mission Ops',
-    'description': u'Mission Operations Engineering',
+    'description': 'Mission Operations Engineering',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -646,7 +646,7 @@ core = [
     'id': 'propulsion',
     'name': 'Propulsion Systems',
     'abbreviation': 'Propulsion',
-    'description': u'Propulsion Systems Engineering',
+    'description': 'Propulsion Systems Engineering',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -656,7 +656,7 @@ core = [
     'id': 'rf_comm',
     'name': 'RF Communications Systems',
     'abbreviation': 'RF Comm',
-    'description': u'RF Communications Engineering',
+    'description': 'RF Communications Engineering',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -666,7 +666,7 @@ core = [
     'id': 'radiation',
     'name': 'Radiation Analysis',
     'abbreviation': 'Radiation',
-    'description': u'Analyzed trajectory radiation characterization and SPENVIS results',
+    'description': 'Analyzed trajectory radiation characterization and SPENVIS results',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -676,7 +676,7 @@ core = [
     'id': 'reliability',
     'name': 'Reliability',
     'abbreviation': 'Reliability',
-    'description': u'Reliability modeling and analysis.',
+    'description': 'Reliability modeling and analysis.',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -686,7 +686,7 @@ core = [
     'id': 'systems',
     'name': 'Systems Engineering',
     'abbreviation': 'SE',
-    'description': u'Systems Engineering',
+    'description': 'Systems Engineering',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -696,7 +696,7 @@ core = [
     'id': 'thermal',
     'name': 'Thermal Systems',
     'abbreviation': 'Thermal',
-    'description': u'Analysis of mission thermal environment, thermal characteristics of mission systems, and required thermal control systems',
+    'description': 'Analysis of mission thermal environment, thermal characteristics of mission systems, and required thermal control systems',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -705,8 +705,8 @@ core = [
     'oid': 'pgefobjects:Discipline.i_and_t',
     'id': 'i_and_t',
     'name': 'Integration and Test',
-    'abbreviation': 'I&T',
-    'description': u'Verification, integration flow, facilities required, cost estimate',
+    'abbreviation': 'I/T',
+    'description': 'Verification, integration flow, facilities required, cost estimate',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -716,7 +716,7 @@ core = [
     'id': 'orbital_debris',
     'name': 'Orbital Debris',
     'abbreviation': 'Orbital Debris',
-    'description': u'Modeling and analysis of expected debris for planned orbits',
+    'description': 'Modeling and analysis of expected debris for planned orbits',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -816,7 +816,7 @@ dict(
      _cname='Role',
      oid='gsfc:Role.i_and_t_engineer',
      id='i_and_t_engineer',
-     abbreviation='I&T Engineer',
+     abbreviation='I/T Engineer',
      name='Integration and Test Engineer'),
 dict(
      _cname='Role',
@@ -866,7 +866,7 @@ dict(
     'id': 'attitude_control_system',
     'name': 'Attitude Control System',
     'abbreviation': 'ACS',
-    'description': u'Attitude Control Systems',
+    'description': 'Attitude Control Systems',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -875,8 +875,48 @@ dict(
     'oid': 'pgefobjects:ProductType.c_and_dh_system',
     'id': 'c_and_dh_system',
     'name': 'Command and Data Handling System',
-    'abbreviation': 'C&DH',
-    'description': u'Command and Data Handling System',
+    'abbreviation': 'CDH',
+    'description': 'Command and Data Handling System',
+    'create_datetime': epoch,
+    'mod_datetime': epoch
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.diplexer',
+    'id': 'diplexer',
+    'name': 'Diplexer',
+    'abbreviation': 'Diplexer',
+    'description': 'Diplexer',
+    'create_datetime': epoch,
+    'mod_datetime': epoch
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.electronics_box',
+    'id': 'electronics_box',
+    'name': 'Electronics Box',
+    'abbreviation': 'Box',
+    'description': 'Electronics Box',
+    'create_datetime': epoch,
+    'mod_datetime': epoch
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.board',
+    'id': 'board',
+    'name': 'Electronic Circuit Board',
+    'abbreviation': 'Board',
+    'description': 'Electronic Circuit Board',
+    'create_datetime': epoch,
+    'mod_datetime': epoch
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.eee_part',
+    'id': 'eee_part',
+    'name': 'EEE Part',
+    'abbreviation': 'EEE Part',
+    'description': 'Electrical, Electronic, or Electromechanical Component',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -1332,20 +1372,11 @@ dict(
     },
 
 {   '_cname': 'ProductType',
-    'oid': 'pgefobjects:ProductType.electronics_box',
-    'id': 'electronics_box',
-    'name': 'Electronics Box',
-    'abbreviation': 'Electronics Box',
-    'create_datetime': epoch,
-    'mod_datetime': epoch
-    },
-
-{   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.rtg',
     'id': 'rtg',
     'name': 'RadioIsotope Thermal Generator (RTG)',
     'abbreviation': 'RTG',
-    'description': u'Pu-238 based very hot power thingy',
+    'description': 'Pu-238 based very hot power thingy',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -1364,7 +1395,7 @@ dict(
     'id': 'comsec',
     'name': 'Communications Security Box',
     'abbreviation': 'COMSEC',
-    'description': u'Communications Security: a box to prevent unauthorized '
+    'description': 'Communications Security: a box to prevent unauthorized '
                     'access',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -1407,6 +1438,15 @@ dict(
     },
 
 {   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.antenna',
+    'id': 'antenna',
+    'name': 'Antenna',
+    'abbreviation': 'Antenna',
+    'create_datetime': epoch,
+    'mod_datetime': epoch
+    },
+
+{   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.transponder',
     'id': 'transponder',
     'name': 'Transponder',
@@ -1444,7 +1484,7 @@ dict(
 
 {   '_cname': 'ModelFamily',
     'oid': 'pgefobjects:ModelFamily.PGEF',
-    'description': u'Pan Galactic Engineering Framework (PGEF) standard '
+    'description': 'Pan Galactic Engineering Framework (PGEF) standard '
                    'family of model types.',
     'id': 'PGEF',
     'name': 'PGEF Model Family',
@@ -1455,7 +1495,7 @@ dict(
 
 {   '_cname': 'ModelFamily',
     'oid': 'pgefobjects:ModelFamily.SysML',
-    'description': u'OMG Systems Modeling Language (SysML) standard family '
+    'description': 'OMG Systems Modeling Language (SysML) standard family '
                    'of model types.',
     'id': 'SysML',
     'name': 'Systems Modeling Language (SysML)',
@@ -1466,7 +1506,7 @@ dict(
 
 {   '_cname': 'ModelFamily',
     'oid': 'pgefobjects:ModelFamily.STEP',
-    'description': u'STEP standard family of model types.',
+    'description': 'STEP standard family of model types.',
     'id': 'STEP',
     'name': 'STEP (ISO 10303)',
     'abbreviation': 'STEP',
@@ -1476,7 +1516,7 @@ dict(
 
 {   '_cname': 'ModelFamily',
     'oid': 'pgefobjects:ModelFamily.Modelica',
-    'description': u'Modelica standard family of model types.',
+    'description': 'Modelica standard family of model types.',
     'id': 'Modelica',
     'name': 'Modelica',
     'abbreviation': 'Modelica',
@@ -1489,7 +1529,7 @@ dict(
     'id': 'pgef.Spec',
     'name': 'Specification',
     'abbreviation': 'Spec',
-    'description': u'The specification for a part is a model that contains '
+    'description': 'The specification for a part is a model that contains '
                    'a set of testable parameters that define the part.',
     'model_type_family': 'pgefobjects:ModelFamily.PGEF',
     'create_datetime': epoch,
@@ -1501,7 +1541,7 @@ dict(
     'id': 'pgef.Block',
     'name': 'Block Model',
     'abbreviation': 'Block Model',
-    'description': u'Pan Galactic Engineering Framework Block Model',
+    'description': 'Pan Galactic Engineering Framework Block Model',
     'model_type_family': 'pgefobjects:ModelFamily.PGEF',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -1521,7 +1561,7 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'sysml:BDD',
-    'description': u'OMG SysML Block Definition Diagram',
+    'description': 'OMG SysML Block Definition Diagram',
     'id': 'SysML.BDD',
     'model_type_family': 'pgefobjects:ModelFamily.SysML',
     'name': 'SysML Block Definition Diagram',
@@ -1532,7 +1572,7 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'sysml:IBD',
-    'description': u'OMG SysML Internal Block Diagram',
+    'description': 'OMG SysML Internal Block Diagram',
     'id': 'SysML.IBD',
     'model_type_family': 'pgefobjects:ModelFamily.SysML',
     'name': 'SysML Internal Block Diagram',
@@ -1543,7 +1583,7 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'sysml:Activity',
-    'description': u'OMG SysML Activity Model',
+    'description': 'OMG SysML Activity Model',
     'id': 'SysML.Activity',
     'model_type_family': 'pgefobjects:ModelFamily.SysML',
     'name': 'SysML Activity Diagram',
@@ -1554,7 +1594,7 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'sysml:Parametric',
-    'description': u'OMG SysML Parametric Diagram',
+    'description': 'OMG SysML Parametric Diagram',
     'id': 'SysML.Parametric',
     'model_type_family': 'pgefobjects:ModelFamily.SysML',
     'name': 'SysML Parametric Diagram',
@@ -1565,7 +1605,7 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'step:203',
-    'description': u'STEP 3D Mechanical CAD model',
+    'description': 'STEP 3D Mechanical CAD model',
     'id': 'STEP.203',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'ISO 10303-203: Configuration controlled 3D designs '
@@ -1577,7 +1617,7 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'step:209',
-    'description': u'STEP 3D FEA / Composite analysis model',
+    'description': 'STEP 3D FEA / Composite analysis model',
     'id': 'STEP.209',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'ISO 10303-209: Composite and metallic structural '
@@ -1589,7 +1629,7 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'step:210',
-    'description': u'STEP 3D Electronic CAD model',
+    'description': 'STEP 3D Electronic CAD model',
     'id': 'STEP.210',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'ISO 10303-210: Electronic assembly, interconnect '
@@ -1601,7 +1641,7 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'step:214',
-    'description': u'STEP 3D Mechanical CAD model',
+    'description': 'STEP 3D Mechanical CAD model',
     'id': 'STEP.214',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'ISO 10303-214: Core data for automotive mechanical '
@@ -1613,7 +1653,7 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'step:242',
-    'description': u'STEP 3D Mechanical CAD model',
+    'description': 'STEP 3D Mechanical CAD model',
     'id': 'STEP.242',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'ISO 10303-242: Managed model-based 3D engineering',
@@ -1624,7 +1664,7 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'step:TAS',
-    'description': u'STEP-TAS thermal model',
+    'description': 'STEP-TAS thermal model',
     'id': 'STEP-TAS',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'STEP-TAS: Thermal Analysis for Space',
@@ -1635,7 +1675,7 @@ dict(
 
 {   '_cname': 'PortType',
     'oid': 'pgefobjects:PortType.electrical_power',
-    'description': u'Electrical power port',
+    'description': 'Electrical power port',
     'id': 'electrical_power',
     'name': 'Electrical Power',
     'abbreviation': 'Elec',
@@ -1645,7 +1685,7 @@ dict(
 
 {   '_cname': 'PortType',
     'oid': 'pgefobjects:PortType.propulsion_power',
-    'description': u'Propulsion power port',
+    'description': 'Propulsion power port',
     'id': 'propulsion_power',
     'name': 'Propulsion Power',
     'abbreviation': 'Prop',
@@ -1655,7 +1695,7 @@ dict(
 
 {   '_cname': 'PortType',
     'oid': 'pgefobjects:PortType.electronic_control',
-    'description': u'Electronic control signal port',
+    'description': 'Electronic control signal port',
     'id': 'electronic_control',
     'name': 'Electronic Control',
     'abbreviation': 'Control',
@@ -1665,7 +1705,7 @@ dict(
 
 {   '_cname': 'PortType',
     'oid': 'pgefobjects:PortType.analog_data',
-    'description': u'Analog data port',
+    'description': 'Analog data port',
     'id': 'analog_data',
     'name': 'Analog Data',
     'abbreviation': 'Analog',
@@ -1675,7 +1715,7 @@ dict(
 
 {   '_cname': 'PortType',
     'oid': 'pgefobjects:PortType.digital_data',
-    'description': u'Digital data port',
+    'description': 'Digital data port',
     'id': 'digital_data',
     'name': 'Digital Data',
     'abbreviation': 'Digital',
@@ -1685,7 +1725,7 @@ dict(
 
 {   '_cname': 'PortType',
     'oid': 'pgefobjects:PortType.comm',
-    'description': u'Port for wireless communications',
+    'description': 'Port for wireless communications',
     'id': 'comm',
     'name': 'Communications',
     'abbreviation': 'Comm',
@@ -1695,7 +1735,7 @@ dict(
 
 {   '_cname': 'PortType',
     'oid': 'pgefobjects:PortType.thermal',
-    'description': u'Thermal (power) port',
+    'description': 'Thermal (power) port',
     'id': 'thermal',
     'name': 'Thermal',
     'abbreviation': 'Thermal',
@@ -1705,7 +1745,7 @@ dict(
 
 {   '_cname': 'PortType',
     'oid': 'pgefobjects:PortType.gas',
-    'description': u'Gas port',
+    'description': 'Gas port',
     'id': 'gas',
     'name': 'Gas',
     'abbreviation': 'Gas',
@@ -1715,7 +1755,7 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.digital_data.RS422',
-    'description': u'RS422 (TIA/EIA-422) digital data port',
+    'description': 'RS422 (TIA/EIA-422) digital data port',
     'id': 'digital_data.RS422',
     'name': 'RS422 Digital Data Port',
     'abbreviation': 'RS422',
@@ -1732,7 +1772,7 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.digital_data.LVDS',
-    'description': u'LVDS (TIA/EIA-644) digital data port',
+    'description': 'LVDS (TIA/EIA-644) digital data port',
     'id': 'digital_data.LVDS',
     'name': 'LVDS Digital Data Port',
     'abbreviation': 'LVDS',
@@ -1749,7 +1789,7 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.digital_data.SpaceWire',
-    'description': u'SpaceWire digital data port',
+    'description': 'SpaceWire digital data port',
     'id': 'digital_data.SpaceWire',
     'name': 'SpaceWire Digital Data Port',
     'abbreviation': 'SpaceWire',
@@ -1766,7 +1806,7 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.digital_data.GPIO',
-    'description': u'GPIO (General Purpose Input Output) digital data port',
+    'description': 'GPIO (General Purpose Input Output) digital data port',
     'id': 'digital_data.GPIO',
     'name': 'GPIO Digital Data Port',
     'abbreviation': 'GPIO',
@@ -1783,7 +1823,7 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.28V',
-    'description': u'28V electrical power port',
+    'description': '28V electrical power port',
     'id': 'electrical_power.28V',
     'name': '28V Electrical Power Port',
     'abbreviation': '28V',
@@ -1800,7 +1840,7 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.12V',
-    'description': u'12V electrical power port',
+    'description': '12V electrical power port',
     'id': 'electrical_power.12V',
     'name': '12V Electrical Power Port',
     'abbreviation': '12V',
@@ -1817,7 +1857,7 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.5V',
-    'description': u'5V electrical power port',
+    'description': '5V electrical power port',
     'id': 'electrical_power.5V',
     'name': '5V Electrical Power Port',
     'abbreviation': '5V',
@@ -1834,7 +1874,7 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.3.3V',
-    'description': u'3.3V electrical power port',
+    'description': '3.3V electrical power port',
     'id': 'electrical_power.3.3V',
     'name': '3.3V Electrical Power Port',
     'abbreviation': '3.3V',
@@ -1937,7 +1977,6 @@ for pt_oid in [
     'pgefobjects:ProductType.star_tracker',
     'pgefobjects:ProductType.imu',
     'pgefobjects:ProductType.iru',
-    'pgefobjects:ProductType.electronics_box',
     'pgefobjects:ProductType.control_moment_gyro',
     'pgefobjects:ProductType.reaction_wheel',
     'pgefobjects:ProductType.momentum_wheel',
@@ -2035,7 +2074,6 @@ for pt_oid in [
     'pgefobjects:ProductType.solar_array',
     'pgefobjects:ProductType.solar_array_actuator',
     'pgefobjects:ProductType.battery',
-    'pgefobjects:ProductType.electronics_box',
     'pgefobjects:ProductType.rtg',
     'pgefobjects:ProductType.power_harness'
     ]:
@@ -2052,6 +2090,7 @@ for pt_oid in [
 avionics_discipline_obj = core_objs['pgefobjects:Discipline.avionics']
 for pt_oid in [
     'pgefobjects:ProductType.c_and_dh_system',   # C&DH System
+    'pgefobjects:ProductType.board',
     'pgefobjects:ProductType.electronics_box',
     'pgefobjects:ProductType.comsec',
     'pgefobjects:ProductType.computer',
