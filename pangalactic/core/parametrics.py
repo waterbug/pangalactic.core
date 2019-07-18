@@ -7,7 +7,10 @@ from math        import floor, fsum, log10
 
 # pangalactic
 from pangalactic.core                 import config, prefs
-from pangalactic.core.meta            import SELECTABLE_VALUES
+from pangalactic.core.datastructures  import OrderedSet
+from pangalactic.core.meta            import (SELECTABLE_VALUES,
+                                              DEFAULT_CLASS_PARAMETERS,
+                                              DEFAULT_PRODUCT_TYPE_PARAMETERS)
 from pangalactic.core.units           import in_si, ureg
 from pangalactic.core.utils.meta      import get_parameter_definition_oid
 from pangalactic.core.utils.datetimes import dtstamp
@@ -335,17 +338,20 @@ def add_default_parameters(orb, obj):
     # modified?  Hmm ... definitely should at least be an option --
     # probably need a progress bar since it could be time-consuming ...
     orb.log.info('* assigning default parameters to "{}"'.format(obj.id))
-    pids = []
-    # NOTE:  this is the collection of parameters defined in the
-    # `p.repo.refdata` module, hard-coded as a set of default parameters
-    pids = []
+    pids = OrderedSet()
+    cname = obj.__class__.__name__
+    pids |= OrderedSet(DEFAULT_CLASS_PARAMETERS.get(cname, []))
     # TODO: let user set default parameters in their prefs
     if isinstance(obj, orb.classes['HardwareProduct']):
         # default for "default_parms" in config:  mass, power, data rate
         # (config is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
-        pids = (prefs.get('default_parms') or config.get('default_parms')
-                or ['m', 'P', 'R_D'])
+        pids |= OrderedSet(prefs.get('default_parms')
+                           or config.get('default_parms')
+                           or ['m', 'P', 'R_D'])
+        if obj.product_type:
+            pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
+                               obj.product_type.id, []))
     # add default parameters first ...
     orb.log.info('      adding parameters {!s} ...'.format(str(pids)))
     for pid in pids:

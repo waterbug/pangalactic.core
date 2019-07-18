@@ -285,8 +285,8 @@ pdc = [
     'description': 'Length of time during which an activity proceeds.'},
 
 {   '_cname': 'ParameterDefinition',
-    'oid': 'pgef:ParameterDefinition.start_time',
-    'id': 'start_time',
+    'oid': 'pgef:ParameterDefinition.t_start',
+    'id': 't_start',
     'name': 'Start Time',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
@@ -297,8 +297,8 @@ pdc = [
     'description': 'Time at which an activity begins.'},
 
 {   '_cname': 'ParameterDefinition',
-    'oid': 'pgef:ParameterDefinition.end_time',
-    'id': 'end_time',
+    'oid': 'pgef:ParameterDefinition.t_end',
+    'id': 't_end',
     'name': 'End Time',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',

@@ -92,6 +92,13 @@ PGXN_PARAMETERS = ['m', 'm[Ctgcy]', 'P', 'P[Ctgcy]', 'R_D', 'R_D[Ctgcy]',
                    'CoM_X', 'CoM_Y', 'CoM_Z', 'm[CBE]', 'm[MEV]', 'P[CBE]',
                    'P[MEV]', 'R_D[CBE]', 'R_D[MEV]']
 
+# DEFAULT_CLASS_PARAMETERS:  default parameters of objects by class
+DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 'start_time'],
+                            'Mission': ['duration']}
+
+# DEFAULT_PRODUCT_TYPE_PARAMETERS:  default parameters by ProductType id
+DEFAULT_PRODUCT_TYPE_PARAMETERS = {'': []}
+
 # PGXN_PLACEHOLDERS:  Placeholder text for fields in PgxnObject forms
 PGXN_PLACEHOLDERS = {'id': 'abbreviated name; no spaces',
                      'id_ns': 'namespace for id',
