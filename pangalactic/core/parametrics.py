@@ -158,44 +158,71 @@ def create_parm_defz(orb):
     # variables (Mass, Power, Datarate) for which functions have been defined
     # to compute the CBE and MEV values
     all_contexts = orb.get_by_type('ParameterContext')
-    descriptive_contexts = [c for c in all_contexts
-                            if c.context_type == 'descriptive']
-    parm_defz.update(
-        {get_parameter_id(pd.id, c.id) :
-         {'name': get_parameter_name(pd.name, c.abbreviation or c.id),
-          'variable': pd.id,
-          'context': c.id,
-          'context_type': c.context_type,
-          'description':
-                get_parameter_description(pd.description, c.description),
-          'dimensions': c.context_dimensions or pd.dimensions,
-          'range_datatype': c.context_datatype or pd.range_datatype,
-          'computed': c.computed,
-          'mod_datetime': str(dtstamp())
-          } for pd in pds for c in descriptive_contexts
-            if pd.id in ['m', 'P', 'R_D']}
-          )
-    # add PDs for all prescriptive contexts for the variables (Mass, Power,
-    # Datarate) for which functions have been defined to compute the Margin
-    # values
-    all_contexts = orb.get_by_type('ParameterContext')
-    prescriptive_contexts = [c for c in all_contexts
-                             if c.context_type == 'prescriptive']
-    parm_defz.update(
-        {get_parameter_id(pd.id, c.id) :
-         {'name': get_parameter_name(pd.name, c.abbreviation or c.id),
-          'variable': pd.id,
-          'context': c.id,
-          'context_type': c.context_type,
-          'description':
-                get_parameter_description(pd.description, c.description),
-          'dimensions': c.context_dimensions or pd.dimensions,
-          'range_datatype': c.context_datatype or pd.range_datatype,
-          'computed': c.computed,
-          'mod_datetime': str(dtstamp())
-          } for pd in pds for c in prescriptive_contexts
-            if pd.id in ['m', 'P', 'R_D']}
-          )
+    for pid in ['m', 'P', 'R_D']:
+        pd = orb.select('ParameterDefinition', id=pid)
+        for c in all_contexts:
+            add_context_parm_def(orb, pd, c)
+
+    # descriptive_contexts = [c for c in all_contexts
+                            # if c.context_type == 'descriptive']
+    # parm_defz.update(
+        # {get_parameter_id(pd.id, c.id) :
+         # {'name': get_parameter_name(pd.name, c.abbreviation or c.id),
+          # 'variable': pd.id,
+          # 'context': c.id,
+          # 'context_type': c.context_type,
+          # 'description':
+                # get_parameter_description(pd.description, c.description),
+          # 'dimensions': c.context_dimensions or pd.dimensions,
+          # 'range_datatype': c.context_datatype or pd.range_datatype,
+          # 'computed': c.computed,
+          # 'mod_datetime': str(dtstamp())
+          # } for pd in pds for c in descriptive_contexts
+            # if pd.id in ['m', 'P', 'R_D']}
+          # )
+    # # add PDs for all prescriptive contexts for the variables (Mass, Power,
+    # # Datarate) for which functions have been defined to compute the Margin
+    # # values
+    # all_contexts = orb.get_by_type('ParameterContext')
+    # prescriptive_contexts = [c for c in all_contexts
+                             # if c.context_type == 'prescriptive']
+    # parm_defz.update(
+        # {get_parameter_id(pd.id, c.id) :
+         # {'name': get_parameter_name(pd.name, c.abbreviation or c.id),
+          # 'variable': pd.id,
+          # 'context': c.id,
+          # 'context_type': c.context_type,
+          # 'description':
+                # get_parameter_description(pd.description, c.description),
+          # 'dimensions': c.context_dimensions or pd.dimensions,
+          # 'range_datatype': c.context_datatype or pd.range_datatype,
+          # 'computed': c.computed,
+          # 'mod_datetime': str(dtstamp())
+          # } for pd in pds for c in prescriptive_contexts
+            # if pd.id in ['m', 'P', 'R_D']}
+          # )
+
+def add_context_parm_def(orb, pd, c):
+    """
+    Add a context parameter definition to the `parm_defz` cache.
+
+    Args:
+        orb (Uberorb):  singleton imported from p.node.uberorb
+        pd (ParameterDefinition):  ParameterDefinition for the base parameter
+        parameter_context (ParameterContext):  object representing the context
+            of the parameter
+    """
+    parm_defz[get_parameter_id(pd.id, c.id)] = {
+        'name': get_parameter_name(pd.name, c.abbreviation or c.id),
+        'variable': pd.id,
+        'context': c.id,
+        'context_type': c.context_type,
+        'description':
+              get_parameter_description(pd.description, c.description),
+        'dimensions': c.context_dimensions or pd.dimensions,
+        'range_datatype': c.context_datatype or pd.range_datatype,
+        'computed': c.computed,
+        'mod_datetime': str(dtstamp())}
 
 def update_parm_defz(orb, pd):
     """
