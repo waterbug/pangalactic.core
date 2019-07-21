@@ -324,6 +324,7 @@ DESERIALIZATION_ORDER = [
                     'ActivityType',
                     'Activity',
                     'Product',
+                    'Template',
                     'HardwareProduct',
                     'SoftwareProduct',
                     'DigitalProduct',

@@ -125,6 +125,7 @@ def serialize(orb, objs, view=None, include_components=False,
     serialized = []
     person_objs = set()
     product_type_objs = set()
+    activity_type_objs = set()
     for obj in objs:
         if not obj:
             orb.log.debug('  - null object "{}"'.format(obj))
@@ -185,6 +186,10 @@ def serialize(orb, objs, view=None, include_components=False,
             # for Acus, product_type_hint must be included
             if obj.product_type_hint:
                 product_type_objs.add(obj.product_type_hint)
+        elif hasattr(obj, 'activity_type'):
+            # for Activity instances, activity_type must be included
+            if obj.activity_type:
+                activity_type_objs.add(obj.activity_type)
         if getattr(obj, 'component', None):
             # Acu:  always include both assembly and component ...
             serialized += serialize(orb, [obj.assembly, obj.component])
@@ -225,6 +230,10 @@ def serialize(orb, objs, view=None, include_components=False,
         orb.log.debug('  including {} ProductType objects.'.format(
                                                 len(product_type_objs)))
         serialized += serialize(orb, product_type_objs)
+    if activity_type_objs:
+        orb.log.debug('  including {} ActivityType objects.'.format(
+                                                len(activity_type_objs)))
+        serialized += serialize(orb, activity_type_objs)
     orb.log.info('  returning {} objects.'.format(len(serialized)))
     # make sure there is only 1 serialized object per oid ...
     so_by_oid = {so['oid'] : so for so in serialized}
@@ -268,23 +277,17 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     `serialize()`.
 
     For a given object:
-        (0) Check for 'oid'
-            (b) if found and dts is later, update the object
-            (c) if not found, generate a new oid
-        (1) All datatype properties will be deserialized
-        (2) Any included Parameters will be deserialized only if
-            (a) is true and either (b) or (c) is true
-            (a) they do not exist in the db
-            (b) their 'definition' (ParameterDefinition) already exists in
-                the database
-            (c) their 'definition' (ParameterDefinition) is included in the
-                the set of serialized objects (in which case it will have
-                been deserialized first)
+        (0) Check for 'oid' in db; if found, check the db obj.mod_datetime:
+            (a) if mod_datetime is same or earlier, ignore the object
+            (b) if mod_datetime is later, update the object
+            (c) if oid not found in db, deserialize the object
+        (1) Include all datatype properties
+        (2) Deserialized parameters only if (a) or (b) is true:
+            (a) their 'definition' (ParameterDefinition) already exists in db
+            (b) their 'definition' (ParameterDefinition) is included in the
+                the serialized objects
         (3) Other object properties will be deserialized only if
-            (a) they are direct (not inverse) properties
-            -- AND --
-            (b) their values are either included in the collection of
-                serialized objects or present in the database.
+            they are direct (not inverse) properties
     """
     orb.log.info('* deserialize()')
     created = 0
