@@ -9,7 +9,6 @@ from copy import deepcopy
 from sqlalchemy import ForeignKey
 
 # PanGalactic
-from pangalactic.core.meta        import DESERIALIZATION_ORDER
 from pangalactic.core.utils.meta  import (asciify, cookers, uncookers,
                                           cook_datetime, uncook_datetime)
 from pangalactic.core.utils.datetimes import earlier
@@ -249,6 +248,38 @@ def deserialize_parms(oid, ser_parms):
     for parm in ser_parms.values():
         parm['mod_datetime'] = uncook_datetime(parm['mod_datetime'])
     parameterz[oid] = ser_parms
+
+# DESERIALIZATION_ORDER:  order in which to deserialize classes so that
+# object properties (relationships) are assigned properly (i.e., assemblies are
+# assigned their components, etc.)
+DESERIALIZATION_ORDER = [
+                    'Relation',
+                    'Discipline',
+                    'Role',
+                    'Organization',
+                    'Project',
+                    'Person',
+                    'RoleAssignment',
+                    'ParameterDefinition',
+                    'PortType',
+                    'ProductType',
+                    'Mission',
+                    'ActivityType',
+                    'Activity',
+                    'Product',
+                    'Template',
+                    'HardwareProduct',
+                    'SoftwareProduct',
+                    'DigitalProduct',
+                    'Acu',
+                    'ProjectSystemUsage',
+                    'Model',
+                    'Port',
+                    'Flow',
+                    'Representation',
+                    'RepresentationFile',
+                    'Requirement'
+                    ]
 
 def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 force_no_recompute=False):

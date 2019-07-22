@@ -307,37 +307,6 @@ PGXN_HIDE_PARMS = [
                    'Representation'
                    ]
 
-# DESERIALIZATION_ORDER:  order in which to deserialize classes so that
-# relationships are populated properly
-DESERIALIZATION_ORDER = [
-                    'Relation',
-                    'Discipline',
-                    'Role',
-                    'Organization',
-                    'Project',
-                    'Person',
-                    'RoleAssignment',
-                    'ParameterDefinition',
-                    'PortType',
-                    'ProductType',
-                    'Mission',
-                    'ActivityType',
-                    'Activity',
-                    'Product',
-                    'Template',
-                    'HardwareProduct',
-                    'SoftwareProduct',
-                    'DigitalProduct',
-                    'Acu',
-                    'ProjectSystemUsage',
-                    'Model',
-                    'Port',
-                    'Flow',
-                    'Representation',
-                    'RepresentationFile',
-                    'Requirement'
-                    ]
-
 # MODEL_TYPE_PREFS:  preferred model types
 # (for now, the only ones we can render ... ;)
 MODEL_TYPE_PREFS = ['step:203', 'step:214', 'step:242', 'pgefobjects:Block']

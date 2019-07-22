@@ -35,20 +35,26 @@ class OrbTest(unittest.TestCase):
     maxDiff = None
 
     def test_00_home_dir_created(self):
-        """CASE:  home directory is created"""
+        """
+        CASE:  home directory is created
+        """
         value = os.path.exists(orb.home)
         expected = True
         self.assertEqual(expected, value)
 
     def test_01_home_dir_has_expected_subdirs(self):
-        """CASE:  expected subdirectories of home directory exist"""
+        """
+        CASE:  expected subdirectories of home directory exist
+        """
         value = [os.path.exists(os.path.join(orb.home, 'vault')),
                  os.path.exists(os.path.join(orb.home, 'test_data'))]
         expected = [True, True]
         self.assertEqual(expected, value)
 
     def test_02_vault_contains_expected_test_files(self):
-        """CASE:  vault contains the files from p.test.vault"""
+        """
+        CASE:  vault contains the files from p.test.vault
+        """
         # files in pangalactic/test/vault should be copied to orb.vault dir
         vault_module_path = vault_module.__path__[0]
         vault_module_files = set([s for s in os.listdir(vault_module_path)
@@ -59,7 +65,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_03_test_data_dir_contains_expected_test_files(self):
-        """CASE:  test_data_dir contains the files from p.test.data"""
+        """
+        CASE:  test_data_dir contains the files from p.test.data
+        """
         # files in pangalactic/test/data should be copied to orb.test_data_dir
         test_data_mod_path = test_data_module.__path__[0]
         test_data_mod_files = set([s for s in os.listdir(test_data_mod_path)
@@ -70,7 +78,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_04_load_reference_data(self):
-        """CASE:  deserialize the data in p.repo.refdata"""
+        """
+        CASE:  deserialize the data in p.repo.refdata
+        """
         # Reference data in p.repo.refdata should be deserialized into objects
         # and saved in the db:  this test simply verifies that for each
         # serialized object in refdata, there is an object in the db with the
@@ -87,14 +97,18 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_05_check_serialized_test_objects(self):
-        """CASE:  check serialized test objects"""
+        """
+        CASE:  check serialized test objects
+        """
         # Trivial, tests that the serialized test objects are as specified.
         value = create_test_users() + create_test_project()
         expected = serialized_test_objects
         self.assertEqual(expected, value)
 
     def test_06_load_serialized_test_objects(self):
-        """CASE:  load the serialized test objects into the db"""
+        """
+        CASE:  load the serialized test objects into the db
+        """
         # orb.load_serialized_test_objects(None, test=True) deserializes the
         # serialized test objects returned by create_test_objects() and saves
         # them in the db:  this test simply verifies that for each serialized
@@ -114,7 +128,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_07_get(self):
-        """CASE:  test orb.get()"""
+        """
+        CASE:  test orb.get()
+        """
         obj = orb.get('H2G2')   # Project 'H2G2' test object
         test_obj_attrs = dict(oid='H2G2', id='H2G2', id_ns='test',
                               name=u'Hitchhikers Guide to the Galaxy',
@@ -135,7 +151,9 @@ class OrbTest(unittest.TestCase):
     # test_search.todo = 'not done.'
 
     def test_11_serialize_simple(self):
-        """CASE:  serialize a simple object (no parameters, no components)"""
+        """
+        CASE:  serialize a simple object (no parameters, no components)
+        """
         # This test verifies that the values in the serialized
         # object match the "cooked" values of the object attributes.
         obj = orb.get('H2G2')   # Project 'H2G2' test object
@@ -153,8 +171,10 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_12_serialize_with_parameters_no_components(self):
-        """CASE:  serialize object with parameters
-        (use default:  include_components=False)"""
+        """
+        CASE:  serialize an object with parameters but do not include
+        components (i.e. use default:  include_components=False)
+        """
         # This test verifies that the values in the serialized
         # object match the "cooked" values of the object attributes.
         obj = orb.get('test:twanger')   # HardwareProduct 'GMT' test object
@@ -181,7 +201,10 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_13_serialize_with_parameters_and_components(self):
-        """CASE:  serialize an object using include_components=True"""
+        """
+        CASE:  serialize an object including its components (use
+        include_components=True)
+        """
         # This test verifies that the values in the serialized
         # object match the "cooked" values of the object attributes.
         obj = orb.get('test:spacecraft0')   # HardwareProduct test object
@@ -220,7 +243,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_14_deserialize_simple(self):
-        """CASE:  deserialize a simple object (no parameters)"""
+        """
+        CASE:  deserialize a simple object (no parameters)
+        """
         serialized_obj = {
             '_cname': 'Project',
             'create_datetime': '2017-01-22 00:00:00.0',
@@ -255,7 +280,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_15_deserialize_modified(self):
-        """CASE:  deserialize a modified object that exists in db"""
+        """
+        CASE:  deserialize a modified object that exists in db
+        """
         serialized_obj = {
             '_cname': 'Project',
             'create_datetime': '2017-01-22 00:00:00.0',
@@ -290,7 +317,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_16_deserialize_object_with_simple_parameters(self):
-        """CASE:  deserialize a object with simple parameters"""
+        """
+        CASE:  deserialize a object with simple parameters
+        """
         objs = deserialize(orb, parametrized_test_objects)
         parameters = parametrized_test_objects[0]['parameters']
         for o in objs:
@@ -301,7 +330,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_17_deserialize_related_objects(self):
-        """CASE:  deserialize a collection of related objects"""
+        """
+        CASE:  deserialize a collection of related objects
+        """
         # TODO:  rather than using existing components from the other test
         # data, create a new set of [serialized] HardwareProduct objects for
         # the components, which would make the data set completely
@@ -338,7 +369,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_18_compute_cbe(self):
-        """CASE:  compute the mass CBE (Current Best Estimate)"""
+        """
+        CASE:  compute the mass CBE (Current Best Estimate)
+        """
         orb.recompute_parmz()
         value = get_pval(orb, 'test:spacecraft3', 'm[CBE]')
         sc = orb.get('test:spacecraft3')
@@ -352,7 +385,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_19_compute_mev(self):
-        """CASE:  compute the mass MEV (Maximum Estimated Value)"""
+        """
+        CASE:  compute the mass MEV (Maximum Estimated Value)
+        """
         orb.recompute_parmz()
         value = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
         sc = orb.get('test:spacecraft3')
@@ -394,7 +429,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_50_write_mel(self):
-        """CASE:  test output of mel_writer"""
+        """
+        CASE:  test output of mel_writer
+        """
         # This test verifies that the `write_mel_xlsx` function succeeds
         obj = orb.get('H2G2')   # Project 'H2G2' test object
         fpath = os.path.join(orb.vault, 'mel_writer_output.xlsx')
@@ -402,10 +439,6 @@ class OrbTest(unittest.TestCase):
         expected = 1
         value = 1
         self.assertEqual(expected, value)
-
-    # def test_change_passwd(self, login_pwd, new_pwd, userid="", secure=1):
-        # """CASE:  change_passwd"""
-        # pass
 
     # def test_upload_file(self, obj_oid, file_name):
         # pass
