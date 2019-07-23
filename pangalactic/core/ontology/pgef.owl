@@ -655,6 +655,17 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/activity_of -->
+
+    <owl:ObjectProperty rdf:about="&pgef;activity_of">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Product or system of which this is an Activity.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Activity"/>
+        <rdfs:range rdf:resource="&pgef;Product"/>
+    </owl:ObjectProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/product_type -->
 
     <owl:ObjectProperty rdf:about="&pgef;product_type">

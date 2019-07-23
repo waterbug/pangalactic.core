@@ -35,6 +35,7 @@ SYSTEM = ['components', 'where_used', 'projects_using_system',
           'ports', 'has_models', 'frozen', 'version',
           'version_sequence', 'iteration']
 MAIN_VIEWS = dict(
+    Activity=(IDENTITY + ['activity_type', 'activity_of']),
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
          'assembly_level', 'product_type_hint'],
     Discipline=IDENTITY,
