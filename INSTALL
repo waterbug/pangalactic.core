@@ -203,7 +203,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
     - pythonocc-core
       (for CAD viewer functionality)
-      * NOTE: currently requires the 'cadquery' channel for 0.18.2
 
           Configuration: 'conda install pythonocc-core'
 

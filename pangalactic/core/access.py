@@ -7,7 +7,7 @@ from pangalactic.core.uberorb import orb
 from functools import reduce
 
 
-def get_perms(obj, user=None):
+def get_perms(obj, user=None, permissive=False):
     """
     Get the permissions of the specified user relative to the specified object.
     If used as a client-side function, it is assumed that the existence of the
@@ -34,7 +34,7 @@ def get_perms(obj, user=None):
     # fulfilling the role of the administrative service.  Therefore, because
     # operations to sync such data are expensive, the data are cached in
     # `state` variables rather than stored in the local db.
-    if config.get('local_admin'):
+    if config.get('local_admin') or permissive:
         return ['view', 'modify', 'decloak', 'delete']
     perms = set()
     if not hasattr(obj, 'grantees'):
@@ -66,8 +66,7 @@ def get_perms(obj, user=None):
     # product type
     else:
         if (hasattr(obj, 'creator') and
-            getattr(obj.creator, 'oid', False) and
-            obj.creator.oid == user_oid):
+            obj.creator is user):
             perms |= set(['modify', 'decloak', 'delete'])
         # TODO:  more possible permissions for Administrators
         user_orgs = get_user_orgs(user)
@@ -103,7 +102,12 @@ def is_global_admin(user):
     Returns:
         boolean
     """
-    return False
+    admin_role = orb.get('pgefobjects:Role.Administrator')
+    global_admin = orb.select('RoleAssignment',
+                              assigned_role=admin_role,
+                              assigned_to=user,
+                              role_assignment_context=None)
+    return bool(global_admin)
 
 
 def get_orgs_with_access(obj):
