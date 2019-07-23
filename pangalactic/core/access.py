@@ -60,14 +60,51 @@ def get_perms(obj, user=None, permissive=False):
             return list(perms)
     # if we get this far, we have a user_oid and a user object
     if is_global_admin(user):
-        perms |= set(['modify', 'decloak', 'delete'])
+        # global admin is omnipotent ...
+        return ['view', 'modify', 'decloak', 'delete']
     # user has write permissions if Admin for a grantee org or if user
     # has a discipline role in the owner org that corresponds to the
-    # product type
+    # object's 'product_type'
     else:
+        # did the user create the object?  if so, full perms ...
         if (hasattr(obj, 'creator') and
             obj.creator is user):
-            perms |= set(['modify', 'decloak', 'delete'])
+            return ['view', 'modify', 'decloak', 'delete']
+        # is this a Product and does it have a relevant product type?
+        # (config item "discipline_subsystems" must exist for this to work)
+        product_type = None
+        if (hasattr(obj, 'product_type') and
+            getattr(obj.product_type, 'id', '') in
+                                config.get('discipline_subsystems', [])):
+            product_type = obj.product_type
+        # or is it an Acu with an "assembly" of a relevant product type?
+        elif (hasattr(obj, 'assembly') and
+              getattr(obj.assembly.product_type, 'id', '') in
+                                config.get('discipline_subsystems', [])):
+            product_type = obj.assembly.product_type
+        # or is it an Acu with a relevant product type hint?
+        elif (hasattr(obj, 'product_type_hint') and
+              getattr(obj.product_type_hint, 'id', '') in
+                                config.get('discipline_subsystems', [])):
+            product_type = obj.product_type_hint
+        if product_type:
+            # does user have a relevant discipline role in the project or org
+            # that owns the object?
+            if obj.owner:
+                ras = orb.search_exact(cname='RoleAssignment',
+                                       assigned_to=user,
+                                       role_assignment_context=obj.owner)
+                roles = [ra.assigned_role for ra in ras]
+                # look up corresponding disciplines
+                drs = set()
+                for role in roles:
+                    drs |= set(orb.search_exact(cname='DisciplineRole',
+                                                related_role=role))
+                disciplines = [dr.related_to_discipline for dr in drs]
+                subsystem_type_ids = [config['discipline_subsystems'][d.id]
+                                      for d in disciplines]
+                if obj.product_type in subsystem_type_ids:
+                    return ['view', 'modify', 'decloak', 'delete']
         # TODO:  more possible permissions for Administrators
         user_orgs = get_user_orgs(user)
         if user_orgs:
@@ -76,7 +113,6 @@ def get_perms(obj, user=None, permissive=False):
             if orgs_ac:
                 perms |= set(['view'])
     return list(perms)
-
 
 def get_user_orgs(user):
     """

@@ -1964,6 +1964,17 @@ for discipline_oid in [
              related_role=role_obj['oid'],
              related_to_discipline=discipline_obj['oid']))
 
+    # 'Systems Engineer' Role gets related to all disciplines
+    se_dr_oid = '.'.join(['pgefobjects:DisciplineRole', se_role_obj['id'],
+                         discipline_obj['id']])
+    se_dr_id = se_role_obj['id'] + '_to_' + discipline_obj['id']
+    se_dr_name = 'Systems Engineer / ' + discipline_obj['name']
+    core.append(
+        dict(_cname='DisciplineRole', oid=se_dr_oid, id=se_dr_id,
+             name=se_dr_name,
+             related_role=se_role_obj['oid'],
+             related_to_discipline=discipline_obj['oid']))
+
     # 'Lead Engineer' Role gets related to all disciplines
     le_dr_oid = '.'.join(['pgefobjects:DisciplineRole', le_role_obj['id'],
                          discipline_obj['id']])
