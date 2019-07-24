@@ -10,9 +10,10 @@ from functools import reduce
 def get_perms(obj, user=None, permissive=False):
     """
     Get the permissions of the specified user relative to the specified object.
-    If used as a client-side function, it is assumed that the existence of the
-    object on the client side (either by retrieval from the server or by local
-    creation) signifies that it is readable.
+    If used as a client-side function, no user is supplied and the local user
+    is looked up.  On the client side it is assumed that the existence of the
+    object locally (either by retrieval from the server or by local creation)
+    signifies that the user has at least "view" permission.
 
     Args:
         obj (Identifiable):  the object
