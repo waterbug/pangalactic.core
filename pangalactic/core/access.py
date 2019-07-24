@@ -34,8 +34,16 @@ def get_perms(obj, user=None, permissive=False):
     # fulfilling the role of the administrative service.  Therefore, because
     # operations to sync such data are expensive, the data are cached in
     # `state` variables rather than stored in the local db.
+    orb.log.info('* get_perms ...')
+    if obj:
+        cname = obj.__class__.__name__
+        orb.log.info('  for {} object, id: {}, oid: {}'.format(cname, obj.id,
+                                                               obj.oid))
     if config.get('local_admin') or permissive:
-        return ['view', 'modify', 'decloak', 'delete']
+        orb.log.info('  "local_admin" or "permissive" configured.')
+        perms = ['view', 'modify', 'decloak', 'delete']
+        orb.log.info('  perms: {}'.format(perms))
+        return perms
     perms = set()
     if not hasattr(obj, 'grantees'):
         # not a ManagedObject -> everyone has 'view' access
@@ -49,19 +57,28 @@ def get_perms(obj, user=None, permissive=False):
         # user specified -> server-side app
         user_oid = getattr(user, 'oid', None)
         if not user_oid:
+            orb.log.info('  specified user has no "oid".')
+            orb.log.info('  perms: {}'.format(perms))
             return list(perms)
     else:
         # user not provided -> client app (local user)
         user_oid = state.get('local_user_oid')
         if not user_oid:
+            orb.log.info('  no local user configured.')
+            orb.log.info('  perms: {}'.format(perms))
             return list(perms)
         user = orb.get(user_oid)
         if not user:
+            orb.log.info('  no user object found.')
+            orb.log.info('  perms: {}'.format(perms))
             return list(perms)
     # if we get this far, we have a user_oid and a user object
     if is_global_admin(user):
         # global admin is omnipotent ...
-        return ['view', 'modify', 'decloak', 'delete']
+        orb.log.info('  user is a global admin.')
+        perms = ['view', 'modify', 'decloak', 'delete']
+        orb.log.info('  perms: {}'.format(perms))
+        return perms
     # user has write permissions if Admin for a grantee org or if user
     # has a discipline role in the owner org that corresponds to the
     # object's 'product_type'
@@ -69,42 +86,61 @@ def get_perms(obj, user=None, permissive=False):
         # did the user create the object?  if so, full perms ...
         if (hasattr(obj, 'creator') and
             obj.creator is user):
-            return ['view', 'modify', 'decloak', 'delete']
+            orb.log.info('  user is object creator.')
+            perms = ['view', 'modify', 'decloak', 'delete']
+            orb.log.info('  perms: {}'.format(perms))
+            return perms
         # is this a Product and does it have a relevant product type?
         # (config item "discipline_subsystems" must exist for this to work)
-        product_type = None
+        discipline_subsystems = config.get('discipline_subsystems', {})
+        subsystem_type_ids = list(discipline_subsystems.values())
+        product_type_id = None
+        TBD = orb.get('pgefobjects:TBD')
         if (hasattr(obj, 'product_type') and
-            getattr(obj.product_type, 'id', '') in
-                                config.get('discipline_subsystems', [])):
-            product_type = obj.product_type
+            getattr(obj.product_type, 'id', '') in subsystem_type_ids):
+            product_type_id = obj.product_type.id
+            # owner of product is the relevant owner
+            owner = obj.owner
+            orb.log.info('  obj.product_type: "{}"'.format(product_type_id))
         # or is it an Acu with an "assembly" of a relevant product type?
         elif (hasattr(obj, 'assembly') and
-              getattr(obj.assembly.product_type, 'id', '') in
-                                config.get('discipline_subsystems', [])):
-            product_type = obj.assembly.product_type
-        # or is it an Acu with a relevant product type hint?
-        elif (hasattr(obj, 'product_type_hint') and
-              getattr(obj.product_type_hint, 'id', '') in
-                                config.get('discipline_subsystems', [])):
-            product_type = obj.product_type_hint
-        if product_type:
+              getattr(obj.assembly.product_type, 'id', '')
+                                                in subsystem_type_ids):
+            product_type_id = obj.assembly.product_type.id
+            # owner of assembly is the relevant owner
+            owner = obj.assembly.owner
+            orb.log.info('  obj.assembly.product_type: "{}"'.format(
+                                                            product_type_id))
+        # or is it a Acu with TBD component and a relevant product type hint?
+        elif (getattr(obj, 'component', None) is TBD and
+              getattr(obj.product_type_hint, 'id', '') in subsystem_type_ids):
+            product_type_id = obj.product_type_hint.id
+            # owner of assembly is the relevant owner
+            owner = obj.assembly.owner
+            orb.log.info('  obj.product_type_hint: "{}"'.format(
+                                                            product_type_id))
+        if product_type_id and owner:
             # does user have a relevant discipline role in the project or org
             # that owns the object?
-            if obj.owner:
-                ras = orb.search_exact(cname='RoleAssignment',
-                                       assigned_to=user,
-                                       role_assignment_context=obj.owner)
-                roles = [ra.assigned_role for ra in ras]
-                # look up corresponding disciplines
-                drs = set()
-                for role in roles:
-                    drs |= set(orb.search_exact(cname='DisciplineRole',
-                                                related_role=role))
-                disciplines = [dr.related_to_discipline for dr in drs]
-                subsystem_type_ids = [config['discipline_subsystems'][d.id]
-                                      for d in disciplines]
-                if obj.product_type in subsystem_type_ids:
-                    return ['view', 'modify', 'decloak', 'delete']
+            ras = orb.search_exact(cname='RoleAssignment',
+                                   assigned_to=user,
+                                   role_assignment_context=owner)
+            roles = [ra.assigned_role for ra in ras]
+            # look up corresponding disciplines
+            drs = set()
+            for role in roles:
+                drs |= set(orb.search_exact(cname='DisciplineRole',
+                                            related_role=role))
+            disciplines = [dr.related_to_discipline for dr in drs]
+            subsystem_type_ids = [discipline_subsystems[d.id]
+                                  for d in disciplines]
+            if product_type_id in subsystem_type_ids:
+                orb.log.info('  user is authorized for product_type.')
+                perms = ['view', 'modify', 'decloak', 'delete']
+                orb.log.info('  perms: {}'.format(perms))
+                return perms
+            else:
+                orb.log.info('  user is NOT authorized for product_type.')
         # TODO:  more possible permissions for Administrators
         user_orgs = get_user_orgs(user)
         if user_orgs:
@@ -112,6 +148,7 @@ def get_perms(obj, user=None, permissive=False):
                         [get_org_access(obj, org) for org in user_orgs])
             if orgs_ac:
                 perms |= set(['view'])
+    orb.log.info('  perms: {}'.format(perms))
     return list(perms)
 
 def get_user_orgs(user):
