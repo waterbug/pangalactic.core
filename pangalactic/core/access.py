@@ -103,7 +103,7 @@ def get_perms(obj, user=None, permissive=False):
             # owner of product is the relevant owner
             owner = obj.owner
             orb.log.info('  obj.product_type: "{}"'.format(product_type_id))
-        # or is it an Acu with an "assembly" of a relevant product type?
+        # or is it an Acu or with an "assembly" of a relevant product type?
         elif (hasattr(obj, 'assembly') and
               getattr(obj.assembly.product_type, 'id', '')
                                                 in subsystem_type_ids):
