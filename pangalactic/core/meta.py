@@ -94,7 +94,7 @@ PGXN_PARAMETERS = ['m', 'm[Ctgcy]', 'P', 'P[Ctgcy]', 'R_D', 'R_D[Ctgcy]',
                    'P[MEV]', 'R_D[CBE]', 'R_D[MEV]']
 
 # DEFAULT_CLASS_PARAMETERS:  default parameters of objects by class
-DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 'start_time'],
+DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start'],
                             'Mission': ['duration']}
 
 # DEFAULT_PRODUCT_TYPE_PARAMETERS:  default parameters by ProductType id
