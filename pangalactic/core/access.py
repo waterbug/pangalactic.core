@@ -123,6 +123,8 @@ def get_perms(obj, user=None, permissive=False):
         # (config item "discipline_subsystems" must exist for this to work)
         discipline_subsystems = config.get('discipline_subsystems', {})
         subsystem_type_ids = list(discipline_subsystems.values())
+        orb.log.info('  - user has access to subsystems: {}'.format(
+                                                str(subsystem_type_ids)))
         product_type_id = None
         TBD = orb.get('pgefobjects:TBD')
         if (hasattr(obj, 'product_type') and
@@ -132,19 +134,21 @@ def get_perms(obj, user=None, permissive=False):
             # owner of Product is the relevant owner
             owner = obj.owner
             orb.log.info('  - obj.product_type: "{}"'.format(product_type_id))
-        # or is it an Acu or with an "assembly" of a relevant product type?
-        elif (hasattr(obj, 'assembly') and
-              getattr(obj.assembly.product_type, 'id', '')
+        # is it an Acu with a component this has a relevant product type, and
+        # which is owned by an org in which the user has a relevant role?
+        elif (hasattr(obj, 'component') and
+              getattr(obj.component, 'product_type', None) and
+              getattr(obj.component.product_type, 'id', '')
                                                 in subsystem_type_ids):
-            orb.log.info('  - object is an Acu ...')
-            product_type_id = obj.assembly.product_type.id
+            orb.log.info('  - object is an Acu')
+            orb.log.info('    whose component product_type is {}'.format(
+                                obj.component.product_type.id or 'unknown'))
+            product_type_id = obj.component.product_type.id
             # owner of assembly is the relevant owner
             owner = obj.assembly.owner
-            orb.log.info('  - owner is {} ...'.format(
+            orb.log.info('  - assembly owner is {} ...'.format(
                                         getattr(owner, 'id', 'unknown')))
-            orb.log.info('  - obj.assembly.product_type: "{}"'.format(
-                                                            product_type_id))
-        # or is it a Acu with TBD component and a relevant product type hint?
+        # is it a Acu with TBD component and a relevant product type hint?
         elif (getattr(obj, 'component', None) is TBD and
               getattr(obj.product_type_hint, 'id', '') in subsystem_type_ids):
             orb.log.info('  - object is an Acu ...')
