@@ -73,6 +73,12 @@ def get_perms(obj, user=None, permissive=False):
             orb.log.info('  no user object found.')
             orb.log.info('  perms: {}'.format(perms))
             return list(perms)
+    if isinstance(obj, orb.classes['ProjectSystemUsage']):
+        # access is determined by project/system access for PSU
+        if obj.project.oid == 'pgefobjects:SANDBOX':
+            orb.log.debug('  SANDBOX PSUs are modifiable by user')
+            perms = ['view', 'modify', 'decloak', 'delete']
+            return perms
     # if we get this far, we have a user_oid and a user object
     # * first check if the object is a collaborative project
     collab_project = False
@@ -137,12 +143,6 @@ def get_perms(obj, user=None, permissive=False):
             owner = obj.assembly.owner
             orb.log.info('  obj.product_type_hint: "{}"'.format(
                                                             product_type_id))
-        elif isinstance(obj, orb.classes['ProjectSystemUsage']):
-            # access is determined by project/system access for PSU
-            if obj.project.oid == 'pgefobjects:SANDBOX':
-                orb.log.debug('  SANDBOX PSUs are modifiable by user')
-                perms = ['view', 'modify', 'decloak', 'delete']
-                return perms
         if product_type_id and owner:
             # does user have a relevant discipline role in the project or org
             # that owns the object?
