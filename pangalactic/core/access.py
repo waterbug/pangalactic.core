@@ -76,7 +76,7 @@ def get_perms(obj, user=None, permissive=False):
     if isinstance(obj, orb.classes['ProjectSystemUsage']):
         # access is determined by project/system access for PSU
         if obj.project.oid == 'pgefobjects:SANDBOX':
-            orb.log.debug('  SANDBOX PSUs are modifiable by user')
+            orb.log.debug('  ******* SANDBOX PSUs are modifiable by user')
             perms = ['view', 'modify', 'decloak', 'delete']
             return perms
     # if we get this far, we have a user_oid and a user object
@@ -90,27 +90,32 @@ def get_perms(obj, user=None, permissive=False):
             collab_project = True
     if is_global_admin(user):
         # global admin is omnipotent, except for deleting projects ...
-        orb.log.info('  user is a global admin.')
+        orb.log.info('  ******* user is a global admin.')
         if isinstance(obj, orb.classes['Project']):
             # a project can only be deleted by its creator
             perms = ['view', 'modify']
         else:
             perms = ['view', 'modify', 'decloak', 'delete']
+            return perms
         orb.log.info('  perms: {}'.format(perms))
-        return perms
     # user has write permissions if Admin for a grantee org or if user
     # has a discipline role in the owner org that corresponds to the
     # object's 'product_type'
     else:
+        owner = None
         # did the user create the object?  if so, full perms ...
         if (hasattr(obj, 'creator') and
             obj.creator is user):
             orb.log.info('  user is object creator.')
             if collab_project:
                 # a collaborative project cannot be deleted
+                orb.log.info('  - object is a collaborative project ...')
+                orb.log.info('    cannot be deleted.')
                 perms = ['view', 'modify']
             else:
                 # a local project can be deleted by its creator
+                orb.log.info('  - object is a local project ...')
+                orb.log.info('    can be modified or deleted by its creator.')
                 perms = ['view', 'modify', 'decloak', 'delete']
             orb.log.info('  perms: {}'.format(perms))
             return perms
@@ -148,6 +153,15 @@ def get_perms(obj, user=None, permissive=False):
             owner = obj.assembly.owner
             orb.log.info('  - obj.product_type_hint: "{}"'.format(
                                                             product_type_id))
+        else:
+            orb.log.info('  - object type: {}'.format(obj.__class__.__name__))
+            orb.log.info('  - object creator: {}'.format(
+                               getattr(obj.creator, 'id', None) or 'unknown'))
+            if hasattr(obj, 'owner'):
+                orb.log.info('  - object owner: {}'.format(
+                                    getattr(obj, 'owner', None) or 'unknown'))
+            else:
+                orb.log.info('  - object has no "owner" attribute.')
         if product_type_id and owner:
             # does user have a relevant discipline role in the project or org
             # that owns the object?
