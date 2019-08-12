@@ -2170,7 +2170,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
     <owl:Class rdf:about="&pgef;DisciplineProductType">
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A Discipline ProductType is a relationship between a Discipline and the a type of Product that is used by practitioners of that Discipline.  The two classes have a many-to-many relationship:  one Discipline will typically use many ProductTypes, and one ProductType can be used by many Disciplines.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">A Discipline ProductType is a relationship between a Discipline and a type of Product that is used by practitioners of that Discipline.  The two classes have a many-to-many relationship:  one Discipline will typically use many ProductTypes, and one ProductType can be used by many Disciplines.</rdfs:comment>
     </owl:Class>
 
 

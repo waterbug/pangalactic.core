@@ -24,15 +24,6 @@ initial = [
     'mod_datetime': epoch
     },
 
-{   '_cname': 'Organization',
-    'id': 'MDL',
-    'name': 'Mission Design Lab',
-    'oid': 'pgefobjects:Organization.MDL',
-    'owner': 'pgefobjects:PGANA',
-    'create_datetime': epoch,
-    'mod_datetime': epoch
-    },
-
 {   '_cname': 'Person',
     'oid': 'pgefobjects:admin',
     'description': 'Pan Galactic Administrator',

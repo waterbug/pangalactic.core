@@ -74,10 +74,22 @@ def get_perms(obj, user=None, permissive=False):
             orb.log.info('  perms: {}'.format(perms))
             return list(perms)
     # if we get this far, we have a user_oid and a user object
+    # * first check if the object is a collaborative project
+    collab_project = False
+    if isinstance(obj, orb.classes['Project']):
+        ras = orb.search_exact(cname='RoleAssignment',
+                               role_assignment_context=obj)
+        if ras:
+            orb.log.info('  This object is a collaborative project.')
+            collab_project = True
     if is_global_admin(user):
-        # global admin is omnipotent ...
+        # global admin is omnipotent, except for deleting projects ...
         orb.log.info('  user is a global admin.')
-        perms = ['view', 'modify', 'decloak', 'delete']
+        if isinstance(obj, orb.classes['Project']):
+            # a project can only be deleted by its creator
+            perms = ['view', 'modify']
+        else:
+            perms = ['view', 'modify', 'decloak', 'delete']
         orb.log.info('  perms: {}'.format(perms))
         return perms
     # user has write permissions if Admin for a grantee org or if user
@@ -88,7 +100,12 @@ def get_perms(obj, user=None, permissive=False):
         if (hasattr(obj, 'creator') and
             obj.creator is user):
             orb.log.info('  user is object creator.')
-            perms = ['view', 'modify', 'decloak', 'delete']
+            if collab_project:
+                # a collaborative project cannot be deleted
+                perms = ['view', 'modify']
+            else:
+                # a local project can be deleted by its creator
+                perms = ['view', 'modify', 'decloak', 'delete']
             orb.log.info('  perms: {}'.format(perms))
             return perms
         # is this a Product and does it have a relevant product type?
@@ -133,7 +150,7 @@ def get_perms(obj, user=None, permissive=False):
                 drs |= set(orb.search_exact(cname='DisciplineRole',
                                             related_role=role))
             disciplines = [dr.related_to_discipline for dr in drs]
-            subsystem_type_ids = [discipline_subsystems[d.id]
+            subsystem_type_ids = [discipline_subsystems.get(d.id)
                                   for d in disciplines]
             if product_type_id in subsystem_type_ids:
                 orb.log.info('  user is authorized for product_type.')
