@@ -122,26 +122,31 @@ def get_perms(obj, user=None, permissive=False):
         TBD = orb.get('pgefobjects:TBD')
         if (hasattr(obj, 'product_type') and
             getattr(obj.product_type, 'id', '') in subsystem_type_ids):
+            orb.log.info('  - object is a Product ...')
             product_type_id = obj.product_type.id
-            # owner of product is the relevant owner
+            # owner of Product is the relevant owner
             owner = obj.owner
-            orb.log.info('  obj.product_type: "{}"'.format(product_type_id))
+            orb.log.info('  - obj.product_type: "{}"'.format(product_type_id))
         # or is it an Acu or with an "assembly" of a relevant product type?
         elif (hasattr(obj, 'assembly') and
               getattr(obj.assembly.product_type, 'id', '')
                                                 in subsystem_type_ids):
+            orb.log.info('  - object is an Acu ...')
             product_type_id = obj.assembly.product_type.id
             # owner of assembly is the relevant owner
             owner = obj.assembly.owner
-            orb.log.info('  obj.assembly.product_type: "{}"'.format(
+            orb.log.info('  - owner is {} ...'.format(
+                                        getattr(owner, 'id', 'unknown')))
+            orb.log.info('  - obj.assembly.product_type: "{}"'.format(
                                                             product_type_id))
         # or is it a Acu with TBD component and a relevant product type hint?
         elif (getattr(obj, 'component', None) is TBD and
               getattr(obj.product_type_hint, 'id', '') in subsystem_type_ids):
+            orb.log.info('  - object is an Acu ...')
             product_type_id = obj.product_type_hint.id
             # owner of assembly is the relevant owner
             owner = obj.assembly.owner
-            orb.log.info('  obj.product_type_hint: "{}"'.format(
+            orb.log.info('  - obj.product_type_hint: "{}"'.format(
                                                             product_type_id))
         if product_type_id and owner:
             # does user have a relevant discipline role in the project or org

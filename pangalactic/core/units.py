@@ -77,6 +77,7 @@ alt_units = OrderedDict([
                 'foot', 'inch', 'furlong']),
     ('luminosity', ['mcd', 'cd']),
     ('mass', ['kg', 'g', 'mg', 'ug', 'lb']),
+    ('money', ['$']),                         # dollar
     ('substance', ['mol', 'nmol', 'mmol']),
     ('power', ['W', 'kW', 'MW', 'GW', 'TW', 'mW', 'uW', 'nW', 'pW']),
     ('pressure', ['Pa', 'kPa', 'mPa', 'uPa', 'atm', 'psi']),
