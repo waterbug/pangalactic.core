@@ -119,8 +119,9 @@ def get_perms(obj, user=None, permissive=False):
                 perms = ['view', 'modify', 'decloak', 'delete']
             orb.log.info('  perms: {}'.format(perms))
             return perms
-        # is this a Product and does it have a relevant product type?
+        # [1] is this a Product and does it have a relevant product type?
         # (config item "discipline_subsystems" must exist for this to work)
+        # OR ...
         discipline_subsystems = config.get('discipline_subsystems', {})
         subsystem_type_ids = list(discipline_subsystems.values())
         orb.log.info('  - user has access to subsystems: {}'.format(
@@ -134,8 +135,10 @@ def get_perms(obj, user=None, permissive=False):
             # owner of Product is the relevant owner
             owner = obj.owner
             orb.log.info('  - obj.product_type: "{}"'.format(product_type_id))
-        # is it an Acu with a component this has a relevant product type, and
-        # which is owned by an org in which the user has a relevant role?
+        # [2] is it an Acu with a component that has a relevant product type, and
+        # of which the *assembly* is owned by an org in which the user has a
+        # relevant role?
+        # OR ...
         elif (hasattr(obj, 'component') and
               getattr(obj.component, 'product_type', None) and
               getattr(obj.component.product_type, 'id', '')
@@ -148,7 +151,22 @@ def get_perms(obj, user=None, permissive=False):
             owner = obj.assembly.owner
             orb.log.info('  - assembly owner is {} ...'.format(
                                         getattr(owner, 'id', 'unknown')))
-        # is it a Acu with TBD component and a relevant product type hint?
+        # [3] is it an Acu with an assembly that has a relevant product type, and
+        # which is owned by an org in which the user has a relevant role?
+        # OR ...
+        elif (hasattr(obj, 'assembly') and
+              getattr(obj.assembly, 'product_type', None) and
+              getattr(obj.assembly.product_type, 'id', '')
+                                                in subsystem_type_ids):
+            orb.log.info('  - object is an Acu')
+            orb.log.info('    whose assembly product_type is {}'.format(
+                                obj.assembly.product_type.id or 'unknown'))
+            product_type_id = obj.assembly.product_type.id
+            # owner of assembly is the relevant owner
+            owner = obj.assembly.owner
+            orb.log.info('  - assembly owner is {} ...'.format(
+                                        getattr(owner, 'id', 'unknown')))
+        # [4] is it a Acu with TBD component and a relevant product type hint?
         elif (getattr(obj, 'component', None) is TBD and
               getattr(obj.product_type_hint, 'id', '') in subsystem_type_ids):
             orb.log.info('  - object is an Acu ...')
@@ -157,15 +175,16 @@ def get_perms(obj, user=None, permissive=False):
             owner = obj.assembly.owner
             orb.log.info('  - obj.product_type_hint: "{}"'.format(
                                                             product_type_id))
+        # [5] if none of the above, log the relevant info for debugging ...
         else:
-            orb.log.info('  - object type: {}'.format(obj.__class__.__name__))
-            orb.log.info('  - object creator: {}'.format(
+            orb.log.debug('  - object type: {}'.format(obj.__class__.__name__))
+            orb.log.debug('  - object creator: {}'.format(
                                getattr(obj.creator, 'id', None) or 'unknown'))
             if hasattr(obj, 'owner'):
-                orb.log.info('  - object owner: {}'.format(
+                orb.log.debug('  - object owner: {}'.format(
                                     getattr(obj, 'owner', None) or 'unknown'))
             else:
-                orb.log.info('  - object has no "owner" attribute.')
+                orb.log.debug('  - object has no "owner" attribute.')
         if product_type_id and owner:
             # does user have a relevant discipline role in the project or org
             # that owns the object?
