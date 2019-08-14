@@ -437,7 +437,7 @@ class UberORB(object):
             if oid:
                 margin_pid = get_parameter_id(pid, 'Margin')
                 nte_pid = get_parameter_id(pid, 'NTE')
-                self.log.info('        - {} at {}: {}'.format(pid, oid,
+                self.log.debug('        - {} at {}: {}'.format(pid, oid,
                                                               result))
                 if not parameterz.get(oid):
                     parameterz[oid] = {}
@@ -691,7 +691,7 @@ class UberORB(object):
         """
         entity = with_polymorphic(self.classes['Identifiable'], '*')
         if oid:
-            self.log.debug('* get(%s)' % oid[0])
+            # self.log.debug('* get(%s)' % oid[0])
             return self.db.query(entity).filter_by(oid=oid[0]).first()
         elif kw:
             oids = kw.get('oids')
