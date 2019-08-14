@@ -972,6 +972,7 @@ def compute_requirement_margin(orb, oid, default=0):
     nte_units = req.req_units
     acu = req.allocated_to_function
     psu = req.allocated_to_system
+    object_oid = None
     if acu:
         allocated_to_oid = acu.oid
         object_oid = getattr(acu.component, 'oid', None)
