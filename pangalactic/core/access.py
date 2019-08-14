@@ -124,7 +124,7 @@ def get_perms(obj, user=None, permissive=False):
         # OR ...
         discipline_subsystems = config.get('discipline_subsystems', {})
         subsystem_type_ids = list(discipline_subsystems.values())
-        orb.log.info('  - user has access to subsystems: {}'.format(
+        orb.log.info('  - subsystem types: {}'.format(
                                                 str(subsystem_type_ids)))
         product_type_id = None
         TBD = orb.get('pgefobjects:TBD')
@@ -198,15 +198,18 @@ def get_perms(obj, user=None, permissive=False):
                 drs |= set(orb.search_exact(cname='DisciplineRole',
                                             related_role=role))
             disciplines = [dr.related_to_discipline for dr in drs]
-            subsystem_type_ids = [discipline_subsystems.get(d.id)
-                                  for d in disciplines]
-            if product_type_id in subsystem_type_ids:
-                orb.log.info('  user is authorized for product_type.')
+            user_subsystem_type_ids = [discipline_subsystems.get(d.id)
+                                       for d in disciplines]
+            orb.log.info('  user is authorized for subsystem types:')
+            orb.log.info('  {}'.format(user_subsystem_type_ids))
+            orb.log.info('  this product type is "{}"'.format(product_type_id))
+            if product_type_id in user_subsystem_type_ids:
+                orb.log.info('  user is authorized for this product type.')
                 perms = ['view', 'modify', 'decloak', 'delete']
                 orb.log.info('  perms: {}'.format(perms))
                 return perms
             else:
-                orb.log.info('  user is NOT authorized for product_type.')
+                orb.log.info('  user is NOT authorized for this product type.')
         # TODO:  more possible permissions for Administrators
         user_orgs = get_user_orgs(user)
         if user_orgs:
