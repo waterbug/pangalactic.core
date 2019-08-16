@@ -30,7 +30,7 @@ def get_loggers(home, name, console=False, debug=False):
     if debug:
         logger.setLevel(logging.DEBUG)
     handler = RotatingFileHandler(log_filename,
-                                  maxBytes=50000,
+                                  maxBytes=250000,
                                   backupCount=10)
     logger.addHandler(handler)
     message_format = u"%(asctime)s %(message)s"
@@ -44,7 +44,7 @@ def get_loggers(home, name, console=False, debug=False):
     if debug:
         error_logger.setLevel(logging.DEBUG)
     error_handler = RotatingFileHandler(error_log_filename,
-                                        maxBytes=50000,
+                                        maxBytes=250000,
                                         backupCount=10)
     error_handler.setFormatter(formatter)
     error_logger.addHandler(error_handler)

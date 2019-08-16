@@ -438,18 +438,21 @@ class UberORB(object):
                 margin_pid = get_parameter_id(pid, 'Margin')
                 nte_pid = get_parameter_id(pid, 'NTE')
                 self.log.debug('        - {} at {}: {}'.format(pid, oid,
-                                                              result))
+                                                               result))
                 if not parameterz.get(oid):
                     parameterz[oid] = {}
-                parameterz[oid][margin_pid] = dict(value=result,
-                                                   units='%',
+                if isinstance(result, (int, float)):
+                    # if result is int or float, set it as margin; otherwise,
+                    # it is a message indicating that margin could not be
+                    # computed
+                    parameterz[oid][margin_pid] = dict(value=result, units='%',
                                                    mod_datetime=str(dtstamp()))
                 parameterz[oid][nte_pid] = dict(value=nte,
                                                 units=nte_units,
                                                 mod_datetime=str(dtstamp()))
             else:
-                # if margin cannot be computed, None will be returned for oid
-                # and reason for failure will be in "result"
+                # if None was returned for oid, reason for failure will be in
+                # "result"
                 self.log.info('        - compute failed for {}:'.format(
                                                                     req_oid))
                 self.log.info('          {}'.format(result))

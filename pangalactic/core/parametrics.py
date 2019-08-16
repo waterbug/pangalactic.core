@@ -968,7 +968,7 @@ def compute_requirement_margin(orb, oid, default=0):
     nte = req.req_maximum_value
     if not nte:
         msg = 'Requirement is not a "Not To Exceed" (max) type.'
-        return (None, None, None, None, msg)
+        return (None, parameter_id, None, None, msg)
     nte_units = req.req_units
     acu = req.allocated_to_function
     psu = req.allocated_to_system
@@ -981,7 +981,7 @@ def compute_requirement_margin(orb, oid, default=0):
         object_oid = getattr(psu.system, 'oid', None)
     if not object_oid or object_oid == 'pgefobjects:TBD':
         msg = 'Requirement allocation points to unknown or TBD object.'
-        return (None, None, None, None, msg)
+        return (allocated_to_oid, parameter_id, nte, nte_units, msg)
     mev = _compute_pval(orb, object_oid, parameter_id, 'MEV')
     # convert NTE value to base units, if necessary
     quan = nte * ureg.parse_expression(nte_units)
@@ -994,10 +994,10 @@ def compute_requirement_margin(orb, oid, default=0):
         # TODO:  implement a NaN or "Undefined" ...
         msg = 'MEV value for {} is 0; cannot compute margin.'.format(
                                                         parameter_id)
-        return (None, None, None, None, msg)
+        return (allocated_to_oid, parameter_id, nte, nte_units, msg)
     margin = round_to(((converted_nte - mev) / mev))
     orb.log.debug('  ... margin is {}'.format(margin))
-    return allocated_to_oid, parameter_id, nte, nte_units, margin
+    return (allocated_to_oid, parameter_id, nte, nte_units, margin)
 
 # the COMPUTES dict maps variable and context id to applicable compute
 # functions
