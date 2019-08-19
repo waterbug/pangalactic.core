@@ -979,8 +979,11 @@ def compute_requirement_margin(orb, oid, default=0):
     elif psu:
         allocated_to_oid = psu.oid
         object_oid = getattr(psu.system, 'oid', None)
+    else:
+        msg = 'Requirement is not allocated properly (no Acu or PSU).'
+        return (None, parameter_id, nte, nte_units, msg)
     if not object_oid or object_oid == 'pgefobjects:TBD':
-        msg = 'Requirement allocation points to unknown or TBD object.'
+        msg = 'Margin cannot be computed for unknown or TBD object.'
         return (allocated_to_oid, parameter_id, nte, nte_units, msg)
     mev = _compute_pval(orb, object_oid, parameter_id, 'MEV')
     # convert NTE value to base units, if necessary

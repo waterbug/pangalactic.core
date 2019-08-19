@@ -91,8 +91,8 @@ def get_perms(obj, user=None, permissive=False):
     if is_global_admin(user):
         # global admin is omnipotent, except for deleting projects ...
         orb.log.info('  ******* user is a global admin.')
-        if isinstance(obj, orb.classes['Project']):
-            # a project can only be deleted by its creator
+        if collab_project:
+            # collaborative projects cannot be deleted
             perms = ['view', 'modify']
         else:
             perms = ['view', 'modify', 'decloak', 'delete']
@@ -113,8 +113,8 @@ def get_perms(obj, user=None, permissive=False):
                 orb.log.info('    cannot be deleted.')
                 perms = ['view', 'modify']
             else:
-                # a local project can be deleted by its creator
-                orb.log.info('  - object is a local project ...')
+                # any other object can be deleted by its creator
+                orb.log.info('  - object is not a collaborative project ...')
                 orb.log.info('    can be modified or deleted by its creator.')
                 perms = ['view', 'modify', 'decloak', 'delete']
             orb.log.info('  perms: {}'.format(perms))
