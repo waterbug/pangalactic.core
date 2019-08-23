@@ -153,7 +153,7 @@ def create_test_project():
             id='h2g2_mission', id_ns='test', owner='H2G2',
             creator='test:steve', modifier='test:steve',
             create_datetime=NOW, mod_datetime=NOW,
-            name='Hitchhike the Galaxy'),
+            public=True, name='Hitchhike the Galaxy'),
         dict(
             _cname='RoleAssignment',
             oid='test:RA.zaphod_se',
