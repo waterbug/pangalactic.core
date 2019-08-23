@@ -964,6 +964,13 @@ class UberORB(object):
                     rep_files += r_files
             if rep_files:
                 objs += rep_files
+        # also get Mission, if any, and its components (Acus) -- Activities
+        # within the project are already included, since their "owner" is the
+        # project ...
+        mission = orb.select('Mission', owner=project)
+        if mission:
+            objs.append(mission)
+            objs += mission.components  # Acus
         # TODO:  get the files too (fpath = rep_file.url)
         # use set() to eliminate dups
         res = [o for o in set(objs) if o]
