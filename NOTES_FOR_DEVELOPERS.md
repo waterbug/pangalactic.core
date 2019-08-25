@@ -114,7 +114,8 @@
     role_oids[4]:     (dict) maps names of Roles to their oids
     synced[5]:        (bool) keeps track of whether session has been synced
     synced_oids[6]:   (list) oids of user-created objects that have been synced
-    sys_trees[7]:     (dict) maps project ids to system tree attributes
+    synced_projects[7]: (list) oids of projects that have been synced
+    sys_trees[8]:     (dict) maps project ids to system tree attributes
     userid:           (str)  most recent userid used in login
     version:          (str)  version of client
     width:            (int)  current pixel width of pangalaxian gui
@@ -142,7 +143,19 @@
          and deleting it before removing it from the assembly would break
          referential integrity.
 
-    [7]: `sys_trees` data structure:
+    [7]: Projects only need to be synced when a project is first used during an
+         online session because objects may have been added, deleted, or
+         modified while the user was offline. During a session, the bulk
+         project sync is only done once because during the online session all
+         objects are kept in sync by messages. The "synced_projects" list is
+         used to keep track of which projects have been synced during the
+         current online session.  The 'vger.sync_project' rpc is only called
+         when the user selects a project using the project selector -- after
+         the sync completes, the oid for that project is added to
+         "synced_projects".  The "synced_projects" list is cleared when the
+         session ends.
+
+    [8]: `sys_trees` data structure:
 
         {project id : {nodes : (int) # of nodes in sys tree (used in
                                calculating progress bar for tree rebuilds)
