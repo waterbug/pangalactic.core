@@ -4,7 +4,6 @@ Functions related to object access permissions
 from builtins import str
 from pangalactic.core         import state, config
 from pangalactic.core.uberorb import orb
-from functools import reduce
 
 
 def get_perms(obj, user=None, permissive=False):
@@ -55,14 +54,14 @@ def get_perms(obj, user=None, permissive=False):
             # if a ManagedObject is "public", everyone has 'view' access
             perms.add('view')
     if user:
-        # user specified -> server-side app
+        # user specified -> server-side
         user_oid = getattr(user, 'oid', None)
         if not user_oid:
             orb.log.info('  specified user has no "oid".')
             orb.log.info('  perms: {}'.format(perms))
             return list(perms)
     else:
-        # user not provided -> client app (local user)
+        # user not provided -> client-side (local user)
         user_oid = state.get('local_user_oid')
         if not user_oid:
             orb.log.info('  no local user configured.')
@@ -211,12 +210,6 @@ def get_perms(obj, user=None, permissive=False):
             else:
                 orb.log.info('  user is NOT authorized for this product type.')
         # TODO:  more possible permissions for Administrators
-        user_orgs = get_user_orgs(user)
-        if user_orgs:
-            orgs_ac = reduce(lambda x,y: x or y, 
-                        [get_org_access(obj, org) for org in user_orgs])
-            if orgs_ac:
-                perms |= set(['view'])
     orb.log.info('  perms: {}'.format(perms))
     return list(perms)
 
@@ -252,113 +245,69 @@ def is_global_admin(user):
     return bool(global_admin)
 
 
-def get_orgs_with_access(obj):
+def is_cloaked(obj):
     """
-    Get the set of all organizations that have 'view' access to an object.
-    (TODO:  "black box" vs. "white box" [internals] view access ...)
+    Return the cloaking status of an object.
 
     Args:
         obj (Identifiable):  object for which orgs with access are sought
 
     Returns:
-        set of Actor instances
+        status (bool): True if cloaked
     """
-    orb.log.debug('* get_orgs_with_access({})'.format(obj.name))
+    orb.log.debug('* get_cloaked({})'.format(obj.name))
     obj_oid = getattr(obj, 'oid', None)
     if not obj or not obj_oid:
         orb.log.debug('  [no object or object has no oid]')
-        return set()
+        return False
     if (getattr(obj, 'public', False)
         or obj.__class__.__name__ == 'ParameterDefinition'):
         # NOTE: Parameter Definitions are always public, even though they are
         # ManagedObjects
         orb.log.debug('  object is public')
-        return set()
+        return False
     if isinstance(obj, orb.classes['ManagedObject']):
         # access is granted directly for ManagedObjects
         grants = orb.search_exact(cname='ObjectAccess', accessible_object=obj)
-        orgs = set([grant.grantee for grant in grants])
-        orb.log.debug('  {}'.format(str([o.name for o in orgs])))
-        return orgs
+        return not bool(grants)
     elif isinstance(obj, orb.classes['Acu']):
-        # access is determined by assembly/component access for Acu
+        # access for Acu is determined by assembly/component access
         assembly_grants = orb.search_exact(
                         cname='ObjectAccess',
                         accessible_object=obj.assembly)
         if getattr(obj.component, 'public', False):
             # if component is 'public', access depends only on assembly
             if getattr(obj.assembly, 'public', False):
-                orb.log.debug('  Acu between public objects is public.')
-                return set()
+                orb.log.debug('  Acu in a public assembly is public.')
+                return False
             else:
-                orgs = set([grant.grantee for grant in assembly_grants])
-                orb.log.debug('  {}'.format(str([o.name for o in orgs])))
-                return orgs
+                # if assembly is cloaked, Acu is cloaked
+                grants = orb.search_exact(cname='ObjectAccess',
+                                          accessible_object=obj.assembly)
+                return not bool(grants)
         else:
             component_grants = orb.search_exact(
                                             cname='ObjectAccess',
                                             accessible_object=obj.component)
             if assembly_grants and component_grants:
-                component_grantees = [g.grantee for g in component_grants]
-                orgs = set([g.grantee for g in assembly_grants
-                            if g.grantee in component_grantees])
-                orb.log.debug('  {}'.format(str([o.name for o in orgs])))
-                return orgs
+                return False
             else:
-                orb.log.debug('  no orgs have access to this object.')
-                return set()
+                return True
     elif isinstance(obj, orb.classes['ProjectSystemUsage']):
         # access is determined by project/system access for PSU
         if ((not getattr(obj.project, 'oid', None))
             or (obj.project.oid == 'pgefobjects:SANDBOX')):
             orb.log.debug('  PSUs for SANDBOX or None are not accessible.')
-            return set()
+            return True
         # elif not SANDBOX, PSU access depends on system access
         orgs = set([g.grantee for g in orb.search_exact(
                                         cname='ObjectAccess',
                                         accessible_object=obj.system)])
         orb.log.debug('  {}'.format(str([o.name for o in orgs])))
-        return orgs
+        return not bool(orgs)
     else:
         # if object is not a ManagedObject, Acu, or PSU, it is public
         orb.log.debug('  object is public [not MO, Acu, or PSU].')
-        return set()
-
-
-def get_org_access(obj, org):
-    """
-    Get a boolean indicating whether the specified Organization has 'view'
-    access to the specified object.
-
-    Args:
-        obj (Identifiable):  object for which org access is to be determined
-        org (Organization):  org for which access to object is to be determined
-    """
-    obj_oid = getattr(obj, 'oid', None)
-    org_oid = getattr(org, 'oid', None)
-    if not org or not org_oid or org_oid == 'pgefobjects:SANDBOX':
         return False
-    if not obj or not obj_oid:
-        return False
-    if getattr(obj, 'public', False):
-        return True
-    if isinstance(obj, orb.classes['ManagedObject']):
-        # access is granted directly for ManagedObjects
-        return bool(orb.search_exact(cname='ObjectAccess',
-                                     accessible_object=obj, grantee=org))
-    elif isinstance(obj, orb.classes['Acu']):
-        # access is determined by assembly/component access for Acu
-        assembly_granted = bool(orb.search_exact(
-                        cname='ObjectAccess',
-                        accessible_object=obj.assembly, grantee=org))
-        component_granted = bool(orb.search_exact(
-                        cname='ObjectAccess',
-                        accessible_object=obj.component, grantee=org))
-        return (assembly_granted and component_granted)
-    elif isinstance(obj, orb.classes['ProjectSystemUsage']):
-        # access is determined by system access for PSU
-        return bool(orb.search_exact(
-                        cname='ObjectAccess',
-                        accessible_object=obj.system, grantee=org))
-    return False
+
 
