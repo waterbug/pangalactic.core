@@ -396,7 +396,7 @@ class UberORB(object):
         contexts.  This is required at startup or when a parameter is created,
         modified, or deleted.
         """
-        self.log.info('* [orb] recompute_parmz()')
+        # self.log.debug('* [orb] recompute_parmz()')
         # TODO:  preferred contexts should override defaults
         # default descriptive contexts:  CBE, MEV
         d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or []
@@ -437,8 +437,8 @@ class UberORB(object):
             if oid:
                 margin_pid = get_parameter_id(pid, 'Margin')
                 nte_pid = get_parameter_id(pid, 'NTE')
-                self.log.debug('        - {} at {}: {}'.format(pid, oid,
-                                                               result))
+                # self.log.debug('        - {} at {}: {}'.format(pid, oid,
+                                                               # result))
                 if not parameterz.get(oid):
                     parameterz[oid] = {}
                 if isinstance(result, (int, float)):
@@ -453,9 +453,9 @@ class UberORB(object):
             else:
                 # if None was returned for oid, reason for failure will be in
                 # "result"
-                self.log.info('        - compute failed for {}:'.format(
+                self.log.debug('        - compute failed for {}:'.format(
                                                                     req_oid))
-                self.log.info('          {}'.format(result))
+                self.log.debug('          {}'.format(result))
         self._save_parmz()
 
     def assign_test_parameters(self, objs):
@@ -669,7 +669,7 @@ class UberORB(object):
                 pd_context = getattr(obj, 'context', None)
                 if pd_context:
                     update_parm_defz(self, obj, pd_context)
-        self.log.info('  orb.save:  committing db session.')
+        # self.log.debug('  orb.save:  committing db session.')
         self.db.commit()
         if recompute_required and recompute:
             self.recompute_parmz()
@@ -705,7 +705,7 @@ class UberORB(object):
             else:
                 return []
         else:
-            self.log.debug('* get() [nothing]')
+            self.log.debug('* get() [no arguments provided]')
             return None
 
     def get_count(self, cname):
@@ -854,7 +854,7 @@ class UberORB(object):
         Returns:
             list:  a list of objects
         """
-        self.log.debug('* search_exact(**(%s))' % (str(kw)))
+        # self.log.debug('* search_exact(**(%s))' % (str(kw)))
         # only allow search parameters that occur in schemas
         cname = kw.get('cname')
         attrs = [a for a in kw if a in self.registry.pes]
@@ -868,7 +868,7 @@ class UberORB(object):
                 extr = self.registry.ces.get(cname)
                 if extr:
                     bases = self.registry.all_your_base(extr) | set([cname])
-                    self.log.debug('  - bases of cname: {}'.format(str(bases)))
+                    # self.log.debug('  - bases of cname: {}'.format(str(bases)))
                     if not domain in bases:
                         # class does not have all attrs: return empty list
                         return []
@@ -879,7 +879,7 @@ class UberORB(object):
                 # no cname specified -- use the most general class that
                 # contains all specified parameters
                 cname = domain
-                self.log.debug('  - no cname kw, using: {}'.format(cname))
+                # self.log.debug('  - no cname kw, using: {}'.format(cname))
             # self.log.debug('  - ok_kw: {}'.format(str(ok_kw)))
             return list(self.db.query(self.classes[cname]).filter_by(**ok_kw))
         else:
