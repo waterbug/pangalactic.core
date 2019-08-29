@@ -142,28 +142,31 @@ class UberORB(object):
         if not os.path.exists(self.vault):
             os.makedirs(self.vault, mode=0o755)
         self.start_logging(home=pgx_home, console=console, debug=debug)
-        self.log.info('* prefs read: {}'.format(str(prefs)))
-        self.log.info('* state read: {}'.format(str(state)))
+        self.log.info('* prefs read ...')
+        # self.log.debug('  prefs: {}'.format(str(prefs)))
+        self.log.info('* state read ...')
+        # self.log.debug('  state: {}'.format(str(state)))
         self.log.info('* trash read ({} objects).'.format(len(trash)))
         if not prefs.get('units'):
             prefs['units'] = {}
         # * copy test data files from 'p.test.data' module to test_data_dir
         self.test_data_dir = os.path.join(pgx_home, 'test_data')
         current_test_files = set()
-        self.log.debug('* checking for test data in [pgx_home]/test_data...')
+        # self.log.debug('* checking for test data in [pgx_home]/test_data...')
         if not os.path.exists(self.test_data_dir):
             os.makedirs(self.test_data_dir)
         else:
             current_test_files = set(os.listdir(self.test_data_dir))
-        self.log.debug('  - found %i data files' % len(current_test_files))
+        self.log.debug('  - found {} data files'.format(
+                       len(current_test_files)))
         test_data_mod_path = test_data_mod.__path__[0]
         test_data_files = set([s for s in os.listdir(test_data_mod_path)
                                if (not s.startswith('__init__')
                                and not s.startswith('__pycache__'))
                                ])
         test_data_to_copy = test_data_files - current_test_files
-        self.log.debug('  - data files to be installed: %i'
-                       % len(test_data_to_copy))
+        self.log.debug('  - data files to be installed: '.format(
+                       len(test_data_to_copy)))
         if test_data_to_copy:
             self.log.debug('  - copying data files into test_data dir...')
             test_data_cpd = []
@@ -171,33 +174,34 @@ class UberORB(object):
                 shutil.copy(os.path.join(test_data_mod_path, p),
                             self.test_data_dir)
                 test_data_cpd.append(p)
-            self.log.info('  - new test data files installed: %s'
-                          % str(test_data_cpd))
+            # self.log.info('  - new test data files installed: %s'
+                          # % str(test_data_cpd))
         else:
             self.log.info('  - all test data files already installed.')
         # * copy files from 'p.test.vault' module to vault_dir
         self.log.debug('* checking for files in [pgx_home]/vault ...')
         current_vault_files = set(os.listdir(self.vault))
-        self.log.debug('  - found %i vault files:' % len(current_vault_files))
-        if current_vault_files:
-            for fpath in current_vault_files:
-                self.log.debug('    {}'.format(fpath))
+        self.log.debug('  - found {} vault files:'.format(
+                       len(current_vault_files)))
+        # if current_vault_files:
+            # for fpath in current_vault_files:
+                # self.log.debug('    {}'.format(fpath))
         vault_mod_path = test_vault_mod.__path__[0]
         test_vault_files = set([s for s in os.listdir(vault_mod_path)
                                if (not s.startswith('__init__')
                                and not s.startswith('__pycache__'))
                                ])
         vault_files_to_copy = test_vault_files - current_vault_files
-        self.log.debug('  - new test vault files to be installed: %i'
-                       % len(vault_files_to_copy))
+        self.log.debug('  - new test vault files to be installed: {}'.format(
+                       len(vault_files_to_copy)))
         if vault_files_to_copy:
             self.log.debug('  - copying test vault files into vault dir...')
             vault_files_copied = []
             for p in vault_files_to_copy:
                 shutil.copy(os.path.join(vault_mod_path, p), self.vault)
                 vault_files_copied.append(p)
-            self.log.info('  - new test vault files installed: %s'
-                          % str(vault_files_copied))
+            # self.log.debug('  - new test vault files installed: {}'.format(
+                           # str(vault_files_copied)))
         else:
             self.log.info('  - all test vault files already installed.')
         self.cache_path = os.path.join(pgx_home, 'cache')
@@ -363,7 +367,7 @@ class UberORB(object):
         """
         Load `parameterz` dict from json file.
         """
-        self.log.info('* [orb] _load_parmz() ...')
+        # self.log.debug('* [orb] _load_parmz() ...')
         json_path = os.path.join(self.home, 'parameters.json')
         if os.path.exists(json_path):
             with open(json_path) as f:
@@ -371,15 +375,15 @@ class UberORB(object):
             for oid, ser_parms in serialized_parms.items():
                 deserialize_parms(oid, ser_parms)
             self.recompute_parmz()
-            self.log.info('        parameterz cache loaded and recomputed.')
-        else:
-            self.log.info('        "parameters.json" was not found.')
+            # self.log.debug('        parameterz cache loaded and recomputed.')
+        # else:
+            # self.log.debug('        "parameters.json" was not found.')
 
     def _save_parmz(self):
         """
         Save `parameterz` dict to a json file.
         """
-        self.log.info('* [orb] _save_parmz() ...')
+        self.log.debug('* [orb] _save_parmz() ...')
         parms_path = os.path.join(self.home, 'parameters.json')
         serialized_parameterz = {}
         for oid, obj_parms in parameterz.items():
@@ -720,7 +724,7 @@ class UberORB(object):
             count (int)
         """
         # TODO: add a filter
-        self.log.debug('* get_count(%s)' % cname)
+        # self.log.debug('* get_count(%s)' % cname)
         return self.db.query(self.classes[cname]).count()
 
     def get_by_type(self, cname):
@@ -733,7 +737,7 @@ class UberORB(object):
         Returns:
             an iterator of objects of the specified class (may be empty)
         """
-        self.log.debug('* get_by_type(%s)' % cname)
+        # self.log.debug('* get_by_type(%s)' % cname)
         cls = self.classes.get(cname)
         if not cls:
             return []
@@ -750,7 +754,7 @@ class UberORB(object):
         Returns:
             list of objects of the specified class or a subclass (may be empty)
         """
-        self.log.debug('* get_all_subtypes(%s)' % cname)
+        # self.log.debug('* get_all_subtypes(%s)' % cname)
         return self.db.query(self.classes[cname]).all()
 
     def get_oids(self, cname=None):
@@ -835,7 +839,7 @@ class UberORB(object):
         Returns:
             obj (Identifiable or subtype) or None
         """
-        self.log.debug('* select(%s, **(%s))' % (cname, str(kw)))
+        # self.log.debug('* select(%s, **(%s))' % (cname, str(kw)))
         kw['pgef_type'] = cname
         return self.db.query(self.classes[cname]).filter_by(**kw).first()
 

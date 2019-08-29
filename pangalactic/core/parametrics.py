@@ -85,7 +85,7 @@ def refresh_componentz(orb, product):
         product (Product):  the Product instance
     """
     if product:
-        orb.log.info('[orb] refresh_componentz({})'.format(product.id))
+        # orb.log.debug('[orb] refresh_componentz({})'.format(product.id))
         componentz[product.oid] = [Comp._make((acu.component.oid,
                                                acu.quantity or 1))
                                    for acu in product.components
@@ -137,7 +137,7 @@ def create_parm_defz(orb):
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
     """
-    orb.log.info('[orb] create_parm_defz')
+    orb.log.debug('[orb] create_parm_defz')
     pds = orb.get_by_type('ParameterDefinition')
     # first, the "simple variable" parameters ...
     parm_defz.update(
@@ -232,7 +232,7 @@ def update_parm_defz(orb, pd):
         orb (Uberorb):  singleton imported from p.node.uberorb
         pd (ParameterDefinition):  ParameterDefinition being added
     """
-    orb.log.info('[orb] update_parm_defz')
+    orb.log.debug('[orb] update_parm_defz')
     parm_defz[pd.id] = {
         'name': pd.name,
         'variable': pd.id,
@@ -253,7 +253,7 @@ def create_parmz_by_dimz(orb):
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
     """
-    orb.log.info('[orb] create_parmz_by_dimz')
+    orb.log.debug('[orb] create_parmz_by_dimz')
     pds = orb.get_by_type('ParameterDefinition')
     dimz = set([pd.dimensions for pd in pds])
     parmz_by_dimz.update({dim : [pd.id for pd in pds if pd.dimensions == dim]
@@ -270,7 +270,7 @@ def update_parmz_by_dimz(orb, pd):
         orb (Uberorb):  singleton imported from p.node.uberorb
         pd (ParameterDefinition):  ParameterDefinition being added or modified
     """
-    orb.log.info('[orb] refresh_parmz_by_dimz')
+    # orb.log.debug('[orb] refresh_parmz_by_dimz')
     if pd.dimensions in parmz_by_dimz:
         parmz_by_dimz[pd.dimensions].append(pd.id)
     else:
@@ -298,7 +298,7 @@ def add_parameter(orb, oid, variable, context=None):
     if oid not in parameterz:
         parameterz[oid] = {}
     pid = get_parameter_id(variable, context)
-    orb.log.info('[orb] add_parameter "{!s}"'.format(pid))
+    orb.log.debug('[orb] add_parameter "{!s}"'.format(pid))
     if pid in parameterz[oid]:
         # if the object already has that parameter, do nothing
         return
@@ -307,7 +307,7 @@ def add_parameter(orb, oid, variable, context=None):
     if not pd:
         # for now, if no ParameterDefinition exists for pid, pass
         # (maybe eventually raise TypeError)
-        orb.log.info('        - pid {!s} is not defined.'.format(pid))
+        orb.log.debug('        - pid {!s} is not defined.'.format(pid))
         return
     pdz = parm_defz.get(pid)
     if not pdz:
@@ -355,7 +355,7 @@ def add_default_parameters(orb, obj):
         orb (Uberorb):  the orb (singleton)
         obj (Identifiable):  the object to receive parameters
     """
-    orb.log.info('[orb] add default parameters to object "{!s}"'.format(
+    orb.log.debug('[orb] add default parameters to object "{!s}"'.format(
                                                                 obj.oid))
     # Configured Parameters are currently defined by the 'dashboard'
     # configuration (in future that may be augmented by Parameters
@@ -364,7 +364,6 @@ def add_default_parameters(orb, obj):
     # TODO: should all object dashboards be updated if dashboard config is
     # modified?  Hmm ... definitely should at least be an option --
     # probably need a progress bar since it could be time-consuming ...
-    orb.log.info('* assigning default parameters to "{}"'.format(obj.id))
     pids = OrderedSet()
     cname = obj.__class__.__name__
     pids |= OrderedSet(DEFAULT_CLASS_PARAMETERS.get(cname, []))
@@ -380,7 +379,7 @@ def add_default_parameters(orb, obj):
             pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
                                obj.product_type.id, []))
     # add default parameters first ...
-    orb.log.info('      adding parameters {!s} ...'.format(str(pids)))
+    orb.log.debug('      adding parameters {!s} ...'.format(str(pids)))
     for pid in pids:
         add_parameter(orb, obj.oid, pid)
 
@@ -659,7 +658,7 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         msg = '  value {} of datatype {} '.format(value, type(value))
         msg += 'not compatible with parameter datatype `{}`'.format(dt_name)
         msg += ' ... parameter `{}` not set for oid `{}`'.format(pid, oid)
-        orb.log.info(msg)
+        orb.log.debug(msg)
 
 def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
                       local=True):
@@ -708,8 +707,8 @@ def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     except:
         # if unable to cast a value, do nothing (and log it)
         # TODO:  more form validation!
-        orb.log.info('  could not convert string "{}" ...'.format(str_val))
-        orb.log.info('  bailing out.')
+        orb.log.debug('  could not convert string "{}" ...'.format(str_val))
+        orb.log.debug('  bailing out.')
 
 def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
                       local=True):
@@ -759,8 +758,8 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     except:
         # if unable to cast a value, do nothing (and log it)
         # TODO:  more form validation!
-        orb.log.info('  could not convert string "{}" ...'.format(str_val))
-        orb.log.info('  bailing out.')
+        orb.log.debug('  could not convert string "{}" ...'.format(str_val))
+        orb.log.debug('  bailing out.')
 
 def compute_assembly_parameter(orb, product_oid, variable):
     """
@@ -815,11 +814,11 @@ def compute_mev(orb, oid, variable):
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
-    # orb.log.info('* compute_mev "{}": "{}"'.format(oid, variable))
+    # orb.log.debug('* compute_mev "{}": "{}"'.format(oid, variable))
     ctgcy_val = get_pval(orb, oid, variable + '[Ctgcy]')
     if not ctgcy_val:
-        orb.log.info('  contingency not set --')
-        orb.log.info('  setting default value (30%) ...')
+        orb.log.debug('  contingency not set --')
+        orb.log.debug('  setting default value (30%) ...')
         # if Contingency value is 0 or not set, set to default value of 30%
         ctgcy_val = 0.3
         pid = variable + '[Ctgcy]'
@@ -868,7 +867,7 @@ def compute_margin(orb, oid, variable, default=0):
         obj_oid = getattr(allocation_node.system, 'oid', None)
         allocated_to_system = True
     if not obj_oid or obj_oid == 'pgefobjects:TBD':
-        orb.log.info('  allocation is to unknown or TBD system.')
+        orb.log.debug('  allocation is to unknown or TBD system.')
         return 0
     mev = _compute_pval(orb, obj_oid, variable, 'MEV')
     # find a performance requirement for the specified variable, allocated to
@@ -954,7 +953,7 @@ def compute_requirement_margin(orb, oid, default=0):
         # TODO: notify user
         msg = 'Requirement with oid {} is not a performance reqt.'.format(oid)
         return (None, None, None, None, msg)
-    orb.log.info('* Computing margin for reqt "{}"'.format(req.name))
+    orb.log.debug('* Computing margin for reqt "{}"'.format(req.name))
     rel = getattr(req, 'computable_form', None)
     prs = getattr(rel, 'correlates_parameters', None)
     if not prs:
@@ -990,8 +989,8 @@ def compute_requirement_margin(orb, oid, default=0):
     quan = nte * ureg.parse_expression(nte_units)
     quan_base = quan.to_base_units()
     converted_nte = quan_base.magnitude
-    orb.log.debug('  compute_margin: nte is {}'.format(converted_nte))
-    orb.log.debug('                  mev is {}'.format(mev))
+    # orb.log.debug('  compute_margin: nte is {}'.format(converted_nte))
+    # orb.log.debug('                  mev is {}'.format(mev))
     if mev == 0:   # NOTE: 0 == 0.0 evals to True
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
@@ -999,7 +998,7 @@ def compute_requirement_margin(orb, oid, default=0):
                                                         parameter_id)
         return (allocated_to_oid, parameter_id, nte, nte_units, msg)
     margin = round_to(((converted_nte - mev) / mev))
-    orb.log.debug('  ... margin is {}'.format(margin))
+    # orb.log.debug('  ... margin is {}'.format(margin))
     return (allocated_to_oid, parameter_id, nte, nte_units, margin)
 
 # the COMPUTES dict maps variable and context id to applicable compute
@@ -1045,7 +1044,7 @@ COMPUTES = {
     # Args:
         # orb (Uberorb):  singleton imported from p.node.uberorb
     # """
-    # orb.log.info('[orb] refresh_flow_parmz()')
+    # orb.log.debug('[orb] refresh_flow_parmz()')
     # pds = orb.get_by_type('ParameterDefinition')
     # for pd in pds:
         # port_type = getattr(pd, 'port_type', None)

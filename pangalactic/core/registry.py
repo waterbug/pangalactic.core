@@ -262,11 +262,11 @@ class PanGalacticRegistry(object):
                 # if source is file-like, must reset to beginning
                 source.seek(0)
             self.kb.parse(source)
-        self.log.debug('   + nsprefix = %s' % str(nsprefix))
+        # self.log.debug('   + nsprefix = %s' % str(nsprefix))
         new_pes = {}
         new_ces = {}
         pnames = self.kb.get_property_names(nsprefix)
-        self.log.debug('   + pnames:  %s' % pnames)
+        # self.log.debug('   + pnames:  %s' % pnames)
         for pname in pnames:
             attrs = self.kb.get_attrs_of_property(nsprefix, pname)
             e = OrderedDict()
@@ -278,7 +278,7 @@ class PanGalacticRegistry(object):
             # properties anyway)
             new_pes[pname] = e
         cnames = self.kb.get_class_names(nsprefix)
-        self.log.debug('   + cnames:  %s' % cnames)
+        # self.log.debug('   + cnames:  %s' % cnames)
         for cname in cnames:
             attrs = self.kb.get_attrs_of_class(nsprefix, cname)
             e = OrderedDict()
@@ -374,11 +374,11 @@ class PanGalacticRegistry(object):
         to_build = [meta_id for meta_id in self.metaobject_build_order()
                     if meta_id not in self.schemas]
         for meta_id in to_build:
-            self.log.debug('  - constructing schema for %s' % meta_id)
+            # self.log.debug('  - constructing schema for %s' % meta_id)
             e = self.ces[meta_id]
             schema = {}
             schema['pk_name'] = 'oid'
-            self.log.debug('    bases ... %s' % str(e['bases']))
+            # self.log.debug('    bases ... %s' % str(e['bases']))
             schema['base_names'] = e['bases']
             schema['definition'] = e['definition']
             # OrderedSet doesn't have a 'union' method, so use set here ...
@@ -405,7 +405,7 @@ class PanGalacticRegistry(object):
                     schema['fields'][field_name]['local'] = True
                 else:
                     schema['fields'][field_name]['local'] = False
-            self.log.debug('    field_names:  %s' % str(list(attr_order)))
+            # self.log.debug('    field_names:  %s' % str(list(attr_order)))
             # "register" the schema ...
             self.schemas[meta_id] = schema
 
@@ -418,10 +418,10 @@ class PanGalacticRegistry(object):
         @return:  a list of ids in build order
         @rtype:   a `list` of `str`s
         """
-        self.log.debug('* metaobject_build_order()')
+        # self.log.debug('* metaobject_build_order()')
         build_order = []
         nextids = set(list(self.ces))
-        self.log.debug('   begin assembling build_order')
+        # self.log.debug('   begin assembling build_order')
         while 1:
             for e in [self.ces[eid] for eid in nextids]:
                 # append e['id'] to the build_order if the intersection of
@@ -479,13 +479,13 @@ class PanGalacticRegistry(object):
         # 'primaryjoin' kw arg or somehow specifying the 'onclause' of the
         # joins, but I haven't figured out how to do either yet.]
         self.log.info('  - updating classes from schemas')
-        self.log.debug('    [using get_nearest_persistable_base()]')
+        # self.log.debug('    [using get_nearest_persistable_base()]')
         new_meta = [meta_id for meta_id in self.metaobject_build_order()
                     if (meta_id in self.persistables and
                     meta_id not in self.classes)]
 
         for cname in new_meta:
-            self.log.debug('   + creating class for schema %s' % cname)
+            # self.log.debug('   + creating class for schema %s' % cname)
             schema = self.schemas[cname]
             # TODO:  more metadata about class, e.g.:
             #        - some kind of origin (onto)
@@ -494,7 +494,7 @@ class PanGalacticRegistry(object):
             class_dict = {}
             table_name = to_table_name(cname)
             class_dict['__tablename__'] = table_name
-            self.log.debug('  - tablename: %s' % table_name)
+            # self.log.debug('  - tablename: %s' % table_name)
             # special case:  Identifiable defines "discriminator" column
             if cname == 'Identifiable':
                 class_dict['oid'] = Column(String, primary_key=True)
@@ -532,22 +532,22 @@ class PanGalacticRegistry(object):
                 related_cname = field.get('related_cname')
                 if related_cname:
                     # -> object property
-                    self.log.debug('  - non-inverse field "%s"' % field_name)
+                    # self.log.debug('  - non-inverse field "%s"' % field_name)
                     related_oid = to_table_name(related_cname) + '.oid'
                     fk_field_name = field_name + '_oid'
                     fk_col = Column(ForeignKey(related_oid))
                     class_dict[fk_field_name] = fk_col
                     # check whether it *has* an inverse property
-                    self.log.debug('     checking for inverse of %s' %
-                                  field_name)
+                    # self.log.debug('     checking for inverse of %s' %
+                                  # field_name)
                     rel_schema = self.schemas[related_cname]
                     has_inverse = [name for name, f
                                    in rel_schema['fields'].items()
                                    if f['inverse_of'] == field_name]
                     if has_inverse:
                         # if so, add the 'back_populates'
-                        self.log.debug('     inverse found: %s' %
-                                      has_inverse[0])
+                        # self.log.debug('     inverse found: %s' %
+                                      # has_inverse[0])
                         if related_cname == cname:
                             # self-referential -> need a 'remote_side' arg
                             rel = relationship(related_cname,
@@ -559,7 +559,7 @@ class PanGalacticRegistry(object):
                                                foreign_keys=[fk_col],
                                                back_populates=has_inverse[0])
                     else:
-                        self.log.debug('     no inverse found.')
+                        # self.log.debug('     no inverse found.')
                         if related_cname == cname:
                             # self-referential -> need a 'remote_side' arg
                             rel = relationship(related_cname,
@@ -578,8 +578,8 @@ class PanGalacticRegistry(object):
                 # inverse property -> no ForeignKey column, just a relationship
                 field = fields[field_name]
                 orig_field = field['inverse_of']
-                self.log.debug('     "%s", inverse of "%s"' % (field_name,
-                                                              orig_field))
+                # self.log.debug('     "%s", inverse of "%s"' % (field_name,
+                                                              # orig_field))
                 related_cname = field['related_cname']
                 fk_col = related_cname + '.' + orig_field + '_oid'
                 if related_cname == cname:
@@ -595,8 +595,8 @@ class PanGalacticRegistry(object):
                                        foreign_keys=fk_col)
                                        # back_populates=orig_field)
                 class_dict[field_name] = rel
-            self.log.debug('    ->  base class: %s' % str(base_id))
-            self.log.debug('    ->  class_dict: %s' % str(class_dict))
+            # self.log.debug('    ->  base class: %s' % str(base_id))
+            # self.log.debug('    ->  class_dict: %s' % str(class_dict))
             # create class
             self.classes[cname] = type(builtin_str(cname), (base_class,),
                                        class_dict)
@@ -727,14 +727,14 @@ class PanGalacticRegistry(object):
         @return:  `meta_id` of nearest persistable base
         @rtype:   `str`
         """
-        self.log.debug('* get_nearest_persistable_base(%s)' % meta_id)
+        # self.log.debug('* get_nearest_persistable_base(%s)' % meta_id)
         bases = [b for b in self.ces[meta_id]['bases']
                  if b in self.persistables]
         if bases:
             base = bases.pop()
         else:
             base = None
-        self.log.debug('  - base: %s' % base)
+        # self.log.debug('  - base: %s' % base)
         return base
 
     def report(self, meta_ids=None):
