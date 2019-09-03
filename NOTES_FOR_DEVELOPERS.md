@@ -78,6 +78,7 @@
     default_parms:      (list) ids of default parameters to assign to objs
     host:               (list) fqdn of message bus host
     local_admin:        (bool) if `true`, user can edit any item locally
+    load_extra_data[2]: (list) names of files containing data to load
     logo:               (str)  logo icon file name
     p_defaults:         (dict) default parameter values {id: val (string)}
     port:               (str)  port to use for message bus host connection
@@ -120,8 +121,13 @@
     version:          (str)  version of client
     width:            (int)  current pixel width of pangalaxian gui
 
+    [2]: `load_extra_data` is intended for use primarily on the server (vger)
+         for special data not included in `refdata`, such as data specific to
+         local organizations, etc.
+
     [3]: `assigned_roles` data structure:
-    {project oid: [list of names of assigned roles on the project]}
+
+        {project oid: [list of names of assigned roles on the project]}
 
         NOTE:  for project-independent role assignments, 'global' is used in
         place of a project oid.
