@@ -431,7 +431,7 @@ PGEF_COL_WIDTHS = {
             'iteration': 50,
             'modifier': 100,
             'mod_datetime': 100,
-            'name': 200,
+            'name': 150,
             'owner': 100,
             'oid': 100,
             'product_type': 200,
