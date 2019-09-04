@@ -356,31 +356,19 @@ def get_next_port_seq(obj, port_type):
     except:
         return 0
 
-def get_port_id(obj_id, port_type_id, seq):
+def get_port_id(port_type_id, seq):
     """
     Create an id for a new Port.
 
     Args:
-        obj_id (str):  the id of the object that owns the port
         port_type_id (str):  the id of the port's type_of_port (PortType)
         seq (int):  the sequence number assigned to the port
     """
-    return '-'.join([obj_id, port_type_id, str(seq)])
+    return '-'.join([port_type_id, str(seq)])
 
-def get_port_name(obj_name, port_type_name, seq):
+def get_port_name(port_type_name, seq):
     """
     Create a name for a new Port.
-
-    Args:
-        obj_name (str):  the name of the object that owns the port
-        port_type_name (str):  the name of the port's type_of_port (PortType)
-        seq (int):  the sequence number assigned to the port
-    """
-    return ' '.join([obj_name, port_type_name, builtin_str(seq)])
-
-def get_port_abbr(port_type_name, seq):
-    """
-    Create an abbreviation for a new Port (to be shown in tooltip).
 
     Args:
         port_type_name (str):  the name of the port's type_of_port (PortType)
