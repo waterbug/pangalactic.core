@@ -6,8 +6,7 @@ from builtins import str
 from copy     import deepcopy
 import random
 from pangalactic.core.parametrics import parm_defz
-from pangalactic.core.utils.meta import (get_port_abbr, get_port_id,
-                                         get_port_name)
+from pangalactic.core.utils.meta import get_port_id, get_port_name
 from pangalactic.core.utils.datetimes import dtstamp
 
 NOW = str(dtstamp())
@@ -468,12 +467,11 @@ def create_test_project():
         dict(
             _cname='Port',
             oid='test:port.twanger.0',
-            id=get_port_id('GMT', 'electrical_power', 0),
+            id=get_port_id('electrical_power', 0),
             id_ns='test',
-            abbreviation=get_port_abbr('Electrical Power', 0),
+            abbreviation=get_port_name('Electrical Power', 0),
             owner='test:yoyodyne',
-            name=get_port_name('Gigawatt Magic Twanger',
-                               'Electrical Power', 0),
+            name=get_port_name('Electrical Power', 0),
             of_product='test:twanger',
             type_of_port='pgefobjects:PortType.electrical_power',
             creator='test:steve',
@@ -484,12 +482,11 @@ def create_test_project():
         dict(
             _cname='Port',
             oid='test:port.overthruster.0',
-            id=get_port_id('OO', 'electrical_power', 0),
+            id=get_port_id('electrical_power', 0),
             id_ns='test',
-            abbreviation=get_port_abbr('Electrical Power', 0),
+            abbreviation=get_port_name('Electrical Power', 0),
             owner='test:banzai',
-            name=get_port_name('Oscillation Overthruster',
-                               'Electrical Power', 0),
+            name=get_port_name('Electrical Power', 0),
             of_product='test:overthruster',
             type_of_port='pgefobjects:PortType.electrical_power',
             creator='test:buckaroo',
@@ -500,12 +497,11 @@ def create_test_project():
         dict(
             _cname='Port',
             oid='test:port.iidrive.0',
-            id=get_port_id('IIDrive', 'electrical_power', 0),
+            id=get_port_id('electrical_power', 0),
             id_ns='test',
-            abbreviation=get_port_abbr('Electrical Power', 0),
+            abbreviation=get_port_name('Electrical Power', 0),
             owner='test:yoyodyne',
-            name=get_port_name('Infinite Improbability Drive',
-                               'Electrical Power', 0),
+            name=get_port_name('Electrical Power', 0),
             of_product='test:iidrive',
             type_of_port='pgefobjects:PortType.electrical_power',
             creator='test:zaphod',

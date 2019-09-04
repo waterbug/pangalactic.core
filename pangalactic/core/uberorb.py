@@ -234,6 +234,7 @@ class UberORB(object):
         # registry needs debugging, just hack this.
         self.init_registry(pgx_home, db_url, version=schema_version,
                            log=self.log, debug=False, console=console)
+        # basically, versionables == {Product and all its subclasses}
         self.versionables = [cname for cname in self.classes if 'version' in
                              self.schemas[cname]['field_names']]
         self.load_reference_data()
@@ -1119,13 +1120,12 @@ class UberORB(object):
 
     def is_versioned(self, obj):
         """
-        Determine if a object is being versioned:  (1) it has a 'version'
-        attribute and (2) its 'version' attribute has been assigned a non-null
-        version (i.e. a non-empty string)
+        Determine if a object is being versioned: for now, being an instance of
+        "Product" means it is versioned (i.e., it has "version" and "iteration"
+        attributes).  This function permits the criteria for deciding whether
+        an object is versioned to change in the future.
         """
-        if obj.__class__.__name__ in self.versionables and obj.version:
-            return True
-        return False
+        return isinstance(obj, self.classes['Product'])
 
 # A node has only one instance of UberORB, the 'orb', which is intended to be
 # imported by all application components.
