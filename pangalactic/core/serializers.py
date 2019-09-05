@@ -390,7 +390,18 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 db_obj = orb.get(oid)
                 # check against db object's mod_datetime
                 so_datetime = uncook_datetime(d.get('mod_datetime'))
-                if so_datetime and earlier(db_obj.mod_datetime, so_datetime):
+                if not (so_datetime and
+                        earlier(db_obj.mod_datetime, so_datetime)):
+                    # orb.log.debug('    serialized obj has same or '
+                                   # 'older mod_datetime, ignoring it.')
+                    # if not, ignore it
+                    ignores.append(oid)
+                    # NOTE: do not return "ignored" objs SCW 2019-09-05
+                    # objs.append(db_obj)
+                    if dictify:
+                        output['unmodified'].append(db_obj)
+                    continue
+                else:
                     # orb.log.debug('    serialized obj has later '
                                    # 'mod_datetime, saving it.')
                     # if it is newer, update the object
@@ -398,14 +409,6 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     orb.db.add(db_obj)
                     if dictify:
                         output['modified'].append(db_obj)
-                else:
-                    # orb.log.debug('    serialized obj has same or '
-                                   # 'older mod_datetime, ignoring it.')
-                    # if not, ignore it
-                    ignores.append(oid)
-                    objs.append(db_obj)
-                    if dictify:
-                        output['unmodified'].append(db_obj)
             # else:
                 # object will be appended to output['new'] after it is
                 # created (below)

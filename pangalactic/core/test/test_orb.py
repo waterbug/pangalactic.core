@@ -288,12 +288,12 @@ class OrbTest(unittest.TestCase):
             'create_datetime': '2017-01-22 00:00:00.0',
             'id': 'TEST',
             'id_ns': 'test',
-            'mod_datetime': '2017-01-22 00:00:00.0',
+            'mod_datetime': '2017-01-23 00:00:00.0',
             'name': 'Test Project',
             'name_code': 'TEST',
             'oid': 'TEST',
-            # test that deprecated attributes are ignored:
-            'owner': 'pgefobjects:PGANA'}
+            # test that unrecognized attributes are ignored:
+            'foo': 'pgefobjects:PGANA'}
         objs = deserialize(orb, [serialized_obj])
         obj = objs[0]
         value = [
