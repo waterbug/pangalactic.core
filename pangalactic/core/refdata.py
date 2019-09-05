@@ -1988,6 +1988,31 @@ for discipline_oid in [
              related_role=le_role_obj['oid'],
              related_to_discipline=discipline_obj['oid']))
 
+# For Lead Engineer and Systems Engineer roles, add a DisciplineRole
+# relationship to the "engineering" meta-discipline so that they will be able
+# to edit *ANY* product type (engineering has a DisciplineProductType
+# relationship to every ProductType)
+
+se_dr_oid = '.'.join(['pgefobjects:DisciplineRole', se_role_obj['id'],
+                     'engineering'])
+se_dr_id = se_role_obj['id'] + '_to_engineering'
+se_dr_name = 'Systems Engineer / Engineering'
+core.append(
+    dict(_cname='DisciplineRole', oid=se_dr_oid, id=se_dr_id,
+         name=se_dr_name,
+         related_role=se_role_obj['oid'],
+         related_to_discipline='pgefobjects:Discipline.engineering'))
+
+le_dr_oid = '.'.join(['pgefobjects:DisciplineRole', le_role_obj['id'],
+                     'engineering'])
+le_dr_id = le_role_obj['id'] + '_to_engineering'
+le_dr_name = 'Lead Engineer / Engineering'
+core.append(
+    dict(_cname='DisciplineRole', oid=le_dr_oid, id=le_dr_id,
+         name=le_dr_name,
+         related_role=le_role_obj['oid'],
+         related_to_discipline='pgefobjects:Discipline.engineering'))
+
 # End of generated DisciplineRole relationships
 ############################################################################
 
