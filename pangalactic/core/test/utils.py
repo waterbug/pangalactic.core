@@ -56,7 +56,7 @@ def create_test_users():
     """
     objs = [
         dict(
-             _cname='Organization', oid='test:yoyodyne', id='yoyodyne',
+             _cname='Organization', oid='test:yoyodyne', id='YOYODYNE',
              id_ns='pangalactic', name='Yoyodyne Propulsion Systems',
              name_code='YPS', city='Grovers Mill',
              state_or_province='NJ'),
@@ -122,6 +122,14 @@ def create_test_users():
             phone='1-Z00-THORNYS'),
         dict(
             _cname='Person',
+            oid='test:carefulwalker', id='carefulwalker',
+            id_ns='pangalactic', name='John Carefulwalker',
+            org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
+            email='carefulwalker@redlectroids.planet10.univ',
+            first_name='John', mi_or_name='', last_name='Carefulwalker',
+            phone='1-Z00-CAREFUL'),
+        dict(
+            _cname='Person',
             oid='test:manyjars', id='manyjars',
             id_ns='pangalactic', name='John Manyjars',
             org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
@@ -163,11 +171,11 @@ def create_test_project():
             role_assignment_context='H2G2'),
         dict(
             _cname='RoleAssignment',
-            oid='test:RA.steve_le',
-            id='steve_le',
+            oid='test:RA.carefulwalker_le',
+            id='carefulwalker_le',
             id_ns='test',
             assigned_role='gsfc:Role.lead_engineer',
-            assigned_to='test:steve',
+            assigned_to='test:carefulwalker',
             role_assignment_context='H2G2'),
         dict(
             _cname='RoleAssignment',

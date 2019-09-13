@@ -19,6 +19,7 @@ from pangalactic.core.serializers import (deserialize, serialize,
                                           serialize_parms)
 from pangalactic.core.uberorb     import orb
 from pangalactic.core             import refdata
+from pangalactic.core.access      import get_perms
 from pangalactic.core.test        import data as test_data_module
 from pangalactic.core.test        import vault as vault_module
 from pangalactic.core.test.utils  import (create_test_users,
@@ -346,6 +347,7 @@ class OrbTest(unittest.TestCase):
             by_oid['test:OTHER:system-1'].system,
             by_oid['test:spacecraft3'].components,
             by_oid['test:spacecraft3'].has_models,
+            by_oid['test:spacecraft3'].owner,
             by_oid['test:spacecraft3.mcad.model.0'].of_thing,
             by_oid['test:spacecraft3.mcad.model.0'].has_representations,
             by_oid['test:spacecraft3.mcad.0.representation'].of_object,
@@ -359,6 +361,7 @@ class OrbTest(unittest.TestCase):
             by_oid['test:spacecraft3'],
             [by_oid[acu_oid] for acu_oid in acu_oids],
             [by_oid['test:spacecraft3.mcad.model.0']],
+            by_oid['test:OTHER'],
             by_oid['test:spacecraft3'],
             [by_oid['test:spacecraft3.mcad.0.representation']],
             by_oid['test:spacecraft3.mcad.model.0'],
@@ -426,6 +429,55 @@ class OrbTest(unittest.TestCase):
         margin = round_to(((nte - mev) / mev))
         # expected output is (oid of allocated node, parameter id, margin)
         expected = ('test:OTHER:system-1', 'm', nte, perf_reqt.req_units, margin)
+        self.assertEqual(expected, value)
+
+    def test_22_systems_engineer_perms(self):
+        """
+        CASE:  test role-based permissions on project objects
+        """
+        # Steve has Administrator role on H2G2
+        steve = orb.get('test:steve')
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        # Zaphod Beeblebrox has Systems Engineer role on H2G2
+        zaphod = orb.get('test:zaphod')
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        sc = orb.get('test:spacecraft0')
+        # perms on Assembly Component Usages are based on owner of assembly,
+        # which determines the role context, and product type of the component
+        acu1 = orb.get('test:H2G2:acu-1')  # Oscillation Overthruster acu
+        acu2 = orb.get('test:H2G2:acu-2')  # Infinite Improbability Drive acu
+        acu4 = orb.get('test:H2G2:acu-4')  # Bambleweeny Sub-Meson Brain acu
+        # perms on ProjectSystemUsage are determined by project roles: only the
+        # Systems Engineer, Lead Engineer, and Administrator have full perms
+        psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+        value = [set(get_perms(sc, user=steve)),          # Adm/sc: full perms
+                 set(get_perms(sc, user=carefulwalker)),  # SE/sc: full perms
+                 set(get_perms(sc, user=zaphod)),         # LE/sc: full perms
+                 set(get_perms(sc, user=buckaroo)),       # PE/sc: view only
+                 set(get_perms(acu1, user=steve)),        # Adm: full perms
+                 set(get_perms(acu1, user=buckaroo)),     # PE: full perms
+                 set(get_perms(acu2, user=buckaroo)),     # PE: full perms
+                 set(get_perms(acu4, user=buckaroo)),     # PE: view only
+                 set(get_perms(psu, user=steve)),         # Adm/psu: full perms
+                 set(get_perms(psu, user=carefulwalker)), # SE/psu: full perms
+                 set(get_perms(psu, user=zaphod)),        # LE/psu: full perms
+                 set(get_perms(psu, user=buckaroo))       # PE/psu: view only
+                 ]
+        expected = [set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view']),
+                    set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view']),
+                    set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view'])
+                    ]
         self.assertEqual(expected, value)
 
     def test_50_write_mel(self):

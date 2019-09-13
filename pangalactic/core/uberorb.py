@@ -52,37 +52,34 @@ class UberORB(object):
     the local metadata registry, and remote repositories and services.
 
     IMPORTANT:  The UberORB is intended to be a singleton.  The UberORB class
-    should not be imported; instead, the module-level instance created at the
-    end of this module should be imported.
+    should not be imported; instead, import 'orb', the module-level instance
+    created at the end of this module.
 
     NOTE:  the orb does not have an __init__() in order to avoid side-effects
     of importing the module-level instance that is created -- its start()
     method must be called to initialize it.
 
     Attributes:
-        [Instance (orb) attributes defined here]
-        registry (PanGalacticRegistry):  instance of PanGalacticRegistry
-        log (Logger):  instance of pgorb_logger
-        error_log (Logger):  instance of pgorb_error_logger
+        classes (dict):  a mapping of `meta_id`s to runtime app classes.
         db (Session):  interface to the local db
-        new_oids (list of str):  oids of objects that have been created but not
-            saved
-        remote (TBD) interface to remote services [TO BE IMPLEMENTED]
+        db_engine (SQLAlchemy orm):  result of registry `create_engine`
+        discipline_subsystems: cache that maps Discpline ids to corresponding
+            ProductType ids (used by the 'access' module, which determines user
+            permissions relative to domain objects
+        error_log (Logger):  instance of pgorb_error_logger
         home (str):  full path to the application home directory -- populated
             by orb.start()
-
-        [referenced from PanGalacticRegistry]
-        db_engine (SQLAlchemy orm):  result of registry `create_engine`
+        log (Logger):  instance of pgorb_logger
+        new_oids (list of str):  oids of objects that have been created but not
+            saved
+        registry (PanGalacticRegistry):  instance of PanGalacticRegistry
+        remote (TBD) interface to remote services [TO BE IMPLEMENTED]
         schemas (dict):  see definition in
             p.meta.registry._update_schemas_from_extracts
-        classes (dict):  a mapping of `meta_id`s to runtime app classes.
-        parms (dict):  the parameter cache, which maps tuples of
-            (object oid, parameter id) to parameter value
     """
     started = False
     startup_msg = '* orb starting up ...'
     new_oids = []
-    parms = {}
 
     def start(self, home=None, db_url=None, console=False, debug=False, **kw):
         """
@@ -248,6 +245,35 @@ class UberORB(object):
         # self.store_path = os.path.join(self.home, 'datasets.h5')
         # self.data_store = pandas.io.pytables.HDFStore(self.store_path)
         self.data_store = {}
+        # create 'role_product_types' cache
+        self.role_product_types = {}
+        # discipline_subsystems maps Discipline ids to ProductType ids
+        discipline_subsystems = {}
+        for dpt in orb.get_by_type('DisciplineProductType'):
+            did = dpt.used_in_discipline.id
+            ptid = dpt.relevant_product_type.id
+            if discipline_subsystems.get(did):
+                discipline_subsystems[did].append(ptid)
+            else:
+                discipline_subsystems[did] = [ptid]
+        # role_disciplines maps Role ids to related Discipline ids
+        role_disciplines = {}
+        for dr in orb.get_by_type('DisciplineRole'):
+            rtdid = dr.related_to_discipline.id
+            rrid = dr.related_role.id
+            if role_disciplines.get(rrid):
+                role_disciplines[rrid].append(rtdid)
+            else:
+                role_disciplines[rrid] = [rtdid]
+        for role_id, discipline_ids in role_disciplines.items():
+            for discipline_id in discipline_ids:
+                if discipline_subsystems.get(discipline_id):
+                    if self.role_product_types.get(role_id):
+                        self.role_product_types[role_id] |= set(
+                            discipline_subsystems.get(discipline_id))
+                    else:
+                        self.role_product_types[role_id] = set(
+                            discipline_subsystems.get(discipline_id))
         self.started = True
         return self.home
 
