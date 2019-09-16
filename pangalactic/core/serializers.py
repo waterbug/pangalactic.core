@@ -121,6 +121,7 @@ def serialize(orb, objs, view=None, include_components=False,
     if not objs:
         return []
     serialized = []
+    org_objs = set()
     person_objs = set()
     product_type_objs = set()
     activity_type_objs = set()
@@ -172,10 +173,16 @@ def serialize(orb, objs, view=None, include_components=False,
         serialized.append(d)
         if hasattr(obj, 'creator'):
             # for Modelables, creator and modifier must be included
-            if obj.creator:
+            if obj.creator and not 'pgefobjects:' in obj.creator.oid:
                 person_objs.add(obj.creator)
-            if obj.modifier:
+            if obj.modifier and not 'pgefobjects:' in obj.modifier.oid:
                 person_objs.add(obj.modifier)
+        if hasattr(obj, 'owner'):
+            # for ManagedObjects, owner must be included
+            # NOTE:  IMPORTANT!! used for access control / authorization,
+            # and for identification of project requirements, etc.
+            if obj.owner and not 'pgefobjects:' in obj.owner.oid:
+                org_objs.add(obj.owner)
         if hasattr(obj, 'product_type'):
             # for Products, product_type must be included
             if obj.product_type:
@@ -224,6 +231,11 @@ def serialize(orb, objs, view=None, include_components=False,
         orb.log.debug('  including {} Person objects.'.format(
                                                     len(person_objs)))
         serialized += serialize(orb, person_objs)
+    if org_objs:
+        # values of "owner" attributes
+        orb.log.debug('  including {} Organization objects.'.format(
+                                                    len(org_objs)))
+        serialized += serialize(orb, org_objs)
     if product_type_objs:
         orb.log.debug('  including {} ProductType objects.'.format(
                                                 len(product_type_objs)))
