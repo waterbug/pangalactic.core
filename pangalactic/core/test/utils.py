@@ -695,15 +695,83 @@ def create_test_project():
         ]
     return test_project
 
-parametrized_test_objects = [
+owned_test_objects = [
+    dict(
+         _cname='Organization', oid='test:yoyoinst', id='YOYOINST',
+         id_ns='pangalactic', name='Yoyodyne Instrument Systems',
+         name_code='YIS', city='Grovers Mill',
+         state_or_province='NJ'),
     dict(
        _cname='HardwareProduct',
        oid='test:inst2',
        id='Inst-v2',
        id_ns='test',
-       owner='test:yoyodyne',
+       owner='test:yoyoinst',
        name='Instrument v.2',
        description='Instrument, version 2, Advanced',
+       comment='This instrument is quite advanced.',
+       creator='test:steve',
+       create_datetime=NOW,
+       modifier='test:steve',
+       mod_datetime=NOW,
+       parameters={
+       'P':
+         {'mod_datetime': NOW,
+          'units': 'W',
+          'value': 50.0},
+       'm':
+         {'mod_datetime': NOW,
+          'units': 'kg',
+          'value': 500.0}
+       },
+       iteration=1,
+       version='2',
+       version_sequence=2),
+     ]
+
+locally_owned_test_objects = [
+    dict(
+         _cname='Organization', oid='test:yoyodyne', id='YOYODYNE',
+         id_ns='pangalactic', name='Yoyodyne Propulsion Systems',
+         name_code='YPS', city='Grovers Mill',
+         state_or_province='NJ'),
+    dict(
+       _cname='HardwareProduct',
+       oid='test:prop10',
+       id='prop10',
+       id_ns='test',
+       owner='test:yoyodyne',
+       name='Yoyomatic Propulsion System',
+       description='Yoyomatic system, Advanced',
+       comment='This propulsion system is very advanced.',
+       creator='test:steve',
+       create_datetime=NOW,
+       modifier='test:steve',
+       mod_datetime=NOW,
+       parameters={
+       'P':
+         {'mod_datetime': NOW,
+          'units': 'W',
+          'value': 50000.0},
+       'm':
+         {'mod_datetime': NOW,
+          'units': 'kg',
+          'value': 1000.0}
+       },
+       iteration=1,
+       version='0',
+       version_sequence=0),
+     ]
+
+parametrized_test_objects = [
+    dict(
+       _cname='HardwareProduct',
+       oid='test:inst3',
+       id='Inst-v3',
+       id_ns='test',
+       owner='test:yoyodyne',
+       name='Instrument v.3',
+       description='Instrument, version 3, Advanced',
        comment='This instrument is quite advanced.',
        creator='test:steve',
        create_datetime=NOW,
@@ -720,20 +788,20 @@ parametrized_test_objects = [
           'value': 1000.0}
        },
        iteration=1,
-       version='2',
-       version_sequence=2),
+       version='3',
+       version_sequence=3),
      ]
 
 # TODO:  use this to test exporting of simplified parameters ...
 parametrized_summary_test_object = [
     dict(
        _cname='HardwareProduct',
-       oid='test:inst3',
-       id='Inst-v3',
+       oid='test:inst4',
+       id='Inst-v4',
        id_ns='test',
        owner='test:yoyodyne',
-       name='Instrument v.3',
-       description='Instrument, version 3, Advanced',
+       name='Instrument v.4',
+       description='Instrument, version 4, Advanced',
        comment='This instrument is quite advanced.',
        creator='test:steve',
        create_datetime=NOW,
@@ -741,9 +809,9 @@ parametrized_summary_test_object = [
        mod_datetime=NOW,
        parameters={'m' : (50.0, 'kg'),
                    'p' : (10.0, 'W')},
-       iteration=2,
-       version='3',
-       version_sequence=3),
+       iteration=1,
+       version='4',
+       version_sequence=4),
      ]
 
 test_parms = {

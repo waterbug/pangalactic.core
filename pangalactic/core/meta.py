@@ -31,9 +31,7 @@ PGXN_REQD = dict(
 # app-specific settings defined in the 'pangalactic.config' module-level
 # dictionary.
 # TODO:  support for field "aliases" (a.k.a. "display names")
-SYSTEM = ['components', 'where_used', 'projects_using_system',
-          'ports', 'has_models', 'frozen', 'version',
-          'version_sequence', 'iteration']
+SYSTEM = ['owner', 'frozen', 'version', 'version_sequence', 'iteration']
 MAIN_VIEWS = dict(
     Activity=(IDENTITY + ['activity_type', 'activity_of']),
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
@@ -265,6 +263,9 @@ ONE2M = {
          # inverse of 'owner'
          'owned_objects' :        {'domain' : 'Organization',
                                    'range'  : 'ManagedObject'},
+         # inverse of 'of_product'
+         'ports' :                {'domain' : 'Product',
+                                   'range'  : 'Port'},
          # inverse of 'product_type'
          'products_of_type' :     {'domain' : 'ProductType',
                                    'range'  : 'Product'},
