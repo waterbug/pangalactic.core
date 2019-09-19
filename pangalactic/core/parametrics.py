@@ -162,7 +162,13 @@ def create_parm_defz(orb):
         pd = orb.select('ParameterDefinition', id=pid)
         for c in all_contexts:
             add_context_parm_def(orb, pd, c)
-
+    # all float-valued parameters should have associated Contingency parms
+    float_pds = [pd for pd in pds if pd.range_datatype == 'float']
+    contingency = orb.select('ParameterContext', name='Contingency')
+    for float_pd in float_pds:
+        contingency_pid = get_parameter_id(float_pd.id, contingency.id)
+        if contingency_pid not in parm_defz:
+            add_context_parm_def(orb, float_pd, contingency)
     # descriptive_contexts = [c for c in all_contexts
                             # if c.context_type == 'descriptive']
     # parm_defz.update(
@@ -209,7 +215,7 @@ def add_context_parm_def(orb, pd, c):
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
         pd (ParameterDefinition):  ParameterDefinition for the base parameter
-        parameter_context (ParameterContext):  object representing the context
+        c (ParameterContext):  object representing the context
             of the parameter
     """
     parm_defz[get_parameter_id(pd.id, c.id)] = {

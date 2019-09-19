@@ -580,21 +580,6 @@ def create_test_project():
             mod_datetime=NOW
             ),
         dict(
-            _cname='ParameterDefinition',
-            oid='test:ParameterDefinition.X_y',
-            id='X_y',
-            id_ns='test',
-            name='X y',
-            description='X y parameter',
-            dimensions='mass',
-            range_datatype='float',
-            public=True,
-            creator='test:steve',
-            create_datetime=NOW,
-            modifier='test:steve',
-            mod_datetime=NOW
-            ),
-        dict(
             _cname='Acu',
             oid='test:H2G2:acu-1',
             id='acu-1',
