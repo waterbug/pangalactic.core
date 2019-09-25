@@ -17,7 +17,7 @@ from pangalactic.core.units import in_si
 # below)
 IDENTITY = ['id', 'name', 'description']
 PGXN_REQD = dict(
-    HardwareProduct=(IDENTITY + ['product_type']),
+    HardwareProduct=(IDENTITY + ['owner', 'product_type']),
     ParameterDefinition=['id', 'name', 'description', 'dimensions',
                          'range_datatype'],
     Project=IDENTITY,
@@ -31,7 +31,7 @@ PGXN_REQD = dict(
 # app-specific settings defined in the 'pangalactic.config' module-level
 # dictionary.
 # TODO:  support for field "aliases" (a.k.a. "display names")
-SYSTEM = ['owner', 'frozen', 'version', 'version_sequence', 'iteration']
+SYSTEM = ['frozen', 'version', 'version_sequence', 'iteration']
 MAIN_VIEWS = dict(
     Activity=(IDENTITY + ['activity_type', 'activity_of']),
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
@@ -53,7 +53,7 @@ MAIN_VIEWS = dict(
     ParameterDefinition=(IDENTITY + ['range_datatype', 'dimensions']),
     ParameterRelation=['referenced_relation', 'correlates_parameter'],
     Port=['id', 'name', 'of_product', 'type_of_port'],
-    Product=(IDENTITY + ['product_type'] + SYSTEM),
+    Product=(PGXN_REQD['HardwareProduct'] + ['public'] + SYSTEM),
     ProductType=IDENTITY,
     ProductTypeParameterDefinition=['used_in_product_type',
                                     'parameter_definition'],
