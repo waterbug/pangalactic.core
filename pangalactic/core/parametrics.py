@@ -329,9 +329,6 @@ def add_default_parameters(orb, obj):
     # configuration (in future that may be augmented by Parameters
     # referenced by, e.g., a ProductType and/or a ModelTemplate, both of
     # which are essentially collections of ParameterDefinitions.
-    # TODO: should all object dashboards be updated if dashboard config is
-    # modified?  Hmm ... definitely should at least be an option --
-    # probably need a progress bar since it could be time-consuming ...
     pids = OrderedSet()
     cname = obj.__class__.__name__
     pids |= OrderedSet(DEFAULT_CLASS_PARAMETERS.get(cname, []))
@@ -576,17 +573,28 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
     if not oid:
         # orb.log.debug('  no oid provided; ignoring.')
         return
-    parm = parameterz.get(oid, {}).get(pid, {})
-    pd = parm_defz.get(pid, {})
-    if not parm:
-        # NOTE:  this is the case if
-        # (1) that oid is not in parameterz or
-        # (2) the object with that oid doesn't have that parameter
-        # orb.log.debug('  parameter not found; ignoring.')
+    pd = parm_defz.get(pid)
+    if not pd:
+        orb.log.debug('  parameter "{}" is not defined; ignoring.'.format(pid))
         return
     if pd['computed']:
         # orb.log.debug('  parameter is computed -- not setting.')
         return
+    ######################################################################
+    # NOTE: henceforth, if the parameter whose value is being set is not
+    # present it will be added (SCW 2019-09-26)
+    ######################################################################
+    parm = parameterz.get(oid, {}).get(pid, {})
+    if not parm:
+        # NOTE:  this is the case if
+        # (1) that oid is not in parameterz or
+        # (2) the object with that oid doesn't have that parameter
+        # orb.log.debug('  parameter not found; adding.')
+        try:
+            add_parameter(orb, oid, pd['variable'], context=pd['context'].id)
+        except:
+            orb.log.debug('  add parameter "{}" failed; ignoring.'.format(pid))
+            return
     try:
         # cast value to range_datatype before setting
         pdz = parm_defz.get(pid)

@@ -86,10 +86,8 @@ PGXN_VIEWS = dict(
 
 # PGXN_PARAMETERS:  preferred ordering for parameters in PgxnObject parameter
 # forms
-PGXN_PARAMETERS = ['m', 'm[Ctgcy]', 'P', 'P[Ctgcy]', 'R_D', 'R_D[Ctgcy]',
-                   'Vendor', 'Cost', 'TRL', 'height', 'width', 'depth',
-                   'CoM_X', 'CoM_Y', 'CoM_Z', 'm[CBE]', 'm[MEV]', 'P[CBE]',
-                   'P[MEV]', 'R_D[CBE]', 'R_D[MEV]']
+PGXN_PARAMETERS = ['m', 'P', 'R_D', 'Vendor', 'Cost', 'TRL', 'height', 'width',
+                   'depth', 'CoM_X', 'CoM_Y', 'CoM_Z']
 
 # DEFAULT_CLASS_PARAMETERS:  default parameters of objects by class
 DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start'],
