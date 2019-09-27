@@ -270,12 +270,13 @@ def add_parameter(orb, oid, variable, context=None):
     if pid in parameterz[oid]:
         # if the object already has that parameter, do nothing
         return
-    # check for pid ParameterDefinition in db and cache
-    pd = orb.get(get_parameter_definition_oid(pid))
+    # check for ParameterDefinition of base variable in db
+    pd = orb.get(get_parameter_definition_oid(variable))
     if not pd:
         # for now, if no ParameterDefinition exists for pid, pass
         # (maybe eventually raise TypeError)
-        orb.log.debug('        - pid {!s} is not defined.'.format(pid))
+        orb.log.debug('        - variable {!s} is not defined.'.format(
+                                                             variable))
         return
     pdz = parm_defz.get(pid)
     if not pdz:
@@ -476,11 +477,13 @@ def get_pval_as_str(orb, oid, pid, units=None, allow_nan=False):
             # if not an int or float, cast directly to string ...
             return str(val)
     except:
-        # extremely verbose:  logs an ERROR for every unpopulated parameter
+        # FOR EXTREME DEBUGGING ONLY:
+        # this logs an ERROR for every unpopulated parameter
         # msg = '* get_pval_as_str(orb, {}, {})'.format(oid, pid)
         # msg += '  encountered an error.'
         # orb.log.debug(msg)
-        # if the value causes error, return '-'
+
+        # for production use, return '-' if the value causes error
         return '-'
 
 def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
@@ -575,7 +578,7 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         return
     pd = parm_defz.get(pid)
     if not pd:
-        orb.log.debug('  parameter "{}" is not defined; ignoring.'.format(pid))
+        # orb.log.debug('  parameter "{}" is not defined; ignoring.'.format(pid))
         return
     if pd['computed']:
         # orb.log.debug('  parameter is computed -- not setting.')
@@ -589,22 +592,19 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         # NOTE:  this is the case if
         # (1) that oid is not in parameterz or
         # (2) the object with that oid doesn't have that parameter
-        # orb.log.debug('  parameter not found; adding.')
-        try:
-            add_parameter(orb, oid, pd['variable'], context=pd['context'].id)
-        except:
-            orb.log.debug('  add parameter "{}" failed; ignoring.'.format(pid))
-            return
+        # ... which should not happen very often, so debug logging is ok
+        orb.log.debug('  parameter not found; adding.')
+        add_parameter(orb, oid, pd['variable'], context=pd['context'])
     try:
         # cast value to range_datatype before setting
         pdz = parm_defz.get(pid)
         if not pdz:
-            # orb.log.debug('  parameter definition not found.')
+            orb.log.debug('  parameter definition not found, quitting.')
             return
         dt_name = pdz['range_datatype']
         dtype = DATATYPES[dt_name]
         value = dtype(value)
-        if units is not None:
+        if units is not None and units != "$":
             # TODO:  validate units (ensure they are consistent with dims)
             try:
                 quan = value * ureg.parse_expression(units)
@@ -617,10 +617,12 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
                 dims = pdz.get('dimensions')
                 units = in_si.get(dims)
                 orb.log.debug('  setting to base units: {}'.format(units))
+                # if units parse failed, assume base units
+                converted_value = value
             finally:
                 parameterz[oid][pid]['units'] = units
         else:
-            # None for units -> value is already in base units
+            # None or "$" for units -> value is already in base units
             converted_value = value
         parameterz[oid][pid]['value'] = converted_value
         if local or mod_datetime is None:
@@ -631,9 +633,12 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         # orb.log.debug('  setting mod_datetime: "{}"'.format(dts))
         orb.recompute_parmz()
     except:
-        msg = '  value {} of datatype {} '.format(value, type(value))
-        msg += 'not compatible with parameter datatype `{}`'.format(dt_name)
-        msg += ' ... parameter `{}` not set for oid `{}`'.format(pid, oid)
+        orb.log.debug('  *** set_pval() failed:')
+        msg = '      value {} of datatype {}'.format(value, type(value))
+        orb.log.debug(msg)
+        msg = '      caused something gnarly to happen ...'
+        orb.log.debug(msg)
+        msg = '      so parm "{}" was not set for oid "{}"'.format(pid, oid)
         orb.log.debug(msg)
 
 def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
