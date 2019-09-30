@@ -309,8 +309,8 @@ pdc = [
     'description': 'Time at which an activity ceases.'},
 
 {   '_cname': 'ParameterDefinition',
-    'oid': 'pgef:ParameterDefinition.freqDown',
-    'id': 'freqDown',
+    'oid': 'pgef:ParameterDefinition.f_downlink',
+    'id': 'f_downlink',
     'name': 'Downlink Frequency',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
@@ -321,8 +321,8 @@ pdc = [
     'description': 'Frequency of downlink signal'},
 
 {   '_cname': 'ParameterDefinition',
-    'oid': 'pgef:ParameterDefinition.freqUp',
-    'id': 'freqUp',
+    'oid': 'pgef:ParameterDefinition.f_uplink',
+    'id': 'f_uplink',
     'name': 'Uplink Frequency',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
