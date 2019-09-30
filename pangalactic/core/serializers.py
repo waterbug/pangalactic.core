@@ -173,15 +173,15 @@ def serialize(orb, objs, view=None, include_components=False,
         serialized.append(d)
         if hasattr(obj, 'creator'):
             # for Modelables, creator and modifier must be included
-            if obj.creator and not 'pgefobjects:' in obj.creator.oid:
+            if obj.creator:
                 person_objs.add(obj.creator)
-            if obj.modifier and not 'pgefobjects:' in obj.modifier.oid:
+            if obj.modifier:
                 person_objs.add(obj.modifier)
         if hasattr(obj, 'owner'):
             # for ManagedObjects, owner must be included
             # NOTE:  IMPORTANT!! used for access control / authorization,
             # and for identification of project requirements, etc.
-            if obj.owner and not 'pgefobjects:' in obj.owner.oid:
+            if obj.owner:
                 org_objs.add(obj.owner)
         if hasattr(obj, 'product_type'):
             # for Products, product_type must be included
