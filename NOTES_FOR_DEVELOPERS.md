@@ -596,3 +596,49 @@ yielded no noticeable gain (less than 1%), and it is difficult to see any
 operations within the function that could be formulated to compile into pure C,
 anyway.
 
+### Process for Building Application Releases / Installers
+
+1. Bump version for all packages:
+
+   * pangalactic.core
+   * pangalactic.node
+   * pangalactic.vger
+   * any application-level packages
+
+   * Edit the sedscr sed script to rewrite the necessary files
+   * Run the `bump_version.sh` shell script
+   * git commit
+   * git push
+
+2. Build all conda packages
+
+   * Remove all __pycache__ directories inside packages:
+ 
+        `find . -name __pycache__ -exec rm -r {} \;`
+
+   * Edit conda recipe "meta.yaml" files to update versions and dependencies
+   * Run `conda build [pkg name] --python=[python version]`
+     where "python version" is currently 3.6 (NOTE: for compatibility it may be
+     necessary to install "conda-build" into the virtual env where the build is
+     being done, rather than the base env.)
+
+3. Put conda packages into the local conda repository
+
+4. Install conda packages locally
+
+        `conda install [app]`
+
+5. Run pyinstaller on the app-level package -- e.g.:
+
+        `pyinstaller app.spec`
+
+   ... where "app.spec" is the pyinstaller spec file for the app.
+
+6. Test the .exe:
+
+   * cd to the "dist" directory, and to the app subdirectory
+   * `./run_app.exe`
+
+7. Use Inno Setup to build the "setup.exe" installer for Windows.
+
+
