@@ -142,15 +142,18 @@ def get_perms(obj, user=None, permissive=False):
                                       for r in role_ids])
             orb.log.debug('  user is authorized for subsystem types:')
             orb.log.debug('  {}'.format(subsystem_types))
-            pt_id = obj.product_type.id
+            pt_id = getattr(obj.product_type, 'id', 'unknown')
             orb.log.debug('  this ProductType is "{}"'.format(pt_id))
             if pt_id in subsystem_types:
-                orb.log.debug('  user is authorized for this ProductType.')
+                orb.log.debug(
+                    '  user is authorized for ProductType "{}".'.format(pt_id))
                 perms = ['view', 'modify', 'decloak', 'delete']
                 orb.log.debug('  perms: {}'.format(perms))
                 return perms
             else:
-                orb.log.debug('  user is NOT authorized for this ProductType.')
+                txt = '  user is NOT authorized for ProductType "{}".'.format(
+                                                                        pt_id)
+                orb.log.debug(txt)
         # [2] is it an Acu?
         # if so, the user can modify it if:
         # [2a] the user has a role in the context of the assembly's "owner"
