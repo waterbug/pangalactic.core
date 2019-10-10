@@ -54,7 +54,7 @@ MAIN_VIEWS = dict(
     ParameterRelation=['referenced_relation', 'correlates_parameter'],
     Port=['id', 'name', 'of_product', 'type_of_port'],
     Product=(PGXN_REQD['HardwareProduct'] + ['public'] + SYSTEM),
-    ProductType=IDENTITY,
+    ProductType=['abbreviation'] + IDENTITY,
     ProductTypeParameterDefinition=['used_in_product_type',
                                     'parameter_definition'],
     Project=(IDENTITY + ['parent_organization']),

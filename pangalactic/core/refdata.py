@@ -976,7 +976,7 @@ dict(
     'oid': 'pgefobjects:ProductType.propulsion_system',
     'id': 'propulsion_system',
     'name': 'Propulsion System',
-    'abbreviation': 'Propulsion',
+    'abbreviation': 'Prop',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -985,7 +985,7 @@ dict(
     'oid': 'pgefobjects:ProductType.thermal_control_system',
     'id': 'thermal_control_system',
     'name': 'Thermal Control System',
-    'abbreviation': 'Thermal',
+    'abbreviation': 'Therm',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
