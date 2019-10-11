@@ -331,24 +331,24 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         (3) Other object properties will be deserialized only if
             they are direct (not inverse) properties
     """
-    orb.log.info('* deserialize()')
-    created = 0
+    # orb.log.debug('* deserializing ...')
     if not serialized:
-        orb.log.info('  no objects provided -- returning []')
+        # orb.log.debug('  no objects provided -- returning []')
         return []
-    input_len = len(serialized)
     # SCW 2017-08-24  Deserializer ignores objects that don't have an oid!
+    # input_len = len(serialized)
     serialized = [so for so in serialized if so and so.get('oid')]
     new_len = len(serialized)
-    if new_len < input_len:
-        orb.log.info('  {} empty objects removed.'.format(
-                                                    input_len - new_len))
+    # if new_len < input_len:
+        # orb.log.debug('  {} empty objects removed.'.format(
+                                                    # input_len - new_len))
     if new_len == 0:
-        orb.log.info('  all objects were empty -- returning []')
+        # orb.log.debug('  all objects were empty -- returning []')
         return []
     recompute_parmz_required = False
     refresh_componentz_required = False
     objs = []
+    created = []
     updates = {}
     ignores = []
     loadable = {}
@@ -359,9 +359,9 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         # ignore reference data objects ('pgefobjects' namespace)
         serialized = [so for so in serialized
                   if not asciify(so.get('oid', '')).startswith('pgefobjects:')]
-    if len(serialized) < new_len:
-        orb.log.info('  {} ref data object(s) found, ignored.'.format(
-                                               new_len - len(serialized)))
+    # if len(serialized) < new_len:
+        # orb.log.info('  {} ref data object(s) found, ignored.'.format(
+                                               # new_len - len(serialized)))
     current_oids = orb.get_oids()
     for so in serialized:
         so_cname = so.get('_cname')
@@ -384,7 +384,6 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             loadable['other'].append(so)
     order = [c for c in DESERIALIZATION_ORDER if c in loadable]
     order.append('other')
-    orb.log.info('  deserializing objects ...')
     for group in order:
         for d in loadable[group]:
             cname = d.get('_cname', '')
@@ -486,7 +485,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     # orb.log.debug('    name: {}'.format(obj.name))
                     orb.db.add(obj)
                     objs.append(obj)
-                    created += 1
+                    created.append(obj.id)
                     current_oids.append(obj.oid)
                     if dictify:
                         output['new'].append(obj)
@@ -500,11 +499,13 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 refresh_componentz(orb, obj.assembly)
                 refresh_componentz_required = False
     orb.db.commit()
-    orb.log.debug('***************************')
-    orb.log.debug('* deserialization complete:')
-    orb.log.debug('    {} objects created'.format(created))
-    orb.log.debug('    {} objects updated'.format(len(updates)))
-    orb.log.debug('***************************')
+    log_txt = '* deserializer:'
+    if created:
+        orb.log.info('{} new object(s) created: {}'.format(
+                                                        log_txt, str(created)))
+    if updates:
+        ids = str([o.id for o in updates.values()])
+        orb.log.info('{} object(s) updated: {}'.format(log_txt, ids))
     if recompute_parmz_required and not force_no_recompute:
         orb.recompute_parmz()
     if dictify:
