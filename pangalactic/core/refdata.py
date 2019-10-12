@@ -182,7 +182,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'data',
-    'range_datatype': 'int',
+    'range_datatype': 'float',
     'description': 'Data storage capacity'},
 
 {   '_cname': 'ParameterDefinition',
@@ -195,7 +195,7 @@ pdc = [
     'mod_datetime': '2018-05-25 00:00:00',
     'dimensions': 'bitrate',
     'port_type': 'pgefobjects:PortType.digital_data',
-    'range_datatype': 'int',
+    'range_datatype': 'float',
     'description': 'Flow of bits per unit time through a data port.'},
 
 {   '_cname': 'ParameterDefinition',
