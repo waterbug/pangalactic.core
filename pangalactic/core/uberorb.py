@@ -595,8 +595,6 @@ class UberORB(object):
             for o in i_objs:
                 self.db.add(o)
             self.db.commit()
-        # XXX IMPORTANT!  Create the parameter definitions cache ('parm_defz')
-        create_parm_defz(self)
         # 2:  load balance of reference data
         missing_c = [so for so in refdata.core if so['oid'] not in oids]
         objs = []
@@ -613,7 +611,7 @@ class UberORB(object):
             self.db.add(o)
         # 3:  check for updates to reference data
         self.log.info('  + checking for updates to reference data ...')
-        all_ref = refdata.initial + refdata.core
+        all_ref = refdata.initial + refdata.core + refdata.pdc
         all_ref_oids = [so['oid'] for so in all_ref]
         # get mod_datetimes of all current ref data objects
         mod_dts = self.get_mod_dts(oids=all_ref_oids)
@@ -629,9 +627,13 @@ class UberORB(object):
             self.log.info('    updates completed.')
         else:
             self.log.info('    no updates found.')
-        # 4:  delete deprecated reference data
-        # NOTE:  don't do this step until the deprecated data has been removed
-        # from the current database
+        # 4:  XXX IMPORTANT!  Create parameter definitions cache ('parm_defz')
+        create_parm_defz(self)
+        # 5:  delete deprecated reference data
+        #     **********************************************************
+        #     NOTE:  DON'T DO THIS STEP UNTIL ALL DATA RELATED TO THE
+        #     DEPRECATED DATA HAS BEEN REMOVED FROM THE CURRENT DATABASE
+        #     **********************************************************
         # oids = self.get_oids()
         # deprecated = [oid for oid in refdata.deprecated if oid in oids]
         # if deprecated:
