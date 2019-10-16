@@ -163,6 +163,8 @@ def create_test_project():
             public=True, name='Hitchhike the Galaxy'),
         dict(
             _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
             oid='test:RA.zaphod_se',
             id='zaphod_se',
             id_ns='test',
@@ -171,6 +173,8 @@ def create_test_project():
             role_assignment_context='H2G2'),
         dict(
             _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
             oid='test:RA.carefulwalker_le',
             id='carefulwalker_le',
             id_ns='test',
@@ -179,6 +183,8 @@ def create_test_project():
             role_assignment_context='H2G2'),
         dict(
             _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
             oid='test:RA.steve_h2g2_admin',
             id='steve_h2g2_admin',
             id_ns='test',
@@ -187,6 +193,8 @@ def create_test_project():
             role_assignment_context='H2G2'),
         dict(
             _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
             oid='test:RA.steve_admin',
             id='steve_admin',
             id_ns='test',
@@ -194,6 +202,8 @@ def create_test_project():
             assigned_to='test:steve'),
         dict(
             _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
             oid='test:RA.buckaroo_propulsion',
             id='buckaroo_propulsion',
             id_ns='test',
@@ -202,6 +212,8 @@ def create_test_project():
             role_assignment_context='H2G2'),
         dict(
             _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
             oid='test:RA.whorfin_propulsion',
             id='whorfin_propulsion',
             id_ns='test',
@@ -210,6 +222,8 @@ def create_test_project():
             role_assignment_context='H2G2'),
         dict(
             _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
             oid='test:RA.bigboote_acs',
             id='bigboote_acs',
             assigned_role='gsfc:Role.acs_engineer',
@@ -217,6 +231,8 @@ def create_test_project():
             role_assignment_context='H2G2'),
         dict(
             _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
             oid='test:RA.smallberries_thermal',
             id='smallberries_thermal',
             assigned_role='gsfc:Role.thermal_engineer',
@@ -224,6 +240,8 @@ def create_test_project():
             role_assignment_context='H2G2'),
         dict(
             _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
             oid='test:RA.thornystick_mechanical',
             id='thornystick_mechanical',
             assigned_role='gsfc:Role.mechanical_engineer',
@@ -231,6 +249,8 @@ def create_test_project():
             role_assignment_context='H2G2'),
         dict(
             _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
             oid='test:RA.manyjars_power',
             id='manyjars_power',
             assigned_role='gsfc:Role.power_engineer',
