@@ -171,7 +171,7 @@ class UberORB(object):
                 shutil.copy(os.path.join(test_data_mod_path, p),
                             self.test_data_dir)
                 test_data_cpd.append(p)
-            # self.log.info('  - new test data files installed: %s'
+            # self.log.debug('  - new test data files installed: %s'
                           # % str(test_data_cpd))
         else:
             self.log.info('  - all test data files already installed.')
@@ -669,18 +669,17 @@ class UberORB(object):
             self.log.info('* orb.save')
             new = bool(oid in self.new_oids) or not self.get(oid)
             if new:
-                self.log.info('  orb.save: %s is a new %s, saving it ...' % (
-                                                        oid, cname))
+                log_txt = 'orb.save: {} is a new {}, saving it ...'.format(
+                           getattr(obj, 'id', '[unknown]'), cname)
+                self.log.info('  {}'.format(log_txt))
                 self.db.add(obj)
-                self.log.info('  orb.save: adding object with oid "%s" ...' % (
-                                                                obj.oid))
                 if obj.oid in self.new_oids:
                     self.new_oids.remove(obj.oid)
             else:
                 # updating an existing object
-                self.log.info(
-                    '  orb.save: oid "%s" is existing %s, updating ...' % (
-                                                        oid, cname))
+                log_txt = 'orb.save: "{}" is existing {}, updating ...'.format(
+                           getattr(obj, 'id', '[unknown]'), cname)
+                self.log.info('  {}'.format(log_txt))
                 # NOTE:  in new paradigm, obj is versioned iff
                 # [1] it has a 'version' attr and
                 # [2] a non-null version has been assigned to it (i.e. neither
@@ -901,7 +900,8 @@ class UberORB(object):
                 extr = self.registry.ces.get(cname)
                 if extr:
                     bases = self.registry.all_your_base(extr) | set([cname])
-                    # self.log.debug('  - bases of cname: {}'.format(str(bases)))
+                    # self.log.debug('  - bases of cname: {}'.format(
+                                   # str(bases)))
                     if not domain in bases:
                         # class does not have all attrs: return empty list
                         return []
@@ -970,7 +970,8 @@ class UberORB(object):
                 # NOTE:  get_assembly is recursive, gets *all* sub-assemblies
                 assemblies += get_assembly(system)
             if assemblies:
-                self.log.debug('  {} assemblies found'.format(len(assemblies)))
+                self.log.debug('  {} assemblies found'.format(
+                               len(assemblies)))
             objs += assemblies
         else:
             self.log.debug('  no ProjectSystemUsages found')
@@ -1008,9 +1009,10 @@ class UberORB(object):
         # use set() to eliminate dups
         res = [o for o in set(objs) if o]
         self.log.info('  returning {} object(s).'.format(len(res)))
-        if res:
-            for o in res:
-                self.log.debug('  - {}: {}'.format(o.__class__.__name__, o.id))
+        # if res:
+            # for o in res:
+                # self.log.debug('  - {}: {}'.format(
+                               # o.__class__.__name__, o.id))
         return res
 
     def get_reqts_for_project(self, project):
@@ -1026,6 +1028,7 @@ class UberORB(object):
             self.log.info('  no project provided -- returning empty list.')
             return []
         reqts = self.search_exact(cname='Requirement', owner=project)
+        self.log.info('  returning {} reqt(s).'.format(len(reqts)))
         return reqts
 
     def count_reqts_for_project(self, project):
@@ -1035,10 +1038,10 @@ class UberORB(object):
         Args:
             project (Project):  the specified project
         """
-        self.log.info('* [orb] count_reqts_for_project({})'.format(
+        self.log.debug('* [orb] count_reqts_for_project({})'.format(
                                         getattr(project, 'id', '[None]')))
         if not project:
-            self.log.info('  no project provided -- returning 0.')
+            self.log.debug('  no project provided -- returning 0.')
             return 0
         # return self.db.query(self.classes['Requirement']).count()
         return self.db.query(self.classes['Requirement']).filter_by(
