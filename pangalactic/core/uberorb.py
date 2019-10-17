@@ -139,11 +139,11 @@ class UberORB(object):
         if not os.path.exists(self.vault):
             os.makedirs(self.vault, mode=0o755)
         self.start_logging(home=pgx_home, console=console, debug=debug)
-        self.log.info('* prefs read ...')
+        self.log.debug('* prefs read ...')
         # self.log.debug('  prefs: {}'.format(str(prefs)))
-        self.log.info('* state read ...')
+        self.log.debug('* state read ...')
         # self.log.debug('  state: {}'.format(str(state)))
-        self.log.info('* trash read ({} objects).'.format(len(trash)))
+        self.log.debug('* trash read ({} objects).'.format(len(trash)))
         if not prefs.get('units'):
             prefs['units'] = {}
         # * copy test data files from 'p.test.data' module to test_data_dir
@@ -174,7 +174,7 @@ class UberORB(object):
             # self.log.debug('  - new test data files installed: %s'
                           # % str(test_data_cpd))
         else:
-            self.log.info('  - all test data files already installed.')
+            self.log.debug('  - all test data files already installed.')
         # * copy files from 'p.test.vault' module to vault_dir
         self.log.debug('* checking for files in [pgx_home]/vault ...')
         current_vault_files = set(os.listdir(self.vault))
@@ -200,7 +200,7 @@ class UberORB(object):
             # self.log.debug('  - new test vault files installed: {}'.format(
                            # str(vault_files_copied)))
         else:
-            self.log.info('  - all test vault files already installed.')
+            self.log.debug('  - all test vault files already installed.')
         self.cache_path = os.path.join(pgx_home, 'cache')
         if not db_url:
             # if no db_url is specified, create a local sqlite db
@@ -297,7 +297,7 @@ class UberORB(object):
         Initialize the local database.
         """
         msg = '* init_db():  initializing local db session ...'
-        self.log.info(msg)
+        self.log.debug(msg)
         self.startup_msg = msg
         if not getattr(self, 'db', None):
             Session = sessionmaker(bind=self.db_engine)
@@ -333,7 +333,7 @@ class UberORB(object):
         # Args:
             # home (str):  home directory (full path)
         # """
-        # self.log.info('* drop_and_create_db() ...')
+        # self.log.debug('* drop_and_create_db() ...')
         # db_url = state.get('db_url')
         # if db_url and db_url.startswith('postgresql:'):
             # # pyscopg2 (only used here, when schema changes)
@@ -344,12 +344,12 @@ class UberORB(object):
                     # conn.autocommit = True
                     # with conn.cursor() as cur:
                         # cur.execute('DROP DATABASE {};'.format(db_name))
-                        # self.log.info('  database "{}" dropped.'.format(
+                        # self.log.debug('  database "{}" dropped.'.format(
                                                                  # db_name))
                         # cur.execute('CREATE DATABASE {};'.format(db_name))
-                # self.log.info('  database "{}" created.'.format(db_name))
+                # self.log.debug('  database "{}" created.'.format(db_name))
             # except:
-                # self.log.info('  problem encountered -- see error log.')
+                # self.log.debug('  problem encountered -- see error log.')
                 # self.error_log.info('* error in drop_and_create_db():')
                 # self.error_log.info(traceback.format_exc())
         # elif db_url and db_url.startswith('sqlite:'):
@@ -359,11 +359,11 @@ class UberORB(object):
                 # db_path = os.path.join(home, 'local.db')
                 # if os.path.exists(db_path):
                     # os.remove(db_path)
-                    # self.log.info('  db file removed.')
+                    # self.log.debug('  db file removed.')
                 # else:
-                    # self.log.info('  file "local.db" not found.')
+                    # self.log.debug('  file "local.db" not found.')
             # except:
-                # self.log.info('  error encounterd in removing db file.')
+                # self.log.debug('  error encounterd in removing db file.')
                 # self.error_log.info('* error in drop_and_create_db():')
                 # self.error_log.info(traceback.format_exc())
 
@@ -375,20 +375,21 @@ class UberORB(object):
         if os.path.exists(json_path):
             with open(json_path) as f:
                 diagramz.update(json.loads(f.read()))
-            self.log.info('[orb] diagramz cache read from diagrams.json')
+            # self.log.debug('[orb] diagramz cache read from diagrams.json')
         else:
-            self.log.info('[orb] no diagrams.json file found.')
+            # self.log.debug('[orb] no diagrams.json file found.')
+            pass
 
     def _save_diagramz(self):
         """
         Save `diagramz` cache to diagrams.json file.
         """
-        self.log.info('* [orb] _save_diagramz() ...')
+        # self.log.debug('* [orb] _save_diagramz() ...')
         diagz_path = os.path.join(self.home, 'diagrams.json')
         with open(diagz_path, 'w') as f:
             f.write(json.dumps(diagramz, separators=(',', ':'),
                                indent=4, sort_keys=True))
-        self.log.info('        ... diagrams.json file written.')
+        # self.log.debug('        ... diagrams.json file written.')
 
     def _load_parmz(self):
         """
@@ -419,7 +420,7 @@ class UberORB(object):
         with open(parms_path, 'w') as f:
             f.write(json.dumps(serialized_parameterz, separators=(',', ':'),
                                indent=4, sort_keys=True))
-        self.log.info('        ... parameters.json file written.')
+        self.log.debug('        ... parameters.json file written.')
 
     def recompute_parmz(self):
         """
@@ -498,26 +499,27 @@ class UberORB(object):
             objs (iterable of Modelable):  objects the test parameters will be
                 assigned to
         """
-        self.log.info('* [orb] assign_test_parameters()')
+        # self.log.debug('* [orb] assign_test_parameters()')
         try:
             for o in objs:
                 add_default_parameters(self, o)
                 gen_test_pvals(parameterz[o.oid])
             self.recompute_parmz()
-            self.log.info('        ... done.')
+            # self.log.debug('        ... done.')
         except:
-            self.log.info('        ... failed.')
+            # self.log.debug('        ... failed.')
+            pass
 
     def _build_componentz_cache(self):
         """
         Build the `componentz` cache (which maps Product oids to the oids of
         their components) at startup.
         """
-        self.log.info('* [orb] _build_componentz_cache()')
+        # self.log.debug('* [orb] _build_componentz_cache()')
         for product in self.get_all_subtypes('Product'):
             if product.components:
                 refresh_componentz(self, product)
-        self.log.info('  componentz cache ready.')
+        # self.log.debug('  componentz cache ready.')
 
     def start_logging(self, home=None, console=False, debug=False):
         """
@@ -552,15 +554,15 @@ class UberORB(object):
                 if __version__ in schema_maps:
                     map_fn = schema_maps[__version__]
                     sdata = map_fn(sdata)
-                    self.log.info('        data loaded and transformed.')
+                    self.log.debug('        data loaded and transformed.')
                 else:
-                    self.log.info('        data loaded (no transformation).')
+                    self.log.debug('        data loaded (no transformation).')
             except:
-                self.log.info('        an error ocurred (see error log).')
+                self.log.debug('        an error ocurred (see error log).')
                 self.error_log.info('* error in load_and_transform_data():')
                 self.error_log.info(traceback.format_exc())
         else:
-            self.log.info('        file "db.yaml" not found.')
+            self.log.debug('        file "db.yaml" not found.')
         return sdata
 
     def load_reference_data(self):
@@ -573,8 +575,8 @@ class UberORB(object):
         # 0:  load initial reference data
         missing_i = [so for so in refdata.initial if so['oid'] not in oids]
         if missing_i:
-            self.log.info('  + missing some initial reference data:')
-            self.log.info('  {}'.format([so['oid'] for so in missing_i]))
+            self.log.debug('  + missing some initial reference data:')
+            self.log.debug('  {}'.format([so['oid'] for so in missing_i]))
             i_objs = deserialize(self, [so for so in missing_i],
                                  include_refdata=True,
                                  force_no_recompute=True)
@@ -587,8 +589,8 @@ class UberORB(object):
         # 1:  load parameter definitions and contexts
         missing_p = [so for so in refdata.pdc if so['oid'] not in oids]
         if missing_p:
-            self.log.info('  + missing some reference parameters/contexts:')
-            self.log.info('  {}'.format([so['oid'] for so in missing_p]))
+            self.log.debug('  + missing some reference parameters/contexts:')
+            self.log.debug('  {}'.format([so['oid'] for so in missing_p]))
             i_objs = deserialize(self, [so for so in missing_p],
                                  include_refdata=True,
                                  force_no_recompute=True)
@@ -599,8 +601,8 @@ class UberORB(object):
         missing_c = [so for so in refdata.core if so['oid'] not in oids]
         objs = []
         if missing_c:
-            self.log.info('  + missing some core reference data:')
-            self.log.info('  {}'.format([so['oid'] for so in missing_c]))
+            self.log.debug('  + missing some core reference data:')
+            self.log.debug('  {}'.format([so['oid'] for so in missing_c]))
             objs = deserialize(self, [so for so in missing_c],
                                include_refdata=True,
                                force_no_recompute=True)
@@ -610,7 +612,7 @@ class UberORB(object):
                 o.creator = o.modifier = admin
             self.db.add(o)
         # 3:  check for updates to reference data
-        self.log.info('  + checking for updates to reference data ...')
+        self.log.debug('  + checking for updates to reference data ...')
         all_ref = refdata.initial + refdata.core + refdata.pdc
         all_ref_oids = [so['oid'] for so in all_ref]
         # get mod_datetimes of all current ref data objects
@@ -622,11 +624,11 @@ class UberORB(object):
                          (uncook_datetime(so.get('mod_datetime')) >
                          uncook_datetime(mod_dts.get(so['oid']))))] 
         if updated_r:
-            self.log.info('    updates found ...')
+            self.log.debug('    updates found ...')
             deserialize(self, updated_r, force_no_recompute=True)
-            self.log.info('    updates completed.')
+            self.log.debug('    updates completed.')
         else:
-            self.log.info('    no updates found.')
+            self.log.debug('    no updates found.')
         # 4:  XXX IMPORTANT!  Create parameter definitions cache ('parm_defz')
         create_parm_defz(self)
         # 5:  delete deprecated reference data
@@ -637,8 +639,8 @@ class UberORB(object):
         # oids = self.get_oids()
         # deprecated = [oid for oid in refdata.deprecated if oid in oids]
         # if deprecated:
-            # self.log.info('  + deleting deprecated reference data:')
-            # self.log.info('  {}'.format([oid for oid in deprecated]))
+            # self.log.debug('  + deleting deprecated reference data:')
+            # self.log.debug('  {}'.format([oid for oid in deprecated]))
             # for oid in deprecated:
                 # self.delete([self.get(oid) for oid in deprecated])
         self.log.info('  + all reference data loaded.')
@@ -666,12 +668,12 @@ class UberORB(object):
             oid = getattr(obj, 'oid', None)
             if isinstance(obj, self.classes['Modelable']):
                 recompute_required = True
-            self.log.info('* orb.save')
+            self.log.debug('* orb.save')
             new = bool(oid in self.new_oids) or not self.get(oid)
             if new:
                 log_txt = 'orb.save: {} is a new {}, saving it ...'.format(
                            getattr(obj, 'id', '[unknown]'), cname)
-                self.log.info('  {}'.format(log_txt))
+                self.log.debug('  {}'.format(log_txt))
                 self.db.add(obj)
                 if obj.oid in self.new_oids:
                     self.new_oids.remove(obj.oid)
@@ -679,7 +681,7 @@ class UberORB(object):
                 # updating an existing object
                 log_txt = 'orb.save: "{}" is existing {}, updating ...'.format(
                            getattr(obj, 'id', '[unknown]'), cname)
-                self.log.info('  {}'.format(log_txt))
+                self.log.debug('  {}'.format(log_txt))
                 # NOTE:  in new paradigm, obj is versioned iff
                 # [1] it has a 'version' attr and
                 # [2] a non-null version has been assigned to it (i.e. neither
@@ -951,10 +953,10 @@ class UberORB(object):
         Args:
             project (Project):  the specified project
         """
-        self.log.info('* [orb] get_objects_for_project({})'.format(
+        self.log.debug('* [orb] get_objects_for_project({})'.format(
                                         getattr(project, 'id', '[None]')))
         if not project:
-            self.log.info('  no project provided -- returning empty list.')
+            self.log.debug('  no project provided -- returning empty list.')
             return []
         objs = self.search_exact(owner=project)
         psus = self.search_exact(cname='ProjectSystemUsage',
@@ -1008,7 +1010,7 @@ class UberORB(object):
         # TODO:  get the files too (fpath = rep_file.url)
         # use set() to eliminate dups
         res = [o for o in set(objs) if o]
-        self.log.info('  returning {} object(s).'.format(len(res)))
+        self.log.debug('  returning {} object(s).'.format(len(res)))
         # if res:
             # for o in res:
                 # self.log.debug('  - {}: {}'.format(
@@ -1022,13 +1024,13 @@ class UberORB(object):
         Args:
             project (Project):  the specified project
         """
-        self.log.info('* [orb] get_reqts_for_project({})'.format(
+        self.log.debug('* [orb] get_reqts_for_project({})'.format(
                                         getattr(project, 'id', '[None]')))
         if not project:
-            self.log.info('  no project provided -- returning empty list.')
+            self.log.debug('  no project provided -- returning empty list.')
             return []
         reqts = self.search_exact(cname='Requirement', owner=project)
-        self.log.info('  returning {} reqt(s).'.format(len(reqts)))
+        self.log.debug('  returning {} reqt(s).'.format(len(reqts)))
         return reqts
 
     def count_reqts_for_project(self, project):
@@ -1085,7 +1087,7 @@ class UberORB(object):
         Args:
             objs (Iterable of Identifiable or subtype): objects in the local db
         """
-        self.log.info('* bulk_delete() called ...')
+        self.log.debug('* bulk_delete() called ...')
         # TODO: make sure appropriate relationships in which these objects
         # are the parent or child are also deleted
         info = []
@@ -1140,9 +1142,9 @@ class UberORB(object):
                 trash[obj.oid] = serialize(self, [obj])
             self.db.delete(obj)
         self.db.commit()
-        self.log.info(' - objs deleted:')
+        self.log.debug(' - objs deleted:')
         for text in info:
-            self.log.info(text)
+            self.log.debug(text)
         if refresh_assemblies:
             for assembly in refresh_assemblies:
                 refresh_componentz(self, assembly)

@@ -160,9 +160,9 @@ class PanGalacticKnowledgeBase(Graph):
             kbpath (str):  path to an OWL file
         """
         if kbpath.endswith('.owl'):
-            print('* KB: registering namespaces from owl file ...')
+            # print('* KB: registering namespaces from owl file ...')
             register_namespaces(kbpath)
-            print('* KB: beginning parse of owl ...')
+            # print('* KB: beginning parse of owl ...')
             self.parse(kbpath)
 
     def _get_class_nodes_by_type(self):

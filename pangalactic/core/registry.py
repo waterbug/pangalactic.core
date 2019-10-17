@@ -162,7 +162,7 @@ class PanGalacticRegistry(object):
         f.write(str(pkgutil.get_data('pangalactic.core.ontology',
                                      'pgef.owl').decode('utf-8')))
         f.close()
-        self.log.info('* not installed; using pgef.owl in home dir.')
+        # self.log.debug('* not installed; using pgef.owl in home dir.')
         self.apps_dict = {}   # not currently used
         self.apps = []
         self.schemas = {}
@@ -180,9 +180,9 @@ class PanGalacticRegistry(object):
             self.db_engine = create_engine('sqlite:///%s' % local_db_path)
         # create the KB (knowledgebase) and initialize the registry's schemas,
         # which will be used in generating the database and app classes
-        self.log.info('* [registry] creating KB from pgef.owl source ...')
-        self.log.info('             (pgef.owl path: "{}")'.format(
-                                                            pgef_owl_path))
+        # self.log.debug('* [registry] creating KB from pgef.owl source ...')
+        # self.log.debug('             (pgef.owl path: "{}")'.format(
+                                                            # pgef_owl_path))
         self.kb = KB(pgef_owl_path)
         self._create_pgef_core_meta_objects(use_cache=(not force_new_core))
         # check for app ontologies -- if any are found, load them
@@ -219,14 +219,14 @@ class PanGalacticRegistry(object):
             the cached models; otherwise, it will rebuild them using pgef.owl.
         @type  use_cache:  `bool`
         """
-        self.log.info('* creating pgef core meta objects')
+        # self.log.debug('* creating pgef core meta objects')
         # [1] create extracts or get them from cache
         if use_cache:
             if self.got_pgef_cache:
-                self.log.info('  - restoring meta objects from cache.')
+                # self.log.debug('  - restoring meta objects from cache.')
                 self._get_extracts_from_cache()
             else:
-                self.log.info('  - pgef cache needs rebuilding.')
+                # self.log.debug('  - pgef cache needs rebuilding.')
                 # TODO:  display a "processing" message to user with "Building
                 # application classes from ontology"
                 # create extracts of pgef core meta objects from owl source files
@@ -251,12 +251,12 @@ class PanGalacticRegistry(object):
                 from its source files; otherwise, source must be the path to an
                 OWL file.
         """
-        self.log.info('* creating extracts from source')
+        # self.log.debug('* creating extracts from source')
         if source == None:
-            self.log.info('   + source:  pgef.owl')
+            # self.log.debug('   + source:  pgef.owl')
             nsprefix = 'pgef'
         else:
-            self.log.info('   + source:  %s' % str(source))
+            # self.log.debug('   + source:  %s' % str(source))
             nsprefix = get_ontology_prefix(source)
             if hasattr(source, 'read'):
                 # if source is file-like, must reset to beginning
@@ -370,7 +370,7 @@ class PanGalacticRegistry(object):
         ... where the structure of the field dicts (`field-n-attrs`) is
         documented in `pangalactic.meta.utils.property_to_field`.
         """
-        self.log.info('* updating schemas from extracts')
+        # self.log.debug('* updating schemas from extracts')
         to_build = [meta_id for meta_id in self.metaobject_build_order()
                     if meta_id not in self.schemas]
         for meta_id in to_build:
@@ -478,7 +478,7 @@ class PanGalacticRegistry(object):
         # [There may be a way to resolve this using relationship's
         # 'primaryjoin' kw arg or somehow specifying the 'onclause' of the
         # joins, but I haven't figured out how to do either yet.]
-        self.log.info('  - updating classes from schemas')
+        # self.log.debug('  - updating classes from schemas')
         # self.log.debug('    [using get_nearest_persistable_base()]')
         new_meta = [meta_id for meta_id in self.metaobject_build_order()
                     if (meta_id in self.persistables and
@@ -613,7 +613,7 @@ class PanGalacticRegistry(object):
         # also, detect whether the OWL files have changed since the cached
         # version was built.
         self.apps_dict = {} # clear it, in case it needs refreshing
-        self.log.info('* looking for app ontologies')
+        # self.log.debug('* looking for app ontologies')
         app_owl_file_paths = glob.glob(os.path.join(self.onto_path, '*.owl'))
         if 'pgef.owl' in app_owl_file_paths:
             app_owl_file_paths.remove('pgef.owl')
@@ -624,9 +624,10 @@ class PanGalacticRegistry(object):
             for owl_file in app_owl_file_paths:
                 nsprefix = get_ontology_prefix(owl_file)
                 self.apps_dict[nsprefix] = owl_file
-                self.log.info('   + found:  %s in %s' % (nsprefix, owl_file))
+                # self.log.debug('   + found:  %s in %s' % (nsprefix, owl_file))
         else:
-            self.log.info('   + no application OWL files found.')
+            # self.log.debug('   + no application OWL files found.')
+            pass
 
     def build_app_classes_from_ontology(self, source, use_cache=True):
         """
@@ -654,22 +655,22 @@ class PanGalacticRegistry(object):
         # namespace, because all the metaobjects can have an 'origin_ns'
         # attribute, or some such.  That's a separate issue -- this issue is
         # just about global name uniqueness, collisions, and "qualified names".
-        self.log.info('* building app classes from ontology')
+        # self.log.debug('* building app classes from ontology')
         if os.sep in source or '.' in source:
             app_prefix = os.path.basename(source).split('.')[0]
         else:
             app_prefix = source
             source = os.path.join(self.onto_path, (app_prefix+'.owl'))
-        self.log.info('  app_prefix = "%s"' % app_prefix)
+        # self.log.debug('  app_prefix = "%s"' % app_prefix)
         app_cache_path = os.path.join(self.cache_path, app_prefix)
         got_cache = os.path.exists(app_cache_path)
         # [1] create extracts or get them from cache
         if use_cache:
             if got_cache:
-                self.log.info('  - using cache.')
+                # self.log.debug('  - using cache.')
                 self._get_extracts_from_cache()
             else:
-                self.log.info('  - cache needs rebuilding.')
+                # self.log.debug('  - cache needs rebuilding.')
                 # TODO:  display a "processing" message to user with "Building
                 # application classes from ontology"
                 # create extracts of pgef core meta objects from owl source files
@@ -1015,7 +1016,7 @@ class PanGalacticRegistry(object):
                           # using pgef.owl.
         # @type  use_cache:  `bool`
         # """
-        # self.log.info('* create_metaobjects_from_src()')
+        # self.log.debug('* create_metaobjects_from_src()')
         # # (1) get extracts of app meta objects from cache or source files
         # if use_cache:
             # # use the cache, Luke! no, really ... implement something
@@ -1060,7 +1061,7 @@ class PanGalacticRegistry(object):
             # contains an OWL dataset.
         # @type  source:  `str`
         # """
-        # self.log.info('* create_report_on_source()')
+        # self.log.debug('* create_report_on_source()')
         # if source == None:
             # self.log.debug(' '.join(['   + no source specified; getting "pgef"',
                                     # 'from its source OWL files ...']))
@@ -1069,7 +1070,7 @@ class PanGalacticRegistry(object):
             # self.log.debug('   + source = %s' % str(source))
             # nsprefix = get_ontology_prefix(source)
             # self.kb.parse(source)
-        # self.log.info('   + nsprefix = %s' % str(nsprefix))
+        # self.log.debug('   + nsprefix = %s' % str(nsprefix))
         # pnames = self.kb.get_property_names(nsprefix)
         # for pname in pnames:
             # e = self.kb.get_attrs_of_property(nsprefix, pname)
