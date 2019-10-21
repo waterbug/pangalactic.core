@@ -92,6 +92,8 @@
     editor:
         parameters:     (list) [ids] order of parameters in pgxnobject panels
     model_types:        (list) oids of ModelTypes that pangalaxian can "render"
+    views:              (dict) preferred ordering of table columns by class
+                               (maps class name to list of field names)
 
 * state
     admin_of:         (list) oids of Projects in which user has admin role

@@ -26,7 +26,7 @@ import dateutil.parser as dtparser
 # PanGalactic
 from pangalactic.core      import datatypes
 from pangalactic.core.meta import (PLURALS, ATTR_EXT_NAMES, EXT_NAMES,
-                                   EXT_NAMES_PLURAL, READONLY)
+                                   EXT_NAMES_PLURAL, MAX_LENGTH, READONLY)
 from pangalactic.core.utils.datetimes import EPOCH, EPOCH_DATE
 
 _inf = inflect.engine()
@@ -73,19 +73,19 @@ def property_to_field(name, pe):
      'is_inverse'    : [bool:  True -> property is an inverse ("backref")],
      'inverse_of'    : [name of property of which this one is an inverse],
      'choices'       : [choices list -- i.e., a discrete range],
+     'max_length'    : [maximum length of a string field],
      'null'          : [bool:  whether the field can be null],
      'editable'      : [bool:  opposite of read-only],
      'unique'        : [bool:  same as the sql concept],
-     'external_name' : [name displayed in user interfaces]
+     'external_name' : [name displayed in user interfaces],
      'definition'    : [definition of the field],
-     'help_text'     : [extra help text, in addition to definition]
-     'db_column'     : [name of the db column (default is field name)],
+     'help_text'     : [extra help text, in addition to definition],
+     'db_column'     : [name of the db column (default is field name)]
     }
 
     The 'fields' key in a schema dict will consist of a dict that maps
     field names to field dicts of this form.
     """
-    # TODO:  add max_length and/or other applicable constraints
     field = {}
     field['id'] = pe['id']
     field['id_ns'] = pe['id_ns']
@@ -100,6 +100,7 @@ def property_to_field(name, pe):
                                          pe['functional'])]
         field['is_inverse'] = False
         field['inverse_of'] = ''
+        field['max_length'] = MAX_LENGTH.get(pe['id'], 80)
     else:
         field['field_type'] = ForeignKey
         field['related_cname'] = pe['range']

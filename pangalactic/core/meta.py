@@ -15,7 +15,7 @@ from pangalactic.core.units import in_si
 # PGXN_REQD:  Properties that are validated by PgxnObject to be non-empty
 # SEE ALSO:  PGXN_HIDE and PGXN_MASK (fields never shown for a class -- defined
 # below)
-IDENTITY = ['id', 'name', 'description']
+IDENTITY = ['id', 'name', 'url', 'description']
 PGXN_REQD = dict(
     HardwareProduct=(IDENTITY + ['owner', 'product_type']),
     ParameterDefinition=['id', 'name', 'description', 'dimensions',
@@ -31,7 +31,7 @@ PGXN_REQD = dict(
 # app-specific settings defined in the 'pangalactic.config' module-level
 # dictionary.
 # TODO:  support for field "aliases" (a.k.a. "display names")
-SYSTEM = ['frozen', 'version', 'version_sequence', 'iteration']
+SYSTEM = ['derived_from', 'frozen', 'version', 'version_sequence', 'iteration']
 MAIN_VIEWS = dict(
     Activity=(IDENTITY + ['activity_type', 'activity_of']),
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
@@ -73,16 +73,14 @@ MAIN_VIEWS = dict(
 # PGXN_VIEWS:  Default fields/ordering for the PgxnObject "info", "narrative"
 # and "admin" tabs
 PGXN_VIEWS = dict(
-    info=['derived_from', 'owner', 'public', 'req_type', 'req_constraint_type',
-          'req_dimensions', 'req_target_value', 'req_tolerance',
-          'req_tolerance_type', 'req_tolerance_lower', 'req_tolerance_upper',
-          'req_maximum_value', 'req_minimum_value', 'validated',
-          'verification_method'],
+    info=['public', 'req_type', 'req_constraint_type', 'req_dimensions',
+          'req_target_value', 'req_tolerance', 'req_tolerance_type',
+          'req_tolerance_lower', 'req_tolerance_upper', 'req_maximum_value',
+          'req_minimum_value', 'validated', 'verification_method'],
     narrative=['comment', 'rationale', 'purpose', 'computable_form',
                'req_epilog', 'req_min_max_phrase', 'req_shall_phrase',
                'req_subject'],
-    admin=['oid', 'creator', 'create_datetime', 'modifier', 'mod_datetime',
-           'url'])
+    admin=['oid', 'creator', 'create_datetime', 'modifier', 'mod_datetime'])
 
 # PGXN_PARAMETERS:  preferred ordering for parameters in PgxnObject parameter
 # forms
@@ -417,23 +415,31 @@ PGEF_PROPS_ORDER = [
             'abbreviation'
             ]
 
+# max length of string fields (default: 80)
+MAX_LENGTH = {
+            'abbreviation': 50,
+            'id': 150,
+            'name': 150,
+            'url': 250,
+            }
+
 # Default column widths (in pixels) for specified properties
 PGEF_COL_WIDTHS = {
             'abbreviation': 100,
             'creator': 100,
             'create_datetime': 100,
-            'comment': 250,
-            'description': 250,
+            'comment': 200,
+            'description': 200,
             'frozen': 50,
             'id': 150,
             'id_ns': 100,
             'iteration': 50,
             'modifier': 100,
             'mod_datetime': 100,
-            'name': 150,
+            'name': 200,
             'owner': 100,
             'oid': 100,
-            'product_type': 200,
+            'product_type': 150,
             'purpose': 250,
             'range_datatype': 50,
             'rationale': 250,
