@@ -266,7 +266,7 @@ def add_parameter(orb, oid, variable, context=None):
     if oid not in parameterz:
         parameterz[oid] = {}
     pid = get_parameter_id(variable, context)
-    orb.log.debug('[orb] add_parameter "{!s}"'.format(pid))
+    # orb.log.debug('[orb] add_parameter "{!s}"'.format(pid))
     if pid in parameterz[oid]:
         # if the object already has that parameter, do nothing
         return
@@ -275,7 +275,8 @@ def add_parameter(orb, oid, variable, context=None):
     if not pd:
         # for now, if no ParameterDefinition exists for pid, pass
         # (maybe eventually raise TypeError)
-        orb.log.debug('        - variable {!s} is not defined.'.format(
+        orb.log.debug(
+            '* add_parameter: variable "{!s}" is not defined.'.format(
                                                              variable))
         return
     pdz = parm_defz.get(pid)
@@ -324,8 +325,8 @@ def add_default_parameters(orb, obj):
         orb (Uberorb):  the orb (singleton)
         obj (Identifiable):  the object to receive parameters
     """
-    orb.log.debug('[orb] add default parameters to object "{!s}"'.format(
-                                                                obj.oid))
+    # orb.log.debug('[orb] add default parameters to object "{!s}"'.format(
+                                                                # obj.oid))
     # Configured Parameters are currently defined by the 'dashboard'
     # configuration (in future that may be augmented by Parameters
     # referenced by, e.g., a ProductType and/or a ModelTemplate, both of
@@ -345,7 +346,7 @@ def add_default_parameters(orb, obj):
             pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
                                obj.product_type.id, []))
     # add default parameters first ...
-    orb.log.debug('      adding parameters {!s} ...'.format(str(pids)))
+    # orb.log.debug('      adding parameters {!s} ...'.format(str(pids)))
     for pid in pids:
         add_parameter(orb, obj.oid, pid)
 
@@ -359,7 +360,7 @@ def add_product_type_parameters(orb, obj, pt):
         obj (Identifiable):  the object to receive parameters
         pt (ProductType):  the product type
     """
-    orb.log.debug('* assigning parameters for product type "{}"'.format(pt.id))
+    # orb.log.debug('* assigning parameters for product type "{}"'.format(pt.id))
     # then check for parameters specific to the product_type, if any
     if pt:
         # check if the product_type has parameters
@@ -402,7 +403,8 @@ def get_pval(orb, oid, pid, allow_nan=False):
     # orb.log.debug('* get_pval() ...')
     pdz = parm_defz.get(pid)
     if not pdz:
-        orb.log.debug('  - "{}" does not have a definition.'.format(pid))
+        orb.log.debug('* get_pval: "{}" does not have a definition.'.format(
+                                                                        pid))
         return
     try:
         # for extreme debugging only ...
@@ -798,8 +800,8 @@ def compute_mev(orb, oid, variable):
     # orb.log.debug('* compute_mev "{}": "{}"'.format(oid, variable))
     ctgcy_val = get_pval(orb, oid, variable + '[Ctgcy]')
     if not ctgcy_val:
-        orb.log.debug('  contingency not set --')
-        orb.log.debug('  setting default value (30%) ...')
+        # orb.log.debug('  contingency not set --')
+        # orb.log.debug('  setting default value (30%) ...')
         # if Contingency value is 0 or not set, set to default value of 30%
         ctgcy_val = 0.3
         pid = variable + '[Ctgcy]'
@@ -848,14 +850,15 @@ def compute_margin(orb, oid, variable, default=0):
         obj_oid = getattr(allocation_node.system, 'oid', None)
         allocated_to_system = True
     if not obj_oid or obj_oid == 'pgefobjects:TBD':
-        orb.log.debug('  allocation is to unknown or TBD system.')
+        # orb.log.debug('  allocation is to unknown or TBD system.')
         return 0
     mev = _compute_pval(orb, obj_oid, variable, 'MEV')
     # find a performance requirement for the specified variable, allocated to
     # the allocation_node
     pd = orb.get(get_parameter_definition_oid(variable))
     if not pd:
-        orb.log.info('  parameter definition not found.')
+        orb.log.info('  no parameter definition found for "{}".'.format(
+                                                                variable))
         return 0
     # find all reqts allocated to the node
     if allocated_to_system:
@@ -865,7 +868,7 @@ def compute_margin(orb, oid, variable, default=0):
         reqts = orb.search_exact(cname='Requirement',
                                  allocated_to_function=allocation_node)
     if not reqts:
-        orb.log.info('  no reqts found with that allocation.')
+        # orb.log.debug('  no reqts found with that allocation.')
         return 0
     # identify the relevant performance requirement
     perf_reqt = None
@@ -878,7 +881,7 @@ def compute_margin(orb, oid, variable, default=0):
                 if pd.id == variable:
                     perf_reqt = reqt
     if not perf_reqt:
-        orb.log.info('  relevant performance requirement not found.')
+        # orb.log.debug('  relevant performance requirement not found.')
         return 0
     # TODO:  here we would identify the type of constraint, but currently we
     # only support the NTE (maximum value) constraint
@@ -886,21 +889,21 @@ def compute_margin(orb, oid, variable, default=0):
         nte = float(perf_reqt.req_maximum_value)
     except:
         # value was None or other non-numeric
-        orb.log.info('  NTE not specified by the relevant requirement.')
+        # orb.log.debug('  NTE not specified by the relevant requirement.')
         return 0
     nte_units = perf_reqt.req_units
     # convert NTE value to base units, if necessary
     quan = nte * ureg.parse_expression(nte_units)
     quan_base = quan.to_base_units()
     converted_nte = quan_base.magnitude
-    orb.log.debug('  compute_margin: nte is {}'.format(converted_nte))
-    orb.log.debug('                  mev is {}'.format(mev))
+    # orb.log.debug('  compute_margin: nte is {}'.format(converted_nte))
+    # orb.log.debug('                  mev is {}'.format(mev))
     if mev == 0:   # NOTE: 0 == 0.0 evals to True
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
         return 'undefined'
     margin = round_to(((converted_nte - mev) / mev))
-    orb.log.debug('  ... margin is {}'.format(margin))
+    # orb.log.debug('  ... margin is {}'.format(margin))
     return margin
 
 def compute_requirement_margin(orb, oid, default=0):
@@ -934,7 +937,7 @@ def compute_requirement_margin(orb, oid, default=0):
         # TODO: notify user
         msg = 'Requirement with oid {} is not a performance reqt.'.format(oid)
         return (None, None, None, None, msg)
-    orb.log.debug('* Computing margin for reqt "{}"'.format(req.name))
+    # orb.log.debug('* Computing margin for reqt "{}"'.format(req.name))
     rel = getattr(req, 'computable_form', None)
     prs = getattr(rel, 'correlates_parameters', None)
     if not prs:
