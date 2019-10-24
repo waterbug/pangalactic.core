@@ -47,15 +47,6 @@ initial = [
     },
 
 {   '_cname': 'Role',
-    'oid': 'pgefobjects:Role.Disabled',
-    'description': 'Indicates that all assigned roles are inactive',
-    'id': 'Disabled',
-    'name': 'Disabled',
-    'create_datetime': epoch,
-    'mod_datetime': epoch
-    },
-
-{   '_cname': 'Role',
     'oid': 'pgefobjects:Role.Administrator',
     'description': 'Administrator in an organizational context',
     'id': 'Administrator',
