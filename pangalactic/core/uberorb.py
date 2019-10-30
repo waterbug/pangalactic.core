@@ -857,6 +857,29 @@ class UberORB(object):
         return {row['oid'] : str(row['mod_datetime'])
                 for row in self.db.execute(s)}
 
+    def get_oid_cnames(self, oids=None, cname=None):
+        """
+        For a list of oids, get a dict that maps the oids to their class names.
+
+        Keyword Args:
+            oids (list):  oids of objects
+
+        Returns:
+            dict:  mapping of oids to class names.
+        """
+        ident = self.classes['Identifiable'].__table__
+        if oids:
+            s = sql.select([ident]).where(ident.c.oid.in_(oids))
+        elif cname:
+            s = sql.select([ident]).where(sql.and_(
+                                        ident.c.oid.in_(oids),
+                                        ident.c.pgef_type == cname
+                                        ))
+        else:
+            return {}
+        return {row['oid'] : str(row['pgef_type'])
+                for row in self.db.execute(s)}
+
     def select(self, cname, **kw):
         """
         Get a single object from the local db by its class name and a set of
