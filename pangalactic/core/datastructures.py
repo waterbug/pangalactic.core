@@ -6,16 +6,17 @@ from collections.abc import MutableSet
 
 def chunkify(data, chunk_size):
     """
-    Return the specified data (an iterable) as a list of lists each of length
+    Return the specified data (a list) as a list of lists each of length
     'chunk_size' plus a final list containing the remainder (if any).  If the
-    length of the data is <= chunk size, return the data.
+    length of the data is <= chunk size, return a list containing the data
+    list.
 
     Args:
         data (iterable):  the data to be returned in chunks
         chunk_size (int):  length of each chunk
     """
     if len(data) <= chunk_size:
-        return data
+        return [data]
     full_chunks = len(data) // chunk_size
     chunks = [data[i*chunk_size : (i + 1)*chunk_size]
               for i in range(0, full_chunks)]
