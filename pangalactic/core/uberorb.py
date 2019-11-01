@@ -489,7 +489,6 @@ class UberORB(object):
                 # self.log.debug('        - compute failed for {}:'.format(
                                                                     # req_oid))
                 # self.log.debug('          {}'.format(result))
-        self._save_parmz()
 
     def assign_test_parameters(self, objs):
         """
