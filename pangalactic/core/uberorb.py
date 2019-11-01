@@ -483,11 +483,12 @@ class UberORB(object):
                                                 units=nte_units,
                                                 mod_datetime=str(dtstamp()))
             else:
+                pass
                 # if None was returned for oid, reason for failure will be in
                 # "result"
-                self.log.debug('        - compute failed for {}:'.format(
-                                                                    req_oid))
-                self.log.debug('          {}'.format(result))
+                # self.log.debug('        - compute failed for {}:'.format(
+                                                                    # req_oid))
+                # self.log.debug('          {}'.format(result))
         self._save_parmz()
 
     def assign_test_parameters(self, objs):
