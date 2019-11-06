@@ -1072,37 +1072,6 @@ class UberORB(object):
         return self.db.query(self.classes['Requirement']).filter_by(
                                                         owner=project).count()
 
-    def get_next_ref_des(self, assembly, component, prefix=None):
-        """
-        Get the next reference designator for the specified assembly and component.
-
-        This function assumes that reference designators are strings of the form
-        'prefix-n', where 'n' can be cast to an integer.
-
-        Args:
-            assembly (Product): the product containing the component
-            component (Product): the constituent product
-
-        Keyword Args:
-            prefix (str): a string to be used as the prefix of the reference
-                designator
-        """
-        # TODO:  use a product type abbreviation for 'prefix' (or some other
-        # semantic ref designator algorithm)
-        prefix = 'Generic'
-        if component.product_type:
-            prefix = component.product_type.name
-        acus = self.search_exact(cname='Acu', assembly=assembly)
-        if acus:
-            rds = [acu.reference_designator for acu in acus]
-            # allow product_type to contain '-' (but it shouldn't)
-            all_prefixes = [(' '.join(rd.split(' ')[:-1])) for rd in rds if rd]
-            these_prefixes = [p for p in all_prefixes if p == prefix]
-            new_nbr = len(these_prefixes) + 1
-            return prefix + ' ' + str(new_nbr)
-        else:
-            return prefix + ' 1'
-
     def delete(self, objs):
         """
         Delete the specified objects from the local db.

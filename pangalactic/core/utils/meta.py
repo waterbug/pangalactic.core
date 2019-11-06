@@ -300,6 +300,35 @@ def get_ra_id(ra_context_id, role_id, fname, mi, lname):
     else:
         return ':'.join([role_id, '_'.join([lname, fname, mi])])
 
+def get_next_ref_des(assembly, component, prefix=None):
+    """
+    Get the next reference designator for the specified assembly and component.
+
+    This function assumes that reference designators are strings of the form
+    'prefix-n', where 'n' can be cast to an integer.
+
+    Args:
+        assembly (Product): the product containing the component
+        component (Product): the constituent product
+
+    Keyword Args:
+        prefix (str): a string to be used as the prefix of the reference
+            designator
+    """
+    prefix = 'Generic'
+    if component.product_type:
+        prefix = component.product_type.abbreviation
+    acus = assembly.components
+    if acus:
+        rds = [acu.reference_designator for acu in acus]
+        # allow product_type to contain '-' (but it shouldn't)
+        all_prefixes = [(' '.join(rd.split(' ')[:-1])) for rd in rds if rd]
+        these_prefixes = [p for p in all_prefixes if p == prefix]
+        new_nbr = len(these_prefixes) + 1
+        return prefix + ' ' + str(new_nbr)
+    else:
+        return prefix + ' 1'
+
 def get_ra_name(ra_context_id, role_id, fname, mi, lname):
     """
     Create a 'name' for a new Acu.
@@ -307,7 +336,7 @@ def get_ra_name(ra_context_id, role_id, fname, mi, lname):
     Args:
         assembly_name:  the 'name' of the assembly (Product)
         ref_des:  the reference_designator of the Acu, created using
-            orb.get_next_ref_des()
+            get_next_ref_des()
     """
     if ra_context_id:
         return ': '.join([ra_context_id, role_id,
@@ -322,7 +351,7 @@ def get_acu_id(assembly_id, ref_des):
     Args:
         assembly_id:  the 'id' of the assembly (Product)
         ref_des:  the reference_designator of the Acu, created using
-            orb.get_next_ref_des()
+            get_next_ref_des()
     """
     return assembly_id + ':' + '-'.join(ref_des.split(' '))
 
@@ -333,7 +362,7 @@ def get_acu_name(assembly_name, ref_des):
     Args:
         assembly_name:  the 'name' of the assembly (Product)
         ref_des:  the reference_designator of the Acu, created using
-            orb.get_next_ref_des()
+            get_next_ref_des()
     """
     return assembly_name + ' : ' + ref_des
 
