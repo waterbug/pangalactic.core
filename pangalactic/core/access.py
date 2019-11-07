@@ -136,9 +136,9 @@ def get_perms(obj, user=None, permissive=False):
             # orb.log.debug('  user has roles: {}'.format(role_ids))
             subsystem_types = set()
             if role_ids:
-                subsystem_types = set.union(
-                                        *[orb.role_product_types.get(r, set())
-                                          for r in role_ids])
+                rpt = [orb.role_product_types.get(r, set()) for r in role_ids]
+                if rpt:
+                    subsystem_types = set.union(*rpt)
             # orb.log.debug('  user is authorized for subsystem types:')
             # orb.log.debug('  {}'.format(subsystem_types))
             pt_id = getattr(obj.product_type, 'id', 'unknown')
@@ -176,8 +176,10 @@ def get_perms(obj, user=None, permissive=False):
             # orb.log.debug('    + assigned roles of user "{}" on {}:'.format(
                                             # user.id, obj.assembly.owner.id))
             # orb.log.debug('      {}'.format(str(role_ids)))
-            subsystem_types = set.union(*[orb.role_product_types.get(r, set())
-                                          for r in role_ids])
+            subsystem_types = []
+            rpt = [orb.role_product_types.get(r, set()) for r in role_ids]
+            if rpt:
+                subsystem_types = set.union(*rpt)
             # orb.log.debug('    + authorized subsystem types: {}:'.format(
                                                     # str(subsystem_types)))
             assembly_type = getattr(obj.assembly.product_type, 'id', '')
