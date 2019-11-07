@@ -2,7 +2,6 @@
 Functions related to object access permissions
 """
 from builtins import str
-from functools import reduce
 from pangalactic.core         import state, config
 from pangalactic.core.uberorb import orb
 
@@ -137,9 +136,9 @@ def get_perms(obj, user=None, permissive=False):
             orb.log.debug('  user has roles: {}'.format(role_ids))
             subsystem_types = set()
             if role_ids:
-                subsystem_types = reduce(lambda x,y: x | y,
-                                     [orb.role_product_types.get(r, set())
-                                      for r in role_ids])
+                subsystem_types = list(map(set.union,
+                                       [orb.role_product_types.get(r, set())
+                                        for r in role_ids]))
             orb.log.debug('  user is authorized for subsystem types:')
             orb.log.debug('  {}'.format(subsystem_types))
             pt_id = getattr(obj.product_type, 'id', 'unknown')
@@ -174,9 +173,9 @@ def get_perms(obj, user=None, permissive=False):
                                    assigned_to=user,
                                    role_assignment_context=obj.assembly.owner)
             role_ids = [ra.assigned_role.id for ra in ras]
-            subsystem_types = reduce(lambda x,y: x | y,
-                                     [orb.role_product_types.get(r, set())
-                                      for r in role_ids])
+            subsystem_types = list(map(set.union,
+                                       [orb.role_product_types.get(r, set())
+                                        for r in role_ids]))
             assembly_type = getattr(obj.assembly.product_type, 'id', '')
             orb.log.debug('    assembly product_type is "{}"'.format(
                           assembly_type))
