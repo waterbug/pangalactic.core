@@ -35,10 +35,10 @@ def get_perms(obj, user=None, permissive=False):
     # operations to sync such data are expensive, the data are cached in
     # `state` variables rather than stored in the local db.
     orb.log.info('* get_perms ...')
-    if obj:
-        cname = obj.__class__.__name__
-        orb.log.debug('  for {} object, id: {}, oid: {}'.format(cname, obj.id,
-                                                               obj.oid))
+    # if obj:
+        # cname = obj.__class__.__name__
+        # orb.log.debug('  for {} object, id: {}, oid: {}'.format(cname,
+                                                        # obj.id, obj.oid))
     if config.get('local_admin') or permissive:
         orb.log.debug('  "local_admin" or "permissive" configured.')
         perms = ['view', 'modify', 'decloak', 'delete']
@@ -125,36 +125,36 @@ def get_perms(obj, user=None, permissive=False):
         TBD = orb.get('pgefobjects:TBD')
         # [1] is the object a Product?
         if isinstance(obj, orb.classes['Product']):
-            orb.log.debug('  - object is a Product ...')
+            # orb.log.debug('  - object is a Product ...')
             if not obj.owner:
-                orb.log.debug('    owner not specified -- view only.')
+                # orb.log.debug('    owner not specified -- view only.')
                 return ['view']
             ras = orb.search_exact(cname='RoleAssignment',
                                    assigned_to=user,
                                    role_assignment_context=obj.owner)
             role_ids = [ra.assigned_role.id for ra in ras]
-            orb.log.debug('  user has roles: {}'.format(role_ids))
+            # orb.log.debug('  user has roles: {}'.format(role_ids))
             subsystem_types = set()
             if role_ids:
-                subsystem_types = list(map(set.union,
-                                       [orb.role_product_types.get(r, set())
-                                        for r in role_ids]))
-            orb.log.debug('  user is authorized for subsystem types:')
-            orb.log.debug('  {}'.format(subsystem_types))
+                subsystem_types = set.union(
+                                        *[orb.role_product_types.get(r, set())
+                                          for r in role_ids])
+            # orb.log.debug('  user is authorized for subsystem types:')
+            # orb.log.debug('  {}'.format(subsystem_types))
             pt_id = getattr(obj.product_type, 'id', 'unknown')
-            orb.log.debug('  this ProductType is "{}"'.format(pt_id))
+            # orb.log.debug('  this ProductType is "{}"'.format(pt_id))
             if pt_id in subsystem_types:
-                orb.log.debug(
-                    '  user is authorized for ProductType "{}".'.format(pt_id))
+                # orb.log.debug(
+                    # '  user is authorized for ProductType "{}".'.format(pt_id))
                 perms = ['view', 'modify', 'decloak', 'delete']
-                orb.log.debug('  perms: {}'.format(perms))
+                # orb.log.debug('  perms: {}'.format(perms))
                 return perms
             else:
                 txt = '  user is NOT authorized for ProductType "{}".'.format(
                                                                         pt_id)
                 orb.log.debug(txt)
         # [2] is it an Acu?
-        # if so, the user can modify it if:
+        # if so, the user can modify it if any of the following is true:
         # [2a] the user has a role in the context of the assembly's "owner"
         #      that relates to the assembly's product_type
         # [2b] its component is real and the user has a role in the context of
@@ -173,41 +173,45 @@ def get_perms(obj, user=None, permissive=False):
                                    assigned_to=user,
                                    role_assignment_context=obj.assembly.owner)
             role_ids = [ra.assigned_role.id for ra in ras]
-            subsystem_types = list(map(set.union,
-                                       [orb.role_product_types.get(r, set())
-                                        for r in role_ids]))
+            # orb.log.debug('    + assigned roles of user "{}" on {}:'.format(
+                                            # user.id, obj.assembly.owner.id))
+            # orb.log.debug('      {}'.format(str(role_ids)))
+            subsystem_types = set.union(*[orb.role_product_types.get(r, set())
+                                          for r in role_ids])
+            # orb.log.debug('    + authorized subsystem types: {}:'.format(
+                                                    # str(subsystem_types)))
             assembly_type = getattr(obj.assembly.product_type, 'id', '')
             orb.log.debug('    assembly product_type is "{}"'.format(
                           assembly_type))
             # [2a] assembly with a relevant product type
             if assembly_type in subsystem_types:
-                orb.log.debug('  - assembly product_type is relevant.')
+                # orb.log.debug('  - assembly product_type is relevant.')
                 perms = ['view', 'modify', 'decloak', 'delete']
-                orb.log.debug('    perms: {}'.format(perms))
+                # orb.log.debug('    perms: {}'.format(perms))
                 return perms
             # [2b] real component with a relevant product type
             elif (getattr(obj.component.product_type, 'id', None)
                   in subsystem_types):
-                orb.log.debug('  - component product_type is relevant.')
+                # orb.log.debug('  - component product_type is relevant.')
                 perms = ['view', 'modify', 'decloak', 'delete']
-                orb.log.debug('    perms: {}'.format(perms))
+                # orb.log.debug('    perms: {}'.format(perms))
                 return perms
             # [2c] TBD component with a relevant product type hint
             elif getattr(obj, 'component', None) is TBD:
                 pt = getattr(obj.product_type_hint, 'id', '')
                 if pt in subsystem_types:
-                    orb.log.debug('  - TBD product_type_hint is relevant.')
+                    # orb.log.debug('  - TBD product_type_hint is relevant.')
                     perms = ['view', 'modify', 'decloak', 'delete']
-                    orb.log.debug('    perms: {}'.format(perms))
+                    # orb.log.debug('    perms: {}'.format(perms))
                     return perms
                 else:
-                    orb.log.debug('  - TBD product_type_hint is not relevant.')
+                    # orb.log.debug('  - TBD product_type_hint is not relevant.')
                     perms = ['view']
-                    orb.log.debug('    perms: {}'.format(perms))
+                    # orb.log.debug('    perms: {}'.format(perms))
                     return perms
         # [3] is it a ProjectSystemUsage?
         elif isinstance(obj, orb.classes['ProjectSystemUsage']):
-            orb.log.debug('  - object is a ProjectSystemUsage')
+            # orb.log.debug('  - object is a ProjectSystemUsage')
             # access will depend on the user's role in the project
             ras = orb.search_exact(cname='RoleAssignment',
                                    assigned_to=user,
@@ -216,10 +220,10 @@ def get_perms(obj, user=None, permissive=False):
             auth_roles = set(['administrator', 'lead_engineer',
                               'systems_engineer'])
             if roles & auth_roles:
-                orb.log.debug('  - user is authorized by role(s) ...')
-                orb.log.debug('    {}'.format(list(roles & auth_roles)))
+                # orb.log.debug('  - user is authorized by role(s) ...')
+                # orb.log.debug('    {}'.format(list(roles & auth_roles)))
                 perms = ['view', 'modify', 'decloak', 'delete']
-                orb.log.debug('    perms: {}'.format(perms))
+                # orb.log.debug('    perms: {}'.format(perms))
                 return perms
         # [4] if none of the above, log the relevant info for debugging ...
         else:
