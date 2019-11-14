@@ -39,6 +39,7 @@ MAIN_VIEWS = dict(
     Discipline=IDENTITY,
     DisciplineProductType=['used_in_discipline', 'relevant_product_type'],
     DisciplineRole=['related_to_discipline', 'related_role'],
+    Flow=['flow_context', 'start_port', 'end_port'],
     HardwareProduct=(PGXN_REQD['HardwareProduct'] + ['public'] + SYSTEM),
     Model=(IDENTITY + ['type_of_model', 'of_thing']),
     ModelFamily=IDENTITY,
