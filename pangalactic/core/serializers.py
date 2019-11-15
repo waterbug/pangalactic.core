@@ -472,8 +472,9 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 for a, val in kw.items():
                     setattr(obj, a, val)
                 objs.append(obj)
-                if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
+                if cname == 'Acu':
                     refresh_componentz_required = True
+                if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                     recompute_parmz_required = True
             elif d['oid'] not in ignores:
                 # orb.log.debug('* creating new object ...')
@@ -489,15 +490,17 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     current_oids.append(obj.oid)
                     if dictify:
                         output['new'].append(obj)
-                    if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
+                    if cname == 'Acu':
                         refresh_componentz_required = True
+                    if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                         recompute_parmz_required = True
                 # else:
                     # orb.log.debug('  object creation failed:')
                     # orb.log.debug('    obj: {}'.format(obj))
             if refresh_componentz_required:
-                refresh_componentz(orb, obj.assembly)
-                refresh_componentz_required = False
+                if getattr(obj, 'assembly', None):
+                    refresh_componentz(orb, obj.assembly)
+                    refresh_componentz_required = False
     orb.db.commit()
     log_txt = '* deserializer:'
     if created:
