@@ -902,8 +902,19 @@ def compute_margin(orb, oid, variable, default=0):
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
         return 'undefined'
-    margin = round_to(((converted_nte - mev) / mev))
-    # orb.log.debug('  ... margin is {}'.format(margin))
+    msg = '- NTE specified for allocation to "{}" -- computing margin ...'
+    alloc_ref = ''
+    if isinstance(allocation_node, orb.classes['Acu']):
+        alloc_ref = (allocation_node.reference_designator or
+                     allocation_node.name or
+                     allocation_node.component.name)
+    elif isinstance(allocation_node, orb.classes['ProjectSystemUsage']):
+        alloc_ref = (allocation_node.system_role or
+                     allocation_node.name or
+                     allocation_node.system.name)
+    orb.log.debug(msg.format(alloc_ref))
+    margin = round_to(((converted_nte - mev) / converted_nte))
+    orb.log.debug('  ... margin is {}%'.format(margin * 100.0))
     return margin
 
 def compute_requirement_margin(orb, oid, default=0):
@@ -981,8 +992,15 @@ def compute_requirement_margin(orb, oid, default=0):
         msg = 'MEV value for {} is 0; cannot compute margin.'.format(
                                                         parameter_id)
         return (allocated_to_oid, parameter_id, nte, nte_units, msg)
-    margin = round_to(((converted_nte - mev) / mev))
-    # orb.log.debug('  ... margin is {}'.format(margin))
+    msg = '  NTE specified for allocation to "{}" -- computing margin ...'
+    alloc_ref = ''
+    if acu:
+        alloc_ref = acu.reference_designator or acu.name or acu.id
+    elif psu:
+        alloc_ref = psu.system_role or psu.name or psu.id
+    orb.log.debug(msg.format(alloc_ref))
+    margin = round_to(((converted_nte - mev) / converted_nte))
+    orb.log.debug('  ... margin is {}%'.format(margin * 100.0))
     return (allocated_to_oid, parameter_id, nte, nte_units, margin)
 
 # the COMPUTES dict maps variable and context id to applicable compute

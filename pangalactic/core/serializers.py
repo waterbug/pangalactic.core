@@ -472,7 +472,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 for a, val in kw.items():
                     setattr(obj, a, val)
                 objs.append(obj)
-                if cname == 'Acu':
+                if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                     refresh_componentz_required = True
                     recompute_parmz_required = True
             elif d['oid'] not in ignores:
@@ -489,7 +489,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     current_oids.append(obj.oid)
                     if dictify:
                         output['new'].append(obj)
-                    if cname == 'Acu':
+                    if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                         refresh_componentz_required = True
                         recompute_parmz_required = True
                 # else:

@@ -457,15 +457,15 @@ class UberORB(object):
         for oid in oid_deletions:
             del parameterz[oid]
         # [1] iterate over current set of performance requirements
-        perf_reqt_oids = [r.oid for r in orb.get_by_type('Requirement')
-                          if r.req_type == 'performance']
-        for req_oid in perf_reqt_oids:
+        perf_reqs = orb.search_exact(cname='Requirement',
+                                     req_type='performance')
+        for req in perf_reqs:
             # compute_requirement_margin() returns a tuple:
             # 0: oid of Acu or PSU to which reqt is allocated
             # 1: id of performance parameter
             # 2: margin [result] (expressed as a %)
             oid, pid, nte, nte_units, result = compute_requirement_margin(
-                                                                orb, req_oid)
+                                                                orb, req.oid)
             if oid:
                 margin_pid = get_parameter_id(pid, 'Margin')
                 nte_pid = get_parameter_id(pid, 'NTE')
@@ -483,12 +483,11 @@ class UberORB(object):
                                                 units=nte_units,
                                                 mod_datetime=str(dtstamp()))
             else:
-                pass
                 # if None was returned for oid, reason for failure will be in
                 # "result"
-                # self.log.debug('        - compute failed for {}:'.format(
-                                                                    # req_oid))
-                # self.log.debug('          {}'.format(result))
+                self.log.debug(' - margin computation failed for requirement:')
+                self.log.debug('   "{}"'.format(req.name))
+                self.log.debug('   computation result: {}'.format(result))
 
     def assign_test_parameters(self, objs):
         """
