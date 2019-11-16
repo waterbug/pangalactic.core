@@ -469,8 +469,8 @@ class UberORB(object):
             if oid:
                 margin_pid = get_parameter_id(pid, 'Margin')
                 nte_pid = get_parameter_id(pid, 'NTE')
-                # self.log.debug('        - {} at {}: {}'.format(pid, oid,
-                                                               # result))
+                self.log.debug('        - {} at {}: {}'.format(pid, oid,
+                                                               result))
                 if not parameterz.get(oid):
                     parameterz[oid] = {}
                 if isinstance(result, (int, float)):

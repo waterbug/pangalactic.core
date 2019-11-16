@@ -227,6 +227,14 @@ def serialize(orb, objs, view=None, include_components=False,
             serialized += serialize(orb, [obj.assigned_to])
             # include Organization object
             serialized += serialize(orb, [obj.role_assignment_context])
+        if isinstance(obj, orb.classes['Requirement']):
+            # include 'computable_form' (a Relation object)
+            if obj.computable_form:
+                serialized += serialize(orb, [obj.computable_form])
+                # include any relevant ParameterRelation objects)
+                if obj.computable_form.correlates_parameters:
+                    for pr in obj.computable_form.correlates_parameters:
+                        serialized += serialize(orb, [pr])
     if person_objs:
         orb.log.debug('  including {} Person objects.'.format(
                                                     len(person_objs)))
@@ -272,6 +280,7 @@ DESERIALIZATION_ORDER = [
                     'Person',
                     'RoleAssignment',
                     'ParameterDefinition',
+                    'ParameterRelation',
                     'PortType',
                     'ProductType',
                     'Mission',
