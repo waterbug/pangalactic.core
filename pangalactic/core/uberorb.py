@@ -1102,6 +1102,7 @@ class UberORB(object):
             info.append('   id: {}, name: {} (oid {})'.format(obj.id, obj.name,
                                                               obj.oid))
             if isinstance(obj, self.classes['Product']):
+                # for Products, delete related psus and asus
                 psus = obj.projects_using_system
                 for psu in psus:
                     info.append('   id: {}, name: {} (oid {})'.format(psu.id,
@@ -1129,6 +1130,16 @@ class UberORB(object):
                         self.db.delete(acu)
                         if assembly.oid in componentz:
                             refresh_assemblies.append(assembly)
+                if isinstance(obj, self.classes['Requirement']):
+                    # delete any related Relation and ParameterRelation objects
+                    rel = obj.computable_form
+                    if rel:
+                        prs = rel.correlates_parameters
+                        if prs:
+                            for pr in prs:
+                                orb.db.delete(pr)
+                        obj.computable_form = None
+                        orb.db.delete(rel)
             if parameterz.get(obj.oid):
                 # NOTE: very important:  remove oid from parameterz
                 del parameterz[obj.oid]
