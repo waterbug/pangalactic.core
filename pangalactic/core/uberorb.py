@@ -1022,6 +1022,16 @@ class UberORB(object):
                     rep_files += r_files
             if rep_files:
                 objs += rep_files
+        reqts = self.search_exact(cname='Requirement', owner=project)
+        if reqts:
+            # include all Relations that are 'computable_form' of a reqt
+            # and their ParameterRelations (rel.correlates_parameters)
+            for reqt in reqts:
+                if reqt.computable_form:
+                    objs.append(reqt.computable_form)
+                    prs = reqt.computable_form.correlates_parameters
+                    if prs:
+                        objs += prs
         # also get Mission, if any, and its components (Acus) -- Activities
         # within the project are already included, since their "owner" is the
         # project ...
