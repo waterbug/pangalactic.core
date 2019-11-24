@@ -43,7 +43,7 @@ from pangalactic.core.test.utils  import gen_test_pvals
 from pangalactic.core.utils.datetimes import dtstamp
 from pangalactic.core.log         import get_loggers
 from pangalactic.core.validation  import get_assembly
-from functools import reduce
+# from functools import reduce
 
 
 class UberORB(object):
@@ -942,25 +942,27 @@ class UberORB(object):
         else:
             return []
 
-    def get_internal_flows_of(self, product):
+    def get_internal_flows_of(self, managed_object):
         """
-        Get all flows between the ports of the components of the specified
-        product, including internal flows between component ports and the ports
-        of the product itself.
+        Get all flows of which the specified ManagedObject is the
+        'flow_context'.
 
         Args:
-            product (Product):  the specified product
+            managed_object (ManagedObject):  the specified object
         """
         # handle exception in case we get something that's not a Product
         try:
-            objs = [product] + [acu.component for acu in product.components]
-            port_oids = [p.oid for p in
-                         reduce(lambda x, y: x+y, [o.ports for o in objs])]
-            Port = orb.classes['Port']
-            Flow = orb.classes['Flow']
-            flows = orb.db.query(Flow).join(Flow.start_port).filter(
-                        Port.oid.in_(port_oids)).join(Flow.end_port).filter(
-                        Port.oid.in_(port_oids)).all()
+            # NOTE:  this deprecated code may be useful for something
+            # objs = [product] + [acu.component for acu in product.components]
+            # port_oids = [p.oid for p in
+                         # reduce(lambda x, y: x+y, [o.ports for o in objs])]
+            # Port = orb.classes['Port']
+            # Flow = orb.classes['Flow']
+            # flows = orb.db.query(Flow).join(Flow.start_port).filter(
+                        # Port.oid.in_(port_oids)).join(Flow.end_port).filter(
+                        # Port.oid.in_(port_oids)).all()
+            flows = self.search_exact(cname='Flow',
+                                      flow_context=managed_object)
             return flows
         except:
             return []
