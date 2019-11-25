@@ -212,14 +212,17 @@ def serialize(orb, objs, view=None, include_components=False,
         ###################################################################
         # NOTE:  Ports and Flows need to be part of a "product definition"
         # abstraction -- i.e., the "white box" model of the product
-        # TODO:  implement white box "product definitions".
-        # For now, include ports here ...
-        if hasattr(obj, 'ports'):
+        # TODO:  implement "white box" vs. "black box" serializations and,
+        # more broadly, white/black box Product objects!  Maybe use a new
+        # 'product_definition' attribute that can be white or black box ...
+        if isinstance(obj, orb.classes['Product']):
+            # + for now, ALWAYS include ports (white box)
             if obj.ports:
                 s_ports = serialize(orb, obj.ports)
                 serialized += s_ports
-        # ... and flows (if including components -- i.e white box)
-        if include_components and getattr(obj, 'components', None):
+            # + for now, ALWAYS include flows (white box)
+            #   NOTE: technically any ManagedObject can be a flow_context but
+            #   as a practical matter, only Products are currently supported
             flows = orb.get_internal_flows_of(obj)
             if flows:
                 s_flows = serialize(orb, flows)
