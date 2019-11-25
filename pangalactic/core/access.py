@@ -230,7 +230,15 @@ def get_perms(obj, user=None, permissive=False):
                 perms = ['view', 'modify', 'decloak', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 return perms
-        # [4] if none of the above, log the relevant info for debugging ...
+        # [4] is it a Port?
+        elif isinstance(obj, orb.classes['Port']):
+            # access will depend on the user's permissions on 'of_product'
+            return get_perms(obj.of_product)
+        # [5] is it a Flow?
+            # access will depend on the user's permissions on 'flow_context'
+        elif isinstance(obj, orb.classes['Flow']):
+            return get_perms(obj.flow_context)
+        # [6] if none of the above, log the relevant info for debugging ...
         else:
             orb.log.debug('  - object type: {}'.format(obj.__class__.__name__))
             orb.log.debug('  - object creator: {}'.format(
