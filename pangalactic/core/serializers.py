@@ -209,17 +209,22 @@ def serialize(orb, objs, view=None, include_components=False,
             scomps = serialize(orb, [acu.component
                                      for acu in obj.components])
             serialized += scomps
-        # be sure to include Ports!
+        ###################################################################
+        # NOTE:  Ports and Flows need to be part of a "product definition"
+        # abstraction -- i.e., the "white box" model of the product
+        # TODO:  implement white box "product definitions".
+        # For now, include ports here ...
         if hasattr(obj, 'ports'):
             if obj.ports:
                 s_ports = serialize(orb, obj.ports)
                 serialized += s_ports
-        # ... and Flows (if including components)!
+        # ... and flows (if including components -- i.e white box)
         if include_components and getattr(obj, 'components', None):
             flows = orb.get_internal_flows_of(obj)
             if flows:
                 s_flows = serialize(orb, flows)
                 serialized += s_flows
+        ###################################################################
         if isinstance(obj, orb.classes['RoleAssignment']):
             # include Role object
             serialized += serialize(orb, [obj.assigned_role])
@@ -372,6 +377,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         # orb.log.info('  {} ref data object(s) found, ignored.'.format(
                                                # new_len - len(serialized)))
     current_oids = orb.get_oids()
+    incoming_oids = [so['oid'] for so in serialized]
     for so in serialized:
         so_cname = so.get('_cname')
         if not so_cname:
@@ -393,6 +399,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             loadable['other'].append(so)
     order = [c for c in DESERIALIZATION_ORDER if c in loadable]
     order.append('other')
+    ports_and_flows_to_be_deleted = []
     for group in order:
         for d in loadable[group]:
             cname = d.get('_cname', '')
@@ -485,6 +492,19 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     refresh_componentz_required = True
                 if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                     recompute_parmz_required = True
+                elif issubclass(cls, orb.classes['Product']):
+                    # NOTE:  this assumes "white box" Product, which includes
+                    # the internals: ports, flows, components.  Removed
+                    # components are covered by deleted Acus; ports and flows
+                    # are handled here ...
+                    for port in obj.ports:
+                        if port.oid not in incoming_oids:
+                            ports_and_flows_to_be_deleted.append(port)
+                    flows = orb.get_internal_flows_of(obj)
+                    if flows:
+                        for flow in flows:
+                            if flow.oid not in incoming_oids:
+                                ports_and_flows_to_be_deleted.append(flow)
             elif d['oid'] not in ignores:
                 # orb.log.debug('* creating new object ...')
                 obj = cls(**kw)
@@ -511,6 +531,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     refresh_componentz(orb, obj.assembly)
                     refresh_componentz_required = False
     orb.db.commit()
+    if ports_and_flows_to_be_deleted:
+        orb.delete(ports_and_flows_to_be_deleted)
     log_txt = '* deserializer:'
     if created:
         orb.log.info('{} new object(s) created: {}'.format(

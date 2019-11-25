@@ -35,6 +35,9 @@ def get_perms(obj, user=None, permissive=False):
     # operations to sync such data are expensive, the data are cached in
     # `state` variables rather than stored in the local db.
     orb.log.info('* get_perms ...')
+    # empty or None objects have no permissions
+    if not obj:
+        return []
     # if obj:
         # cname = obj.__class__.__name__
         # orb.log.debug('  for {} object, id: {}, oid: {}'.format(cname,
