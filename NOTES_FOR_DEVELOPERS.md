@@ -1,5 +1,15 @@
 # PANGALACTIC DEVELOPER NOTES
 
+## Concept of Master Model
+
+* The concept of the **Master Model** is to unify the management of all
+  ontology/db objects that combine to represent the full set of information
+  that is shared (and therefore needs to be synchronized) among the
+  discipline/domain-specific models and views of a product.  These include
+  **Product** (and its subclasses), **Acu**, **Port**, **Flow**,
+  **ProductType**, **ParameterDefinition**, **ParameterContext** and the
+  parameter data structures.
+
 ## Structure of the `pangalactic` Namespace Packages
 
 ### `core`: base pangalactic package: ontology, registry, orb, reference data

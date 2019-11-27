@@ -43,7 +43,7 @@ from pangalactic.core.test.utils  import gen_test_pvals
 from pangalactic.core.utils.datetimes import dtstamp
 from pangalactic.core.log         import get_loggers
 from pangalactic.core.validation  import get_assembly
-# from functools import reduce
+from functools import reduce
 
 
 class UberORB(object):
@@ -952,20 +952,51 @@ class UberORB(object):
         """
         # handle exception in case we get something that's not a Product
         try:
-            # NOTE:  this deprecated code may be useful for something
-            # objs = [product] + [acu.component for acu in product.components]
-            # port_oids = [p.oid for p in
-                         # reduce(lambda x, y: x+y, [o.ports for o in objs])]
-            # Port = orb.classes['Port']
-            # Flow = orb.classes['Flow']
-            # flows = orb.db.query(Flow).join(Flow.start_port).filter(
-                        # Port.oid.in_(port_oids)).join(Flow.end_port).filter(
-                        # Port.oid.in_(port_oids)).all()
             flows = self.search_exact(cname='Flow',
                                       flow_context=managed_object)
             return flows
         except:
             return []
+
+    def get_all_usage_flows(self, usage):
+        """
+        For an assembly component usage (Acu) or a ProjectSystemUsage, get all
+        flows defined to or from its component/system object in the context of
+        its assembly/project object.
+
+        Args:
+            usage (Acu or ProjectSystemUsage):  the specified usage
+        """
+        if isinstance(usage, self.classes['Acu']):
+            assembly = usage.assembly
+            component = usage.component
+            other_objs = [usage.assembly]
+            other_objs += [acu.component for acu in usage.assembly.components
+                           if acu is not usage]
+        elif isinstance(usage, self.classes['ProjectSystemUsage']):
+            assembly = usage.project
+            component = usage.system
+            other_objs = [usage.project]
+            other_objs += [psu.system for psu in usage.project.systems
+                           if psu is not usage]
+        else:
+            return []
+        other_port_oids = [p.oid for p in reduce(lambda x, y: x+y,
+                                        [o.ports for o in other_objs])]
+        comp_port_oids = [p.oid for p in component.ports]
+        Port = orb.classes['Port']
+        Flow = orb.classes['Flow']
+        flows_from = orb.db.query(Flow).filter_by(
+                        flow_context=assembly).join(Flow.start_port).filter(
+                        Port.oid.in_(comp_port_oids)).join(
+                        Flow.end_port).filter(Port.oid.in_(
+                        other_port_oids)).all()
+        flows_to = orb.db.query(Flow).filter_by(
+                        flow_context=assembly).join(Flow.start_port).filter(
+                        Port.oid.in_(other_port_oids)).join(
+                        Flow.end_port).filter(Port.oid.in_(
+                        comp_port_oids)).all()
+        return flows_from + flows_to
 
     def get_objects_for_project(self, project):
         """
@@ -1103,8 +1134,19 @@ class UberORB(object):
                 continue
             info.append('   id: {}, name: {} (oid {})'.format(obj.id, obj.name,
                                                               obj.oid))
+            if isinstance(obj, (self.classes['Acu'],
+                                self.classes['ProjectSystemUsage'])):
+                # delete any related flows to/from its component/system in
+                # the context of its assembly/project
+                flows = self.get_all_usage_flows(obj)
+                for flow in flows:
+                    info.append('   id: {}, name: {} (oid {})'.format(
+                                                                    flow.id,
+                                                                    flow.name,
+                                                                    flow.oid))
+                    orb.db.delete(flow)
             if isinstance(obj, self.classes['Product']):
-                # for Products, delete related psus and asus
+                # for Products, delete related acus, psus, and flows
                 psus = obj.projects_using_system
                 for psu in psus:
                     info.append('   id: {}, name: {} (oid {})'.format(psu.id,
@@ -1132,6 +1174,14 @@ class UberORB(object):
                         self.db.delete(acu)
                         if assembly.oid in componentz:
                             refresh_assemblies.append(assembly)
+                flows = self.get_internal_flows_of(obj)
+                if flows:
+                    for flow in flows:
+                        info.append('   id: {}, name: {} (oid {})'.format(
+                                                                    flow.id,
+                                                                    flow.name,
+                                                                    flow.oid))
+                        orb.db.delete(flow)
                 if isinstance(obj, self.classes['Requirement']):
                     # delete any related Relation and ParameterRelation objects
                     rel = obj.computable_form
