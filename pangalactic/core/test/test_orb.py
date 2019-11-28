@@ -193,7 +193,7 @@ class OrbTest(unittest.TestCase):
                 value['port_of_product'] = 'test:twanger'
                 value['type_of_port'] = 'pgefobjects:PortType.electrical_power'
         expected = dict(
-            length=5,
+            length=7,
             twanger_id=obj.id,
             twanger_parameters=serialize_parms(parameterz.get(obj.oid, {})),
             twanger_product_type=obj.product_type.oid,
@@ -440,7 +440,7 @@ class OrbTest(unittest.TestCase):
         mev = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
         perf_reqt = orb.get('test:OTHER:Spacecraft-Mass')
         nte = perf_reqt.req_maximum_value
-        expected = round_to(((nte - mev) / mev))
+        expected = round_to(((nte - mev) / nte))
         self.assertEqual(expected, value)
 
     def test_23_compute_requirement_margin(self):
@@ -452,7 +452,7 @@ class OrbTest(unittest.TestCase):
         mev = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
         perf_reqt = orb.get('test:OTHER:Spacecraft-Mass')
         nte = perf_reqt.req_maximum_value
-        margin = round_to(((nte - mev) / mev))
+        margin = round_to(((nte - mev) / nte))
         # expected output is (oid of allocated node, parameter id, margin)
         expected = ('test:OTHER:system-1', 'm', nte, perf_reqt.req_units, margin)
         self.assertEqual(expected, value)
