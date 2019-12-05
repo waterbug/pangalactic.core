@@ -10,6 +10,11 @@
   **ProductType**, **ParameterDefinition**, **ParameterContext** and the
   parameter data structures.
 
+  Specifically, this is needed to deal with computed product parameters (and
+  related Requirements) that may be assigned to Ports, Flows, etc. -- this will
+  require some kind of "Product Definition" or "Master Model" semantic, to
+  manage the total configuration of a product and keep it in sync.
+
 ## Structure of the `pangalactic` Namespace Packages
 
 ### `core`: base pangalactic package: ontology, registry, orb, reference data
@@ -121,14 +126,18 @@
     icon_type:        (str)  suffix for platform-specific icons [e.g., '.ico']
     last_path:        (str)  most recent path in file selections
     local_user_oid:   (str)  oid of Person object for local user 
-    mode:             (str)  current Pangalaxian gui mode (e.g. 'system')
-    product:          (str)  oid of currently selected Product
+    mode:             (str)  current Pangalaxian gui mode
+                             ('system', 'component', 'db', or 'data')
+    product:          (str)  oid of currently selected Product -- refers to the
+                             product selected in 'product modeler'
     project:          (str)  oid of currently selected Project
     role_oids[4]:     (dict) maps names of Roles to their oids
     synced[5]:        (bool) keeps track of whether session has been synced
     synced_oids[6]:   (list) oids of user-created objects that have been synced
     synced_projects[7]: (list) oids of projects that have been synced
     sys_trees[8]:     (dict) maps project ids to system tree attributes
+    system:           (str)  oid of currently selected system (Product) --
+                             refers to the product selected in 'system modeler'
     userid:           (str)  most recent userid used in login
     version:          (str)  version of client
     width:            (int)  current pixel width of pangalaxian gui

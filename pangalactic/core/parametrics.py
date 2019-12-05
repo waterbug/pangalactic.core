@@ -527,6 +527,15 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
         # orb.log.debug('  "{}" is computed ...'.format(pid))
         # look up compute function -- in the future, there may be a Relation
         # expression, found using the ParameterRelation relationship
+        if not parameterz.get(oid, {}).get(variable):
+            # if object does not have the base parameter (variable), the
+            # computed parameter has no meaning for it
+            obj_parms = parameterz.get(oid)
+            if obj_parms and obj_parms.get(pid):
+                # if the object has the computed parameter, it is invalid;
+                # delete it ...
+                del obj_parms[pid]
+            return val
         compute = COMPUTES.get((variable, context_id))
         if compute:
             # orb.log.debug('  compute function is {!s}'.format(getattr(
@@ -534,7 +543,7 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
             val = compute(orb, oid, variable) or 0.0
             # orb.log.debug('  value is {}'.format(val))
         else:
-            pass
+            return val
             # orb.log.debug('  compute function not found.')
             # val = 'undefined'
         dims = pdz.get('dimensions')

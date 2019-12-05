@@ -13,15 +13,6 @@ The Pan Galactic Meta Object Registry
 # [DONE] generate registry schemas from kb classes + properties
 
 # Python
-from __future__ import print_function
-try:
-    # Python 2
-    from __builtin__ import str as builtin_str
-except ImportError:
-    # Python 3
-    from builtins import str as builtin_str
-from builtins import range
-from builtins import object
 import glob, os, pkgutil, shutil
 from collections import OrderedDict
 
@@ -598,7 +589,7 @@ class PanGalacticRegistry(object):
             # self.log.debug('    ->  base class: %s' % str(base_id))
             # self.log.debug('    ->  class_dict: %s' % str(class_dict))
             # create class
-            self.classes[cname] = type(builtin_str(cname), (base_class,),
+            self.classes[cname] = type(str(cname), (base_class,),
                                        class_dict)
         # generate all tables ...
         Base.metadata.create_all(self.db_engine)

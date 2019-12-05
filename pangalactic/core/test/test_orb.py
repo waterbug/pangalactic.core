@@ -506,6 +506,18 @@ class OrbTest(unittest.TestCase):
                     ]
         self.assertEqual(expected, value)
 
+    def test_25_deserialize_object_with_modified_parameters(self):
+        """
+        CASE:  deserialize an object with modified parameters
+        """
+        # initial state of object was already deserialized in test 18
+        oid = parametrized_test_objects[0]['oid']
+        obj = orb.get(oid)
+        parameters = parametrized_test_objects[0]['parameters']
+        value = parameterz[obj.oid]
+        expected = parameters
+        self.assertEqual(expected, value)
+
     def test_50_write_mel(self):
         """
         CASE:  test output of mel_writer

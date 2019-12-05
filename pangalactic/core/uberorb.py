@@ -433,12 +433,14 @@ class UberORB(object):
         # default descriptive contexts:  CBE, MEV
         d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or []
         variables = config.get('variables', ['m', 'P', 'R_D']) or []
-        # TODO:  make this more efficient by iterating over only the "top
-        # level" assembly oids, since _compute_pval is recursive and will
+        # NOTE: this iterates only over assembly oids (i.e., keys in the
+        # 'componentz' dict), since _compute_pval is recursive and will
         # recompute all lower-level component/subassembly values in each pass
+        # NOTE: a further implication is that non-products (e.g. Port,
+        # PortTemplate, etc.) DO NOT HAVE COMPUTED PARAMETERS ...
         for context in d_contexts:
             for variable in variables:
-                for oid in parameterz:
+                for oid in componentz:
                     _compute_pval(self, oid, variable, context)
         # Margins for all performance requirements
         # [0] Remove any previously computed performance requirements (NTEs and
@@ -579,9 +581,10 @@ class UberORB(object):
             i_objs = deserialize(self, [so for so in missing_i],
                                  include_refdata=True,
                                  force_no_recompute=True)
-            for o in i_objs:
-                self.db.add(o)
-            self.db.commit()
+            self.save(i_objs)
+            # for o in i_objs:
+                # self.db.add(o)
+            # self.db.commit()
         admin = self.get('pgefobjects:admin')
         pgana = self.get('pgefobjects:PGANA')
         self.log.info('  + initial reference data loaded.')
@@ -590,12 +593,13 @@ class UberORB(object):
         if missing_p:
             self.log.debug('  + missing some reference parameters/contexts:')
             self.log.debug('  {}'.format([so['oid'] for so in missing_p]))
-            i_objs = deserialize(self, [so for so in missing_p],
+            p_objs = deserialize(self, [so for so in missing_p],
                                  include_refdata=True,
                                  force_no_recompute=True)
-            for o in i_objs:
-                self.db.add(o)
-            self.db.commit()
+            self.save(p_objs)
+            # for o in p_objs:
+                # self.db.add(o)
+            # self.db.commit()
         # 2:  load balance of reference data
         missing_c = [so for so in refdata.core if so['oid'] not in oids]
         objs = []
@@ -624,7 +628,8 @@ class UberORB(object):
                          uncook_datetime(mod_dts.get(so['oid']))))] 
         if updated_r:
             self.log.debug('    updates found ...')
-            deserialize(self, updated_r, force_no_recompute=True)
+            # deserialize(self, updated_r, force_no_recompute=True)
+            deserialize(self, updated_r)
             self.log.debug('    updates completed.')
         else:
             self.log.debug('    no updates found.')

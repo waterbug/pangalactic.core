@@ -1,7 +1,9 @@
 """
 PanGalactic reference data
 """
+from pangalactic.core.utils.datetimes import dtstamp
 epoch = '2017-01-01 00:00:00'
+dtnow = str(dtstamp())
 
 
 initial = [
@@ -322,6 +324,30 @@ pdc = [
     'dimensions': 'frequency',
     'range_datatype': 'float',
     'description': 'Frequency of uplink signal'},
+
+{   '_cname': 'ParameterDefinition',
+    'oid': 'pgef:ParameterDefinition.input',
+    'id': 'input',
+    'name': 'Input',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': dtnow,
+    'mod_datetime': dtnow,
+    'dimensions': '',
+    'range_datatype': 'bool',
+    'description': 'Intended for input only.'},
+
+{   '_cname': 'ParameterDefinition',
+    'oid': 'pgef:ParameterDefinition.output',
+    'id': 'output',
+    'name': 'Output',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': dtnow,
+    'mod_datetime': dtnow,
+    'dimensions': '',
+    'range_datatype': 'bool',
+    'description': 'Intended for output only.'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.CBE',
@@ -1864,10 +1890,14 @@ dict(
        'V':
          {'value': 28,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'input':
+         {'value': True,
+          'mod_datetime': dtnow,
+          'units': ''}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': dtnow
     },
 
 {   '_cname': 'PortTemplate',
@@ -1881,10 +1911,14 @@ dict(
        'V':
          {'value': 28,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'output':
+         {'value': True,
+          'mod_datetime': dtnow,
+          'units': ''}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': dtnow
     },
 
 {   '_cname': 'PortTemplate',
@@ -1915,10 +1949,14 @@ dict(
        'V':
          {'value': 12,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'input':
+         {'value': True,
+          'mod_datetime': dtnow,
+          'units': ''}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': dtnow
     },
 
 {   '_cname': 'PortTemplate',
@@ -1932,10 +1970,14 @@ dict(
        'V':
          {'value': 12,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'output':
+         {'value': True,
+          'mod_datetime': dtnow,
+          'units': ''}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': dtnow
     },
 
 {   '_cname': 'PortTemplate',
@@ -1966,10 +2008,14 @@ dict(
        'V':
          {'value': 5,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'input':
+         {'value': True,
+          'mod_datetime': dtnow,
+          'units': ''}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': dtnow
     },
 
 {   '_cname': 'PortTemplate',
@@ -1983,10 +2029,14 @@ dict(
        'V':
          {'value': 5,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'output':
+         {'value': True,
+          'mod_datetime': dtnow,
+          'units': ''}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': dtnow
     },
 
 {   '_cname': 'PortTemplate',
@@ -2017,10 +2067,14 @@ dict(
        'V':
          {'value': 3.3,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'input':
+         {'value': True,
+          'mod_datetime': dtnow,
+          'units': ''}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': dtnow
     },
 
 {   '_cname': 'PortTemplate',
@@ -2034,10 +2088,14 @@ dict(
        'V':
          {'value': 3.3,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'output':
+         {'value': True,
+          'mod_datetime': dtnow,
+          'units': ''}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': dtnow
     }
 
 ]
