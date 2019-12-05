@@ -499,6 +499,9 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
     "public" `get_pval` function should always be used by other modules (which
     will access the cached pre-computed parameter values).
 
+    NOTE: this function will return 0.0 if the parameter is not a computed
+    parameter or is not defined for the specified object.
+
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Identifiable that has the parameter
@@ -551,7 +554,7 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
         if val != 'undefined':
             parameterz[oid][pid] = dict(value=val, units=units,
                                         mod_datetime=str(dtstamp()))
-    else:
+    elif oid in parameterz:
         # msg = '  "{}" is not computed; getting value ...'.format(pid)
         # orb.log.debug(msg)
         parm = parameterz[oid].get(pid) or {}
