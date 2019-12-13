@@ -326,28 +326,16 @@ pdc = [
     'description': 'Frequency of uplink signal'},
 
 {   '_cname': 'ParameterDefinition',
-    'oid': 'pgef:ParameterDefinition.input',
-    'id': 'input',
-    'name': 'Input',
+    'oid': 'pgef:ParameterDefinition.directionality',
+    'id': 'directionality',
+    'name': 'Directionality',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'create_datetime': dtnow,
     'mod_datetime': dtnow,
     'dimensions': '',
-    'range_datatype': 'bool',
-    'description': 'Intended for input only.'},
-
-{   '_cname': 'ParameterDefinition',
-    'oid': 'pgef:ParameterDefinition.output',
-    'id': 'output',
-    'name': 'Output',
-    'owner': 'pgefobjects:PGANA',
-    'creator': 'pgefobjects:admin',
-    'create_datetime': dtnow,
-    'mod_datetime': dtnow,
-    'dimensions': '',
-    'range_datatype': 'bool',
-    'description': 'Intended for output only.'},
+    'range_datatype': 'str',
+    'description': 'Whether a Port is "input", "output", or bidirectional.'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.CBE',
@@ -1873,52 +1861,14 @@ dict(
        'V':
          {'value': 28,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'directionality':
+         {'value': '',
+          'mod_datetime': epoch,
+          'units': ''}
           },
     'create_datetime': epoch,
     'mod_datetime': epoch
-    },
-
-{   '_cname': 'PortTemplate',
-    'oid': 'pgefobjects:PortTemplate.electrical_power.28V.in',
-    'description': '28V electrical power input port',
-    'id': 'electrical_power.28V.in',
-    'name': '28V Electrical Power Port (input)',
-    'abbreviation': '28V(in)',
-    'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 28,
-          'mod_datetime': epoch,
-          'units': 'V'},
-       'input':
-         {'value': True,
-          'mod_datetime': dtnow,
-          'units': ''}
-          },
-    'create_datetime': epoch,
-    'mod_datetime': dtnow
-    },
-
-{   '_cname': 'PortTemplate',
-    'oid': 'pgefobjects:PortTemplate.electrical_power.28V.out',
-    'description': '28V electrical power output port',
-    'id': 'electrical_power.28V.out',
-    'name': '28V Electrical Power Port (output)',
-    'abbreviation': '28V(out)',
-    'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 28,
-          'mod_datetime': epoch,
-          'units': 'V'},
-       'output':
-         {'value': True,
-          'mod_datetime': dtnow,
-          'units': ''}
-          },
-    'create_datetime': epoch,
-    'mod_datetime': dtnow
     },
 
 {   '_cname': 'PortTemplate',
@@ -1932,52 +1882,14 @@ dict(
        'V':
          {'value': 12,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'directionality':
+         {'value': '',
+          'mod_datetime': epoch,
+          'units': ''}
           },
     'create_datetime': epoch,
     'mod_datetime': epoch
-    },
-
-{   '_cname': 'PortTemplate',
-    'oid': 'pgefobjects:PortTemplate.electrical_power.12V.in',
-    'description': '12V electrical power input port',
-    'id': 'electrical_power.12V.in',
-    'name': '12V Electrical Power Port (input)',
-    'abbreviation': '12V(in)',
-    'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 12,
-          'mod_datetime': epoch,
-          'units': 'V'},
-       'input':
-         {'value': True,
-          'mod_datetime': dtnow,
-          'units': ''}
-          },
-    'create_datetime': epoch,
-    'mod_datetime': dtnow
-    },
-
-{   '_cname': 'PortTemplate',
-    'oid': 'pgefobjects:PortTemplate.electrical_power.12V.out',
-    'description': '12V electrical power output port',
-    'id': 'electrical_power.12V.out',
-    'name': '12V Electrical Power Port (output)',
-    'abbreviation': '12V(out)',
-    'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 12,
-          'mod_datetime': epoch,
-          'units': 'V'},
-       'output':
-         {'value': True,
-          'mod_datetime': dtnow,
-          'units': ''}
-          },
-    'create_datetime': epoch,
-    'mod_datetime': dtnow
     },
 
 {   '_cname': 'PortTemplate',
@@ -1991,52 +1903,14 @@ dict(
        'V':
          {'value': 5,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'directionality':
+         {'value': '',
+          'mod_datetime': epoch,
+          'units': ''}
           },
     'create_datetime': epoch,
     'mod_datetime': epoch
-    },
-
-{   '_cname': 'PortTemplate',
-    'oid': 'pgefobjects:PortTemplate.electrical_power.5V.in',
-    'description': '5V electrical power input port',
-    'id': 'electrical_power.5V.in',
-    'name': '5V Electrical Power Port (input)',
-    'abbreviation': '5V(in)',
-    'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 5,
-          'mod_datetime': epoch,
-          'units': 'V'},
-       'input':
-         {'value': True,
-          'mod_datetime': dtnow,
-          'units': ''}
-          },
-    'create_datetime': epoch,
-    'mod_datetime': dtnow
-    },
-
-{   '_cname': 'PortTemplate',
-    'oid': 'pgefobjects:PortTemplate.electrical_power.5V.out',
-    'description': '5V electrical power output port',
-    'id': 'electrical_power.5V.out',
-    'name': '5V Electrical Power Port (output)',
-    'abbreviation': '5V(out)',
-    'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 5,
-          'mod_datetime': epoch,
-          'units': 'V'},
-       'output':
-         {'value': True,
-          'mod_datetime': dtnow,
-          'units': ''}
-          },
-    'create_datetime': epoch,
-    'mod_datetime': dtnow
     },
 
 {   '_cname': 'PortTemplate',
@@ -2050,54 +1924,15 @@ dict(
        'V':
          {'value': 3.3,
           'mod_datetime': epoch,
-          'units': 'V'}
+          'units': 'V'},
+       'directionality':
+         {'value': '',
+          'mod_datetime': epoch,
+          'units': ''}
           },
     'create_datetime': epoch,
     'mod_datetime': epoch
-    },
-
-{   '_cname': 'PortTemplate',
-    'oid': 'pgefobjects:PortTemplate.electrical_power.3.3V.in',
-    'description': '3.3V electrical power input port',
-    'id': 'electrical_power.3.3V.in',
-    'name': '3.3V Electrical Power Port (input)',
-    'abbreviation': '3.3V(in)',
-    'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 3.3,
-          'mod_datetime': epoch,
-          'units': 'V'},
-       'input':
-         {'value': True,
-          'mod_datetime': dtnow,
-          'units': ''}
-          },
-    'create_datetime': epoch,
-    'mod_datetime': dtnow
-    },
-
-{   '_cname': 'PortTemplate',
-    'oid': 'pgefobjects:PortTemplate.electrical_power.3.3V.out',
-    'description': '3.3V electrical power output port',
-    'id': 'electrical_power.3.3V.out',
-    'name': '3.3V Electrical Power Port (output)',
-    'abbreviation': '3.3V(out)',
-    'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 3.3,
-          'mod_datetime': epoch,
-          'units': 'V'},
-       'output':
-         {'value': True,
-          'mod_datetime': dtnow,
-          'units': ''}
-          },
-    'create_datetime': epoch,
-    'mod_datetime': dtnow
     }
-
 ]
 
 core_objs = {so['oid'] : so for so in core}

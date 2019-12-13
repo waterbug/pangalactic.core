@@ -337,8 +337,9 @@ def intconv(val):
     """
     return int(float(val or 0))
 
-# SELECTABLE_VALUES:  Dictionaries of values for Properties with a finite range
-# of selectable values -- the form is:  {[combo-box string value] : value}
+# SELECTABLE_VALUES:  Dictionaries of values for Properties or Parameters with
+# a finite range of selectable values -- the form is:
+# ([combo-box string value] : value)
 SELECTABLE_VALUES = dict(
     range_datatype=OrderedDict([
         ('float', float),
@@ -346,8 +347,13 @@ SELECTABLE_VALUES = dict(
         ('text', str),
         ('boolean', bool)]),
     dimensions=OrderedDict(
-        [(dim, dim) for dim in in_si])
-        )
+        [(dim, dim) for dim in in_si]),
+    directionality=OrderedDict([
+        # null -> bidirectional
+        ('', ''),
+        ('input', 'input'),
+        ('output', 'output')
+        ]))
 
 # TEXT_PROPERTIES:  Properties that get a TextWidget interface
 TEXT_PROPERTIES = ['comment', 'description', 'rationale', 'purpose']

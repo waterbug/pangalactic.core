@@ -137,8 +137,9 @@
     synced_projects[7]: (list) oids of projects that have been synced
     sys_trees[8]:     (dict) maps project ids to system tree attributes
     system:           (str)  oid of currently selected system (Product or
-                             Project) -- may be selected in the system tree or
-                             in the 'system modeler' window
+                             Project) -- may be selected by clicking on an item
+                             in the system tree or drilling down into
+                             (double-clicking on) a block in the diagram
     userid:           (str)  most recent userid used in login
     version:          (str)  version of client
     width:            (int)  current pixel width of pangalaxian gui
