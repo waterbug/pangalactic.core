@@ -234,13 +234,22 @@ class UberORB(object):
         # basically, versionables == {Product and all its subclasses}
         self.versionables = [cname for cname in self.classes if 'version' in
                              self.schemas[cname]['field_names']]
-        self.load_reference_data()
-        # build the 'componentz' runtime cache ...
-        self._build_componentz_cache()
-        self._load_parmz()
-        self._load_diagramz()
-        # populate the 'parmz_by_dimz' runtime cache ...
+        # [1] XXX IMPORTANT!  Create parameter definitions cache ('parm_defz')
+        # -- if new parameter definitions are created in load_reference_data(),
+        # the deserializer will update 'parm_defz' and 'parmz_by_dimz' caches
+        create_parm_defz(self)
         create_parmz_by_dimz(self)
+        # [2] build the 'componentz' runtime cache ...
+        self._build_componentz_cache()
+        # *** NOTE ***********************************************************
+        # run _load_parmz() before loading ref data, since ref data may update
+        # both parameter definitions and assigned parameters that were loaded
+        # from the parameters cache (parameters.json)
+        # ********************************************************************
+        self._load_parmz()
+        # [3] load (and update) ref data ...
+        self.load_reference_data()
+        self._load_diagramz()
         # get the hdf5 store or create a new one ...
         # self.store_path = os.path.join(self.home, 'datasets.h5')
         # self.data_store = pandas.io.pytables.HDFStore(self.store_path)
@@ -401,7 +410,7 @@ class UberORB(object):
             with open(json_path) as f:
                 serialized_parms = json.loads(f.read())
             for oid, ser_parms in serialized_parms.items():
-                deserialize_parms(oid, ser_parms)
+                deserialize_parms(self, oid, ser_parms)
             self.recompute_parmz()
             # self.log.debug('        parameterz cache loaded and recomputed.')
         # else:
@@ -600,7 +609,25 @@ class UberORB(object):
             # for o in p_objs:
                 # self.db.add(o)
             # self.db.commit()
-        # 2:  load balance of reference data
+        # 2:  check for updates to parameter definitions and contexts
+        self.log.debug('  + checking for updates to parameter definitions ...')
+        all_pds = refdata.pdc
+        all_pd_oids = [so['oid'] for so in all_pds]
+        # get mod_datetimes of all current ref data objects
+        pd_mod_dts = self.get_mod_dts(oids=all_pd_oids)
+        # compare them to all newly imported refdata objects
+        updated_pds = [so for so in all_pds
+                       if (uncook_datetime(so.get('mod_datetime')) and
+                           uncook_datetime(pd_mod_dts.get(so['oid'])) and
+                           (uncook_datetime(so.get('mod_datetime')) >
+                           uncook_datetime(pd_mod_dts.get(so['oid']))))] 
+        if updated_pds:
+            self.log.debug('    {} updates found ...'.format(len(updated_pds)))
+            deserialize(self, updated_pds, include_refdata=True)
+            self.log.debug('    parameter definition updates completed.')
+        else:
+            self.log.debug('    no updates found.')
+        # 4:  load balance of reference data
         missing_c = [so for so in refdata.core if so['oid'] not in oids]
         objs = []
         if missing_c:
@@ -614,9 +641,9 @@ class UberORB(object):
                 o.owner = pgana
                 o.creator = o.modifier = admin
             self.db.add(o)
-        # 3:  check for updates to reference data
+        # 5:  check for updates to reference data other than parameter defs
         self.log.debug('  + checking for updates to reference data ...')
-        all_ref = refdata.initial + refdata.core + refdata.pdc
+        all_ref = refdata.initial + refdata.core
         all_ref_oids = [so['oid'] for so in all_ref]
         # get mod_datetimes of all current ref data objects
         mod_dts = self.get_mod_dts(oids=all_ref_oids)
@@ -627,15 +654,12 @@ class UberORB(object):
                          (uncook_datetime(so.get('mod_datetime')) >
                          uncook_datetime(mod_dts.get(so['oid']))))] 
         if updated_r:
-            self.log.debug('    updates found ...')
-            # deserialize(self, updated_r, force_no_recompute=True)
-            deserialize(self, updated_r)
+            self.log.debug('    {} updates found ...'.format(len(updated_r)))
+            deserialize(self, updated_r, include_refdata=True)
             self.log.debug('    updates completed.')
         else:
             self.log.debug('    no updates found.')
-        # 4:  XXX IMPORTANT!  Create parameter definitions cache ('parm_defz')
-        create_parm_defz(self)
-        # 5:  delete deprecated reference data
+        # 6:  delete deprecated reference data
         #     **********************************************************
         #     NOTE:  DON'T DO THIS STEP UNTIL ALL DATA RELATED TO THE
         #     DEPRECATED DATA HAS BEEN REMOVED FROM THE CURRENT DATABASE
@@ -670,7 +694,9 @@ class UberORB(object):
         for obj in objs:
             cname = obj.__class__.__name__
             oid = getattr(obj, 'oid', None)
-            if isinstance(obj, self.classes['Modelable']):
+            # if the object is used in any assemblies, recompute parameters
+            # TODO:  target the recompute to the specific assemblies ...
+            if getattr(obj, 'where_used', []):
                 recompute_required = True
             self.log.debug('* orb.save')
             new = bool(oid in self.new_oids) or not self.get(oid)
@@ -703,10 +729,8 @@ class UberORB(object):
             elif cname == 'ParameterDefinition':
                 # NOTE:  all Parameter Definitions are public
                 obj.public = True
+                update_parm_defz(self, obj)
                 update_parmz_by_dimz(self, obj)
-                pd_context = getattr(obj, 'context', None)
-                if pd_context:
-                    update_parm_defz(self, obj, pd_context)
         # self.log.debug('  orb.save:  committing db session.')
         self.db.commit()
         if recompute_required and recompute:

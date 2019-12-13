@@ -2,6 +2,7 @@
 Functions to support Parameters and Relations
 """
 from collections import namedtuple
+from copy        import deepcopy
 from decimal     import Decimal
 from math        import floor, fsum, log10
 
@@ -126,6 +127,18 @@ def get_parameter_description(variable_desc, context_desc):
         desc += ' [' + context_desc + ']'
     return desc
 
+def split_pid(pid):
+    """
+    Extract the variable and context from a parameter id.
+
+    Args:
+        pid (str):  parameter id
+    """
+    if pid.endswith(']'):
+        return pid.split('[')[0], pid.split('[')[1][:-1]
+    else:
+        return pid, ''
+
 def create_parm_defz(orb):
     """
     Create the `parm_defz` cache of ParameterDefinitions, in the format:
@@ -194,7 +207,8 @@ def add_context_parm_def(orb, pd, c):
 
 def update_parm_defz(orb, pd):
     """
-    Update the `parm_defz` cache when a new ParameterDefinition is created.
+    Update the `parm_defz` cache when a new ParameterDefinition is created or
+    modified.
 
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
@@ -267,10 +281,11 @@ def add_parameter(orb, oid, variable, context=None):
         parameterz[oid] = {}
     pid = get_parameter_id(variable, context)
     # orb.log.debug('[orb] add_parameter "{!s}"'.format(pid))
+    # [1] check if object already has that parm
     if pid in parameterz[oid]:
         # if the object already has that parameter, do nothing
-        return
-    # check for ParameterDefinition of base variable in db
+        return False
+    # [2] check for ParameterDefinition of base variable in db
     pd = orb.get(get_parameter_definition_oid(variable))
     if not pd:
         # for now, if no ParameterDefinition exists for pid, pass
@@ -278,7 +293,19 @@ def add_parameter(orb, oid, variable, context=None):
         orb.log.debug(
             '* add_parameter: variable "{!s}" is not defined.'.format(
                                                              variable))
-        return
+        return False
+    # [3] if pid is context parm, check if its base parm is assigned ...
+    if context and not parameterz[oid].get(variable):
+        # (1) the pid is a context parameter AND
+        # (2) the corresponding base parameter has not been assigned
+        # ... which should not happen very often, so debug logging is ok
+        orb.log.debug(
+            '* add_parameter: base parameter "{!s}" not assigned.'.format(
+                                                             variable))
+        orb.log.debug(
+            '                 so cannot add context paarameter {!s}'.format(
+                                                                        pid))
+        return False
     pdz = parm_defz.get(pid)
     if not pdz:
         # if not in parm_defz, add it:
@@ -316,6 +343,7 @@ def add_parameter(orb, oid, variable, context=None):
         value=value,   # consistent with datatype defined in `range_datatype`
         units=in_si.get(dims),   # SI units consistent with `dimensions`
         mod_datetime=str(dtstamp()))
+    return True
 
 def add_default_parameters(orb, obj):
     """
@@ -389,6 +417,26 @@ def delete_parameter(orb, oid, pid):
     else:
         # object doesn't have any parameters; ignore
         return
+
+def repair_parms(parms):
+    """
+    Repair the parameters dictionary for an object by removing any invalid
+    context parameters (context parameters should not be present unless their
+    base [variable] parameter is present).
+
+    Args:
+        orb (Uberorb):  singleton imported from p.node.uberorb
+        parms (dict):  parameters dict of an object
+    """
+    if not parms:
+        # this is a no-op if the dict is empty
+        return
+    new_parms = deepcopy(parms)
+    for pid in parms:
+        # remove any context parms for which the base parm is not present
+        if pid.endswith(']') and not pid.split('[')[0] in parms:
+            del new_parms[pid]
+    return new_parms
 
 def get_pval(orb, oid, pid, allow_nan=False):
     """
@@ -561,7 +609,8 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
         val = parm.get('value') or 0.0
     return val
 
-def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
+def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True,
+             recompute=True):
     """
     Set the value of a parameter instance for the specified object to the
     specified value, as expressed in the specified units (or in base units if
@@ -603,12 +652,11 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
     ######################################################################
     parm = parameterz.get(oid, {}).get(pid, {})
     if not parm:
-        # NOTE:  this is the case if
-        # (1) that oid is not in parameterz or
-        # (2) the object with that oid doesn't have that parameter
-        # ... which should not happen very often, so debug logging is ok
-        orb.log.debug('  parameter not found; adding.')
-        add_parameter(orb, oid, pd['variable'], context=pd['context'])
+        # NOTE:  add_parameter() will check if base parameter is assigned
+        if add_parameter(orb, oid, pd['variable'], context=pd['context']):
+            orb.log.debug('  parameter not found; added.')
+        else:
+            orb.log.debug('  parameter could not be added (see log).')
     try:
         # cast value to range_datatype before setting
         pdz = parm_defz.get(pid)
@@ -618,7 +666,7 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         dt_name = pdz['range_datatype']
         dtype = DATATYPES[dt_name]
         value = dtype(value)
-        if units is not None and units != "$":
+        if units is not None and units not in ["$", "%"]:
             # TODO:  validate units (ensure they are consistent with dims)
             try:
                 quan = value * ureg.parse_expression(units)
@@ -645,7 +693,8 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         # dts = str(mod_datetime)
         # orb.log.debug('  setting value: {}'.format(value))
         # orb.log.debug('  setting mod_datetime: "{}"'.format(dts))
-        orb.recompute_parmz()
+        if recompute:
+            orb.recompute_parmz()
     except:
         orb.log.debug('  *** set_pval() failed:')
         msg = '      value {} of datatype {}'.format(value, type(value))
@@ -810,6 +859,8 @@ def compute_mev(orb, oid, variable):
         default (any): a value to be returned if the parameter is not found
     """
     # orb.log.debug('* compute_mev "{}": "{}"'.format(oid, variable))
+    if oid not in parameterz or variable not in parameterz[oid]:
+        return 0.0
     ctgcy_val = get_pval(orb, oid, variable + '[Ctgcy]')
     if not ctgcy_val:
         # orb.log.debug('  contingency not set --')

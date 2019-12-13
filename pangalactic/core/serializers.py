@@ -11,7 +11,10 @@ from sqlalchemy import ForeignKey
 from pangalactic.core.utils.meta  import (asciify, cookers, uncookers,
                                           cook_datetime, uncook_datetime)
 from pangalactic.core.utils.datetimes import earlier
-from pangalactic.core.parametrics import parameterz, refresh_componentz
+from pangalactic.core.parametrics import (parameterz, refresh_componentz,
+                                          repair_parms, set_pval,
+                                          update_parm_defz,
+                                          update_parmz_by_dimz)
 
 
 def serialize_parms(obj_parms):
@@ -244,37 +247,67 @@ def serialize(orb, objs, view=None, include_components=False,
                     for pr in obj.computable_form.correlates_parameters:
                         serialized += serialize(orb, [pr])
     if person_objs:
-        orb.log.debug('  including {} Person objects.'.format(
-                                                    len(person_objs)))
+        # orb.log.debug('  including {} Person objects.'.format(
+                                                    # len(person_objs)))
         serialized += serialize(orb, person_objs)
     if org_objs:
         # values of "owner" attributes
-        orb.log.debug('  including {} Organization objects.'.format(
-                                                    len(org_objs)))
+        # orb.log.debug('  including {} Organization objects.'.format(
+                                                    # len(org_objs)))
         serialized += serialize(orb, org_objs)
     if product_type_objs:
-        orb.log.debug('  including {} ProductType objects.'.format(
-                                                len(product_type_objs)))
+        # orb.log.debug('  including {} ProductType objects.'.format(
+                                                # len(product_type_objs)))
         serialized += serialize(orb, product_type_objs)
     if activity_type_objs:
-        orb.log.debug('  including {} ActivityType objects.'.format(
-                                                len(activity_type_objs)))
+        # orb.log.debug('  including {} ActivityType objects.'.format(
+                                                # len(activity_type_objs)))
         serialized += serialize(orb, activity_type_objs)
     orb.log.info('  returning {} objects.'.format(len(serialized)))
     # make sure there is only 1 serialized object per oid ...
     so_by_oid = {so['oid'] : so for so in serialized}
     return list(so_by_oid.values())
 
-def deserialize_parms(oid, ser_parms):
+def deserialize_parms(orb, oid, ser_parms, cname=None):
     """
     Deserialize a serialized object `parms` dictionary.
 
     Args:
+        orb (UberORB): the (singleton) `orb` instance
+        oid (str):  oid attr of the object to which the parameters are assigned
         ser_parms (dict):  the serialized parms dictionary
+
+    Keyword Args:
+        cname (str):  class name of the object to which the parameters are
+            assigned (only used for logging)
     """
-    for parm in ser_parms.values():
+    if cname:
+        orb.log.debug('* deserializing parms for {} ({})...'.format(oid,
+                                                                    cname))
+        # orb.log.debug('  parms: {}'.format(ser_parms))
+    if not ser_parms:
+        return
+    # NOTE:  repair_parms does a deepcopy internally and removes any invalid
+    # context parameters ...
+    new_parms = repair_parms(ser_parms)
+    # if cname:
+        # orb.log.debug('  repaired parms: {}'.format(new_parms))
+    for parm in new_parms.values():
         parm['mod_datetime'] = uncook_datetime(parm['mod_datetime'])
-    parameterz[oid] = ser_parms
+    if oid in parameterz:
+        for pid in new_parms:
+            if pid in parameterz[oid]:
+                parameterz[oid][pid].update(new_parms[pid])
+            else:
+                set_pval(orb, oid, pid, new_parms[pid]['value'],
+                         units=new_parms[pid]['units'])
+        # remove pids not in new_parms
+        pids = list(parameterz[oid])
+        for pid in pids:
+            if pid not in new_parms:
+                del parameterz[oid][pid]
+    else:
+        parameterz[oid] = new_parms
 
 # DESERIALIZATION_ORDER:  order in which to deserialize classes so that
 # object properties (relationships) are assigned properly (i.e., assemblies are
@@ -341,11 +374,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             (b) if mod_datetime is later, update the object
             (c) if oid not found in db, deserialize the object
         (1) Include all datatype properties
-        (2) Deserialized parameters only if (a) or (b) is true:
-            (a) their 'definition' (ParameterDefinition) already exists in db
-            (b) their 'definition' (ParameterDefinition) is included in the
-                the serialized objects
-        (3) Other object properties will be deserialized only if
+        (2) Other object properties will be deserialized only if
             they are direct (not inverse) properties
     """
     # orb.log.debug('* deserializing ...')
@@ -461,8 +490,9 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             parm_dict = d.get('parameters')
             if parm_dict:
                 recompute_parmz_required = True
-                # orb.log.debug('  + parameters found, deserializing ...')
-                deserialize_parms(d['oid'], parm_dict)
+                # orb.log.debug('  + parameters found: {}'.format(parm_dict))
+                # orb.log.debug('    deserializing parameters ...')
+                deserialize_parms(orb, oid, parm_dict, cname=cname)
             # else:
                 # orb.log.debug('  + no parameters found for this object.')
             # identify fk values; explicitly ignore inverse properties
@@ -508,6 +538,9 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         for flow in flows:
                             if flow.oid not in incoming_oids:
                                 ports_and_flows_to_be_deleted.append(flow)
+                elif cname == 'ParameterDefinition':
+                    update_parm_defz(orb, obj)
+                    update_parmz_by_dimz(orb, obj)
             elif d['oid'] not in ignores:
                 # orb.log.debug('* creating new object ...')
                 obj = cls(**kw)

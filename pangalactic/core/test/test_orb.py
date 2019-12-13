@@ -12,9 +12,10 @@ import unittest
 import dateutil.parser as dtparser
 
 # pangalactic
-from pangalactic.core.parametrics import (_compute_pval, compute_margin,
+from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
-                                          get_pval, parameterz, round_to)
+                                          get_pval, parameterz, repair_parms,
+                                          round_to)
 from pangalactic.core.serializers import (deserialize, serialize,
                                           serialize_parms)
 from pangalactic.core.uberorb     import orb
@@ -517,6 +518,41 @@ class OrbTest(unittest.TestCase):
         value = parameterz[obj.oid]
         expected = parameters
         self.assertEqual(expected, value)
+
+    def test_40_write_mel(self):
+        """
+        CASE:  test 'repair_parms' function.
+        """
+        bad_parms = {
+            'm[CBE]': 
+              {'mod_datetime': '',
+               'units': 'kg',
+               'value': 0.0},
+            'm[MEV]':
+              {'mod_datetime': '',
+               'units': 'kg',
+               'value': 0.0},
+            'P[CBE]':
+              {'mod_datetime': '',
+               'units': 'kg',
+               'value': 0.0},
+            'P[MEV]':
+              {'mod_datetime': '',
+               'units': 'kg',
+               'value': 0.0},
+            'output':
+              {'mod_datetime': '',
+               'units': '',
+               'value': True}
+            }
+        expected = {
+            'output':
+              {'mod_datetime': '',
+               'units': '',
+               'value': True}
+            }
+        good_parms = repair_parms(bad_parms)
+        self.assertEqual(expected, good_parms)
 
     def test_50_write_mel(self):
         """
