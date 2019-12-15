@@ -1,7 +1,6 @@
 """
 PGEF date-time convenience functions.
 """
-from builtins import str
 from time import strptime
 from datetime import timedelta, datetime, date, time
 
@@ -104,8 +103,7 @@ def str2date(s):
 
 def date2str(dt):
     """
-    Get a PGEF formatted datetime string (i.e., a string of the form yielded by
-    dt2str(datetime)) from a datetime object.
+    Get a PGEF formatted date string from a datetime object.
 
     @param dt:  a datetime object
     @type  dt:  C{datetime}
@@ -149,8 +147,7 @@ def str2dt(s):
 
 def dt2str(dt):
     """
-    Get a PGEF formatted datetime string (i.e., a string of the form yielded by
-    dt2str(datetime)) from a datetime object.
+    Get a PGEF formatted datetime string from a datetime object.
 
     @param dt:  a datetime object
     @type  dt:  C{datetime}
@@ -158,7 +155,26 @@ def dt2str(dt):
     @return:  a string in PGEF datetime format (C{PGEF_DATETIME_FMT})
     @rtype:   C{str}
     """
-    return str(dt)
+    try:
+        return dt.strftime(PGEF_DATETIME_FMT_NO_TZ)
+    except:
+        return ''
+
+def dt2local_tz_str(dt):
+    """
+    Get a PGEF formatted datetime string from a datetime object converted to
+    local time zone.
+
+    @param dt:  a datetime object
+    @type  dt:  C{datetime}
+
+    @return:  a string in PGEF datetime format (C{PGEF_DATETIME_FMT})
+    @rtype:   C{str}
+    """
+    try:
+        return to_local_tz(dt).strftime(PGEF_DATETIME_FMT)
+    except:
+        return ''
 
 def str2time(tstr, format=PGEF_TIME_FMT):
     """

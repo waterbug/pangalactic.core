@@ -1,10 +1,7 @@
 """
 PanGalactic reference data
 """
-from pangalactic.core.utils.datetimes import dtstamp
 epoch = '2017-01-01 00:00:00'
-dtnow = str(dtstamp())
-
 
 initial = [
 {   '_cname': 'Actor',
@@ -331,8 +328,8 @@ pdc = [
     'name': 'Directionality',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
-    'create_datetime': dtnow,
-    'mod_datetime': dtnow,
+    'create_datetime': '2019-12-15 00:00:00',
+    'mod_datetime': '2019-12-15 00:00:00',
     'dimensions': '',
     'range_datatype': 'str',
     'description': 'Whether a Port is "input", "output", or bidirectional.'},
@@ -1865,10 +1862,10 @@ dict(
        'directionality':
          {'value': '',
           'mod_datetime': epoch,
-          'units': ''}
+          'units': None}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2019-12-15 00:00:00'
     },
 
 {   '_cname': 'PortTemplate',
@@ -1886,10 +1883,10 @@ dict(
        'directionality':
          {'value': '',
           'mod_datetime': epoch,
-          'units': ''}
+          'units': None}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2019-12-15 00:00:00'
     },
 
 {   '_cname': 'PortTemplate',
@@ -1907,10 +1904,10 @@ dict(
        'directionality':
          {'value': '',
           'mod_datetime': epoch,
-          'units': ''}
+          'units': None}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2019-12-15 00:00:00'
     },
 
 {   '_cname': 'PortTemplate',
@@ -1928,10 +1925,10 @@ dict(
        'directionality':
          {'value': '',
           'mod_datetime': epoch,
-          'units': ''}
+          'units': None}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2019-12-15 00:00:00'
     }
 ]
 
