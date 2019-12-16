@@ -2,7 +2,6 @@
 """
 Unit tests for "cook" (serialize) functions
 """
-from builtins import str
 import unittest
 from datetime import date, datetime
 

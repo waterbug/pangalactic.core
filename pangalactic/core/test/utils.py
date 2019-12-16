@@ -2,7 +2,6 @@
 """
 Create PGEF test data.
 """
-from builtins import str
 from copy     import deepcopy
 import random
 from pangalactic.core.parametrics import parm_defz

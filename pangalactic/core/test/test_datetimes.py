@@ -2,7 +2,6 @@
 """
 Unit tests for date/time related functions
 """
-from builtins import range
 import unittest
 from datetime import datetime, date, time
 

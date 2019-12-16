@@ -288,7 +288,7 @@ def deserialize_parms(orb, oid, ser_parms, cname=None):
     if not ser_parms:
         return
     # NOTE:  repair_parms does a deepcopy internally and removes any invalid
-    # context parameters ...
+    # context parameters (i.e. ones that don't have base parameters present)
     new_parms = repair_parms(ser_parms)
     # if cname:
         # orb.log.debug('  repaired parms: {}'.format(new_parms))

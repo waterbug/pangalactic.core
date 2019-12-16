@@ -2,7 +2,6 @@
 """
 HTTP get.
 """
-from builtins import object
 import os
 import http.client
 import string

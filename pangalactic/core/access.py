@@ -1,7 +1,6 @@
 """
 Functions related to object access permissions
 """
-from builtins import str
 from pangalactic.core         import state, config
 from pangalactic.core.uberorb import orb
 

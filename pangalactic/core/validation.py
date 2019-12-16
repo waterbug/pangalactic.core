@@ -1,7 +1,6 @@
 """
 Utility functions to support validation checks.
 """
-from builtins import str
 import re
 from collections import OrderedDict
 from functools import reduce

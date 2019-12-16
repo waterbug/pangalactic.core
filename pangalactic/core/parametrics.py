@@ -167,10 +167,14 @@ def create_parm_defz(orb):
               str(getattr(pd, 'mod_datetime', '') or dtstamp())
           } for pd in pds}
           )
+    orb.log.debug('      bases created: {}'.format(
+                                            str(list(parm_defz.keys()))))
     # add PDs for the descriptive contexts (CBE, Contingency, MEV) for the
     # variables (Mass, Power, Datarate) for which functions have been defined
     # to compute the CBE and MEV values
     all_contexts = orb.get_by_type('ParameterContext')
+    orb.log.debug('      adding context parms for: {}'.format(
+                                    str([c.id for c in all_contexts])))
     for pid in ['m', 'P', 'R_D']:
         pd = orb.select('ParameterDefinition', id=pid)
         for c in all_contexts:
@@ -178,6 +182,8 @@ def create_parm_defz(orb):
     # all float-valued parameters should have associated Contingency parms
     float_pds = [pd for pd in pds if pd.range_datatype == 'float']
     contingency = orb.select('ParameterContext', name='Contingency')
+    orb.log.debug('      adding Ctgcy parms for float types: {}'.format(
+                                    str([pd.id for pd in float_pds])))
     for float_pd in float_pds:
         contingency_pid = get_parameter_id(float_pd.id, contingency.id)
         if contingency_pid not in parm_defz:
@@ -353,8 +359,8 @@ def add_default_parameters(orb, obj):
         orb (Uberorb):  the orb (singleton)
         obj (Identifiable):  the object to receive parameters
     """
-    # orb.log.debug('[orb] add default parameters to object "{!s}"'.format(
-                                                                # obj.oid))
+    orb.log.debug('[orb] add default parameters to object "{!s}"'.format(
+                                                                obj.oid))
     # Configured Parameters are currently defined by the 'dashboard'
     # configuration (in future that may be augmented by Parameters
     # referenced by, e.g., a ProductType and/or a ModelTemplate, both of
@@ -374,7 +380,7 @@ def add_default_parameters(orb, obj):
             pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
                                obj.product_type.id, []))
     # add default parameters first ...
-    # orb.log.debug('      adding parameters {!s} ...'.format(str(pids)))
+    orb.log.debug('      adding parameters {!s} ...'.format(str(pids)))
     for pid in pids:
         add_parameter(orb, obj.oid, pid)
 

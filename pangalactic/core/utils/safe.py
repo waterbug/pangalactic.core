@@ -7,13 +7,7 @@ compiler does the work, handling arbitrarily nested structures is transparent.
 From the Python Cookbook
 Submitter:        Michael Spencer
 Date downloaded:  2006/01/09
-
-@version: $Revision$
 """
-from builtins import object
-__version__ = "$Revision$"[11:-2]
-
-
 import compiler
 
 

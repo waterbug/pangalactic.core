@@ -5,7 +5,6 @@ Pan Galactic hub for object metadata and storage operations.
 NOTE:  Only the `orb` instance created in this module should be imported (it is
 intended to be a singleton).
 """
-from builtins import object
 import json, os, shutil, sys, traceback
 
 # ruamel_yaml
@@ -234,19 +233,6 @@ class UberORB(object):
         # basically, versionables == {Product and all its subclasses}
         self.versionables = [cname for cname in self.classes if 'version' in
                              self.schemas[cname]['field_names']]
-        # [1] XXX IMPORTANT!  Create parameter definitions cache ('parm_defz')
-        # -- if new parameter definitions are created in load_reference_data(),
-        # the deserializer will update 'parm_defz' and 'parmz_by_dimz' caches
-        create_parm_defz(self)
-        create_parmz_by_dimz(self)
-        # [2] build the 'componentz' runtime cache ...
-        self._build_componentz_cache()
-        # *** NOTE ***********************************************************
-        # run _load_parmz() before loading ref data, since ref data may update
-        # both parameter definitions and assigned parameters that were loaded
-        # from the parameters cache (parameters.json)
-        # ********************************************************************
-        self._load_parmz()
         # [3] load (and update) ref data ...
         self.load_reference_data()
         self._load_diagramz()
@@ -509,15 +495,15 @@ class UberORB(object):
             objs (iterable of Modelable):  objects the test parameters will be
                 assigned to
         """
-        # self.log.debug('* [orb] assign_test_parameters()')
+        self.log.debug('* [orb] assign_test_parameters()')
         try:
             for o in objs:
                 add_default_parameters(self, o)
                 gen_test_pvals(parameterz[o.oid])
             self.recompute_parmz()
-            # self.log.debug('        ... done.')
+            self.log.debug('        ... done.')
         except:
-            # self.log.debug('        ... failed.')
+            self.log.debug('        ... failed.')
             pass
 
     def _build_componentz_cache(self):
@@ -581,9 +567,10 @@ class UberORB(object):
         objects created at runtime refer to some of the reference objects.
         """
         self.log.info('* checking reference data ...')
-        oids = self.get_oids()
-        # 0:  load initial reference data
-        missing_i = [so for so in refdata.initial if so['oid'] not in oids]
+        # first get the oids of everything in the db ...
+        db_oids = self.get_oids()
+        # [0] load initial reference data (administrative)
+        missing_i = [so for so in refdata.initial if so['oid'] not in db_oids]
         if missing_i:
             self.log.debug('  + missing some initial reference data:')
             self.log.debug('  {}'.format([so['oid'] for so in missing_i]))
@@ -597,8 +584,10 @@ class UberORB(object):
         admin = self.get('pgefobjects:admin')
         pgana = self.get('pgefobjects:PGANA')
         self.log.info('  + initial reference data loaded.')
-        # 1:  load parameter definitions and contexts
-        missing_p = [so for so in refdata.pdc if so['oid'] not in oids]
+        # [1] load any parameter definitions and contexts that may be missing
+        #     from the current db (in a first-time installation, this will of
+        #     course be *all* parameter definitions and contexts)
+        missing_p = [so for so in refdata.pdc if so['oid'] not in db_oids]
         if missing_p:
             self.log.debug('  + missing some reference parameters/contexts:')
             self.log.debug('  {}'.format([so['oid'] for so in missing_p]))
@@ -606,10 +595,19 @@ class UberORB(object):
                                  include_refdata=True,
                                  force_no_recompute=True)
             self.save(p_objs)
-            # for o in p_objs:
-                # self.db.add(o)
-            # self.db.commit()
-        # 2:  check for updates to parameter definitions and contexts
+        # [2] XXX IMPORTANT!  Create the parameter definitions caches
+        # ('parm_defz' and 'parmz_by_dimz') before loading parameters from
+        # 'parameters.json' -- the deserializer uses these caches
+        create_parm_defz(self)
+        create_parmz_by_dimz(self)
+        # *** NOTE ***********************************************************
+        # [3] run _load_parmz() before checking for updates to parameter
+        # definitions and contexts, since updated ref data may update parameter
+        # data that was loaded from the parameters cache (parameters.json) --
+        # e.g., some ref data objects might have updated parameters
+        # ********************************************************************
+        self._load_parmz()
+        # [4] check for updates to parameter definitions and contexts
         self.log.debug('  + checking for updates to parameter definitions ...')
         all_pds = refdata.pdc
         all_pd_oids = [so['oid'] for so in all_pds]
@@ -627,8 +625,8 @@ class UberORB(object):
             self.log.debug('    parameter definition updates completed.')
         else:
             self.log.debug('    no updates found.')
-        # 4:  load balance of reference data
-        missing_c = [so for so in refdata.core if so['oid'] not in oids]
+        # [5] load balance of any missing reference data (i.e. not in db)
+        missing_c = [so for so in refdata.core if so['oid'] not in db_oids]
         objs = []
         if missing_c:
             self.log.debug('  + missing some core reference data:')
@@ -641,7 +639,7 @@ class UberORB(object):
                 o.owner = pgana
                 o.creator = o.modifier = admin
             self.db.add(o)
-        # 5:  check for updates to reference data other than parameter defs
+        # [6] check for updates to reference data other than parameter defs
         self.log.debug('  + checking for updates to reference data ...')
         all_ref = refdata.initial + refdata.core
         all_ref_oids = [so['oid'] for so in all_ref]
@@ -659,18 +657,22 @@ class UberORB(object):
             self.log.debug('    updates completed.')
         else:
             self.log.debug('    no updates found.')
-        # 6:  delete deprecated reference data
+        # [7] delete deprecated reference data
         #     **********************************************************
         #     NOTE:  DON'T DO THIS STEP UNTIL ALL DATA RELATED TO THE
         #     DEPRECATED DATA HAS BEEN REMOVED FROM THE CURRENT DATABASE
         #     **********************************************************
-        # oids = self.get_oids()
-        # deprecated = [oid for oid in refdata.deprecated if oid in oids]
+        # db_oids = self.get_oids()
+        # deprecated = [oid for oid in refdata.deprecated if oid in db_oids]
         # if deprecated:
             # self.log.debug('  + deleting deprecated reference data:')
             # self.log.debug('  {}'.format([oid for oid in deprecated]))
             # for oid in deprecated:
                 # self.delete([self.get(oid) for oid in deprecated])
+        # build the 'componentz' runtime cache, which is used in recomputing
+        # parameters ...
+        self._build_componentz_cache()
+        self.recompute_parmz()
         self.log.info('  + all reference data loaded.')
 
     # begin db functions

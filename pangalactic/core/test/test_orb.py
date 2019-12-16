@@ -2,9 +2,8 @@
 """
 Unit tests for pangalactic.core.uberorb.orb
 """
-from builtins import str
-from builtins import range
-from math     import fsum
+from copy import deepcopy
+from math import fsum
 import os
 import unittest
 
@@ -29,9 +28,10 @@ from pangalactic.core.test.utils  import (create_test_users,
                                           owned_test_objects,
                                           parametrized_test_objects,
                                           related_test_objects)
+from pangalactic.core.utils.meta  import uncook_datetime
 from pangalactic.core.utils.reports import write_mel_xlsx
 
-orb.start(home='pangalaxian_test')
+orb.start(home='pangalaxian_test', debug=True)
 serialized_test_objects = create_test_users()
 serialized_test_objects += create_test_project()
 
@@ -354,7 +354,15 @@ class OrbTest(unittest.TestCase):
             if o.__class__.__name__ == 'HardwareProduct':
                 obj = o
         value = parameterz[obj.oid]
-        expected = parameters
+        # NOTE: in the "python-serialized" format of parametrized_test_objects,
+        # datetime objects are serialized as strings, but all other primitive
+        # types are unaltered (because json and yaml know how to serialize and
+        # deserialize all the other primitive types)
+        deser_parms = deepcopy(parameters)
+        for pid in deser_parms:
+            deser_parms[pid]['mod_datetime'] = uncook_datetime(
+                                               parameters[pid]['mod_datetime'])
+        expected = deser_parms
         self.assertEqual(expected, value)
 
     def test_19_deserialize_related_objects(self):
@@ -516,7 +524,17 @@ class OrbTest(unittest.TestCase):
         obj = orb.get(oid)
         parameters = parametrized_test_objects[0]['parameters']
         value = parameterz[obj.oid]
-        expected = parameters
+        # NOTE: in the "python-serialized" format of parametrized_test_objects,
+        # datetime objects are serialized as strings but all other primitive
+        # types are unaltered (because json and yaml know how to serialize and
+        # deserialize all the other primitive types)
+        deser_parms = deepcopy(parameters)
+        for pid in deser_parms:
+            deser_parms[pid]['mod_datetime'] = uncook_datetime(
+                                               parameters[pid]['mod_datetime'])
+        expected = deser_parms
+        # save parameters.json file for forensics ...
+        orb._save_parmz()
         self.assertEqual(expected, value)
 
     def test_40_write_mel(self):

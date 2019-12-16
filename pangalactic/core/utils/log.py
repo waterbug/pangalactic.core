@@ -2,7 +2,6 @@
 """
 PanGalactic loggers
 """
-from builtins import object
 import logging
 from logging.handlers import RotatingFileHandler
 import os, sys

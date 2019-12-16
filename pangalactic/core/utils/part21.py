@@ -4,9 +4,6 @@ A generic (no dependencies on the rest of pangalactic) reader/writer for
 Part 21 files (ISO 10303-21, STEP "Clear Text Encoding" serialization
 format).
 """
-from __future__ import print_function
-
-from builtins import range
 import sys, string
 from optparse import OptionParser
 # from pprint import pprint

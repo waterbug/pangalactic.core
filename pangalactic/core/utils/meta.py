@@ -2,13 +2,6 @@
 """
 Utilities for doing meta stuff
 """
-try:
-    # Python 2
-    from __builtin__ import str as builtin_str
-except ImportError:
-    # Python 3
-    from builtins import str as builtin_str
-from builtins import map
 import codecs
 import inflect
 import json
@@ -224,8 +217,8 @@ def to_collection_name(cname):
     @return: a table name
     @rtype:  L{str}
     """
-    return builtin_str(to_table_name(PLURALS.get(
-                       cname, _inf.plural(cname)))[:-1])
+    return str(to_table_name(PLURALS.get(
+               cname, _inf.plural(cname)))[:-1])
 
 def to_class_name(table_name):
     """
@@ -245,7 +238,7 @@ def to_class_name(table_name):
     while i < len(parts):
         metaobject_name += parts[i].capitalize()
         i += 1
-    return builtin_str(metaobject_name)
+    return str(metaobject_name)
 
 def classnamify(base, tablename, table):
     """
@@ -405,7 +398,7 @@ def get_port_name(port_type_name, seq):
         port_type_name (str):  the name of the port's type_of_port (PortType)
         seq (int):  the sequence number assigned to the port
     """
-    return ' '.join([port_type_name, builtin_str(seq)])
+    return ' '.join([port_type_name, str(seq)])
 
 def get_flow_id(start_port_id, end_port_id):
     """
@@ -516,19 +509,19 @@ def cook_int(value):
     return value
 
 def cook_float(value):
-    return builtin_str(value)
+    return str(value)
 
 def cook_bool(value):
     return value
 
 def cook_date(value):
-    return builtin_str(value)
+    return str(value)
 
 def cook_time(value):
-    return builtin_str(value)
+    return str(value)
 
 def cook_datetime(value):
-    return builtin_str(value)
+    return str(value)
 
 # python 2 strings, obviously
 cookers = {
