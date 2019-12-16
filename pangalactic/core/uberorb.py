@@ -1225,7 +1225,7 @@ class UberORB(object):
                         obj.computable_form = None
                         orb.db.delete(rel)
             if parameterz.get(obj.oid):
-                # NOTE: very important:  remove oid from parameterz
+                # NOTE: VERY IMPORTANT! remove oid from parameterz
                 del parameterz[obj.oid]
                 recompute_required = True
             elif isinstance(obj, self.classes['Acu']):
