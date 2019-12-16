@@ -728,6 +728,7 @@ class UberORB(object):
                 self.db.merge(obj)
             if cname == 'Acu':
                 refresh_componentz(self, obj.assembly)
+                recompute_required = True
             elif cname == 'ParameterDefinition':
                 # NOTE:  all Parameter Definitions are public
                 obj.public = True
