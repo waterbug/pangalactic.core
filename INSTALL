@@ -52,11 +52,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
     (1.2) Install the following dependencies of pangalactic.core:
 
-    - future
-      Python 2 / 3 compatibility functions / aliases
-
-          Configuration:  'conda install future'
-
     - inflect
       Nuanced capitalization
       * NOTE:  not in the default conda channel, use 'conda-forge' channel
@@ -171,11 +166,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
       Detects whether a file is binary, and certain types of files
 
           Configuration:  'conda install binaryornot'
-
-    - future
-      Python 2 / 3 compatibility functions / aliases
-
-          Configuration:  'conda install future'
 
     - pyqt =5.6.0
       [5.9 currently causes diagram double-click problem]

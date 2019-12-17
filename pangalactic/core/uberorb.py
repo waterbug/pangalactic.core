@@ -729,6 +729,8 @@ class UberORB(object):
             if cname == 'Acu':
                 refresh_componentz(self, obj.assembly)
                 recompute_required = True
+            elif cname == 'Requirement' and obj.req_type == 'performance':
+                recompute_required = True
             elif cname == 'ParameterDefinition':
                 # NOTE:  all Parameter Definitions are public
                 obj.public = True
@@ -1224,6 +1226,8 @@ class UberORB(object):
                                 orb.db.delete(pr)
                         obj.computable_form = None
                         orb.db.delete(rel)
+                        # computable_form -> require recompute
+                        recompute_required = True
             if parameterz.get(obj.oid):
                 # NOTE: VERY IMPORTANT! remove oid from parameterz
                 del parameterz[obj.oid]
