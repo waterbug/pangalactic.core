@@ -31,6 +31,7 @@ from pangalactic.core.parametrics import (add_default_parameters,
                                           create_parmz_by_dimz,
                                           get_parameter_id,
                                           parameterz, refresh_componentz,
+                                          refresh_req_allocz, req_allocz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
 from pangalactic.core.serializers import (deserialize, deserialize_parms,
@@ -437,7 +438,7 @@ class UberORB(object):
             for variable in variables:
                 for oid in componentz:
                     _compute_pval(self, oid, variable, context)
-        # Margins for all performance requirements
+        # Recompute Margins for all performance requirements
         # [0] Remove any previously computed performance requirements (NTEs and
         #     Margins) in case any requirements have been deleted or
         #     re-allocated
@@ -625,7 +626,7 @@ class UberORB(object):
             self.log.debug('    parameter definition updates completed.')
         else:
             self.log.debug('    no updates found.')
-        # [5] load balance of any missing reference data (i.e. not in db)
+        # [5] load balance of any reference data missiong from db
         missing_c = [so for so in refdata.core if so['oid'] not in db_oids]
         objs = []
         if missing_c:
@@ -672,6 +673,9 @@ class UberORB(object):
         # build the 'componentz' runtime cache, which is used in recomputing
         # parameters ...
         self._build_componentz_cache()
+        # update the req_allocz runtime cache (used in computing margins)
+        for req_oid in self.get_oids(cname='Requirement'):
+            refresh_req_allocz(self, req_oid)
         self.recompute_parmz()
         self.log.info('  + all reference data loaded.')
 
@@ -728,8 +732,26 @@ class UberORB(object):
                 self.db.merge(obj)
             if cname == 'Acu':
                 refresh_componentz(self, obj.assembly)
+                if not new:
+                    # find all allocations to this Acu and refresh them ...
+                    alloc_reqs = [req_oid for req_oid in req_allocz
+                                  if req_allocz[req_oid][0] == obj.oid]
+                    if alloc_reqs:
+                        for req_oid in alloc_reqs:
+                            refresh_req_allocz(self, req_oid)
                 recompute_required = True
+            elif cname == 'ProjectSystemUsage':
+                if not new:
+                    # find all allocations to this Acu and refresh them ...
+                    alloc_reqs = [req_oid for req_oid in req_allocz
+                                  if req_allocz[req_oid][0] == obj.oid]
+                    if alloc_reqs:
+                        for req_oid in alloc_reqs:
+                            refresh_req_allocz(self, req_oid)
+                # TODO: is recompute required here???
+                # recompute_required = True
             elif cname == 'Requirement' and obj.req_type == 'performance':
+                refresh_req_allocz(self, req_oid)
                 recompute_required = True
             elif cname == 'ParameterDefinition':
                 # NOTE:  all Parameter Definitions are public

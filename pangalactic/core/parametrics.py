@@ -25,9 +25,13 @@ TWOPLACES = Decimal('0.01')
 
 # componentz:  runtime component cache
 # purpose:  enable fast computation of assembly parameters
-# format:  {product.oid : list of Comp('oid', 'quantity') namedtuples}
+# format:  {product.oid : list of Comp namedtuples}
+#          ... where:
+#            oid (str): Acu.component.oid
+#            quantity (int): Acu.quantity
+#            reference_designator (str): Acu.reference_designator
 componentz = {}
-Comp = namedtuple('Comp', 'oid quantity')
+Comp = namedtuple('Comp', 'oid quantity reference_designator')
 
 # parm_defz:  runtime cache of parameter definitions
 # purpose:  enable fast lookup of parameter metadata & compact representation
@@ -49,6 +53,37 @@ parameterz = {}
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
 # format:  {dimension : [ids of ParameterDefinitions having that dimension]}
 parmz_by_dimz = {}
+
+# req_allocz:  runtime requirement allocations cache
+# purpose:  optimize performance of margin calculations
+# format:  {req_oid : [usage_oid, obj_oid, alloc_ref, pid, constraint]}
+# ... where:
+#   req_oid (str):  the oid of the requirement
+#   usage_oid (str): the oid of the Acu or ProjectSystemUsage to which
+#       the requirement is allocated
+#   obj_oid (str):  the oid of the component or system of the usage
+#   alloc_ref (str):  the reference_designator or system_role of the usage
+#   pid (str):  the parameter base id
+#   constraint (NamedTuple): a named tuple of the form:
+#
+#      (units, target, max, min, tol, upper, lower, constraint_type, tol_type)
+#
+# ... where:
+#
+#   units (str): units of the numerical quantities
+#   target (float): target value (for val with tolerance(s))
+#   max (float): maximum value
+#   min (float): minimum value
+#   tol (float): symmetric tolerance
+#   upper (float): upper tolerance if asymmetrical
+#   lower (float): lower tolerance if asymmetrical
+#   constraint_type (str): name of constraint type, one of:
+#       ['single_value' | 'maximum' | 'minimum' ]
+#   tol_type (str): name of tolerance type, one of:
+#       ['symmetric' | 'asymmetric']
+req_allocz = {}
+Constraint = namedtuple('Constraint',
+             'units target max min tol upper lower constraint_type tol_type')
 ###########################################################################
 
 
@@ -73,13 +108,16 @@ def round_to(x, n=4):
 def refresh_componentz(orb, product):
     """
     Refresh the `componentz` cache for a Product instance. This must be called
-    before calling orb.recompute_parmz() whenever a new Acu is created,
-    deleted, or modified.  The 'componentz' dictionary has the form
+    before calling orb.recompute_parmz() whenever a new Acu that references
+    that Product instance as its assembly is created, deleted, or modified.
+    The 'componentz' dictionary has the form
 
-        {product.oid : list of Comp('oid', 'quantity') namedtuples}
+        {product.oid :
+          list of Comp('oid', 'quantity', 'reference_designator')}
 
     where the list of `Comp` namedtuples is created from `product.components`
-    (Acus of the product), using Acu.component.oid and Acu.quantity.
+    (Acus of the product), using Acu.component.oid, Acu.oid, Acu.quantity, and
+    Acu.reference_designator.
 
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
@@ -87,11 +125,123 @@ def refresh_componentz(orb, product):
     """
     if product:
         # orb.log.debug('[orb] refresh_componentz({})'.format(product.id))
-        componentz[product.oid] = [Comp._make((acu.component.oid,
-                                               acu.quantity or 1))
+        componentz[product.oid] = [Comp._make((
+                                        getattr(acu.component, 'oid', None),
+                                        acu.quantity or 1,
+                                        acu.reference_designator))
                                    for acu in product.components
                                    if acu.component
                                    and acu.component.oid != 'pgefobjects:TBD']
+
+def refresh_req_allocz(orb, req_oid):
+    """
+    Refresh the `req_allocz` cache for a Requirement instance.  This must be
+    called whenever a Requirement instance is created, modified, or deleted or
+    an Acu or ProjectSystemUsage is deleted or modified, which could affect the
+    'obj_oid' and/or 'alloc_ref' items.
+
+    NOTE:  this function depends only on the database and does not use any
+    other caches, nor does it update the parameterz cache, so it can be used by
+    any margin computation function.
+
+    The 'req_allocz' dictionary has the form:
+
+        {req_oid : [usage_oid, obj_oid, alloc_ref, pid, constraint]}
+
+    ... where:
+
+      req_oid (str):  the oid of the requirement
+      usage_oid (str): the oid of the Acu or ProjectSystemUsage to which
+          the requirement is allocated
+      obj_oid (str):  the oid of the component or system of the usage
+      alloc_ref (str):  the reference_designator or system_role of the usage
+      pid (str):  the parameter base id
+      constraint (NamedTuple): a named tuple of the form:
+
+      (units, target, max, min, tol, upper, lower, constraint_type, tol_type)
+
+    ... where:
+
+      units (str): units of the numerical quantities
+      target (float): target value (for val with tolerance(s))
+      max (float): maximum value
+      min (float): minimum value
+      tol (float): symmetric tolerance
+      upper (float): upper tolerance if asymmetrical
+      lower (float): lower tolerance if asymmetrical
+      constraint_type (str): name of constraint type, one of:
+          ['single_value' | 'maximum' | 'minimum' ]
+      tol_type (str): name of tolerance type, one of:
+          ['symmetric' | 'asymmetric']
+
+    Args:
+        orb (Uberorb):  singleton imported from p.node.uberorb
+        req_oid (str):  the oid of a Requirement instance
+    """
+    orb.log.debug('* refresh_req_allocz({})'.format(req_oid))
+    # first check whether req has been deleted
+    req = orb.get(req_oid)
+    if not req and req_oid in req_allocz:
+        # the requirement is referenced in req_allocz but the requirement
+        # has now been deleted: remove it from req_allocz
+        orb.log.debug('  req was deleted, removing from req_allocz ...')
+        del req_allocz[req_oid]
+        return
+    usage_oid = None
+    alloc_ref = None
+    obj_oid = None
+    if req.allocated_to_function:
+        acu = req.allocated_to_function
+        alloc_ref = acu.reference_designator or acu.name or acu.id
+        usage_oid = acu.oid
+        obj_oid = getattr(acu.component, 'oid', None)
+    elif req.allocated_to_system:
+        psu = req.allocated_to_system
+        alloc_ref = psu.system_role or psu.name or psu.id
+        usage_oid = psu.oid
+        obj_oid = getattr(psu.system, 'oid', None)
+    else:
+        # req is not allocated; if present, delete it
+        orb.log.debug('  req is not allocated')
+        if req_oid in req_allocz:
+            del req_allocz[req_oid]
+            orb.log.debug('  + removed from req_allocz.')
+        return
+    if req.req_type == 'performance':
+        orb.log.debug('  functional req (no parameter or constraint).')
+        if usage_oid:
+            req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+    relation = req.computable_form
+    pid = None
+    if relation:
+        # look for ParameterRelations to identify parameters
+        parm_rels = relation.correlates_parameters
+        if parm_rels:
+            # for now, there should only be a single correlated parameter
+            parm_def = parm_rels[0].correlates_parameter
+            pid = parm_def.id
+        else:
+            orb.log.debug('  no parameter found -> functional req.')
+    else:
+        orb.log.debug('  no computable_form found -> functional req.')
+        req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+        return
+    if pid:
+        req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, pid,
+                                 Constraint._make((
+                                     req.req_units,
+                                     req.req_target_value,
+                                     req.req_maximum_value,
+                                     req.req_minimum_value,
+                                     req.req_tolerance,
+                                     req.req_tolerance_upper,
+                                     req.req_tolerance_lower,
+                                     req.req_constraint_type,
+                                     req.req_tolerance_type
+                                     ))]
+    else:
+        orb.log.debug('  no parameter found; treat as functional req.')
+        req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, None, None]
 
 def node_count(product_oid):
     """
@@ -819,8 +969,8 @@ def compute_assembly_parameter(orb, product_oid, variable):
     If no components are defined for the product, simply return the value of
     the parameter as specified for the product, or the default (usually 0).
 
-    CAUTION: this may return a wildly inaccurate value for an incompletely
-    specified assembly.
+    CAUTION: this will obviously return a wildly inaccurate value if the
+    list of components in a specified assembly is incomplete.
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
@@ -828,7 +978,7 @@ def compute_assembly_parameter(orb, product_oid, variable):
             being estimated
         variable (str): variable for which the assembly value is being computed
     """
-    # VERY verbose, even for debugging!
+    # This logging is VERY verbose, even for debugging!
     # orb.log.debug('[parametrics] compute_assembly_parameter()')
     if (product_oid in parameterz and variable in parameterz[product_oid]):
         radt = parm_defz[variable]['range_datatype']
@@ -889,9 +1039,9 @@ def compute_mev(orb, oid, variable):
     else:
         return 0.0
 
-def compute_margin(orb, oid, variable, default=0):
+def compute_margin(orb, usage_oid, variable, default=0):
     """
-    Compute the "Margin" for the specified parameter (variable) at the
+    Compute the "Margin" for the specified variable (base parameter) at the
     specified function or system role. So far, "Margin" is only defined for
     performance requirements that specify a maximum or "Not To Exceed" value,
     and is computed as (NTE-CBE)/CBE, where CBE is the Current Best Estimate of
@@ -900,67 +1050,42 @@ def compute_margin(orb, oid, variable, default=0):
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
-        oid (str): the oid of the function (Acu) or system role
-            (ProjectSystemUsage) to which a performance requirement for the
-            specified variable is allocated
+        usage_oid (str): the oid of the usage (Acu or ProjectSystemUsage) to
+            which a performance requirement for the specified variable is
+            allocated
         variable (str): name of the variable associated with parameter
             constrained by the performance requirement
 
     Keyword Args:
-        context (str): the `id` of the context that defines the margin (for
-            now, the only supported context is 'NTE', so context is ignored)
         default (any): a value to be returned if the parameter is not found
     """
-    allocation_node = orb.get(oid)
-    allocated_to_system = False
-    if hasattr(allocation_node, 'component'):
-        obj_oid = getattr(allocation_node.component, 'oid', None)
-    if hasattr(allocation_node, 'system'):
-        obj_oid = getattr(allocation_node.system, 'oid', None)
-        allocated_to_system = True
-    if not obj_oid or obj_oid == 'pgefobjects:TBD':
-        # orb.log.debug('  allocation is to unknown or TBD system.')
-        return 0
-    mev = _compute_pval(orb, obj_oid, variable, 'MEV')
-    # find a performance requirement for the specified variable, allocated to
-    # the allocation_node
-    pd = orb.get(get_parameter_definition_oid(variable))
-    if not pd:
-        orb.log.info('  no parameter definition found for "{}".'.format(
-                                                                variable))
-        return 0
-    # find all reqts allocated to the node
-    if allocated_to_system:
-        reqts = orb.search_exact(cname='Requirement',
-                                 allocated_to_system=allocation_node)
+    orb.log.debug('* compute_margin()')
+    # find requirements allocated to the specified usage and constraining the
+    # specified variable
+    allocated_req_oids = [req_oid for req_oid in req_allocz
+                          if req_allocz[req_oid][0] == usage_oid
+                          and req_allocz[req_oid][3] == variable]
+    if not allocated_req_oids:
+        # no requirement constraining the specified variable is allocated to
+        # this usage
+        txt = 'usage "{}" has no reqt allocated to it constraining "{}".'
+        orb.log.debug('  {}'.format(txt.format(usage_oid, variable)))
+        return 'undefined'
+    # for now, assume there is only one reqt that satisfies
+    req_oid = allocated_req_oids[0]
+    usage_oid, obj_oid, alloc_ref, pid, constraint = req_allocz[req_oid]
+    if constraint.constraint_type == 'maximum':
+        nte = constraint.max
+        nte_units = constraint.units
+        # convert NTE value to base units, if necessary
+        quan = nte * ureg.parse_expression(nte_units)
+        quan_base = quan.to_base_units()
+        converted_nte = quan_base.magnitude
     else:
-        reqts = orb.search_exact(cname='Requirement',
-                                 allocated_to_function=allocation_node)
-    if not reqts:
-        # orb.log.debug('  no reqts found with that allocation.')
-        return 0
-    # identify the relevant performance requirement
-    perf_reqt = None
-    for reqt in reqts:
-        rel = reqt.computable_form
-        if rel:
-            prs = rel.correlates_parameters
-            if prs:
-                pd = prs[0].correlates_parameter
-                if pd.id == variable:
-                    perf_reqt = reqt
-    if not perf_reqt:
-        # orb.log.debug('  relevant performance requirement not found.')
-        return 0
-    # TODO:  here we would identify the type of constraint, but currently we
-    # only support the NTE (maximum value) constraint
-    try:
-        nte = float(perf_reqt.req_maximum_value)
-    except:
-        # value was None or other non-numeric
-        # orb.log.debug('  NTE not specified by the relevant requirement.')
-        return 0
-    nte_units = perf_reqt.req_units
+        txt = 'constraint_type is "{}"; ignored (for now).'
+        orb.log.debug('  {}'.format(txt.format(constraint.constraint_type)))
+        return 'undefined'
+    mev = _compute_pval(orb, obj_oid, variable, 'MEV')
     # convert NTE value to base units, if necessary
     quan = nte * ureg.parse_expression(nte_units)
     quan_base = quan.to_base_units()
@@ -972,22 +1097,12 @@ def compute_margin(orb, oid, variable, default=0):
         # TODO:  implement a NaN or "Undefined" ...
         return 'undefined'
     msg = '- {} NTE specified for allocation to "{}" -- computing margin ...'
-    alloc_ref = ''
-    if isinstance(allocation_node, orb.classes['Acu']):
-        alloc_ref = (allocation_node.reference_designator or
-                     allocation_node.name or
-                     allocation_node.component.name)
-    elif isinstance(allocation_node, orb.classes['ProjectSystemUsage']):
-        alloc_ref = (allocation_node.system_role or
-                     allocation_node.name or
-                     allocation_node.system.name)
-    parm_name = getattr(pd, 'name', 'unspecified')
-    orb.log.debug(msg.format(parm_name, alloc_ref))
+    orb.log.debug(msg.format(pid, alloc_ref))
     margin = round_to(((converted_nte - mev) / converted_nte))
     orb.log.debug('  ... margin is {}%'.format(margin * 100.0))
     return margin
 
-def compute_requirement_margin(orb, oid, default=0):
+def compute_requirement_margin(orb, req_oid, default=0):
     """
     Compute the "Margin" for the specified performance requirement. So far,
     "Margin" is only defined for performance requirements that specify a
@@ -997,8 +1112,8 @@ def compute_requirement_margin(orb, oid, default=0):
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
-        oid (str): the oid of the performance requirement for which margin is
-            to be computed
+        req_oid (str): the oid of the performance requirement for which margin
+            is to be computed
 
     Keyword Args:
         context (str): the `id` of the context that defines the margin (for
@@ -1008,71 +1123,46 @@ def compute_requirement_margin(orb, oid, default=0):
     Return:
         allocated_to_oid, parameter_id, margin (tuple)
     """
-    req = orb.get(oid)
-    # float cast is unnec. because python 3 division will do the right thing
-    if not isinstance(req, orb.classes['Requirement']):
+    orb.log.debug('* compute_requirement_margin()')
+    if req_oid not in req_allocz:
         # TODO: notify user 
-        msg = 'Requirement with oid {} does not exist.'.format(oid)
+        msg = 'Requirement {} is not allocated.'.format(req_oid)
         return (None, None, None, None, msg)
-    if getattr(req, 'req_type', None) != 'performance':
-        # TODO: notify user
-        msg = 'Requirement with oid {} is not a performance reqt.'.format(oid)
+    usage_oid, obj_oid, alloc_ref, pid, constraint = req_allocz[req_oid]
+    if not pid:
+        msg = 'Requirement {} is not a performance reqt.'.format(req_oid)
         return (None, None, None, None, msg)
-    # orb.log.debug('* Computing margin for reqt "{}"'.format(req.name))
-    rel = getattr(req, 'computable_form', None)
-    prs = getattr(rel, 'correlates_parameters', None)
-    if not prs:
-        msg = 'Performance parameter could not be determined.'
-        return (None, None, None, None, msg)
-    pd = getattr(prs[0], 'correlates_parameter', None)
-    parameter_id = getattr(pd, 'id', None)
-    if not parameter_id:
-        msg = 'Parameter identity is unknown.'
-        return (None, None, None, None, msg)
-    nte = req.req_maximum_value
-    if not nte:
-        msg = 'Requirement is not a "Not To Exceed" (max) type.'
-        return (None, parameter_id, None, None, msg)
-    nte_units = req.req_units
-    acu = req.allocated_to_function
-    psu = req.allocated_to_system
-    object_oid = None
-    if acu:
-        allocated_to_oid = acu.oid
-        object_oid = getattr(acu.component, 'oid', None)
-    elif psu:
-        allocated_to_oid = psu.oid
-        object_oid = getattr(psu.system, 'oid', None)
+    if constraint.constraint_type == 'maximum':
+        nte = constraint.max
+        nte_units = constraint.units
+        # convert NTE value to base units, if necessary
+        quan = nte * ureg.parse_expression(nte_units)
+        quan_base = quan.to_base_units()
+        converted_nte = quan_base.magnitude
     else:
+        txt = 'constraint_type is "{}"; ignored (for now).'
+        orb.log.debug('  {}'.format(txt.format(constraint.constraint_type)))
+        return (None, pid, None, None, msg)
+    if not obj_oid:
         msg = 'Requirement is not allocated properly (no Acu or PSU).'
-        return (None, parameter_id, nte, nte_units, msg)
-    if not object_oid or object_oid == 'pgefobjects:TBD':
+        return (None, pid, nte, nte_units, msg)
+    elif obj_oid == 'pgefobjects:TBD':
         msg = 'Margin cannot be computed for unknown or TBD object.'
-        return (allocated_to_oid, parameter_id, nte, nte_units, msg)
-    mev = _compute_pval(orb, object_oid, parameter_id, 'MEV')
-    # convert NTE value to base units, if necessary
-    quan = nte * ureg.parse_expression(nte_units)
-    quan_base = quan.to_base_units()
-    converted_nte = quan_base.magnitude
+        return (usage_oid, pid, nte, nte_units, msg)
+    mev = _compute_pval(orb, obj_oid, pid, 'MEV')
     # orb.log.debug('  compute_margin: nte is {}'.format(converted_nte))
     # orb.log.debug('                  mev is {}'.format(mev))
     if mev == 0:   # NOTE: 0 == 0.0 evals to True
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
-        msg = 'MEV value for {} is 0; cannot compute margin.'.format(
-                                                        parameter_id)
-        return (allocated_to_oid, parameter_id, nte, nte_units, msg)
+        msg = 'MEV value for {} is 0; cannot compute margin.'.format(pid)
+        return (usage_oid, pid, nte, nte_units, msg)
     msg = '- {} NTE specified for allocation to "{}" -- computing margin ...'
-    alloc_ref = ''
-    if acu:
-        alloc_ref = acu.reference_designator or acu.name or acu.id
-    elif psu:
-        alloc_ref = psu.system_role or psu.name or psu.id
-    parm_name = getattr(pd, 'name', 'unspecified')
-    orb.log.debug(msg.format(parm_name, alloc_ref))
+    orb.log.debug(msg.format(pid, alloc_ref))
+    # float cast is unnec. because python 3 division will do the right thing
     margin = round_to(((converted_nte - mev) / converted_nte))
     orb.log.debug('  ... margin is {}%'.format(margin * 100.0))
-    return (allocated_to_oid, parameter_id, nte, nte_units, margin)
+    return (usage_oid, pid, nte, nte_units, margin)
 
 # the COMPUTES dict maps variable and context id to applicable compute
 # functions
