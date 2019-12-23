@@ -11,15 +11,15 @@ import unittest
 import dateutil.parser as dtparser
 
 # pangalactic
+from pangalactic.core             import refdata
+from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
                                           get_pval, parameterz, repair_parms,
+                                          refresh_req_allocz, req_allocz,
                                           round_to)
 from pangalactic.core.serializers import (deserialize, serialize,
                                           serialize_parms)
-from pangalactic.core.uberorb     import orb
-from pangalactic.core             import refdata
-from pangalactic.core.access      import get_perms
 from pangalactic.core.test        import data as test_data_module
 from pangalactic.core.test        import vault as vault_module
 from pangalactic.core.test.utils  import (create_test_users,
@@ -28,6 +28,7 @@ from pangalactic.core.test.utils  import (create_test_users,
                                           owned_test_objects,
                                           parametrized_test_objects,
                                           related_test_objects)
+from pangalactic.core.uberorb     import orb
 from pangalactic.core.utils.meta  import uncook_datetime
 from pangalactic.core.utils.reports import write_mel_xlsx
 
@@ -375,9 +376,15 @@ class OrbTest(unittest.TestCase):
         # self-contained and would demonstrate the "serializability" of an
         # entire project.  :)
         objs = deserialize(orb, related_test_objects)
+        # # refresh req_allocz ...
+        # for obj in objs:
+            # if isinstance(obj, orb.classes['Requirement']):
+                # refresh_req_allocz(orb, obj.oid)
+        # orb.recompute_parmz()
         by_oid = {o.oid : o for o in objs}
         acu_oids = ['test:spacecraft3-acu-{}'.format(n) for n in range(1, 6)]
         value = [
+            bool('test:OTHER:Spacecraft-Mass' in req_allocz),
             by_oid['test:OTHER:system-1'].project,
             by_oid['test:OTHER:system-1'].system,
             by_oid['test:spacecraft3'].components,
@@ -392,6 +399,7 @@ class OrbTest(unittest.TestCase):
             by_oid['test:spacecraft3.mcad.0.representationfile.0'].url
             ]
         expected = [
+            True,
             by_oid['test:OTHER'],
             by_oid['test:spacecraft3'],
             [by_oid[acu_oid] for acu_oid in acu_oids],

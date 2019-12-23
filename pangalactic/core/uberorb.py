@@ -454,16 +454,17 @@ class UberORB(object):
                 oid_deletions.append(oid)
         for oid in oid_deletions:
             del parameterz[oid]
-        # [1] iterate over current set of performance requirements
-        perf_reqs = orb.search_exact(cname='Requirement',
-                                     req_type='performance')
-        for req in perf_reqs:
+        # [1] iterate over current set of performance requirements, which
+        # should already have been identified by running refresh_req_allocz()
+        for req_oid in req_allocz:
             # compute_requirement_margin() returns a tuple:
             # 0: oid of Acu or PSU to which reqt is allocated
             # 1: id of performance parameter
-            # 2: margin [result] (expressed as a %)
+            # 2: nte value (max) of performance parameter
+            # 3: units of nte value
+            # 4: margin [result] (expressed as a %)
             oid, pid, nte, nte_units, result = compute_requirement_margin(
-                                                                orb, req.oid)
+                                                                orb, req_oid)
             if oid:
                 margin_pid = get_parameter_id(pid, 'Margin')
                 nte_pid = get_parameter_id(pid, 'NTE')
@@ -481,10 +482,9 @@ class UberORB(object):
                                                 units=nte_units,
                                                 mod_datetime=str(dtstamp()))
             else:
-                # if None was returned for oid, reason for failure will be in
-                # "result"
-                self.log.debug(' - margin computation failed for requirement:')
-                self.log.debug('   "{}"'.format(req.name))
+                # if oid is empty, reason for failure will be in "result"
+                self.log.debug(' - margin comp. failed for req with oid:')
+                self.log.debug('   "{}"'.format(req_oid))
                 self.log.debug('   computation result: {}'.format(result))
 
     def assign_test_parameters(self, objs):
@@ -742,7 +742,7 @@ class UberORB(object):
                 recompute_required = True
             elif cname == 'ProjectSystemUsage':
                 if not new:
-                    # find all allocations to this Acu and refresh them ...
+                    # find all allocations to this PSU and refresh them ...
                     alloc_reqs = [req_oid for req_oid in req_allocz
                                   if req_allocz[req_oid][0] == obj.oid]
                     if alloc_reqs:

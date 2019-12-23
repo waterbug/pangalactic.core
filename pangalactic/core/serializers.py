@@ -12,6 +12,7 @@ from pangalactic.core.utils.meta  import (asciify, cookers, uncookers,
                                           cook_datetime, uncook_datetime)
 from pangalactic.core.utils.datetimes import earlier
 from pangalactic.core.parametrics import (parameterz, refresh_componentz,
+                                          refresh_req_allocz,
                                           repair_parms, set_pval,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
@@ -393,7 +394,11 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         return []
     recompute_parmz_required = False
     refresh_componentz_required = False
+    req_oids = set()
+    acus = set()
+    psus = set()
     objs = []
+    products = []
     created = []
     updates = {}
     ignores = []
@@ -526,10 +531,10 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                     recompute_parmz_required = True
                 elif issubclass(cls, orb.classes['Product']):
-                    # NOTE:  this assumes "white box" Product, which includes
-                    # the internals: ports, flows, components.  Removed
-                    # components are covered by deleted Acus; ports and flows
-                    # are handled here ...
+                    # NOTE:  the following assumes "white box" Product, which
+                    # includes the internals: ports, flows, components.
+                    # Removed components are covered by deleted Acus; ports and
+                    # flows are handled here ...
                     for port in obj.ports:
                         if port.oid not in incoming_oids:
                             ports_and_flows_to_be_deleted.append(port)
@@ -556,7 +561,12 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     if dictify:
                         output['new'].append(obj)
                     if cname == 'Acu':
+                        acus.add(obj)
                         refresh_componentz_required = True
+                    elif cname in ['ProjectSystemUsage']:
+                        psus.add(obj)
+                    elif isinstance(obj, orb.classes['Product']):
+                        products.append(obj)
                     if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                         recompute_parmz_required = True
                 # else:
@@ -576,7 +586,26 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     if updates:
         ids = str([o.id for o in updates.values()])
         orb.log.info('{} object(s) updated: {}'.format(log_txt, ids))
-    if recompute_parmz_required and not force_no_recompute:
+    # if there are any Requirement objects or Product, Acu, PSU with allocated
+    # requirements, refresh the req_allocz cache for the relevant requirements
+    for product in products:
+        acus.update(product.where_used)
+        psus.update(product.projects_using_system)
+    for acu in acus:
+        # look for requirement allocations to acus ...
+        if acu.allocated_requirements:
+            req_oids.update([r.oid for r in acu.allocated_requirements])
+    for psu in psus:
+        # look for requirement allocations to psus ...
+        if psu.system_requirements:
+            req_oids.update([r.oid for r in psu.system_requirements])
+    if req_oids:
+        # orb.log.debug('  - relevant req oids: {}'.format(str(req_oids)))
+        # orb.log.debug('    a refresh of req_allocz is required ...')
+        for req_oid in req_oids:
+            refresh_req_allocz(orb, req_oid)
+        orb.recompute_parmz()
+    elif recompute_parmz_required and not force_no_recompute:
         orb.recompute_parmz()
     if dictify:
         return output

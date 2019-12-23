@@ -207,7 +207,7 @@ def refresh_req_allocz(orb, req_oid):
             del req_allocz[req_oid]
             orb.log.debug('  + removed from req_allocz.')
         return
-    if req.req_type == 'performance':
+    if req.req_type == 'functional':
         orb.log.debug('  functional req (no parameter or constraint).')
         if usage_oid:
             req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, None, None]
@@ -217,11 +217,13 @@ def refresh_req_allocz(orb, req_oid):
         # look for ParameterRelations to identify parameters
         parm_rels = relation.correlates_parameters
         if parm_rels:
-            # for now, there should only be a single correlated parameter
+            # for now, there should only be a single correlated parameter (max)
             parm_def = parm_rels[0].correlates_parameter
             pid = parm_def.id
         else:
             orb.log.debug('  no parameter found -> functional req.')
+            req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+            return
     else:
         orb.log.debug('  no computable_form found -> functional req.')
         req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, None, None]
@@ -1060,6 +1062,7 @@ def compute_margin(orb, usage_oid, variable, default=0):
         default (any): a value to be returned if the parameter is not found
     """
     orb.log.debug('* compute_margin()')
+    orb.log.debug('  using req_allocz: {}'.format(str(req_allocz)))
     # find requirements allocated to the specified usage and constraining the
     # specified variable
     allocated_req_oids = [req_oid for req_oid in req_allocz
