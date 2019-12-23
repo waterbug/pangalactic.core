@@ -83,25 +83,11 @@ def get_perms(obj, user=None, permissive=False):
             perms = ['view', 'modify', 'decloak', 'delete']
             return perms
     # if we get this far, we have a user_oid and a user object
-    # * first check if the object is a collaborative project
-    collab_project = False
-    if isinstance(obj, orb.classes['Project']):
-        ras = orb.search_exact(cname='RoleAssignment',
-                               role_assignment_context=obj)
-        if ras:
-            orb.log.debug('  This object is a collaborative project.')
-            collab_project = True
     if is_global_admin(user):
         # global admin is omnipotent, except for deleting projects ...
         orb.log.debug('  ******* user is a global admin.')
-        if collab_project:
-            # collaborative projects cannot be deleted
-            # TODO: allow deletion of collaborative projects but revert
-            # ownership of any owned objects to the project's parent org
-            perms = ['view', 'modify']
-        else:
-            perms = ['view', 'modify', 'decloak', 'delete']
-            return perms
+        perms = ['view', 'modify', 'decloak', 'delete']
+        return perms
         orb.log.debug('  perms: {}'.format(perms))
     # user has write permissions if Admin for a grantee org or if user
     # has a discipline role in the owner org that corresponds to the
@@ -111,16 +97,8 @@ def get_perms(obj, user=None, permissive=False):
         if (hasattr(obj, 'creator') and
             obj.creator is user):
             orb.log.debug('  user is object creator.')
-            if collab_project:
-                # a collaborative project cannot be deleted
-                orb.log.debug('  - object is a collaborative project ...')
-                orb.log.debug('    cannot be deleted.')
-                perms = ['view', 'modify']
-            else:
-                # any other object can be deleted by its creator
-                orb.log.debug('  - object is not a collaborative project ...')
-                orb.log.debug('    can be modified or deleted by its creator.')
-                perms = ['view', 'modify', 'decloak', 'delete']
+            # any object can be deleted by its creator
+            perms = ['view', 'modify', 'decloak', 'delete']
             orb.log.debug('  perms: {}'.format(perms))
             return perms
         # From here on, access depends on roles and product_types

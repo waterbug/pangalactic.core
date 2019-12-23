@@ -16,8 +16,7 @@ from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
                                           get_pval, parameterz, repair_parms,
-                                          refresh_req_allocz, req_allocz,
-                                          round_to)
+                                          req_allocz, round_to)
 from pangalactic.core.serializers import (deserialize, serialize,
                                           serialize_parms)
 from pangalactic.core.test        import data as test_data_module
@@ -368,7 +367,11 @@ class OrbTest(unittest.TestCase):
 
     def test_19_deserialize_related_objects(self):
         """
-        CASE:  deserialize a collection of related objects
+        CASE:  deserialize a collection of related objects.  Note that this
+        also tests the deserializer's refreshing of the requirement allocation
+        cache, 'req_allocz', since 'related_test_objects' contains an allocated
+        requirement and its allocation, which will be further exercised in
+        'test_22_compute_margin' and 'test_23_compute_requirement_margin'.
         """
         # TODO:  rather than using existing components from the other test
         # data, create a new set of [serialized] HardwareProduct objects for
@@ -376,11 +379,6 @@ class OrbTest(unittest.TestCase):
         # self-contained and would demonstrate the "serializability" of an
         # entire project.  :)
         objs = deserialize(orb, related_test_objects)
-        # # refresh req_allocz ...
-        # for obj in objs:
-            # if isinstance(obj, orb.classes['Requirement']):
-                # refresh_req_allocz(orb, obj.oid)
-        # orb.recompute_parmz()
         by_oid = {o.oid : o for o in objs}
         acu_oids = ['test:spacecraft3-acu-{}'.format(n) for n in range(1, 6)]
         value = [

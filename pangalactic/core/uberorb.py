@@ -101,7 +101,7 @@ class UberORB(object):
         if home:
             pgx_home = home
         # [2] from 'PANGALACTIC_HOME' env var
-        elif os.environ.get('PANGALACTIC_HOME'):
+        elif 'PANGALACTIC_HOME' in os.environ:
             pgx_home = os.environ['PANGALACTIC_HOME']
         # [3] create a 'pangalaxian' directory in the user's home dir
         else:
@@ -144,7 +144,7 @@ class UberORB(object):
         self.log.debug('* state read ...')
         # self.log.debug('  state: {}'.format(str(state)))
         self.log.debug('* trash read ({} objects).'.format(len(trash)))
-        if not prefs.get('units'):
+        if 'units' not in prefs:
             prefs['units'] = {}
         # * copy test data files from 'p.test.data' module to test_data_dir
         self.test_data_dir = os.path.join(pgx_home, 'test_data')
@@ -248,7 +248,7 @@ class UberORB(object):
         for dpt in orb.get_by_type('DisciplineProductType'):
             did = dpt.used_in_discipline.id
             ptid = dpt.relevant_product_type.id
-            if discipline_subsystems.get(did):
+            if did in discipline_subsystems:
                 discipline_subsystems[did].append(ptid)
             else:
                 discipline_subsystems[did] = [ptid]
@@ -257,14 +257,14 @@ class UberORB(object):
         for dr in orb.get_by_type('DisciplineRole'):
             rtdid = dr.related_to_discipline.id
             rrid = dr.related_role.id
-            if role_disciplines.get(rrid):
+            if rrid in role_disciplines:
                 role_disciplines[rrid].append(rtdid)
             else:
                 role_disciplines[rrid] = [rtdid]
         for role_id, discipline_ids in role_disciplines.items():
             for discipline_id in discipline_ids:
-                if discipline_subsystems.get(discipline_id):
-                    if self.role_product_types.get(role_id):
+                if discipline_id in discipline_subsystems:
+                    if role_id in self.role_product_types:
                         self.role_product_types[role_id] |= set(
                             discipline_subsystems.get(discipline_id))
                     else:
@@ -470,7 +470,7 @@ class UberORB(object):
                 nte_pid = get_parameter_id(pid, 'NTE')
                 self.log.debug('        - {} at {}: {}'.format(pid, oid,
                                                                result))
-                if not parameterz.get(oid):
+                if oid not in parameterz:
                     parameterz[oid] = {}
                 if isinstance(result, (int, float)):
                     # if result is int or float, set it as margin; otherwise,
@@ -1032,13 +1032,12 @@ class UberORB(object):
         elif isinstance(usage, self.classes['ProjectSystemUsage']):
             assembly = usage.project
             component = usage.system
-            other_objs = [usage.project]
-            other_objs += [psu.system for psu in usage.project.systems
-                           if psu is not usage]
+            other_objs = [psu.system for psu in usage.project.systems
+                          if psu is not usage]
         else:
             return []
         other_port_oids = [p.oid for p in reduce(lambda x, y: x+y,
-                                        [o.ports for o in other_objs])]
+                                        [o.ports for o in other_objs], [])]
         comp_port_oids = [p.oid for p in component.ports]
         Port = orb.classes['Port']
         Flow = orb.classes['Flow']
@@ -1190,6 +1189,26 @@ class UberORB(object):
                 continue
             info.append('   id: {}, name: {} (oid {})'.format(obj.id, obj.name,
                                                               obj.oid))
+            if isinstance(obj, self.classes['Project']):
+                # delete all related role assignments and system usages:
+                ras = self.search_exact(cname='RoleAssignment',
+                                        role_assignment_context=obj)
+                if ras:
+                    txt = 'deleted role assignments for'
+                    info.append('   - {} "{}" ...'.format(txt, obj.id))
+                    for ra in ras:
+                        info.append('     id: {}, name: {})'.format(ra.id,
+                                                                    ra.name))
+                        orb.db.delete(ra)
+                psus = self.search_exact(cname='ProjectSystemUsage',
+                                         project=obj)
+                if psus:
+                    txt = 'deleted system usages for'
+                    info.append('   - {} "{}" ...'.format(txt, obj.id))
+                    for psu in psus:
+                        info.append('     id: {}, name: {}'.format(psu.id,
+                                                                   psu.name))
+                        orb.db.delete(psu)
             if isinstance(obj, (self.classes['Acu'],
                                 self.classes['ProjectSystemUsage'])):
                 # delete any related flows to/from its component/system in
@@ -1238,19 +1257,22 @@ class UberORB(object):
                                                                     flow.name,
                                                                     flow.oid))
                         orb.db.delete(flow)
-                if isinstance(obj, self.classes['Requirement']):
-                    # delete any related Relation and ParameterRelation objects
-                    rel = obj.computable_form
-                    if rel:
-                        prs = rel.correlates_parameters
-                        if prs:
-                            for pr in prs:
-                                orb.db.delete(pr)
-                        obj.computable_form = None
-                        orb.db.delete(rel)
-                        # computable_form -> require recompute
-                        recompute_required = True
-            if parameterz.get(obj.oid):
+            if isinstance(obj, self.classes['Requirement']):
+                # delete any related Relation and ParameterRelation objects
+                rel = obj.computable_form
+                if rel:
+                    prs = rel.correlates_parameters
+                    if prs:
+                        for pr in prs:
+                            orb.db.delete(pr)
+                    obj.computable_form = None
+                    orb.db.delete(rel)
+                    # computable_form -> require recompute
+                    recompute_required = True
+                # if its oid is in req_allocz, remove it
+                if obj.oid in req_allocz:
+                    del req_allocz[obj.oid]
+            if obj.oid in parameterz:
                 # NOTE: VERY IMPORTANT! remove oid from parameterz
                 del parameterz[obj.oid]
                 recompute_required = True

@@ -74,13 +74,13 @@ MAIN_VIEWS = dict(
 # PGXN_VIEWS:  Default fields/ordering for the PgxnObject "info", "narrative"
 # and "admin" tabs
 PGXN_VIEWS = dict(
-    info=['public', 'req_type', 'req_constraint_type', 'req_dimensions',
-          'req_target_value', 'req_tolerance', 'req_tolerance_type',
-          'req_tolerance_lower', 'req_tolerance_upper', 'req_maximum_value',
-          'req_minimum_value', 'validated', 'verification_method'],
-    narrative=['comment', 'rationale', 'purpose', 'computable_form',
-               'req_epilog', 'req_min_max_phrase', 'req_shall_phrase',
-               'req_subject'],
+    info=['public', 'computable_form', 'req_type', 'req_constraint_type',
+          'req_dimensions', 'req_target_value', 'req_tolerance',
+          'req_tolerance_type', 'req_tolerance_lower', 'req_tolerance_upper',
+          'req_maximum_value', 'req_minimum_value', 'validated',
+          'verification_method'],
+    narrative=['comment', 'rationale', 'purpose', 'req_epilog',
+               'req_min_max_phrase', 'req_shall_phrase', 'req_subject'],
     admin=['oid', 'creator', 'create_datetime', 'modifier', 'mod_datetime'])
 
 # PGXN_PARAMETERS:  preferred ordering for parameters in PgxnObject parameter

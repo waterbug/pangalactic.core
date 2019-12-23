@@ -121,7 +121,7 @@ def serialize(orb, objs, view=None, include_components=False,
     parameterz[obj.oid]) is serialized and assigned to the serialized
     object as the 'parameters' key.
     """
-    orb.log.info('* serializing objects ...')
+    # orb.log.info('* serializing objects ...')
     if not objs:
         return []
     serialized = []
@@ -131,12 +131,12 @@ def serialize(orb, objs, view=None, include_components=False,
     activity_type_objs = set()
     for obj in objs:
         if not obj:
-            orb.log.debug('  - null object "{}"'.format(obj))
+            # orb.log.debug('  - null object "{}"'.format(obj))
             # don't include the null object in serialized
             # serialized.append(obj)
             continue
-        orb.log.info('  - obj.id: {}'.format(obj.id))
-        orb.log.debug('  - {}'.format(obj.id))
+        # orb.log.info('  - obj.id: {}'.format(obj.id))
+        # orb.log.debug('  - {}'.format(obj.id))
         cname = obj.__class__.__name__
         schema = orb.schemas[cname]
         d = {}
@@ -148,10 +148,10 @@ def serialize(orb, objs, view=None, include_components=False,
             if obj_parms:
                 # NOTE:  serialize_parms() uses deepcopy()
                 d['parameters'] = serialize_parms(obj_parms)
-                orb.log.info('  - parameters found, serialized.')
+                # orb.log.info('  - parameters found, serialized.')
             else:
                 d['parameters'] = {}
-                orb.log.info('  - no parameters found.')
+                # orb.log.info('  - no parameters found.')
         for name in schema['fields']:
             if getattr(obj, name, None) is None:
                 # ignore None values
@@ -264,7 +264,7 @@ def serialize(orb, objs, view=None, include_components=False,
         # orb.log.debug('  including {} ActivityType objects.'.format(
                                                 # len(activity_type_objs)))
         serialized += serialize(orb, activity_type_objs)
-    orb.log.info('  returning {} objects.'.format(len(serialized)))
+    # orb.log.info('  serialized {} objects.'.format(len(serialized)))
     # make sure there is only 1 serialized object per oid ...
     so_by_oid = {so['oid'] : so for so in serialized}
     return list(so_by_oid.values())
@@ -581,11 +581,12 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         orb.delete(ports_and_flows_to_be_deleted)
     log_txt = '* deserializer:'
     if created:
-        orb.log.info('{} new object(s) created: {}'.format(
+        orb.log.info('{} new object(s) deserialized: {}'.format(
                                                         log_txt, str(created)))
     if updates:
         ids = str([o.id for o in updates.values()])
-        orb.log.info('{} object(s) updated: {}'.format(log_txt, ids))
+        orb.log.info('{} updated object(s) deserialized: {}'.format(
+                                                        log_txt, ids))
     # if there are any Requirement objects or Product, Acu, PSU with allocated
     # requirements, refresh the req_allocz cache for the relevant requirements
     for product in products:
@@ -600,13 +601,18 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         if psu.system_requirements:
             req_oids.update([r.oid for r in psu.system_requirements])
     if req_oids:
-        # orb.log.debug('  - relevant req oids: {}'.format(str(req_oids)))
-        # orb.log.debug('    a refresh of req_allocz is required ...')
+        orb.log.debug('  - relevant req oids: {}'.format(str(req_oids)))
+        orb.log.debug('    req_allocz is being refreshed ...')
         for req_oid in req_oids:
             refresh_req_allocz(orb, req_oid)
+        orb.log.debug('    done.')
+        orb.log.debug('  - recomputing parameters ...')
         orb.recompute_parmz()
+        orb.log.debug('    done.')
     elif recompute_parmz_required and not force_no_recompute:
+        orb.log.debug('  - recomputing parameters ...')
         orb.recompute_parmz()
+        orb.log.debug('    done.')
     if dictify:
         return output
     else:
