@@ -1143,6 +1143,7 @@ def compute_requirement_margin(orb, req_oid, default=0):
         quan_base = quan.to_base_units()
         converted_nte = quan_base.magnitude
     else:
+        msg = 'Constraint type is not "maximum" -- cannot handle (yet).'
         txt = 'constraint_type is "{}"; ignored (for now).'
         orb.log.debug('  {}'.format(txt.format(constraint.constraint_type)))
         return (None, pid, None, None, msg)
