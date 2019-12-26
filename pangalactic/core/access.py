@@ -218,13 +218,14 @@ def get_perms(obj, user=None, permissive=False):
         # [6] if none of the above, log the relevant info for debugging ...
         else:
             orb.log.debug('  - object type: {}'.format(obj.__class__.__name__))
-            orb.log.debug('  - object creator: {}'.format(
-                               getattr(obj.creator, 'id', None) or 'unknown'))
+            creator_id = '[undefined]'
+            if hasattr(obj, 'creator'):
+                creator_id = getattr(obj.creator, 'id', None) or '[unknown]'
+            orb.log.debug('  - object creator: {}'.format(creator_id))
+            owner_id = '[undefined]'
             if hasattr(obj, 'owner'):
-                orb.log.debug('  - object owner: {}'.format(
-                                    getattr(obj, 'owner', None) or 'unknown'))
-            else:
-                orb.log.debug('  - object has no "owner" attribute.')
+                owner_id = getattr(obj.owner, 'id', None) or '[unknown]'
+            orb.log.debug('  - object owner: {}'.format(owner_id))
         # TODO:  more possible permissions for Administrators
     orb.log.info('  perms: {}'.format(perms))
     return list(perms)
