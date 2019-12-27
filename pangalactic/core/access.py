@@ -267,7 +267,7 @@ def is_cloaked(obj):
     Return the cloaking status of an object.
 
     Args:
-        obj (Identifiable):  object for which orgs with access are sought
+        obj (Identifiable):  object for cloaking state is sought
 
     Returns:
         status (bool): True if cloaked
@@ -277,54 +277,28 @@ def is_cloaked(obj):
     if not obj or not obj_oid:
         orb.log.debug('  [no object or object has no oid]')
         return False
-    if (getattr(obj, 'public', False)
-        or obj.__class__.__name__ == 'ParameterDefinition'):
-        # NOTE: Parameter Definitions are always public, even though they are
-        # ManagedObjects
-        orb.log.debug('  object is public')
+    if hasattr(obj, 'public') and obj.public:
         return False
-    if isinstance(obj, orb.classes['ManagedObject']):
-        # access is granted directly for ManagedObjects
-        grants = orb.search_exact(cname='ObjectAccess', accessible_object=obj)
-        return not bool(grants)
+    elif isinstance(obj, (orb.classes['Organization'],
+                          orb.classes['ParameterDefinition'])):
+        # NOTE: Parameter Definitions and Organizations/Projects are always
+        # public, even though they are ManagedObjects
+        return False
     elif isinstance(obj, orb.classes['Acu']):
-        # access for Acu is determined by assembly/component access
-        assembly_grants = orb.search_exact(
-                        cname='ObjectAccess',
-                        accessible_object=obj.assembly)
-        if getattr(obj.component, 'public', False):
-            # if component is 'public', access depends only on assembly
-            if getattr(obj.assembly, 'public', False):
-                orb.log.debug('  Acu in a public assembly is public.')
-                return False
-            else:
-                # if assembly is cloaked, Acu is cloaked
-                grants = orb.search_exact(cname='ObjectAccess',
-                                          accessible_object=obj.assembly)
-                return not bool(grants)
-        else:
-            component_grants = orb.search_exact(
-                                            cname='ObjectAccess',
-                                            accessible_object=obj.component)
-            if assembly_grants and component_grants:
-                return False
-            else:
-                return True
+        # cloaking for Acu is determined by assembly cloaking
+        return is_cloaked(obj.assembly)
     elif isinstance(obj, orb.classes['ProjectSystemUsage']):
-        # access is determined by project/system access for PSU
-        if ((not getattr(obj.project, 'oid', None))
-            or (obj.project.oid == 'pgefobjects:SANDBOX')):
-            orb.log.debug('  PSUs for SANDBOX or None are not accessible.')
+        if (getattr(obj, 'project', None) and
+            getattr(obj.project, 'id', '') == 'SANDBOX'):
+            # SANDBOX PSUs are always cloaked
             return True
-        # elif not SANDBOX, PSU access depends on system access
-        orgs = set([g.grantee for g in orb.search_exact(
-                                        cname='ObjectAccess',
-                                        accessible_object=obj.system)])
-        orb.log.debug('  {}'.format(str([o.name for o in orgs])))
-        return not bool(orgs)
+        else:
+            # otherwise, cloaking for PSU is determined by system cloaking
+            return is_cloaked(obj.system)
+    elif hasattr(obj, 'public') and not obj.public:
+        return True
     else:
         # if object is not a ManagedObject, Acu, or PSU, it is public
-        orb.log.debug('  object is public [not MO, Acu, or PSU].')
+        orb.log.debug('  object is public.')
         return False
-
 
