@@ -16,8 +16,9 @@ from pangalactic.core.units import in_si
 # SEE ALSO:  PGXN_HIDE and PGXN_MASK (fields never shown for a class -- defined
 # below)
 IDENTITY = ['id', 'name', 'url', 'description']
+PRODUCT_ID = ['id', 'version', 'name', 'url', 'description']
 PGXN_REQD = dict(
-    HardwareProduct=(IDENTITY + ['owner', 'product_type']),
+    HardwareProduct=(PRODUCT_ID + ['owner', 'product_type']),
     ParameterDefinition=['id', 'name', 'description', 'dimensions',
                          'range_datatype'],
     Project=IDENTITY,
@@ -31,7 +32,7 @@ PGXN_REQD = dict(
 # app-specific settings defined in the 'pangalactic.config' module-level
 # dictionary.
 # TODO:  support for field "aliases" (a.k.a. "display names")
-SYSTEM = ['derived_from', 'frozen', 'version', 'version_sequence', 'iteration']
+SYSTEM = ['version_sequence', 'iteration', 'frozen', 'derived_from']
 MAIN_VIEWS = dict(
     Activity=(IDENTITY + ['activity_type', 'activity_of']),
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
@@ -98,7 +99,8 @@ DEFAULT_PRODUCT_TYPE_PARAMETERS = {'': []}
 # PGXN_PLACEHOLDERS:  Placeholder text for fields in PgxnObject forms
 PGXN_PLACEHOLDERS = {'id': 'abbreviated name; no spaces',
                      'id_ns': 'namespace for id',
-                     'name': 'verbose name; spaces ok'
+                     'name': 'verbose name; spaces ok',
+                     'version': 'blank ok; id+version must be unique'
                      }
 
 # PGXN_OBJECT_MENU:  Classes that Pangalaxian "New Object" dialog offers to

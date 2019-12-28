@@ -56,7 +56,7 @@ def get_assembly(product):
 
 
 def validate_all(fields_dict, cname, schema, view, required=None, idvs=None,
-                 html=False):
+                 ids=None, html=False):
     """
     Check a dict of form fields for minimum required fields and valid data.
 
@@ -79,12 +79,20 @@ def validate_all(fields_dict, cname, schema, view, required=None, idvs=None,
     msg_dict = OrderedDict()
     # field_names has the correct order -- use it for ordering output
     id_value = fields_dict.get('id')
-    idv = (fields_dict.get('id'), fields_dict.get('version'))
+    idvs = idvs or [('', '')]
     if id_value:
-        if idv in idvs:
-            msg_dict['Duplicate id + version'] = 'specified id, version '
-            msg_dict['Duplicate id + version'] += '"{}" exists.'.format(idv)
         invalid = list(set(id_value) - ID_ALLOWED_CHARS)
+        if 'version' in fields_dict:
+            idv = (fields_dict.get('id'), fields_dict.get('version'))
+            if idv in idvs:
+                msg = '{} with id + version '.format(cname)
+                msg += '"{}v.{}" exists.'.format(idv[0], idv[1])
+                msg_dict['Duplicate id + version'] = msg
+        else:
+            ids = set([idv[0] for idv in idvs])
+            if id_value in ids:
+                msg_dict['Duplicate id'] = '{} with id "{}" exists.'.format(
+                                                            cname, id_value)
         if cname == 'ParameterDefinition':
             # special format required for ParameterDefinition id
             try:
@@ -125,6 +133,8 @@ def validate_all(fields_dict, cname, schema, view, required=None, idvs=None,
     fields = schema['field_names']
     to_be_validated = [n for n in fields if n in view] or fields
     required = required or PGXN_REQD.get(cname) or []
+    # 'version' and 'url' may always be blank
+    required = [f for f in required if f not in ('version', 'url')]
     for fname in to_be_validated:
         if (fname in required) and not fields_dict.get(fname):
             msg_dict[fname] = 'is required.'
