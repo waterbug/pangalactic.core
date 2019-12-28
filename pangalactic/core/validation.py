@@ -86,7 +86,7 @@ def validate_all(fields_dict, cname, schema, view, required=None, idvs=None,
             idv = (fields_dict.get('id'), fields_dict.get('version'))
             if idv in idvs:
                 msg = '{} with id + version '.format(cname)
-                msg += '"{}v.{}" exists.'.format(idv[0], idv[1])
+                msg += '"{}.v.{}" exists.'.format(idv[0], idv[1])
                 msg_dict['Duplicate id + version'] = msg
         else:
             ids = set([idv[0] for idv in idvs])

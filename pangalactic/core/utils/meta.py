@@ -431,7 +431,7 @@ def display_id(obj):
     version = getattr(obj, 'version', None)
     obj_id = getattr(obj, 'id', None) or 'unknown'
     if version:
-        return obj_id + '.v' + version
+        return obj_id + '.v.' + version
     else:
         return obj_id
 
