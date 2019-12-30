@@ -15,8 +15,8 @@ from pangalactic.core.units import in_si
 # PGXN_REQD:  Properties that are validated by PgxnObject to be non-empty
 # SEE ALSO:  PGXN_HIDE and PGXN_MASK (fields never shown for a class -- defined
 # below)
-IDENTITY = ['id', 'name', 'url', 'description']
-PRODUCT_ID = ['id', 'version', 'name', 'url', 'description']
+IDENTITY = ['id', 'name', 'description']
+PRODUCT_ID = ['id', 'version', 'name', 'description']
 PGXN_REQD = dict(
     HardwareProduct=(PRODUCT_ID + ['owner', 'product_type']),
     ParameterDefinition=['id', 'name', 'description', 'dimensions',
@@ -82,7 +82,8 @@ PGXN_VIEWS = dict(
           'verification_method'],
     narrative=['comment', 'rationale', 'purpose', 'req_epilog',
                'req_min_max_phrase', 'req_shall_phrase', 'req_subject'],
-    admin=['oid', 'creator', 'create_datetime', 'modifier', 'mod_datetime'])
+    admin=['oid', 'url', 'creator', 'create_datetime', 'modifier',
+           'mod_datetime'])
 
 # PGXN_PARAMETERS:  preferred ordering for parameters in PgxnObject parameter
 # forms

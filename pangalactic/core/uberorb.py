@@ -1190,7 +1190,7 @@ class UberORB(object):
             info.append('   id: {}, name: {} (oid {})'.format(obj.id, obj.name,
                                                               obj.oid))
             if isinstance(obj, self.classes['Project']):
-                # delete all related role assignments and system usages:
+                # delete all related role assignments:
                 ras = self.search_exact(cname='RoleAssignment',
                                         role_assignment_context=obj)
                 if ras:
@@ -1200,6 +1200,7 @@ class UberORB(object):
                         info.append('     id: {}, name: {})'.format(ra.id,
                                                                     ra.name))
                         orb.db.delete(ra)
+                # delete any related system usages:
                 psus = self.search_exact(cname='ProjectSystemUsage',
                                          project=obj)
                 if psus:
@@ -1209,6 +1210,23 @@ class UberORB(object):
                         info.append('     id: {}, name: {}'.format(psu.id,
                                                                    psu.name))
                         orb.db.delete(psu)
+                # delete any flows that have this as their 'flow_context':
+                flows = self.search_exact(cname='Flow', flow_context=obj)
+                if flows:
+                    for flow in flows:
+                        orb.db.delete(flow)
+            if isinstance(obj, self.classes['Organization']):
+                # if an Organization (which includes projects) owns any
+                # objects, change their ownership to either its
+                # 'parent_organization', or if none, to PGANA (if PGANA they
+                # will be editable only by Global Admins until/unless their
+                # ownership is reassigned to another Organization ... these
+                # mods will be committed when the db session is committed
+                if obj.owned_objects:
+                    pgana = self.get('pgefobjects:PGANA')
+                    new_owner = obj.parent_organization or pgana
+                    for owned_obj in obj.owned_objects:
+                        owned_obj.owner = new_owner
             if isinstance(obj, (self.classes['Acu'],
                                 self.classes['ProjectSystemUsage'])):
                 # delete any related flows to/from its component/system in
