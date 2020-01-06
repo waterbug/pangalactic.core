@@ -167,15 +167,20 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install binaryornot'
 
-    - pyqt =5.6.0
-      [5.9 currently causes diagram double-click problem]
+    - pyqt
       * NOTE: use the 'default' conda channel -- this is especially important
         on Windows, where the 'conda-forge' channel versions of 'sip' do not
         work with the default channel versions and will cause failures (this
         may require commenting out the conda-forge channel in your .condarc
         while installing pyqt)
 
-          Configuration:  'conda install pyqt=5.6.0'
+          Configuration:  'conda install pyqt'
+
+    - pyqtgraph
+      Graphing package for pyqt apps, used for the mission concept modeler
+      module, 'conops'.  NOTE:  this adds numpy as a dependency.
+
+          Configuration:  'conda install pyqt'
 
     - qt5reactor
       Integration of twisted reactor with PyQt5 event loop

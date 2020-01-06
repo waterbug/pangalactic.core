@@ -609,8 +609,8 @@ def get_pval(orb, oid, pid, allow_nan=False):
     # orb.log.debug('* get_pval() ...')
     pdz = parm_defz.get(pid)
     if not pdz:
-        orb.log.debug('* get_pval: "{}" does not have a definition.'.format(
-                                                                        pid))
+        # orb.log.debug('* get_pval: "{}" does not have a definition.'.format(
+                                                                        # pid))
         return
     try:
         # for extreme debugging only ...
