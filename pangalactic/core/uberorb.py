@@ -751,7 +751,7 @@ class UberORB(object):
                 # TODO: is recompute required here???
                 # recompute_required = True
             elif cname == 'Requirement' and obj.req_type == 'performance':
-                refresh_req_allocz(self, req_oid)
+                refresh_req_allocz(self, obj.oid)
                 recompute_required = True
             elif cname == 'ParameterDefinition':
                 # NOTE:  all Parameter Definitions are public

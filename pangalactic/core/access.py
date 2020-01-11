@@ -33,7 +33,7 @@ def get_perms(obj, user=None, permissive=False):
     # fulfilling the role of the administrative service.  Therefore, because
     # operations to sync such data are expensive, the data are cached in
     # `state` variables rather than stored in the local db.
-    orb.log.info('* get_perms ...')
+    # orb.log.info('* get_perms ...')
     # empty or None objects have no permissions
     if not obj:
         return []
@@ -42,9 +42,9 @@ def get_perms(obj, user=None, permissive=False):
         # orb.log.debug('  for {} object, id: {}, oid: {}'.format(cname,
                                                         # obj.id, obj.oid))
     if config.get('local_admin') or permissive:
-        orb.log.debug('  "local_admin" or "permissive" configured.')
+        # orb.log.debug('  "local_admin" or "permissive" configured.')
         perms = ['view', 'modify', 'decloak', 'delete']
-        orb.log.debug('  perms: {}'.format(perms))
+        # orb.log.debug('  perms: {}'.format(perms))
         return perms
     perms = set()
     # NOTE: don't need "grantees" any more -- only one possibility!
@@ -61,34 +61,34 @@ def get_perms(obj, user=None, permissive=False):
         # user specified -> server-side
         user_oid = getattr(user, 'oid', None)
         if not user_oid:
-            orb.log.debug('  specified user has no "oid".')
-            orb.log.debug('  perms: {}'.format(perms))
+            # orb.log.debug('  specified user has no "oid".')
+            # orb.log.debug('  perms: {}'.format(perms))
             return list(perms)
     else:
         # user not provided -> client-side (local user)
         user_oid = state.get('local_user_oid')
         if not user_oid:
-            orb.log.debug('  no local user configured.')
-            orb.log.debug('  perms: {}'.format(perms))
+            # orb.log.debug('  no local user configured.')
+            # orb.log.debug('  perms: {}'.format(perms))
             return list(perms)
         user = orb.get(user_oid)
         if not user:
-            orb.log.debug('  no user object found.')
-            orb.log.debug('  perms: {}'.format(perms))
+            # orb.log.debug('  no user object found.')
+            # orb.log.debug('  perms: {}'.format(perms))
             return list(perms)
     if isinstance(obj, orb.classes['ProjectSystemUsage']):
         # access is determined by project/system access for PSU
         if obj.project.oid == 'pgefobjects:SANDBOX':
-            orb.log.debug('  ******* SANDBOX PSUs are modifiable by user')
+            # orb.log.debug('  ******* SANDBOX PSUs are modifiable by user')
             perms = ['view', 'modify', 'decloak', 'delete']
             return perms
     # if we get this far, we have a user_oid and a user object
     if is_global_admin(user):
         # global admin is omnipotent, except for deleting projects ...
-        orb.log.debug('  ******* user is a global admin.')
+        # orb.log.debug('  ******* user is a global admin.')
         perms = ['view', 'modify', 'decloak', 'delete']
+        # orb.log.debug('  perms: {}'.format(perms))
         return perms
-        orb.log.debug('  perms: {}'.format(perms))
     # user has write permissions if Admin for a grantee org or if user
     # has a discipline role in the owner org that corresponds to the
     # object's 'product_type'
@@ -96,10 +96,10 @@ def get_perms(obj, user=None, permissive=False):
         # did the user create the object?  if so, full perms ...
         if (hasattr(obj, 'creator') and
             obj.creator is user):
-            orb.log.debug('  user is object creator.')
+            # orb.log.debug('  user is object creator.')
             # any object can be deleted by its creator
             perms = ['view', 'modify', 'decloak', 'delete']
-            orb.log.debug('  perms: {}'.format(perms))
+            # orb.log.debug('  perms: {}'.format(perms))
             return perms
         # From here on, access depends on roles and product_types
         TBD = orb.get('pgefobjects:TBD')
@@ -112,27 +112,46 @@ def get_perms(obj, user=None, permissive=False):
             ras = orb.search_exact(cname='RoleAssignment',
                                    assigned_to=user,
                                    role_assignment_context=obj.owner)
-            role_ids = [ra.assigned_role.id for ra in ras]
+            role_ids = set([ra.assigned_role.id for ra in ras])
             # orb.log.debug('  user has roles: {}'.format(role_ids))
-            subsystem_types = set()
-            if role_ids:
-                rpt = [orb.role_product_types.get(r, set()) for r in role_ids]
-                if rpt:
-                    subsystem_types = set.union(*rpt)
-            # orb.log.debug('  user is authorized for subsystem types:')
-            # orb.log.debug('  {}'.format(subsystem_types))
-            pt_id = getattr(obj.product_type, 'id', 'unknown')
-            # orb.log.debug('  this ProductType is "{}"'.format(pt_id))
-            if pt_id in subsystem_types:
-                # orb.log.debug(
-                    # '  user is authorized for ProductType "{}".'.format(pt_id))
-                perms = ['view', 'modify', 'decloak', 'delete']
-                # orb.log.debug('  perms: {}'.format(perms))
-                return perms
-            else:
-                txt = '  user is NOT authorized for ProductType "{}".'.format(
-                                                                        pt_id)
-                orb.log.debug(txt)
+            if isinstance(obj, orb.classes['HardwareProduct']):
+                # permissions determined by product_type only apply to HW
+                subsystem_types = set()
+                if role_ids:
+                    rpt = [orb.role_product_types.get(r, set())
+                           for r in role_ids]
+                    if rpt:
+                        subsystem_types = set.union(*rpt)
+                # orb.log.debug('  user is authorized for subsystem types:')
+                # orb.log.debug('  {}'.format(subsystem_types))
+                pt_id = getattr(obj.product_type, 'id', 'unknown')
+                # orb.log.debug('  this ProductType is "{}"'.format(pt_id))
+                if pt_id in subsystem_types:
+                    # orb.log.debug(
+                        # '  user is authorized for ProductType "{}".'.format(
+                        # pt_id))
+                    perms = ['view', 'modify', 'decloak', 'delete']
+                    # orb.log.debug('  perms: {}'.format(perms))
+                    return perms
+                else:
+                    # txt = '  user NOT authorized for ProductType "{}".'.format(
+                                                                         # pt_id)
+                    # orb.log.debug(txt)
+                    perms = ['view']
+                    # orb.log.debug('  perms: {}'.format(perms))
+                    return perms
+            elif isinstance(obj, orb.classes['Requirement']):
+                # Requirements (subclass of DigitalProduct) are a special case
+                req_mgrs = set(['Administrator', 'systems_engineer',
+                                'lead_engineer'])
+                if req_mgrs & role_ids:
+                    perms = ['view', 'modify', 'decloak', 'delete']
+                    # orb.log.debug('  perms: {}'.format(perms))
+                    return perms
+                else:
+                    perms = ['view']
+                    # orb.log.debug('  perms: {}'.format(perms))
+                    return perms
         # [2] is it an Acu?
         # if so, the user can modify it if any of the following is true:
         # [2a] the user has a role in the context of the assembly's "owner"
@@ -144,15 +163,15 @@ def get_perms(obj, user=None, permissive=False):
         #      the assembly's "owner" that relates to the Acu's
         #      product_type_hint (regardless of the assembly's product type)
         elif isinstance(obj, orb.classes['Acu']):
-            orb.log.debug('  - object is an Acu')
+            # orb.log.debug('  - object is an Acu')
             # access will depend on ownership of its assembly
             if not obj.assembly.owner:
-                orb.log.debug('    assembly owner not specified -- view only!')
+                # orb.log.debug('    assembly owner not specified -- view only!')
                 return ['view']
             ras = orb.search_exact(cname='RoleAssignment',
                                    assigned_to=user,
                                    role_assignment_context=obj.assembly.owner)
-            role_ids = [ra.assigned_role.id for ra in ras]
+            role_ids = set([ra.assigned_role.id for ra in ras])
             # orb.log.debug('    + assigned roles of user "{}" on {}:'.format(
                                             # user.id, obj.assembly.owner.id))
             # orb.log.debug('      {}'.format(str(role_ids)))
@@ -163,8 +182,8 @@ def get_perms(obj, user=None, permissive=False):
             # orb.log.debug('    + authorized subsystem types: {}:'.format(
                                                     # str(subsystem_types)))
             assembly_type = getattr(obj.assembly.product_type, 'id', '')
-            orb.log.debug('    assembly product_type is "{}"'.format(
-                          assembly_type))
+            # orb.log.debug('    assembly product_type is "{}"'.format(
+                          # assembly_type))
             # [2a] assembly with a relevant product type
             if assembly_type in subsystem_types:
                 # orb.log.debug('  - assembly product_type is relevant.')
@@ -217,15 +236,16 @@ def get_perms(obj, user=None, permissive=False):
             return get_perms(obj.flow_context)
         # [6] if none of the above, log the relevant info for debugging ...
         else:
-            orb.log.debug('  - object type: {}'.format(obj.__class__.__name__))
-            creator_id = '[undefined]'
-            if hasattr(obj, 'creator'):
-                creator_id = getattr(obj.creator, 'id', None) or '[unknown]'
-            orb.log.debug('  - object creator: {}'.format(creator_id))
-            owner_id = '[undefined]'
-            if hasattr(obj, 'owner'):
-                owner_id = getattr(obj.owner, 'id', None) or '[unknown]'
-            orb.log.debug('  - object owner: {}'.format(owner_id))
+            return list(perms)
+            # orb.log.debug('  - object type: {}'.format(obj.__class__.__name__))
+            # creator_id = '[undefined]'
+            # if hasattr(obj, 'creator'):
+                # creator_id = getattr(obj.creator, 'id', None) or '[unknown]'
+            # orb.log.debug('  - object creator: {}'.format(creator_id))
+            # owner_id = '[undefined]'
+            # if hasattr(obj, 'owner'):
+                # owner_id = getattr(obj.owner, 'id', None) or '[unknown]'
+            # orb.log.debug('  - object owner: {}'.format(owner_id))
         # TODO:  more possible permissions for Administrators
     orb.log.info('  perms: {}'.format(perms))
     return list(perms)
