@@ -702,6 +702,48 @@ def create_test_project():
             create_datetime=NOW,
             modifier='test:steve',
             mod_datetime=NOW
+            ),
+        dict(
+            _cname='ParameterRelation',
+            oid='H2G2:Spacecraft-Mass-Computable-Form-PR',
+            id='H2G2.1.0.Spacecraft-Mass-Computable-Form',
+            id_ns='test',
+            name='H2G2 1.0 Spacecraft Mass Computable Form',
+            referenced_relation='H2G2:Spacecraft-Mass-Computable-Form',
+            correlates_parameter='pgef:ParameterDefinition.m',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Relation',
+            oid='H2G2:Spacecraft-Mass-Computable-Form',
+            id='H2G2.1.0.Spacecraft-Mass-Computable-Form',
+            id_ns='test',
+            name='H2G2 1.0 Spacecraft Mass Computable Form',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
+            ),
+        dict(
+            _cname='Requirement',
+            oid='H2G2:Spacecraft-Mass',
+            id='H2G2.1.0.Spacecraft-Mass',
+            id_ns='test',
+            name='H2G2 1.0 Spacecraft Mass',
+            owner='H2G2',
+            allocated_to_system='test:H2G2:system-1',
+            req_type='performance',
+            req_constraint_type='maximum',
+            req_maximum_value=5000.0,
+            req_units='kg',
+            computable_form='H2G2:Spacecraft-Mass-Computable-Form',
+            creator='test:steve',
+            create_datetime=NOW,
+            modifier='test:steve',
+            mod_datetime=NOW
             )
         ]
     return test_project
@@ -971,7 +1013,7 @@ related_test_objects = [
         id='OTHER.1.0.Spacecraft-Mass',
         id_ns='test',
         name='OTHER 1.0 Spacecraft Mass',
-        project='test:OTHER',
+        owner='test:OTHER',
         allocated_to_system='test:OTHER:system-1',
         req_type='performance',
         req_constraint_type='maximum',

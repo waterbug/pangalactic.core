@@ -493,20 +493,29 @@ class OrbTest(unittest.TestCase):
         # perms on ProjectSystemUsage are determined by project roles: only the
         # Systems Engineer, Lead Engineer, and Administrator have full perms
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+        req = orb.get('H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         value = [set(get_perms(sc, user=steve)),          # Adm/sc: full perms
                  set(get_perms(sc, user=carefulwalker)),  # SE/sc: full perms
                  set(get_perms(sc, user=zaphod)),         # LE/sc: full perms
                  set(get_perms(sc, user=buckaroo)),       # PE/sc: view only
-                 set(get_perms(acu1, user=steve)),        # Adm: full perms
-                 set(get_perms(acu1, user=buckaroo)),     # PE: full perms
-                 set(get_perms(acu2, user=buckaroo)),     # PE: full perms
-                 set(get_perms(acu4, user=buckaroo)),     # PE: view only
+                 set(get_perms(acu1, user=steve)),        # Adm/acu: full perms
+                 set(get_perms(acu1, user=buckaroo)),     # PE/acu: full perms
+                 set(get_perms(acu2, user=buckaroo)),     # PE/acu: full perms
+                 set(get_perms(acu4, user=buckaroo)),     # PE/acu: view only
                  set(get_perms(psu, user=steve)),         # Adm/psu: full perms
                  set(get_perms(psu, user=carefulwalker)), # SE/psu: full perms
                  set(get_perms(psu, user=zaphod)),        # LE/psu: full perms
-                 set(get_perms(psu, user=buckaroo))       # PE/psu: view only
+                 set(get_perms(psu, user=buckaroo)),      # PE/psu: view only
+                 set(get_perms(req, user=steve)),         # Adm/req: full perms
+                 set(get_perms(req, user=carefulwalker)), # SE/req: full perms
+                 set(get_perms(req, user=zaphod)),        # LE/req: full perms
+                 set(get_perms(req, user=buckaroo))       # PE/req: view only
                  ]
         expected = [set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view', 'modify', 'decloak', 'delete']),
+                    set(['view']),
+                    set(['view', 'modify', 'decloak', 'delete']),
                     set(['view', 'modify', 'decloak', 'delete']),
                     set(['view', 'modify', 'decloak', 'delete']),
                     set(['view']),
