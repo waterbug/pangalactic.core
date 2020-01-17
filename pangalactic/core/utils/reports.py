@@ -138,7 +138,7 @@ def write_mel_xlsx(context, is_project=True,
     # set title row height to 12*2
     worksheet.set_row(title_row, 12*2)
     worksheet.merge_range(title_row, 0, title_row, 47,
-                          '  MASTER EQUIPMENT LIST',
+                          '  MASTER EQUIPMENT LIST (MEL)',
                           fmts['black_bg_18'])
 
     # First row of headers (hrow1)
@@ -168,11 +168,11 @@ def write_mel_xlsx(context, is_project=True,
                           'PRICE COST MODELING DATA',
                           fmts['ctr_green_bold_12'])
 
-    # # Second row of headers (hrow2)
-    # # Set height to accomodate wrapped column heading text
+    # Second row of headers (hrow2)
+    # Set height to accomodate wrapped column heading text
     worksheet.set_row(hrow2, 12*8)
     worksheet.write(hrow2, 0, "", fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 1, "Subassembly/Component",
+    worksheet.write(hrow2, 1, "Subassembly / Component",
                     fmts['left_pale_blue_12'])
     worksheet.write(hrow2, 2, 'Unit Mass\n[kg]\n(CBE)',
                     fmts['ctr_pale_blue_12'])
@@ -250,7 +250,8 @@ def write_mel_xlsx(context, is_project=True,
     worksheet.write(hrow2, 40,
                  'Engineering\nComplexity\nMod. Level\n(Simple,\nNew)',
                  fmts['ctr_green_12'])
-    # # Third row of headers (hrow3)
+
+    # Third row of headers (hrow3)
     worksheet.write(hrow3, 1, "TOTAL FLIGHT HARDWARE",
                     fmts['left_pale_blue_bold_12'])
     worksheet.write(hrow3, 35, "WS",
