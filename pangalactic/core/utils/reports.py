@@ -77,55 +77,49 @@ def write_mel_xlsx(context, is_project=True,
     book = xlsxwriter.Workbook(file_path)
     worksheet = book.add_worksheet()
     # xlsxwriter specifies widths in "characters" (as does Excel)
-    col_widths = 48 * [8]
-    col_widths[0]  = 10
-    col_widths[1] = 40
+    col_widths = 42 * [8]
+    col_widths[0] = 10   # Level
+    col_widths[1] = 40    # System/Subsystem Name
     col_widths[2] = 8     # UNIT MASS
-    col_widths[3] = 6     # Cold Units
-    col_widths[4] = 6
-    col_widths[5] = 6
-    col_widths[6] = 8     # Flight Spares
-    col_widths[7] = 10    # EM Prototype
-    col_widths[8] = 9     # Total Mass [kg] (CBE)
-    col_widths[9] = 12    # Contingency [%]
-    col_widths[10] = 12   # Total Mass w/ Contingency (MEV)
-    col_widths[11] = 8
-    col_widths[12] = 8
-    col_widths[13] = 12   # Contingency [%]
-    col_widths[14] = 12   # Total Power w/ Contingency (MEV)
-    col_widths[15] = 8
-    col_widths[16] = 8
-    col_widths[17] = 12   # Contingency [%]
-    col_widths[18] = 12   # Total Power w/ Contingency (MEV)
-    col_widths[19] = 13   # QUIESCENT Total Power [W] (CBE)
-    col_widths[20] = 10   # Quoted Unit Price ($K)
-    col_widths[21] = 15   # Composition
-    col_widths[22] = 40   # ADDITIONAL INFORMATION
-    col_widths[23] = 16   # TRL
-    col_widths[24] = 8
-    col_widths[25] = 15   # LOCATION
-    col_widths[26] = 14   # Temperature
-    col_widths[27] = 12
-    col_widths[28] = 12
-    col_widths[29] = 15   # Radiation
-    col_widths[30] = 10
-    col_widths[31] = 10
-    col_widths[32] = 10
-    col_widths[33] = 5
-    col_widths[34] = 5
-    col_widths[35] = 5
-    col_widths[36] = 5
-    col_widths[37] = 5
-    col_widths[38] = 5
-    col_widths[39] = 5
-    col_widths[40] = 10
-    col_widths[41] = 60
-    col_widths[42] = 12
-    col_widths[43] = 12
-    col_widths[44] = 12
-    col_widths[45] = 12
-    col_widths[46] = 12
-    col_widths[47] = 12
+    col_widths[3] = 6     # Cold Units       [# of Units]
+    col_widths[4] = 6     # Hot Units        [# of Units]
+    col_widths[5] = 6     # Flight Units     [# of Units]
+    col_widths[6] = 6     # Flight Spares    [# of Units]
+    col_widths[7] = 6     # ETU/Qual Units   [# of Units]
+    col_widths[8] = 6     # EM/EDU Prototype [# of Units]
+    col_widths[9] = 9     # Total Mass [kg] (CBE)
+    col_widths[10] = 12   # Mass Contingency [%]
+    col_widths[11] = 12   # Total Mass w/ Contingency (MEV)
+    col_widths[12] = 12   # Nominal Unit Power (W)
+    col_widths[13] = 12   # Nominal Total Power (W)
+    col_widths[14] = 12   # Nominal Power Contingency [%]
+    col_widths[15] = 12   # Nominal Total Power w/ Contingency (MEV)
+    col_widths[16] = 12   # Peak Unit Power (W)
+    col_widths[17] = 12   # Peak Total Power (W)
+    col_widths[18] = 12   # Peak Power Contingency [%]
+    col_widths[19] = 12   # Peak Total Power w/ Contingency (MEV)
+    col_widths[20] = 16   # QUIESCENT Total Power [W] (CBE)
+    col_widths[21] = 12   # Quoted Unit Price ($K)
+    col_widths[22] = 24   # Composition
+    col_widths[23] = 40   # ADDITIONAL INFORMATION
+    col_widths[24] = 16   # TRL
+    col_widths[25] = 12   # Similarity to Existing
+    col_widths[26] =  5   # Design        [Heritage Summary]
+    col_widths[27] =  5   # Manufacture   [Heritage Summary]
+    col_widths[28] =  5   # Software      [Heritage Summary]
+    col_widths[29] =  5   # Provider      [Heritage Summary]
+    col_widths[30] =  5   # Use           [Heritage Summary]
+    col_widths[31] =  5   # Operating Env [Heritage Summary]
+    col_widths[32] =  5   # Ref Prior Use [Heritage Summary]
+    col_widths[33] = 16   # Reference Mission(s)
+    col_widths[34] = 120  # Heritage Justification and Additional Information
+    col_widths[35] = 16   # Structure Mass (kg)               [COST MODELING DATA]
+    col_widths[36] = 16   # Electronic Complexity Factor      [COST MODELING DATA]
+    col_widths[37] = 16   # Structure Complexity Factor       [COST MODELING DATA]
+    col_widths[38] = 16   # Electronic Remaining Design       [COST MODELING DATA]
+    col_widths[39] = 16   # Structure Remaining Design        [COST MODELING DATA]
+    col_widths[40] = 16   # Engineering Complexity Mod. Level [COST MODELING DATA]
+    col_widths[41] = 10   # [Add columns to the right if needed]
 
     for i, width in enumerate(col_widths):
         worksheet.set_column(i, i, width)
@@ -154,26 +148,23 @@ def write_mel_xlsx(context, is_project=True,
     worksheet.write(hrow1, 1, 'NAME (Mission or Payload Name)',
                                         fmts['ctr_pale_blue_bold_12'])
     worksheet.write(hrow1, 2, 'UNIT\nMASS', fmts['ctr_pale_blue_bold_12'])
-    worksheet.merge_range(hrow1, 3, hrow1, 7, '# OF UNITS',
+    worksheet.merge_range(hrow1, 3, hrow1, 8, '# OF UNITS',
                           fmts['ctr_pale_blue_bold_12'])
-    worksheet.merge_range(hrow1, 8, hrow1, 10, 'FLIGHT HARDWARE MASS',
+    worksheet.merge_range(hrow1, 9, hrow1, 11, 'FLIGHT HARDWARE MASS',
                           fmts['ctr_pale_blue_bold_12'])
-    worksheet.merge_range(hrow1, 11, hrow1, 14,
+    worksheet.merge_range(hrow1, 12, hrow1, 15,
                           'NOMINAL FLIGHT HARDWARE POWER',
                           fmts['ctr_pale_blue_bold_12'])
-    worksheet.merge_range(hrow1, 15, hrow1, 18,
+    worksheet.merge_range(hrow1, 16, hrow1, 19,
                           'PEAK FLIGHT HARDWARE POWER',
                           fmts['ctr_gray_bold_12'])
-    worksheet.write(hrow1, 19, 'QUIESCENT', fmts['ctr_gray_bold_12'])
-    worksheet.write(hrow1, 22, 'ADDITIONAL INFORMATION',
+    worksheet.write(hrow1, 20, 'QUIESCENT', fmts['ctr_gray_bold_12'])
+    worksheet.write(hrow1, 23, 'ADDITIONAL INFORMATION',
                     fmts['ctr_pale_blue_bold_12'])
-    worksheet.merge_range(hrow1, 26, hrow1, 29,
-                          'HERITAGE VS ENVIRONMENTAL REQUIREMENTS',
-                          fmts['ctr_turquoise_bold_12'])
-    worksheet.merge_range(hrow1, 33, hrow1, 39,
+    worksheet.merge_range(hrow1, 26, hrow1, 32,
                           'HERITAGE SUMMARY',
-                          fmts['ctr_turquoise_bold_12'])
-    worksheet.merge_range(hrow1, 42, hrow1, 47,
+                          fmts['ctr_light_steel_blue_bold_12'])
+    worksheet.merge_range(hrow1, 35, hrow1, 40,
                           'PRICE COST MODELING DATA',
                           fmts['ctr_green_bold_12'])
 
@@ -185,32 +176,34 @@ def write_mel_xlsx(context, is_project=True,
                     fmts['left_pale_blue_12'])
     worksheet.write(hrow2, 2, 'Unit Mass\n[kg]\n(CBE)',
                     fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 3, 'Cold\nUnits', fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 4, 'Hot\nUnits', fmts['ctr_pale_blue_12'])
+    worksheet.write(hrow2, 3, 'Cold\nUnits', fmts['ctr_gray_12'])
+    worksheet.write(hrow2, 4, 'Hot\nUnits', fmts['ctr_gray_12'])
     worksheet.write(hrow2, 5, 'Flight\nUnits', fmts['ctr_pale_blue_12'])
     worksheet.write(hrow2, 6, 'Flight\nSpares', fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 7, 'EM\nPrototype', fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 8, 'Total Mass\n[kg] (CBE)',
+    worksheet.write(hrow2, 7, 'ETU /\nQual\nUnit', fmts['ctr_gray_12'])
+    worksheet.write(hrow2, 8, 'EM /\nEDU /\nProto-\ntype',
                     fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 9, 'Contingency\n[%]', fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 10, 'Total Mass\n[kg] with\nContingency\n(MEV)',
+    worksheet.write(hrow2, 9, 'Total Mass\n[kg] (CBE)',
                     fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 11, 'Unit\nPower [W]\n(CBE)',
+    worksheet.write(hrow2, 10, 'Contingency\n[%]', fmts['ctr_pale_blue_12'])
+    worksheet.write(hrow2, 11, 'Total Mass\n[kg] with\nContingency\n(MEV)',
                     fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 12, 'Total\nPower [W]\n(CBE)',
+    worksheet.write(hrow2, 12, 'Unit\nPower [W]\n(CBE)',
                     fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 13, 'Contingency\n(%)', fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 14, 'Total\nPower [W]\nwith\nContingency\n(MEV)',
+    worksheet.write(hrow2, 13, 'Total\nPower [W]\n(CBE)',
                     fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 15, 'Unit\nPower [W]\n(CBE)', fmts['ctr_gray_12'])
-    worksheet.write(hrow2, 16, 'Total\nPower [W]\n(CBE)', fmts['ctr_gray_12'])
-    worksheet.write(hrow2, 17, 'Contingency\n(%)', fmts['ctr_gray_12'])
-    worksheet.write(hrow2, 18, 'Total\nPower [W]\nwith\nContingency\n(MEV)',
+    worksheet.write(hrow2, 14, 'Contingency\n(%)', fmts['ctr_pale_blue_12'])
+    worksheet.write(hrow2, 15, 'Total\nPower [W]\nwith\nContingency\n(MEV)',
+                    fmts['ctr_pale_blue_12'])
+    worksheet.write(hrow2, 16, 'Unit\nPower [W]\n(CBE)', fmts['ctr_gray_12'])
+    worksheet.write(hrow2, 17, 'Total\nPower [W]\n(CBE)', fmts['ctr_gray_12'])
+    worksheet.write(hrow2, 18, 'Contingency\n(%)', fmts['ctr_gray_12'])
+    worksheet.write(hrow2, 19, 'Total\nPower [W]\nwith\nContingency\n(MEV)',
                     fmts['ctr_gray_12'])
-    worksheet.write(hrow2, 19, 'Total Power\n[W] (CBE)', fmts['ctr_gray_12'])
-    worksheet.merge_range(hrow1, 20, hrow2, 20, 'Quoted\nUnit\nPrice\n($K)',
+    worksheet.write(hrow2, 20, 'Total Power\n[W] (CBE)', fmts['ctr_gray_12'])
+    worksheet.merge_range(hrow1, 21, hrow2, 21, 'Quoted\nUnit\nPrice\n($K)',
                           fmts['ctr_pale_blue_12'])
-    worksheet.merge_range(hrow1, 21, hrow2, 21, 'Composition',
+    worksheet.merge_range(hrow1, 22, hrow2, 22, 'Composition',
                           fmts['ctr_pale_blue_12'])
     text = """(As applicable:
     Vendor, make, model, part #,
@@ -218,62 +211,60 @@ def write_mel_xlsx(context, is_project=True,
     notation of identical items,
     instrument / component
     characteristics, ETU approach...)"""
-    worksheet.write(hrow2, 22, text, fmts['ctr_pale_blue_12'])
+    worksheet.write(hrow2, 23, text, fmts['ctr_pale_blue_12'])
     trl_text = """TECHNOLOGY
     READINESS
     LEVEL
-    (TRL)
+
+    TRL
     """
-    worksheet.merge_range(hrow1, 23, hrow2, 23, trl_text,
+    worksheet.merge_range(hrow1, 24, hrow2, 24, trl_text,
                        fmts['ctr_periwinkle_bold_12'])
-    vendor_maturity_text = "VENDOR\nMATURITY\nDESCRIPTION"
-    worksheet.merge_range(hrow1, 24, hrow2, 24, vendor_maturity_text,
-                                            fmts['turquoise_bold_12_rotated'])
-    worksheet.merge_range(hrow1, 25, hrow2, 25, 'LOCATION',
-                                            fmts['ctr_turquoise_bold_12'])
-    worksheet.write(hrow2, 26, 'Temperature\n-X to Y',
-                 fmts['ctr_turquoise_12'])
-    worksheet.write(hrow2, 27, 'Pressure\nX to Y [mPa]',
-                 fmts['ctr_turquoise_12'])
-    worksheet.write(hrow2, 28, 'Entry Load\n< X [G]', fmts['ctr_turquoise_12'])
-    worksheet.write(hrow2, 29, 'Radiation\nTID\n< X [krad-Si]',
-                 fmts['ctr_turquoise_12'])
-    worksheet.merge_range(hrow1, 30, hrow2, 30,
-                       'NEW TECHNOLOGY\nOR\nENGNRG CHANGE?',
-                       fmts['turquoise_bold_12_rotated'])
-    worksheet.merge_range(hrow1, 31, hrow2, 31, 'OWNERSHIP?',
-                       fmts['turquoise_bold_12_rotated'])
-    worksheet.merge_range(hrow1, 32, hrow2, 32, 'PERFORMANCE\nCHANGE?',
-                       fmts['turquoise_bold_12_rotated'])
-    worksheet.write(hrow2, 33, 'DESIGN', fmts['turquoise_bold_12_rotated'])
-    worksheet.write(hrow2, 34, 'MANUFACTURE',
-                    fmts['turquoise_bold_12_rotated'])
-    worksheet.write(hrow2, 35, 'SOFTWARE', fmts['turquoise_bold_12_rotated'])
-    worksheet.write(hrow2, 36, 'PROVIDER', fmts['turquoise_bold_12_rotated'])
-    worksheet.write(hrow2, 37, 'USE', fmts['turquoise_bold_12_rotated'])
-    worksheet.write(hrow2, 38, 'OPERATING\nENVIRONMENT',
-                    fmts['turquoise_bold_12_rotated'])
-    worksheet.write(hrow2, 39, 'PRIOR USE', fmts['turquoise_bold_12_rotated'])
-    worksheet.merge_range(hrow1, 40, hrow2, 40, 'REFERENCE\nMISSION(S)',
-                          fmts['turquoise_bold_12_rotated'])
-    worksheet.merge_range(hrow1, 41, hrow2, 41,
+    similarity_text = "SIMILARITY TO\nEXISTING"
+    worksheet.merge_range(hrow1, 25, hrow2, 25, similarity_text,
+                                            fmts['light_steel_blue_bold_12_rotated'])
+    worksheet.write(hrow2, 26, 'DESIGN', fmts['light_steel_blue_bold_10_rotated'])
+    worksheet.write(hrow2, 27, 'MANUFACTURE',
+                    fmts['light_steel_blue_bold_10_rotated'])
+    worksheet.write(hrow2, 28, 'SOFTWARE', fmts['light_steel_blue_bold_10_rotated'])
+    worksheet.write(hrow2, 29, 'PROVIDER', fmts['light_steel_blue_bold_10_rotated'])
+    worksheet.write(hrow2, 30, 'USE', fmts['light_steel_blue_bold_10_rotated'])
+    worksheet.write(hrow2, 31, 'OPERATING ENV',
+                    fmts['light_steel_blue_bold_10_rotated'])
+    worksheet.write(hrow2, 32, 'REF PRIOR USE',
+                    fmts['light_steel_blue_bold_10_rotated'])
+    worksheet.merge_range(hrow1, 33, hrow2, 33, 'REFERENCE\nMISSION(S)',
+                          fmts['light_steel_blue_bold_12_rotated'])
+    worksheet.merge_range(hrow1, 34, hrow2, 34,
                    'HERITAGE JUSTIFICATION and ADDITIONAL INFORMATION',
-                   fmts['ctr_turquoise_bold_12'])
-    worksheet.write(hrow2, 42, 'Structure\nMass [kg]', fmts['ctr_green_12'])
-    worksheet.write(hrow2, 43, 'Electronic\nComplexity\nFactor',
+                   fmts['ctr_light_steel_blue_bold_12'])
+    worksheet.write(hrow2, 35, 'Structure\nMass (kg)', fmts['ctr_green_12'])
+    worksheet.write(hrow2, 36, 'Electronic\nComplexity\nFactor',
                                                 fmts['ctr_green_12'])
-    worksheet.write(hrow2, 44, 'Structure\nComplexity\nFactor',
+    worksheet.write(hrow2, 37, 'Structure\nComplexity\nFactor',
                                                 fmts['ctr_green_12'])
-    worksheet.write(hrow2, 45, 'Electronic\nRemaining\nDesign\n(1.00 = 100%)',
+    worksheet.write(hrow2, 38, 'Electronic\nRemaining\nDesign\n(1.00 = 100%)',
                                                 fmts['ctr_green_12'])
-    worksheet.write(hrow2, 46, 'Structure\nRemaining\nDesign\n(1.00 = 100%)',
+    worksheet.write(hrow2, 39, 'Structure\nRemaining\nDesign\n(1.00 = 100%)',
                                                 fmts['ctr_green_12'])
-    worksheet.write(hrow2, 47,
+    worksheet.write(hrow2, 40,
                  'Engineering\nComplexity\nMod. Level\n(Simple,\nNew)',
                  fmts['ctr_green_12'])
     # # Third row of headers (hrow3)
     worksheet.write(hrow3, 1, "TOTAL FLIGHT HARDWARE",
                     fmts['left_pale_blue_bold_12'])
+    worksheet.write(hrow3, 35, "WS",
+                    fmts['ctr_green_bold_12'])
+    worksheet.write(hrow3, 36, "MCPLXE",
+                    fmts['ctr_green_bold_12'])
+    worksheet.write(hrow3, 37, "MCPLXS",
+                    fmts['ctr_green_bold_12'])
+    worksheet.write(hrow3, 38, "NEWST",
+                    fmts['ctr_green_bold_12'])
+    worksheet.write(hrow3, 39, "NEWST",
+                    fmts['ctr_green_bold_12'])
+    worksheet.write(hrow3, 40, "ECMPLX",
+                    fmts['ctr_green_bold_12'])
 
     level_fmts = {1: fmts['ctr_black_bg_12'],
                   2: fmts['ctr_gray_bold_12'],
@@ -345,13 +336,13 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts, level,
     data_fmt = data_fmts.get(level, data_fmts[3])
     sheet.write(row, 2, mcbe, data_fmt)        # Unit Mass
     sheet.write(row, 5, int(qty), data_fmt)    # Flight Units
-    sheet.write(row, 8, mcbe * qty, data_fmt)  # Total Mass
-    sheet.write(row, 9, ctgcy_m, data_fmt)
-    sheet.write(row, 10, mmev * qty, data_fmt) # Mass MEV
-    sheet.write(row, 11, pcbe, data_fmt)       # Unit Power
-    sheet.write(row, 12, pcbe * qty, data_fmt) # Total Power
-    sheet.write(row, 13, ctgcy_P, data_fmt)
-    sheet.write(row, 14, pmev * qty, data_fmt) # Power MEV
+    sheet.write(row, 9, mcbe * qty, data_fmt)  # Total Mass
+    sheet.write(row, 10, ctgcy_m, data_fmt)
+    sheet.write(row, 11, mmev * qty, data_fmt) # Mass MEV
+    sheet.write(row, 12, pcbe, data_fmt)       # Unit Power
+    sheet.write(row, 13, pcbe * qty, data_fmt) # Total Power
+    sheet.write(row, 14, ctgcy_P, data_fmt)
+    sheet.write(row, 15, pmev * qty, data_fmt) # Power MEV
     if component.components:
         next_level = level + 1
         comp_names = [acu.component.name.lower()
