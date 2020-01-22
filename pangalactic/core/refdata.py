@@ -611,7 +611,7 @@ core = [
     'oid': 'pgefobjects:Discipline.avionics',
     'id': 'avionics',
     'name': 'Avionics',
-    'abbreviation': 'Avionics',
+    'abbreviation': 'Avion',
     'description': 'Avionics Engineering',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -651,7 +651,7 @@ core = [
     'oid': 'pgefobjects:Discipline.mechanical',
     'id': 'mechanical',
     'name': 'Mechanical Systems',
-    'abbreviation': 'Mechanical',
+    'abbreviation': 'Mech',
     'description': 'Design of Mechanical Structures and Systems',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -661,7 +661,7 @@ core = [
     'oid': 'pgefobjects:Discipline.misson_ops',
     'id': 'mission_ops',
     'name': 'Mission Operations',
-    'abbreviation': 'Mission Ops',
+    'abbreviation': 'Ops',
     'description': 'Mission Operations Engineering',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -671,7 +671,7 @@ core = [
     'oid': 'pgefobjects:Discipline.propulsion',
     'id': 'propulsion',
     'name': 'Propulsion Systems',
-    'abbreviation': 'Propulsion',
+    'abbreviation': 'Prop',
     'description': 'Propulsion Systems Engineering',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -681,7 +681,7 @@ core = [
     'oid': 'pgefobjects:Discipline.rf_comm',
     'id': 'rf_comm',
     'name': 'RF Communications Systems',
-    'abbreviation': 'RF Comm',
+    'abbreviation': 'Comm',
     'description': 'RF Communications Engineering',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -691,7 +691,7 @@ core = [
     'oid': 'pgefobjects:Discipline.radiation',
     'id': 'radiation',
     'name': 'Radiation Analysis',
-    'abbreviation': 'Radiation',
+    'abbreviation': 'Rad',
     'description': 'Analyzed trajectory radiation characterization and SPENVIS results',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -701,7 +701,7 @@ core = [
     'oid': 'pgefobjects:Discipline.reliability',
     'id': 'reliability',
     'name': 'Reliability',
-    'abbreviation': 'Reliability',
+    'abbreviation': 'Rel',
     'description': 'Reliability modeling and analysis.',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -721,7 +721,7 @@ core = [
     'oid': 'pgefobjects:Discipline.thermal',
     'id': 'thermal',
     'name': 'Thermal Systems',
-    'abbreviation': 'Thermal',
+    'abbreviation': 'Therm',
     'description': 'Analysis of mission thermal environment, thermal characteristics of mission systems, and required thermal control systems',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -731,7 +731,7 @@ core = [
     'oid': 'pgefobjects:Discipline.i_and_t',
     'id': 'i_and_t',
     'name': 'Integration and Test',
-    'abbreviation': 'I/T',
+    'abbreviation': 'IandT',
     'description': 'Verification, integration flow, facilities required, cost estimate',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -741,7 +741,7 @@ core = [
     'oid': 'pgefobjects:Discipline.orbital_debris',
     'id': 'orbital_debris',
     'name': 'Orbital Debris',
-    'abbreviation': 'Orbital Debris',
+    'abbreviation': 'Debris',
     'description': 'Modeling and analysis of expected debris for planned orbits',
     'create_datetime': epoch,
     'mod_datetime': epoch
@@ -951,7 +951,7 @@ dict(
     'oid': 'pgefobjects:ProductType.communications_system',
     'id': 'communications_system',
     'name': 'Communications System',
-    'abbreviation': 'Comm',
+    'abbreviation': 'CommSys',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -960,7 +960,7 @@ dict(
     'oid': 'pgefobjects:ProductType.power_system',
     'id': 'power_system',
     'name': 'Power System',
-    'abbreviation': 'Power',
+    'abbreviation': 'PowerSys',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -969,7 +969,7 @@ dict(
     'oid': 'pgefobjects:ProductType.mechanical_system',
     'id': 'mechanical_system',
     'name': 'Mechanical System',
-    'abbreviation': 'Mech',
+    'abbreviation': 'MechSys',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -978,7 +978,7 @@ dict(
     'oid': 'pgefobjects:ProductType.propulsion_system',
     'id': 'propulsion_system',
     'name': 'Propulsion System',
-    'abbreviation': 'Prop',
+    'abbreviation': 'PropSys',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -987,7 +987,7 @@ dict(
     'oid': 'pgefobjects:ProductType.thermal_control_system',
     'id': 'thermal_control_system',
     'name': 'Thermal Control System',
-    'abbreviation': 'Therm',
+    'abbreviation': 'ThermSys',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -996,7 +996,7 @@ dict(
     'oid': 'pgefobjects:ProductType.computer',
     'id': 'computer',
     'name': 'Computer System',
-    'abbreviation': 'Comp',
+    'abbreviation': 'CompSys',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
