@@ -747,7 +747,7 @@ core = [
     'mod_datetime': epoch
     },
 
-# Goddard Engineering and Scientific Discipline-related Roles
+# Engineering and Scientific Discipline-related Roles
 dict(
      _cname='Role',
      oid='gsfc:Role.pi',
