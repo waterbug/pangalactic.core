@@ -35,7 +35,7 @@ Comp = namedtuple('Comp', 'oid quantity reference_designator')
 
 # parm_defz:  runtime cache of parameter definitions
 # purpose:  enable fast lookup of parameter metadata & compact representation
-#           of parameters as (value, units, mod_datetime)
+#           of 'parameterz' cache as (value, units, mod_datetime)
 # format:  {'parameter_id': {parameter properties}
 #                            ...}}
 # ... where parameter definition properties are:

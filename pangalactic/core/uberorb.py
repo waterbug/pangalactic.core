@@ -139,6 +139,11 @@ class UberORB(object):
         if not os.path.exists(self.vault):
             os.makedirs(self.vault, mode=0o755)
         self.start_logging(home=pgx_home, console=console, debug=debug)
+        # create "datamatrix" storage area
+        self.datamatrix_store = os.path.join(pgx_home, 'datamatrix_store')
+        if not os.path.exists(self.datamatrix_store):
+            os.makedirs(self.datamatrix_store, mode=0o755)
+        self.start_logging(home=pgx_home, console=console, debug=debug)
         self.log.debug('* prefs read ...')
         # self.log.debug('  prefs: {}'.format(str(prefs)))
         self.log.debug('* state read ...')
@@ -237,10 +242,6 @@ class UberORB(object):
         # [3] load (and update) ref data ...
         self.load_reference_data()
         self._load_diagramz()
-        # get the hdf5 store or create a new one ...
-        # self.store_path = os.path.join(self.home, 'datasets.h5')
-        # self.data_store = pandas.io.pytables.HDFStore(self.store_path)
-        self.data_store = {}
         # create 'role_product_types' cache
         self.role_product_types = {}
         # discipline_subsystems maps Discipline ids to ProductType ids
