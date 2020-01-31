@@ -2,26 +2,25 @@
 """
 Pan Galactic data matrix
 """
-from collections import UserDict
-from uuid import uuid4
+from collections import OrderedDict
 
 # pangalactic
 from pangalactic.core.parametrics import get_pval
 from pangalactic.core.uberorb     import orb
 
 
-class DataMatrix(UserDict):
+class DataMatrix(OrderedDict):
     """
-    A dictionary containing "rows", each of which is dictionary that maps
-    columns ids to the corresponding values.  It has an attribute "schema" that
-    is a dictionary of "column" definitions.
+    An OrderedDict that has OrderedDicts as values, and maps the 'oid' value of
+    each OrderedDict to that OrderDict.  It has an attribute "schema", which is
+    a list of data element identifiers which reference data element definitions
+    in the "dedz" dict. Each contained OrderedDict maps ids in the schema to
+    values, in the order of the schema.
     """
-    def __init__(self, oid=None, id='', owner_oid=None, schema=None,
-                 data=None):
-        super(DataMatrix, self).__init__(data)
-        self.oid = oid or str(uuid4())
+    def __init__(self, *args, schema=None, owner_id='', id='', **kw):
+        super(DataMatrix, self).__init__(*args, **kw)
         self.id = id
-        self.owner_oid = owner_oid
+        self.owner_id = owner_id
         self.schema = schema
 
     def load(self, data):

@@ -139,10 +139,10 @@ class UberORB(object):
         if not os.path.exists(self.vault):
             os.makedirs(self.vault, mode=0o755)
         self.start_logging(home=pgx_home, console=console, debug=debug)
-        # create "datamatrix" storage area
-        self.datamatrix_store = os.path.join(pgx_home, 'datamatrix_store')
-        if not os.path.exists(self.datamatrix_store):
-            os.makedirs(self.datamatrix_store, mode=0o755)
+        # create "data" storage area (for DataMatrix data and metadata)
+        self.data_store = os.path.join(pgx_home, 'data')
+        if not os.path.exists(self.data_store):
+            os.makedirs(self.data_store, mode=0o755)
         self.start_logging(home=pgx_home, console=console, debug=debug)
         self.log.debug('* prefs read ...')
         # self.log.debug('  prefs: {}'.format(str(prefs)))
