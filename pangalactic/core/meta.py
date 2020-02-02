@@ -45,7 +45,6 @@ MAIN_VIEWS = dict(
     Model=(IDENTITY + ['type_of_model', 'of_thing']),
     ModelFamily=IDENTITY,
     ModelType=(IDENTITY + ['model_type_family']),
-    ObjectAccess=['accessible_object', 'grantee'],
     Organization=(IDENTITY + ['name_code', 'cage_code', 'parent_organization',
                               'sub_organizations', 'street_address', 'city',
                               'state_or_province', 'zip_or_postal_zone']),
@@ -219,19 +218,7 @@ M2M = {
        # complementary to 'parameter_definitions'
        'used_in_product_types' : {
                      'domain' : 'ParameterDefinition',
-                     'range'  : 'ProductTypeParameterDefinition'},
-
-       # *** M2M:  ObjectAccess
-       # inverse of 'accessible_object'
-       # complementary to 'accessible_objects'
-       'grantees' : {
-                     'domain' : 'Product',
-                     'range'  : 'ObjectAccess'},
-       # inverse of 'grantee'
-       # complementary to 'grantees'
-       'accessible_objects' : {
-                     'domain' : 'Actor',
-                     'range'  : 'ObjectAccess'}
+                     'range'  : 'ProductTypeParameterDefinition'}
        }
 
 # Special properties that get a customized droppable interface to enable

@@ -47,16 +47,14 @@ def get_perms(obj, user=None, permissive=False):
         # orb.log.debug('  perms: {}'.format(perms))
         return perms
     perms = set()
-    # NOTE: don't need "grantees" any more -- only one possibility!
-    # (the "owner" project or org) ... use "is_decloaked"
-    if not hasattr(obj, 'grantees'):
-        # not a ManagedObject -> everyone has 'view' access
-        perms.add('view')
-    else:
+    if isinstance(obj, orb.classes['ManagedObject']):
         # ManagedObject (can be "cloaked")
         if getattr(obj, 'public', False):
             # if a ManagedObject is "public", everyone has 'view' access
             perms.add('view')
+    else:
+        # not a ManagedObject -> everyone has 'view' access
+        perms.add('view')
     if user:
         # user specified -> server-side
         user_oid = getattr(user, 'oid', None)
@@ -89,9 +87,9 @@ def get_perms(obj, user=None, permissive=False):
         perms = ['view', 'modify', 'decloak', 'delete']
         # orb.log.debug('  perms: {}'.format(perms))
         return perms
-    # user has write permissions if Admin for a grantee org or if user
-    # has a discipline role in the owner org that corresponds to the
-    # object's 'product_type'
+    # user has write permissions if Admin for owner org or if user has a
+    # discipline role in the owner org that corresponds to the object's
+    # 'product_type'
     else:
         # did the user create the object?  if so, full perms ...
         if (hasattr(obj, 'creator') and

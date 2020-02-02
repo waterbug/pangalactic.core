@@ -545,50 +545,6 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/accessible_object -->
-
-    <owl:ObjectProperty rdf:about="&pgef;accessible_object">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The object to which an Object Access relationship has granted access.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ObjectAccess"/>
-        <rdfs:range rdf:resource="&pgef;Product"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/grantees -->
-
-    <owl:ObjectProperty rdf:about="&pgef;grantees">
-        <owl:inverseOf rdf:resource="&pgef;accessible_object"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The Object Access relationships granting access to an object.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Product"/>
-        <rdfs:range rdf:resource="&pgef;ObjectAccess"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/grantee -->
-
-    <owl:ObjectProperty rdf:about="&pgef;grantee">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The Actor to which an Object Access relationship has granted access to an object.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ObjectAccess"/>
-        <rdfs:range rdf:resource="&pgef;Actor"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/grants -->
-
-    <owl:ObjectProperty rdf:about="&pgef;grants">
-        <owl:inverseOf rdf:resource="&pgef;grantee"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The Object Access relationships granting an Actor access to the objects to which it has access.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Actor"/>
-        <rdfs:range rdf:resource="&pgef;ObjectAccess"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/correlates_parameter -->
 
     <owl:ObjectProperty rdf:about="&pgef;correlates_parameter">
@@ -1013,7 +969,7 @@
 
     <owl:DatatypeProperty rdf:about="&pgef;public">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A flag indicating whether access to this object is restricted.  If true, the object is accessible to anyone.  If false, access to the object is governed by ObjectAccess relationships, which specify the Actors, Projects, and Organizations who can access the object.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">A flag indicating whether access to this object is restricted.  If true, the object is accessible to anyone.  If false, access to the object is governed by whether a user has a relevant role assignment its owner organization.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
         <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
@@ -1643,8 +1599,8 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
     <owl:DatatypeProperty rdf:about="&pgef;range_datatype">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The datatype of the range of a ParameterDefinition.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ParameterDefinition"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The datatype of the range of a DataElementDefinition.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DataElementDefinition"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -2034,7 +1990,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
     <owl:Class rdf:about="&pgef;DataPackage">
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A collection of one or more digital products.  The primary purpose of the DataPackage class is to enable the tracking and management of arbitrary collections of exchanged data.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">A collection of one or more DataSets, each of which can contain one or more digital products.  The primary purpose of the DataPackage class is to enable the tracking and management of arbitrary collections of exchanged data.</rdfs:comment>
     </owl:Class>
 
 
@@ -2043,7 +1999,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
     <owl:Class rdf:about="&pgef;DataSet">
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A data set is a digital product whose purpose is to contain a serialized population of objects governed by a schema.  The content can be any representation, such as STEP (ISO 10303), HDF, JSON, CSV (comma-separated-values), or in general any data exchange or serialization format.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">A data set is a digital product whose purpose is to contain a population of serialized objects governed by a schema.  The content can be any representation, such as STEP (ISO 10303), HDF, JSON, CSV (comma-separated-values), or in general any data exchange or serialization format.</rdfs:comment>
     </owl:Class>
 
 
@@ -2202,15 +2158,6 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
 
 
-    <!-- http://pangalactic.us/pgef/ObjectAccess -->
-
-    <owl:Class rdf:about="&pgef;ObjectAccess">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">Object Access is a many-to-many relationship between Managed Objects and Actors that indicates which Actors have access to which Managed Objects.  An Object Access relationship is created when a Managed Object is released to an Actor (usually to a Project, Organization, or Person).</rdfs:comment>
-    </owl:Class>
-
-
-
     <!-- http://pangalactic.us/pgef/ParameterRelation -->
 
     <owl:Class rdf:about="&pgef;ParameterRelation">
@@ -2220,11 +2167,20 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
 
 
+    <!-- http://pangalactic.us/pgef/DataElementDefinition -->
+
+    <owl:Class rdf:about="&pgef;DataElementDefinition">
+        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A data element definition specifies the datatype and textual description of a data element (an assignable property).</rdfs:comment>
+    </owl:Class>
+
+
+
     <!-- http://pangalactic.us/pgef/ParameterDefinition -->
 
     <owl:Class rdf:about="&pgef;ParameterDefinition">
-        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A parameter definition specifies the datatype, dimensions (if applicable), and textual description of a parameter.</rdfs:comment>
+        <rdfs:subClassOf rdf:resource="&pgef;DataElementDefinition"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A parameter definition specifies the dimensions of a parameter, which is a data element that represents a measurable physical property.</rdfs:comment>
     </owl:Class>
 
 
@@ -2445,7 +2401,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/RoleAssignment -->
 
     <owl:Class rdf:about="&pgef;RoleAssignment">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A RoleAssignment is the relationship between a role and a person to which the role has been assigned. RoleAssignment is a many-to-many relationship in that a role may be assigned to multiple persons and a person may have several roles assigned to them.</rdfs:comment>
     </owl:Class>
 
@@ -2479,7 +2435,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/VerificationTest -->
 
     <owl:Class rdf:about="&pgef;VerificationTest">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A VerificationTest is a many-to-many relationship between Tests and Requirements.</rdfs:comment>
     </owl:Class>
 

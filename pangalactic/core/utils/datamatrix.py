@@ -11,30 +11,27 @@ from pangalactic.core.uberorb     import orb
 
 class DataMatrix(OrderedDict):
     """
-    An OrderedDict that has OrderedDicts as values, and maps the 'oid' value of
-    each OrderedDict to that OrderDict.  It has an attribute "schema", which is
-    a list of data element identifiers which reference data element definitions
-    in the "dedz" dict. Each contained OrderedDict maps ids in the schema to
-    values, in the order of the schema.
+    An OrderedDict that has dicts (rows) as values, and maps the 'oid' value of
+    each row to that row.  It has an attribute "schema", which is a list of
+    data element identifiers which reference DataElementDefinitions cached in
+    the "dedz" dict. Each dict maps data element ids in the schema to values.
     """
-    def __init__(self, *args, schema=None, owner_id='', id='', **kw):
+    def __init__(self, *args, schema=None, owner_id='', dmid='', **kw):
         super(DataMatrix, self).__init__(*args, **kw)
-        self.id = id
+        self.id = dmid
         self.owner_id = owner_id
         self.schema = schema
 
     def load(self, data):
         """
-        Reads a stored set of data (.tsv) and schema (.yaml) files.
+        Reads a stored [dmid].tsv file.
         """
         pass
 
     def dump(self):
         """
-        Writes `data` into an [id].tsv file and `schema` into an [id].yaml
-        file.
+        Writes into an [dmid].tsv file.
         """
-        # yaml.safe_dump(self.schema, orb.datamatrix_store)
         pass
 
     # NOTE: this code is just a copy of the code in reports.py for MEL
