@@ -420,6 +420,27 @@ def get_flow_name(start_port_name, end_port_name):
     """
     return ' '.join(['Flow:', start_port_name, 'to', end_port_name])
 
+def get_next_product_type_seq(product_type):
+    """
+    Get the next sequence number for a given ProductType.
+
+    Args:
+        product_type (ProductType):  the ProductType to be considered
+    """
+    return str(len(product_type.get_products_of_type)+1).zfill(6)
+
+def get_product_id(owner_id, product_type):
+    """
+    Create an 'id' attribute for a new Product.
+
+    Args:
+        owner_id (str):  'id' of the owner of the product
+        product_type (ProductType:  ProductType assigned to the product
+    """
+    owner_id = owner_id or 'Vendor'
+    return + '-'.join([owner_id, product_type.id,
+                       get_next_product_type_seq(product_type)])
+
 def display_id(obj):
     """
     Return a string to display as 'id' that will include, if `obj` is an
