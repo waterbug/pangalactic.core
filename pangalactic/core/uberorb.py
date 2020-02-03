@@ -138,12 +138,12 @@ class UberORB(object):
         self.vault = os.path.join(pgx_home, 'vault')
         if not os.path.exists(self.vault):
             os.makedirs(self.vault, mode=0o755)
+        self.logging_initialized = False
         self.start_logging(home=pgx_home, console=console, debug=debug)
         # create "data" storage area (for DataMatrix data and metadata)
         self.data_store = os.path.join(pgx_home, 'data')
         if not os.path.exists(self.data_store):
             os.makedirs(self.data_store, mode=0o755)
-        self.start_logging(home=pgx_home, console=console, debug=debug)
         self.log.debug('* prefs read ...')
         # self.log.debug('  prefs: {}'.format(str(prefs)))
         self.log.debug('* state read ...')
@@ -531,11 +531,15 @@ class UberORB(object):
                 if False: redirect stdout/stderr to log files
             debug (bool):  if True, set log level to 'debug'
         """
-        if not home:
-            home = os.getcwd()
-        self.log, self.error_log = get_loggers(home, 'orb', console=console,
-                                               debug=debug)
-        self.log.info('* orb logging initialized ...')
+        if not self.logging_initialized:
+            if not home:
+                home = os.getcwd()
+            self.log, self.error_log = get_loggers(home, 'orb', console=console,
+                                                   debug=debug)
+            self.log.propagate = False
+            self.error_log.propagate = False
+            self.log.info('* orb logging initialized ...')
+            self.logging_initialized = True
 
     def load_and_transform_data(self):
         """
