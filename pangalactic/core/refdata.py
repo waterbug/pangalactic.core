@@ -584,7 +584,7 @@ core = [
     'abbreviation': 'Sci',
     'description': 'Science',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -594,7 +594,7 @@ core = [
     'abbreviation': 'Eng',
     'description': 'Engineering',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -604,7 +604,7 @@ core = [
     'abbreviation': 'ACS',
     'description': 'Design of Attitude Control Systems',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -614,7 +614,7 @@ core = [
     'abbreviation': 'Avion',
     'description': 'Avionics Engineering',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -624,7 +624,7 @@ core = [
     'abbreviation': 'Power',
     'description': 'Design of Electrical Power Systems',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -634,7 +634,7 @@ core = [
     'abbreviation': 'FSW',
     'description': 'Flight software methodology, reuse, estimate of labor, required test beds',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -644,7 +644,7 @@ core = [
     'abbreviation': 'FD',
     'description': 'Trajectory files and outputs from STK, EMTG, GMAT, or John Downings brain with required propulsion, eclipses, range to earth, angles for comm, etc.',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -654,7 +654,7 @@ core = [
     'abbreviation': 'Mech',
     'description': 'Design of Mechanical Structures and Systems',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -664,7 +664,7 @@ core = [
     'abbreviation': 'Ops',
     'description': 'Mission Operations Engineering',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -674,17 +674,17 @@ core = [
     'abbreviation': 'Prop',
     'description': 'Propulsion Systems Engineering',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
     'oid': 'pgefobjects:Discipline.rf_comm',
     'id': 'rf_comm',
-    'name': 'RF Communications Systems',
+    'name': 'Communications Systems',
     'abbreviation': 'Comm',
-    'description': 'RF Communications Engineering',
+    'description': 'Communications Engineering',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -694,7 +694,7 @@ core = [
     'abbreviation': 'Rad',
     'description': 'Analyzed trajectory radiation characterization and SPENVIS results',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -704,7 +704,7 @@ core = [
     'abbreviation': 'Rel',
     'description': 'Reliability modeling and analysis.',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -714,7 +714,7 @@ core = [
     'abbreviation': 'SE',
     'description': 'Systems Engineering',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -724,7 +724,7 @@ core = [
     'abbreviation': 'Therm',
     'description': 'Analysis of mission thermal environment, thermal characteristics of mission systems, and required thermal control systems',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -734,7 +734,7 @@ core = [
     'abbreviation': 'IandT',
     'description': 'Verification, integration flow, facilities required, cost estimate',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 {   '_cname': 'Discipline',
@@ -744,7 +744,7 @@ core = [
     'abbreviation': 'Debris',
     'description': 'Modeling and analysis of expected debris for planned orbits',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00'
     },
 
 # Engineering and Scientific Discipline-related Roles
