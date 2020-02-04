@@ -2,6 +2,7 @@
 """
 Pan Galactic data matrix
 """
+import os
 from collections import OrderedDict
 
 # pangalactic
@@ -26,13 +27,23 @@ class DataMatrix(OrderedDict):
         """
         Reads a stored [dmid].tsv file.
         """
+        # TODO: look up datatypes of each schema element in data element
+        # definitions and use it with 'uncookers' to deserialize the data ...
         pass
 
-    def dump(self):
+    def save(self):
         """
-        Writes into an [dmid].tsv file.
+        Writes into a [dmid].tsv file.
         """
-        pass
+        with open(os.path.join(orb.data_store, self.id + '.tsv'), 'w') as f:
+            # header line
+            f.write('\t'.join(self.schema) + '\n')
+            # data
+            f.writelines('\n'.join(['\t'.join(
+                         [str(self[r_oid].get(de, '')) for de in self.schema])
+                         for r_oid, r in self.items()]))
+            # I like a final line-ending char :)
+            f.write('\n')
 
     # NOTE: this code is just a copy of the code in reports.py for MEL
     # generation -- needs to be adapted/generalized ...
