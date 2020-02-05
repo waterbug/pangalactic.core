@@ -140,10 +140,6 @@ class UberORB(object):
             os.makedirs(self.vault, mode=0o755)
         self.logging_initialized = False
         self.start_logging(home=pgx_home, console=console, debug=debug)
-        # create "data" storage area (for DataMatrix data and metadata)
-        self.data_store = os.path.join(pgx_home, 'data')
-        if not os.path.exists(self.data_store):
-            os.makedirs(self.data_store, mode=0o755)
         self.log.debug('* prefs read ...')
         # self.log.debug('  prefs: {}'.format(str(prefs)))
         self.log.debug('* state read ...')
@@ -151,6 +147,11 @@ class UberORB(object):
         self.log.debug('* trash read ({} objects).'.format(len(trash)))
         if 'units' not in prefs:
             prefs['units'] = {}
+        # create "data" cache and storage area (for DataMatrix instances)
+        self.data = {}
+        self.data_store = os.path.join(pgx_home, 'data')
+        if not os.path.exists(self.data_store):
+            os.makedirs(self.data_store, mode=0o755)
         # * copy test data files from 'p.test.data' module to test_data_dir
         self.test_data_dir = os.path.join(pgx_home, 'test_data')
         current_test_files = set()

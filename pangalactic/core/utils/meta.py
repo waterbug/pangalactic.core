@@ -427,9 +427,11 @@ def get_next_product_type_seq(product_type):
     Args:
         product_type (ProductType):  the ProductType to be considered
     """
-    return str(len(product_type.get_products_of_type)+1).zfill(6)
+    # TODO: this approach does not work!  Need to get all product id's and pick
+    # a unique numeric ending.
+    return str(len(product_type.products_of_type) + 1).zfill(6)
 
-def get_product_id(owner_id, product_type):
+def gen_product_id(owner_id, product_type):
     """
     Create an 'id' attribute for a new Product.
 
@@ -438,8 +440,11 @@ def get_product_id(owner_id, product_type):
         product_type (ProductType:  ProductType assigned to the product
     """
     owner_id = owner_id or 'Vendor'
-    return + '-'.join([owner_id, product_type.id,
-                       get_next_product_type_seq(product_type)])
+    if product_type and product_type.__class__.__name__ == 'ProductType':
+        return '-'.join([owner_id, product_type.abbreviation,
+                         get_next_product_type_seq(product_type)])
+    else:
+        return '-'.join([owner_id, 'UnknownProductType'])
 
 def display_id(obj):
     """

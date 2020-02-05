@@ -4,6 +4,7 @@ Pan Galactic data matrix
 """
 import os
 from collections import OrderedDict
+from uuid        import uuid4
 
 # pangalactic
 from pangalactic.core.parametrics import get_pval
@@ -12,35 +13,60 @@ from pangalactic.core.uberorb     import orb
 
 class DataMatrix(OrderedDict):
     """
-    An OrderedDict that has dicts (rows) as values, and maps the 'oid' value of
-    each row to that row.  It has an attribute "schema", which is a list of
-    data element identifiers which reference DataElementDefinitions cached in
-    the "dedz" dict. Each dict maps data element ids in the schema to values.
-    """
-    def __init__(self, *args, schema=None, owner_id='', dmid='', **kw):
-        super(DataMatrix, self).__init__(*args, **kw)
-        self.id = dmid
-        self.owner_id = owner_id
-        self.schema = schema
+    An OrderedDict that has dicts (rows) as values, and maps an 'oid' value to
+    each row.  It has an attribute "schema", which is a list of data element
+    identifiers which reference DataElementDefinitions cached in the "dedz"
+    dict. Each dict maps data element ids in the schema to values.
 
-    def load(self, data):
+    Keyword Args:
+        schema (list): list of data element ids (column "names")
+        dataset (DataSet): an associated DataSet instance
+    """
+    def __init__(self, *args, schema=None, dataset=None, **kw):
+        super(DataMatrix, self).__init__(*args, **kw)
+        self.dataset = dataset
+        self.schema = schema or []
+
+    @property
+    def oid(self):
+        return getattr(self.dataset, 'id', 'unknown-datamatrix')
+
+    def load(self, f):
         """
-        Reads a stored [dmid].tsv file.
+        Load data from a datamatrix .tsv file.
+
+        Args:
+            f (file): file object for a .tsv file
         """
-        # TODO: look up datatypes of each schema element in data element
-        # definitions and use it with 'uncookers' to deserialize the data ...
-        pass
+        first = f.readline()
+        schema = first[:-1].split('\t')
+        row_oids = True
+        if schema[0] != 'oid':
+            row_oids = False
+        for line in f:
+            data = line[:-1].split('\t')
+            row_dict = {}
+            for i, de in enumerate(schema):
+                row_dict[de] = data[i]
+            if not row_oids:
+                oid = str(uuid4())
+                row_dict['oid'] = oid
+            self[oid] = row_dict
 
     def save(self):
         """
-        Writes into a [dmid].tsv file.
+        Write my data into a .tsv file.
         """
-        with open(os.path.join(orb.data_store, self.id + '.tsv'), 'w') as f:
+        fname = self.dataset.id + '.tsv'
+        serialization_schema = self.schema[:]
+        serialization_schema.insert(0, 'oid')
+        with open(os.path.join(orb.data_store, fname), 'w') as f:
             # header line
-            f.write('\t'.join(self.schema) + '\n')
+            f.write('\t'.join(serialization_schema) + '\n')
             # data
             f.writelines('\n'.join(['\t'.join(
-                         [str(self[r_oid].get(de, '')) for de in self.schema])
+                         [str(self[r_oid].get(de, ''))
+                          for de in serialization_schema])
                          for r_oid, r in self.items()]))
             # I like a final line-ending char :)
             f.write('\n')

@@ -857,7 +857,7 @@ dict(
     'name': 'Instrument',
     'abbreviation': 'Instrument',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -866,7 +866,7 @@ dict(
     'name': 'Observatory',
     'abbreviation': 'Observ',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -875,7 +875,7 @@ dict(
     'name': 'Spacecraft',
     'abbreviation': 'SC',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -884,7 +884,7 @@ dict(
     'name': 'Launch Vehicle',
     'abbreviation': 'LV',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -894,7 +894,7 @@ dict(
     'abbreviation': 'ACS',
     'description': 'Attitude Control Systems',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -904,7 +904,7 @@ dict(
     'abbreviation': 'CDH',
     'description': 'Command and Data Handling System',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -914,7 +914,7 @@ dict(
     'abbreviation': 'Diplexer',
     'description': 'Diplexer',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -924,7 +924,7 @@ dict(
     'abbreviation': 'Box',
     'description': 'Electronics Box',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -934,17 +934,17 @@ dict(
     'abbreviation': 'Board',
     'description': 'Electronic Circuit Board',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.eee_part',
     'id': 'eee_part',
     'name': 'EEE Part',
-    'abbreviation': 'EEE Part',
+    'abbreviation': 'EEEPart',
     'description': 'Electrical, Electronic, or Electromechanical Component',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -953,7 +953,7 @@ dict(
     'name': 'Communications System',
     'abbreviation': 'CommSys',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -962,7 +962,7 @@ dict(
     'name': 'Power System',
     'abbreviation': 'PowerSys',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -971,7 +971,7 @@ dict(
     'name': 'Mechanical System',
     'abbreviation': 'MechSys',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -980,7 +980,7 @@ dict(
     'name': 'Propulsion System',
     'abbreviation': 'PropSys',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -989,7 +989,7 @@ dict(
     'name': 'Thermal Control System',
     'abbreviation': 'ThermSys',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -998,7 +998,7 @@ dict(
     'name': 'Computer System',
     'abbreviation': 'CompSys',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1007,7 +1007,7 @@ dict(
     'name': 'Star Tracker',
     'abbreviation': 'ST',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1016,7 +1016,7 @@ dict(
     'name': 'Inertial Measurement Unit',
     'abbreviation': 'IMU',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1025,7 +1025,7 @@ dict(
     'name': 'Inertial Rate Unit',
     'abbreviation': 'IRU',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1034,7 +1034,7 @@ dict(
     'name': 'Control Moment Gyro',
     'abbreviation': 'CMG',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1043,7 +1043,7 @@ dict(
     'name': 'Reaction Wheel',
     'abbreviation': 'RW',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1052,7 +1052,7 @@ dict(
     'name': 'Momentum Wheel',
     'abbreviation': 'MW',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1061,7 +1061,7 @@ dict(
     'name': 'Magnetic Torquer',
     'abbreviation': 'MT',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1070,7 +1070,7 @@ dict(
     'name': 'Magnetometer',
     'abbreviation': 'Magnetometer',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1079,7 +1079,7 @@ dict(
     'name': 'Digital Sun Sensor',
     'abbreviation': 'DSS',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1088,7 +1088,7 @@ dict(
     'name': 'Coarse Sun Sensor',
     'abbreviation': 'CSS',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1097,7 +1097,7 @@ dict(
     'name': 'Horizon Sensor',
     'abbreviation': 'HS',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1106,7 +1106,7 @@ dict(
     'name': 'Tank',
     'abbreviation': 'Tank',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 # {   '_cname': 'ProductType',
@@ -1115,25 +1115,25 @@ dict(
     # 'name': 'Oxidizer Tank',
     # 'abbreviation': 'Oxidizer Tank',
     # 'create_datetime': epoch,
-    # 'mod_datetime': epoch
+    # 'mod_datetime': '2020-01-02 00:00:00'
     # },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.pyro_isolation_valve',
     'id': 'pyro_isolation_valve',
     'name': 'Pyro Isolation Valve',
-    'abbreviation': 'Pyro Isolation Valve',
+    'abbreviation': 'PyroValve',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.propellant_filter',
     'id': 'propellant_filter',
     'name': 'Propellant Filter',
-    'abbreviation': 'Filter',
+    'abbreviation': 'PropellantFilter',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1142,16 +1142,16 @@ dict(
     'name': 'Manifold',
     'abbreviation': 'Manifold',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.fill_drain_valve',
     'id': 'fill_drain_valve',
     'name': 'Fill/Drain Valve',
-    'abbreviation': 'Valve',
+    'abbreviation': 'FillDrainValve',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1160,7 +1160,7 @@ dict(
     'name': 'Thruster',
     'abbreviation': 'Thruster',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 # {   '_cname': 'ProductType',
@@ -1169,7 +1169,7 @@ dict(
     # 'name': 'Propellant Tank',
     # 'abbreviation': 'Tank',
     # 'create_datetime': epoch,
-    # 'mod_datetime': epoch
+    # 'mod_datetime': '2020-01-02 00:00:00'
     # },
 
 {   '_cname': 'ProductType',
@@ -1178,25 +1178,25 @@ dict(
     'name': 'Power Processing Unit',
     'abbreviation': 'PPU',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.sep_engine',
     'id': 'sep_engine',
     'name': 'SEP Engine',
-    'abbreviation': 'SEP Engine',
+    'abbreviation': 'SEPEngine',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.sep_engine_gimbal',
     'id': 'sep_engine_gimbal',
     'name': 'SEP Engine Gimbal',
-    'abbreviation': 'SEP Engine Gimbal',
+    'abbreviation': 'SEPEngineGimbal',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1205,7 +1205,7 @@ dict(
     'name': 'Heater',
     'abbreviation': 'Heater',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1214,106 +1214,106 @@ dict(
     'name': 'Thermostat',
     'abbreviation': 'Thermostat',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.temperature_sensor',
     'id': 'temperature_sensor',
     'name': 'Temperature Sensor',
-    'abbreviation': 'Temp Sensor',
+    'abbreviation': 'TempSensor',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_controller',
     'id': 'thermal_controller',
     'name': 'Thermal Controller',
-    'abbreviation': 'Thermal Controller',
+    'abbreviation': 'ThermalController',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.multi_layer_insulation',
     'id': 'multi_layer_insulation',
     'name': 'Multi Layer Insulation',
-    'abbreviation': 'Multi Layer Insulation',
+    'abbreviation': 'MultiLayerInsulation',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_coating',
     'id': 'thermal_coating',
     'name': 'Thermal Coating',
-    'abbreviation': 'Thermal Coating',
+    'abbreviation': 'ThermalCoating',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.radiator_panel',
     'id': 'radiator_panel',
     'name': 'Radiator Panel',
-    'abbreviation': 'Radiator',
+    'abbreviation': 'RadiatorPanel',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.heat_pipe',
     'id': 'heat_pipe',
     'name': 'Heat Pipe',
-    'abbreviation': 'Heat Pipe',
+    'abbreviation': 'HeatPipe',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_strap',
     'id': 'thermal_strap',
     'name': 'Thermal Strap',
-    'abbreviation': 'Thermal Strap',
+    'abbreviation': 'ThermalStrap',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_louver',
     'id': 'thermal_louver',
     'name': 'Thermal Louver',
-    'abbreviation': 'Louver',
+    'abbreviation': 'ThermalLouver',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.mechanical_structure',
     'id': 'mechanical_structure',
     'name': 'Mechanical Structure',
-    'abbreviation': 'Mechanical Structure',
+    'abbreviation': 'MechStruct',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.instrument_accomodation',
     'id': 'instrument_accomodation',
     'name': 'Instrument Accomodation',
-    'abbreviation': 'Inst Accomodation',
+    'abbreviation': 'InstrumentAccom',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.payload_attach_fitting',
     'id': 'payload_attach_fitting',
     'name': 'Payload Attach Fitting',
-    'abbreviation': 'Payload Attach Fitting',
+    'abbreviation': 'PayloadAttachFitting',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1322,25 +1322,25 @@ dict(
     'name': 'Actuator',
     'abbreviation': 'Actuator',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.solar_array_actuator',
     'id': 'solar_array_actuator',
     'name': 'Solar Array Actuator',
-    'abbreviation': 'Solar Array Actuator',
+    'abbreviation': 'SolarArrayActuator',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.antenna_gimbal',
     'id': 'antenna_gimbal',
     'name': 'Antenna Gimbal',
-    'abbreviation': 'Antenna Gimbal',
+    'abbreviation': 'AntennaGimbal',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1349,34 +1349,34 @@ dict(
     'name': 'Boom',
     'abbreviation': 'Boom',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.deployment_system',
     'id': 'deployment_system',
     'name': 'Deployment System',
-    'abbreviation': 'Deployment System',
+    'abbreviation': 'DeploymentSys',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.solar_array',
     'id': 'solar_array',
     'name': 'Solar Array',
-    'abbreviation': 'Solar Array',
+    'abbreviation': 'SolarArray',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.battery',
     'id': 'battery',
     'name': 'Battery',
-    'abbreviation': 'Batt',
+    'abbreviation': 'Battery',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1385,7 +1385,7 @@ dict(
     'name': 'Field Programmable Gate Array',
     'abbreviation': 'FPGA',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1394,7 +1394,7 @@ dict(
     'name': 'Printed Circuit Board',
     'abbreviation': 'PCB',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1404,16 +1404,16 @@ dict(
     'abbreviation': 'RTG',
     'description': 'Pu-238 based very hot power thingy',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.power_harness',
     'id': 'power_harness',
     'name': 'Power Harness',
-    'abbreviation': 'Power Harness',
+    'abbreviation': 'PowerHarness',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1424,7 +1424,7 @@ dict(
     'description': 'Communications Security: a box to prevent unauthorized '
                     'access',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1433,16 +1433,16 @@ dict(
     'name': 'Redundancy Management Unit',
     'abbreviation': 'RMU',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.omni_antenna',
     'id': 'omni_antenna',
     'name': 'Omni Antenna',
-    'abbreviation': 'Omni Antenna',
+    'abbreviation': 'OmniAntenna',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1451,7 +1451,7 @@ dict(
     'name': 'Medium Gain Antenna (MGA)',
     'abbreviation': 'MGA',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1460,7 +1460,7 @@ dict(
     'name': 'High Gain Antenna (HGA)',
     'abbreviation': 'HGA',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1469,7 +1469,7 @@ dict(
     'name': 'Antenna',
     'abbreviation': 'Antenna',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1478,7 +1478,7 @@ dict(
     'name': 'Transponder',
     'abbreviation': 'Xponder',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1487,7 +1487,7 @@ dict(
     'name': 'Transmitter',
     'abbreviation': 'Xmitter',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1496,16 +1496,16 @@ dict(
     'name': 'Receiver',
     'abbreviation': 'Receiver',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.power_amplifier',
     'id': 'power_amplifier',
     'name': 'Power Amplifier',
-    'abbreviation': 'Power Amp',
+    'abbreviation': 'PowerAmp',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-02 00:00:00'
     },
 
 {   '_cname': 'ModelFamily',
