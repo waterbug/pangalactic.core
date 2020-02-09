@@ -869,6 +869,52 @@ class UberORB(object):
             query = query.filter(Identifiable.pgef_type == cname)
         return [row[0] for row in query.all()]
 
+    def get_ids(self, cname=None):
+        """
+        Get all oids from the local db -- used for checking whether a given
+        object is in the db or not.  Returns:
+
+          [1] with no arguments:  all oids in the db
+          [2] with 'cname':  all oids for objects of the specified class
+
+        Keyword Args:
+            cname (str):  class name of the objects to be used
+        """
+        Identifiable = self.classes['Identifiable']
+        query = self.db.query(Identifiable.id)
+        if cname:
+            query = query.filter(Identifiable.pgef_type == cname)
+        return [row[0] for row in query.all()]
+
+    def gen_product_id(self, owner_id, product_type):
+        """
+        Create a unique 'id' attribute for a new HardwareProduct.
+
+        Args:
+            owner_id (str):  'id' of the owner of the product
+            product_type (ProductType:  ProductType assigned to the product
+        """
+        all_ids = self.get_ids(cname='HardwareProduct')
+        hw_id_suffixes = [i.split('-')[-1] for i in all_ids]
+        hw_id_ints = []
+        for i in hw_id_suffixes:
+            try:
+                hw_id_ints.append(int(i))
+            except:
+                continue
+        next_sufx = str(max(hw_id_ints)).zfill(7)
+        while 1:
+            if next_sufx not in hw_id_suffixes:
+                break
+            else:
+                next_int = max(hw_id_ints) + 1
+                next_sufx = str(next_int).zfill(7)
+        owner_id = owner_id or 'Vendor'
+        if product_type and product_type.__class__.__name__ == 'ProductType':
+            return '-'.join([owner_id, product_type.abbreviation, next_sufx])
+        else:
+            return '-'.join([owner_id, 'NoType', next_sufx])
+
     def get_idvs(self, cname=None):
         """
         Return a list of (id, version) tuples:

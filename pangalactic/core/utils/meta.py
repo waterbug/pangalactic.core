@@ -420,32 +420,6 @@ def get_flow_name(start_port_name, end_port_name):
     """
     return ' '.join(['Flow:', start_port_name, 'to', end_port_name])
 
-def get_next_product_type_seq(product_type):
-    """
-    Get the next sequence number for a given ProductType.
-
-    Args:
-        product_type (ProductType):  the ProductType to be considered
-    """
-    # TODO: this approach does not work!  Need to get all product id's and pick
-    # a unique numeric ending.
-    return str(len(product_type.products_of_type) + 1).zfill(6)
-
-def gen_product_id(owner_id, product_type):
-    """
-    Create an 'id' attribute for a new Product.
-
-    Args:
-        owner_id (str):  'id' of the owner of the product
-        product_type (ProductType:  ProductType assigned to the product
-    """
-    owner_id = owner_id or 'Vendor'
-    if product_type and product_type.__class__.__name__ == 'ProductType':
-        return '-'.join([owner_id, product_type.abbreviation,
-                         get_next_product_type_seq(product_type)])
-    else:
-        return '-'.join([owner_id, 'UnknownProductType'])
-
 def display_id(obj):
     """
     Return a string to display as 'id' that will include, if `obj` is an
