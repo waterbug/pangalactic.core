@@ -180,7 +180,7 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
       Graphing package for pyqt apps, used for the mission concept modeler
       module, 'conops'.  NOTE:  this adds numpy as a dependency.
 
-          Configuration:  'conda install pyqt'
+          Configuration:  'conda install pyqtgraph'
 
     - qt5reactor
       Integration of twisted reactor with PyQt5 event loop

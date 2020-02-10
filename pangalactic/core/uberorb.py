@@ -886,16 +886,39 @@ class UberORB(object):
             query = query.filter(Identifiable.pgef_type == cname)
         return [row[0] for row in query.all()]
 
-    def gen_product_id(self, owner_id, product_type):
+    def gen_product_id(self, obj):
         """
         Create a unique 'id' attribute for a new HardwareProduct.
 
         Args:
-            owner_id (str):  'id' of the owner of the product
-            product_type (ProductType:  ProductType assigned to the product
+            obj (HardwareProduct):  obj for which to generate an 'id'
         """
+        self.log.debug('* gen_product_id')
+        if not isinstance(obj, self.classes['HardwareProduct']):
+            return None
         all_ids = self.get_ids(cname='HardwareProduct')
+        self.log.debug('  all_ids:')
+        self.log.debug('  {}'.format(str(all_ids)))
         hw_id_suffixes = [i.split('-')[-1] for i in all_ids]
+        self.log.debug('  hw_id_suffixes:')
+        self.log.debug('  {}'.format(str(hw_id_suffixes)))
+        current_id_parts = (obj.id or '').split('-')
+        self.log.debug('  current_id_parts: {}'.format(str(current_id_parts)))
+        if current_id_parts[-1] in hw_id_suffixes:
+            hw_id_suffixes.remove(current_id_parts[-1])
+        owner_id = getattr(obj.owner, 'id', '')
+        self.log.debug('  owner_id: {}'.format(owner_id))
+        pt_abbr = obj.product_type.abbreviation or 'NoType'
+        self.log.debug('  pt_abbr: {}'.format(pt_abbr))
+        # test whether current id already conforms -- i.e., first part is
+        # [owner.id or "Vendor"] + '-' + [product_type.abbrev.] + '-'
+        # and last part (suffix) is unique
+        if (len(current_id_parts) >= 3 and
+            ((obj.id or '').startswith(owner_id + '-' + pt_abbr + '-') or
+             (obj.id or '').startswith('Vendor-' + pt_abbr + '-')) and
+            # suffix is unique (has been removed from hw_id_suffixes once)
+            current_id_parts[-1] not in hw_id_suffixes):
+            return obj.id
         hw_id_ints = []
         for i in hw_id_suffixes:
             try:
@@ -910,8 +933,10 @@ class UberORB(object):
                 next_int = max(hw_id_ints) + 1
                 next_sufx = str(next_int).zfill(7)
         owner_id = owner_id or 'Vendor'
-        if product_type and product_type.__class__.__name__ == 'ProductType':
-            return '-'.join([owner_id, product_type.abbreviation, next_sufx])
+        if (obj.product_type and
+            obj.product_type.__class__.__name__ == 'ProductType'):
+            return '-'.join([owner_id, obj.product_type.abbreviation,
+                             next_sufx])
         else:
             return '-'.join([owner_id, 'NoType', next_sufx])
 
