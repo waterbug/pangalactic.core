@@ -29,83 +29,86 @@ class DataMatrix(OrderedDict):
     data_store, it will look for 'schema' and create an empty instance with
     that schema, or with a default schema if none is provided.
 
-    Keyword Args:
-        dataset (DataSet): an associated DataSet instance (only exists if the
-            DataMatrix has been saved)
+    Attributes:
         schema (list): list of data element ids (column "names")
         project (Project): associated project (becomes the owner of the DataSet
             that is created when the DataMatrix is saved)
     """
-    def __init__(self, *args, project=None, dataset=None, schema_name=None,
-                 schema=None, **kw):
+    def __init__(self, *args, project=None, schema_name=None, schema=None,
+        **kw):
+        """
+        Initialize.
+
+        Keyword Args:
+            schema_name (str): name of a schema for lookup in
+                config['dm_schemas'] -- if found, 'schema' arg will be ignored
+            schema (list): list of data element ids (column "names")
+            project (Project): associated project (becomes the owner of the DataSet
+                that is created when the DataMatrix is saved)
+        """
         super(DataMatrix, self).__init__(*args, **kw)
-        sig = 'project={}, dataset={}, schema_name={}, schema={}'.format(
+        sig = 'project={}, schema_name={}, schema={}'.format(
                                             getattr(project, 'id', 'None'),
-                                            getattr(dataset, 'id', 'None'),
                                             str(schema_name),
                                             str(schema))
         orb.log.debug('* DataMatrix({})'.format(sig))
-        self.schema = schema or []
         if not isinstance(project, orb.classes['Project']):
             project = orb.get('pgefobjects:SANDBOX')
         self.project = project
+        self.schema_name = schema_name
         got_data = False
-        if isinstance(dataset, orb.classes['DataSet']):
-            # we received a DataSet instance -- look for a corresponding file
-            # in the data_store and load its data into the datamatrix ...
+        if self.schema_name:
+            fname = self.oid + '.tsv'
             try:
-                fname = dataset.has_representations[0].has_files[0].url
+                self.load(fname)
+                self.schema_name = self.oid[len(self.project.id):]
+                got_data = True
             except:
-                orb.log.debug('  - dataset did not reference a url;')
-                orb.log.debug('    an empty instance will be created ...')
-                fname = None
-            if fname is not None:
-                try:
-                    self.load(fname)
-                    self.dataset = dataset
-                    if dataset.id.startswith(self.project.id):
-                        self.schema_name = dataset.id[len(self.project.id):]
-                    else:
-                        self.schema_name = dataset.id
-                    got_data = True
-                except:
-                    orb.log.debug('  - unable to load "{}".'.format(fname))
-                    orb.log.debug('    empty DataMatrix will be created ...')
-                finally:
-                    if not got_data:
-                        # DataSet was invalid -- delete it and its refs ...
-                        to_delete = [dataset]
-                        if dataset.has_representations:
-                            reps = dataset.has_representations
-                            to_delete += reps
-                            for rep in reps:
-                                if rep.has_files:
-                                    to_delete += rep.has_files
-                        orb.delete(to_delete)
+                orb.log.debug('  - unable to load "{}".'.format(fname))
+                orb.log.debug('    empty DataMatrix will be created ...')
         if not got_data:
-            # look up schema if valid, or use "MEL" schema as default, for now
-            if not config['dm_schemas'].get(schema_name):
-                # if provided schema_name is not found, use 'MEL'
-                schema_name = 'MEL'
-            self.schema_name = schema_name
-            self.schema = config['dm_schemas'][self.schema_name]
+            # look up schema ...
+            if config['dm_schemas'].get(schema_name):
+                orb.log.debug('  - found schema "{}":'.format(schema_name))
+                self.schema_name = schema_name
+                self.schema = config['dm_schemas'][schema_name]
+                orb.log.debug('    {}'.format(str(self.schema)))
+            else:
+                # if schema not found, use "generic" schema_name as default
+                schema_name = 'generic'
+                self.schema = schema
             # look for a saved DataMatrix with that project and schema_name:
             fname = project.id + '-' + schema_name + '.tsv'
-            rep_file = orb.select('RepresentationFile', url=fname)
-            if rep_file:
-                dataset = getattr(getattr(rep_file, 'of_representation', None),
-                                  'of_object', None)
-                if dataset:
-                    try:
-                        self.load(fname)
-                    except:
-                        orb.log.debug('  - could not load saved datamatrix.')
+            if os.path.exists(os.path.join(orb.data_store, fname)):
+                try:
+                    self.load(fname)
+                except:
+                    orb.log.debug('  - could not load saved file "{}".'.format(
+                                                                        fname))
         # add myself to the orb.data in-memory cache
         orb.data[self.oid] = self
 
     @property
     def oid(self):
         return self.project.id + '-' + self.schema_name
+
+    def row(self, i):
+        """
+        Return the i-th value from the dm.
+        """
+        if i >= len(self):
+            return {}
+        idxs = list(self.keys())
+        return self[idxs[i]]
+
+    def append_new_row(self):
+        """
+        Appends an empty row, with a new oid.
+        """
+        row_dict = {}
+        oid = str(uuid4())
+        row_dict['oid'] = oid
+        self[oid] = row_dict
 
     def load(self, fname):
         """
