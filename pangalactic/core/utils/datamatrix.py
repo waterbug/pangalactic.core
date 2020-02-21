@@ -27,24 +27,25 @@ class DataMatrix(OrderedDict):
     DataSet.has_representations[0].has_files[0].url, which it will attempt to
     load from the orb.data_store.  If no file by that name is found in the
     data_store, it will look for 'schema' and create an empty instance with
-    that schema, or with a default schema if none is provided.
+    that schema, or with a default schema (set by the app) if none is provided.
 
     Attributes:
         schema (list): list of data element ids (column "names")
+        schema_name (str): list of data element ids (column "names")
         project (Project): associated project (becomes the owner of the DataSet
             that is created when the DataMatrix is saved)
     """
     def __init__(self, *args, project=None, schema_name=None, schema=None,
-        **kw):
+                 **kw):
         """
         Initialize.
 
         Keyword Args:
+            project (Project): associated project (becomes the owner of the DataSet
+                that is created when the DataMatrix is saved)
             schema_name (str): name of a schema for lookup in
                 config['dm_schemas'] -- if found, 'schema' arg will be ignored
             schema (list): list of data element ids (column "names")
-            project (Project): associated project (becomes the owner of the DataSet
-                that is created when the DataMatrix is saved)
         """
         super(DataMatrix, self).__init__(*args, **kw)
         sig = 'project={}, schema_name={}, schema={}'.format(
@@ -55,13 +56,15 @@ class DataMatrix(OrderedDict):
         if not isinstance(project, orb.classes['Project']):
             project = orb.get('pgefobjects:SANDBOX')
         self.project = project
-        self.schema_name = schema_name
+        orb.log.debug('  - project: {}'.format(project.id))
+        self.schema_name = schema_name or config.get('default_schema_name',
+                                                     'generic')
         got_data = False
         if self.schema_name:
             fname = self.oid + '.tsv'
             try:
                 self.load(fname)
-                self.schema_name = self.oid[len(self.project.id):]
+                self.schema_name = self.oid[len(self.project.id)+1:]
                 got_data = True
             except:
                 orb.log.debug('  - unable to load "{}".'.format(fname))
@@ -76,7 +79,7 @@ class DataMatrix(OrderedDict):
             else:
                 # if schema not found, use "generic" schema_name as default
                 schema_name = 'generic'
-                self.schema = schema
+                self.schema = schema or ['name', 'desc']
             # look for a saved DataMatrix with that project and schema_name:
             fname = project.id + '-' + schema_name + '.tsv'
             if os.path.exists(os.path.join(orb.data_store, fname)):
@@ -109,6 +112,7 @@ class DataMatrix(OrderedDict):
         oid = str(uuid4())
         row_dict['oid'] = oid
         self[oid] = row_dict
+        return row_dict
 
     def load(self, fname):
         """
@@ -169,38 +173,6 @@ class DataMatrix(OrderedDict):
             f.writelines(data_out)
             # I like a final line-ending char :)
             f.write('\n')
-        # look for an existing dataset
-        dataset = None
-        rep_file = orb.select('RepresentationFile', url=fname)
-        if rep_file:
-            rep = rep_file.of_representation
-            if rep:
-                dataset = rep.of_object
-        if not dataset:
-            # create the associated DataSet, etc., to reference the file
-            NOW = dtstamp()
-            ADMIN = orb.get('pgefobjects:admin')
-            DataSet = orb.classes['DataSet']
-            ds_id = self.project.id + '-' + self.schema_name
-            ds_oid = str(uuid4())
-            self.dataset = DataSet(oid=ds_oid, id=ds_id, owner=self.project,
-                                   creator=ADMIN, modifier=ADMIN,
-                                   create_datetime=NOW, mod_datetime=NOW)
-            Representation = orb.classes['Representation']
-            rep_oid = str(uuid4())
-            rep = Representation(oid=rep_oid, id=ds_id+'-representation',
-                                 of_object=self.dataset,
-                                 creator=ADMIN, modifier=ADMIN,
-                                 create_datetime=NOW, mod_datetime=NOW)
-            RepresentationFile = orb.classes['RepresentationFile']
-            rep_file_oid = str(uuid4())
-            rep_file = RepresentationFile(
-                                oid=rep_file_oid,
-                                id=ds_id+'-representation_file',
-                                of_representation=rep, url=fname,
-                                creator=ADMIN, modifier=ADMIN,
-                                create_datetime=NOW, mod_datetime=NOW)
-            orb.save([self.dataset, rep, rep_file])
 
     # NOTE: this code is just a copy of the code in reports.py for MEL
     # generation -- needs to be adapted/generalized ...

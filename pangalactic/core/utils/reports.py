@@ -360,3 +360,143 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts, level,
                                             qty=qty_by_name[comp_name])
     return row
 
+def write_mel_tsv(context, is_project=True,
+                  file_path='mel_data.tsv'):
+    """
+    Output Master Equipment List (MEL) data to a .tsv file (suitable for
+    loading into a DataMatrix).
+
+    Args:
+        context (Project or Product):  the project or system of which this is
+            the MEL
+        is_project (bool):  flag indicating whether context is a Product or
+            Project
+        file_path (str):  path to data file
+    """
+    # STANDARD MEL SCHEMA
+    # ===================
+    # Level
+    # System/Subsystem Name
+    # UNIT MASS
+    # Cold Units       [# of Units]
+    # Hot Units        [# of Units]
+    # Flight Units     [# of Units]
+    # Flight Spares    [# of Units]
+    # ETU/Qual Units   [# of Units]
+    # EM/EDU Prototype [# of Units]
+    # Total Mass [kg] (CBE)
+    # Mass Contingency [%]
+    # Total Mass w/ Contingency (MEV)
+    # Nominal Unit Power (W)
+    # Nominal Total Power (W)
+    # Nominal Power Contingency [%]
+    # Nominal Total Power w/ Contingency (MEV)
+    # Peak Unit Power (W)
+    # Peak Total Power (W)
+    # Peak Power Contingency [%]
+    # Peak Total Power w/ Contingency (MEV)
+    # QUIESCENT Total Power [W] (CBE)
+    # Quoted Unit Price ($K)
+    # Composition
+    # ADDITIONAL INFORMATION
+    # TRL
+    # Similarity to Existing
+    # Design        [Heritage Summary]
+    # Manufacture   [Heritage Summary]
+    # Software      [Heritage Summary]
+    # Provider      [Heritage Summary]
+    # Use           [Heritage Summary]
+    # Operating Env [Heritage Summary]
+    # Ref Prior Use [Heritage Summary]
+    # Reference Mission(s)
+    # Heritage Justification and Additional Information
+    # Structure Mass (kg)               [COST MODELING DATA]
+    # Electronic Complexity Factor      [COST MODELING DATA]
+    # Structure Complexity Factor       [COST MODELING DATA]
+    # Electronic Remaining Design       [COST MODELING DATA]
+    # Structure Remaining Design        [COST MODELING DATA]
+    # Engineering Complexity Mod. Level [COST MODELING DATA]
+
+    ### NOTE: WORKING HERE!!! ...
+    # with open(file_path) as f:
+    # system level
+    # (note that system.name overwrites the template "NAME..." placeholder)
+    if is_project:
+        # context is Project, so may include several systems
+        project = context
+        mel_label = 'MISSION: {}'.format(project.id)
+        # worksheet.write(hrow1, 1, mel_label, fmts['left_pale_blue_bold_12'])
+        # start_row = 1
+        # system_names = [psu.system.name.lower() for psu in project.systems]
+        # system_names.sort()
+        # systems_by_name = {psu.system.name.lower() : psu.system
+                           # for psu in project.systems}
+        # for system_name in system_names:
+            # last_row = write_component_rows_tsv(1, start_row,
+                                                # systems_by_name[system_name])
+            # start_row = last_row + 1
+    # else:
+        # # if context is Product -> a single system MEL
+        # system = context
+        # worksheet.write(hrow1, 1, system.name, fmts['left_pale_blue_bold_12'])
+        # write_component_rows_tsv(1, 1, system)
+    # book.close()
+
+def write_component_rows_tsv(level, row, component, qty=1):
+    """
+    Write a set of component rows.
+
+    Args:
+        level (int): assembly level of component
+        row (int): row number of component in the file
+        component (HardwareProduct): component object
+    """
+    # NB:  levels are 1-based; rows are 0-based
+    mcbe = get_pval(orb, component.oid, 'm[CBE]')
+    ctgcy_m = str(100 * get_pval(orb, component.oid, 'm[Ctgcy]')) + ' %'
+    mmev = get_pval(orb, component.oid, 'm[MEV]')
+    pcbe = get_pval(orb, component.oid, 'P[CBE]')
+    ctgcy_P = str(100 * get_pval(orb, component.oid, 'P[Ctgcy]')) + ' %'
+    pmev = get_pval(orb, component.oid, 'P[MEV]')
+    # columns:
+    #   0: Level
+    #   1: Name
+    #   2: UNIT MASS CBE
+    #   8: Mass CBE
+    #   9: Mass Contingency (Margin)
+    #  10: Mass MEV
+    #  12: Power CBE
+    #  13: Power Contingency (Margin)
+    #  14: Power MEV
+    row += 1
+    print('writing {} in row {}'.format(component.name, row))
+    # first write the formatting to the whole row to set the bg color
+    # sheet.write_row(row, 0, [' ']*48, level_fmts.get(level, level_fmts[3]))
+    # # then write the "LEVEL" cell
+    # sheet.write(row, 0, level, level_fmts.get(level, level_fmts[3]))
+    # sheet.write(row, 1, component.name, name_fmts.get(level, name_fmts[3]))
+    # data_fmt = data_fmts.get(level, data_fmts[3])
+    # sheet.write(row, 2, mcbe, data_fmt)        # Unit Mass
+    # sheet.write(row, 5, int(qty), data_fmt)    # Flight Units
+    # sheet.write(row, 9, mcbe * qty, data_fmt)  # Total Mass
+    # sheet.write(row, 10, ctgcy_m, data_fmt)
+    # sheet.write(row, 11, mmev * qty, data_fmt) # Mass MEV
+    # sheet.write(row, 12, pcbe, data_fmt)       # Unit Power
+    # sheet.write(row, 13, pcbe * qty, data_fmt) # Total Power
+    # sheet.write(row, 14, ctgcy_P, data_fmt)
+    # sheet.write(row, 15, pmev * qty, data_fmt) # Power MEV
+    # if component.components:
+        # next_level = level + 1
+        # comp_names = [acu.component.name.lower()
+                      # for acu in component.components]
+        # comp_names.sort()
+        # comps_by_name = {acu.component.name.lower() : acu.component
+                         # for acu in component.components}
+        # qty_by_name = {acu.component.name.lower() : acu.quantity or 1
+                       # for acu in component.components}
+        # for comp_name in comp_names:
+            # row = write_component_rows_tsv(next_level, row,
+                                           # comps_by_name[comp_name],
+                                           # qty=qty_by_name[comp_name])
+    # return row
+
