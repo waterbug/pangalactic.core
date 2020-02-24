@@ -25,12 +25,13 @@ from pangalactic.core.registry    import PanGalacticRegistry
 from pangalactic.core.utils.meta  import uncook_datetime
 from pangalactic.core.mapping     import schema_maps, schema_version
 from pangalactic.core.parametrics import (add_default_parameters,
-                                          _compute_pval, componentz,
+                                          add_parameter, _compute_pval,
+                                          componentz,
                                           compute_requirement_margin,
                                           create_parm_defz,
                                           create_parmz_by_dimz,
-                                          get_parameter_id,
-                                          parameterz, refresh_componentz,
+                                          get_parameter_id, parameterz,
+                                          refresh_componentz,
                                           refresh_req_allocz, req_allocz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
@@ -430,7 +431,7 @@ class UberORB(object):
         contexts.  This is required at startup or when a parameter is created,
         modified, or deleted.
         """
-        # self.log.debug('* [orb] recompute_parmz()')
+        self.log.debug('* [orb] recompute_parmz()')
         # TODO:  preferred contexts should override defaults
         # default descriptive contexts:  CBE, MEV
         d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or []
@@ -750,6 +751,13 @@ class UberORB(object):
                         for req_oid in alloc_reqs:
                             refresh_req_allocz(self, req_oid)
                 recompute_required = True
+            elif cname == 'HardwareProduct':
+                # make sure HW Products have mass, power, data rate parms
+                if obj.oid not in parameterz:
+                    parameterz[obj.oid] = {}
+                for pid in ['m', 'P', 'R_D']:
+                    if not parameterz[obj.oid].get(pid):
+                         add_parameter(orb, obj.oid, pid)
             elif cname == 'ProjectSystemUsage':
                 if not new:
                     # find all allocations to this PSU and refresh them ...

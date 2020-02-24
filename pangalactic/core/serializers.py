@@ -11,7 +11,8 @@ from sqlalchemy import ForeignKey
 from pangalactic.core.utils.meta  import (asciify, cookers, uncookers,
                                           cook_datetime, uncook_datetime)
 from pangalactic.core.utils.datetimes import earlier
-from pangalactic.core.parametrics import (parameterz, refresh_componentz,
+from pangalactic.core.parametrics import (add_parameter, parameterz,
+                                          refresh_componentz,
                                           refresh_req_allocz,
                                           repair_parms, set_pval,
                                           update_parm_defz,
@@ -568,6 +569,13 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         psus.add(obj)
                     elif isinstance(obj, orb.classes['Product']):
                         products.append(obj)
+                        if cname == 'HardwareProduct':
+                            # make sure HW Products have mass, power, data rate
+                            if obj.oid not in parameterz:
+                                parameterz[obj.oid] = {}
+                            for pid in ['m', 'P', 'R_D']:
+                                if not parameterz[obj.oid].get(pid):
+                                     add_parameter(orb, obj.oid, pid)
                     if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                         recompute_parmz_required = True
                 # else:
