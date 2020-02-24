@@ -543,6 +543,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         for flow in flows:
                             if flow.oid not in incoming_oids:
                                 ports_and_flows_to_be_deleted.append(flow)
+                    recompute_parmz_required = True
                 elif cname == 'ParameterDefinition':
                     update_parm_defz(orb, obj)
                     update_parmz_by_dimz(orb, obj)
@@ -609,7 +610,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         orb.log.debug('  - recomputing parameters ...')
         orb.recompute_parmz()
         orb.log.debug('    done.')
-    elif recompute_parmz_required and not force_no_recompute:
+    if recompute_parmz_required and not force_no_recompute:
         orb.log.debug('  - recomputing parameters ...')
         orb.recompute_parmz()
         orb.log.debug('    done.')
