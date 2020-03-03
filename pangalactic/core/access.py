@@ -47,17 +47,17 @@ def get_perms(obj, user=None, permissive=False):
         # orb.log.debug('  perms: {}'.format(perms))
         return perms
     perms = set()
-    if isinstance(obj, orb.classes['ManagedObject']):
-        # ManagedObject (can be "cloaked")
+    if isinstance(obj, orb.classes['Product']):
+        # Products can be "cloaked" ("non-public")
         if getattr(obj, 'public', False):
-            # ManagedObject is "public" -> everyone has 'view' access;
+            # Product is "public" -> everyone has 'view' access;
             # determine other perms by logic below ...
             perms.add('view')
         elif obj.owner is None:
-            # non-public ManagedObject with no owner -> no permissions
+            # non-public Product with no owner -> no permissions
             return list(perms)
     else:
-        # not a ManagedObject -> everyone has 'view' access
+        # not a Product -> everyone has 'view' access
         perms.add('view')
     if user:
         # user specified -> server-side
