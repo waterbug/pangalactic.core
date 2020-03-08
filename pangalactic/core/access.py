@@ -294,7 +294,7 @@ def is_cloaked(obj):
     Returns:
         status (bool): True if cloaked
     """
-    orb.log.debug('* get_cloaked({})'.format(obj.name))
+    orb.log.debug('* is_cloaked({})'.format(obj.name))
     obj_oid = getattr(obj, 'oid', None)
     if not obj or not obj_oid:
         orb.log.debug('  [no object or object has no oid]')

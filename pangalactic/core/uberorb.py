@@ -741,6 +741,14 @@ class UberORB(object):
                         obj.iteration = 0
                     obj.iteration += 1
                 self.db.merge(obj)
+            if hasattr(obj, 'owner') and not obj.owner:
+                # ensure 'owner' is always populated if present!
+                if obj.creator and getattr(obj.creator, 'org', None):
+                    # first fallback:  owner is creator's org ...
+                    obj.owner = obj.creator.org
+                else:
+                    # ultimate fallback:  owner is PGANA
+                    obj.owner = orb.get('pgefobjects:PGANA')
             if cname == 'Acu':
                 refresh_componentz(self, obj.assembly)
                 if not new:

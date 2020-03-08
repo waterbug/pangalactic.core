@@ -3,6 +3,7 @@
 Serializers / deserializers for pangalactic domain objects and parameters.
 """
 from copy import deepcopy
+# import pprint
 
 # SQLAlchemy
 from sqlalchemy import ForeignKey
@@ -283,9 +284,9 @@ def deserialize_parms(orb, oid, ser_parms, cname=None):
         cname (str):  class name of the object to which the parameters are
             assigned (only used for logging)
     """
-    if cname:
-        orb.log.debug('* deserializing parms for {} ({})...'.format(oid,
-                                                                    cname))
+    # if cname:
+        # orb.log.debug('* deserializing parms for {} ({})...'.format(oid,
+                                                                    # cname))
         # orb.log.debug('  parms: {}'.format(ser_parms))
     if not ser_parms:
         return
@@ -393,6 +394,11 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     if new_len == 0:
         # orb.log.debug('  all objects were empty -- returning []')
         return []
+    else:
+        orb.log.debug('* deserializing {} objects ...'.format(new_len))
+        # objoids = [so['oid'] for so in serialized]
+        # orb.log.debug('  {}'.format(pprint.pformat(objoids)))
+
     recompute_parmz_required = False
     refresh_componentz_required = False
     req_oids = set()
@@ -457,8 +463,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 so_datetime = uncook_datetime(d.get('mod_datetime'))
                 if not (so_datetime and
                         earlier(db_obj.mod_datetime, so_datetime)):
-                    # orb.log.debug('    serialized obj has same or '
-                                   # 'older mod_datetime, ignoring it.')
+                    # txt = '    object "{}" has same or older'.format(oid)
+                    # orb.log.debug('{} mod_datetime, ignoring.'.format(txt))
                     # if not, ignore it
                     ignores.append(oid)
                     # NOTE: do not return "ignored" objs SCW 2019-09-05
@@ -467,17 +473,18 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         output['unmodified'].append(db_obj)
                     continue
                 else:
-                    # orb.log.debug('    serialized obj has later '
-                                   # 'mod_datetime, saving it.')
+                    # orb.log.debug('    object has later '
+                                  # 'mod_datetime, saving it.')
                     # if it is newer, update the object
                     updates[oid] = db_obj
                     orb.db.add(db_obj)
                     if dictify:
                         output['modified'].append(db_obj)
-            # else:
+            else:
                 # object will be appended to output['new'] after it is
                 # created (below)
-                # orb.log.debug('  - object is new (oid not in db).')
+                msg = 'object with oid "{}" is new (not in db).'.format(oid)
+                orb.log.debug('  - '.format(msg))
             # first do datatype properties (non-object properties)
             kw = dict([(name, d.get(name))
                            for name in field_names
@@ -499,7 +506,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 # orb.log.debug('  + parameters found: {}'.format(parm_dict))
                 # orb.log.debug('    deserializing parameters ...')
                 deserialize_parms(orb, oid, parm_dict, cname=cname)
-            # else:
+            else:
+                pass
                 # orb.log.debug('  + no parameters found for this object.')
             # identify fk values; explicitly ignore inverse properties
             # (even though d should not have any)
@@ -521,8 +529,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         # orb.log.debug('      rel obj NOT found.')
             cls = orb.classes[cname]
             if d['oid'] in updates:
-                # orb.log.debug('* updating existing object {}'.format(
-                                                                # d['oid']))
+                # orb.log.debug('* updating object with oid "{}"'.format(
+                                                             # d['oid']))
                 obj = updates[d['oid']]
                 for a, val in kw.items():
                     setattr(obj, a, val)
@@ -549,13 +557,13 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     update_parm_defz(orb, obj)
                     update_parmz_by_dimz(orb, obj)
             elif d['oid'] not in ignores:
-                # orb.log.debug('* creating new object ...')
+                orb.log.debug('* creating new object ...')
                 obj = cls(**kw)
                 if obj:
-                    # orb.log.debug('  object created:')
-                    # orb.log.debug('    oid: {}'.format(obj.oid))
-                    # orb.log.debug('    id: {}'.format(obj.id))
-                    # orb.log.debug('    name: {}'.format(obj.name))
+                    orb.log.debug('  object created:')
+                    orb.log.debug('    oid: {}'.format(obj.oid))
+                    orb.log.debug('    id: {}'.format(obj.id))
+                    orb.log.debug('    name: {}'.format(obj.name))
                     orb.db.add(obj)
                     objs.append(obj)
                     created.append(obj.id)
@@ -578,9 +586,9 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                                      add_parameter(orb, obj.oid, pid)
                     if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                         recompute_parmz_required = True
-                # else:
-                    # orb.log.debug('  object creation failed:')
-                    # orb.log.debug('    obj: {}'.format(obj))
+                else:
+                    orb.log.debug('  object creation failed for kw dict:')
+                    orb.log.debug('  {}'.format(str(kw)))
             if refresh_componentz_required:
                 if getattr(obj, 'assembly', None):
                     refresh_componentz(orb, obj.assembly)
@@ -615,13 +623,13 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         for req_oid in req_oids:
             refresh_req_allocz(orb, req_oid)
         orb.log.debug('    done.')
-        orb.log.debug('  - recomputing parameters ...')
+        # orb.log.debug('  - recomputing parameters ...')
         orb.recompute_parmz()
-        orb.log.debug('    done.')
-    if recompute_parmz_required and not force_no_recompute:
-        orb.log.debug('  - recomputing parameters ...')
+        # orb.log.debug('    done.')
+    elif recompute_parmz_required and not force_no_recompute:
+        # orb.log.debug('  - recomputing parameters ...')
         orb.recompute_parmz()
-        orb.log.debug('    done.')
+        # orb.log.debug('    done.')
     if dictify:
         return output
     else:
