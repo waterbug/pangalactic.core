@@ -128,6 +128,7 @@ def serialize(orb, objs, view=None, include_components=False,
         return []
     serialized = []
     org_objs = set()
+    org_oids = set()
     person_objs = set()
     product_type_objs = set()
     activity_type_objs = set()
@@ -183,12 +184,15 @@ def serialize(orb, objs, view=None, include_components=False,
                 person_objs.add(obj.creator)
             if obj.modifier:
                 person_objs.add(obj.modifier)
-        if hasattr(obj, 'owner'):
+        owner_org = getattr(obj, 'owner', None)
+        if (owner_org and owner_org.oid != obj.oid
+            and owner_org.oid not in org_oids):
             # for ManagedObjects, owner must be included
             # NOTE:  IMPORTANT!! used for access control / authorization,
             # and for identification of project requirements, etc.
-            if obj.owner:
-                org_objs.add(obj.owner)
+            # orb.log.debug(' + adding org {}'.format(owner_org.id))
+            org_objs.add(owner_org)
+            org_oids.add(owner_org.oid)
         if hasattr(obj, 'product_type'):
             # for Products, product_type must be included
             if obj.product_type:
