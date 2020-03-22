@@ -321,19 +321,18 @@ Note that in pangalactic, `louie` is used *only* on the client side
 
 (2) orb.clone() *ALWAYS* sets the `mod_datetime` of the clone
 
-## Behavior of Project and System selector states
+## Behavior of Project and System selection states
 
-* Project selector
+* Project selection
   - component mode:  any Parts or Models created will have the selected
                      Project as their `owner` (person creating them will be
                      `creator`)
   - systems mode:    left dock systems tree will be for the selected Project
                      (if no system is selected -- see below)
 
-* System selector
-  - component mode:  not visible [may change if needed]
-  - systems mode:    selected system will be shown as root of left dock
-                     systems tree
+* System selection
+  - component mode:  is displayed in the product info panel (dropped there)
+  - systems mode:    is selected the systems tree
 
 ## Representation of Many-to-Many Relationships in the UI
 
@@ -526,6 +525,37 @@ Object X:
     nor are present in the user's trash are pushed to the client (i.e., any
     locally "missing" objects created by the user are "restored").
 
+## Features Requiring Platform Detection
+
+Some features require the desktop application to detect the platform on which
+it is running and adapt itself accordingly.
+
+* CAD Viewer
+
+  - Windows:  viewer runs in the main app process
+
+    The use of the python `multiprocessing` module to enable the viewer to run
+    in a separate process introduces an incompatibility when PyInstaller and
+    Innosetup are used to create a self-contained application from a conda
+    package that uses PyQt5.  Note that the application works when run as a
+    conda package, and also works after the processing by PyInstaller, but does
+    not work when installed using the setup.exe produced by Innosetup.  The
+    following code enables PyInstaller to handle the `multiprocessing` module
+    on the Windows platform:
+
+        # multiprocessing.freeze_support is needed for multiprocessing to work
+        # with PyInstaller on Windows -- and it must be invoked *immediately*
+        # after if __name__ == "__main__":
+        multiprocessing.freeze_support()
+
+    However, since the Innosetup-created `setup.exe` installed version does not
+    work properly, that code cannot be used.
+
+  - Mac:  viewer runs in a separate process (can have multiple viewers running
+    simultaneously)
+
+  - Linux:  both (same or multiple separate processes)
+
 ## Installation and Configuration of Crossbar
 
 [TBD]
@@ -533,74 +563,24 @@ Object X:
 ## Configuration for Testing the Client with a Local Crossbar and Repo Service
 
 The `Pangalaxian` desktop application can be tested using a local crossbar
-server and repository service (`pangalactic.repo.pger`) by configuring it as
+server and repository service (`pangalactic.vger.vger`) by configuring it as
 follows:
 
 0. start up the client (which creates its home directory)
 1. stop the client and cd to its home directory
-2. copy or link the local crossbar server's `server_cert.pem` file to the
-    client's home directory, replacing any `server_cert.pem` that was there.
+2. copy or link the `localhost` `server_cert.pem` file to the client's home
+   directory, replacing any `server_cert.pem` that was there.
 3. edit the `config` file:
-    - set 'host' to 'localhost'
-    - set 'port' to the port that crossbar is running on
+    - set 'host' to `localhost`
+    - set 'port' to the port that crossbar is running on (`8080` is default)
 4. start up the client again using the flags:
     - '-t' (test mode)
     - '-d' (debug level logging)
-    - '-n' ('pger' will stand in for the admin service)
 
 You should now be able to log in to your local crossbar and access your local
 repository service.
 
-
-## Package Installation and Management
-
-The `conda` package manager is used to manage the installation and updating of
-`pangalactic` for both the client and server.
-
-### Client Installation and Updates
-
-For the Windows platform, `conda-constructor` is used to create an installer
-for the client package.  When run, the installer creates a `conda` installation
-(which includes `conda` itself) in the user's home directory.  
-
-The client includes a self-updating mechanism that can be invoked from the menu
-by the user and will use conda to check for updates to the package in the
-pre-configured `conda` repository.  The client update process works as follows:
-
-#### Server-Initiated
-
-0.  upon login, client issues rpc checking for new version release
-1.  server response includes new release metadata with `schema_changed` flag
-2.  if schema changed:
-    - serialize all objects (db-independent form)
-    - backup the serialized objects (old schema) into yaml file(s)
-3.  install new version
-4.  restart cattens (i.e. tell user to restart; offer to exit now)
-5.  at startup, the client compares its `state['schema_version']` to the
-    package version and, if different, it checks whether the schema has been
-    modified (same as step 1); if it has, the client looks for a serialized
-    data file.
-6.  if a serialized data file is found, the client checks to see if the current
-    version is found in the `mappings.fns` dictionary; if it is, the client
-    imports the serialized data and runs the conversion function
-    `mappings.fns[version]` on the data, then deserializes it; if the version
-    is not found in the `mappings.fns` dictionary, it means that no conversion
-    function is required for the schema mod, so the data is simply deserialized
-    as is (which loads it into the db).
-
-#### Client-Initiated
-
-0.  the client package is updated, either by:
-    [a] the client's menu item "Tools/Update <client name>..." or
-    [b] by using `conda update <client name>..." at the command line
-1.  the client reloads the `mapping` module and checks whether the package
-    version is in the `mappings.schema_mods` version list -- if so, its schema
-    has been modified
-2.  if the schema changed, the client serializes all db data to a file
-3.  restart cattens (i.e. tell user to restart; offer to exit now)
-4.  replicate steps [5] and [6] above.
-
-### Repository Service Installation and Updates
+## Repository Service Installation and Updates
 
 Since the repository service is only supported on Linux and does not have a
 GUI, the server package is installed and updated using the `conda` command line
@@ -619,7 +599,16 @@ yielded no noticeable gain (less than 1%), and it is difficult to see any
 operations within the function that could be formulated to compile into pure C,
 anyway.
 
-### Process for Building Application Releases / Installers
+### Notes on Deserialization Profiling and Optimization
+
+## Windows Desktop Application Installation and Management
+
+On the Windows platform, **PyInstaller** and **Innosetup** are used to create
+a `setup.exe` installer for the desktop application package.  When run, the
+application is installed in the user's home directory and does not require
+admin privileges.  
+
+### Process for Building Windows Desktop App Releases / Installers
 
 1. Bump version for all packages:
 
@@ -628,8 +617,8 @@ anyway.
    * pangalactic.vger
    * any application-level packages
 
-   * Edit the sedscr sed script to rewrite the necessary files
-   * Run the `bump_version.sh` shell script
+   * Edit the `sedscr` sed script to increment the version string
+   * Run the `bump_version.sh` shell script (which runs the sed script)
    * git commit
    * git push
 
@@ -640,27 +629,32 @@ anyway.
         `find . -name __pycache__ -exec rm -r {} \;`
 
    * Edit conda recipe "meta.yaml" files to update versions and dependencies
-   * Run `conda build [pkg name] --python=[python version]`
-     where "python version" is currently 3.6 (NOTE: for compatibility it may be
-     necessary to install "conda-build" into the virtual env where the build is
-     being done, rather than the base env.)
+   * Run `conda build [pkg name] [--python=[python version]]` ("python version"
+     is only needed if different than the env's python)
+   * NOTE: for compatibility it may be necessary to install "conda-build" into
+     the virtual env where the build is being done, rather than the base env.
 
-3. Put conda packages into the local conda repository
+3. Put conda packages into an accessible conda repository
 
-4. Install conda packages locally
+4. Install conda packages from the conda repository specified in step 3 (which
+   should either be referenced in `.condarc` or specified using `-c`):
 
         `conda install [app]`
 
 5. Run pyinstaller on the app-level package -- e.g.:
 
-        `pyinstaller app.spec`
+        `pyinstaller [app].spec`
 
-   ... where "app.spec" is the pyinstaller spec file for the app.
+   ... where "app.spec" is the pyinstaller spec file for the app, created by
+   running pyinstaller and then modifying as necessary.
 
 6. Test the .exe:
 
-   * cd to the "dist" directory, and to the app subdirectory
-   * `./run_app.exe`
+   * cd to the "dist" directory, and to the app subdirectory, whose name is
+     specified in the spec file
+   * execute the command:
+
+        `./run_[app].exe`
 
 7. Use Inno Setup to build the "setup.exe" installer for Windows.
 
