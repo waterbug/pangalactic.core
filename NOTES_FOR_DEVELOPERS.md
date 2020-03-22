@@ -532,7 +532,7 @@ it is running and adapt itself accordingly.
 
 * CAD Viewer
 
-  - Windows:  viewer runs in the main app process
+  - Windows:  viewer can only run in the main app process
 
     The use of the python `multiprocessing` module to enable the viewer to run
     in a separate process introduces an incompatibility when PyInstaller and
@@ -551,10 +551,11 @@ it is running and adapt itself accordingly.
     However, since the Innosetup-created `setup.exe` installed version does not
     work properly, that code cannot be used.
 
-  - Mac:  viewer runs in a separate process (can have multiple viewers running
-    simultaneously)
+  - Mac:  viewer can only run in a separate process (can have multiple viewers
+    running simultaneously)
 
-  - Linux:  both (same or multiple separate processes)
+  - Linux:  can run either a single viewer in the main process or multiple
+    viewers in separate process(es)
 
 ## Installation and Configuration of Crossbar
 
