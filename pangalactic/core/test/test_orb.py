@@ -7,6 +7,9 @@ from math import fsum
 import os
 import unittest
 
+# yaml
+import ruamel_yaml as yaml
+
 # python-dateutil
 import dateutil.parser as dtparser
 
@@ -15,9 +18,11 @@ from pangalactic.core             import refdata
 from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
-                                          get_pval, parameterz, repair_parms,
+                                          get_pval, parameterz,
                                           req_allocz, round_to)
-from pangalactic.core.serializers import (deserialize, serialize,
+from pangalactic.core.serializers import (deserialize,
+                                          deserialize_parms,
+                                          serialize,
                                           serialize_parms)
 from pangalactic.core.test        import data as test_data_module
 from pangalactic.core.test        import vault as vault_module
@@ -28,8 +33,11 @@ from pangalactic.core.test.utils  import (create_test_users,
                                           parametrized_test_objects,
                                           related_test_objects)
 from pangalactic.core.uberorb     import orb
-from pangalactic.core.utils.meta  import uncook_datetime
-from pangalactic.core.utils.reports import write_mel_xlsx
+from pangalactic.core.utils.datetimes import dtstamp
+from pangalactic.core.utils.meta      import uncook_datetime
+from pangalactic.core.utils.reports   import write_mel_xlsx
+
+NOW = str(dtstamp())
 
 orb.start(home='pangalaxian_test', debug=True)
 serialized_test_objects = create_test_users()
@@ -344,28 +352,71 @@ class OrbTest(unittest.TestCase):
         expected = orb.get('test:yoyodyne')
         self.assertEqual(expected, value)
 
-    def test_18_deserialize_object_with_simple_parameters(self):
+    def test_18_deserialize_parameters(self):
+        """
+        CASE:  test pangalactic.core.serializers.deserialize_parms function.
+        """
+        test_oid = 'dummy_oid'
+        serialized_parms= {
+            'P[CBE]':
+              {'mod_datetime': NOW,
+               'units': 'W',
+               'value': 100.0},
+            'R_D[CBE]':
+              {'mod_datetime': NOW,
+               'units': 'bit/s',
+               'value': 1000000.0},
+            'm[CBE]':
+              {'mod_datetime': NOW,
+               'units': 'kg',
+               'value': 1000.0}
+            }
+        deserialize_parms(orb, test_oid, serialized_parms)
+        expected = [True, True, True, True, True, True,
+                    100.0, 1000000.0, 1000.0, 0.0, 0.0, 0.0]
+        test_parms = parameterz.get(test_oid, {})
+        actual = [('P[CBE]' in test_parms),
+                  ('R_D[CBE]' in test_parms),
+                  ('m[CBE]' in test_parms),
+                  ('P' in test_parms),
+                  ('R_D' in test_parms),
+                  ('m' in test_parms),
+                  get_pval(orb, test_oid, 'P[CBE]'),
+                  get_pval(orb, test_oid, 'R_D[CBE]'),
+                  get_pval(orb, test_oid, 'm[CBE]'),
+                  get_pval(orb, test_oid, 'P'),
+                  get_pval(orb, test_oid, 'R_D'),
+                  get_pval(orb, test_oid, 'm')]
+        self.assertEqual(expected, actual)
+
+    def test_19_deserialize_object_with_simple_parameters(self):
         """
         CASE:  deserialize an object with simple parameters
         """
-        objs = deserialize(orb, parametrized_test_objects)
-        parameters = parametrized_test_objects[0]['parameters']
+        f = open('parm_test.yaml')
+        data = f.read()
+        f.close()
+        sobjs = yaml.safe_load(data)
+        objs = deserialize(orb, sobjs)
+        parameters = sobjs[0]['parameters']
         for o in objs:
             if o.__class__.__name__ == 'HardwareProduct':
                 obj = o
-        value = parameterz[obj.oid]
+        parms = parameterz[obj.oid]
+        P = get_pval(orb, obj.oid, 'P')
+        value = [parms, P]
         # NOTE: in the "python-serialized" format of parametrized_test_objects,
         # datetime objects are serialized as strings, but all other primitive
         # types are unaltered (because json and yaml know how to serialize and
         # deserialize all the other primitive types)
         deser_parms = deepcopy(parameters)
-        for pid in deser_parms:
+        for pid in parameters:
             deser_parms[pid]['mod_datetime'] = uncook_datetime(
                                                parameters[pid]['mod_datetime'])
-        expected = deser_parms
+        expected = [deser_parms, deser_parms['P']['value']]
         self.assertEqual(expected, value)
 
-    def test_19_deserialize_related_objects(self):
+    def test_20_deserialize_related_objects(self):
         """
         CASE:  deserialize a collection of related objects.  Note that this
         also tests the deserializer's refreshing of the requirement allocation
@@ -412,7 +463,7 @@ class OrbTest(unittest.TestCase):
             ]
         self.assertEqual(expected, value)
 
-    def test_20_compute_cbe(self):
+    def test_21_compute_cbe(self):
         """
         CASE:  compute the mass CBE (Current Best Estimate)
         """
@@ -428,7 +479,7 @@ class OrbTest(unittest.TestCase):
         expected += get_pval(orb, 'test:mr_fusion', 'm')
         self.assertEqual(expected, value)
 
-    def test_21_compute_mev(self):
+    def test_22_compute_mev(self):
         """
         CASE:  compute the mass MEV (Maximum Estimated Value)
         """
@@ -445,7 +496,7 @@ class OrbTest(unittest.TestCase):
         expected = round_to(1.3 * expected)
         self.assertEqual(expected, value)
 
-    def test_22_compute_margin(self):
+    def test_23_compute_margin(self):
         """
         CASE:  compute the mass margin ((NTE - MEV) / MEV) for a node to which
         a performance requirement is allocated
@@ -458,7 +509,7 @@ class OrbTest(unittest.TestCase):
         expected = round_to(((nte - mev) / nte))
         self.assertEqual(expected, value)
 
-    def test_23_compute_requirement_margin(self):
+    def test_24_compute_requirement_margin(self):
         """
         CASE:  compute the margin associated with a performance requirement
         """
@@ -472,7 +523,7 @@ class OrbTest(unittest.TestCase):
         expected = ('test:OTHER:system-1', 'm', nte, perf_reqt.req_units, margin)
         self.assertEqual(expected, value)
 
-    def test_24_systems_engineer_perms(self):
+    def test_25_systems_engineer_perms(self):
         """
         CASE:  test role-based permissions on project objects
         """
@@ -530,7 +581,7 @@ class OrbTest(unittest.TestCase):
                     ]
         self.assertEqual(expected, value)
 
-    def test_25_deserialize_object_with_modified_parameters(self):
+    def test_26_deserialize_object_with_modified_parameters(self):
         """
         CASE:  deserialize an object with modified parameters
         """
@@ -551,41 +602,6 @@ class OrbTest(unittest.TestCase):
         # save parameters.json file for forensics ...
         orb._save_parmz()
         self.assertEqual(expected, value)
-
-    def test_40_write_mel(self):
-        """
-        CASE:  test 'repair_parms' function.
-        """
-        bad_parms = {
-            'm[CBE]': 
-              {'mod_datetime': '',
-               'units': 'kg',
-               'value': 0.0},
-            'm[MEV]':
-              {'mod_datetime': '',
-               'units': 'kg',
-               'value': 0.0},
-            'P[CBE]':
-              {'mod_datetime': '',
-               'units': 'kg',
-               'value': 0.0},
-            'P[MEV]':
-              {'mod_datetime': '',
-               'units': 'kg',
-               'value': 0.0},
-            'output':
-              {'mod_datetime': '',
-               'units': '',
-               'value': True}
-            }
-        expected = {
-            'output':
-              {'mod_datetime': '',
-               'units': '',
-               'value': True}
-            }
-        good_parms = repair_parms(bad_parms)
-        self.assertEqual(expected, good_parms)
 
     def test_50_write_mel(self):
         """

@@ -715,12 +715,12 @@ class UberORB(object):
             # TODO:  target the recompute to the specific assemblies ...
             if getattr(obj, 'where_used', []):
                 recompute_required = True
-            self.log.debug('* orb.save')
+            # self.log.debug('* orb.save')
             new = bool(oid in self.new_oids) or not self.get(oid)
             if new:
                 log_txt = 'orb.save: {} is a new {}, saving it ...'.format(
                            getattr(obj, 'id', '[unknown]'), cname)
-                self.log.debug('  {}'.format(log_txt))
+                self.log.debug('* {}'.format(log_txt))
                 self.db.add(obj)
                 if obj.oid in self.new_oids:
                     self.new_oids.remove(obj.oid)
@@ -728,7 +728,7 @@ class UberORB(object):
                 # updating an existing object
                 log_txt = 'orb.save: "{}" is existing {}, updating ...'.format(
                            getattr(obj, 'id', '[unknown]'), cname)
-                self.log.debug('  {}'.format(log_txt))
+                self.log.debug('* {}'.format(log_txt))
                 # NOTE:  in new paradigm, obj is versioned iff
                 # [1] it has a 'version' attr and
                 # [2] a non-null version has been assigned to it (i.e. neither

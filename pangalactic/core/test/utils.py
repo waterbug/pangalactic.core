@@ -2,7 +2,7 @@
 """
 Create PGEF test data.
 """
-from copy     import deepcopy
+from copy import deepcopy
 import random
 from pangalactic.core.parametrics import parm_defz
 from pangalactic.core.utils.meta import get_port_id, get_port_name
@@ -835,6 +835,10 @@ parametrized_test_objects = [
          {'mod_datetime': NOW,
           'units': 'W',
           'value': 100.0},
+       'R_D':
+         {'mod_datetime': NOW,
+          'units': 'bit/s',
+          'value': 1000000.0},
        'm':
          {'mod_datetime': NOW,
           'units': 'kg',

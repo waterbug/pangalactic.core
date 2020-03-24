@@ -15,7 +15,7 @@ from pangalactic.core.utils.datetimes import earlier
 from pangalactic.core.parametrics import (add_parameter, parameterz,
                                           refresh_componentz,
                                           refresh_req_allocz,
-                                          repair_parms, set_pval,
+                                          set_pval,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
 
@@ -293,28 +293,34 @@ def deserialize_parms(orb, oid, ser_parms, cname=None):
                                                                     # cname))
         # orb.log.debug('  parms: {}'.format(ser_parms))
     if not ser_parms:
+        # orb.log.debug('  object with oid "{}" has no parameters'.format(oid))
         return
-    # NOTE:  repair_parms does a deepcopy internally and removes any invalid
-    # context parameters (i.e. ones that don't have base parameters present)
-    new_parms = repair_parms(ser_parms)
-    # if cname:
-        # orb.log.debug('  repaired parms: {}'.format(new_parms))
-    for parm in new_parms.values():
-        parm['mod_datetime'] = uncook_datetime(parm['mod_datetime'])
     if oid in parameterz:
-        for pid in new_parms:
+        for pid in ser_parms:
             if pid in parameterz[oid]:
-                parameterz[oid][pid].update(new_parms[pid])
+                parameterz[oid][pid].update(ser_parms[pid])
+                new_dt = uncook_datetime(ser_parms[pid]['mod_datetime'])
+                parameterz[oid][pid]['mod_datetime'] = new_dt
             else:
-                set_pval(orb, oid, pid, new_parms[pid]['value'],
-                         units=new_parms[pid]['units'])
-        # remove pids not in new_parms
-        pids = list(parameterz[oid])
-        for pid in pids:
-            if pid not in new_parms:
-                del parameterz[oid][pid]
+                set_pval(orb, oid, pid, ser_parms[pid]['value'],
+                         units=ser_parms[pid]['units'])
+        ### FIXME:  it's dangerous to remove pids not in new_parms, but we
+        ### must deal with deleted parameters ...
+        # pids = list(parameterz[oid])
+        # for pid in pids:
+            # if pid not in new_parms:
+                # del parameterz[oid][pid]
     else:
-        parameterz[oid] = new_parms
+        parameterz[oid] = deepcopy(ser_parms)
+        for pid in parameterz[oid]:
+            new_dt = uncook_datetime(ser_parms[pid]['mod_datetime'])
+            parameterz[oid][pid]['mod_datetime'] = new_dt
+    # add base parameters for any context parameters for which the base
+    # parameter is absent
+    base_pids = set([pid.split('[')[0] for pid in parameterz[oid]])
+    for base_pid in base_pids:
+        if not base_pid in parameterz[oid]:
+            set_pval(orb, oid, base_pid, 0.0)
 
 # DESERIALIZATION_ORDER:  order in which to deserialize classes so that
 # object properties (relationships) are assigned properly (i.e., assemblies are
@@ -398,8 +404,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     if new_len == 0:
         # orb.log.debug('  all objects were empty -- returning []')
         return []
-    else:
-        orb.log.debug('* deserializing {} objects ...'.format(new_len))
+    # else:
+        # orb.log.debug('* deserializing {} object(s) ...'.format(new_len))
         # objoids = [so['oid'] for so in serialized]
         # orb.log.debug('  {}'.format(pprint.pformat(objoids)))
 
@@ -484,11 +490,6 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     orb.db.add(db_obj)
                     if dictify:
                         output['modified'].append(db_obj)
-            else:
-                # object will be appended to output['new'] after it is
-                # created (below)
-                msg = 'object with oid "{}" is new (not in db).'.format(oid)
-                orb.log.debug('  - '.format(msg))
             # first do datatype properties (non-object properties)
             kw = dict([(name, d.get(name))
                            for name in field_names
@@ -560,14 +561,14 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 elif cname == 'ParameterDefinition':
                     update_parm_defz(orb, obj)
                     update_parmz_by_dimz(orb, obj)
+                orb.log.debug('* updated object: [{}] {}'.format(cname,
+                                                          obj.id or '(no id)'))
             elif d['oid'] not in ignores:
-                orb.log.debug('* creating new object ...')
+                # orb.log.debug('* creating new object ...')
                 obj = cls(**kw)
                 if obj:
-                    orb.log.debug('  object created:')
-                    orb.log.debug('    oid: {}'.format(obj.oid))
-                    orb.log.debug('    id: {}'.format(obj.id))
-                    orb.log.debug('    name: {}'.format(obj.name))
+                    orb.log.debug('* new object: [{}] {}'.format(cname,
+                                                          obj.id or '(no id)'))
                     orb.db.add(obj)
                     objs.append(obj)
                     created.append(obj.id)
@@ -601,13 +602,13 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     if ports_and_flows_to_be_deleted:
         orb.delete(ports_and_flows_to_be_deleted)
     log_txt = '* deserializer:'
-    if created:
-        orb.log.info('{} new object(s) deserialized: {}'.format(
-                                                        log_txt, str(created)))
-    if updates:
-        ids = str([o.id for o in updates.values()])
-        orb.log.info('{} updated object(s) deserialized: {}'.format(
-                                                        log_txt, ids))
+    # if created:
+        # orb.log.info('{} new object(s) deserialized: {}'.format(
+                                                        # log_txt, str(created)))
+    # if updates:
+        # ids = str([o.id for o in updates.values()])
+        # orb.log.info('{} updated object(s) deserialized: {}'.format(
+                                                        # log_txt, ids))
     # if there are any Requirement objects or Product, Acu, PSU with allocated
     # requirements, refresh the req_allocz cache for the relevant requirements
     for product in products:

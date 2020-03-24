@@ -2,7 +2,6 @@
 Functions to support Parameters and Relations
 """
 from collections import namedtuple
-from copy        import deepcopy
 from decimal     import Decimal
 from math        import floor, fsum, log10
 
@@ -13,12 +12,14 @@ from pangalactic.core.meta            import (SELECTABLE_VALUES,
                                               DEFAULT_CLASS_PARAMETERS,
                                               DEFAULT_PRODUCT_TYPE_PARAMETERS)
 from pangalactic.core.units           import in_si, ureg
-from pangalactic.core.utils.meta      import get_parameter_definition_oid
+from pangalactic.core.utils.meta      import (get_parameter_definition_oid,
+                                              uncook_datetime)
 from pangalactic.core.utils.datetimes import dtstamp
 
 
 DATATYPES = SELECTABLE_VALUES['range_datatype']
-# NULL = {True: np.nan, False: 0.0}
+# NULL values by dtype:
+NULL = {'float': 0.0, 'int': 0, 'str': '', 'bool': False}
 TWOPLACES = Decimal('0.01')
 
 # CACHES ##################################################################
@@ -372,7 +373,7 @@ def update_parm_defz(orb, pd):
         orb (Uberorb):  singleton imported from p.node.uberorb
         pd (ParameterDefinition):  ParameterDefinition being added
     """
-    orb.log.debug('[orb] update_parm_defz')
+    # orb.log.debug('[orb] update_parm_defz')
     parm_defz[pd.id] = {
         'name': pd.name,
         'variable': pd.id,
@@ -558,43 +559,27 @@ def add_product_type_parameters(orb, obj, pt):
 
 def delete_parameter(orb, oid, pid):
     """
-    Delete a parameter from an object.
+    Delete a parameter from an object.  This should be rare and would only be
+    necessary if the parameter is irrelevant to the object; therefore, the base
+    variable and all related context parameters would be deleted.
 
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
         oid (str):  oid of the object that owns the parameter
         pid (str):  `id` attribute of the parameter
     """
-    # TODO (URGENT!): need to dispatch louie & pubsub messages!
+    # TODO: need to dispatch louie & pubsub messages!
+    if '[' in pid:
+        # find the base pid (variable)
+        base_pid = pid.split('[')[0]
     if oid in parameterz:
-        if parameterz[oid].get(pid):
-            del parameterz[oid][pid]
-        else:
-            # object doesn't have that parameter; ignore
-            return
-    else:
-        # object doesn't have any parameters; ignore
-        return
-
-def repair_parms(parms):
-    """
-    Repair the parameters dictionary for an object by removing any invalid
-    context parameters (context parameters should not be present unless their
-    base [variable] parameter is present).
-
-    Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
-        parms (dict):  parameters dict of an object
-    """
-    if not parms:
-        # this is a no-op if the dict is empty
-        return
-    new_parms = deepcopy(parms)
-    for pid in parms:
-        # remove any context parms for which the base parm is not present
-        if pid.endswith(']') and not pid.split('[')[0] in parms:
-            del new_parms[pid]
-    return new_parms
+        if parameterz[oid].get(base_pid):
+            del parameterz[oid][base_pid]
+        # look for all context parameters of that object with that base pid
+        for other_pid in parameterz[oid]:
+            # if it's a context parameter with the same base pid, delete it
+            if '[' in other_pid and base_pid == other_pid.split('[')[0]:
+                del parameterz[oid][other_pid]
 
 def get_pval(orb, oid, pid, allow_nan=False):
     """
@@ -617,8 +602,7 @@ def get_pval(orb, oid, pid, allow_nan=False):
         # orb.log.debug('  value of {} is {} ({})'.format(pid, val, type(val)))
         return parameterz[oid][pid]['value']
     except:
-        # return NULL[allow_nan]
-        return 0
+        return NULL.get(pdz.get('range_datatype', 'float'))
 
 def get_pval_as_str(orb, oid, pid, units=None, allow_nan=False):
     """
@@ -823,7 +807,10 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True,
             return
         dt_name = pdz['range_datatype']
         dtype = DATATYPES[dt_name]
-        value = dtype(value)
+        if value:
+            value = dtype(value)
+        else:
+            value = NULL.get(dt_name, 0.0)
         if units is not None and units not in ["$", "%"]:
             # TODO:  validate units (ensure they are consistent with dims)
             try:
