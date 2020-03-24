@@ -949,12 +949,12 @@ class UberORB(object):
                 next_int = max(hw_id_ints) + 1
                 next_sufx = str(next_int).zfill(7)
         owner_id = owner_id or 'Vendor'
-        if (obj.product_type and
-            obj.product_type.__class__.__name__ == 'ProductType'):
-            return '-'.join([owner_id, obj.product_type.abbreviation,
-                             next_sufx])
+        abbrev = (getattr(obj.product_type, 'abbreviation', None)
+                  or obj.product_type.id)
+        if isinstance(obj.product_type, orb.classes['ProductType']):
+            return '-'.join([owner_id, abbrev, next_sufx])
         else:
-            return '-'.join([owner_id, 'NoType', next_sufx])
+            return '-'.join([owner_id, 'Generic', next_sufx])
 
     def get_idvs(self, cname=None):
         """

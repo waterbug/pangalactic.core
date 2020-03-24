@@ -58,10 +58,10 @@ def create_test_users():
              _cname='Organization', oid='test:yoyodyne', id='YOYODYNE',
              id_ns='pangalactic', name='Yoyodyne Propulsion Systems',
              name_code='YPS', city='Grovers Mill',
-             state_or_province='NJ'),
+             state_or_province='NJ', owner='pgefobjects:PGANA'),
         dict(
              _cname='Organization', oid='test:banzai', id='BANZAI',
-             id_ns='pangalactic',
+             id_ns='pangalactic', owner='pgefobjects:PGANA',
              name='Banzai Aerospace', name_code='BA',
              city='White Sands', state_or_province='NM'),
         dict(
@@ -70,10 +70,10 @@ def create_test_users():
             id_ns='pangalactic', name='Steve Waterbury',
             email='waterbug@pangalactic.us', first_name='Stephen',
             mi_or_name='C', last_name='Waterbury',
-            org='test:banzai'),
+            org='test:banzai', owner='pgefobjects:PGANA'),
         dict(
             _cname='Person',
-            oid='test:zaphod', id='zaphod',
+            oid='test:zaphod', id='zaphod', owner='pgefobjects:PGANA',
             id_ns='pangalactic', name='Zaphod Z. Beeblebrox',
             org='test:banzai', create_datetime=NOW, mod_datetime=NOW,
             email='zaphod@space.univ', first_name='Zaphod',
@@ -81,7 +81,7 @@ def create_test_users():
             phone='1-800-ZAPHOD'),
         dict(
             _cname='Person',
-            oid='test:buckaroo', id='buckaroo',
+            oid='test:buckaroo', id='buckaroo', owner='pgefobjects:PGANA',
             id_ns='pangalactic', name='Buckaroo Banzai',
             org='test:banzai', create_datetime=NOW, mod_datetime=NOW,
             email='buckaroo@banzai.earth.milkyway.univ',
@@ -89,7 +89,7 @@ def create_test_users():
             phone='1-800-BANZAI'),
         dict(
             _cname='Person',
-            oid='test:whorfin', id='whorfin',
+            oid='test:whorfin', id='whorfin', owner='pgefobjects:PGANA',
             id_ns='pangalactic', name='John Whorfin (Dr. Emilio Lizardo)',
             org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
             email='whorfin@redlectroids.planet10.univ',
@@ -97,7 +97,7 @@ def create_test_users():
             phone='1-Z00-WHORFIN'),
         dict(
             _cname='Person',
-            oid='test:bigboote', id='bigboote',
+            oid='test:bigboote', id='bigboote', owner='pgefobjects:PGANA',
             id_ns='pangalactic', name='John Bigboote',
             org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
             email='bigboote@redlectroids.planet10.univ',
@@ -110,7 +110,7 @@ def create_test_users():
             org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
             email='smallberries@redlectroids.planet10.univ',
             first_name='John', mi_or_name='', last_name='Smallberries',
-            phone='1-Z00-SMALLBE'),
+            phone='1-Z00-SMALLBE', owner='pgefobjects:PGANA'),
         dict(
             _cname='Person',
             oid='test:thornystick', id='thornystick',
@@ -118,7 +118,7 @@ def create_test_users():
             org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
             email='thornystick@redlectroids.planet10.univ',
             first_name='John', mi_or_name='', last_name='Thornystick',
-            phone='1-Z00-THORNYS'),
+            phone='1-Z00-THORNYS', owner='pgefobjects:PGANA'),
         dict(
             _cname='Person',
             oid='test:carefulwalker', id='carefulwalker',
@@ -126,7 +126,7 @@ def create_test_users():
             org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
             email='carefulwalker@redlectroids.planet10.univ',
             first_name='John', mi_or_name='', last_name='Carefulwalker',
-            phone='1-Z00-CAREFUL'),
+            phone='1-Z00-CAREFUL', owner='pgefobjects:PGANA'),
         dict(
             _cname='Person',
             oid='test:manyjars', id='manyjars',
@@ -134,7 +134,7 @@ def create_test_users():
             org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
             email='manyjars@redlectroids.planet10.univ',
             first_name='John', mi_or_name='', last_name='Manyjars',
-            phone='1-Z00-MANYJAR')
+            phone='1-Z00-MANYJAR', owner='pgefobjects:PGANA')
             ]
     return objs
 
@@ -149,7 +149,7 @@ def create_test_project():
     test_project = [
         dict(
             _cname='Project', oid='H2G2', id='H2G2',
-            id_ns='test',
+            id_ns='test', owner='pgefobjects:PGANA',
             creator='test:steve', modifier='test:steve',
             create_datetime=NOW, mod_datetime=NOW,
             name='Hitchhikers Guide to the Galaxy',
@@ -753,7 +753,7 @@ owned_test_objects = [
          _cname='Organization', oid='test:yoyoinst', id='YOYOINST',
          id_ns='pangalactic', name='Yoyodyne Instrument Systems',
          name_code='YIS', city='Grovers Mill',
-         state_or_province='NJ'),
+         state_or_province='NJ', owner='pgefobjects:PGANA'),
     dict(
        _cname='HardwareProduct',
        oid='test:inst2',
@@ -787,7 +787,7 @@ locally_owned_test_objects = [
          _cname='Organization', oid='test:yoyodyne', id='YOYODYNE',
          id_ns='pangalactic', name='Yoyodyne Propulsion Systems',
          name_code='YPS', city='Grovers Mill',
-         state_or_province='NJ'),
+         state_or_province='NJ', owner='pgefobjects:PGANA'),
     dict(
        _cname='HardwareProduct',
        oid='test:prop10',

@@ -97,7 +97,7 @@ DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start'],
 DEFAULT_PRODUCT_TYPE_PARAMETERS = {'': []}
 
 # PGXN_PLACEHOLDERS:  Placeholder text for fields in PgxnObject forms
-PGXN_PLACEHOLDERS = {'id': 'abbreviated name; no spaces',
+PGXN_PLACEHOLDERS = {'id': 'unique identifier; no spaces',
                      'id_ns': 'namespace for id',
                      'name': 'verbose name; spaces ok',
                      'version': 'blank ok; id+version must be unique'
@@ -467,7 +467,6 @@ READONLY = [
             'creator',          #  "   "    "   "
             'create_datetime',  # tds
             'has_models',       # inverse of 'of_thing' property of Model
-            'id',               # generated at creation-time
             'id_ns',            # derive from 'owner'; might be YAGNI ...
             'iteration',
             'modifier',         # set from user id

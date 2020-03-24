@@ -537,6 +537,7 @@ core = [
     'name': 'Sandbox Project',
     'name_code': 'SANDBOX',
     'description': 'Sandbox for experimentation',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -573,6 +574,7 @@ core = [
     'id': 'TBD',
     'name': 'TBD',
     'public': True,
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -856,6 +858,7 @@ dict(
     'id': 'instrument',
     'name': 'Instrument',
     'abbreviation': 'Instrument',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -865,6 +868,7 @@ dict(
     'id': 'observatory',
     'name': 'Observatory',
     'abbreviation': 'Observ',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -874,6 +878,7 @@ dict(
     'id': 'spacecraft',
     'name': 'Spacecraft',
     'abbreviation': 'SC',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -893,6 +898,7 @@ dict(
     'name': 'Attitude Control System',
     'abbreviation': 'ACS',
     'description': 'Attitude Control Systems',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -903,6 +909,7 @@ dict(
     'name': 'Command and Data Handling System',
     'abbreviation': 'CDH',
     'description': 'Command and Data Handling System',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -913,6 +920,7 @@ dict(
     'name': 'Diplexer',
     'abbreviation': 'Diplexer',
     'description': 'Diplexer',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -923,6 +931,7 @@ dict(
     'name': 'Electronics Box',
     'abbreviation': 'Box',
     'description': 'Electronics Box',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -933,6 +942,7 @@ dict(
     'name': 'Electronic Circuit Board',
     'abbreviation': 'Board',
     'description': 'Electronic Circuit Board',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -943,6 +953,7 @@ dict(
     'name': 'EEE Part',
     'abbreviation': 'EEEPart',
     'description': 'Electrical, Electronic, or Electromechanical Component',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -952,6 +963,7 @@ dict(
     'id': 'communications_system',
     'name': 'Communications System',
     'abbreviation': 'CommSys',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -961,6 +973,7 @@ dict(
     'id': 'power_system',
     'name': 'Power System',
     'abbreviation': 'PowerSys',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -970,6 +983,7 @@ dict(
     'id': 'mechanical_system',
     'name': 'Mechanical System',
     'abbreviation': 'MechSys',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -979,6 +993,7 @@ dict(
     'id': 'propulsion_system',
     'name': 'Propulsion System',
     'abbreviation': 'PropSys',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -988,6 +1003,7 @@ dict(
     'id': 'thermal_control_system',
     'name': 'Thermal Control System',
     'abbreviation': 'ThermSys',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -997,6 +1013,7 @@ dict(
     'id': 'computer',
     'name': 'Computer System',
     'abbreviation': 'CompSys',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1006,6 +1023,7 @@ dict(
     'id': 'star_tracker',
     'name': 'Star Tracker',
     'abbreviation': 'ST',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1015,6 +1033,7 @@ dict(
     'id': 'imu',
     'name': 'Inertial Measurement Unit',
     'abbreviation': 'IMU',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1024,6 +1043,7 @@ dict(
     'id': 'iru',
     'name': 'Inertial Rate Unit',
     'abbreviation': 'IRU',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1033,6 +1053,7 @@ dict(
     'id': 'control_moment_gyro',
     'name': 'Control Moment Gyro',
     'abbreviation': 'CMG',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1042,6 +1063,7 @@ dict(
     'id': 'reaction_wheel',
     'name': 'Reaction Wheel',
     'abbreviation': 'RW',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1051,6 +1073,7 @@ dict(
     'id': 'momentum_wheel',
     'name': 'Momentum Wheel',
     'abbreviation': 'MW',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1060,6 +1083,7 @@ dict(
     'id': 'magnetic_torquer',
     'name': 'Magnetic Torquer',
     'abbreviation': 'MT',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1069,6 +1093,7 @@ dict(
     'id': 'magnetometer',
     'name': 'Magnetometer',
     'abbreviation': 'Magnetometer',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1078,6 +1103,7 @@ dict(
     'id': 'digital_sun_sensor',
     'name': 'Digital Sun Sensor',
     'abbreviation': 'DSS',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1087,6 +1113,7 @@ dict(
     'id': 'coarse_sun_sensor',
     'name': 'Coarse Sun Sensor',
     'abbreviation': 'CSS',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1096,6 +1123,7 @@ dict(
     'id': 'horizon_sensor',
     'name': 'Horizon Sensor',
     'abbreviation': 'HS',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1105,6 +1133,7 @@ dict(
     'id': 'tank',
     'name': 'Tank',
     'abbreviation': 'Tank',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1123,6 +1152,7 @@ dict(
     'id': 'pyro_isolation_valve',
     'name': 'Pyro Isolation Valve',
     'abbreviation': 'PyroValve',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1132,6 +1162,7 @@ dict(
     'id': 'propellant_filter',
     'name': 'Propellant Filter',
     'abbreviation': 'PropellantFilter',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1141,6 +1172,7 @@ dict(
     'id': 'manifold',
     'name': 'Manifold',
     'abbreviation': 'Manifold',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1150,6 +1182,7 @@ dict(
     'id': 'fill_drain_valve',
     'name': 'Fill/Drain Valve',
     'abbreviation': 'FillDrainValve',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1159,6 +1192,7 @@ dict(
     'id': 'thruster',
     'name': 'Thruster',
     'abbreviation': 'Thruster',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1177,6 +1211,7 @@ dict(
     'id': 'power_processing_unit',
     'name': 'Power Processing Unit',
     'abbreviation': 'PPU',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1186,6 +1221,7 @@ dict(
     'id': 'sep_engine',
     'name': 'SEP Engine',
     'abbreviation': 'SEPEngine',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1195,6 +1231,7 @@ dict(
     'id': 'sep_engine_gimbal',
     'name': 'SEP Engine Gimbal',
     'abbreviation': 'SEPEngineGimbal',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1204,6 +1241,7 @@ dict(
     'id': 'heater',
     'name': 'Heater',
     'abbreviation': 'Heater',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1213,6 +1251,7 @@ dict(
     'id': 'thermostat',
     'name': 'Thermostat',
     'abbreviation': 'Thermostat',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1222,6 +1261,7 @@ dict(
     'id': 'temperature_sensor',
     'name': 'Temperature Sensor',
     'abbreviation': 'TempSensor',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1231,6 +1271,7 @@ dict(
     'id': 'thermal_controller',
     'name': 'Thermal Controller',
     'abbreviation': 'ThermalController',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1240,6 +1281,7 @@ dict(
     'id': 'multi_layer_insulation',
     'name': 'Multi Layer Insulation',
     'abbreviation': 'MultiLayerInsulation',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1249,6 +1291,7 @@ dict(
     'id': 'thermal_coating',
     'name': 'Thermal Coating',
     'abbreviation': 'ThermalCoating',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1258,6 +1301,7 @@ dict(
     'id': 'radiator_panel',
     'name': 'Radiator Panel',
     'abbreviation': 'RadiatorPanel',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1267,6 +1311,7 @@ dict(
     'id': 'heat_pipe',
     'name': 'Heat Pipe',
     'abbreviation': 'HeatPipe',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1276,6 +1321,7 @@ dict(
     'id': 'thermal_strap',
     'name': 'Thermal Strap',
     'abbreviation': 'ThermalStrap',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1285,6 +1331,7 @@ dict(
     'id': 'thermal_louver',
     'name': 'Thermal Louver',
     'abbreviation': 'ThermalLouver',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1294,6 +1341,7 @@ dict(
     'id': 'mechanical_structure',
     'name': 'Mechanical Structure',
     'abbreviation': 'MechStruct',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1303,6 +1351,7 @@ dict(
     'id': 'instrument_accomodation',
     'name': 'Instrument Accomodation',
     'abbreviation': 'InstrumentAccom',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1312,6 +1361,7 @@ dict(
     'id': 'payload_attach_fitting',
     'name': 'Payload Attach Fitting',
     'abbreviation': 'PayloadAttachFitting',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1321,6 +1371,7 @@ dict(
     'id': 'actuator',
     'name': 'Actuator',
     'abbreviation': 'Actuator',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1330,6 +1381,7 @@ dict(
     'id': 'solar_array_actuator',
     'name': 'Solar Array Actuator',
     'abbreviation': 'SolarArrayActuator',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1339,6 +1391,7 @@ dict(
     'id': 'antenna_gimbal',
     'name': 'Antenna Gimbal',
     'abbreviation': 'AntennaGimbal',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1348,6 +1401,7 @@ dict(
     'id': 'boom',
     'name': 'Boom',
     'abbreviation': 'Boom',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1357,6 +1411,7 @@ dict(
     'id': 'deployment_system',
     'name': 'Deployment System',
     'abbreviation': 'DeploymentSys',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1366,6 +1421,7 @@ dict(
     'id': 'solar_array',
     'name': 'Solar Array',
     'abbreviation': 'SolarArray',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1375,6 +1431,7 @@ dict(
     'id': 'battery',
     'name': 'Battery',
     'abbreviation': 'Battery',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1384,6 +1441,7 @@ dict(
     'id': 'fpga',
     'name': 'Field Programmable Gate Array',
     'abbreviation': 'FPGA',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1393,6 +1451,7 @@ dict(
     'id': 'printed_circuit_board',
     'name': 'Printed Circuit Board',
     'abbreviation': 'PCB',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1402,6 +1461,7 @@ dict(
     'id': 'rtg',
     'name': 'RadioIsotope Thermal Generator (RTG)',
     'abbreviation': 'RTG',
+    'owner': 'pgefobjects:PGANA',
     'description': 'Pu-238 based very hot power thingy',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
@@ -1412,6 +1472,7 @@ dict(
     'id': 'power_harness',
     'name': 'Power Harness',
     'abbreviation': 'PowerHarness',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1423,6 +1484,7 @@ dict(
     'abbreviation': 'COMSEC',
     'description': 'Communications Security: a box to prevent unauthorized '
                     'access',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1432,6 +1494,7 @@ dict(
     'id': 'redundancy_management_unit',
     'name': 'Redundancy Management Unit',
     'abbreviation': 'RMU',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1441,6 +1504,7 @@ dict(
     'id': 'omni_antenna',
     'name': 'Omni Antenna',
     'abbreviation': 'OmniAntenna',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1450,6 +1514,7 @@ dict(
     'id': 'medium_gain_antenna',
     'name': 'Medium Gain Antenna (MGA)',
     'abbreviation': 'MGA',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1459,6 +1524,7 @@ dict(
     'id': 'high_gain_antenna',
     'name': 'High Gain Antenna (HGA)',
     'abbreviation': 'HGA',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1468,6 +1534,7 @@ dict(
     'id': 'antenna',
     'name': 'Antenna',
     'abbreviation': 'Antenna',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1477,6 +1544,7 @@ dict(
     'id': 'transponder',
     'name': 'Transponder',
     'abbreviation': 'Xponder',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1486,6 +1554,7 @@ dict(
     'id': 'transmitter',
     'name': 'Transmitter',
     'abbreviation': 'Xmitter',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1495,6 +1564,7 @@ dict(
     'id': 'receiver',
     'name': 'Receiver',
     'abbreviation': 'Receiver',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1504,6 +1574,7 @@ dict(
     'id': 'power_amplifier',
     'name': 'Power Amplifier',
     'abbreviation': 'PowerAmp',
+    'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
