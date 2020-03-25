@@ -915,6 +915,72 @@ dict(
     },
 
 {   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.cryogenic_system',
+    'id': 'cryogenic_system',
+    'name': 'Cryogenic System',
+    'abbreviation': 'CryoSys',
+    'description': 'Cryogenic System',
+    'owner': 'pgefobjects:PGANA',
+    'create_datetime': epoch,
+    'mod_datetime': '2020-03-24 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.detector',
+    'id': 'detector',
+    'name': 'Detector',
+    'abbreviation': 'Detector',
+    'description': 'Type for detectors (electonic, photonic, baryonic, etc.)',
+    'owner': 'pgefobjects:PGANA',
+    'create_datetime': epoch,
+    'mod_datetime': '2020-03-24 01:00:00'
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.hybrid_divider',
+    'id': 'hybrid_divider',
+    'name': 'Hybrid Divider',
+    'abbreviation': 'HybridDivider',
+    'description': 'Hybrid Divider',
+    'owner': 'pgefobjects:PGANA',
+    'create_datetime': epoch,
+    'mod_datetime': '2020-03-24 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.electro_mechanical',
+    'id': 'electro_mechanical',
+    'name': 'Electro Mechanical Device',
+    'abbreviation': 'ElectroMech',
+    'description': 'Electro Mechanical Devices',
+    'owner': 'pgefobjects:PGANA',
+    'create_datetime': epoch,
+    'mod_datetime': '2020-03-24 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.optical_component',
+    'id': 'optical_component',
+    'name': 'Optical Component',
+    'abbreviation': 'OpticalComp',
+    'description': 'Optical Components',
+    'owner': 'pgefobjects:PGANA',
+    'create_datetime': epoch,
+    'mod_datetime': '2020-03-24 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.optical_system',
+    'id': 'optical_system',
+    'name': 'Optical System',
+    'abbreviation': 'OpticalSys',
+    'description': 'Optical Systems',
+    'owner': 'pgefobjects:PGANA',
+    'create_datetime': epoch,
+    'mod_datetime': '2020-03-24 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.diplexer',
     'id': 'diplexer',
     'name': 'Diplexer',
@@ -966,6 +1032,16 @@ dict(
     'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.communications_component',
+    'id': 'communications_component',
+    'name': 'Communications Component',
+    'abbreviation': 'CommComp',
+    'owner': 'pgefobjects:PGANA',
+    'create_datetime': epoch,
+    'mod_datetime': '2020-03-24 00:00:00'
     },
 
 {   '_cname': 'ProductType',

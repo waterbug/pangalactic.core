@@ -604,7 +604,7 @@ def get_pval(orb, oid, pid, allow_nan=False):
     except:
         return NULL.get(pdz.get('range_datatype', 'float'))
 
-def get_pval_as_str(orb, oid, pid, units=None, allow_nan=False):
+def get_pval_as_str(orb, oid, pid, units='', allow_nan=False):
     """
     Return a cached parameter value in the specified units (or in base units if
     not specified) as a formatted string, for display in UI.  (Used in the
