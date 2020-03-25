@@ -1045,6 +1045,16 @@ dict(
     },
 
 {   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.metrology_equipment',
+    'id': 'metrology_equipment',
+    'name': 'Metrology Equipment',
+    'abbreviation': 'MetEqpt',
+    'owner': 'pgefobjects:PGANA',
+    'create_datetime': epoch,
+    'mod_datetime': '2020-03-24 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.power_system',
     'id': 'power_system',
     'name': 'Power System',

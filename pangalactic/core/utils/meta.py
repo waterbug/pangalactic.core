@@ -288,10 +288,10 @@ def get_ra_id(ra_context_id, role_id, fname, mi, lname):
         lname:  last name of the Person
     """
     if ra_context_id:
-        return ':'.join([ra_context_id, role_id,
+        return '-'.join([ra_context_id, role_id,
                          '_'.join([lname, fname, mi])])
     else:
-        return ':'.join([role_id, '_'.join([lname, fname, mi])])
+        return '-'.join([role_id, '_'.join([lname, fname, mi])])
 
 def get_next_ref_des(assembly, component, prefix=None):
     """
@@ -347,7 +347,7 @@ def get_acu_id(assembly_id, ref_des):
         ref_des:  the reference_designator of the Acu, created using
             get_next_ref_des()
     """
-    return assembly_id + ':' + '-'.join(ref_des.split(' '))
+    return assembly_id + '-' + '-'.join(ref_des.split(' '))
 
 def get_acu_name(assembly_name, ref_des):
     """
