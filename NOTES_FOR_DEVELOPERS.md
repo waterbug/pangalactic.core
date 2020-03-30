@@ -93,7 +93,7 @@
     default_parms:      (list) ids of default parameters to assign to objs
     host:               (list) fqdn of message bus host
     local_admin:        (bool) if `true`, user can edit any item locally
-    load_extra_data[2]: (list) names of files containing data to load
+    load_extra_data[1]: (list) names of files containing data to load
     logo:               (str)  logo icon file name
     p_defaults:         (dict) default parameter values {id: val (string)}
     port:               (str)  port to use for message bus host connection
@@ -112,7 +112,7 @@
 
 * state
     admin_of:         (list) oids of Projects in which user has admin role
-    assigned_roles[3]: (dict) maps proj/org oids to assigned role names for user
+    assigned_roles[2]: (dict) maps proj/org oids to assigned role names for user
     cloaked:          (list) oids of local cloaked objects
     connected:        (bool) true if logged in to message bus
     current_cname:    (str)  name of currently selected db table class
@@ -131,11 +131,10 @@
     product:          (str)  oid of currently selected Product -- refers to the
                              product selected in 'product modeler'
     project:          (str)  oid of currently selected Project
-    role_oids[4]:     (dict) maps names of Roles to their oids
-    synced[5]:        (bool) keeps track of whether session has been synced
-    synced_oids[6]:   (list) oids of user-created objects that have been synced
-    synced_projects[7]: (list) oids of projects that have been synced
-    sys_trees[8]:     (dict) maps project ids to system tree attributes
+    synced[3]:        (bool) keeps track of whether session has been synced
+    synced_oids[4]:   (list) oids of user-created objects that have been synced
+    synced_projects[5]: (list) oids of projects that have been synced
+    sys_trees[6]:     (dict) maps project ids to system tree attributes
     system:           (str)  oid of currently selected system (Product or
                              Project) -- may be selected by clicking on an item
                              in the system tree or drilling down into
@@ -144,35 +143,31 @@
     version:          (str)  version of client
     width:            (int)  current pixel width of pangalaxian gui
 
-    [2]: `load_extra_data` is intended for use primarily on the server (vger)
+    [1]: `load_extra_data` is intended for use primarily on the server (vger)
          for special data not included in `refdata`, such as data specific to
          local organizations, etc.
 
-    [3]: `assigned_roles` data structure:
+    [2]: `assigned_roles` data structure:
 
         {project oid: [list of names of assigned roles on the project]}
 
         NOTE:  for project-independent role assignments, 'global' is used in
         place of a project oid.
 
-    [4]: `role_oids` data structure:
-
-        {role name : role oid}
-
-    [5]: `synced` is set to False when the mbus is first joined upon login, and
+    [3]: `synced` is set to False when the mbus is first joined upon login, and
          set to True when initial sync operations are completed.  (This enabled
          sync operations to be factored into a separate `sync_with_services`
          method so it could be called by `check_version`, which is only done on
          Windows [the `win32` platform] for now.)
 
-    [6]: the "synced_oids" list is used in determining whether an object may be
+    [4]: the "synced_oids" list is used in determining whether an object may be
          deleted while the client is offline (not connected to the repository):
          any object that has been synced to the repository *cannot* be deleted
          while offline, because it may be used in an assembly by another user
          and deleting it before removing it from the assembly would break
          referential integrity.
 
-    [7]: Projects only need to be synced when a project is first used during an
+    [5]: Projects only need to be synced when a project is first used during an
          online session because objects may have been added, deleted, or
          modified while the user was offline. During a session, the bulk
          project sync is only done once because during the online session all
@@ -184,7 +179,7 @@
          "synced_projects".  The "synced_projects" list is cleared when the
          session ends.
 
-    [8]: `sys_trees` data structure:
+    [6]: `sys_trees` data structure:
 
         {project id : {nodes : (int) # of nodes in sys tree (used in
                                calculating progress bar for tree rebuilds)

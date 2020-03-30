@@ -911,7 +911,7 @@ class UberORB(object):
         """
         self.log.debug('* gen_product_id')
         if not isinstance(obj, self.classes['HardwareProduct']):
-            return None
+            return ''
         all_ids = self.get_ids(cname='HardwareProduct')
         self.log.debug('  all_ids:')
         self.log.debug('  {}'.format(str(all_ids)))
@@ -924,7 +924,7 @@ class UberORB(object):
             hw_id_suffixes.remove(current_id_parts[-1])
         owner_id = getattr(obj.owner, 'id', '')
         self.log.debug('  owner_id: {}'.format(owner_id))
-        pt_abbr = obj.product_type.abbreviation or 'NoType'
+        pt_abbr = getattr(obj.product_type, 'abbreviation', 'TBD') or 'TBD'
         self.log.debug('  pt_abbr: {}'.format(pt_abbr))
         # test whether current id already conforms -- i.e., first part is
         # [owner.id or "Vendor"] + '-' + [product_type.abbrev.] + '-'
@@ -935,7 +935,7 @@ class UberORB(object):
             # suffix is unique (has been removed from hw_id_suffixes once)
             current_id_parts[-1] not in hw_id_suffixes):
             return obj.id
-        hw_id_ints = []
+        hw_id_ints = [0]
         for i in hw_id_suffixes:
             try:
                 hw_id_ints.append(int(i))
@@ -949,12 +949,12 @@ class UberORB(object):
                 next_int = max(hw_id_ints) + 1
                 next_sufx = str(next_int).zfill(7)
         owner_id = owner_id or 'Vendor'
-        abbrev = (getattr(obj.product_type, 'abbreviation', None)
-                  or obj.product_type.id)
+        abbrev = getattr(obj.product_type, 'abbreviation', 'TBD') or 'TBD'
         if isinstance(obj.product_type, orb.classes['ProductType']):
             return '-'.join([owner_id, abbrev, next_sufx])
         else:
-            return '-'.join([owner_id, 'Generic', next_sufx])
+            # no product_type assigned yet
+            return '-'.join([owner_id, 'TBD', next_sufx])
 
     def get_idvs(self, cname=None):
         """
