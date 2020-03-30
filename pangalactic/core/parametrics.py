@@ -12,8 +12,7 @@ from pangalactic.core.meta            import (SELECTABLE_VALUES,
                                               DEFAULT_CLASS_PARAMETERS,
                                               DEFAULT_PRODUCT_TYPE_PARAMETERS)
 from pangalactic.core.units           import in_si, ureg
-from pangalactic.core.utils.meta      import (get_parameter_definition_oid,
-                                              uncook_datetime)
+from pangalactic.core.utils.meta      import get_parameter_definition_oid
 from pangalactic.core.utils.datetimes import dtstamp
 
 
@@ -34,7 +33,8 @@ TWOPLACES = Decimal('0.01')
 componentz = {}
 Comp = namedtuple('Comp', 'oid quantity reference_designator')
 
-# parm_defz:  runtime cache of parameter definitions
+# parm_defz:  runtime cache of parameter definitions (both base and context
+#             parameter definitions are included)
 # purpose:  enable fast lookup of parameter metadata & compact representation
 #           of 'parameterz' cache as (value, units, mod_datetime)
 # format:  {'parameter_id': {parameter properties}
@@ -417,12 +417,12 @@ def update_parmz_by_dimz(orb, pd):
     else:
         parmz_by_dimz[pd.dimensions] = [pd.id]
 
-def add_parameter(orb, oid, variable, context=None):
+def add_parameter(orb, oid, pid):
     """
-    Add a new parameter to an object, which really means adding a parameter
-    data structure to the `p.node.parametrics.parameterz` dictionary under that
-    objects's oid.  The parameter data structure format is a dict with the
-    following keys:
+    Add a new parameter to an object, which means adding a parameter's data
+    structure to the `p.node.parametrics.parameterz` dictionary under that
+    objects's oid, if it does not already exist for the specified paramter.
+    The parameter data structure format is a dict with the following keys:
 
         value, units, mod_datetime
 
@@ -433,76 +433,103 @@ def add_parameter(orb, oid, variable, context=None):
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
         oid (str):  oid of the object that owns the parameter
-        variable (str):  the variable of the parameter
-        context (str):  the `id` of the context of the parameter
+        pid (str):  the id of the parameter
     """
     if oid not in parameterz:
         parameterz[oid] = {}
-    pid = get_parameter_id(variable, context)
+    is_context_parm = False
+    if '[' in pid:
+        # this is a context parameter id -- find the base pid (variable)
+        variable = pid.split('[')[0]
+        is_context_parm = True
+    else:
+        variable = pid
     # orb.log.debug('[orb] add_parameter "{!s}"'.format(pid))
-    # [1] check if object already has that parm
+    # [1] check if object already has that parameter
     if pid in parameterz[oid]:
         # if the object already has that parameter, do nothing
-        return False
+        return True
     # [2] check for ParameterDefinition of base variable in db
     pd = orb.get(get_parameter_definition_oid(variable))
     if not pd:
         # for now, if no ParameterDefinition exists for pid, pass
         # (maybe eventually raise TypeError)
         orb.log.debug(
-            '* add_parameter: variable "{!s}" is not defined.'.format(
-                                                             variable))
+            '* add_parameter(): variable "{}" is not defined.'.format(
+                                                              variable))
         return False
-    # [3] if pid is context parm, check if its base parm is assigned ...
-    if context and not parameterz[oid].get(variable):
-        # (1) the pid is a context parameter AND
-        # (2) the corresponding base parameter has not been assigned
-        # ... which should not happen very often, so debug logging is ok
-        orb.log.debug(
-            '* add_parameter: base parameter "{!s}" not assigned.'.format(
-                                                             variable))
-        orb.log.debug(
-            '                 so cannot add context paarameter {!s}'.format(
-                                                                        pid))
-        return False
-    pdz = parm_defz.get(pid)
-    if not pdz:
-        # if not in parm_defz, add it:
-        pdz = {pd.id :
-               {'name': pd.name,
-                'variable': pd.id,
-                'context': None,
-                'context_type': None,
-                'description': pd.description,
-                'dimensions': pd.dimensions,
-                'range_datatype': pd.range_datatype,
-                'computed': False,
-                'mod_datetime':
-                    str(getattr(pd, 'mod_datetime', '') or dtstamp())
-                }}
-        parm_defz.update(pdz)
-    # NOTE:  setting the parameter's value is a separate operation -- when a
-    # parameter is created, its value is initialized to the appropriate "null"
-    radt = pdz.get('range_datatype', 'float')
-    dims = pdz.get('dimensions')
-    p_defaults = config.get('p_defaults') or {}
-    if p_defaults.get(pid):
-        # if a default value is configured for this pid, override null
-        dtype = DATATYPES[radt]
-        value = dtype(p_defaults[pid])
-    elif radt == 'float':
-        value = 0.0
-    elif radt == 'int':
-        value = 0
-    elif radt == 'boolean':
-        value = False
-    else:  # 'text'
-        value = ''
-    parameterz[oid][pid] = dict(
-        value=value,   # consistent with datatype defined in `range_datatype`
-        units=in_si.get(dims),   # SI units consistent with `dimensions`
-        mod_datetime=str(dtstamp()))
-    return True
+    # [3] check if the variable (base parameter) has been assigned ...
+    if not parameterz[oid].get(variable):
+        # the variable (base parameter) has not been assigned ... this is
+        # rare, so debug logging is ok
+        if is_context_parm:
+            orb.log.debug('* adding base parameter "{}".'.format(variable))
+        else:
+            orb.log.debug('* adding parameter "{}".'.format(variable))
+        pdz = parm_defz.get(variable)
+        if not pdz:
+            # if not in parm_defz, add it:
+            pdz = {pd.id :
+                   {'name': pd.name,
+                    'variable': pd.id,
+                    'context': None,
+                    'context_type': None,
+                    'description': pd.description,
+                    'dimensions': pd.dimensions,
+                    'range_datatype': pd.range_datatype,
+                    'computed': False,
+                    'mod_datetime':
+                        str(getattr(pd, 'mod_datetime', '') or dtstamp())
+                    }}
+            parm_defz.update(pdz)
+        # NOTE:  setting the parameter's value is a separate operation -- when a
+        # parameter is created, its value is initialized to the appropriate "null"
+        radt = pdz.get('range_datatype', 'float')
+        dims = pdz.get('dimensions')
+        p_defaults = config.get('p_defaults') or {}
+        if p_defaults.get(variable):
+            # if a default value is configured for this variable, override null
+            dtype = DATATYPES[radt]
+            value = dtype(p_defaults[variable])
+        elif radt == 'float':
+            value = 0.0
+        elif radt == 'int':
+            value = 0
+        elif radt == 'boolean':
+            value = False
+        else:  # 'text'
+            value = ''
+        parameterz[oid][variable] = dict(
+            value=value,   # consistent with datatype defined in `range_datatype`
+            units=in_si.get(dims),   # SI units consistent with `dimensions`
+            mod_datetime=str(dtstamp()))
+    if is_context_parm:
+        # if this is a context parameter, its base variable has been added by
+        # the above clause if it was not already present, so it is safe to add
+        # the context parameter now
+        pdz = parm_defz.get(pid)
+        radt = pdz.get('range_datatype', 'float')
+        dims = pdz.get('dimensions')
+        p_defaults = config.get('p_defaults') or {}
+        if p_defaults.get(pid):
+            # if a default value is configured for this pid, override null
+            dtype = DATATYPES[radt]
+            value = dtype(p_defaults[pid])
+        elif radt == 'float':
+            value = 0.0
+        elif radt == 'int':
+            value = 0
+        elif radt == 'boolean':
+            value = False
+        else:  # 'text'
+            value = ''
+        parameterz[oid][pid] = dict(
+            value=value,
+            units=in_si.get(dims),   # SI units consistent with `dimensions`
+            mod_datetime=str(dtstamp()))
+        return True
+    else:
+        return True
 
 def add_default_parameters(orb, obj):
     """
@@ -512,8 +539,8 @@ def add_default_parameters(orb, obj):
         orb (Uberorb):  the orb (singleton)
         obj (Identifiable):  the object to receive parameters
     """
-    orb.log.debug('[orb] add default parameters to object "{!s}"'.format(
-                                                                obj.oid))
+    orb.log.debug('* adding default parameters to object "{}"'.format(
+                                                                obj.id))
     # Configured Parameters are currently defined by the 'dashboard'
     # configuration (in future that may be augmented by Parameters
     # referenced by, e.g., a ProductType and/or a ModelTemplate, both of
@@ -533,7 +560,7 @@ def add_default_parameters(orb, obj):
             pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
                                obj.product_type.id, []))
     # add default parameters first ...
-    orb.log.debug('      adding parameters {!s} ...'.format(str(pids)))
+    orb.log.debug('  - adding parameters {!s} ...'.format(str(pids)))
     for pid in pids:
         add_parameter(orb, obj.oid, pid)
 
@@ -794,11 +821,15 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True,
     ######################################################################
     parm = parameterz.get(oid, {}).get(pid, {})
     if not parm:
-        # NOTE:  add_parameter() will check if base parameter is assigned
-        if add_parameter(orb, oid, pd['variable'], context=pd['context']):
-            orb.log.debug('  parameter not found; added.')
+        # NOTE:  add_parameter() now checks if base parameter has been assigned
+        # and if not, assigns it and returns True
+        if add_parameter(orb, oid, pid):
+            orb.log.debug('  parameter either exists or was added.')
         else:
+            # if the parameter cannot be added, it normally implies that its
+            # base parameter has not been defined ...
             orb.log.debug('  parameter could not be added (see log).')
+            return
     try:
         # cast value to range_datatype before setting
         pdz = parm_defz.get(pid)

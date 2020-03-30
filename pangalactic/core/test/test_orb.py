@@ -169,17 +169,25 @@ class OrbTest(unittest.TestCase):
         # This test verifies that the values in the serialized
         # object match the "cooked" values of the object attributes.
         obj = orb.get('H2G2')   # Project 'H2G2' test object
-        value = serialize(orb, [obj])
-        expected = [{
-            '_cname': obj.__class__.__name__,
-            'create_datetime': str(obj.create_datetime),
-            'id': obj.id,
-            'id_ns': obj.id_ns,
-            'mod_datetime': str(obj.mod_datetime),
-            'name': obj.name,
-            'name_code': obj.name_code,
-            'oid': obj.oid,
-            'parameters':{}}]
+        res = serialize(orb, [obj])
+        value = [len(res)]
+        for sobj in res:
+            if sobj['oid'] == obj.oid:
+                value.append(sobj['_cname'])
+                value.append(sobj['create_datetime'])
+                value.append(sobj['mod_datetime'])
+                value.append(sobj['id'])
+                value.append(sobj['name'])
+                value.append(sobj['name_code'])
+                value.append(bool(sobj['parameters']))
+        expected = [2,
+                    obj.__class__.__name__,
+                    str(obj.create_datetime),
+                    str(obj.mod_datetime),
+                    obj.id,
+                    obj.name,
+                    obj.name_code,
+                    False]
         self.assertEqual(expected, value)
 
     def test_12_serialize_with_parameters_no_components(self):
@@ -586,6 +594,7 @@ class OrbTest(unittest.TestCase):
         CASE:  deserialize an object with modified parameters
         """
         # initial state of object was already deserialized in test 18
+        deserialize(orb, parametrized_test_objects)
         oid = parametrized_test_objects[0]['oid']
         obj = orb.get(oid)
         parameters = parametrized_test_objects[0]['parameters']
