@@ -32,7 +32,6 @@ from pangalactic.core.names          import namespaces
 from pangalactic.core.utils.meta     import dump_metadata, load_metadata
 from pangalactic.core.utils.meta     import property_to_field
 from pangalactic.core.utils.meta     import to_table_name
-from pangalactic.core.log            import get_loggers
 
 
 # create SqlAlchemy declarative 'Base' class for MetaObject classes
@@ -117,9 +116,6 @@ class PanGalacticRegistry(object):
         self.got_pgef_cache = True
         if log:
             self.log = log
-        elif console:
-            # print log messages
-            self.log = FakeLog()
         else:
             # log messages neither logged nor printed
             self.log = AntiLog()
@@ -184,22 +180,6 @@ class PanGalacticRegistry(object):
                 if fname.endswith('.owl'):
                     self.build_app_classes_from_ontology(
                                     os.path.join(self.onto_path, fname))
-
-    def start_logging(self, console=False, debug=False):
-        """
-        Create a registry (`pgreg`) log and begin writing to it.
-
-        Keyword Args:
-            console (bool):  if True, sends log messages to stdout
-            debug (bool):  if True, sets level to debug
-        """
-        if config.get('test_mode') and console:
-            console = True
-        else:
-            console = False
-        self.log, self.error_log = get_loggers(self.home, 'registry',
-                                               console=console, debug=debug)
-        self.log.info('* registry logging initialized ...')
 
     def _create_pgef_core_meta_objects(self, use_cache=True):
         """
