@@ -32,15 +32,10 @@ def gen_test_pvals(parms):
             parm['value'] = 0.30
         elif pdz.get('range_datatype') == 'float':
             if not parm['value']:
-                if pdz.get('variable') == 'P':
-                    # special case for Power parameters
-                    # (can be positive or negative)
-                    parm['value'] = float(random.randint(-500, 500))
-                else:
-                    parm['value'] = float(random.randint(1, 1000))
-        # special cases for Data Rate parameters
+                parm['value'] = float(random.randint(1, 1000))
+        # special cases for Data Rate parameters (bigger)
         elif pdz.get('variable') == 'R_D':
-            parm['value'] = random.randint(10000, 100000)
+            parm['value'] = float(random.randint(10000, 100000))
         elif pdz.get('range_datatype') == 'int':
             # make sure no non-zero default has been set
             if not parm['value']:
@@ -705,7 +700,7 @@ def create_test_project():
             ),
         dict(
             _cname='ParameterRelation',
-            oid='H2G2:Spacecraft-Mass-Computable-Form-PR',
+            oid='test:H2G2:Spacecraft-Mass-Computable-Form-PR',
             id='H2G2.1.0.Spacecraft-Mass-Computable-Form',
             id_ns='test',
             name='H2G2 1.0 Spacecraft Mass Computable Form',
@@ -718,7 +713,7 @@ def create_test_project():
             ),
         dict(
             _cname='Relation',
-            oid='H2G2:Spacecraft-Mass-Computable-Form',
+            oid='test:H2G2:Spacecraft-Mass-Computable-Form',
             id='H2G2.1.0.Spacecraft-Mass-Computable-Form',
             id_ns='test',
             name='H2G2 1.0 Spacecraft Mass Computable Form',
@@ -729,7 +724,7 @@ def create_test_project():
             ),
         dict(
             _cname='Requirement',
-            oid='H2G2:Spacecraft-Mass',
+            oid='test:H2G2:Spacecraft-Mass',
             id='H2G2.1.0.Spacecraft-Mass',
             id_ns='test',
             name='H2G2 1.0 Spacecraft Mass',
@@ -739,7 +734,7 @@ def create_test_project():
             req_constraint_type='maximum',
             req_maximum_value=5000.0,
             req_units='kg',
-            computable_form='H2G2:Spacecraft-Mass-Computable-Form',
+            computable_form='test:H2G2:Spacecraft-Mass-Computable-Form',
             creator='test:steve',
             create_datetime=NOW,
             modifier='test:steve',

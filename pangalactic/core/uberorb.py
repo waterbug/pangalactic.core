@@ -1273,7 +1273,7 @@ class UberORB(object):
         Args:
             objs (Iterable of Identifiable or subtype): objects in the local db
         """
-        self.log.debug('* bulk_delete() called ...')
+        self.log.debug('* delete() called ...')
         # TODO: make sure appropriate relationships in which these objects
         # are the parent or child are also deleted
         info = []

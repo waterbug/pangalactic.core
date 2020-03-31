@@ -14,11 +14,11 @@ import ruamel_yaml as yaml
 import dateutil.parser as dtparser
 
 # pangalactic
-from pangalactic.core             import refdata
+from pangalactic.core             import config, refdata, write_config
 from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
-                                          get_pval, parameterz,
+                                          get_pval, parameterz, parm_defz,
                                           req_allocz, round_to)
 from pangalactic.core.serializers import (deserialize,
                                           deserialize_parms,
@@ -42,6 +42,22 @@ NOW = str(dtstamp())
 orb.start(home='pangalaxian_test', debug=True)
 serialized_test_objects = create_test_users()
 serialized_test_objects += create_test_project()
+config['default_parms'] = [
+    'm[CBE]',
+    'm[Ctgcy]',
+    'm[MEV]',
+    'P[CBE]',
+    'P[Ctgcy]',
+    'P[MEV]',
+    'R_D[CBE]',
+    'R_D[Ctgcy]',
+    'R_D[MEV]',
+    'Cost',
+    'TRL',
+    'height',
+    'width',
+    'depth']
+
 
 class OrbTest(unittest.TestCase):
     maxDiff = None
@@ -135,11 +151,40 @@ class OrbTest(unittest.TestCase):
         objs = orb.get_by_type('HardwareProduct')
         orb.assign_test_parameters(objs)
         value = orb.db.query(Identifiable).filter(
-                                            Identifiable.oid.in_(oids)).count()
+                             Identifiable.oid.in_(oids)).count()
         expected = len(oids)
         self.assertEqual(expected, value)
 
-    def test_07_get(self):
+    def test_07_test_assigned_parameters(self):
+        """
+        CASE:  test the parameters assigned to the serialized test objects.
+
+        This tests the 'add_parameter()' and 'add_default_parameters()'
+        functions of the p.core.parametrics module since
+        'assign_test_parameters' uses them.
+        """
+        # for debugging, write config file to home dir ...
+        write_config(os.path.join(orb.home, 'config'))
+        orb.recompute_parmz()
+        self.test_hw = []
+        hw = orb.get_by_type('HardwareProduct')
+        for h in hw:
+            if h.oid.startswith('test:'):
+                self.test_hw.append(h)
+        # test that the configured default parameters and their related base
+        # parameters have been added to the test HardwareProducts and assigned
+        # values of the correct type
+        all_pids = config['default_parms'] + ['m', 'P', 'R_D']
+        expected = []
+        value = []
+        for h in self.test_hw:
+            for pid in all_pids:
+                pval = get_pval(orb, h.oid, pid)
+                value.append(type(pval) in [int, float])
+                expected.append(True)
+        self.assertEqual(expected, value)
+
+    def test_08_get(self):
         """
         CASE:  test orb.get()
         """
@@ -150,19 +195,19 @@ class OrbTest(unittest.TestCase):
         obj_attrs = {a: getattr(obj, a) for a in test_obj_attrs}
         self.assertEqual(test_obj_attrs, obj_attrs)
 
-    # def test_08_save(self, savelist):
+    # def test_09_save(self, savelist):
         # pass
     # test_save.todo = 'not done.'
 
-    # def test_09_search_exact(self, ...):
+    # def test_10_search_exact(self, ...):
         # pass
     # test_search.todo = 'not done.'
 
-    # def test_10_select(self, ...):
+    # def test_11_select(self, ...):
         # pass
     # test_search.todo = 'not done.'
 
-    def test_11_serialize_simple(self):
+    def test_12_serialize_simple(self):
         """
         CASE:  serialize a simple object (no parameters, no components)
         """
@@ -190,7 +235,7 @@ class OrbTest(unittest.TestCase):
                     False]
         self.assertEqual(expected, value)
 
-    def test_12_serialize_with_parameters_no_components(self):
+    def test_13_serialize_with_parameters_no_components(self):
         """
         CASE:  serialize an object with parameters but do not include
         components (i.e. use default:  include_components=False)
@@ -220,7 +265,7 @@ class OrbTest(unittest.TestCase):
             )
         self.assertEqual(expected, value)
 
-    def test_13_serialize_with_parameters_and_components(self):
+    def test_14_serialize_with_parameters_and_components(self):
         """
         CASE:  serialize an object including its components (use
         include_components=True)
@@ -262,7 +307,7 @@ class OrbTest(unittest.TestCase):
             6, 5)
         self.assertEqual(expected, value)
 
-    def test_14_deserialize_simple(self):
+    def test_15_deserialize_simple(self):
         """
         CASE:  deserialize a simple object (no parameters)
         """
@@ -299,7 +344,7 @@ class OrbTest(unittest.TestCase):
                     ]
         self.assertEqual(expected, value)
 
-    def test_15_deserialize_modified(self):
+    def test_16_deserialize_modified(self):
         """
         CASE:  deserialize a modified object that exists in db
         """
@@ -336,7 +381,7 @@ class OrbTest(unittest.TestCase):
                     ]
         self.assertEqual(expected, value)
 
-    def test_16_deserialize_object_with_new_owner(self):
+    def test_17_deserialize_object_with_new_owner(self):
         """
         CASE:  deserialize an object whose owner is unknown to the db
         """
@@ -348,7 +393,7 @@ class OrbTest(unittest.TestCase):
         expected = orb.get('test:yoyoinst')
         self.assertEqual(expected, value)
 
-    def test_17_deserialize_object_with_known_owner(self):
+    def test_18_deserialize_object_with_known_owner(self):
         """
         CASE:  deserialize an object whose owner is already in the db
         """
@@ -360,7 +405,7 @@ class OrbTest(unittest.TestCase):
         expected = orb.get('test:yoyodyne')
         self.assertEqual(expected, value)
 
-    def test_18_deserialize_parameters(self):
+    def test_19_deserialize_parameters(self):
         """
         CASE:  test pangalactic.core.serializers.deserialize_parms function.
         """
@@ -397,7 +442,7 @@ class OrbTest(unittest.TestCase):
                   get_pval(orb, test_oid, 'm')]
         self.assertEqual(expected, actual)
 
-    def test_19_deserialize_object_with_simple_parameters(self):
+    def test_20_deserialize_object_with_simple_parameters(self):
         """
         CASE:  deserialize an object with simple parameters
         """
@@ -424,7 +469,7 @@ class OrbTest(unittest.TestCase):
         expected = [deser_parms, deser_parms['P']['value']]
         self.assertEqual(expected, value)
 
-    def test_20_deserialize_related_objects(self):
+    def test_21_deserialize_related_objects(self):
         """
         CASE:  deserialize a collection of related objects.  Note that this
         also tests the deserializer's refreshing of the requirement allocation
@@ -471,7 +516,7 @@ class OrbTest(unittest.TestCase):
             ]
         self.assertEqual(expected, value)
 
-    def test_21_compute_cbe(self):
+    def test_22_compute_cbe(self):
         """
         CASE:  compute the mass CBE (Current Best Estimate)
         """
@@ -487,7 +532,7 @@ class OrbTest(unittest.TestCase):
         expected += get_pval(orb, 'test:mr_fusion', 'm')
         self.assertEqual(expected, value)
 
-    def test_22_compute_mev(self):
+    def test_23_compute_mev(self):
         """
         CASE:  compute the mass MEV (Maximum Estimated Value)
         """
@@ -504,7 +549,7 @@ class OrbTest(unittest.TestCase):
         expected = round_to(1.3 * expected)
         self.assertEqual(expected, value)
 
-    def test_23_compute_margin(self):
+    def test_24_compute_margin(self):
         """
         CASE:  compute the mass margin ((NTE - MEV) / MEV) for a node to which
         a performance requirement is allocated
@@ -517,7 +562,7 @@ class OrbTest(unittest.TestCase):
         expected = round_to(((nte - mev) / nte))
         self.assertEqual(expected, value)
 
-    def test_24_compute_requirement_margin(self):
+    def test_25_compute_requirement_margin(self):
         """
         CASE:  compute the margin associated with a performance requirement
         """
@@ -531,7 +576,7 @@ class OrbTest(unittest.TestCase):
         expected = ('test:OTHER:system-1', 'm', nte, perf_reqt.req_units, margin)
         self.assertEqual(expected, value)
 
-    def test_25_systems_engineer_perms(self):
+    def test_26_systems_engineer_perms(self):
         """
         CASE:  test role-based permissions on project objects
         """
@@ -552,7 +597,7 @@ class OrbTest(unittest.TestCase):
         # perms on ProjectSystemUsage are determined by project roles: only the
         # Systems Engineer, Lead Engineer, and Administrator have full perms
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
-        req = orb.get('H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
+        req = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         value = [set(get_perms(sc, user=steve)),          # Adm/sc: full perms
                  set(get_perms(sc, user=carefulwalker)),  # SE/sc: full perms
                  set(get_perms(sc, user=zaphod)),         # LE/sc: full perms
@@ -589,7 +634,7 @@ class OrbTest(unittest.TestCase):
                     ]
         self.assertEqual(expected, value)
 
-    def test_26_deserialize_object_with_modified_parameters(self):
+    def test_27_deserialize_object_with_modified_parameters(self):
         """
         CASE:  deserialize an object with modified parameters
         """
