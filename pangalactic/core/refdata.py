@@ -1307,9 +1307,10 @@ dict(
     'id': 'manifold',
     'name': 'Manifold',
     'abbreviation': 'Manifold',
+    'description': 'Manifold',
     'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-04-01 01:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -1496,7 +1497,7 @@ dict(
     'description': 'Mechanical Structure',
     'owner': 'pgefobjects:PGANA',
     'create_datetime': epoch,
-    'mod_datetime': '2020-01-02 00:00:00'
+    'mod_datetime': '2020-04-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
