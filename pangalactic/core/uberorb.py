@@ -253,11 +253,12 @@ class UberORB(object):
         # discipline_subsystems maps Discipline ids to ProductType ids
         discipline_subsystems = {}
         for dpt in orb.get_by_type('DisciplineProductType'):
-            did = dpt.used_in_discipline.id
-            ptid = dpt.relevant_product_type.id
+            did = getattr(dpt.used_in_discipline, 'id', '')
+            ptid = getattr(dpt.relevant_product_type, 'id', '')
             if did in discipline_subsystems:
-                discipline_subsystems[did].append(ptid)
-            else:
+                if did and ptid:
+                    discipline_subsystems[did].append(ptid)
+            elif did and ptid:
                 discipline_subsystems[did] = [ptid]
         # role_disciplines maps Role ids to related Discipline ids
         role_disciplines = {}
