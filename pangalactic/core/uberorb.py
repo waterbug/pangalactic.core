@@ -67,9 +67,6 @@ class UberORB(object):
             of DataMatrix are stored
         db (Session):  interface to the local db
         db_engine (SQLAlchemy orm):  result of registry `create_engine`
-        discipline_subsystems: cache that maps Discpline ids to corresponding
-            ProductType ids (used by the 'access' module, which determines user
-            permissions relative to domain objects
         error_log (Logger):  instance of pgorb_error_logger
         home (str):  full path to the application home directory -- populated
             by orb.start()
@@ -78,6 +75,9 @@ class UberORB(object):
             saved
         registry (PanGalacticRegistry):  instance of PanGalacticRegistry
         remote (TBD) interface to remote services [TO BE IMPLEMENTED]
+        role_product_types: cache that maps Role ids to corresponding
+            ProductType ids (used by the 'access' module, which determines user
+            permissions relative to domain objects
         schemas (dict):  see definition in
             p.meta.registry._update_schemas_from_extracts
     """
@@ -263,11 +263,12 @@ class UberORB(object):
         # role_disciplines maps Role ids to related Discipline ids
         role_disciplines = {}
         for dr in orb.get_by_type('DisciplineRole'):
-            rtdid = dr.related_to_discipline.id
-            rrid = dr.related_role.id
+            rtdid = getattr(dr.related_to_discipline, 'id', '')
+            rrid = getattr(dr.related_role, 'id', '')
             if rrid in role_disciplines:
-                role_disciplines[rrid].append(rtdid)
-            else:
+                if rrid and rtdid:
+                    role_disciplines[rrid].append(rtdid)
+            elif rrid and rtdid:
                 role_disciplines[rrid] = [rtdid]
         for role_id, discipline_ids in role_disciplines.items():
             for discipline_id in discipline_ids:
