@@ -435,7 +435,7 @@ def display_id(obj):
     else:
         return obj_id
 
-def display_name(obj):
+def get_display_name(obj):
     """
     Return a string to display as 'name' that will include, if `obj` is an
     instance of Product, its 'version' string if it is not null.
@@ -466,7 +466,7 @@ def get_block_model_name(obj):
     Args:
         obj (Modelable):  the object that is the subject of the model
     """
-    return ' '.join([display_name(obj), 'Pgx IBD'])
+    return ' '.join([get_display_name(obj), 'Pgx IBD'])
 
 def get_block_model_file_name(obj):
     """
