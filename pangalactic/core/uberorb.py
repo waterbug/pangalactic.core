@@ -25,22 +25,29 @@ from pangalactic.core.registry    import PanGalacticRegistry
 from pangalactic.core.utils.meta  import uncook_datetime
 from pangalactic.core.mapping     import schema_maps, schema_version
 from pangalactic.core.parametrics import (add_default_parameters,
+                                          add_default_data_elements,
                                           add_parameter, _compute_pval,
                                           componentz,
                                           compute_requirement_margin,
+                                          create_de_defz,
                                           create_parm_defz,
                                           create_parmz_by_dimz,
-                                          get_parameter_id, parameterz,
+                                          data_elementz,
+                                          get_parameter_id,
+                                          parameterz,
                                           refresh_componentz,
                                           refresh_req_allocz, req_allocz,
+                                          update_de_defz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
 from pangalactic.core.serializers import (deserialize, deserialize_parms,
-                                          serialize, serialize_parms)
+                                          deserialize_des,
+                                          serialize, serialize_parms,
+                                          serialize_des)
 from pangalactic.core             import refdata
 from pangalactic.core.test        import data as test_data_mod
 from pangalactic.core.test        import vault as test_vault_mod
-from pangalactic.core.test.utils  import gen_test_pvals
+from pangalactic.core.test.utils  import gen_test_dvals, gen_test_pvals
 from pangalactic.core.utils.datetimes import dtstamp
 from pangalactic.core.log         import get_loggers
 from pangalactic.core.validation  import get_assembly
@@ -380,27 +387,27 @@ class UberORB(object):
         if os.path.exists(json_path):
             with open(json_path) as f:
                 diagramz.update(json.loads(f.read()))
-            # self.log.debug('[orb] diagramz cache read from diagrams.json')
+            # self.log.debug('* diagramz cache read from diagrams.json')
         else:
-            # self.log.debug('[orb] no diagrams.json file found.')
+            # self.log.debug('* no diagrams.json file found.')
             pass
 
     def _save_diagramz(self):
         """
         Save `diagramz` cache to diagrams.json file.
         """
-        # self.log.debug('* [orb] _save_diagramz() ...')
+        self.log.debug('* _save_diagramz() ...')
         diagz_path = os.path.join(self.home, 'diagrams.json')
         with open(diagz_path, 'w') as f:
             f.write(json.dumps(diagramz, separators=(',', ':'),
                                indent=4, sort_keys=True))
-        # self.log.debug('        ... diagrams.json file written.')
+        self.log.debug('  ... diagrams.json file written.')
 
     def _load_parmz(self):
         """
         Load `parameterz` dict from json file.
         """
-        # self.log.debug('* [orb] _load_parmz() ...')
+        self.log.debug('* _load_parmz() ...')
         json_path = os.path.join(self.home, 'parameters.json')
         if os.path.exists(json_path):
             with open(json_path) as f:
@@ -408,15 +415,15 @@ class UberORB(object):
             for oid, ser_parms in serialized_parms.items():
                 deserialize_parms(self, oid, ser_parms)
             self.recompute_parmz()
-            # self.log.debug('        parameterz cache loaded and recomputed.')
-        # else:
-            # self.log.debug('        "parameters.json" was not found.')
+            self.log.debug('  - parameterz cache loaded and recomputed.')
+        else:
+            self.log.debug('  - "parameters.json" was not found.')
 
     def _save_parmz(self):
         """
         Save `parameterz` dict to a json file.
         """
-        self.log.debug('* [orb] _save_parmz() ...')
+        self.log.debug('* _save_parmz() ...')
         parms_path = os.path.join(self.home, 'parameters.json')
         serialized_parameterz = {}
         for oid, obj_parms in parameterz.items():
@@ -425,7 +432,41 @@ class UberORB(object):
         with open(parms_path, 'w') as f:
             f.write(json.dumps(serialized_parameterz, separators=(',', ':'),
                                indent=4, sort_keys=True))
-        self.log.debug('        ... parameters.json file written.')
+        self.log.debug('  ... parameters.json file written.')
+
+    def _load_data_elementz(self):
+        """
+        Load `data_elementz` dict from json file.
+        """
+        self.log.debug('* _load_data_elementz() ...')
+        json_path = os.path.join(self.home, 'data_elements.json')
+        if os.path.exists(json_path):
+            with open(json_path) as f:
+                serialized_des = json.loads(f.read())
+            for oid, ser_des in serialized_des.items():
+                deserialize_des(self, oid, ser_des)
+            self.log.debug('  - data_elementz cache loaded.')
+        else:
+            self.log.debug('  - "data_elements.json" was not found.')
+
+    def _save_data_elementz(self):
+        """
+        Save `data_elementz` dict to a json file.
+        """
+        self.log.debug('* _save_data_elementz() ...')
+        json_path = os.path.join(self.home, 'parameters.json')
+        serialized_data_elementz = {}
+        try:
+            for oid, obj_des in data_elementz.items():
+                # NOTE: serialize_des() uses deepcopy()
+                serialized_data_elementz[oid] = serialize_des(obj_des)
+            with open(json_path, 'w') as f:
+                f.write(json.dumps(serialized_data_elementz,
+                                   separators=(',', ':'),
+                                   indent=4, sort_keys=True))
+            self.log.debug('  ... data_elements.json file written.')
+        except:
+            self.log.debug('  ... writing data_elements.json file failed!')
 
     def recompute_parmz(self):
         """
@@ -433,7 +474,7 @@ class UberORB(object):
         contexts.  This is required at startup or when a parameter is created,
         modified, or deleted.
         """
-        self.log.debug('* [orb] recompute_parmz()')
+        self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
         # default descriptive contexts:  CBE, MEV
         d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or []
@@ -477,7 +518,7 @@ class UberORB(object):
             if oid:
                 margin_pid = get_parameter_id(pid, 'Margin')
                 nte_pid = get_parameter_id(pid, 'NTE')
-                self.log.debug('        - {} at {}: {}'.format(pid, oid,
+                self.log.debug('  - {} at {}: {}'.format(pid, oid,
                                                                result))
                 if oid not in parameterz:
                     parameterz[oid] = {}
@@ -498,22 +539,24 @@ class UberORB(object):
 
     def assign_test_parameters(self, objs):
         """
-        Assign a set of test parameters with randomly-generated values to an
-        iterable of objects.
+        Assign a set of test parameters and data elements with
+        randomly-generated values to an iterable of objects.
 
         Args:
-            objs (iterable of Modelable):  objects the test parameters will be
-                assigned to
+            objs (iterable of Modelable):  objects the test parameters and data
+                elements will be assigned to
         """
-        self.log.debug('* [orb] assign_test_parameters()')
+        self.log.debug('* assign_test_parameters()')
         try:
             for o in objs:
+                add_default_data_elements(self, o)
+                gen_test_dvals(data_elementz[o.oid])
                 add_default_parameters(self, o)
                 gen_test_pvals(parameterz[o.oid])
             self.recompute_parmz()
-            self.log.debug('        ... done.')
+            self.log.debug('  ... done.')
         except:
-            self.log.debug('        ... failed.')
+            self.log.debug('  ... failed.')
             pass
 
     def _build_componentz_cache(self):
@@ -521,7 +564,7 @@ class UberORB(object):
         Build the `componentz` cache (which maps Product oids to the oids of
         their components) at startup.
         """
-        # self.log.debug('* [orb] _build_componentz_cache()')
+        # self.log.debug('* _build_componentz_cache()')
         for product in self.get_all_subtypes('Product'):
             if product.components:
                 refresh_componentz(self, product)
@@ -554,7 +597,7 @@ class UberORB(object):
         Load and transform all dumped serialized data to the new schema.
         Called when restarting after an upgrade that includes a schema change.
         """
-        self.log.info('* [orb] transforming all data to new schema ...')
+        self.log.info('* transforming all data to new schema ...')
         sdata = ''
         data_path = os.path.join(self.vault, 'db.yaml')
         if os.path.exists(data_path):
@@ -564,15 +607,15 @@ class UberORB(object):
                 if __version__ in schema_maps:
                     map_fn = schema_maps[__version__]
                     sdata = map_fn(sdata)
-                    self.log.debug('        data loaded and transformed.')
+                    self.log.debug('  - data loaded and transformed.')
                 else:
-                    self.log.debug('        data loaded (no transformation).')
+                    self.log.debug('  - data loaded (no transformation).')
             except:
-                self.log.debug('        an error ocurred (see error log).')
+                self.log.debug('  - an error ocurred (see error log).')
                 self.error_log.info('* error in load_and_transform_data():')
                 self.error_log.info(traceback.format_exc())
         else:
-            self.log.debug('        file "db.yaml" not found.')
+            self.log.debug('  - file "db.yaml" not found.')
         return sdata
 
     def load_reference_data(self):
@@ -609,17 +652,32 @@ class UberORB(object):
                                  include_refdata=True,
                                  force_no_recompute=True)
             self.save(p_objs)
+        # [1.1] load any data element definitions that may be missing
+        #     from the current db (in a first-time installation, this will of
+        #     course be *all* data element definitions)
+        missing_d = [so for so in refdata.deds if so['oid'] not in db_oids]
+        if missing_d:
+            self.log.debug('  + missing some reference data elements:')
+            self.log.debug('  {}'.format([so['oid'] for so in missing_d]))
+            d_objs = deserialize(self, [so for so in missing_d],
+                                 include_refdata=True,
+                                 force_no_recompute=True)
+            self.save(d_objs)
         # [2] XXX IMPORTANT!  Create the parameter definitions caches
         # ('parm_defz' and 'parmz_by_dimz') before loading parameters from
         # 'parameters.json' -- the deserializer uses these caches
+        create_de_defz(self)
         create_parm_defz(self)
         create_parmz_by_dimz(self)
         # *** NOTE ***********************************************************
-        # [3] run _load_parmz() before checking for updates to parameter
-        # definitions and contexts, since updated ref data may update parameter
-        # data that was loaded from the parameters cache (parameters.json) --
-        # e.g., some ref data objects might have updated parameters
+        # [3] run _load_parmz() and _load_data_elementz() before checking for
+        # updates to data element definitions and parameter definitions and
+        # contexts, since updated ref data may update data element and
+        # parameter data that was loaded from the parameters cache
+        # (parameters.json) -- e.g., some ref data objects might have updated
+        # parameters
         # ********************************************************************
+        self._load_data_elementz()
         self._load_parmz()
         # [4] check for updates to parameter definitions and contexts
         self.log.debug('  + checking for updates to parameter definitions ...')
@@ -781,8 +839,12 @@ class UberORB(object):
             elif cname == 'Requirement' and obj.req_type == 'performance':
                 refresh_req_allocz(self, obj.oid)
                 recompute_required = True
+            elif cname == 'DataElementDefinition':
+                # NOTE:  all DataElementDefinitions are public
+                obj.public = True
+                update_de_defz(self, obj)
             elif cname == 'ParameterDefinition':
-                # NOTE:  all Parameter Definitions are public
+                # NOTE:  all ParameterDefinitions are public
                 obj.public = True
                 update_parm_defz(self, obj)
                 update_parmz_by_dimz(self, obj)
@@ -1162,10 +1224,10 @@ class UberORB(object):
         Args:
             project (Project):  the specified project
         """
-        self.log.debug('* [orb] get_objects_for_project({})'.format(
+        self.log.debug('* get_objects_for_project({})'.format(
                                         getattr(project, 'id', '[None]')))
         if not project:
-            self.log.debug('  no project provided -- returning empty list.')
+            self.log.debug('  - no project provided -- returning empty list.')
             return []
         objs = self.search_exact(owner=project)
         psus = self.search_exact(cname='ProjectSystemUsage',
@@ -1181,11 +1243,11 @@ class UberORB(object):
                 # NOTE:  get_assembly is recursive, gets *all* sub-assemblies
                 assemblies += get_assembly(system)
             if assemblies:
-                self.log.debug('  {} assemblies found'.format(
+                self.log.debug('  - {} assemblies found'.format(
                                len(assemblies)))
             objs += assemblies
         else:
-            self.log.debug('  no ProjectSystemUsages found')
+            self.log.debug('  - no ProjectSystemUsages found')
         objs.append(project)
         models = []
         for o in objs:
@@ -1229,7 +1291,7 @@ class UberORB(object):
         # TODO:  get the files too (fpath = rep_file.url)
         # use set() to eliminate dups
         res = [o for o in set(objs) if o]
-        self.log.debug('  returning {} object(s).'.format(len(res)))
+        self.log.debug('  - returning {} object(s).'.format(len(res)))
         # if res:
             # for o in res:
                 # self.log.debug('  - {}: {}'.format(
@@ -1243,13 +1305,13 @@ class UberORB(object):
         Args:
             project (Project):  the specified project
         """
-        self.log.debug('* [orb] get_reqts_for_project({})'.format(
+        self.log.debug('* get_reqts_for_project({})'.format(
                                         getattr(project, 'id', '[None]')))
         if not project:
             self.log.debug('  no project provided -- returning empty list.')
             return []
         reqts = self.search_exact(cname='Requirement', owner=project)
-        self.log.debug('  returning {} reqt(s).'.format(len(reqts)))
+        self.log.debug('  - returning {} reqt(s).'.format(len(reqts)))
         return reqts
 
     def count_reqts_for_project(self, project):
@@ -1259,10 +1321,10 @@ class UberORB(object):
         Args:
             project (Project):  the specified project
         """
-        self.log.debug('* [orb] count_reqts_for_project({})'.format(
+        self.log.debug('* count_reqts_for_project({})'.format(
                                         getattr(project, 'id', '[None]')))
         if not project:
-            self.log.debug('  no project provided -- returning 0.')
+            self.log.debug('  - no project provided -- returning 0.')
             return 0
         # return self.db.query(self.classes['Requirement']).count()
         return self.db.query(self.classes['Requirement']).filter_by(

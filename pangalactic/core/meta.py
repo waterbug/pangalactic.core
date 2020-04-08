@@ -86,8 +86,14 @@ PGXN_VIEWS = dict(
 
 # PGXN_PARAMETERS:  preferred ordering for parameters in PgxnObject parameter
 # forms
-PGXN_PARAMETERS = ['m', 'P', 'R_D', 'Vendor', 'Cost', 'TRL', 'height', 'width',
+PGXN_PARAMETERS = ['m', 'P', 'R_D', 'Cost', 'height', 'width',
                    'depth', 'CoM_X', 'CoM_Y', 'CoM_Z']
+
+# DEFAULT_CLASS_DATA_ELEMENTS:  default data elements of objects by class
+DEFAULT_CLASS_DATA_ELEMENTS = {'HardwareProduct': ['Vendor', 'TRL']}
+
+# DEFAULT_PRODUCT_TYPE_DATA_ELMTS:  default data elements by ProductType id
+DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {'': []}
 
 # DEFAULT_CLASS_PARAMETERS:  default parameters of objects by class
 DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start'],

@@ -64,6 +64,53 @@ initial = [
     }
 ]
 
+deds = [
+{   '_cname': 'DataElementDefinition',
+    'oid': 'pgef:DataElementDefinition.row',
+    'id': 'row',
+    'name': 'Row',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': epoch,
+    'mod_datetime': epoch,
+    'range_datatype': 'int',
+    'description': 'The number of a row in a table.'},
+
+{   '_cname': 'DataElementDefinition',
+    'oid': 'pgef:DataElementDefinition.Vendor',
+    'id': 'Vendor',
+    'name': 'Vendor',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': epoch,
+    'mod_datetime': epoch,
+    'range_datatype': 'str',
+    'description': 'Entity from which a thing is procured.'},
+
+{   '_cname': 'DataElementDefinition',
+    'oid': 'pgef:DataElementDefinition.TRL',
+    'id': 'TRL',
+    'name': 'TRL',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': epoch,
+    'mod_datetime': epoch,
+    'dimensions': None,
+    'range_datatype': 'int',
+    'description': 'Technology Readiness Level (TRL)'},
+
+{   '_cname': 'DataElementDefinition',
+    'oid': 'pgef:DataElementDefinition.directionality',
+    'id': 'directionality',
+    'name': 'Directionality',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': epoch,
+    'mod_datetime': epoch,
+    'range_datatype': 'str',
+    'description': 'Whether a Port is "input", "output", or bidirectional.'}
+    ]
+
 # parameter_definitions_and_contexts
 pdc = [
 {   '_cname': 'ParameterDefinition',
@@ -239,30 +286,6 @@ pdc = [
     'description': 'On a solar panel, Substrate Area includes the Active Area plus the mounting substrate or mesh area, including all stiffeners, areas for mounting sensors, wiring harnesses (if on the top side, facing the Sun), expansion/contraction relief areas around the solar cells, hold down or pre-deployed clamping areas, and other top side mounted equipment areas.'},
 
 {   '_cname': 'ParameterDefinition',
-    'oid': 'pgef:ParameterDefinition.TRL',
-    'id': 'TRL',
-    'name': 'TRL',
-    'owner': 'pgefobjects:PGANA',
-    'creator': 'pgefobjects:admin',
-    'create_datetime': epoch,
-    'mod_datetime': epoch,
-    'dimensions': None,
-    'range_datatype': 'int',
-    'description': 'Technology Readiness Level (TRL)'},
-
-{   '_cname': 'ParameterDefinition',
-    'oid': 'pgef:ParameterDefinition.Vendor',
-    'id': 'Vendor',
-    'name': 'Vendor',
-    'owner': 'pgefobjects:PGANA',
-    'creator': 'pgefobjects:admin',
-    'create_datetime': epoch,
-    'mod_datetime': epoch,
-    'dimensions': None,
-    'range_datatype': 'text',
-    'description': 'Entity from which a thing is procured.'},
-
-{   '_cname': 'ParameterDefinition',
     'oid': 'pgef:ParameterDefinition.duration',
     'id': 'duration',
     'name': 'Duration',
@@ -321,18 +344,6 @@ pdc = [
     'dimensions': 'frequency',
     'range_datatype': 'float',
     'description': 'Frequency of uplink signal'},
-
-{   '_cname': 'ParameterDefinition',
-    'oid': 'pgef:ParameterDefinition.directionality',
-    'id': 'directionality',
-    'name': 'Directionality',
-    'owner': 'pgefobjects:PGANA',
-    'creator': 'pgefobjects:admin',
-    'create_datetime': '2019-12-15 00:00:00',
-    'mod_datetime': '2019-12-15 00:00:00',
-    'dimensions': '',
-    'range_datatype': 'str',
-    'description': 'Whether a Port is "input", "output", or bidirectional.'},
 
 {   '_cname': 'ParameterContext',
     'oid': 'pgef:ParameterContext.CBE',
@@ -2095,6 +2106,12 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.28V',
+    'data_elements': {
+       'directionality':
+         {'value': '',
+          'mod_datetime': epoch,
+          'units': None}
+          },
     'description': '28V electrical power port',
     'id': 'electrical_power.28V',
     'name': '28V Electrical Power Port',
@@ -2104,11 +2121,7 @@ dict(
        'V':
          {'value': 28,
           'mod_datetime': epoch,
-          'units': 'V'},
-       'directionality':
-         {'value': '',
-          'mod_datetime': epoch,
-          'units': None}
+          'units': 'V'}
           },
     'create_datetime': epoch,
     'mod_datetime': '2019-12-15 00:00:00'
@@ -2116,6 +2129,12 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.12V',
+    'data_elements': {
+       'directionality':
+         {'value': '',
+          'mod_datetime': epoch,
+          'units': None}
+          },
     'description': '12V electrical power port',
     'id': 'electrical_power.12V',
     'name': '12V Electrical Power Port',
@@ -2125,11 +2144,7 @@ dict(
        'V':
          {'value': 12,
           'mod_datetime': epoch,
-          'units': 'V'},
-       'directionality':
-         {'value': '',
-          'mod_datetime': epoch,
-          'units': None}
+          'units': 'V'}
           },
     'create_datetime': epoch,
     'mod_datetime': '2019-12-15 00:00:00'
@@ -2137,6 +2152,12 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.5V',
+    'data_elements': {
+       'directionality':
+         {'value': '',
+          'mod_datetime': epoch,
+          'units': None}
+          },
     'description': '5V electrical power port',
     'id': 'electrical_power.5V',
     'name': '5V Electrical Power Port',
@@ -2146,11 +2167,7 @@ dict(
        'V':
          {'value': 5,
           'mod_datetime': epoch,
-          'units': 'V'},
-       'directionality':
-         {'value': '',
-          'mod_datetime': epoch,
-          'units': None}
+          'units': 'V'}
           },
     'create_datetime': epoch,
     'mod_datetime': '2019-12-15 00:00:00'
@@ -2158,6 +2175,12 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.3.3V',
+    'data_elements': {
+       'directionality':
+         {'value': '',
+          'mod_datetime': epoch,
+          'units': None}
+          },
     'description': '3.3V electrical power port',
     'id': 'electrical_power.3.3V',
     'name': '3.3V Electrical Power Port',
@@ -2167,11 +2190,7 @@ dict(
        'V':
          {'value': 3.3,
           'mod_datetime': epoch,
-          'units': 'V'},
-       'directionality':
-         {'value': '',
-          'mod_datetime': epoch,
-          'units': None}
+          'units': 'V'}
           },
     'create_datetime': epoch,
     'mod_datetime': '2019-12-15 00:00:00'

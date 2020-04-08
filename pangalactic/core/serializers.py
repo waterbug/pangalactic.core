@@ -12,13 +12,38 @@ from sqlalchemy import ForeignKey
 from pangalactic.core.utils.meta  import (asciify, cookers, uncookers,
                                           cook_datetime, uncook_datetime)
 from pangalactic.core.utils.datetimes import earlier
-from pangalactic.core.parametrics import (add_parameter, parameterz,
+from pangalactic.core.parametrics import (add_parameter,
+                                          data_elementz,
+                                          parameterz,
                                           refresh_componentz,
                                           refresh_req_allocz,
-                                          set_pval,
+                                          set_dval, set_pval,
+                                          update_de_defz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
 
+
+def serialize_des(obj_des):
+    """
+    Args:
+        obj_des (dict):  a dictionary containing the data elements
+            associated with an object (for a given object `obj`, its
+            data elements dictionary will be `data_elementz[obj.oid]`).
+
+    Serialize the dictionary of data elements associated with an object.
+    Basically, this function is only required to serialize the
+    `mod_datetime` value of each data element.
+
+    IMPLEMENTATION NOTE:  uses deepcopy() to avoid side-effects to the
+    `data_elementz` dict.
+    """
+    if obj_des:
+        ser_des = deepcopy(obj_des)
+        for de in ser_des.values():
+            de['mod_datetime'] = cook_datetime(de['mod_datetime'])
+        return ser_des
+    else:
+        return {}
 
 def serialize_parms(obj_parms):
     """
@@ -144,9 +169,19 @@ def serialize(orb, objs, view=None, include_components=False,
         schema = orb.schemas[cname]
         d = {}
         d['_cname'] = cname
-        # serialize parameters, if any
-        # (parameters can only be assigned to subclasses of Modelable)
+        # serialize data elements and parameters, if any
+        # (they can only be assigned to subclasses of Modelable)
         if isinstance(obj, orb.classes['Modelable']):
+            # serialize data elements
+            obj_des = data_elementz.get(obj.oid, {})
+            if obj_des:
+                # NOTE:  serialize_des() uses deepcopy()
+                d['data_elements'] = serialize_des(obj_des)
+                # orb.log.info('  - data elements found, serialized.')
+            else:
+                d['data_elements'] = {}
+                # orb.log.info('  - no data elements found.')
+            # serialize parameters
             obj_parms = parameterz.get(obj.oid, {})
             if obj_parms:
                 # NOTE:  serialize_parms() uses deepcopy()
@@ -274,6 +309,48 @@ def serialize(orb, objs, view=None, include_components=False,
     # make sure there is only 1 serialized object per oid ...
     so_by_oid = {so['oid'] : so for so in serialized}
     return list(so_by_oid.values())
+
+def deserialize_des(orb, oid, ser_des, cname=None):
+    """
+    Deserialize a serialized object `data_elements` dictionary.
+
+    Args:
+        orb (UberORB): the (singleton) `orb` instance
+        oid (str):  oid attr of the object to which the data elements are
+            assigned
+        ser_des (dict):  the serialized data elements dictionary
+
+    Keyword Args:
+        cname (str):  class name of the object to which the parameters are
+            assigned (only used for logging)
+    """
+    # if cname:
+        # orb.log.debug('* deserializing data elements for {} ({})...'.format(
+                                                                # oid, cname))
+        # orb.log.debug('  data elements: {}'.format(ser_des))
+    if not ser_des:
+        # orb.log.debug('  object with oid "{}" has no data elements'.format(
+                                                                      # oid))
+        return
+    if oid in data_elementz:
+        for deid in ser_des:
+            if deid in data_elementz[oid]:
+                data_elementz[oid][deid].update(ser_des[deid])
+                new_dt = uncook_datetime(ser_des[deid]['mod_datetime'])
+                data_elementz[oid][deid]['mod_datetime'] = new_dt
+            else:
+                set_dval(orb, oid, deid, ser_des[deid]['value'])
+        ### FIXME:  it's dangerous to remove deids not in new_des, but we
+        ### must deal with deleted parameters ...
+        # deids = list(data_elementz[oid])
+        # for deid in deids:
+            # if deid not in new_des:
+                # del data_elementz[oid][deid]
+    else:
+        data_elementz[oid] = deepcopy(ser_des)
+        for deid in data_elementz[oid]:
+            new_dt = uncook_datetime(ser_des[deid]['mod_datetime'])
+            data_elementz[oid][deid]['mod_datetime'] = new_dt
 
 def deserialize_parms(orb, oid, ser_parms, cname=None):
     """
@@ -504,6 +581,15 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                                     (schema['fields'][name]['range'],
                                      schema['fields'][name]['functional'])
                                         ](d.get(name))
+            # special case:  'data_elements' key
+            de_dict = d.get('data_elements')
+            if de_dict:
+                orb.log.debug('  + data elements found: {}'.format(de_dict))
+                orb.log.debug('    deserializing data elements ...')
+                deserialize_des(orb, oid, de_dict, cname=cname)
+            else:
+                pass
+                # orb.log.debug('  + no parameters found for this object.')
             # special case:  'parameters' key
             parm_dict = d.get('parameters')
             if parm_dict:
@@ -561,6 +647,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 elif cname == 'ParameterDefinition':
                     update_parm_defz(orb, obj)
                     update_parmz_by_dimz(orb, obj)
+                elif cname == 'DataElementDefinition':
+                    update_de_defz(orb, obj)
                 orb.log.debug('* updated object: [{}] {}'.format(cname,
                                                           obj.id or '(no id)'))
             elif d['oid'] not in ignores:
@@ -601,7 +689,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     orb.db.commit()
     if ports_and_flows_to_be_deleted:
         orb.delete(ports_and_flows_to_be_deleted)
-    log_txt = '* deserializer:'
+    # log_txt = '* deserializer:'
     # if created:
         # orb.log.info('{} new object(s) deserialized: {}'.format(
                                                         # log_txt, str(created)))

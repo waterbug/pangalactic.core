@@ -200,52 +200,13 @@ mode            context                     types
 ----            -------                     -----
 System          system modeler              Mission, System
 Component       component modeler, library  Part, etc.
-Data            datasets                    DataSet
+Data            structured data             DataMatrix
 DB              database                    All Types
 Admin           admin                       Project, Mission Study, Role
 
 #### Mode: `data`
 
-* Operates on flat `DataSet` instances
-
-  + MainWindow layout:
-    - if no datasets ... left: `No Data`, center: empty
-    - if 1 dataset ..... left:  metadata, center: data table
-    - if > 1 dataset ... left:  metadata of selected ds, center: data table
-
-* `DataSet`: data that is typically imported from some external source --
-  usually from a file.
-
-* represented internally as pandas DataFrame (hdf5) or xray DataSet
-  (multi-dimensional with units, etc.)
-
-* saved as HDF5
-
-* To be implemented:
-
-  - [possibly] use `xray` `Dataset` to represent `pgef` `DataSet`
-
-  - unit conversion
-
-  - have a DataSet reference object in db, referencing its serialized form
-    (can this be queried using Blaze?)
-
-  - operations on DataSets, to be supported by wizards:
-
-    * join datasets
-    * map a dataset into a type (i.e. collection of objects of a
-      specified type -- e.g. Requirement)
-
-  - DataSet Properties:
-
-    * name:     string identifier
-    * source:   file name/path or other url / location identifier
-    * target:   serialized file or db name / table / file (.db)
-    * sheet:    for excel files, the sheet name
-    * mapping:  [fk] names of fields/columns in file mapped to table name/column(s)
-                and types
-    * key:      (optional) primary key column
-    * dtstamp:  date/time imported
+* Main widget is DataGrid, which uses a `DataMatrix` as its underlying model
 
 #### Mode:  `db`
 
@@ -262,15 +223,6 @@ Admin           admin                       Project, Mission Study, Role
                        center: diagram
     - if > 1 model ... left:  tree structure + metadata of selected model,
                        center: diagram
-
-### Views [not implemented yet]
-
-view            context                     types
-----            -------                     -----
-Documentation   docs                        Document + subtypes
-Requirements    reqt mgt                    Requirement
-Models          models                      Model
-DataSets        data                        DataSet
 
 ## Diagrams (used in `system` and `component` modes)
 

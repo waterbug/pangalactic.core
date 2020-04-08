@@ -70,6 +70,7 @@ class DataMatrix(OrderedDict):
                 orb.log.debug('  - unable to load "{}".'.format(fname))
                 orb.log.debug('    empty DataMatrix will be created ...')
         if not got_data:
+            orb.log.debug('  - no data; looking up schema ...')
             # look up schema ...
             if config['dm_schemas'].get(schema_name):
                 orb.log.debug('  - found schema "{}":'.format(schema_name))
@@ -122,24 +123,19 @@ class DataMatrix(OrderedDict):
             fname (str): name of a DataMatrix .tsv file
         """
         # TODO: add exception handling:  empty file, etc.
-        orb.log.debug('* dm.load({})'.format(fname))
+        orb.log.debug('  - dm.load({})'.format(fname))
         with open(os.path.join(orb.data_store, fname)) as f:
             first = f.readline()
-            serialization_schema = first[:-1].split('\t')
+            self.schema = first[:-1].split('\t')
             row_oids = True
-            if serialization_schema[0] != 'oid':
-                row_oids = False
-                self.schema = serialization_schema[:]
-            else:
-                self.schema = serialization_schema[1:]
-            orb.log.debug('  - schema: {}'.format(str(self.schema)))
+            orb.log.debug('    + schema: {}'.format(str(self.schema)))
             for line in f:
                 data = line[:-1].split('\t')
                 if len(data) == 1:
                     # this would be a final empty line
                     break
                 row_dict = {}
-                for i, de in enumerate(serialization_schema):
+                for i, de in enumerate(self.schema):
                     row_dict[de] = data[i]
                 if row_oids:
                     oid = row_dict['oid']
@@ -147,29 +143,29 @@ class DataMatrix(OrderedDict):
                     oid = str(uuid4())
                     row_dict['oid'] = oid
                 self[oid] = row_dict
-            orb.log.debug('  - read {} row(s) of data.'.format(len(self) - 1))
+            orb.log.debug('    + read {} row(s) of data:'.format(len(self)))
+            for row_oid, row_data in self.items():
+                orb.log.debug('      {}: {}'.format(row_oid, str(row_data)))
 
     def save(self):
         """
         Write my data into a .tsv file.
         """
-        orb.log.debug('* dm.save()')
-        orb.log.debug('  full dm:')
-        orb.log.debug('  {}'.format(str(deepcopy(self))))
+        orb.log.debug('  - dm.save()')
+        orb.log.debug('    + full dm:')
+        orb.log.debug('      {}'.format(str(deepcopy(self))))
         fname = self.oid + '.tsv'
-        serialization_schema = self.schema[:]
-        serialization_schema.insert(0, 'oid')
         with open(os.path.join(orb.data_store, fname), 'w') as f:
             # header line
-            schema_out = '\t'.join(serialization_schema) + '\n'
+            schema_out = '\t'.join(self.schema) + '\n'
             orb.log.debug('  - writing schema: {}'.format(schema_out))
             f.write(schema_out)
             # data
             data_out = '\n'.join(['\t'.join(
                          [str(self[r_oid].get(de, ''))
-                          for de in serialization_schema])
+                          for de in self.schema])
                          for r_oid, r in self.items()])
-            orb.log.debug('  - writing data: {}'.format(data_out))
+            orb.log.debug('    + writing data: {}'.format(data_out))
             f.writelines(data_out)
             # I like a final line-ending char :)
             f.write('\n')

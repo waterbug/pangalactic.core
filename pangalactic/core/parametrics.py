@@ -1,5 +1,5 @@
 """
-Functions to support Parameters and Relations
+Functions to support Parameters, Relations, and Data Elements
 """
 from collections import namedtuple
 from decimal     import Decimal
@@ -9,10 +9,13 @@ from math        import floor, fsum, log10
 from pangalactic.core                 import config, prefs
 from pangalactic.core.datastructures  import OrderedSet
 from pangalactic.core.meta            import (SELECTABLE_VALUES,
+                                              DEFAULT_CLASS_DATA_ELEMENTS,
                                               DEFAULT_CLASS_PARAMETERS,
+                                              DEFAULT_PRODUCT_TYPE_DATA_ELMTS,
                                               DEFAULT_PRODUCT_TYPE_PARAMETERS)
 from pangalactic.core.units           import in_si, ureg
-from pangalactic.core.utils.meta      import get_parameter_definition_oid
+from pangalactic.core.utils.meta      import (get_parameter_definition_oid,
+                                              get_data_element_definition_oid)
 from pangalactic.core.utils.datetimes import dtstamp
 
 
@@ -21,7 +24,11 @@ DATATYPES = SELECTABLE_VALUES['range_datatype']
 NULL = {'float': 0.0, 'int': 0, 'str': '', 'bool': False}
 TWOPLACES = Decimal('0.01')
 
-# CACHES ##################################################################
+# NOTE! ###################################################################
+# For Data Element handling, see DATA ELEMENT SECTION, at the end ...
+# NOTE! ###################################################################
+
+# PARAMETER CACHES ########################################################
 
 # componentz:  runtime component cache
 # purpose:  enable fast computation of assembly parameters
@@ -33,19 +40,25 @@ TWOPLACES = Decimal('0.01')
 componentz = {}
 Comp = namedtuple('Comp', 'oid quantity reference_designator')
 
-# parm_defz:  runtime cache of parameter definitions (both base and context
-#             parameter definitions are included)
+# parm_defz:  runtime cache of parameter definitions and data element
+#             definitions (both base and context parameter definitions are
+#             included)
 # purpose:  enable fast lookup of parameter metadata & compact representation
 #           of 'parameterz' cache as (value, units, mod_datetime)
-# format:  {'parameter_id': {parameter properties}
+# format:  {'parameter id': {parameter properties}
 #                            ...}}
-# ... where parameter definition properties are:
+# ... where parameter properties are:
 # name, variable, context, description, dimensions, range_datatype, computed,
 # mod_datetime
+# ... and data element properties are:
+# name, variable, description, range_datatype, mod_datetime
 parm_defz = {}
 
-# parameterz:  persistent cache of assigned parameter values
-# format:  {object.oid : {'parameter_id': {parameter properties}
+# parameterz:  persistent** cache of assigned parameter values
+#              ** persisted in the file 'parameters.json' in the
+#              application home directory -- see the orb functions
+#              `_save_parmz` and `_load_parmz`
+# format:  {object.oid : {'parameter id': {parameter properties}
 #                         ...}}
 # ... where parameter properties are:
 # value, units, mod_datetime
@@ -86,7 +99,6 @@ req_allocz = {}
 Constraint = namedtuple('Constraint',
              'units target max min tol upper lower constraint_type tol_type')
 ###########################################################################
-
 
 def round_to(x, n=4):
     """
@@ -294,10 +306,12 @@ def split_pid(pid):
 
 def create_parm_defz(orb):
     """
-    Create the `parm_defz` cache of ParameterDefinitions, in the format:
+    Create the `parm_defz` cache of DataElementDefinitions and
+    ParameterDefinitions, in the format:
 
         {parameter_id : {name, variable, context, context_type, description,
                          dimensions, range_datatype, computed, mod_datetime},
+         data_element_id : {name, description, range_datatype, mod_datetime},
          ...}
 
     Args:
@@ -306,22 +320,21 @@ def create_parm_defz(orb):
     orb.log.debug('[orb] create_parm_defz')
     pds = orb.get_by_type('ParameterDefinition')
     # first, the "simple variable" parameters ...
-    parm_defz.update(
-        {pd.id :
-         {'name': pd.name,
-          'variable': pd.id,
-          'context': None,
-          'context_type': None,
-          'description': pd.description,
-          'dimensions': pd.dimensions,
-          'range_datatype': pd.range_datatype,
-          'computed': False,
-          'mod_datetime':
-              str(getattr(pd, 'mod_datetime', '') or dtstamp())
-          } for pd in pds}
-          )
+    pd_dict = {pd.id :
+               {'name': pd.name,
+                'variable': pd.id,
+                'context': None,
+                'context_type': None,
+                'description': pd.description,
+                'dimensions': pd.dimensions,
+                'range_datatype': pd.range_datatype,
+                'computed': False,
+                'mod_datetime':
+                    str(getattr(pd, 'mod_datetime', '') or dtstamp())
+                } for pd in pds}
+    parm_defz.update(pd_dict)
     orb.log.debug('      bases created: {}'.format(
-                                            str(list(parm_defz.keys()))))
+                                            str(list(pd_dict.keys()))))
     # add PDs for the descriptive contexts (CBE, Contingency, MEV) for the
     # variables (Mass, Power, Datarate) for which functions have been defined
     # to compute the CBE and MEV values
@@ -500,7 +513,7 @@ def add_parameter(orb, oid, pid):
         else:  # 'text'
             value = ''
         parameterz[oid][variable] = dict(
-            value=value,   # consistent with datatype defined in `range_datatype`
+            value=value,   # consistent with dtype defined in `range_datatype`
             units=in_si.get(dims),   # SI units consistent with `dimensions`
             mod_datetime=str(dtstamp()))
     if is_context_parm:
@@ -1202,6 +1215,274 @@ COMPUTES = {
     ('R_D', 'MEV'):    compute_mev,
     ('R_D', 'Margin'): compute_margin
     }
+
+################################################
+# DATA ELEMENT SECTION
+################################################
+
+# DATA ELEMENT CACHES ##################################################
+
+# de_defz:  runtime cache of data element definitions
+# purpose:  to enable fast lookup of data element metadata
+# format:  {data element id: {data element properties}
+#                             ...}}
+# ... where data element properties are:
+# name, description, range_datatype, mod_datetime
+de_defz = {}
+
+# data_elementz:  persistent** cache of assigned data element values
+#              ** persisted in the file 'data_elements.json' in the
+#              application home directory -- see the orb functions
+#              `_save_data_elementz` and `_load_data_elementz`
+# format:  {object.oid : {'data element id': {data element properties}
+#                         ...}}
+# ... where data element properties are:
+# value, mod_datetime
+data_elementz = {}
+
+def create_de_defz(orb):
+    """
+    Create the `de_defz` cache of DataElementDefinitions, in the format:
+
+        {data_element_id : {name, description, range_datatype, mod_datetime},
+         ...}
+
+    Args:
+        orb (Uberorb):  singleton imported from p.node.uberorb
+    """
+    orb.log.debug('[orb] create_de_defz')
+    de_def_objs = orb.get_by_type('DataElementDefinition')
+    de_defz.update(
+        {de_def_obj.id :
+         {'name': de_def_obj.name,
+          'description': de_def_obj.description,
+          'range_datatype': de_def_obj.range_datatype,
+          'mod_datetime':
+              str(getattr(de_def_obj, 'mod_datetime', '') or dtstamp())
+          } for de_def_obj in de_def_objs}
+          )
+    orb.log.debug('      data element defs created: {}'.format(
+                                            str(list(de_defz.keys()))))
+
+def update_de_defz(orb, de_def_obj):
+    """
+    Update the `de_defz` cache when a new DataElementDefinition is created or
+    modified.
+
+    Args:
+        orb (Uberorb):  singleton imported from p.node.uberorb
+        de_def_obj (DataElementDefinition):  DataElementDefinition object
+    """
+    # orb.log.debug('[orb] update_parm_defz')
+    de_defz[de_def_obj.id] = {
+        'name': de_def_obj.name,
+        'description': de_def_obj.description,
+        'range_datatype': de_def_obj.range_datatype,
+        'mod_datetime': str(dtstamp())}
+
+def add_data_element(orb, oid, deid):
+    """
+    Add a new data element to an object, which means adding a data element's data
+    structure to the `p.node.parametrics.data_elementz` dictionary under that
+    objects's oid, if it does not already exist for the specified paramter.
+    The data element data structure format is a dict with the following keys:
+
+        value, units, mod_datetime
+
+    NOTE:  'units' here refers to the preferred units in which to *display* the
+    data element's value, not the units of the 'value', which are *always* mks
+    base units.
+
+    Args:
+        orb (Uberorb):  singleton imported from p.node.uberorb
+        oid (str):  oid of the object that owns the data element
+        deid (str):  the id of the data element
+    """
+    if oid not in data_elementz:
+        data_elementz[oid] = {}
+    orb.log.debug('* add_data_element("{}")'.format(deid))
+    # [1] check if object already has that data element
+    if deid in data_elementz[oid]:
+        # if the object already has that data element, do nothing
+        return True
+    # [2] check for DataElementDefinition in db
+    de_def_obj = orb.get(get_data_element_definition_oid(deid))
+    if not de_def_obj:
+        # if no DataElementDefinition exists for deid, pass
+        # (maybe eventually raise TypeError)
+        orb.log.debug('  - invalid: id "{}" has no definition.'.format(deid))
+        return False
+    # [3] check whether the data element has been assigned yet ...
+    if not data_elementz[oid].get(deid):
+        # the data element has not yet been assigned
+        orb.log.debug('* adding data element "{}".'.format(deid))
+        de_def = de_defz.get(deid)
+        if not de_def:
+            # create it from the DataElementDefinition object
+            de_def = {de_def_obj.id :
+                   {'name': de_def_obj.name,
+                    'description': de_def_obj.description,
+                    'range_datatype': de_def_obj.range_datatype,
+                    'mod_datetime':
+                        str(getattr(
+                                de_def_obj, 'mod_datetime', '') or dtstamp())
+                    }}
+            de_defz.update(de_def)
+        # NOTE:  setting the data element's value is a separate operation -- when a
+        # data element is created, its value is initialized to the appropriate "null"
+        radt = de_def.get('range_datatype', 'str')
+        de_defaults = config.get('de_defaults') or {}
+        if de_defaults.get(deid):
+            # if a default value is configured for this deid, override null
+            dtype = DATATYPES[radt]
+            value = dtype(de_defaults[deid])
+        elif radt == 'float':
+            value = 0.0
+        elif radt == 'int':
+            value = 0
+        elif radt == 'boolean':
+            value = False
+        else:  # 'str' or 'text'
+            value = ''
+        data_elementz[oid][deid] = dict(
+            value=value,   # consistent with dtype defined in `range_datatype`
+            mod_datetime=str(dtstamp()))
+    else:
+        return True
+
+def get_dval(orb, oid, deid):
+    """
+    Return a cached data element value.
+
+    Args:
+        orb (Uberorb): the orb (see p.node.uberorb)
+        obj (Identifiable): the object that has the data element
+        deid (str): the data element 'id' value
+    """
+    # Too verbose -- only for extreme debugging ...
+    # orb.log.debug('* get_dval() ...')
+    dedef = de_defz.get(deid)
+    if not dedef:
+        # orb.log.debug('* get_dval: "{}" does not have a definition.'.format(
+                                                                        # deid))
+        return
+    try:
+        # for extreme debugging only ...
+        # orb.log.debug('  value of {} is {} ({})'.format(pid, val, type(val)))
+        return data_elementz[oid][deid]['value']
+    except:
+        return NULL.get(dedef.get('range_datatype', 'str'))
+
+def get_dval_as_str(orb, oid, deid):
+    """
+    Return a cached data element value a string for display and editing in UI.
+    (Used in the object editor, `p.node.gui.pgxnobject.PgxnObject`, the
+    dashboard, and the DataGrid.)
+
+    Args:
+        orb (Uberorb): the orb (see p.node.uberorb)
+        obj (Identifiable): the object that owns the data element
+        deid (str): the `id` of the data element
+    """
+    str(get_dval(orb, oid, deid))
+
+def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
+    """
+    Set the value of a data element instance for the specified object to the
+    specified value.
+
+    Args:
+        orb (Uberorb): the orb (see p.node.uberorb)
+        oid (str): the oid of the Modelable that has the data element
+        deid (str): the data element 'id'
+        value (TBD): value should be of the datatype specified by
+            the data element object's definition.range_datatype
+
+    Keyword Args:
+        mod_datetime (datetime): mod_datetime of the data element (if the action
+            originates locally, this will be None and a datetime stamp will be
+            generated)
+        local (bool):  if False, we were called as a result of a remote event
+            -- i.e., someone else set the value [default: True]
+    """
+    # NOTE: uncomment debug logging for EXTREMELY verbose debugging output
+    # orb.log.debug('* set_dval({}, {}, {})'.format(oid, deid, str(value)))
+    if not oid:
+        # orb.log.debug('  no oid provided; ignoring.')
+        return
+    dedef = de_defz.get(deid)
+    if not dedef:
+        orb.log.debug('  data element "{}" is not defined; ignoring.'.format(
+                                                                       deid))
+        return
+    ######################################################################
+    # NOTE: if the data element whose value is being set is not
+    # present it will be added
+    ######################################################################
+    data_element = data_elementz.get(oid, {}).get(deid, {})
+    if not data_element:
+        if add_data_element(orb, oid, deid):
+            orb.log.debug('  data element either exists or was added.')
+        else:
+            orb.log.debug('  data element could not be added (see log).')
+            return
+    try:
+        # cast value to range_datatype before setting
+        dt_name = dedef['range_datatype']
+        dtype = DATATYPES[dt_name]
+        if value:
+            value = dtype(value)
+        else:
+            value = NULL.get(dt_name, 0.0)
+        data_elementz[oid][deid]['value'] = value
+        if local or mod_datetime is None:
+            mod_datetime = str(dtstamp())
+        data_elementz[oid][deid]['mod_datetime'] = mod_datetime
+        # dts = str(mod_datetime)
+        # orb.log.debug('  setting value: {}'.format(value))
+        # orb.log.debug('  setting mod_datetime: "{}"'.format(dts))
+    except:
+        orb.log.debug('  *** set_dval() failed:')
+        msg = '      setting value {} of type {}'.format(value, type(value))
+        orb.log.debug(msg)
+        msg = '      caused something gnarly to happen ...'
+        orb.log.debug(msg)
+        msg = '      so data element "{}" was not set for oid "{}"'.format(
+                                                                 deid, oid)
+        orb.log.debug(msg)
+
+def add_default_data_elements(orb, obj):
+    """
+    Assign the configured or preferred default data elements to an object.
+
+    Args:
+        orb (Uberorb):  the orb (singleton)
+        obj (Identifiable):  the object to receive data elements
+    """
+    orb.log.debug('* adding default data elements to object "{}"'.format(
+                                                                 obj.id))
+    # Configured Parameters are currently defined by the 'dashboard'
+    # configuration (in future that may be augmented by Parameters
+    # referenced by, e.g., a ProductType and/or a ModelTemplate, both of
+    # which are essentially collections of ParameterDefinitions.
+    deids = OrderedSet()
+    cname = obj.__class__.__name__
+    deids |= OrderedSet(DEFAULT_CLASS_DATA_ELEMENTS.get(cname, []))
+    # TODO: let user set default data elements in their prefs
+    if isinstance(obj, orb.classes['HardwareProduct']):
+        # default for "default_parms" in config:  mass, power, data rate
+        # (config is read in p.node.gui.startup, and will be overridden by
+        # prefs['default_parms'] if it is set
+        deids |= OrderedSet(prefs.get('default_data_elements')
+                           or config.get('default_data_elements')
+                           or ['TRL', 'Vendor'])
+        if obj.product_type:
+            deids |= OrderedSet(DEFAULT_PRODUCT_TYPE_DATA_ELMTS.get(
+                                obj.product_type.id, []))
+    # add default parameters first ...
+    orb.log.debug('  - adding parameters {} ...'.format(str(deids)))
+    for deid in deids:
+        add_data_element(orb, obj.oid, deid)
 
 ################################################
 # CODE BELOW THIS LINE IS DEPRECATED ...

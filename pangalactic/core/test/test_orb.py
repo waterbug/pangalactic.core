@@ -18,11 +18,13 @@ from pangalactic.core             import config, refdata, write_config
 from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
+                                          data_elementz,
                                           get_pval, parameterz, parm_defz,
                                           req_allocz, round_to)
 from pangalactic.core.serializers import (deserialize,
                                           deserialize_parms,
                                           serialize,
+                                          serialize_des,
                                           serialize_parms)
 from pangalactic.core.test        import data as test_data_module
 from pangalactic.core.test        import vault as vault_module
@@ -42,6 +44,7 @@ NOW = str(dtstamp())
 orb.start(home='pangalaxian_test', debug=True)
 serialized_test_objects = create_test_users()
 serialized_test_objects += create_test_project()
+config['default_data_elements'] = ['TRL']
 config['default_parms'] = [
     'm[CBE]',
     'm[Ctgcy]',
@@ -53,7 +56,6 @@ config['default_parms'] = [
     'R_D[Ctgcy]',
     'R_D[MEV]',
     'Cost',
-    'TRL',
     'height',
     'width',
     'depth']
@@ -147,7 +149,8 @@ class OrbTest(unittest.TestCase):
                 oids.append(serialized_object['oid'])
         Identifiable = orb.classes['Identifiable']
         deserialize(orb, serialized_test_objects)
-        # assign test parameters to HWProducts for use in subsequent tests ...
+        # assign test parameters and data elements to HWProducts for use in
+        # subsequent tests ...
         objs = orb.get_by_type('HardwareProduct')
         orb.assign_test_parameters(objs)
         value = orb.db.query(Identifiable).filter(
@@ -155,11 +158,13 @@ class OrbTest(unittest.TestCase):
         expected = len(oids)
         self.assertEqual(expected, value)
 
-    def test_07_test_assigned_parameters(self):
+    def test_07_test_assigned_parameters_and_data_elements(self):
         """
-        CASE:  test the parameters assigned to the serialized test objects.
+        CASE:  test the parameters and data elements assigned to the serialized
+        test objects.
 
-        This tests the 'add_parameter()' and 'add_default_parameters()'
+        This tests the 'add_parameter()', 'add_default_parameters()',
+        'add_data_element()', and 'add_default_data_elements()'
         functions of the p.core.parametrics module since
         'assign_test_parameters' uses them.
         """
@@ -289,6 +294,7 @@ class OrbTest(unittest.TestCase):
             'comment': obj.comment,
             'create_datetime': str(obj.create_datetime),
             'creator': obj.creator.oid,
+            'data_elements': serialize_des(data_elementz.get(obj.oid, {})),
             'description': obj.description,
             'id': obj.id,
             'id_ns': obj.id_ns,

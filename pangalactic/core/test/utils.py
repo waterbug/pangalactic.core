@@ -4,11 +4,42 @@ Create PGEF test data.
 """
 from copy import deepcopy
 import random
-from pangalactic.core.parametrics import parm_defz
+from pangalactic.core.parametrics import de_defz, parm_defz
 from pangalactic.core.utils.meta import get_port_id, get_port_name
 from pangalactic.core.utils.datetimes import dtstamp
 
 NOW = str(dtstamp())
+
+def gen_test_dvals(data_elements):
+    """
+    Generate random values for a set of data elements.
+
+    Args:
+        data_elements (dict):  data elements dict of the form
+
+            {data element id: {standard data element dict}, ...}
+
+            where the standard data element dict is defined in
+            p.core.parametrics and is the value of data_elementz[obj.oid] for
+            any object that has data elements.
+    """
+    for deid, de in data_elements.items():
+        # get the cached data element definition
+        de_def = de_defz.get(deid, {})
+        if de_def.get('range_datatype') in ['text', 'str']:
+            # make sure no non-null default has been set
+            if not de['value']:
+                i = random.randint(0, 2)
+                j = random.randint(0, 2)
+                k = random.randint(0, 2)
+                de['value'] = i * 'spam' + j * 'eggs' + k * 'spam'
+        elif de_def.get('range_datatype') == 'int':
+            # make sure no non-zero default has been set
+            if not de['value']:
+                de['value'] = random.randint(1, 10)
+        elif de_def.get('range_datatype') == 'float':
+            if not de['value']:
+                de['value'] = float(random.randint(1, 1000))
 
 def gen_test_pvals(parms):
     """
@@ -17,9 +48,10 @@ def gen_test_pvals(parms):
 
     Args:
         parms (dict):  parameters dict of the form
-            {parameter id: {standard parameter dict},
-             ...}
-            where the standard parameter dict is defined in p.node.parametrics
+
+            {parameter id: {standard parameter dict}, ...}
+
+            where the standard parameter dict is defined in p.core.parametrics
             and is the value of parameterz[obj.oid] for any object that has
             parameters.
     """
@@ -860,11 +892,24 @@ parametrized_summary_test_object = [
        modifier='test:steve',
        mod_datetime=NOW,
        parameters={'m' : (50.0, 'kg'),
-                   'p' : (10.0, 'W')},
+                   'P' : (10.0, 'W')},
        iteration=1,
        version='4',
        version_sequence=4),
      ]
+
+test_data_elements = {
+    "TRL":{
+        "mod_datetime":NOW,
+        "units":"",
+        "value":4
+    },
+    "Vendor":{
+        "mod_datetime":NOW,
+        "units":"",
+        "value":""
+    }
+}
 
 test_parms = {
     "Cost":{
@@ -881,16 +926,6 @@ test_parms = {
         "mod_datetime":NOW,
         "units":"bit/s",
         "value":0
-    },
-    "TRL":{
-        "mod_datetime":NOW,
-        "units":"",
-        "value":4
-    },
-    "Vendor":{
-        "mod_datetime":NOW,
-        "units":"",
-        "value":""
     },
     "depth":{
         "mod_datetime":NOW,
@@ -961,6 +996,7 @@ related_test_objects = [
         owner='test:OTHER',
         name='Rocinante Spacecraft',
         description='A Martian Navy gunship',
+        data_elements=deepcopy(test_data_elements),
         parameters=deepcopy(test_parms),
         comment='Prototype',
         creator='test:bigboote',

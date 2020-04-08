@@ -17,9 +17,10 @@ PGEF "DataGrid" Widget
 
 ## Implementation
 
-* cell == "item"
+* cell == a parameter or data element instance in context of a GridTreeItem
   - addressable using (row_oid, column_id, value) tuple
-  - partial synonyms:  "field", "column", "parameter", "attribute", "property"
+  - synonyms:  "field", "column", "parameter", "attribute", "property"
+               "data element"
   - data element definitions are in a dict with the following keys:
     + id: unique identifier (unique among data elements AND parameters)
     + datatype:  int, float, str, bool
@@ -27,8 +28,9 @@ PGEF "DataGrid" Widget
     + label: "external" name (table column label; may contain line breaks)
     + description: definition
 
-* row == "entity"
-  - analogous to an object but does not need to have a "class" specified
+* row == GridTreeItem
+  - a dict that is semantically analogous to a domain object (and may be
+    "linked" to one), and whose items are parameters and data elements
   - has a unique "oid", same as an object, so can also have parameters
   - future:
     + if mirroring a Product (same oid), parameter fields will be synced

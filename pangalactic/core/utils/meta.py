@@ -249,6 +249,16 @@ def classnamify(base, tablename, table):
     """
     return to_class_name(tablename)
 
+def get_data_element_definition_oid(deid):
+    """
+    Return the oid of the DataElementDefinition for the specified data element
+    id.
+
+    Args:
+        deid (str): the 'id' defined in the DataElementDefinition
+    """
+    return 'pgef:DataElementDefinition.' + deid
+
 def get_parameter_definition_oid(variable):
     """
     Return the oid of the ParameterDefinition for the specified variable.
