@@ -1471,7 +1471,7 @@ def set_dval_from_str(orb, oid, deid, str_val, mod_datetime=None, local=True):
                                                            # str(str_val)))
     try:
         de_def = de_defz.get(deid, {})
-        radt = pd.get('range_datatype')
+        radt = de_def.get('range_datatype', 'str')
         if radt in ['int', 'float']:
             dtype = DATATYPES.get(radt)
             num_fmt = prefs.get('numeric_format')
