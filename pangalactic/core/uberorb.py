@@ -287,6 +287,8 @@ class UberORB(object):
                         self.role_product_types[role_id] = set(
                             discipline_subsystems.get(discipline_id))
         self.started = True
+        self._save_data_elementz()
+        self._save_parmz()
         return self.home
 
     def init_registry(self, home, db_url, force_new_core=False, version='',
@@ -454,7 +456,7 @@ class UberORB(object):
         Save `data_elementz` dict to a json file.
         """
         self.log.debug('* _save_data_elementz() ...')
-        json_path = os.path.join(self.home, 'parameters.json')
+        json_path = os.path.join(self.home, 'data_elements.json')
         serialized_data_elementz = {}
         try:
             for oid, obj_des in data_elementz.items():
@@ -626,7 +628,8 @@ class UberORB(object):
         self.log.info('* checking reference data ...')
         # first get the oids of everything in the db ...
         db_oids = self.get_oids()
-        # [0] load initial reference data (administrative)
+        # [0] load initial reference data (Orgs, Persons, Roles,
+        # RoleAssignments)
         missing_i = [so for so in refdata.initial if so['oid'] not in db_oids]
         if missing_i:
             self.log.debug('  + missing some initial reference data:')

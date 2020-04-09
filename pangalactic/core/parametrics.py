@@ -306,8 +306,7 @@ def split_pid(pid):
 
 def create_parm_defz(orb):
     """
-    Create the `parm_defz` cache of DataElementDefinitions and
-    ParameterDefinitions, in the format:
+    Create the `parm_defz` cache of ParameterDefinitions, in the format:
 
         {parameter_id : {name, variable, context, context_type, description,
                          dimensions, range_datatype, computed, mod_datetime},
@@ -1287,11 +1286,7 @@ def add_data_element(orb, oid, deid):
     objects's oid, if it does not already exist for the specified paramter.
     The data element data structure format is a dict with the following keys:
 
-        value, units, mod_datetime
-
-    NOTE:  'units' here refers to the preferred units in which to *display* the
-    data element's value, not the units of the 'value', which are *always* mks
-    base units.
+        value, mod_datetime
 
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb

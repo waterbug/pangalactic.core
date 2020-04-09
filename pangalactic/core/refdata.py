@@ -2045,7 +2045,7 @@ dict(
     'type_of_port': 'pgefobjects:PortType.digital_data',
     'parameters': {
        'R_D':
-         {'value': 655e6,
+         {'value': 10,  # per Wikipedia: up to 10 Mbit/s
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
           },
@@ -2062,7 +2062,7 @@ dict(
     'type_of_port': 'pgefobjects:PortType.digital_data',
     'parameters': {
        'R_D':
-         {'value': 1e7,  # per Wikipedia: 10 Mbit/s
+         {'value': 655,  # per Wikipedia: 655 Mbit/s
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
           },
@@ -2079,7 +2079,7 @@ dict(
     'type_of_port': 'pgefobjects:PortType.digital_data',
     'parameters': {
        'R_D':
-         {'value': 4e8,  # per Wikipedia: 400 Mbit/s
+         {'value': 400,  # per Wikipedia: 400 Mbit/s
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
           },
@@ -2095,7 +2095,7 @@ dict(
     'abbreviation': 'GPIO',
     'parameters': {
        'R_D':
-         {'value': 0,  # TBD
+         {'value': 0,  # per Wikipedia: no data rate specified
           'mod_datetime': epoch,
           'units': 'Mbit/s'}
           },
