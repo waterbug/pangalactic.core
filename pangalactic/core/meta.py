@@ -286,8 +286,8 @@ PGXN_MASK = dict(
     Test=(PGXN_HIDE + ['components', 'fsc_code', 'product_type'])
     )
 
-# PGXN_HIDE_PARMS:  Subclasses of Modelable for which 'parameters' panel should
-# be hidden
+# PGXN_HIDE_PARMS:  Subclasses of Modelable for which 'parameters' and 'data'
+# panels should be hidden
 PGXN_HIDE_PARMS = [
                    'Actor',
                    'Acu',

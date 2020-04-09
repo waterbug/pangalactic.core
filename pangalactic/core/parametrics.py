@@ -919,7 +919,7 @@ def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     """
     # This log msg is only needed for extreme debugging -- `set_pval()` is
     # called at the end and will log essentially the same information ...
-    # orb.log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
+    # orb.log.debug('* get_pval_from_str({}, {}, {})'.format(oid, pid,
                                                            # str(str_val)))
     try:
         radt = parm_defz[pid].get('range_datatype')
@@ -1450,6 +1450,50 @@ def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
         msg = '      so data element "{}" was not set for oid "{}"'.format(
                                                                  deid, oid)
         orb.log.debug(msg)
+
+def set_dval_from_str(orb, oid, deid, str_val, mod_datetime=None, local=True):
+    """
+    Set the value of a data element instance for the specified object from a
+    string value.  (Mainly for use in saving input from the object editor,
+    `p.node.gui.pgxnobject.PgxnObject`.)
+
+    Args:
+        orb (Uberorb): the orb (see p.node.uberorb)
+        oid (str): the oid of the Modelable that has the parameter
+        pid (str): the parameter 'id'
+        str_val (str): string value
+
+    Keyword Args:
+        mod_datetime (datetime): mod_datetime of the parameter (if the action
+            originates locally, this will be None and a datetime stamp will be
+            generated)
+        local (bool):  if False, we were called as a result of a remote event
+            -- i.e., someone else set the value [default: True]
+    """
+    # This log msg is only needed for extreme debugging -- `set_pval()` is
+    # called at the end and will log essentially the same information ...
+    # orb.log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
+                                                           # str(str_val)))
+    try:
+        de_def = de_defz.get(deid, {})
+        radt = pd.get('range_datatype')
+        if radt in ['int', 'float']:
+            dtype = DATATYPES.get(radt)
+            num_fmt = prefs.get('numeric_format')
+            if num_fmt == 'Thousands Commas' or not num_fmt:
+                val = dtype(str_val.replace(',', ''))
+            else:
+                # this should work for both 'Scientific Notation' and
+                # 'No Commas'
+                val = dtype(str_val)
+        else:
+            val = str_val
+        set_dval(orb, oid, deid, val, mod_datetime=mod_datetime, local=local)
+    except:
+        # if unable to cast a value, do nothing (and log it)
+        # TODO:  more form validation!
+        orb.log.debug('  could not convert string "{}" ...'.format(str_val))
+        orb.log.debug('  bailing out.')
 
 def add_default_data_elements(orb, obj):
     """

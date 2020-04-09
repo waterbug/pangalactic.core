@@ -951,11 +951,10 @@ class UberORB(object):
 
     def get_ids(self, cname=None):
         """
-        Get all oids from the local db -- used for checking whether a given
-        object is in the db or not.  Returns:
+        Get all ids from the local db -- used for validating ids.  Returns:
 
-          [1] with no arguments:  all oids in the db
-          [2] with 'cname':  all oids for objects of the specified class
+          [1] with no arguments:  all ids in the db
+          [2] with 'cname':  all ids for objects of the specified class
 
         Keyword Args:
             cname (str):  class name of the objects to be used
