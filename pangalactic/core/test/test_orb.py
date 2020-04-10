@@ -20,7 +20,7 @@ from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
                                           data_elementz,
                                           get_pval, parameterz, parm_defz,
-                                          req_allocz, round_to)
+                                          req_allocz, round_to, set_pval)
 from pangalactic.core.serializers import (deserialize,
                                           deserialize_parms,
                                           serialize,
@@ -32,7 +32,7 @@ from pangalactic.core.test.utils  import (create_test_users,
                                           create_test_project,
                                           locally_owned_test_objects,
                                           owned_test_objects,
-                                          parametrized_test_objects,
+                                          parametrized_test_object,
                                           related_test_objects)
 from pangalactic.core.uberorb     import orb
 from pangalactic.core.utils.datetimes import dtstamp
@@ -262,7 +262,7 @@ class OrbTest(unittest.TestCase):
         expected = dict(
             length=7,
             twanger_id=obj.id,
-            twanger_parameters=serialize_parms(parameterz.get(obj.oid, {})),
+            twanger_parameters=serialize_parms(orb, obj.oid),
             twanger_product_type=obj.product_type.oid,
             port_oid=obj.ports[0].oid,
             port_of_product=obj.ports[0].of_product.oid,
@@ -294,7 +294,7 @@ class OrbTest(unittest.TestCase):
             'comment': obj.comment,
             'create_datetime': str(obj.create_datetime),
             'creator': obj.creator.oid,
-            'data_elements': serialize_des(data_elementz.get(obj.oid, {})),
+            'data_elements': serialize_des(orb, obj.oid),
             'description': obj.description,
             'id': obj.id,
             'id_ns': obj.id_ns,
@@ -304,7 +304,7 @@ class OrbTest(unittest.TestCase):
             'name': obj.name,
             'oid': obj.oid,
             'owner': obj.owner.oid,
-            'parameters': serialize_parms(parameterz.get(obj.oid, {})),
+            'parameters': serialize_parms(orb, obj.oid),
             'product_type': obj.product_type.oid,
             'public': True,
             'version': obj.version,
@@ -415,24 +415,25 @@ class OrbTest(unittest.TestCase):
         """
         CASE:  test pangalactic.core.serializers.deserialize_parms function.
         """
-        test_oid = 'dummy_oid'
+        test_oid = 'test:iidrive'
         serialized_parms= {
-            'P[CBE]':
+            'P':
               {'mod_datetime': NOW,
                'units': 'W',
                'value': 100.0},
-            'R_D[CBE]':
+            'R_D':
               {'mod_datetime': NOW,
                'units': 'bit/s',
                'value': 1000000.0},
-            'm[CBE]':
+            'm':
               {'mod_datetime': NOW,
                'units': 'kg',
                'value': 1000.0}
             }
         deserialize_parms(orb, test_oid, serialized_parms)
+        orb.recompute_parmz()
         expected = [True, True, True, True, True, True,
-                    100.0, 1000000.0, 1000.0, 0.0, 0.0, 0.0]
+                    0.0, 0.0, 0.0, 100.0, 1000000.0, 1000.0]
         test_parms = parameterz.get(test_oid, {})
         actual = [('P[CBE]' in test_parms),
                   ('R_D[CBE]' in test_parms),
@@ -462,17 +463,18 @@ class OrbTest(unittest.TestCase):
             if o.__class__.__name__ == 'HardwareProduct':
                 obj = o
         parms = parameterz[obj.oid]
+        m = get_pval(orb, obj.oid, 'm')
         P = get_pval(orb, obj.oid, 'P')
-        value = [parms, P]
+        R_D = get_pval(orb, obj.oid, 'R_D')
+        value = [m, P, R_D]
         # NOTE: in the "python-serialized" format of parametrized_test_objects,
         # datetime objects are serialized as strings, but all other primitive
         # types are unaltered (because json and yaml know how to serialize and
         # deserialize all the other primitive types)
         deser_parms = deepcopy(parameters)
-        for pid in parameters:
-            deser_parms[pid]['mod_datetime'] = uncook_datetime(
-                                               parameters[pid]['mod_datetime'])
-        expected = [deser_parms, deser_parms['P']['value']]
+        expected = [deser_parms['m']['value'],
+                    deser_parms['P']['value'],
+                    deser_parms['R_D']['value']]
         self.assertEqual(expected, value)
 
     def test_21_deserialize_related_objects(self):
@@ -640,28 +642,24 @@ class OrbTest(unittest.TestCase):
                     ]
         self.assertEqual(expected, value)
 
-    def test_27_deserialize_object_with_modified_parameters(self):
-        """
-        CASE:  deserialize an object with modified parameters
-        """
-        # initial state of object was already deserialized in test 18
-        deserialize(orb, parametrized_test_objects)
-        oid = parametrized_test_objects[0]['oid']
-        obj = orb.get(oid)
-        parameters = parametrized_test_objects[0]['parameters']
-        value = parameterz[obj.oid]
-        # NOTE: in the "python-serialized" format of parametrized_test_objects,
-        # datetime objects are serialized as strings but all other primitive
-        # types are unaltered (because json and yaml know how to serialize and
-        # deserialize all the other primitive types)
-        deser_parms = deepcopy(parameters)
-        for pid in deser_parms:
-            deser_parms[pid]['mod_datetime'] = uncook_datetime(
-                                               parameters[pid]['mod_datetime'])
-        expected = deser_parms
-        # save parameters.json file for forensics ...
-        orb._save_parmz()
-        self.assertEqual(expected, value)
+    # TODO:  revise this test!
+    # def test_27_deserialize_object_with_modified_parameters(self):
+        # """
+        # CASE:  deserialize an object with modified parameters
+        # """
+        # deserialize(orb, parametrized_test_object)
+        # oid = parametrized_test_object[0]['oid']
+        # obj = orb.get(oid)
+        # # assumed to be a local action -> mod_datetime will be generated
+        # set_pval(orb, oid, 'm', 42)
+        # set_pval(orb, oid, 'P', 33)
+        # set_pval(orb, oid, 'R_D', 400, units='Mbit/s')
+        # value = parameterz[obj.oid]
+        # deser_parms = deepcopy(parameters)
+        # expected = deser_parms
+        # # save parameters.json file for forensics ...
+        # orb._save_parmz()
+        # self.assertEqual(expected, value)
 
     def test_50_write_mel(self):
         """

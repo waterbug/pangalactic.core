@@ -430,7 +430,7 @@ class UberORB(object):
         serialized_parameterz = {}
         for oid, obj_parms in parameterz.items():
             # NOTE: serialize_parms() uses deepcopy()
-            serialized_parameterz[oid] = serialize_parms(obj_parms)
+            serialized_parameterz[oid] = serialize_parms(self, oid)
         with open(parms_path, 'w') as f:
             f.write(json.dumps(serialized_parameterz, separators=(',', ':'),
                                indent=4, sort_keys=True))
@@ -461,7 +461,7 @@ class UberORB(object):
         try:
             for oid, obj_des in data_elementz.items():
                 # NOTE: serialize_des() uses deepcopy()
-                serialized_data_elementz[oid] = serialize_des(obj_des)
+                serialized_data_elementz[oid] = serialize_des(self, oid)
             with open(json_path, 'w') as f:
                 f.write(json.dumps(serialized_data_elementz,
                                    separators=(',', ':'),
@@ -476,7 +476,7 @@ class UberORB(object):
         contexts.  This is required at startup or when a parameter is created,
         modified, or deleted.
         """
-        self.log.debug('* recompute_parmz()')
+        # self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
         # default descriptive contexts:  CBE, MEV
         d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or []

@@ -12,43 +12,51 @@ from sqlalchemy import ForeignKey
 from pangalactic.core.utils.meta  import (asciify, cookers, uncookers,
                                           cook_datetime, uncook_datetime)
 from pangalactic.core.utils.datetimes import earlier
-from pangalactic.core.parametrics import (add_parameter,
-                                          data_elementz,
-                                          de_defz,
-                                          parameterz,
-                                          parm_defz,
-                                          refresh_componentz,
-                                          refresh_req_allocz,
-                                          set_dval, set_pval,
-                                          update_de_defz,
+from pangalactic.core.parametrics import (add_parameter, data_elementz,
+                                          de_defz, get_pval, parameterz,
+                                          parm_defz, refresh_componentz,
+                                          refresh_req_allocz, set_dval,
+                                          set_pval, update_de_defz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
 
 
-def serialize_des(obj_des):
+def serialize_des(orb, oid):
     """
     Args:
-        obj_des (dict):  a dictionary containing the data elements
-            associated with an object (for a given object `obj`, its
-            data elements dictionary will be `data_elementz[obj.oid]`).
+        orb (UberORB): the (singleton) `orb` instance
+        oid (str):  the oid of the object whose data elements are to be
+            serialized.
 
-    Serialize the dictionary of data elements associated with an object.
-    Basically, this function is only required to serialize the
-    `mod_datetime` value of each data element.
+    Serialize the data elements associated with an object.  Basically, this
+    function is only required to serialize the `mod_datetime` value of each
+    data element.
 
     IMPLEMENTATION NOTE:  uses deepcopy() to avoid side-effects to the
     `data_elementz` dict.
     """
-    if obj_des:
-        ser_des = deepcopy(obj_des)
+    if oid in data_elementz:
+        ser_des = deepcopy(data_elementz[oid])
         for de in ser_des.values():
             de['mod_datetime'] = cook_datetime(de['mod_datetime'])
         return ser_des
     else:
         return {}
 
-def serialize_parms(obj_parms):
+def serialize_parms(orb, oid):
     """
+    Output the **serialized** format for parameters (which is used for data
+    exchange, messaging, and storage [parameters.json]) -- note that this is
+    different from the **cache** format for parameters (which is used in the
+    `parameterz` in-memory cache).
+
+        * In the **serialized** format, the value and units are consistent:
+          i.e., the value is expressed in terms of the specified units.
+
+        * In the **cache** format, the values are *always* expressed in base
+          units and the units represent the preferred units to be used when
+          displaying the value in the user interface.
+
     Args:
         obj_parms (dict):  a dictionary containing the parameters
             associated with an object (for a given object `obj`, its
@@ -62,10 +70,15 @@ def serialize_parms(obj_parms):
     IMPLEMENTATION NOTE:  uses deepcopy() to avoid side-effects to the
     `parameterz` dict.
     """
-    if obj_parms:
-        ser_parms = deepcopy(obj_parms)
-        for parm in ser_parms.values():
-            parm['mod_datetime'] = cook_datetime(parm['mod_datetime'])
+    if oid in parameterz:
+        ser_parms = {}
+        stored_parms = deepcopy(parameterz[oid])
+        for pid, parm in stored_parms.items():
+            ser_parm = {}
+            ser_parm['units'] = parm['units']
+            ser_parm['value'] = get_pval(orb, oid, pid, units=parm['units'])
+            ser_parm['mod_datetime'] = cook_datetime(parm['mod_datetime'])
+            ser_parms[pid] = ser_parm
         return ser_parms
     else:
         return {}
@@ -175,23 +188,9 @@ def serialize(orb, objs, view=None, include_components=False,
         # (they can only be assigned to subclasses of Modelable)
         if isinstance(obj, orb.classes['Modelable']):
             # serialize data elements
-            obj_des = data_elementz.get(obj.oid, {})
-            if obj_des:
-                # NOTE:  serialize_des() uses deepcopy()
-                d['data_elements'] = serialize_des(obj_des)
-                orb.log.info('  - data elements found, serialized.')
-            else:
-                d['data_elements'] = {}
-                # orb.log.info('  - no data elements found.')
+            d['data_elements'] = serialize_des(orb, obj.oid)
             # serialize parameters
-            obj_parms = parameterz.get(obj.oid, {})
-            if obj_parms:
-                # NOTE:  serialize_parms() uses deepcopy()
-                d['parameters'] = serialize_parms(obj_parms)
-                # orb.log.info('  - parameters found, serialized.')
-            else:
-                d['parameters'] = {}
-                # orb.log.info('  - no parameters found.')
+            d['parameters'] = serialize_parms(orb, obj.oid)
         for name in schema['fields']:
             if getattr(obj, name, None) is None:
                 # ignore None values
@@ -364,7 +363,17 @@ def deserialize_des(orb, oid, ser_des, cname=None):
 
 def deserialize_parms(orb, oid, ser_parms, cname=None):
     """
-    Deserialize a serialized object `parameters` section.
+    Deserialize the **serialized** format for parameters (which is used for
+    data exchange, messaging, and persistent storage [parameters.json]) -- note
+    that this is different from the **cache** format for parameters (which is
+    used in the `parameterz` in-memory cache).
+
+        * In the **serialized** format, the value and units are consistent:
+          i.e., the value is expressed in terms of the specified units.
+
+        * In the **cache** format, the values are *always* expressed in base
+          units and the units represent the preferred units to be used when
+          displaying the value in the user interface.
 
     [NOTE: for backwards compatibility, detection of data elements in a
     `parameters` section has been added, because some data elements (such as
@@ -393,26 +402,14 @@ def deserialize_parms(orb, oid, ser_parms, cname=None):
     for pid in ser_parms:
         new_dt = uncook_datetime(ser_parms[pid]['mod_datetime'])
         if pid in parm_defz:
-            if pid in parameterz[oid]:
-                parameterz[oid][pid].update(ser_parms[pid])
-                parameterz[oid][pid]['mod_datetime'] = new_dt
-            else:
-                set_pval(orb, oid, pid, ser_parms[pid]['value'],
-                         units=ser_parms[pid]['units'])
+            set_pval(orb, oid, pid, ser_parms[pid]['value'],
+                     units=ser_parms[pid]['units'], mod_datetime=new_dt)
         elif pid in de_defz:
             log_msg = 'data element found in parameters: "{}"'.format(pid)
             orb.log.debug('  - {}'.format(log_msg))
-            if oid not in data_elementz:
-                data_elementz[oid] = {}
-            if pid in data_elementz[oid]:
-                data_elementz[oid][pid]['value'] = ser_parms[pid][
-                                                            'value']
-                data_elementz[oid][pid]['mod_datetime'] = new_dt
-            else:
-                set_dval(orb, oid, pid, ser_parms[pid]['value'],
-                         mod_datetime=new_dt)
-            # if pid refers to a data element, make sure it does not appear
-            # in parameterz
+            set_dval(orb, oid, pid, ser_parms[pid]['value'],
+                     mod_datetime=new_dt)
+            # pid refers to a data element, so it should not be in parameterz
             if pid in parameterz[oid]:
                 del parameterz[oid][pid]
         else:

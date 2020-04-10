@@ -620,14 +620,17 @@ def delete_parameter(orb, oid, pid):
             if '[' in other_pid and base_pid == other_pid.split('[')[0]:
                 del parameterz[oid][other_pid]
 
-def get_pval(orb, oid, pid, allow_nan=False):
+def get_pval(orb, oid, pid, units='', allow_nan=False):
     """
-    Return a cached parameter value in base units.
+    Return a cached parameter value in base units or in the units specified.
 
     Args:
         orb (Uberorb): the orb (see p.node.uberorb)
         obj (Identifiable): the object that has the parameter
         pid (str): the parameter 'id' value
+
+    Keyword Args:
+        units (str):  units in which the return value should be expressed
     """
     # Too verbose -- only for extreme debugging ...
     # orb.log.debug('* get_pval() ...')
@@ -637,9 +640,31 @@ def get_pval(orb, oid, pid, allow_nan=False):
                                                                         # pid))
         return
     try:
-        # for extreme debugging only ...
-        # orb.log.debug('  value of {} is {} ({})'.format(pid, val, type(val)))
-        return parameterz[oid][pid]['value']
+        if not units:
+            # if no units are specified, return the value in base units
+            return parameterz[oid][pid]['value']
+        else:
+            # convert based on dimensions/units ...
+            dims = pdz.get('dimensions')
+            # special cases for 'percent' and 'money'
+            if dims == 'percent':
+                # show percentage values in interface -- they will
+                # later be saved (by set_pval) as .01 * value
+                return 100.0 * parameterz[oid][pid]['value']
+            elif dims == 'money':
+                # round to 2 decimal places
+                val = get_pval(orb, oid, pid)
+                if val is None:
+                    return 0.00
+                elif val:
+                    return float(Decimal(val).quantize(TWOPLACES))
+                else:
+                    return 0.00
+            else:
+                base_val = parameterz[oid][pid]['value']
+                quan = base_val * ureg.parse_expression(in_si[dims])
+                quan_converted = quan.to(units)
+                return quan_converted.magnitude
     except:
         return NULL.get(pdz.get('range_datatype', 'float'))
 
@@ -835,18 +860,19 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True,
     if not parm:
         # NOTE:  add_parameter() now checks if base parameter has been assigned
         # and if not, assigns it and returns True
-        if add_parameter(orb, oid, pid):
-            orb.log.debug('  parameter either exists or was added.')
-        else:
+        added = add_parameter(orb, oid, pid)
+        if not added:
             # if the parameter cannot be added, it normally implies that its
             # base parameter has not been defined ...
             orb.log.debug('  parameter could not be added (see log).')
             return
+        # else:
+            # orb.log.debug('  parameter either exists or was added.')
     try:
         # cast value to range_datatype before setting
         pdz = parm_defz.get(pid)
         if not pdz:
-            orb.log.debug('  parameter definition not found, quitting.')
+            # orb.log.debug('  parameter definition not found, quitting.')
             return
         dt_name = pdz['range_datatype']
         dtype = DATATYPES[dt_name]
@@ -939,8 +965,8 @@ def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     except:
         # if unable to cast a value, do nothing (and log it)
         # TODO:  more form validation!
-        orb.log.debug('  could not convert string "{}" ...'.format(str_val))
-        orb.log.debug('  bailing out.')
+        msg = 'get_pval_from_string() could not convert string "{}"'
+        orb.log.debug('* {}'.format(msg.format(str_val)))
 
 def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
                       local=True):
@@ -990,8 +1016,8 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     except:
         # if unable to cast a value, do nothing (and log it)
         # TODO:  more form validation!
-        orb.log.debug('  could not convert string "{}" ...'.format(str_val))
-        orb.log.debug('  bailing out.')
+        msg = 'set_pval_from_str() could not convert string "{}".'
+        orb.log.debug('* {}'.format(msg.format(str_val)))
 
 def compute_assembly_parameter(orb, product_oid, variable):
     """
@@ -1519,7 +1545,7 @@ def add_default_data_elements(orb, obj):
             deids |= OrderedSet(DEFAULT_PRODUCT_TYPE_DATA_ELMTS.get(
                                 obj.product_type.id, []))
     # add default parameters first ...
-    orb.log.debug('  - adding parameters {} ...'.format(str(deids)))
+    # orb.log.debug('  - adding data elements {} ...'.format(str(deids)))
     for deid in deids:
         add_data_element(orb, obj.oid, deid)
 

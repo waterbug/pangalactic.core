@@ -843,7 +843,7 @@ locally_owned_test_objects = [
        version_sequence=0),
      ]
 
-parametrized_test_objects = [
+parametrized_test_object = [
     dict(
        _cname='HardwareProduct',
        oid='test:inst3',
