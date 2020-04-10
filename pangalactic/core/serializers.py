@@ -753,10 +753,10 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             refresh_req_allocz(orb, req_oid)
         orb.log.debug('    done.')
         # orb.log.debug('  - recomputing parameters ...')
-        orb.recompute_parmz()
+        recompute_parmz_required = True
         # orb.log.debug('    done.')
-    elif recompute_parmz_required and not force_no_recompute:
-        # orb.log.debug('  - recomputing parameters ...')
+    if recompute_parmz_required and not force_no_recompute:
+        orb.log.debug('  - deserialize recomputing parameters ...')
         orb.recompute_parmz()
         # orb.log.debug('    done.')
     if dictify:

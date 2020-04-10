@@ -815,8 +815,7 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
         val = parm.get('value') or 0.0
     return val
 
-def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True,
-             recompute=True):
+def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
     """
     Set the value of a parameter instance for the specified object to the
     specified value, as expressed in the specified units (or in base units if
@@ -907,8 +906,6 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True,
         # dts = str(mod_datetime)
         # orb.log.debug('  setting value: {}'.format(value))
         # orb.log.debug('  setting mod_datetime: "{}"'.format(dts))
-        if recompute:
-            orb.recompute_parmz()
     except:
         orb.log.debug('  *** set_pval() failed:')
         msg = '      value {} of datatype {}'.format(value, type(value))

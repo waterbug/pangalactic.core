@@ -416,7 +416,6 @@ class UberORB(object):
                 serialized_parms = json.loads(f.read())
             for oid, ser_parms in serialized_parms.items():
                 deserialize_parms(self, oid, ser_parms)
-            # self.recompute_parmz()
             self.log.debug('  - parameterz cache loaded and recomputed.')
         else:
             self.log.debug('  - "parameters.json" was not found.')
@@ -476,7 +475,7 @@ class UberORB(object):
         contexts.  This is required at startup or when a parameter is created,
         modified, or deleted.
         """
-        self.log.debug('* recompute_parmz()')
+        # self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
         # default descriptive contexts:  CBE, MEV
         d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or []
@@ -682,6 +681,7 @@ class UberORB(object):
         # ********************************************************************
         self._load_data_elementz()
         self._load_parmz()
+        self.recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
         self.log.debug('  + checking for updates to parameter definitions ...')
         all_pds = refdata.pdc
