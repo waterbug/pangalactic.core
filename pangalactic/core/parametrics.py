@@ -1275,7 +1275,7 @@ def create_de_defz(orb):
     Args:
         orb (Uberorb):  singleton imported from p.node.uberorb
     """
-    orb.log.debug('[orb] create_de_defz')
+    orb.log.debug('* create_de_defz')
     de_def_objs = orb.get_by_type('DataElementDefinition')
     de_defz.update(
         {de_def_obj.id :
@@ -1286,7 +1286,7 @@ def create_de_defz(orb):
               str(getattr(de_def_obj, 'mod_datetime', '') or dtstamp())
           } for de_def_obj in de_def_objs}
           )
-    orb.log.debug('      data element defs created: {}'.format(
+    orb.log.debug('  - data element defs created: {}'.format(
                                             str(list(de_defz.keys()))))
 
 def update_de_defz(orb, de_def_obj):
@@ -1298,7 +1298,7 @@ def update_de_defz(orb, de_def_obj):
         orb (Uberorb):  singleton imported from p.node.uberorb
         de_def_obj (DataElementDefinition):  DataElementDefinition object
     """
-    # orb.log.debug('[orb] update_parm_defz')
+    # orb.log.debug('* update_de_defz')
     de_defz[de_def_obj.id] = {
         'name': de_def_obj.name,
         'description': de_def_obj.description,
@@ -1336,7 +1336,7 @@ def add_data_element(orb, oid, deid):
     # [3] check whether the data element has been assigned yet ...
     if not data_elementz[oid].get(deid):
         # the data element has not yet been assigned
-        orb.log.debug('* adding data element "{}".'.format(deid))
+        orb.log.debug('  - adding data element "{}" ...'.format(deid))
         de_def = de_defz.get(deid)
         if not de_def:
             # create it from the DataElementDefinition object
@@ -1368,7 +1368,10 @@ def add_data_element(orb, oid, deid):
         data_elementz[oid][deid] = dict(
             value=value,   # consistent with dtype defined in `range_datatype`
             mod_datetime=str(dtstamp()))
+        orb.log.debug('    data element "{}" added.'.format(deid))
+        return True
     else:
+        orb.log.debug('    data element "{}" was already there.'.format(deid))
         return True
 
 def get_dval(orb, oid, deid):
