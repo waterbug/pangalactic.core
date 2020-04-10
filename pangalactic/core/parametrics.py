@@ -474,10 +474,10 @@ def add_parameter(orb, oid, pid):
     if not parameterz[oid].get(variable):
         # the variable (base parameter) has not been assigned ... this is
         # rare, so debug logging is ok
-        if is_context_parm:
-            orb.log.debug('* adding base parameter "{}".'.format(variable))
-        else:
-            orb.log.debug('* adding parameter "{}".'.format(variable))
+        # if is_context_parm:
+            # orb.log.debug('* adding base parameter "{}".'.format(variable))
+        # else:
+            # orb.log.debug('* adding parameter "{}".'.format(variable))
         pdz = parm_defz.get(variable)
         if not pdz:
             # if not in parm_defz, add it:

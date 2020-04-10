@@ -46,16 +46,17 @@ def serialize_des(orb, oid):
 def serialize_parms(orb, oid):
     """
     Output the **serialized** format for parameters (which is used for data
-    exchange, messaging, and storage [parameters.json]) -- note that this is
-    different from the **cache** format for parameters (which is used in the
-    `parameterz` in-memory cache).
+    exchange and interactions with the server) -- note that this is different
+    from the **cache** format for parameters (which is used in the `parameterz`
+    in-memory cache and its persistent storage [parameters.json]).
 
         * In the **serialized** format, the value and units are consistent:
           i.e., the value is expressed in terms of the specified units.
 
         * In the **cache** format, the values are *always* expressed in base
-          units and the units represent the preferred units to be used when
-          displaying the value in the user interface.
+          units and the 'units' field contains the preferred units to be used
+          when displaying the value in the user interface (i.e., the value must
+          be converted to those units for display).
 
     Args:
         obj_parms (dict):  a dictionary containing the parameters
@@ -325,14 +326,14 @@ def deserialize_des(orb, oid, ser_des, cname=None):
         cname (str):  class name of the object to which the parameters are
             assigned (only used for logging)
     """
-    if cname and ser_des:
-        orb.log.debug('* deserializing data elements for "{}" ({})...'.format(
-                                                                  oid, cname))
-        orb.log.debug('  - data elements: {}'.format(ser_des))
-    elif ser_des:
-        orb.log.debug('* deserializing data elements for oid "{}")...'.format(
-                                                                         oid))
-        orb.log.debug('  - data elements: {}'.format(ser_des))
+    # if cname and ser_des:
+        # orb.log.debug('* deserializing data elements for "{}" ({})...'.format(
+                                                                  # oid, cname))
+        # orb.log.debug('  - data elements: {}'.format(ser_des))
+    # elif ser_des:
+        # orb.log.debug('* deserializing data elements for oid "{}")...'.format(
+                                                                         # oid))
+        # orb.log.debug('  - data elements: {}'.format(ser_des))
     if not ser_des:
         # orb.log.debug('  object with oid "{}" has no data elements'.format(
                                                                       # oid))
@@ -357,23 +358,24 @@ def deserialize_des(orb, oid, ser_des, cname=None):
         for deid in data_elementz[oid]:
             new_dt = uncook_datetime(ser_des[deid]['mod_datetime'])
             data_elementz[oid][deid]['mod_datetime'] = new_dt
-    if data_elementz.get(oid):
-        orb.log.debug('  - oid "{}" now has these data elements: {}.'.format(
-                                         oid, str(list(data_elementz[oid]))))
+    # if data_elementz.get(oid):
+        # orb.log.debug('  - oid "{}" now has these data elements: {}.'.format(
+                                         # oid, str(list(data_elementz[oid]))))
 
 def deserialize_parms(orb, oid, ser_parms, cname=None):
     """
-    Deserialize the **serialized** format for parameters (which is used for
-    data exchange, messaging, and persistent storage [parameters.json]) -- note
-    that this is different from the **cache** format for parameters (which is
-    used in the `parameterz` in-memory cache).
+    Output the **serialized** format for parameters (which is used for data
+    exchange and interactions with the server) -- note that this is different
+    from the **cache** format for parameters (which is used in the `parameterz`
+    in-memory cache and its persistent storage [parameters.json]).
 
         * In the **serialized** format, the value and units are consistent:
           i.e., the value is expressed in terms of the specified units.
 
         * In the **cache** format, the values are *always* expressed in base
-          units and the units represent the preferred units to be used when
-          displaying the value in the user interface.
+          units and the 'units' field contains the preferred units to be used
+          when displaying the value in the user interface (i.e., the value must
+          be converted to those units for display).
 
     [NOTE: for backwards compatibility, detection of data elements in a
     `parameters` section has been added, because some data elements (such as

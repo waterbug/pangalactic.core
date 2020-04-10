@@ -162,7 +162,7 @@ class DataMatrix(OrderedDict):
             f.write(schema_out)
             # data
             data_out = '\n'.join(['\t'.join(
-                         [str(self[r_oid].get(de, ''))
+                         [str(self[r_oid].get(de, '') or '')
                           for de in self.schema])
                          for r_oid, r in self.items()])
             orb.log.debug('    + writing data: {}'.format(data_out))
