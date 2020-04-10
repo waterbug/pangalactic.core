@@ -417,9 +417,9 @@ def deserialize_parms(orb, oid, ser_parms, cname=None):
         else:
             log_msg = 'unknown id found in parameters: "{}"'.format(pid)
             orb.log.debug('  - {}'.format(log_msg))
-            if pid in parameterz[oid]:
+            if pid in parameterz.get(oid, {}):
                 del parameterz[oid][pid]
-            if pid in data_elementz[oid]:
+            if pid in data_elementz.get(oid, {}):
                 del data_elementz[oid][pid]
     ### FIXME (?): it's dangerous to remove pids not in new_parms, but we
     ### may need at some point to deal with deleted parameters ... (i.e.
