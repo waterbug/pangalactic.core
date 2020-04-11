@@ -2045,12 +2045,12 @@ dict(
     'type_of_port': 'pgefobjects:PortType.digital_data',
     'parameters': {
        'R_D':
-         {'value': 10,  # per Wikipedia: up to 10 Mbit/s
-          'mod_datetime': epoch,
+         {'value': 10000000,  # per Wikipedia: up to 10 Mbit/s
+          'mod_datetime': '2020-01-01 00:00:00',
           'units': 'Mbit/s'}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00',
     },
 
 {   '_cname': 'PortTemplate',
@@ -2062,12 +2062,12 @@ dict(
     'type_of_port': 'pgefobjects:PortType.digital_data',
     'parameters': {
        'R_D':
-         {'value': 655,  # per Wikipedia: 655 Mbit/s
-          'mod_datetime': epoch,
+         {'value': 655000000,  # per Wikipedia: 655 Mbit/s
+          'mod_datetime': '2020-01-01 00:00:00',
           'units': 'Mbit/s'}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00',
     },
 
 {   '_cname': 'PortTemplate',
@@ -2079,12 +2079,12 @@ dict(
     'type_of_port': 'pgefobjects:PortType.digital_data',
     'parameters': {
        'R_D':
-         {'value': 400,  # per Wikipedia: 400 Mbit/s
-          'mod_datetime': epoch,
+         {'value': 400000000,  # per Wikipedia: 400 Mbit/s
+          'mod_datetime': '2020-01-01 00:00:00',
           'units': 'Mbit/s'}
           },
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2020-01-01 00:00:00',
     },
 
 {   '_cname': 'PortTemplate',
