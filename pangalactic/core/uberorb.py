@@ -407,31 +407,31 @@ class UberORB(object):
 
     def _load_parmz(self):
         """
-        Load `parameterz` dict from json file.
+        Load the `parameterz` dict from json file in cache format.
         """
         self.log.debug('* _load_parmz() ...')
         json_path = os.path.join(self.home, 'parameters.json')
         if os.path.exists(json_path):
             with open(json_path) as f:
-                serialized_parms = json.loads(f.read())
-            for oid, ser_parms in serialized_parms.items():
-                deserialize_parms(self, oid, ser_parms)
+                stored_parameterz = json.loads(f.read())
+            for oid, parms in stored_parameterz.items():
+                deserialize_parms(self, oid, parms)
             self.log.debug('  - parameterz cache loaded and recomputed.')
         else:
             self.log.debug('  - "parameters.json" was not found.')
 
     def _save_parmz(self):
         """
-        Save `parameterz` dict to a json file.
+        Save `parameterz` dict to a json file in cache format.
         """
         self.log.debug('* _save_parmz() ...')
         parms_path = os.path.join(self.home, 'parameters.json')
-        serialized_parameterz = {}
-        for oid, obj_parms in parameterz.items():
+        stored_parameterz = {}
+        for oid, parms in parameterz.items():
             # NOTE: serialize_parms() uses deepcopy()
-            serialized_parameterz[oid] = serialize_parms(self, oid)
+            stored_parameterz[oid] = serialize_parms(self, oid)
         with open(parms_path, 'w') as f:
-            f.write(json.dumps(serialized_parameterz, separators=(',', ':'),
+            f.write(json.dumps(stored_parameterz, separators=(',', ':'),
                                indent=4, sort_keys=True))
         self.log.debug('  ... parameters.json file written.')
 

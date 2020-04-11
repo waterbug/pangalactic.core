@@ -2,7 +2,6 @@
 """
 Unit tests for pangalactic.core.uberorb.orb
 """
-from copy import deepcopy
 from math import fsum
 import os
 import unittest
@@ -18,9 +17,8 @@ from pangalactic.core             import config, refdata, write_config
 from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
-                                          data_elementz,
-                                          get_pval, parameterz, parm_defz,
-                                          req_allocz, round_to, set_pval)
+                                          get_pval, parameterz,
+                                          req_allocz, round_to)
 from pangalactic.core.serializers import (deserialize,
                                           deserialize_parms,
                                           serialize,
@@ -32,14 +30,10 @@ from pangalactic.core.test.utils  import (create_test_users,
                                           create_test_project,
                                           locally_owned_test_objects,
                                           owned_test_objects,
-                                          parametrized_test_object,
                                           related_test_objects)
 from pangalactic.core.uberorb     import orb
 from pangalactic.core.utils.datetimes import dtstamp
-from pangalactic.core.utils.meta      import uncook_datetime
 from pangalactic.core.utils.reports   import write_mel_xlsx
-
-NOW = str(dtstamp())
 
 orb.start(home='pangalaxian_test', debug=True)
 serialized_test_objects = create_test_users()
@@ -411,11 +405,17 @@ class OrbTest(unittest.TestCase):
         expected = orb.get('test:yoyodyne')
         self.assertEqual(expected, value)
 
-    def test_19_deserialize_parameters(self):
+    def test_19_deserialize_new_parameter_values(self):
         """
         CASE:  test pangalactic.core.serializers.deserialize_parms function.
+
+        This tests parameter deserialization, including the comparison of
+        'mod_datetime' strings to determine the precedence of values.
         """
         test_oid = 'test:iidrive'
+        current_dt = parameterz[test_oid]['m']['mod_datetime']
+        current_mass = get_pval(orb, test_oid, 'm')
+        NOW = str(dtstamp())
         serialized_parms= {
             'P':
               {'mod_datetime': NOW,
@@ -426,14 +426,16 @@ class OrbTest(unittest.TestCase):
                'units': 'bit/s',
                'value': 1000000.0},
             'm':
-              {'mod_datetime': NOW,
+              {'mod_datetime': current_dt,
                'units': 'kg',
                'value': 1000.0}
             }
         deserialize_parms(orb, test_oid, serialized_parms)
         orb.recompute_parmz()
-        expected = [True, True, True, True, True, True,
-                    0.0, 0.0, 0.0, 100.0, 1000000.0, 1000.0]
+        # deserialized mass should be ignored since its dt string is the
+        # same as that of the current mass parameter ...
+        expected = [True, True, True, True, True, True, True,
+                    0.0, 0.0, 0.0, 100.0, 1000000.0, current_mass]
         test_parms = parameterz.get(test_oid, {})
         actual = [('P[CBE]' in test_parms),
                   ('R_D[CBE]' in test_parms),
@@ -441,6 +443,7 @@ class OrbTest(unittest.TestCase):
                   ('P' in test_parms),
                   ('R_D' in test_parms),
                   ('m' in test_parms),
+                  NOW > current_dt,
                   get_pval(orb, test_oid, 'P[CBE]'),
                   get_pval(orb, test_oid, 'R_D[CBE]'),
                   get_pval(orb, test_oid, 'm[CBE]'),
@@ -462,19 +465,13 @@ class OrbTest(unittest.TestCase):
         for o in objs:
             if o.__class__.__name__ == 'HardwareProduct':
                 obj = o
-        parms = parameterz[obj.oid]
         m = get_pval(orb, obj.oid, 'm')
         P = get_pval(orb, obj.oid, 'P')
         R_D = get_pval(orb, obj.oid, 'R_D')
         value = [m, P, R_D]
-        # NOTE: in the "python-serialized" format of parametrized_test_objects,
-        # datetime objects are serialized as strings, but all other primitive
-        # types are unaltered (because json and yaml know how to serialize and
-        # deserialize all the other primitive types)
-        deser_parms = deepcopy(parameters)
-        expected = [deser_parms['m']['value'],
-                    deser_parms['P']['value'],
-                    deser_parms['R_D']['value']]
+        expected = [parameters['m']['value'],
+                    parameters['P']['value'],
+                    parameters['R_D']['value']]
         self.assertEqual(expected, value)
 
     def test_21_deserialize_related_objects(self):

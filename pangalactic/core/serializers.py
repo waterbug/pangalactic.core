@@ -10,14 +10,13 @@ from sqlalchemy import ForeignKey
 
 # PanGalactic
 from pangalactic.core.utils.meta  import (asciify, cookers, uncookers,
-                                          cook_datetime, uncook_datetime)
+                                          uncook_datetime)
 from pangalactic.core.utils.datetimes import earlier
 from pangalactic.core.parametrics import (add_parameter, data_elementz,
-                                          de_defz, get_pval, parameterz,
-                                          parm_defz, refresh_componentz,
-                                          refresh_req_allocz, set_dval,
-                                          set_pval, update_de_defz,
-                                          update_parm_defz,
+                                          de_defz, parameterz, parm_defz,
+                                          refresh_componentz,
+                                          refresh_req_allocz, set_pval,
+                                          update_de_defz, update_parm_defz,
                                           update_parmz_by_dimz)
 
 
@@ -36,27 +35,16 @@ def serialize_des(orb, oid):
     `data_elementz` dict.
     """
     if oid in data_elementz:
-        ser_des = deepcopy(data_elementz[oid])
-        for de in ser_des.values():
-            de['mod_datetime'] = cook_datetime(de['mod_datetime'])
-        return ser_des
+        return deepcopy(data_elementz[oid])
     else:
         return {}
 
 def serialize_parms(orb, oid):
     """
-    Output the **serialized** format for parameters (which is used for data
-    exchange and interactions with the server) -- note that this is different
-    from the **cache** format for parameters (which is used in the `parameterz`
-    in-memory cache and its persistent storage [parameters.json]).
-
-        * In the **serialized** format, the value and units are consistent:
-          i.e., the value is expressed in terms of the specified units.
-
-        * In the **cache** format, the values are *always* expressed in base
-          units and the 'units' field contains the preferred units to be used
-          when displaying the value in the user interface (i.e., the value must
-          be converted to those units for display).
+    Output the serialized format for parameters. Note that the values are
+    *always* expressed in *base* units and the 'units' field contains the
+    preferred units to be used when displaying the value in the user interface
+    (i.e., the value must be converted to those units for display).
 
     Args:
         obj_parms (dict):  a dictionary containing the parameters
@@ -72,15 +60,7 @@ def serialize_parms(orb, oid):
     `parameterz` dict.
     """
     if oid in parameterz:
-        ser_parms = {}
-        stored_parms = deepcopy(parameterz[oid])
-        for pid, parm in stored_parms.items():
-            ser_parm = {}
-            ser_parm['units'] = parm['units']
-            ser_parm['value'] = get_pval(orb, oid, pid, units=parm['units'])
-            ser_parm['mod_datetime'] = cook_datetime(parm['mod_datetime'])
-            ser_parms[pid] = ser_parm
-        return ser_parms
+        return deepcopy(parameterz[oid])
     else:
         return {}
 
@@ -338,44 +318,39 @@ def deserialize_des(orb, oid, ser_des, cname=None):
         # orb.log.debug('  object with oid "{}" has no data elements'.format(
                                                                       # oid))
         return
-    if oid in data_elementz:
-        for deid in ser_des:
-            if deid in data_elementz[oid]:
-                data_elementz[oid][deid].update(ser_des[deid])
-                new_dt = uncook_datetime(ser_des[deid]['mod_datetime'])
-                data_elementz[oid][deid]['mod_datetime'] = new_dt
-            else:
-                # set_dval() will add the data element AND set its value
-                set_dval(orb, oid, deid, ser_des[deid]['value'])
-        ### FIXME:  it's dangerous to remove deids not in new_des, but we
-        ### must deal with deleted parameters ...
-        # deids = list(data_elementz[oid])
-        # for deid in deids:
-            # if deid not in new_des:
-                # del data_elementz[oid][deid]
-    else:
-        data_elementz[oid] = deepcopy(ser_des)
-        for deid in data_elementz[oid]:
-            new_dt = uncook_datetime(ser_des[deid]['mod_datetime'])
-            data_elementz[oid][deid]['mod_datetime'] = new_dt
+    if oid not in data_elementz:
+        data_elementz[oid] = {}
+    for deid, de in ser_des.items():
+        mod_dt = de['mod_datetime']
+        if deid in de_defz:
+            if ((data_elementz[oid].get(deid) and
+                 mod_dt > data_elementz[oid][deid]['mod_datetime'])
+                or not data_elementz[oid].get(deid)):
+                # deserialized data element value is more recent or that
+                # data element was not previously assigned
+                data_elementz[oid] = ser_des
+        else:
+            log_msg = 'unknown id found in data elements: "{}"'.format(deid)
+            orb.log.debug('  - {}'.format(log_msg))
+            # deid has no definition, so it should not be in data_elementz
+            if deid in data_elementz.get(oid, {}):
+                del data_elementz[oid][deid]
+    ### FIXME:  it's dangerous to remove deids not in new_des, but we
+    ### must deal with deleted parameters ...
+    # deids = list(data_elementz[oid])
+    # for deid in deids:
+        # if deid not in new_des:
+            # del data_elementz[oid][deid]
     # if data_elementz.get(oid):
         # orb.log.debug('  - oid "{}" now has these data elements: {}.'.format(
                                          # oid, str(list(data_elementz[oid]))))
 
 def deserialize_parms(orb, oid, ser_parms, cname=None):
     """
-    Output the **serialized** format for parameters (which is used for data
-    exchange and interactions with the server) -- note that this is different
-    from the **cache** format for parameters (which is used in the `parameterz`
-    in-memory cache and its persistent storage [parameters.json]).
-
-        * In the **serialized** format, the value and units are consistent:
-          i.e., the value is expressed in terms of the specified units.
-
-        * In the **cache** format, the values are *always* expressed in base
-          units and the 'units' field contains the preferred units to be used
-          when displaying the value in the user interface (i.e., the value must
-          be converted to those units for display).
+    Output the serialized format for parameters. Note that the values are
+    *always* expressed in base units and the 'units' field contains the
+    preferred units to be used when displaying the value in the user interface
+    (i.e., the value must be converted to those units for display).
 
     [NOTE: for backwards compatibility, detection of data elements in a
     `parameters` section has been added, because some data elements (such as
@@ -401,22 +376,40 @@ def deserialize_parms(orb, oid, ser_parms, cname=None):
         return
     if oid not in parameterz:
         parameterz[oid] = {}
-    for pid in ser_parms:
-        new_dt = uncook_datetime(ser_parms[pid]['mod_datetime'])
+    for pid, parm in ser_parms.items():
+        mod_dt = parm['mod_datetime']
         if pid in parm_defz:
-            set_pval(orb, oid, pid, ser_parms[pid]['value'],
-                     units=ser_parms[pid]['units'], mod_datetime=new_dt)
+            # this is a parameter (has a ParameterDefinition)
+            if ((parameterz[oid].get(pid) and
+                 mod_dt > parameterz[oid][pid]['mod_datetime'])
+                or not parameterz[oid].get(pid)):
+                # deserialized parameter value is more recent or that parameter
+                # was not previously assigned
+                parameterz[oid][pid] = parm
         elif pid in de_defz:
+            # this is a data element (has a DataElementDefinition)
             log_msg = 'data element found in parameters: "{}"'.format(pid)
             orb.log.debug('  - {}'.format(log_msg))
-            set_dval(orb, oid, pid, ser_parms[pid]['value'],
-                     mod_datetime=new_dt)
+            if oid not in data_elementz:
+                data_elementz[oid] = {}
+            de = data_elementz[oid].get(pid)
+            if (de and mod_dt > de['mod_datetime']):
+                # deserialized value is more recent
+                de['mod_datetime'] = parm['mod_datetime']
+                de['value'] = parm['value']
+            elif not data_elementz[oid].get(pid):
+                # that data element was not previously assigned
+                de = dict(value=parm['value'],
+                          mod_datetime=parm['mod_datetime'])
+                data_elementz[oid][pid] = de
             # pid refers to a data element, so it should not be in parameterz
             if pid in parameterz[oid]:
                 del parameterz[oid][pid]
         else:
             log_msg = 'unknown id found in parameters: "{}"'.format(pid)
             orb.log.debug('  - {}'.format(log_msg))
+            # pid has no definition, so it should not be in parameterz or
+            # data_elementz
             if pid in parameterz.get(oid, {}):
                 del parameterz[oid][pid]
             if pid in data_elementz.get(oid, {}):
@@ -433,6 +426,9 @@ def deserialize_parms(orb, oid, ser_parms, cname=None):
     base_pids = set([pid.split('[')[0] for pid in parameterz[oid]])
     for base_pid in base_pids:
         if not base_pid in parameterz[oid]:
+            log_msg = 'base variable not in parameters, adding: "{}"'.format(
+                                                                    base_pid)
+            orb.log.debug('  - {}'.format(log_msg))
             set_pval(orb, oid, base_pid, 0.0)
 
 # DESERIALIZATION_ORDER:  order in which to deserialize classes so that
