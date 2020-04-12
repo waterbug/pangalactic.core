@@ -66,17 +66,6 @@ initial = [
 
 deds = [
 {   '_cname': 'DataElementDefinition',
-    'oid': 'pgef:DataElementDefinition.row',
-    'id': 'row',
-    'name': 'Row',
-    'owner': 'pgefobjects:PGANA',
-    'creator': 'pgefobjects:admin',
-    'create_datetime': epoch,
-    'mod_datetime': epoch,
-    'range_datatype': 'int',
-    'description': 'The number of a row in a table.'},
-
-{   '_cname': 'DataElementDefinition',
     'oid': 'pgef:DataElementDefinition.Vendor',
     'id': 'Vendor',
     'name': 'Vendor',

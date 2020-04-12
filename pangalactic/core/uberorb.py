@@ -1219,9 +1219,10 @@ class UberORB(object):
     def get_objects_for_project(self, project):
         """
         Get all the objects relevant to the specified project, including
-        objects for which the project is the `owner` or `user` (i.e., to which
-        the project has a `ProjectSystemUsage` relationship), plus all related
-        objects (their assemblies and related components, etc.).
+        [1] the project object, [2] objects for which the project is the
+        `owner` or `user` (i.e., to which the project has a
+        `ProjectSystemUsage` relationship), and [3] all related objects
+        (assemblies and related components, etc.).
 
         Args:
             project (Project):  the specified project

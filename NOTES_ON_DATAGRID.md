@@ -50,11 +50,25 @@ PGEF "DataGrid" Widget
     + cell-specific undo (as long as the edit is not "obe" -- i.e. no other
       edits have a later time-date stamp)
 
-* DMTableView (to enable filtering etc.)
+* GridTreeView(QTreeView)
   - cells addressable by row + column
-  - each row item (row_oid, column_id) maps to a QTableWidgetItem
-    + oid -> row
-    + column id -> column
+  - NOTE:  hideColumn(0) does hide the first column but also hides the tree
+    node expansion interface!  :P  To hide the initial columns (e.g. the "oid"
+    and "row" columns), they will need to be removed from the model before
+    creating the view.
+  - NOTE: setTabKeyNavigation(True) works but navigates vertically!
+    ... I think that's because the "Items" in the model are tree nodes,
+    which translates to "rows", basically ... so the navigation is
+    between the rows, not cells -- so kind of useless.
+
+    In QWidget.setTabOrder(a, b) a and b must be *widgets*, and the "cells" in
+    the QTreeView, while indexed, are not widgets.  Tab navigation between
+    cells may be possible but would probably require a LOT of work (assign a
+    widget [Delegate] to each cell and use QWidget.setTabOrder(a, b) between
+    each pair of cell delegates -- sheesh! :P)
+
+    Bottom line:  selecting a cell by double-clicking on it will be the *only*
+    way to edit a cell, for now.
 
 * access control
   - DataMatrix
