@@ -667,7 +667,10 @@ class UberORB(object):
             self.save(d_objs)
         # [2] XXX IMPORTANT!  Create the parameter definitions caches
         # ('parm_defz' and 'parmz_by_dimz') before loading parameters from
-        # 'parameters.json' -- the deserializer uses these caches
+        # 'parameters.json' -- the deserializer uses these caches.  Note that
+        # create_de_defz will create DataElementDefinitions for any data
+        # element definitions found in config['deds'] and will add them to
+        # 'de_defz'.
         create_de_defz(self)
         create_parm_defz(self)
         create_parmz_by_dimz(self)

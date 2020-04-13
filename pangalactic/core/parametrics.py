@@ -15,7 +15,8 @@ from pangalactic.core.meta            import (SELECTABLE_VALUES,
                                               DEFAULT_PRODUCT_TYPE_PARAMETERS)
 from pangalactic.core.units           import in_si, ureg
 from pangalactic.core.utils.meta      import (get_parameter_definition_oid,
-                                              get_data_element_definition_oid)
+                                              get_data_element_definition_oid,
+                                              uncook_datetime)
 from pangalactic.core.utils.datetimes import dtstamp
 
 
@@ -24,11 +25,11 @@ DATATYPES = SELECTABLE_VALUES['range_datatype']
 NULL = {'float': 0.0, 'int': 0, 'str': '', 'bool': False}
 TWOPLACES = Decimal('0.01')
 
-# NOTE! ###################################################################
+# NOTE! #####################################################################
 # For Data Element handling, see DATA ELEMENT SECTION, at the end ...
-# NOTE! ###################################################################
+# NOTE! #####################################################################
 
-# PARAMETER CACHES ########################################################
+# PARAMETER CACHES ##########################################################
 
 # componentz:  runtime component cache
 # purpose:  enable fast computation of assembly parameters
@@ -48,10 +49,10 @@ Comp = namedtuple('Comp', 'oid quantity reference_designator')
 # format:  {'parameter id': {parameter properties}
 #                            ...}}
 # ... where parameter properties are:
+# ---------------------------------------------------------------------------
 # name, variable, context, description, dimensions, range_datatype, computed,
 # mod_datetime
-# ... and data element properties are:
-# name, variable, description, range_datatype, mod_datetime
+# ---------------------------------------------------------------------------
 parm_defz = {}
 
 # parameterz:  persistent** cache of assigned parameter values
@@ -61,7 +62,9 @@ parm_defz = {}
 # format:  {object.oid : {'parameter id': {parameter properties}
 #                         ...}}
 # ... where parameter properties are:
+# --------------------------
 # value, units, mod_datetime
+# --------------------------
 parameterz = {}
 
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
@@ -79,9 +82,9 @@ parmz_by_dimz = {}
 #   alloc_ref (str):  the reference_designator or system_role of the usage
 #   pid (str):  the parameter base id
 #   constraint (NamedTuple): a named tuple of the form:
-#
-#      (units, target, max, min, tol, upper, lower, constraint_type, tol_type)
-#
+#   -----------------------------------------------------------------------
+#   (units, target, max, min, tol, upper, lower, constraint_type, tol_type)
+#   -----------------------------------------------------------------------
 # ... where:
 #
 #   units (str): units of the numerical quantities
@@ -98,7 +101,7 @@ parmz_by_dimz = {}
 req_allocz = {}
 Constraint = namedtuple('Constraint',
              'units target max min tol upper lower constraint_type tol_type')
-###########################################################################
+#############################################################################
 
 def round_to(x, n=4):
     """
@@ -1249,7 +1252,14 @@ COMPUTES = {
 # format:  {data element id: {data element properties}
 #                             ...}}
 # ... where data element properties are:
-# name, description, range_datatype, mod_datetime
+# ------------------------------------------------------
+# name, description, label, range_datatype, mod_datetime
+# ------------------------------------------------------
+# NOTE:  although "label" (a formatted label to use as a column header) is not
+# an attribute of DataElementDefinition, the label item can be set from a data
+# element structure that is set in the application's "config" file, which
+# create_de_defz() will use to update de_defz after populating it from the db
+# DataElementDefinition objects.
 de_defz = {}
 
 # data_elementz:  persistent** cache of assigned data element values
@@ -1273,6 +1283,34 @@ def create_de_defz(orb):
         orb (Uberorb):  singleton imported from p.node.uberorb
     """
     orb.log.debug('* create_de_defz')
+    # check for data element definition structures in config['deds']
+    new_ded_objs = []
+    orb.log.debug('  - checking for deds in config["deds"] ...')
+    new_config_ded_ids = []
+    if config.get('deds'):
+        ded_ids = orb.get_ids('DataElementDefinition')
+        new_config_ded_ids = [deid for deid in config['deds']
+                              if deid not in ded_ids]
+        if new_config_ded_ids:
+            # if any are found, create DataElementDefinitions from them
+            dt = dtstamp()
+            admin = orb.get('pgefobjects:admin')
+            DataElementDefinition = orb.classes.get('DataElementDefinition')
+            for deid in new_config_ded_ids:
+                ded = config['deds'][deid]
+                ded_oid = 'pgef:DataElementDefinition.' + deid
+                dt = uncook_datetime(ded.get('mod_datetime')) or dt
+                descr = ded.get('description') or ded.get('name', deid)
+                ded_obj = DataElementDefinition(oid=ded_oid, id=deid,
+                                            name=ded.get('name', deid),
+                                            range_datatype=ded['range_datatype'],
+                                            creator=admin, modifier=admin,
+                                            description=descr,
+                                            create_datetime=dt,
+                                            mod_datetime=dt)
+                new_ded_objs.append(ded_obj)
+        if new_ded_objs:
+            orb.save(new_ded_objs)
     de_def_objs = orb.get_by_type('DataElementDefinition')
     de_defz.update(
         {de_def_obj.id :
@@ -1283,6 +1321,13 @@ def create_de_defz(orb):
               str(getattr(de_def_obj, 'mod_datetime', '') or dtstamp())
           } for de_def_obj in de_def_objs}
           )
+    # update config_deds with labels, if they have any
+    # TODO:  add labels as "external names" in p.core.meta
+    if new_config_ded_ids:
+        for deid in new_config_ded_ids:
+            ded = config['deds'][deid]
+            if de_defz.get(deid) and ded.get('label'):
+                de_defz[deid]['label'] = ded['label']
     orb.log.debug('  - data element defs created: {}'.format(
                                             str(list(de_defz.keys()))))
 

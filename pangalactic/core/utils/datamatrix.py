@@ -9,9 +9,10 @@ from uuid        import uuid4
 
 # pangalactic
 from pangalactic.core                  import config
-from pangalactic.core.parametrics      import get_pval
+from pangalactic.core.parametrics      import de_defz, get_pval
 from pangalactic.core.uberorb          import orb
 from pangalactic.core.utils.datetimes  import dtstamp
+from pangalactic.core.utils.meta       import cookers, uncookers
 
 
 class DataMatrix(OrderedDict):
@@ -19,21 +20,30 @@ class DataMatrix(OrderedDict):
     An OrderedDict that has dicts (rows) as values, and maps a unique 'oid'
     value to each row.  It has an attribute "schema", which is a list of data
     element identifiers that reference DataElementDefinitions cached in the
-    "dedz" dict. Each row dict maps data element ids in the schema to values.
+    "de_defz" dict. Each row dict maps data element ids in the schema to
+    values.
 
-    The intent is that a DataMatrix will be created using a DataSet instance
-    and/or a schema.  Providing a DataSet implies that the DataMatrix has been
-    saved and that its .tsv file is referenced by the file name in
-    DataSet.has_representations[0].has_files[0].url, which it will attempt to
-    load from the orb.data_store.  If no file by that name is found in the
-    data_store, it will look for 'schema' and create an empty instance with
-    that schema, or with a default schema (set by the app) if none is provided.
+    The intent is that a DataMatrix can be created from a data structure that
+    has keys/schema corresponding to data elements that are defined in
+    "de_defz".
+
+    A DataMatrix is cached in the orb's data store (`orb.data`) and can be
+    saved to a .tsv file whose name is formed using the 'id' of its owner
+    Project and the name of its schema.
+
+    When DataMatrix is instantiated, its initialization will first look for an
+    appropriately named file in the orb's persistent data store (the `data`
+    directory in app home); if that is not found, it will use the schema
+    provided in the `schema` argument or, if that is not provided, a default
+    schema that can be configured by the app, and create an empty instance with
+    that schema.
 
     Attributes:
-        schema (list): list of data element ids (column "names")
-        schema_name (str): list of data element ids (column "names")
         project (Project): associated project (becomes the owner of the DataSet
             that is created when the DataMatrix is saved)
+        schema_name (str): name of a schema for lookup in config['dm_schemas']
+            -- if found, 'schema' arg will be ignored
+        schema (list): list of data element ids (column "names")
     """
     def __init__(self, *args, project=None, schema_name=None, schema=None,
                  **kw):
@@ -48,10 +58,10 @@ class DataMatrix(OrderedDict):
             schema (list): list of data element ids (column "names")
         """
         super(DataMatrix, self).__init__(*args, **kw)
-        sig = 'project={}, schema_name={}, schema={}'.format(
-                                            getattr(project, 'id', 'None'),
-                                            str(schema_name),
-                                            str(schema))
+        sig = 'project="{}", schema_name="{}", schema={}'.format(
+                                        getattr(project, 'id', '') or '[None]',
+                                        schema_name or '[None]',
+                                        str(schema or '[None]'))
         orb.log.debug('* DataMatrix({})'.format(sig))
         if not isinstance(project, orb.classes['Project']):
             project = orb.get('pgefobjects:SANDBOX')
@@ -59,42 +69,56 @@ class DataMatrix(OrderedDict):
         orb.log.debug('  - project: {}'.format(project.id))
         self.schema_name = schema_name or config.get('default_schema_name',
                                                      'generic')
+        orb.log.debug('  - schema_name set to: "{}"'.format(schema_name))
         got_data = False
+        config_deds = config.get('deds', {})
         if self.schema_name:
             fname = self.oid + '.tsv'
             try:
                 self.load(fname)
                 self.schema_name = self.oid[len(self.project.id)+1:]
+                # if load is successful, it will set self.schema from the file
+                # column headings -- the following checks to see if any column
+                # labels can be found based on self.schema; if a label is not
+                # found, the column heading from the file will be used
+                self.column_labels = [
+                    (de_defz.get(deid, {}).get('label', '')
+                     or config_deds.get(deid, {}).get('label', '')
+                     or de_defz.get(deid, {}).get('name', '')
+                     or config_deds.get(deid, {}).get('name', '')
+                     or deid)
+                    for deid in self.schema]
                 got_data = True
             except:
                 orb.log.debug('  - unable to load "{}".'.format(fname))
                 orb.log.debug('    empty DataMatrix will be created ...')
         if not got_data:
             orb.log.debug('  - no data; looking up schema ...')
-            # look up schema ...
-            if config['dm_schemas'].get(schema_name):
-                orb.log.debug('  - found schema "{}":'.format(schema_name))
-                self.schema_name = schema_name
-                self.schema = config['dm_schemas'][schema_name]
-                orb.log.debug('    {}'.format(str(self.schema)))
+            # if self.dm has a 'schema_name' set, precedence is given to a schema
+            # lookup in config["dm_schemas"] by 'schema_name' over a 'schema'
+            # that has been assigned to the dm.
+            std_schema = config.get('dm_schemas', {}).get(schema_name, [])
+            if std_schema:
+                msg = 'std schema "{}" found, setting col labels ...'.format(
+                                                                 schema_name)
+                orb.log.debug('  - {}'.format(msg))
+                self.schema = std_schema[:]
+                self.column_labels = [
+                    (de_defz.get(deid, {}).get('label', '')
+                     or config_deds.get(deid, {}).get('label', '')
+                     or de_defz.get(deid, {}).get('name', '')
+                     or config_deds.get(deid, {}).get('name', '')
+                     or deid)
+                    for deid in std_schema]
             else:
-                # if schema not found, use "generic" schema_name as default
-                schema_name = 'generic'
                 self.schema = schema or ['name', 'desc']
-            # look for a saved DataMatrix with that project and schema_name:
-            fname = project.id + '-' + schema_name + '.tsv'
-            if os.path.exists(os.path.join(orb.data_store, fname)):
-                try:
-                    self.load(fname)
-                except:
-                    orb.log.debug('  - could not load saved file "{}".'.format(
-                                                                        fname))
+                self.column_labels = schema or ['Name', 'Description']
         # add myself to the orb.data in-memory cache
         orb.data[self.oid] = self
 
     @property
     def oid(self):
-        return self.project.id + '-' + self.schema_name
+        return '-'.join([self.project.id, self.schema_name])
 
     def row(self, i):
         """
@@ -111,7 +135,6 @@ class DataMatrix(OrderedDict):
         """
         row_dict = {}
         oid = str(uuid4())
-        row_dict['oid'] = oid
         self[oid] = row_dict
         return row_dict
 
@@ -123,33 +146,42 @@ class DataMatrix(OrderedDict):
             fname (str): name of a DataMatrix .tsv file
         """
         # TODO: add exception handling:  empty file, etc.
-        orb.log.debug('  - dm.load({})'.format(fname))
-        with open(os.path.join(orb.data_store, fname)) as f:
+        orb.log.debug('* dm.load({})'.format(fname))
+        fpath = os.path.join(orb.data_store, fname)
+        if not os.path.exists(fpath):
+            orb.log.debug('  - path "{}" does not exist)'.format(fpath))
+            return
+        with open(fpath) as f:
             first = f.readline()
-            self.schema = first[:-1].split('\t')
-            row_oids = True
-            orb.log.debug('    + schema: {}'.format(str(self.schema)))
+            schema = first[:-1].split('\t')
             for line in f:
                 data = line[:-1].split('\t')
                 if len(data) == 1:
                     # this would be a final empty line
                     break
-                row_dict = {}
-                for i, de in enumerate(self.schema):
-                    row_dict[de] = data[i]
-                if row_oids:
-                    oid = row_dict['oid']
+                data_row_dict = {}
+                for i, de in enumerate(schema):
+                    data_row_dict[de] = data[i]
+                if 'oid' in data_row_dict:
+                    oid = data_row_dict['oid']
+                    del data_row_dict['oid']
+                    schema.remove('oid')
                 else:
                     oid = str(uuid4())
-                    row_dict['oid'] = oid
-                self[oid] = row_dict
+                self[oid] = deepcopy(data_row_dict)
             orb.log.debug('    + read {} row(s) of data:'.format(len(self)))
-            for row_oid, row_data in self.items():
-                orb.log.debug('      {}: {}'.format(row_oid, str(row_data)))
+            self.schema = schema
+            orb.log.debug('    + schema: {}'.format(str(schema)))
+            for row_oid, row_dict in self.items():
+                # type cast data element values in each row
+                for de in row_dict:
+                    row_dict[de] = uncookers[(schema[de]['range_datatype'],
+                                              True)](row_dict[de])
+                orb.log.debug('      {}: {}'.format(row_oid, str(row_dict)))
 
     def save(self):
         """
-        Write my data into a .tsv file.
+        Serialize my data into a .tsv file.
         """
         orb.log.debug('  - dm.save()')
         orb.log.debug('    + full dm:')
@@ -157,14 +189,21 @@ class DataMatrix(OrderedDict):
         fname = self.oid + '.tsv'
         with open(os.path.join(orb.data_store, fname), 'w') as f:
             # header line
-            schema_out = '\t'.join(self.schema) + '\n'
+            ser_schema = ['oid']
+            ser_schema += self.schema
+            schema_out = '\t'.join(ser_schema) + '\n'
             orb.log.debug('  - writing schema: {}'.format(schema_out))
             f.write(schema_out)
+            # add 'oid' column to data
+            serialized_data = deepcopy(self)
+            for oid, row in serialized_data.items():
+                for de, val in self.schema:
+                    row[de] = cookers[(de_defz[de]['range_datatype'],
+                                       True)](row[de])
+                row['oid'] = oid
             # data
-            data_out = '\n'.join(['\t'.join(
-                         [str(self[r_oid].get(de, '') or '')
-                          for de in self.schema])
-                         for r_oid, r in self.items()])
+            data_out = '\n'.join(['\t'.join([row[de] for de in ser_schema])
+                                   for row in serialized_data])
             orb.log.debug('    + writing data: {}'.format(data_out))
             f.writelines(data_out)
             # I like a final line-ending char :)
