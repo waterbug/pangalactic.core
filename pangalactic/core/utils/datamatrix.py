@@ -3,47 +3,127 @@
 Pan Galactic DataMatrix object, based on OrderedDict.
 """
 import os
-from collections import OrderedDict
-from copy        import deepcopy
-from uuid        import uuid4
+# from copy import deepcopy
+from uuid import uuid4
 
 # pangalactic
 from pangalactic.core                  import config
-from pangalactic.core.parametrics      import de_defz, get_pval
+from pangalactic.core.parametrics      import (de_defz, parm_defz,
+                                               data_elementz,
+                                               parameterz,
+                                               entz, ent_histz,
+                                               get_dval, get_pval,
+                                               set_dval, set_pval)
 from pangalactic.core.uberorb          import orb
 from pangalactic.core.utils.datetimes  import dtstamp
-from pangalactic.core.utils.meta       import cookers, uncookers
+# from pangalactic.core.utils.meta       import uncookers
 
 
-class DataMatrix(OrderedDict):
+class Entity:
     """
-    An OrderedDict that has dicts (rows) as values, and maps a unique 'oid'
-    value to each row.  It has an attribute "schema", which is a list of data
-    element identifiers that reference DataElementDefinitions cached in the
-    "de_defz" dict. Each row dict maps data element ids in the schema to
+    An interface to access a set of Data Elements and Parameters in the
+    `data_elementz` and `parameterz` caches, respectively.  The concept behind
+    Entity is essentially synonymous with "record" as in database records,
+    "row" as in tables or matrices, anonymous Class instances in an ontology,
+    or "Item" in a PyQt QAbstractItemModel.  Its metadata (owner, creator,
+    modifier, create_datetime, and mod_datetime) are maintained in the 'entz'
+    cache.  Attributes aside from metadata are accessed directly in the
+    `data_elementz` and `parameterz` caches, so there is no need for an Entity
+    to store any data locally other than its 'oid', which is used to access its
+    data in the caches.
+
+    Keyword Args:
+        oid (str):  a unique identifier
+        owner (str):  oid of an Organization
+        creator (str):  oid of the entity's creator
+        modifier (str):  oid of the entity's last modifier
+        create_datetime (str):  iso-format string of creation datetime
+        mod_datetime (str):  iso-format string of last mod datetime
+    """
+    def __init__(self, oid=None, owner=None, creator=None, modifier=None,
+                 create_datetime=None, mod_datetime=None):
+        if not oid:
+            oid = str(uuid4())
+        self.oid = oid
+        # TODO:  also check if oid is that of an object
+        if oid not in entz:
+            dt = str(dtstamp())
+            creator = 'pgefobjects:admin'
+            modifier = 'pgefobjects:admin'
+            create_datetime = create_datetime or dt
+            mod_datetime = mod_datetime or dt
+            owner = owner or 'pgefobjects:PGANA'
+            entz[oid] = dict(oid=oid, owner=owner, creator=creator,
+                             modifier=modifier, create_datetime=create_datetime,
+                             mod_datetime=mod_datetime)
+
+    def __getattr__(self, field_id):
+        """
+        Get the value of an entity field, returning [1] for a data element, a
+        simple value or [2] for a parameter, a value in base units.
+        """
+        if field_id in ('oid', 'owner', 'creator', 'modifier',
+                        'create_datetime', 'mod_datetime'):
+            # metadata
+            return entz[self.oid].get(field_id)
+        elif field_id in parm_defz:
+            return get_pval(orb, self.oid, field_id)
+        else:
+            return get_dval(orb, self.oid, field_id)
+
+    def __setattr__(self, field_id, value):
+        """
+        Set the value of an entity field, which may be either a data element or a
+        parameter.  Note that this will add the field if it is not already present.
+        """
+        if field_id == 'oid':
+            object.__setattr__(self, 'oid', value)
+        elif field_id in ('oid', 'owner', 'creator', 'modifier',
+                          'create_datetime', 'mod_datetime'):
+            # metadata
+            entz[self.oid][field_id] = value
+        elif field_id in parm_defz:
+            set_pval(orb, self.oid, field_id, value)
+        else:
+            set_dval(orb, self.oid, field_id, value)
+
+    def __delattr__(self, field_id):
+        """
+        Delete an entity field.
+        """
+        if field_id in parameterz.get(self.oid, {}):
+            del parameterz[self.oid][field_id]
+        elif field_id in data_elementz.get(self.oid, {}):
+            del data_elementz[self.oid][field_id]
+
+
+class DataMatrix(dict):
+    """
+    A dict that contains "entities" (dicts), a.k.a. rows, as its values.  The
+    DataMatrix maps the unique identifier ("oid") of each entity to the entity.
+    The DataMatrix has an attribute "schema" that is a list of data element
+    identifiers that reference DataElementDefinitions (which are cached in the
+    "de_defz" dict for quick access). Each entity maps data element ids to
     values.
 
-    The intent is that a DataMatrix can be created from a data structure that
-    has keys/schema corresponding to data elements that are defined in
-    "de_defz".
-
     A DataMatrix is cached in the orb's data store (`orb.data`) and can be
-    saved to a .tsv file whose name is formed using the 'id' of its owner
-    Project and the name of its schema.
+    saved to a .tsv file whose name is formed using the unique identifier (oid)
+    of the DataMatrix, which is composed from the 'id' of its owner Project and
+    the name of its schema.
 
-    When DataMatrix is instantiated, its initialization will first look for an
-    appropriately named file in the orb's persistent data store (the `data`
+    When a DataMatrix is instantiated, its initialization will first look for
+    an appropriately named file in the orb's persistent data store (the `data`
     directory in app home); if that is not found, it will use the schema
     provided in the `schema` argument or, if that is not provided, a default
     schema that can be configured by the app, and create an empty instance with
     that schema.
 
     Attributes:
-        project (Project): associated project (becomes the owner of the DataSet
-            that is created when the DataMatrix is saved)
-        schema_name (str): name of a schema for lookup in config['dm_schemas']
+        project (Project): associated project (owner of the DataMatrix)
+        schema_name (str): name of a schema for lookup in `schemaz` cache
             -- if found, 'schema' arg will be ignored
-        schema (list): list of data element ids (column "names")
+        schema (list): list of data element or parameter ids (column "names")
+        oids (list): list of Entity oids
     """
     def __init__(self, *args, project=None, schema_name=None, schema=None,
                  **kw):
@@ -51,13 +131,13 @@ class DataMatrix(OrderedDict):
         Initialize.
 
         Keyword Args:
-            project (Project): associated project (becomes the owner of the DataSet
-                that is created when the DataMatrix is saved)
+            project (Project): associated project (owner of the DataMatrix)
             schema_name (str): name of a schema for lookup in
                 config['dm_schemas'] -- if found, 'schema' arg will be ignored
             schema (list): list of data element ids (column "names")
         """
         super(DataMatrix, self).__init__(*args, **kw)
+        self.oids = []
         sig = 'project="{}", schema_name="{}", schema={}'.format(
                                         getattr(project, 'id', '') or '[None]',
                                         schema_name or '[None]',
@@ -122,92 +202,146 @@ class DataMatrix(OrderedDict):
 
     def row(self, i):
         """
-        Return the i-th value from the dm.
+        Return the i-th row from the dm.
         """
-        if i >= len(self):
-            return {}
-        idxs = list(self.keys())
-        return self[idxs[i]]
+        if i >= len(self.oids):
+            return
+        return self[self.oids[i]]
 
     def append_new_row(self):
         """
-        Appends an empty row, with a new oid.
+        Appends an empty Entity with a new oid.
         """
-        row_dict = {}
-        oid = str(uuid4())
-        self[oid] = row_dict
-        return row_dict
+        e = Entity()
+        self[e.oid] = e
+        self.oids.append(e.oid)
+        return e
 
-    def load(self, fname):
+    def insert_new_row(self, i):
         """
-        Load data from a datamatrix .tsv file.
+        Inserts an empty Entity with a new oid, in the ith position.
+        """
+        e = Entity()
+        self[e.oid] = e
+        self.oids.insert(i, e.oid)
+        return e
 
-        Args:
-            fname (str): name of a DataMatrix .tsv file
+    def remove_row(self, i):
         """
-        # TODO: add exception handling:  empty file, etc.
-        orb.log.debug('* dm.load({})'.format(fname))
-        fpath = os.path.join(orb.data_store, fname)
-        if not os.path.exists(fpath):
-            orb.log.debug('  - path "{}" does not exist)'.format(fpath))
-            return
-        with open(fpath) as f:
-            first = f.readline()
-            schema = first[:-1].split('\t')
-            for line in f:
-                data = line[:-1].split('\t')
-                if len(data) == 1:
-                    # this would be a final empty line
-                    break
-                data_row_dict = {}
-                for i, de in enumerate(schema):
-                    data_row_dict[de] = data[i]
-                if 'oid' in data_row_dict:
-                    oid = data_row_dict['oid']
-                    del data_row_dict['oid']
-                    schema.remove('oid')
-                else:
-                    oid = str(uuid4())
-                self[oid] = deepcopy(data_row_dict)
-            orb.log.debug('    + read {} row(s) of data:'.format(len(self)))
-            self.schema = schema
-            orb.log.debug('    + schema: {}'.format(str(schema)))
-            for row_oid, row_dict in self.items():
-                # type cast data element values in each row
-                for de in row_dict:
-                    row_dict[de] = uncookers[(schema[de]['range_datatype'],
-                                              True)](row_dict[de])
-                orb.log.debug('      {}: {}'.format(row_oid, str(row_dict)))
+        Remove the ith row.
+        """
+        if i >= len(self.oids):
+            return False
+        oid = self.oids[i]
+        del self[oid]
+        self.oids.pop(i)
+        return True
 
-    def save(self):
+    def remove_oid(self, oid):
         """
-        Serialize my data into a .tsv file.
+        Remove the row with the specified oid.
+        """
+        if oid not in self.oids:
+            return False
+        self.oids.remove(oid)
+        del self[oid]
+        return True
+
+    # ---------------------------------------------------------------------
+    # NOTE:  the "load" method is unnecessary in the Entity paradigm:  the
+    # Entity's data is all in the caches and is accessed from there.
+    # ---------------------------------------------------------------------
+    # def load(self, fname):
+        # """
+        # Load data from a datamatrix .tsv file.
+
+        # Args:
+            # fname (str): name of a DataMatrix .tsv file
+        # """
+        # # TODO: add exception handling:  empty file, etc.
+        # orb.log.debug('* dm.load({})'.format(fname))
+        # fpath = os.path.join(orb.data_store, fname)
+        # if not os.path.exists(fpath):
+            # orb.log.debug('  - path "{}" does not exist)'.format(fpath))
+            # return
+        # with open(fpath) as f:
+            # first = f.readline()
+            # schema = first[:-1].split('\t')
+            # orb.log.debug('  - serialized schema: "{}"'.format(str(schema)))
+            # for line in f:
+                # data = line[:-1].split('\t')
+                # if len(data) == 1:
+                    # # this would be a final empty line
+                    # break
+                # data_row_dict = {}
+                # for i, de in enumerate(schema):
+                    # data_row_dict[de] = data[i]
+                # if 'oid' in data_row_dict:
+                    # oid = data_row_dict['oid']
+                    # del data_row_dict['oid']
+                # else:
+                    # oid = str(uuid4())
+                # self[oid] = deepcopy(data_row_dict)
+                # self.oids.append(oid)
+                # orb.log.debug('  - read row "{}": {}'.format(
+                                                # oid, str(self[oid])))
+            # schema.remove('oid')
+            # orb.log.debug('  - schema: "{}"'.format(str(schema)))
+            # orb.log.debug('    + read {} row(s) of data:'.format(len(self)))
+            # self.schema = schema
+            # orb.log.debug('    + schema: {}'.format(str(schema)))
+            # for row_oid, row_dict in self.items():
+                # # type cast data element values in each row
+                # for de in row_dict:
+                    # row_dict[de] = uncookers[(schema[de]['range_datatype'],
+                                              # True)](row_dict[de])
+                # orb.log.debug('      {}: {}'.format(row_oid, str(row_dict)))
+
+    def save(self, fmt='tsv'):
+        """
+        Persist my data.
+
+        Keyword args:
+            fmt (str):  persistence format: one of [tsv|json|yaml]
+        """
+        if fmt == 'tsv':
+            self.to_tsv()
+            return True
+        # TODO:  json and yaml
+        return False
+
+    def to_tsv(self, fpath=None):
+        """
+        Write my data into a .tsv file in the specified path (default: the
+        orb's "data store" (i.e., 'app_home/data').
         """
         orb.log.debug('  - dm.save()')
-        orb.log.debug('    + full dm:')
-        orb.log.debug('      {}'.format(str(deepcopy(self))))
+        orb.log.debug('    data rows: {}'.format(len(self)))
+        orb.log.debug('    row oids: {}'.format(str(self.oids)))
         fname = self.oid + '.tsv'
-        with open(os.path.join(orb.data_store, fname), 'w') as f:
-            # header line
-            ser_schema = ['oid']
-            ser_schema += self.schema
-            schema_out = '\t'.join(ser_schema) + '\n'
-            orb.log.debug('  - writing schema: {}'.format(schema_out))
-            f.write(schema_out)
-            # add 'oid' column to data
-            serialized_data = deepcopy(self)
-            for oid, row in serialized_data.items():
-                for de, val in self.schema:
-                    row[de] = cookers[(de_defz[de]['range_datatype'],
-                                       True)](row[de])
-                row['oid'] = oid
-            # data
-            data_out = '\n'.join(['\t'.join([row[de] for de in ser_schema])
-                                   for row in serialized_data])
-            orb.log.debug('    + writing data: {}'.format(data_out))
-            f.writelines(data_out)
-            # I like a final line-ending char :)
-            f.write('\n')
+        orb.log.debug('    output file name: {}'.format(fname))
+        if not fpath:
+            fpath = orb.data_store
+        f = open(os.path.join(fpath, fname), 'w')
+        # header line
+        ser_schema = ['oid']
+        ser_schema += self.schema[:]
+        data_out = '\t'.join(ser_schema) + '\n'
+        orb.log.debug('  - output schema: {}'.format(ser_schema))
+        for oid in self.oids:
+            if not oid:
+                continue
+            orb.log.debug('  - row with oid: {}'.format(oid))
+            orb.log.debug('    {}'.format(str(self[oid])))
+            ser_row = [oid]
+            for deid in self.schema:
+                ser_row.append(str(self[oid].get(deid) or ''))
+            orb.log.debug('    serialized row: {}'.format(str(ser_row)))
+            data_out += '\t'.join(ser_row) + '\n'
+        orb.log.debug('    + writing data:')
+        orb.log.debug('      {}'.format(data_out))
+        f.write(data_out)
+        f.close()
 
     # NOTE: this code is just a copy of the code in reports.py for MEL
     # generation -- needs to be adapted/generalized ...

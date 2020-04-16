@@ -28,7 +28,7 @@ PGEF "DataGrid" Widget
     + label: "external" name (table column label; may contain line breaks)
     + description: definition
 
-* row == GridTreeItem
+* Entity == row == GridTreeItem
   - a dict that is semantically analogous to a domain object (and may be
     "linked" to one), and whose items are parameters and data elements
   - has a unique "oid", same as an object, so can also have parameters

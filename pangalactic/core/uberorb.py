@@ -33,6 +33,7 @@ from pangalactic.core.parametrics import (add_default_parameters,
                                           create_parm_defz,
                                           create_parmz_by_dimz,
                                           data_elementz,
+                                          entz, ent_histz,
                                           get_parameter_id,
                                           parameterz,
                                           refresh_componentz,
@@ -289,6 +290,8 @@ class UberORB(object):
         self.started = True
         self._save_data_elementz()
         self._save_parmz()
+        self._save_entz()
+        self._save_ent_histz()
         return self.home
 
     def init_registry(self, home, db_url, force_new_core=False, version='',
@@ -399,8 +402,8 @@ class UberORB(object):
         Save `diagramz` cache to diagrams.json file.
         """
         self.log.debug('* _save_diagramz() ...')
-        diagz_path = os.path.join(self.home, 'diagrams.json')
-        with open(diagz_path, 'w') as f:
+        json_path = os.path.join(self.home, 'diagrams.json')
+        with open(json_path, 'w') as f:
             f.write(json.dumps(diagramz, separators=(',', ':'),
                                indent=4, sort_keys=True))
         self.log.debug('  ... diagrams.json file written.')
@@ -425,12 +428,12 @@ class UberORB(object):
         Save `parameterz` dict to a json file in cache format.
         """
         self.log.debug('* _save_parmz() ...')
-        parms_path = os.path.join(self.home, 'parameters.json')
+        json_path = os.path.join(self.home, 'parameters.json')
         stored_parameterz = {}
         for oid, parms in parameterz.items():
             # NOTE: serialize_parms() uses deepcopy()
             stored_parameterz[oid] = serialize_parms(self, oid)
-        with open(parms_path, 'w') as f:
+        with open(json_path, 'w') as f:
             f.write(json.dumps(stored_parameterz, separators=(',', ':'),
                                indent=4, sort_keys=True))
         self.log.debug('  ... parameters.json file written.')
@@ -468,6 +471,54 @@ class UberORB(object):
             self.log.debug('  ... data_elements.json file written.')
         except:
             self.log.debug('  ... writing data_elements.json file failed!')
+
+    def _load_entz(self):
+        """
+        Load the `entz` dict from json file.
+        """
+        self.log.debug('* _load_entz() ...')
+        json_path = os.path.join(self.home, 'ents.json')
+        if os.path.exists(json_path):
+            with open(json_path) as f:
+                entz.update(json.loads(f.read()))
+            self.log.debug('  - entz cache loaded.')
+        else:
+            self.log.debug('  - "ents.json" was not found.')
+
+    def _save_entz(self):
+        """
+        Save `entz` dict to json file.
+        """
+        self.log.debug('* _save_entz() ...')
+        json_path = os.path.join(self.home, 'ents.json')
+        with open(json_path, 'w') as f:
+            f.write(json.dumps(entz, separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        self.log.debug('  ... ents.json file written.')
+
+    def _load_ent_histz(self):
+        """
+        Load the `ent_histz` dict from json file.
+        """
+        self.log.debug('* _load_ent_histz() ...')
+        json_path = os.path.join(self.home, 'ent_hists.json')
+        if os.path.exists(json_path):
+            with open(json_path) as f:
+                ent_histz.update(json.loads(f.read()))
+            self.log.debug('  - ent_histz cache loaded.')
+        else:
+            self.log.debug('  - "ent_hists.json" was not found.')
+
+    def _save_ent_histz(self):
+        """
+        Save `ent_histz` dict to json file.
+        """
+        self.log.debug('* _save_ent_histz() ...')
+        json_path = os.path.join(self.home, 'ent_hists.json')
+        with open(json_path, 'w') as f:
+            f.write(json.dumps(ent_histz, separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        self.log.debug('  ... ent_hists.json file written.')
 
     def recompute_parmz(self):
         """
@@ -684,6 +735,8 @@ class UberORB(object):
         # ********************************************************************
         self._load_data_elementz()
         self._load_parmz()
+        self._load_entz()
+        self._load_ent_histz()
         self.recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
         self.log.debug('  + checking for updates to parameter definitions ...')

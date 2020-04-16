@@ -1266,11 +1266,41 @@ de_defz = {}
 #              ** persisted in the file 'data_elements.json' in the
 #              application home directory -- see the orb functions
 #              `_save_data_elementz` and `_load_data_elementz`
-# format:  {object.oid : {'data element id': {data element properties}
-#                         ...}}
+# format:  {oid : {'data element id': {data element properties}
+#                   ...}}
 # ... where data element properties are:
+# -------------------
 # value, mod_datetime
+# -------------------
 data_elementz = {}
+
+# entz:        persistent** cache of entities (dicts)
+#              ** persisted in the file 'ents.json' in the
+#              application home directory -- see the orb functions
+#              `_save_data_elementz` and `_load_entz`
+# format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
+#           ...}
+# ... where required data elements for the entity are:
+# -------------------------------------------------------
+# owner, creator, modifier, create_datetime, mod_datetime
+# -------------------------------------------------------
+entz = {}
+
+# EXPERIMENTAL:  support for searching of entities by data element and
+#                parameter values (in base units)
+# ent_lookupz    runtime cache for reverse lookup of entities
+#              maps tuples of values to entity oids
+# format:  {de_values, p_values) : oid,
+#           ...}
+ent_lookupz = {}
+
+# ent_histz:  persistent** cache of previous versions of entities,
+#             saved as named tuples ...
+#              ** persisted in the file 'ent_hists.json' in the
+#              application home directory -- see the orb functions
+#              `_save_data_elementz` and `_load_entz`
+# format:  {entity['oid'] : [list of previous versions of entity]}
+ent_histz = {}
 
 def create_de_defz(orb):
     """
@@ -1431,7 +1461,7 @@ def get_dval(orb, oid, deid):
     if not dedef:
         # orb.log.debug('* get_dval: "{}" does not have a definition.'.format(
                                                                         # deid))
-        return
+        return None
     try:
         # for extreme debugging only ...
         # orb.log.debug('  value of {} is {} ({})'.format(pid, val, type(val)))
@@ -1594,97 +1624,37 @@ def add_default_data_elements(orb, obj):
     for deid in deids:
         add_data_element(orb, obj.oid, deid)
 
-################################################
-# CODE BELOW THIS LINE IS DEPRECATED ...
-################################################
+#############################################################
+# ENTITY SECTION (see Entity class in the parametrics module)
+#############################################################
 
-# NOTE: this may not be needed
-# flow_parmz:  runtime cache that maps parameters to port types
-# format:  {parameter.id : port_type}
-# flow_parmz = {}
+# ENTITY DATA CACHES ##################################################
 
-# def refresh_flow_parmz(orb):
-    # """
-    # Refresh the `flow_parmz` cache.  The purpose of the 'flow_parmz' cache is
-    # to avoid db lookups in indentifying flow/port-related parameters, which
-    # need to be synchronized with the assignment of Ports to HardwareProducts.
+# entz:        persistent** cache of Entity metadata
+#              ** persisted in the file 'ents.json' in the
+#              application home directory -- see the orb functions
+#              `_save_data_elementz` and `_load_entz`
+# format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
+#           ...}
+# ... where required data elements for the entity are:
+# -------------------------------------------------------
+# owner, creator, modifier, create_datetime, mod_datetime
+# -------------------------------------------------------
+entz = {}
 
-    # This function is called at orb startup and whenever a new
-    # ParameterDefinition is saved.  The 'flow_parmz' dictionary has the form
+# ent_lookupz  runtime cache for reverse lookup of entities
+#              maps tuples of values to entity oids
+#              (EXPERIMENTAL) support for searching of Entity instance data by
+#              data element and parameter values (in base units)
+# format:  {de_values, p_values) : oid,
+#           ...}
+ent_lookupz = {}
 
-        # {parameter.id : port_type}
-
-    # where the port_type.oid comes from the 'port_type' attribute of the
-    # ParameterDefinition.
-
-    # Args:
-        # orb (Uberorb):  singleton imported from p.node.uberorb
-    # """
-    # orb.log.debug('[orb] refresh_flow_parmz()')
-    # pds = orb.get_by_type('ParameterDefinition')
-    # for pd in pds:
-        # port_type = getattr(pd, 'port_type', None)
-        # if port_type:
-            # flow_parmz[pd.id] = port_type
-
-# OBSOLETE:  original version of compute_assembly_parameter(), using db
-# lookups for components (rather than the "componentz" cache)
-
-# def compute_assembly_parameter(orb, product, base_parameters):
-    # """
-    # Return the total value of an assembly parameter for a product based on the
-    # summed values of the base parameter over all of the product's known
-    # components.  If no components are defined for the product, simply return
-    # the value of the base parameter as specified for the product, or the
-    # default.
-
-    # CAUTION: this may return a wildly inaccurate value for an incompletely
-    # specified assembly.
-
-    # Args:
-        # orb (Uberorb): the orb (see p.node.uberorb)
-        # product (Product): the Product whose total parameter is being estimated
-        # base_parameters (str): the identifier of the base parameter
-    # """
-    # # VERY verbose, even for debugging!
-    # # orb.log.debug('[parametrics] compute_assembly_parameter()')
-    # if product:
-        # base_parameter_id = base_parameters 
-        # components = [acu.component for acu in product.components
-                      # if acu.component
-                      # and acu.component.oid != 'pgefobjects:TBD']
-        # if components:
-            # summation = fsum([compute_assembly_parameter(orb, c, base_parameter_id)
-                              # for c in components])
-            # if summation:
-                # return summation
-            # else:   # if component values sum to zero, use base value
-                # return _compute_pval(orb, product, base_parameter_id)
-        # else:
-            # # if the product has no known component, return its specified parameter
-            # # value (note that the default here is 0.0)
-            # return _compute_pval(orb, product, base_parameter_id)
-    # else:
-        # return 0.0
-
-# def get_product_parameter(orb, oid, parameter_id, base_parameters,
-                          # default=0.0):
-    # """
-    # Find the product of the base parameters for the specified object.
-
-    # Args:
-        # orb (Uberorb): the orb (see p.node.uberorb)
-        # oid (str): the oid of the Modelable containing the parameters
-        # parameter_id (str): the `id` of the parameter
-        # base_parameters (str): a comma-delimited string containing the ids of
-            # the parameters to be multiplied
-
-    # Keyword Args:
-        # default (any): a value to be returned of the parameter is not found
-    # """
-    # import operator
-    # from functools    import reduce
-    # pids = [p.strip() for p in base_parameters.split(',')]
-    # vals = [_compute_pval(orb, oid, pid) for pid in pids]
-    # return round_to(reduce(operator.mul, vals, 1.0))
+# ent_histz:  persistent** cache of previous versions of Entity states,
+#             saved as named tuples ...
+#              ** persisted in the file 'ent_hists.json' in the
+#              application home directory -- see the orb functions
+#              `_save_data_elementz` and `_load_entz`
+# format:  {entity['oid'] : [list of previous versions of entity]}
+ent_histz = {}
 
