@@ -6,6 +6,7 @@ NOTE:  Only the `orb` instance created in this module should be imported (it is
 intended to be a singleton).
 """
 import json, os, shutil, sys, traceback
+from copy import deepcopy
 
 # ruamel_yaml
 import ruamel_yaml as yaml
@@ -33,6 +34,7 @@ from pangalactic.core.parametrics import (add_default_parameters,
                                           create_parm_defz,
                                           create_parmz_by_dimz,
                                           data_elementz,
+                                          dmz, schemaz,
                                           entz, ent_histz,
                                           get_parameter_id,
                                           parameterz,
@@ -132,6 +134,8 @@ class UberORB(object):
         if not os.path.exists(pgx_home):
             os.makedirs(pgx_home, mode=0o755)
         pgx_home = os.path.abspath(pgx_home)
+        # --------------------------------------------------------------------
+        # ### NOTE:  any user-set config overrides app config
         # If config values have been edited, they will take precedence over any
         # config set by app start-up defaults.
         app_config = {}
@@ -141,10 +145,29 @@ class UberORB(object):
         if config:
             app_config.update(config)
         config.update(app_config)
-        # Saved prefs, state, and trash are read here; will be overwritten by
-        # any new prefs, state, and trash set at runtime.
-        read_prefs(os.path.join(pgx_home, 'prefs'))
+        # ### NOTE:  any user-set config overrides app config
+        # --------------------------------------------------------------------
+        # ### NOTE:  any app preset state overrides current state
+        # if there is any current state, it was set by the app, and it should
+        # override current state, so copy it to 'app_state' before reading new
+        # state, and then update the new state from the app_state (overwriting
+        # current stuff) ...
+        app_state = {}
+        if state:
+            app_state = deepcopy(state)
         read_state(os.path.join(pgx_home, 'state'))
+        state.update(app_state)
+        # ### NOTE:  any app preset state overrides current state
+        # e.g., if there are any app schemas or DataMatrix instances set by the
+        # app, they are update here ...
+        if state.get('schemaz'):
+            schemaz.update(state['schemaz'])
+        if state.get('dmz'):
+            dmz.update(state['dmz'])
+        # --------------------------------------------------------------------
+        # Saved prefs and trash are read here; will be overwritten by
+        # any new prefs and trash set at runtime.
+        read_prefs(os.path.join(pgx_home, 'prefs'))
         read_trash(os.path.join(pgx_home, 'trash'))
         # create "file vault"
         self.vault = os.path.join(pgx_home, 'vault')
@@ -230,14 +253,14 @@ class UberORB(object):
         # if __version__ != schema_version:
             # if the state 'schema_version' does not match the current
             # package's schema_version:
-            # [1] drop and create database
-            # self.drop_and_create_db(pgx_home)
-            # [2] initialize registry with "force_new_core" to create the new
-            #     classes and db tables
+            # [a] drop and create database:
+            #     self.drop_and_create_db(pgx_home)
+            # [b] initialize registry with "force_new_core" to create the new
+            #     classes and db tables:
             # self.init_registry(pgx_home, db_url, force_new_core=True,
                                # version=schema_version, debug=False,
                                # console=console)
-            # [3] transform and import data that was dumped previously
+            # [c] transform and import data that was dumped previously:
             # serialized_data = self.load_and_transform_data()
             # if serialized_data:
                 # deserialize(self, serialized_data, include_refdata=True)
@@ -253,7 +276,8 @@ class UberORB(object):
         # basically, versionables == {Product and all its subclasses}
         self.versionables = [cname for cname in self.classes if 'version' in
                              self.schemas[cname]['field_names']]
-        # [3] load (and update) ref data ...
+        # [3] load (and update) ref data ... note that this must be done AFTER
+        #     config and state have been created and updated
         self.load_reference_data()
         self._load_diagramz()
         # create 'role_product_types' cache
@@ -719,9 +743,11 @@ class UberORB(object):
         # [2] XXX IMPORTANT!  Create the parameter definitions caches
         # ('parm_defz' and 'parmz_by_dimz') before loading parameters from
         # 'parameters.json' -- the deserializer uses these caches.  Note that
-        # create_de_defz will create DataElementDefinitions for any data
-        # element definitions found in config['deds'] and will add them to
-        # 'de_defz'.
+        # create_de_defz will first populate 'de_defz' from
+        # DataElementDefinitions found in the database (created from refdata)
+        # and then will check for data element definitions in state['de_defz']
+        # -- if any are found, it will create DataElementDefinitions from them,
+        # add them to the database, and then add them to 'de_defz'.
         create_de_defz(self)
         create_parm_defz(self)
         create_parmz_by_dimz(self)

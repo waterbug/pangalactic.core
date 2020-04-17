@@ -6,7 +6,7 @@ from decimal     import Decimal
 from math        import floor, fsum, log10
 
 # pangalactic
-from pangalactic.core                 import config, prefs
+from pangalactic.core                 import config, prefs, state
 from pangalactic.core.datastructures  import OrderedSet
 from pangalactic.core.meta            import (SELECTABLE_VALUES,
                                               DEFAULT_CLASS_DATA_ELEMENTS,
@@ -1313,21 +1313,21 @@ def create_de_defz(orb):
         orb (Uberorb):  singleton imported from p.node.uberorb
     """
     orb.log.debug('* create_de_defz')
-    # check for data element definition structures in config['deds']
+    # check for data element definition structures in state['de_defz']
     new_ded_objs = []
-    orb.log.debug('  - checking for deds in config["deds"] ...')
-    new_config_ded_ids = []
-    if config.get('deds'):
+    orb.log.debug('  - checking for de defs in state["de_defz"] ...')
+    new_state_ded_ids = []
+    if state.get('de_defz'):
         ded_ids = orb.get_ids('DataElementDefinition')
-        new_config_ded_ids = [deid for deid in config['deds']
+        new_state_ded_ids = [deid for deid in state['de_defz']
                               if deid not in ded_ids]
-        if new_config_ded_ids:
+        if new_state_ded_ids:
             # if any are found, create DataElementDefinitions from them
             dt = dtstamp()
             admin = orb.get('pgefobjects:admin')
             DataElementDefinition = orb.classes.get('DataElementDefinition')
-            for deid in new_config_ded_ids:
-                ded = config['deds'][deid]
+            for deid in new_state_ded_ids:
+                ded = state['de_defz'][deid]
                 ded_oid = 'pgef:DataElementDefinition.' + deid
                 dt = uncook_datetime(ded.get('mod_datetime')) or dt
                 descr = ded.get('description') or ded.get('name', deid)
@@ -1351,11 +1351,11 @@ def create_de_defz(orb):
               str(getattr(de_def_obj, 'mod_datetime', '') or dtstamp())
           } for de_def_obj in de_def_objs}
           )
-    # update config_deds with labels, if they have any
+    # update state_dedz with labels, if they have any
     # TODO:  add labels as "external names" in p.core.meta
-    if new_config_ded_ids:
-        for deid in new_config_ded_ids:
-            ded = config['deds'][deid]
+    if new_state_ded_ids:
+        for deid in new_state_ded_ids:
+            ded = state['de_defz'][deid]
             if de_defz.get(deid) and ded.get('label'):
                 de_defz[deid]['label'] = ded['label']
     orb.log.debug('  - data element defs created: {}'.format(
