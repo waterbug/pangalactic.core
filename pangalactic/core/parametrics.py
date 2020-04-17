@@ -1628,7 +1628,7 @@ def add_default_data_elements(orb, obj):
 # ENTITY SECTION (see Entity class in the parametrics module)
 #############################################################
 
-# ENTITY DATA CACHES ##################################################
+# ENTITY DATA CACHES #########################################################
 
 # entz:        persistent** cache of Entity metadata
 #              ** persisted in the file 'ents.json' in the
@@ -1636,18 +1636,19 @@ def add_default_data_elements(orb, obj):
 #              `_save_data_elementz` and `_load_entz`
 # format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
 #           ...}
-# ... where required data elements for the entity are:
+# ... where required data elements for the Entity are:
 # -------------------------------------------------------
 # owner, creator, modifier, create_datetime, mod_datetime
 # -------------------------------------------------------
 entz = {}
 
-# ent_lookupz  runtime cache for reverse lookup of entities
+# ent_lookupz  runtime cache for reverse lookup of Entity instances
 #              maps tuples of values to entity oids
 #              (EXPERIMENTAL) support for searching of Entity instance data by
 #              data element and parameter values (in base units)
-# format:  {de_values, p_values) : oid,
+# format:  {(oid, de_value1, ..., p_value1, ...) : oid,
 #           ...}
+#          where 'oid' is inserted for uniqueness.
 ent_lookupz = {}
 
 # ent_histz:  persistent** cache of previous versions of Entity states,
@@ -1657,4 +1658,25 @@ ent_lookupz = {}
 #              `_save_data_elementz` and `_load_entz`
 # format:  {entity['oid'] : [list of previous versions of entity]}
 ent_histz = {}
+
+# RELATED CACHES #############################################################
+
+# dmz:         persistent** cache of DataMatrix metadata
+#              ** persisted in the file 'dms.json' in the
+#              application home directory
+# format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
+#           ...}
+# ... where supported metadata for a DataMatrix are:
+# -------------------------------------------------------
+# owner, creator, modifier, create_datetime, mod_datetime
+# -------------------------------------------------------
+dmz = {}
+
+# schemaz:     persistent** cache of schemas (column views)
+#              ** persisted in the file 'schemas.json' in the
+#              application home directory
+# format:  {schema_name : [colname1, colname2, ...],
+#           ...}
+# -------------------------------------------------------
+schemaz = {}
 

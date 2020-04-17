@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Pan Galactic DataMatrix object, based on OrderedDict.
+Pan Galactic Entity and DataMatrix classes.
 """
 import os
 # from copy import deepcopy
+from collections import UserList
 from uuid import uuid4
 
 # pangalactic
@@ -12,6 +13,7 @@ from pangalactic.core.parametrics      import (de_defz, parm_defz,
                                                data_elementz,
                                                parameterz,
                                                entz, ent_histz,
+                                               schemaz, dmz,
                                                get_dval, get_pval,
                                                set_dval, set_pval)
 from pangalactic.core.uberorb          import orb
@@ -19,7 +21,7 @@ from pangalactic.core.utils.datetimes  import dtstamp
 # from pangalactic.core.utils.meta       import uncookers
 
 
-class Entity:
+class Entity(dict):
     """
     An interface to access a set of Data Elements and Parameters in the
     `data_elementz` and `parameterz` caches, respectively.  The concept behind
@@ -27,12 +29,13 @@ class Entity:
     "row" as in tables or matrices, anonymous Class instances in an ontology,
     or "Item" in a PyQt QAbstractItemModel.  Its metadata (owner, creator,
     modifier, create_datetime, and mod_datetime) are maintained in the 'entz'
-    cache.  Attributes aside from metadata are accessed directly in the
-    `data_elementz` and `parameterz` caches, so there is no need for an Entity
-    to store any data locally other than its 'oid', which is used to access its
-    data in the caches.
+    cache.  Attributes other than its 'oid' are accessed from caches: its
+    metadata are stored in the 'entz' cache; all other attributes are accessed
+    via the `data_elementz` and `parameterz` caches; therefore, an Entity does
+    not store any data locally other than its 'oid', which is used as a key
+    when interfacing to the caches.
 
-    Keyword Args:
+    Attributes:
         oid (str):  a unique identifier
         owner (str):  oid of an Organization
         creator (str):  oid of the entity's creator
@@ -40,8 +43,27 @@ class Entity:
         create_datetime (str):  iso-format string of creation datetime
         mod_datetime (str):  iso-format string of last mod datetime
     """
-    def __init__(self, oid=None, owner=None, creator=None, modifier=None,
-                 create_datetime=None, mod_datetime=None):
+    def __init__(self, *args, oid=None, owner=None, creator=None,
+                 modifier=None, create_datetime=None, mod_datetime=None,
+                 **kw):
+        """
+        Initialize.
+
+        Args:
+            args (tuple):  positional arguments, passed to superclass (dict)
+                initialization
+
+        Keyword Args:
+            oid (str):  a unique identifier
+            owner (str):  oid of an Organization
+            creator (str):  oid of the entity's creator
+            modifier (str):  oid of the entity's last modifier
+            create_datetime (str):  iso-format string of creation datetime
+            mod_datetime (str):  iso-format string of last mod datetime
+            kw (dict):  keyword args, passed to superclass (dict)
+                initialization
+        """
+        super(Entity, self).__init__(*args, **kw)
         if not oid:
             oid = str(uuid4())
         self.oid = oid
@@ -97,7 +119,134 @@ class Entity:
             del data_elementz[self.oid][field_id]
 
 
-class DataMatrix(dict):
+class DataMatrix(UserList):
+    """
+    A UserList subclass that contains instances of Entity as its items.  The
+    DataMatrix has an attribute "schema" that is a list of identifiers that
+    reference DataElementDefinitions or ParameterDefinitions (which are cached
+    in the "de_defz" dict and "parm_defz" dict, respectively).
+
+    A DataMatrix's list ('data') contents and its metadata are cached in the
+    `dmz` cache in which its key is its unique identifier ('oid'), which is
+    composed from the 'id' of its owner Project and its `schema_name` (which is
+    the key used to look up its schema in the `schemaz' cache).
+
+    When a DataMatrix is instantiated, its initialization will first check the
+    `dmz` to see if it already exists; if not, it will create a new metadata
+    record for itself there.
+
+    Attributes:
+        data (iterable):  an iterable of Entity oids
+        project (Project): associated project (owner of the DataMatrix)
+        schema_name (str): name of a schema for lookup in the `schemaz` cache
+            -- if found, the 'schema' arg will be ignored
+        schema (list): list of data element ids and parameter ids
+    """
+    def __init__(self, *data, project=None, schema_name=None, schema=None,
+                 owner=None, creator=None, modifier=None, create_datetime=None,
+                 mod_datetime=None):
+        """
+        Initialize.
+
+        Args:
+            data (iterable):  (optional) an iterable of Entity oids
+
+        Keyword Args:
+            project (Project): associated project (owner of the DataMatrix)
+            schema_name (str): name of a schema for lookup in
+                config['dm_schemas'] -- if found, 'schema' arg will be ignored
+            schema (list): list of data element ids (column "names")
+            owner (str):  oid of an Organization
+            creator (str):  oid of the entity's creator
+            modifier (str):  oid of the entity's last modifier
+            create_datetime (str):  iso-format string of creation datetime
+            mod_datetime (str):  iso-format string of last mod datetime
+        """
+        super(DataMatrix, self).__init__(*data)
+        sig = 'project="{}", schema_name="{}", schema={}'.format(
+                                        getattr(project, 'id', '') or '[None]',
+                                        schema_name or '[None]',
+                                        str(schema or '[None]'))
+        orb.log.debug('* DataMatrix({})'.format(sig))
+        if not isinstance(project, orb.classes['Project']):
+            project = orb.get('pgefobjects:SANDBOX')
+        self.project = project
+        orb.log.debug('  - project: {}'.format(project.id))
+        self.schema_name = schema_name or 'generic'
+        orb.log.debug('  - schema_name set to: "{}"'.format(schema_name))
+        orb.log.debug('  - looking up schema ...')
+        config_deds = config.get('deds', {})
+        self.schema = schemaz.get(schema_name, [])
+        if self.schema:
+            self.column_labels = [
+                (de_defz.get(col_id, {}).get('label', '')
+                 or config_deds.get(col_id, {}).get('label', '')
+                 or parm_defz.get(col_id, {}).get('label', '')
+                 or de_defz.get(col_id, {}).get('name', '')
+                 or config_deds.get(col_id, {}).get('name', '')
+                 or parm_defz.get(col_id, {}).get('name', '')
+                 or col_id)
+                for col_id in self.schema]
+        else:
+            # if schema lookup is unsuccessful, use the supplied schema, if
+            # any, or a generic schema of last resort ...
+            self.schema = schema or ['name', 'desc']
+            self.column_labels = schema or ['Name', 'Description']
+        # add myself to the dmz cache
+        dmz[self.oid] = self
+
+    @property
+    def oid(self):
+        return '-'.join([self.project.id, self.schema_name])
+
+    def row(self, i):
+        """
+        Return the i-th row from the dm.
+        """
+        if i >= len(self.oids):
+            return
+        return self[self.oids[i]]
+
+    def append_new_row(self):
+        """
+        Appends an empty Entity with a new oid.
+        """
+        e = Entity()
+        self[e.oid] = e
+        self.oids.append(e.oid)
+        return e
+
+    def insert_new_row(self, i):
+        """
+        Inserts an empty Entity with a new oid, in the ith position.
+        """
+        e = Entity()
+        self[e.oid] = e
+        self.oids.insert(i, e.oid)
+        return e
+
+    def remove_row(self, i):
+        """
+        Remove the ith row.
+        """
+        if i >= len(self.oids):
+            return False
+        oid = self.oids[i]
+        del self[oid]
+        self.oids.pop(i)
+        return True
+
+    def remove_oid(self, oid):
+        """
+        Remove the row with the specified oid.
+        """
+        if oid not in self.oids:
+            return False
+        self.oids.remove(oid)
+        del self[oid]
+        return True
+
+class DataMatrixOld(dict):
     """
     A dict that contains "entities" (dicts), a.k.a. rows, as its values.  The
     DataMatrix maps the unique identifier ("oid") of each entity to the entity.
