@@ -846,14 +846,14 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
     # orb.log.debug('* set_pval({}, {}, {})'.format(oid, pid, str(value)))
     if not oid:
         # orb.log.debug('  no oid provided; ignoring.')
-        return
+        return False
     pd = parm_defz.get(pid)
     if not pd:
         # orb.log.debug('  parameter "{}" is not defined; ignoring.'.format(pid))
-        return
+        return False
     if pd['computed']:
         # orb.log.debug('  parameter is computed -- not setting.')
-        return
+        return False
     ######################################################################
     # NOTE: henceforth, if the parameter whose value is being set is not
     # present it will be added (SCW 2019-09-26)
@@ -867,7 +867,7 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
             # if the parameter cannot be added, it normally implies that its
             # base parameter has not been defined ...
             orb.log.debug('  parameter could not be added (see log).')
-            return
+            return False
         # else:
             # orb.log.debug('  parameter either exists or was added.')
     try:
@@ -875,7 +875,7 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         pdz = parm_defz.get(pid)
         if not pdz:
             # orb.log.debug('  parameter definition not found, quitting.')
-            return
+            return False
         dt_name = pdz['range_datatype']
         dtype = DATATYPES[dt_name]
         if value:
@@ -909,6 +909,7 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         # dts = str(mod_datetime)
         # orb.log.debug('  setting value: {}'.format(value))
         # orb.log.debug('  setting mod_datetime: "{}"'.format(dts))
+        return True
     except:
         orb.log.debug('  *** set_pval() failed:')
         msg = '      value {} of datatype {}'.format(value, type(value))
@@ -917,6 +918,7 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
         orb.log.debug(msg)
         msg = '      so parm "{}" was not set for oid "{}"'.format(pid, oid)
         orb.log.debug(msg)
+        return False
 
 def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
                       local=True):
@@ -1505,12 +1507,12 @@ def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
     # orb.log.debug('* set_dval({}, {}, {})'.format(oid, deid, str(value)))
     if not oid:
         # orb.log.debug('  no oid provided; ignoring.')
-        return
+        return False
     dedef = de_defz.get(deid)
     if not dedef:
         orb.log.debug('  data element "{}" is not defined; ignoring.'.format(
                                                                        deid))
-        return
+        return False
     ######################################################################
     # NOTE: if the data element whose value is being set is not
     # present it will be added
@@ -1521,7 +1523,7 @@ def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
             orb.log.debug('  data element either exists or was added.')
         else:
             orb.log.debug('  data element could not be added (see log).')
-            return
+            return False
     try:
         # cast value to range_datatype before setting
         dt_name = dedef['range_datatype']
@@ -1537,6 +1539,7 @@ def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
         # dts = str(mod_datetime)
         # orb.log.debug('  setting value: {}'.format(value))
         # orb.log.debug('  setting mod_datetime: "{}"'.format(dts))
+        return True
     except:
         orb.log.debug('  *** set_dval() failed:')
         msg = '      setting value {} of type {}'.format(value, type(value))
@@ -1546,6 +1549,7 @@ def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
         msg = '      so data element "{}" was not set for oid "{}"'.format(
                                                                  deid, oid)
         orb.log.debug(msg)
+        return False
 
 def set_dval_from_str(orb, oid, deid, str_val, mod_datetime=None, local=True):
     """

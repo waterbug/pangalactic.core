@@ -18,7 +18,7 @@ PGEF "DataGrid" Widget
 ## Implementation
 
 * cell == a parameter or data element instance in context of a GridTreeItem
-  - addressable using (row_oid, column_id, value) tuple
+  - addressable using (`row_oid`, `column_id`, value) tuple
   - synonyms:  "field", "column", "parameter", "attribute", "property"
                "data element"
   - data element definitions are in a dict with the following keys:
@@ -38,14 +38,17 @@ PGEF "DataGrid" Widget
 
 * DataMatrix (grid: rows and columns)
   - attrs:
-    + 'oid': ([project_id]-[system_id]) -- unique
+    + 'oid': ([`project_id`]-[`system_id`]) -- unique
+    + `level_map`:  maps entity oids to assembly level (int) --
+      "level" will be used to identify "child" nodes, etc.
     + 'schema': list of data element ids
-    + 'data': its internal list, a list of dicts
+    + 'data': its internal list, a list of entity oids
   - methods:
     + serialize (returns a list of dicts)
     + dump (save to a .tsv file)
     + load (read from a .tsv file)
   - history tracking (for undo):
+    + entity-level history:  `ent_histz` cache
     + edits are tracked by cell for each user
     + cell-specific undo (as long as the edit is not "obe" -- i.e. no other
       edits have a later time-date stamp)
@@ -86,7 +89,7 @@ PGEF "DataGrid" Widget
     where roles vector is a list of [project-role, ...]
 
 * persistence
-  - data storage is the 'app_home/data' directory
+  - data storage is the `app_home/data` directory
   - datamatrices are stored as tsv files
   - data element definitions ('dedz' dict cache) is stored as a yaml file
 

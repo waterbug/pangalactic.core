@@ -3,25 +3,27 @@
 Pan Galactic Entity and DataMatrix classes.
 """
 import os
-# from copy import deepcopy
-from collections import UserList
-from uuid import uuid4
+from copy            import deepcopy
+from collections     import UserList
+from collections.abc import MutableMapping
+from itertools       import chain
+from uuid            import uuid4
 
 # pangalactic
-from pangalactic.core                  import config
-from pangalactic.core.parametrics      import (de_defz, parm_defz,
-                                               data_elementz,
-                                               parameterz,
-                                               entz, ent_histz,
-                                               schemaz, dmz,
-                                               get_dval, get_pval,
-                                               set_dval, set_pval)
-from pangalactic.core.uberorb          import orb
-from pangalactic.core.utils.datetimes  import dtstamp
+from pangalactic.core                 import config
+from pangalactic.core.parametrics     import (de_defz, parm_defz,
+                                              entz, ent_histz,
+                                              data_elementz,
+                                              parameterz,
+                                              schemaz, dmz,
+                                              get_dval, get_pval,
+                                              set_dval, set_pval)
+from pangalactic.core.uberorb         import orb
+from pangalactic.core.utils.datetimes import dtstamp
 # from pangalactic.core.utils.meta       import uncookers
 
 
-class Entity(dict):
+class Entity(MutableMapping):
     """
     An interface to access a set of Data Elements and Parameters in the
     `data_elementz` and `parameterz` caches, respectively.  The concept behind
@@ -50,8 +52,10 @@ class Entity(dict):
         Initialize.
 
         Args:
-            args (tuple):  positional arguments, passed to superclass (dict)
-                initialization
+            args (tuple):  optional positional arguments (0 or 1).  If a
+                positional arg is present, it must be either a mapping or an
+                iterable in which each element is an iterable containing 2
+                elements (e.g. a list of 2-tuples).
 
         Keyword Args:
             oid (str):  a unique identifier
@@ -63,6 +67,7 @@ class Entity(dict):
             kw (dict):  keyword args, passed to superclass (dict)
                 initialization
         """
+        orb.log.debug('* Entity()')
         super(Entity, self).__init__(*args, **kw)
         if not oid:
             oid = str(uuid4())
@@ -79,44 +84,116 @@ class Entity(dict):
                              modifier=modifier, create_datetime=create_datetime,
                              mod_datetime=mod_datetime)
 
-    def __getattr__(self, field_id):
+    def __getitem__(self, k):
         """
-        Get the value of an entity field, returning [1] for a data element, a
-        simple value or [2] for a parameter, a value in base units.
+        Get the value of an entity key, returning [0] for a metadata key, a
+        metadata value, [1] for a data element, a simple value, [2] for a
+        parameter, a value in base units, [3] if none of those are present,
+        None or whatever is provided in the 'default' arg.
         """
-        if field_id in ('oid', 'owner', 'creator', 'modifier',
-                        'create_datetime', 'mod_datetime'):
+        # orb.log.debug('* __getitem__()')
+        if k in ('oid', 'owner', 'creator', 'modifier', 'create_datetime',
+                 'mod_datetime'):
             # metadata
-            return entz[self.oid].get(field_id)
-        elif field_id in parm_defz:
-            return get_pval(orb, self.oid, field_id)
+            return entz[self.oid].get(k)
+        elif k in parm_defz:
+            return get_pval(orb, self.oid, k)
         else:
-            return get_dval(orb, self.oid, field_id)
+            return get_dval(orb, self.oid, k)
 
-    def __setattr__(self, field_id, value):
+    def get(self, k, *default):
         """
-        Set the value of an entity field, which may be either a data element or a
-        parameter.  Note that this will add the field if it is not already present.
+        Get the value of an entity key, returning [0] for a metadata key, a
+        metadata value, [1] for a data element, a simple value, [2] for a
+        parameter, a value in base units, [3] if none of those are present,
+        None or whatever is provided in the 'default' arg.
         """
-        if field_id == 'oid':
-            object.__setattr__(self, 'oid', value)
-        elif field_id in ('oid', 'owner', 'creator', 'modifier',
+        # orb.log.debug('* get()')
+        if k in ('oid', 'owner', 'creator', 'modifier', 'create_datetime',
+                 'mod_datetime'):
+            # metadata
+            # orb.log.debug('  - got metadata.')
+            return entz[self.oid].get(k)
+        elif k in parm_defz:
+            # orb.log.debug('  - got parameter.')
+            return get_pval(orb, self.oid, k)
+        elif k in de_defz:
+            # orb.log.debug('  - got data element.')
+            return get_dval(orb, self.oid, k)
+        elif default:
+            # orb.log.debug('  - got default: {}.'.format(str(default)))
+            return default[0]
+        else:
+            # orb.log.debug('  - got nothin.')
+            return get_dval(orb, self.oid, k)
+
+    def __setitem__(self, k, v):
+        """
+        Set the value of an entity key, which may be a metadata key, a data
+        element, or a parameter.  Note that this will add the key if it is not
+        already present.
+        """
+        orb.log.debug('* __getitem__()')
+        if k == 'oid':
+            object.__setattr__(self, 'oid', v)
+        elif k in ('oid', 'owner', 'creator', 'modifier',
                           'create_datetime', 'mod_datetime'):
             # metadata
-            entz[self.oid][field_id] = value
-        elif field_id in parm_defz:
-            set_pval(orb, self.oid, field_id, value)
+            if not self.oid in entz:
+                entz[self.oid] = {}
+            entz[self.oid][k] = v
         else:
-            set_dval(orb, self.oid, field_id, value)
+            previous_self = deepcopy(self)
+            if k in parm_defz:
+                success = set_pval(orb, self.oid, k, v)
+            else:
+                success = set_dval(orb, self.oid, k, v)
+            if success:
+                # add previous self to history ...
+                if not self.oid in ent_histz:
+                    ent_histz[self.oid] = [deepcopy(previous_self)]
+                else:
+                    ent_histz[self.oid].append(deepcopy(previous_self))
 
-    def __delattr__(self, field_id):
-        """
-        Delete an entity field.
-        """
-        if field_id in parameterz.get(self.oid, {}):
-            del parameterz[self.oid][field_id]
-        elif field_id in data_elementz.get(self.oid, {}):
-            del data_elementz[self.oid][field_id]
+    def __delitem__(self, k):
+        if k in parameterz.get(self.oid, {}):
+            del parameterz[self.oid][k]
+        elif k in data_elementz.get(self.oid, {}):
+            del data_elementz[self.oid][k]
+
+    def __iter__(self):
+        return chain(parameterz.get(self.oid, {}),
+                     data_elementz.get(self.oid, {}))
+
+    def __len__(self):
+        return len(parameterz.get(self.oid, {})) + len(data_elementz.get(
+                                                            self.oid, {}))
+
+    def __str__(self):
+        parms = None
+        if parameterz.get(self.oid, {}).items():
+            parms = ', '.join(['{}: {}'.format(k, get_pval(orb, self.oid, k))
+                               for k in parameterz.get(self.oid, {})])
+        des = None
+        if data_elementz.get(self.oid, {}).items():
+            des = ', '.join(['{}: {}'.format(k, get_dval(orb, self.oid, k))
+                             for k in data_elementz.get(self.oid, {})])
+        if parms and des:
+            return '{' + ', '.join([parms, des]) + '}'
+        elif parms:
+            return '{' + parms + '}'
+        elif des:
+            return '{' + des + '}'
+        else:
+            return '{}'
+
+    def undo(self):
+        if self.oid in ent_histz and ent_histz[self.oid]:
+            self = ent_histz[self.oid].pop()
+
+    def update(self, *args, **kwargs):
+        for k, v in dict(*args, **kwargs).iteritems():
+            self[k] = v
 
 
 class DataMatrix(UserList):
@@ -136,7 +213,8 @@ class DataMatrix(UserList):
     record for itself there.
 
     Attributes:
-        data (iterable):  an iterable of Entity oids
+        data (iterable):  an iterable of entity oids
+        level_map (dict):  maps entity oids to assembly levels
         project (Project): associated project (owner of the DataMatrix)
         schema_name (str): name of a schema for lookup in the `schemaz` cache
             -- if found, the 'schema' arg will be ignored
@@ -168,6 +246,7 @@ class DataMatrix(UserList):
                                         schema_name or '[None]',
                                         str(schema or '[None]'))
         orb.log.debug('* DataMatrix({})'.format(sig))
+        self.level_map = {}
         if not isinstance(project, orb.classes['Project']):
             project = orb.get('pgefobjects:SANDBOX')
         self.project = project
@@ -203,198 +282,213 @@ class DataMatrix(UserList):
         """
         Return the i-th row from the dm.
         """
-        if i >= len(self.oids):
+        if i >= len(self):
             return
-        return self[self.oids[i]]
+        return self[i]
 
-    def append_new_row(self):
+    def append_new_row(self, child=False):
         """
-        Appends an empty Entity with a new oid.
+        Appends an empty Entity with a new oid, using 'child' flag to compute
+        the level.
         """
         e = Entity()
-        self[e.oid] = e
-        self.oids.append(e.oid)
+        i = len(self)
+        self.append(e)
+        if child:
+            # assembly level 1 higher than preceding row if a child
+            level = (self.level_map.get(self[i-1].get('oid')) or 0) + 1
+        else:
+            # assembly level same as preceding row if a peer
+            level = self.level_map.get(self[i-1].get('oid')) or 0
+        self.level_map[e.oid] = level
         return e
 
-    def insert_new_row(self, i):
+    def insert_new_row(self, i, child=False):
         """
-        Inserts an empty Entity with a new oid, in the ith position.
+        Inserts an empty Entity with a new oid, in the ith position, using
+        'child' flag to compute the level.
         """
         e = Entity()
-        self[e.oid] = e
-        self.oids.insert(i, e.oid)
+        self.insert(i, e)
+        if child:
+            # assembly level 1 higher than preceding row if a child
+            level = (self.level_map.get(self[i-1].get('oid')) or 0) + 1
+        else:
+            # assembly level same as preceding row if a peer
+            level = self.level_map.get(self[i-1].get('oid')) or 0
+        self.level_map[e.oid] = level
         return e
 
     def remove_row(self, i):
         """
         Remove the ith row.
         """
-        if i >= len(self.oids):
+        if i >= len(self):
             return False
-        oid = self.oids[i]
-        del self[oid]
-        self.oids.pop(i)
+        if getattr(self[i], 'oid') in self.level_map:
+            del self.level_map[getattr(self[i], 'oid')]
+        del self[i]
         return True
 
-    def remove_oid(self, oid):
+    def remove_row_by_oid(self, oid):
         """
         Remove the row with the specified oid.
         """
-        if oid not in self.oids:
+        oids = [e.oid for e in self]
+        if oid not in oids:
             return False
-        self.oids.remove(oid)
-        del self[oid]
+        del self[oids.index(oid)]
         return True
 
-class DataMatrixOld(dict):
-    """
-    A dict that contains "entities" (dicts), a.k.a. rows, as its values.  The
-    DataMatrix maps the unique identifier ("oid") of each entity to the entity.
-    The DataMatrix has an attribute "schema" that is a list of data element
-    identifiers that reference DataElementDefinitions (which are cached in the
-    "de_defz" dict for quick access). Each entity maps data element ids to
-    values.
+# class DataMatrixOld(dict):
+    # """
+    # A dict that contains "entities" (dicts), a.k.a. rows, as its values.  The
+    # DataMatrix maps the unique identifier ("oid") of each entity to the entity.
+    # The DataMatrix has an attribute "schema" that is a list of data element
+    # identifiers that reference DataElementDefinitions (which are cached in the
+    # "de_defz" dict for quick access). Each entity maps data element ids to
+    # values.
 
-    A DataMatrix is cached in the orb's data store (`orb.data`) and can be
-    saved to a .tsv file whose name is formed using the unique identifier (oid)
-    of the DataMatrix, which is composed from the 'id' of its owner Project and
-    the name of its schema.
+    # A DataMatrix is cached in the orb's data store (`orb.data`) and can be
+    # saved to a .tsv file whose name is formed using the unique identifier (oid)
+    # of the DataMatrix, which is composed from the 'id' of its owner Project and
+    # the name of its schema.
 
-    When a DataMatrix is instantiated, its initialization will first look for
-    an appropriately named file in the orb's persistent data store (the `data`
-    directory in app home); if that is not found, it will use the schema
-    provided in the `schema` argument or, if that is not provided, a default
-    schema that can be configured by the app, and create an empty instance with
-    that schema.
+    # When a DataMatrix is instantiated, its initialization will first look for
+    # an appropriately named file in the orb's persistent data store (the `data`
+    # directory in app home); if that is not found, it will use the schema
+    # provided in the `schema` argument or, if that is not provided, a default
+    # schema that can be configured by the app, and create an empty instance with
+    # that schema.
 
-    Attributes:
-        project (Project): associated project (owner of the DataMatrix)
-        schema_name (str): name of a schema for lookup in `schemaz` cache
-            -- if found, 'schema' arg will be ignored
-        schema (list): list of data element or parameter ids (column "names")
-        oids (list): list of Entity oids
-    """
-    def __init__(self, *args, project=None, schema_name=None, schema=None,
-                 **kw):
-        """
-        Initialize.
+    # Attributes:
+        # project (Project): associated project (owner of the DataMatrix)
+        # schema_name (str): name of a schema for lookup in `schemaz` cache
+            # -- if found, 'schema' arg will be ignored
+        # schema (list): list of data element or parameter ids (column "names")
+        # oids (list): list of Entity oids
+    # """
+    # def __init__(self, *args, project=None, schema_name=None, schema=None,
+                 # **kw):
+        # """
+        # Initialize.
 
-        Keyword Args:
-            project (Project): associated project (owner of the DataMatrix)
-            schema_name (str): name of a schema for lookup in
-                config['dm_schemas'] -- if found, 'schema' arg will be ignored
-            schema (list): list of data element ids (column "names")
-        """
-        super(DataMatrix, self).__init__(*args, **kw)
-        self.oids = []
-        sig = 'project="{}", schema_name="{}", schema={}'.format(
-                                        getattr(project, 'id', '') or '[None]',
-                                        schema_name or '[None]',
-                                        str(schema or '[None]'))
-        orb.log.debug('* DataMatrix({})'.format(sig))
-        if not isinstance(project, orb.classes['Project']):
-            project = orb.get('pgefobjects:SANDBOX')
-        self.project = project
-        orb.log.debug('  - project: {}'.format(project.id))
-        self.schema_name = schema_name or config.get('default_schema_name',
-                                                     'generic')
-        orb.log.debug('  - schema_name set to: "{}"'.format(schema_name))
-        got_data = False
-        config_deds = config.get('deds', {})
-        if self.schema_name:
-            fname = self.oid + '.tsv'
-            try:
-                self.load(fname)
-                self.schema_name = self.oid[len(self.project.id)+1:]
-                # if load is successful, it will set self.schema from the file
-                # column headings -- the following checks to see if any column
-                # labels can be found based on self.schema; if a label is not
-                # found, the column heading from the file will be used
-                self.column_labels = [
-                    (de_defz.get(deid, {}).get('label', '')
-                     or config_deds.get(deid, {}).get('label', '')
-                     or de_defz.get(deid, {}).get('name', '')
-                     or config_deds.get(deid, {}).get('name', '')
-                     or deid)
-                    for deid in self.schema]
-                got_data = True
-            except:
-                orb.log.debug('  - unable to load "{}".'.format(fname))
-                orb.log.debug('    empty DataMatrix will be created ...')
-        if not got_data:
-            orb.log.debug('  - no data; looking up schema ...')
-            # if self.dm has a 'schema_name' set, precedence is given to a schema
-            # lookup in config["dm_schemas"] by 'schema_name' over a 'schema'
-            # that has been assigned to the dm.
-            std_schema = config.get('dm_schemas', {}).get(schema_name, [])
-            if std_schema:
-                msg = 'std schema "{}" found, setting col labels ...'.format(
-                                                                 schema_name)
-                orb.log.debug('  - {}'.format(msg))
-                self.schema = std_schema[:]
-                self.column_labels = [
-                    (de_defz.get(deid, {}).get('label', '')
-                     or config_deds.get(deid, {}).get('label', '')
-                     or de_defz.get(deid, {}).get('name', '')
-                     or config_deds.get(deid, {}).get('name', '')
-                     or deid)
-                    for deid in std_schema]
-            else:
-                self.schema = schema or ['name', 'desc']
-                self.column_labels = schema or ['Name', 'Description']
-        # add myself to the orb.data in-memory cache
-        orb.data[self.oid] = self
+        # Keyword Args:
+            # project (Project): associated project (owner of the DataMatrix)
+            # schema_name (str): name of a schema for lookup in
+                # config['dm_schemas'] -- if found, 'schema' arg will be ignored
+            # schema (list): list of data element ids (column "names")
+        # """
+        # super(DataMatrix, self).__init__(*args, **kw)
+        # self.oids = []
+        # sig = 'project="{}", schema_name="{}", schema={}'.format(
+                                        # getattr(project, 'id', '') or '[None]',
+                                        # schema_name or '[None]',
+                                        # str(schema or '[None]'))
+        # orb.log.debug('* DataMatrix({})'.format(sig))
+        # if not isinstance(project, orb.classes['Project']):
+            # project = orb.get('pgefobjects:SANDBOX')
+        # self.project = project
+        # orb.log.debug('  - project: {}'.format(project.id))
+        # self.schema_name = schema_name or config.get('default_schema_name',
+                                                     # 'generic')
+        # orb.log.debug('  - schema_name set to: "{}"'.format(schema_name))
+        # got_data = False
+        # config_deds = config.get('deds', {})
+        # if self.schema_name:
+            # fname = self.oid + '.tsv'
+            # try:
+                # self.load(fname)
+                # self.schema_name = self.oid[len(self.project.id)+1:]
+                # # if load is successful, it will set self.schema from the file
+                # # column headings -- the following checks to see if any column
+                # # labels can be found based on self.schema; if a label is not
+                # # found, the column heading from the file will be used
+                # self.column_labels = [
+                    # (de_defz.get(deid, {}).get('label', '')
+                     # or config_deds.get(deid, {}).get('label', '')
+                     # or de_defz.get(deid, {}).get('name', '')
+                     # or config_deds.get(deid, {}).get('name', '')
+                     # or deid)
+                    # for deid in self.schema]
+                # got_data = True
+            # except:
+                # orb.log.debug('  - unable to load "{}".'.format(fname))
+                # orb.log.debug('    empty DataMatrix will be created ...')
+        # if not got_data:
+            # orb.log.debug('  - no data; looking up schema ...')
+            # # if self.dm has a 'schema_name' set, precedence is given to a schema
+            # # lookup in config["dm_schemas"] by 'schema_name' over a 'schema'
+            # # that has been assigned to the dm.
+            # std_schema = config.get('dm_schemas', {}).get(schema_name, [])
+            # if std_schema:
+                # msg = 'std schema "{}" found, setting col labels ...'.format(
+                                                                 # schema_name)
+                # orb.log.debug('  - {}'.format(msg))
+                # self.schema = std_schema[:]
+                # self.column_labels = [
+                    # (de_defz.get(deid, {}).get('label', '')
+                     # or config_deds.get(deid, {}).get('label', '')
+                     # or de_defz.get(deid, {}).get('name', '')
+                     # or config_deds.get(deid, {}).get('name', '')
+                     # or deid)
+                    # for deid in std_schema]
+            # else:
+                # self.schema = schema or ['name', 'desc']
+                # self.column_labels = schema or ['Name', 'Description']
+        # # add myself to the orb.data in-memory cache
+        # orb.data[self.oid] = self
 
-    @property
-    def oid(self):
-        return '-'.join([self.project.id, self.schema_name])
+    # @property
+    # def oid(self):
+        # return '-'.join([self.project.id, self.schema_name])
 
-    def row(self, i):
-        """
-        Return the i-th row from the dm.
-        """
-        if i >= len(self.oids):
-            return
-        return self[self.oids[i]]
+    # def row(self, i):
+        # """
+        # Return the i-th row from the dm.
+        # """
+        # if i >= len(self.oids):
+            # return
+        # return self[self.oids[i]]
 
-    def append_new_row(self):
-        """
-        Appends an empty Entity with a new oid.
-        """
-        e = Entity()
-        self[e.oid] = e
-        self.oids.append(e.oid)
-        return e
+    # def append_new_row(self):
+        # """
+        # Appends an empty Entity with a new oid.
+        # """
+        # e = Entity()
+        # self[e.oid] = e
+        # self.oids.append(e.oid)
+        # return e
 
-    def insert_new_row(self, i):
-        """
-        Inserts an empty Entity with a new oid, in the ith position.
-        """
-        e = Entity()
-        self[e.oid] = e
-        self.oids.insert(i, e.oid)
-        return e
+    # def insert_new_row(self, i):
+        # """
+        # Inserts an empty Entity with a new oid, in the ith position.
+        # """
+        # e = Entity()
+        # self[e.oid] = e
+        # self.oids.insert(i, e.oid)
+        # return e
 
-    def remove_row(self, i):
-        """
-        Remove the ith row.
-        """
-        if i >= len(self.oids):
-            return False
-        oid = self.oids[i]
-        del self[oid]
-        self.oids.pop(i)
-        return True
+    # def remove_row(self, i):
+        # """
+        # Remove the ith row.
+        # """
+        # if i >= len(self.oids):
+            # return False
+        # oid = self.oids[i]
+        # del self[oid]
+        # self.oids.pop(i)
+        # return True
 
-    def remove_oid(self, oid):
-        """
-        Remove the row with the specified oid.
-        """
-        if oid not in self.oids:
-            return False
-        self.oids.remove(oid)
-        del self[oid]
-        return True
+    # def remove_oid(self, oid):
+        # """
+        # Remove the row with the specified oid.
+        # """
+        # if oid not in self.oids:
+            # return False
+        # self.oids.remove(oid)
+        # del self[oid]
+        # return True
 
     # ---------------------------------------------------------------------
     # NOTE:  the "load" method is unnecessary in the Entity paradigm:  the
