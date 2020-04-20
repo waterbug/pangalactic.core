@@ -39,8 +39,13 @@ PGEF "DataGrid" Widget
 * DataMatrix (grid: rows and columns)
   - attrs:
     + 'oid': ([`project_id`]-[`system_id`]) -- unique
-    + `level_map`:  maps entity oids to assembly level (int) --
-      "level" will be used to identify "child" nodes, etc.
+    + `level_map`:  maps entity oids to assembly level (an integer) --
+      "level" will be used to identify "child" nodes, etc.:
+      - level 0 ................................ root (not assembly)
+      - next node 0 < level < this level ....... higher assembly
+      - next node level = this level ........... peer
+      - next node level = this level + 1 ....... child
+      - next node level > this level + 1 ....... error
     + 'schema': list of data element ids
     + 'data': its internal list, a list of entity oids
   - methods:

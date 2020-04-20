@@ -97,7 +97,8 @@ DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {'': []}
 
 # DEFAULT_CLASS_PARAMETERS:  default parameters of objects by class
 DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start'],
-                            'Mission': ['duration']}
+                            'Mission': ['duration'],
+                            'HardwareProduct': ['m', 'P', 'R_D']}
 
 # DEFAULT_PRODUCT_TYPE_PARAMETERS:  default parameters by ProductType id
 DEFAULT_PRODUCT_TYPE_PARAMETERS = {'': []}

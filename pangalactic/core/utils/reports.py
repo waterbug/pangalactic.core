@@ -309,12 +309,12 @@ def write_mel_xlsx(context, is_project=True,
 
 def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts, level,
                               row, component, qty=1):
-    mcbe = get_pval(orb, component.oid, 'm[CBE]')
-    ctgcy_m = str(100 * get_pval(orb, component.oid, 'm[Ctgcy]')) + ' %'
-    mmev = get_pval(orb, component.oid, 'm[MEV]')
-    pcbe = get_pval(orb, component.oid, 'P[CBE]')
-    ctgcy_P = str(100 * get_pval(orb, component.oid, 'P[Ctgcy]')) + ' %'
-    pmev = get_pval(orb, component.oid, 'P[MEV]')
+    mcbe = get_pval(component.oid, 'm[CBE]')
+    ctgcy_m = str(100 * get_pval(component.oid, 'm[Ctgcy]')) + ' %'
+    mmev = get_pval(component.oid, 'm[MEV]')
+    pcbe = get_pval(component.oid, 'P[CBE]')
+    ctgcy_P = str(100 * get_pval(component.oid, 'P[Ctgcy]')) + ' %'
+    pmev = get_pval(component.oid, 'P[MEV]')
     # columns:
     #   0: Level
     #   1: Name
@@ -452,12 +452,12 @@ def write_component_rows_tsv(level, row, component, qty=1):
         component (HardwareProduct): component object
     """
     # NB:  levels are 1-based; rows are 0-based
-    mcbe = get_pval(orb, component.oid, 'm[CBE]')
-    ctgcy_m = str(100 * get_pval(orb, component.oid, 'm[Ctgcy]')) + ' %'
-    mmev = get_pval(orb, component.oid, 'm[MEV]')
-    pcbe = get_pval(orb, component.oid, 'P[CBE]')
-    ctgcy_P = str(100 * get_pval(orb, component.oid, 'P[Ctgcy]')) + ' %'
-    pmev = get_pval(orb, component.oid, 'P[MEV]')
+    mcbe = get_pval(component.oid, 'm[CBE]')
+    ctgcy_m = str(100 * get_pval(component.oid, 'm[Ctgcy]')) + ' %'
+    mmev = get_pval(component.oid, 'm[MEV]')
+    pcbe = get_pval(component.oid, 'P[CBE]')
+    ctgcy_P = str(100 * get_pval(component.oid, 'P[Ctgcy]')) + ' %'
+    pmev = get_pval(component.oid, 'P[MEV]')
     # columns:
     #   0: Level
     #   1: Name

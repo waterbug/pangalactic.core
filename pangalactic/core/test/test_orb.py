@@ -18,7 +18,8 @@ from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
                                           get_pval, parameterz,
-                                          req_allocz, round_to)
+                                          req_allocz, round_to,
+                                          save_parmz, save_data_elementz)
 from pangalactic.core.serializers import (deserialize,
                                           deserialize_parms,
                                           serialize,
@@ -147,6 +148,9 @@ class OrbTest(unittest.TestCase):
         # subsequent tests ...
         objs = orb.get_by_type('HardwareProduct')
         orb.assign_test_parameters(objs)
+        save_parmz(os.path.join('pangalaxian_test', 'parameters.json'))
+        save_data_elementz(os.path.join('pangalaxian_test',
+                                        'data_elements.json'))
         value = orb.db.query(Identifiable).filter(
                              Identifiable.oid.in_(oids)).count()
         expected = len(oids)
@@ -178,7 +182,7 @@ class OrbTest(unittest.TestCase):
         value = []
         for h in self.test_hw:
             for pid in all_pids:
-                pval = get_pval(orb, h.oid, pid)
+                pval = get_pval(h.oid, pid)
                 value.append(type(pval) in [int, float])
                 expected.append(True)
         self.assertEqual(expected, value)
@@ -256,7 +260,7 @@ class OrbTest(unittest.TestCase):
         expected = dict(
             length=7,
             twanger_id=obj.id,
-            twanger_parameters=serialize_parms(orb, obj.oid),
+            twanger_parameters=serialize_parms(obj.oid),
             twanger_product_type=obj.product_type.oid,
             port_oid=obj.ports[0].oid,
             port_of_product=obj.ports[0].of_product.oid,
@@ -288,7 +292,7 @@ class OrbTest(unittest.TestCase):
             'comment': obj.comment,
             'create_datetime': str(obj.create_datetime),
             'creator': obj.creator.oid,
-            'data_elements': serialize_des(orb, obj.oid),
+            'data_elements': serialize_des(obj.oid),
             'description': obj.description,
             'id': obj.id,
             'id_ns': obj.id_ns,
@@ -298,7 +302,7 @@ class OrbTest(unittest.TestCase):
             'name': obj.name,
             'oid': obj.oid,
             'owner': obj.owner.oid,
-            'parameters': serialize_parms(orb, obj.oid),
+            'parameters': serialize_parms(obj.oid),
             'product_type': obj.product_type.oid,
             'public': True,
             'version': obj.version,
@@ -405,6 +409,14 @@ class OrbTest(unittest.TestCase):
         expected = orb.get('test:yoyodyne')
         self.assertEqual(expected, value)
 
+    def test_18_1_deserialize_object_with_known_owner(self):
+        """
+        CASE:  test for existence of a parameter
+        """
+        actual = bool(parameterz['test:iidrive'].get('m'))
+        expected = True
+        self.assertEqual(expected, actual)
+
     def test_19_deserialize_new_parameter_values(self):
         """
         CASE:  test pangalactic.core.serializers.deserialize_parms function.
@@ -414,7 +426,7 @@ class OrbTest(unittest.TestCase):
         """
         test_oid = 'test:iidrive'
         current_dt = parameterz[test_oid]['m']['mod_datetime']
-        current_mass = get_pval(orb, test_oid, 'm')
+        current_mass = get_pval(test_oid, 'm')
         NOW = str(dtstamp())
         serialized_parms= {
             'P':
@@ -430,7 +442,7 @@ class OrbTest(unittest.TestCase):
                'units': 'kg',
                'value': 1000.0}
             }
-        deserialize_parms(orb, test_oid, serialized_parms)
+        deserialize_parms(test_oid, serialized_parms)
         orb.recompute_parmz()
         # deserialized mass should be ignored since its dt string is the
         # same as that of the current mass parameter ...
@@ -444,12 +456,12 @@ class OrbTest(unittest.TestCase):
                   ('R_D' in test_parms),
                   ('m' in test_parms),
                   NOW > current_dt,
-                  get_pval(orb, test_oid, 'P[CBE]'),
-                  get_pval(orb, test_oid, 'R_D[CBE]'),
-                  get_pval(orb, test_oid, 'm[CBE]'),
-                  get_pval(orb, test_oid, 'P'),
-                  get_pval(orb, test_oid, 'R_D'),
-                  get_pval(orb, test_oid, 'm')]
+                  get_pval(test_oid, 'P[CBE]'),
+                  get_pval(test_oid, 'R_D[CBE]'),
+                  get_pval(test_oid, 'm[CBE]'),
+                  get_pval(test_oid, 'P'),
+                  get_pval(test_oid, 'R_D'),
+                  get_pval(test_oid, 'm')]
         self.assertEqual(expected, actual)
 
     def test_20_deserialize_object_with_simple_parameters(self):
@@ -465,9 +477,9 @@ class OrbTest(unittest.TestCase):
         for o in objs:
             if o.__class__.__name__ == 'HardwareProduct':
                 obj = o
-        m = get_pval(orb, obj.oid, 'm')
-        P = get_pval(orb, obj.oid, 'P')
-        R_D = get_pval(orb, obj.oid, 'R_D')
+        m = get_pval(obj.oid, 'm')
+        P = get_pval(obj.oid, 'P')
+        R_D = get_pval(obj.oid, 'R_D')
         value = [m, P, R_D]
         expected = [parameters['m']['value'],
                     parameters['P']['value'],
@@ -526,15 +538,15 @@ class OrbTest(unittest.TestCase):
         CASE:  compute the mass CBE (Current Best Estimate)
         """
         orb.recompute_parmz()
-        value = get_pval(orb, 'test:spacecraft3', 'm[CBE]')
+        value = get_pval('test:spacecraft3', 'm[CBE]')
         sc = orb.get('test:spacecraft3')
-        expected = fsum([get_pval(orb, acu.component.oid, 'm')
+        expected = fsum([get_pval(acu.component.oid, 'm')
                          for acu in sc.components])
         # but the Magic Twanger has components Flux Capacitor and Mr. Fusion,
         # so ...
-        expected -= get_pval(orb, 'test:twanger', 'm')
-        expected += get_pval(orb, 'test:flux_capacitor', 'm')
-        expected += get_pval(orb, 'test:mr_fusion', 'm')
+        expected -= get_pval('test:twanger', 'm')
+        expected += get_pval('test:flux_capacitor', 'm')
+        expected += get_pval('test:mr_fusion', 'm')
         self.assertEqual(expected, value)
 
     def test_23_compute_mev(self):
@@ -542,15 +554,15 @@ class OrbTest(unittest.TestCase):
         CASE:  compute the mass MEV (Maximum Estimated Value)
         """
         orb.recompute_parmz()
-        value = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
+        value = get_pval('test:spacecraft3', 'm[MEV]')
         sc = orb.get('test:spacecraft3')
-        expected = fsum([get_pval(orb, acu.component.oid, 'm')
+        expected = fsum([get_pval(acu.component.oid, 'm')
                          for acu in sc.components])
         # but the Magic Twanger has components Flux Capacitor and Mr. Fusion,
         # so ...
-        expected -= get_pval(orb, 'test:twanger', 'm')
-        expected += get_pval(orb, 'test:flux_capacitor', 'm')
-        expected += get_pval(orb, 'test:mr_fusion', 'm')
+        expected -= get_pval('test:twanger', 'm')
+        expected += get_pval('test:flux_capacitor', 'm')
+        expected += get_pval('test:mr_fusion', 'm')
         expected = round_to(1.3 * expected)
         self.assertEqual(expected, value)
 
@@ -560,8 +572,8 @@ class OrbTest(unittest.TestCase):
         a performance requirement is allocated
         """
         # compute mass margin at ProjectSystemUsage for spacecraft3
-        value = compute_margin(orb, 'test:OTHER:system-1', 'm')
-        mev = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
+        value = compute_margin('test:OTHER:system-1', 'm')
+        mev = get_pval('test:spacecraft3', 'm[MEV]')
         perf_reqt = orb.get('test:OTHER:Spacecraft-Mass')
         nte = perf_reqt.req_maximum_value
         expected = round_to(((nte - mev) / nte))
@@ -572,8 +584,8 @@ class OrbTest(unittest.TestCase):
         CASE:  compute the margin associated with a performance requirement
         """
         # compute margin for the specified performance requirement
-        value = compute_requirement_margin(orb, 'test:OTHER:Spacecraft-Mass')
-        mev = get_pval(orb, 'test:spacecraft3', 'm[MEV]')
+        value = compute_requirement_margin('test:OTHER:Spacecraft-Mass')
+        mev = get_pval('test:spacecraft3', 'm[MEV]')
         perf_reqt = orb.get('test:OTHER:Spacecraft-Mass')
         nte = perf_reqt.req_maximum_value
         margin = round_to(((nte - mev) / nte))
@@ -648,9 +660,9 @@ class OrbTest(unittest.TestCase):
         # oid = parametrized_test_object[0]['oid']
         # obj = orb.get(oid)
         # # assumed to be a local action -> mod_datetime will be generated
-        # set_pval(orb, oid, 'm', 42)
-        # set_pval(orb, oid, 'P', 33)
-        # set_pval(orb, oid, 'R_D', 400, units='Mbit/s')
+        # set_pval(oid, 'm', 42)
+        # set_pval(oid, 'P', 33)
+        # set_pval(oid, 'R_D', 400, units='Mbit/s')
         # value = parameterz[obj.oid]
         # deser_parms = deepcopy(parameters)
         # expected = deser_parms

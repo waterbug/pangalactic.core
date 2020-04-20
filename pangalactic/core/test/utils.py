@@ -28,7 +28,7 @@ def gen_test_dvals(data_elements):
         de_def = de_defz.get(deid, {})
         if de_def.get('range_datatype') in ['text', 'str']:
             # make sure no non-null default has been set
-            if not de['value']:
+            if not de.get('value'):
                 i = random.randint(0, 2)
                 j = random.randint(0, 2)
                 k = random.randint(0, 2)
@@ -72,8 +72,6 @@ def gen_test_pvals(parms):
             # make sure no non-zero default has been set
             if not parm['value']:
                 parm['value'] = random.randint(1, 10)
-        elif pdz.get('range_datatype') == 'text':
-            parm['value'] = 'testing...'
 
 def create_test_users():
     """

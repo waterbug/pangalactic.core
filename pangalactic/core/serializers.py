@@ -2,67 +2,23 @@
 """
 Serializers / deserializers for pangalactic domain objects and parameters.
 """
-from copy import deepcopy
-# import pprint
-
 # SQLAlchemy
 from sqlalchemy import ForeignKey
 
 # PanGalactic
-from pangalactic.core.utils.meta  import (asciify, cookers, uncookers,
-                                          uncook_datetime)
-from pangalactic.core.utils.datetimes import earlier
-from pangalactic.core.parametrics import (add_parameter, data_elementz,
-                                          de_defz, parameterz, parm_defz,
+from pangalactic.core.utils.meta       import (asciify, cookers, uncookers,
+                                               uncook_datetime)
+from pangalactic.core.utils.datetimes  import earlier
+from pangalactic.core.parametrics import (add_parameter,
+                                          deserialize_des,
+                                          deserialize_parms,
+                                          parameterz,
                                           refresh_componentz,
-                                          refresh_req_allocz, set_pval,
+                                          refresh_req_allocz,
+                                          serialize_des, serialize_parms,
                                           update_de_defz, update_parm_defz,
                                           update_parmz_by_dimz)
 
-
-def serialize_des(orb, oid):
-    """
-    Args:
-        orb (UberORB): the (singleton) `orb` instance
-        oid (str):  the oid of the object whose data elements are to be
-            serialized.
-
-    Serialize the data elements associated with an object.  Basically, this
-    function is only required to serialize the `mod_datetime` value of each
-    data element.
-
-    IMPLEMENTATION NOTE:  uses deepcopy() to avoid side-effects to the
-    `data_elementz` dict.
-    """
-    if oid in data_elementz:
-        return deepcopy(data_elementz[oid])
-    else:
-        return {}
-
-def serialize_parms(orb, oid):
-    """
-    Output the serialized format for parameters. Note that the values are
-    *always* expressed in *base* units and the 'units' field contains the
-    preferred units to be used when displaying the value in the user interface
-    (i.e., the value must be converted to those units for display).
-
-    Args:
-        obj_parms (dict):  a dictionary containing the parameters
-            associated with an object (for a given object `obj`, its
-            parameters dictionary will be `parameterz[obj.oid]`).
-
-    Serialize the dictionary of parameters associated with an object.
-    Basically, this function is only required to serialize the
-    `mod_datetime` value of each parameter -- the parameter's other values
-    do not require special serialization.
-
-    IMPLEMENTATION NOTE:  uses deepcopy() to avoid side-effects to the
-    `parameterz` dict.
-    """
-    if oid in parameterz:
-        return deepcopy(parameterz[oid])
-    else:
-        return {}
 
 def serialize(orb, objs, view=None, include_components=False,
               include_inverse_attrs=False):
@@ -169,9 +125,9 @@ def serialize(orb, objs, view=None, include_components=False,
         # (they can only be assigned to subclasses of Modelable)
         if isinstance(obj, orb.classes['Modelable']):
             # serialize data elements
-            d['data_elements'] = serialize_des(orb, obj.oid)
+            d['data_elements'] = serialize_des(obj.oid)
             # serialize parameters
-            d['parameters'] = serialize_parms(orb, obj.oid)
+            d['parameters'] = serialize_parms(obj.oid)
         for name in schema['fields']:
             if getattr(obj, name, None) is None:
                 # ignore None values
@@ -291,145 +247,6 @@ def serialize(orb, objs, view=None, include_components=False,
     # make sure there is only 1 serialized object per oid ...
     so_by_oid = {so['oid'] : so for so in serialized}
     return list(so_by_oid.values())
-
-def deserialize_des(orb, oid, ser_des, cname=None):
-    """
-    Deserialize a serialized object's `data_elements` dictionary.
-
-    Args:
-        orb (UberORB): the (singleton) `orb` instance
-        oid (str):  oid attr of the object to which the data elements are
-            assigned
-        ser_des (dict):  the serialized data elements dictionary
-
-    Keyword Args:
-        cname (str):  class name of the object to which the parameters are
-            assigned (only used for logging)
-    """
-    # if cname and ser_des:
-        # orb.log.debug('* deserializing data elements for "{}" ({})...'.format(
-                                                                  # oid, cname))
-        # orb.log.debug('  - data elements: {}'.format(ser_des))
-    # elif ser_des:
-        # orb.log.debug('* deserializing data elements for oid "{}")...'.format(
-                                                                         # oid))
-        # orb.log.debug('  - data elements: {}'.format(ser_des))
-    if not ser_des:
-        # orb.log.debug('  object with oid "{}" has no data elements'.format(
-                                                                      # oid))
-        return
-    if oid not in data_elementz:
-        data_elementz[oid] = {}
-    for deid, de in ser_des.items():
-        mod_dt = de['mod_datetime']
-        if deid in de_defz:
-            if ((data_elementz[oid].get(deid) and
-                 mod_dt > data_elementz[oid][deid]['mod_datetime'])
-                or not data_elementz[oid].get(deid)):
-                # deserialized data element value is more recent or that
-                # data element was not previously assigned
-                data_elementz[oid] = ser_des
-        else:
-            log_msg = 'unknown id found in data elements: "{}"'.format(deid)
-            orb.log.debug('  - {}'.format(log_msg))
-            # deid has no definition, so it should not be in data_elementz
-            if deid in data_elementz.get(oid, {}):
-                del data_elementz[oid][deid]
-    ### FIXME:  it's dangerous to remove deids not in new_des, but we
-    ### must deal with deleted parameters ...
-    # deids = list(data_elementz[oid])
-    # for deid in deids:
-        # if deid not in new_des:
-            # del data_elementz[oid][deid]
-    # if data_elementz.get(oid):
-        # orb.log.debug('  - oid "{}" now has these data elements: {}.'.format(
-                                         # oid, str(list(data_elementz[oid]))))
-
-def deserialize_parms(orb, oid, ser_parms, cname=None):
-    """
-    Output the serialized format for parameters. Note that the values are
-    *always* expressed in base units and the 'units' field contains the
-    preferred units to be used when displaying the value in the user interface
-    (i.e., the value must be converted to those units for display).
-
-    [NOTE: for backwards compatibility, detection of data elements in a
-    `parameters` section has been added, because some data elements (such as
-    TRL and Vendor) were previously defined as parameters.  Any data elements
-    found will be deserialized and added to the `data_elementz` cache.
-    - SCW 2020-04-09.]
-
-    Args:
-        orb (UberORB): the (singleton) `orb` instance
-        oid (str):  oid attr of the object to which the parameters are assigned
-        ser_parms (dict):  the serialized parms dictionary
-
-    Keyword Args:
-        cname (str):  class name of the object to which the parameters are
-            assigned (only used for logging)
-    """
-    # if cname:
-        # orb.log.debug('* deserializing parms for {} ({})...'.format(oid,
-                                                                    # cname))
-        # orb.log.debug('  parms: {}'.format(ser_parms))
-    if not ser_parms:
-        # orb.log.debug('  object with oid "{}" has no parameters'.format(oid))
-        return
-    if oid not in parameterz:
-        parameterz[oid] = {}
-    for pid, parm in ser_parms.items():
-        mod_dt = parm['mod_datetime']
-        if pid in parm_defz:
-            # this is a parameter (has a ParameterDefinition)
-            if ((parameterz[oid].get(pid) and
-                 mod_dt > parameterz[oid][pid]['mod_datetime'])
-                or not parameterz[oid].get(pid)):
-                # deserialized parameter value is more recent or that parameter
-                # was not previously assigned
-                parameterz[oid][pid] = parm
-        elif pid in de_defz:
-            # this is a data element (has a DataElementDefinition)
-            log_msg = 'data element found in parameters: "{}"'.format(pid)
-            orb.log.debug('  - {}'.format(log_msg))
-            if oid not in data_elementz:
-                data_elementz[oid] = {}
-            de = data_elementz[oid].get(pid)
-            if (de and mod_dt > de['mod_datetime']):
-                # deserialized value is more recent
-                de['mod_datetime'] = parm['mod_datetime']
-                de['value'] = parm['value']
-            elif not data_elementz[oid].get(pid):
-                # that data element was not previously assigned
-                de = dict(value=parm['value'],
-                          mod_datetime=parm['mod_datetime'])
-                data_elementz[oid][pid] = de
-            # pid refers to a data element, so it should not be in parameterz
-            if pid in parameterz[oid]:
-                del parameterz[oid][pid]
-        else:
-            log_msg = 'unknown id found in parameters: "{}"'.format(pid)
-            orb.log.debug('  - {}'.format(log_msg))
-            # pid has no definition, so it should not be in parameterz or
-            # data_elementz
-            if pid in parameterz.get(oid, {}):
-                del parameterz[oid][pid]
-            if pid in data_elementz.get(oid, {}):
-                del data_elementz[oid][pid]
-    ### FIXME (?): it's dangerous to remove pids not in new_parms, but we
-    ### may need at some point to deal with deleted parameters ... (i.e.
-    ### remove them from the cache).
-    # pids = list(parameterz[oid])
-    # for pid in pids:
-        # if pid not in new_parms:
-            # del parameterz[oid][pid]
-    # add base parameters for any context parameters for which the base
-    # parameter is absent
-    base_pids = set([pid.split('[')[0] for pid in parameterz[oid]])
-    for base_pid in base_pids:
-        if not base_pid in parameterz[oid]:
-            log_msg = 'base variable not in parameters, adding: "{}"'.format(
-                                                                    base_pid)
-            orb.log.debug('  - {}'.format(log_msg))
-            set_pval(orb, oid, base_pid, 0.0)
 
 # DESERIALIZATION_ORDER:  order in which to deserialize classes so that
 # object properties (relationships) are assigned properly (i.e., assemblies are
@@ -618,7 +435,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             if de_dict:
                 orb.log.debug('  + data elements found: {}'.format(de_dict))
                 orb.log.debug('    deserializing data elements ...')
-                deserialize_des(orb, oid, de_dict, cname=cname)
+                deserialize_des(oid, de_dict, cname=cname)
             else:
                 pass
                 # orb.log.debug('  + no parameters found for this object.')
@@ -628,7 +445,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 recompute_parmz_required = True
                 # orb.log.debug('  + parameters found: {}'.format(parm_dict))
                 # orb.log.debug('    deserializing parameters ...')
-                deserialize_parms(orb, oid, parm_dict, cname=cname)
+                deserialize_parms(oid, parm_dict, cname=cname)
             else:
                 pass
                 # orb.log.debug('  + no parameters found for this object.')
@@ -708,7 +525,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                                 parameterz[obj.oid] = {}
                             for pid in ['m', 'P', 'R_D']:
                                 if not parameterz[obj.oid].get(pid):
-                                     add_parameter(orb, obj.oid, pid)
+                                     add_parameter(obj.oid, pid)
                     if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                         recompute_parmz_required = True
                 else:
@@ -716,7 +533,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     orb.log.debug('  {}'.format(str(kw)))
             if refresh_componentz_required:
                 if getattr(obj, 'assembly', None):
-                    refresh_componentz(orb, obj.assembly)
+                    refresh_componentz(obj.assembly)
                     refresh_componentz_required = False
     orb.db.commit()
     if ports_and_flows_to_be_deleted:
@@ -746,7 +563,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         orb.log.debug('  - relevant req oids: {}'.format(str(req_oids)))
         orb.log.debug('    req_allocz is being refreshed ...')
         for req_oid in req_oids:
-            refresh_req_allocz(orb, req_oid)
+            req = orb.get(req_oid)
+            refresh_req_allocz(req)
         orb.log.debug('    done.')
         # orb.log.debug('  - recomputing parameters ...')
         recompute_parmz_required = True

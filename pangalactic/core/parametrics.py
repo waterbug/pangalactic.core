@@ -1,12 +1,14 @@
 """
 Functions to support Parameters, Relations, and Data Elements
 """
+import json, os
 from collections import namedtuple
+from copy        import deepcopy
 from decimal     import Decimal
 from math        import floor, fsum, log10
 
 # pangalactic
-from pangalactic.core                 import config, prefs, state
+from pangalactic.core                 import config, prefs
 from pangalactic.core.datastructures  import OrderedSet
 from pangalactic.core.meta            import (SELECTABLE_VALUES,
                                               DEFAULT_CLASS_DATA_ELEMENTS,
@@ -14,9 +16,6 @@ from pangalactic.core.meta            import (SELECTABLE_VALUES,
                                               DEFAULT_PRODUCT_TYPE_DATA_ELMTS,
                                               DEFAULT_PRODUCT_TYPE_PARAMETERS)
 from pangalactic.core.units           import in_si, ureg
-from pangalactic.core.utils.meta      import (get_parameter_definition_oid,
-                                              get_data_element_definition_oid,
-                                              uncook_datetime)
 from pangalactic.core.utils.datetimes import dtstamp
 
 
@@ -41,9 +40,8 @@ TWOPLACES = Decimal('0.01')
 componentz = {}
 Comp = namedtuple('Comp', 'oid quantity reference_designator')
 
-# parm_defz:  runtime cache of parameter definitions and data element
-#             definitions (both base and context parameter definitions are
-#             included)
+# parm_defz:  runtime cache of parameter definitions (both base and context
+#             parameter definitions are included)
 # purpose:  enable fast lookup of parameter metadata & compact representation
 #           of 'parameterz' cache as (value, units, mod_datetime)
 # format:  {'parameter id': {parameter properties}
@@ -67,8 +65,149 @@ parm_defz = {}
 # --------------------------
 parameterz = {}
 
+def serialize_parms(oid):
+    """
+    Output the serialized format for parameters. Note that the values are
+    *always* expressed in *base* units and the 'units' field contains the
+    preferred units to be used when displaying the value in the user interface
+    (i.e., the value must be converted to those units for display).
+
+    Args:
+        obj_parms (dict):  a dictionary containing the parameters
+            associated with an object (for a given object `obj`, its
+            parameters dictionary will be `parameterz[obj.oid]`).
+
+    Serialize the dictionary of parameters associated with an object.
+    Basically, this function is only required to serialize the
+    `mod_datetime` value of each parameter -- the parameter's other values
+    do not require special serialization.
+
+    IMPLEMENTATION NOTE:  uses deepcopy() to avoid side-effects to the
+    `parameterz` dict.
+    """
+    if oid in parameterz:
+        return deepcopy(parameterz[oid])
+    else:
+        return {}
+
+def deserialize_parms(oid, ser_parms, cname=None):
+    """
+    Output the serialized format for parameters. Note that the values are
+    *always* expressed in base units and the 'units' field contains the
+    preferred units to be used when displaying the value in the user interface
+    (i.e., the value must be converted to those units for display).
+
+    [NOTE: for backwards compatibility, detection of data elements in a
+    `parameters` section has been added, because some data elements (such as
+    TRL and Vendor) were previously defined as parameters.  Any data elements
+    found will be deserialized and added to the `data_elementz` cache.
+    - SCW 2020-04-09.]
+
+    Args:
+        orb (UberORB): the (singleton) `orb` instance
+        oid (str):  oid attr of the object to which the parameters are assigned
+        ser_parms (dict):  the serialized parms dictionary
+
+    Keyword Args:
+        cname (str):  class name of the object to which the parameters are
+            assigned (only used for logging)
+    """
+    # if cname:
+        # log.debug('* deserializing parms for {} ({})...'.format(oid,
+                                                                    # cname))
+        # log.debug('  parms: {}'.format(ser_parms))
+    if not ser_parms:
+        # log.debug('  object with oid "{}" has no parameters'.format(oid))
+        return
+    if oid not in parameterz:
+        parameterz[oid] = {}
+    for pid, parm in ser_parms.items():
+        mod_dt = parm['mod_datetime']
+        if pid in parm_defz:
+            # this is a parameter (has a ParameterDefinition)
+            if ((parameterz[oid].get(pid) and
+                 mod_dt > parameterz[oid][pid]['mod_datetime'])
+                or not parameterz[oid].get(pid)):
+                # deserialized parameter value is more recent or that parameter
+                # was not previously assigned
+                parameterz[oid][pid] = parm
+        elif pid in de_defz:
+            # this is a data element (has a DataElementDefinition)
+            # log_msg = 'data element found in parameters: "{}"'.format(pid)
+            # log.debug('  - {}'.format(log_msg))
+            if oid not in data_elementz:
+                data_elementz[oid] = {}
+            de = data_elementz[oid].get(pid)
+            if (de and mod_dt > de['mod_datetime']):
+                # deserialized value is more recent
+                de['mod_datetime'] = parm['mod_datetime']
+                de['value'] = parm['value']
+            elif not data_elementz[oid].get(pid):
+                # that data element was not previously assigned
+                de = dict(value=parm['value'],
+                          mod_datetime=parm['mod_datetime'])
+                data_elementz[oid][pid] = de
+            # pid refers to a data element, so it should not be in parameterz
+            if pid in parameterz[oid]:
+                del parameterz[oid][pid]
+        else:
+            # log_msg = 'unknown id found in parameters: "{}"'.format(pid)
+            # log.debug('  - {}'.format(log_msg))
+            # pid has no definition, so it should not be in parameterz or
+            # data_elementz
+            if pid in parameterz.get(oid, {}):
+                del parameterz[oid][pid]
+            if pid in data_elementz.get(oid, {}):
+                del data_elementz[oid][pid]
+    ### FIXME (?): it's dangerous to remove pids not in new_parms, but we
+    ### may need at some point to deal with deleted parameters ... (i.e.
+    ### remove them from the cache).
+    # pids = list(parameterz[oid])
+    # for pid in pids:
+        # if pid not in new_parms:
+            # del parameterz[oid][pid]
+    # add base parameters for any context parameters for which the base
+    # parameter is absent
+    base_pids = set([pid.split('[')[0] for pid in parameterz[oid]])
+    for base_pid in base_pids:
+        if not base_pid in parameterz[oid]:
+            # log_msg = 'base variable not in parameters, adding: "{}"'.format(
+                                                                    # base_pid)
+            # log.debug('  - {}'.format(log_msg))
+            set_pval(oid, base_pid, 0.0)
+
+def load_parmz(json_path):
+    """
+    Load the `parameterz` dict from json file in cache format.
+    """
+    # log.debug('* load_parmz() ...')
+    if os.path.exists(json_path):
+        with open(json_path) as f:
+            stored_parameterz = json.loads(f.read())
+        for oid, parms in stored_parameterz.items():
+            deserialize_parms(oid, parms)
+        # log.debug('  - parameterz cache loaded and recomputed.')
+    else:
+        # log.debug('  - "parameters.json" was not found.')
+        pass
+
+def save_parmz(json_path):
+    """
+    Save `parameterz` dict to a json file in cache format.
+    """
+    # log.debug('* save_parmz() ...')
+    stored_parameterz = {}
+    for oid, parms in parameterz.items():
+        # NOTE: serialize_parms() uses deepcopy()
+        stored_parameterz[oid] = serialize_parms(oid)
+    with open(json_path, 'w') as f:
+        f.write(json.dumps(stored_parameterz, separators=(',', ':'),
+                           indent=4, sort_keys=True))
+    # log.debug('  ... parameters.json file written.')
+
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
 # format:  {dimension : [ids of ParameterDefinitions having that dimension]}
+# NOTE:  see orb function 'create_parmz_by_dimz'
 parmz_by_dimz = {}
 
 # req_allocz:  runtime requirement allocations cache
@@ -121,7 +260,7 @@ def round_to(x, n=4):
         return int(val)
     return val
 
-def refresh_componentz(orb, product):
+def refresh_componentz(product):
     """
     Refresh the `componentz` cache for a Product instance. This must be called
     before calling orb.recompute_parmz() whenever a new Acu that references
@@ -136,11 +275,10 @@ def refresh_componentz(orb, product):
     Acu.reference_designator.
 
     Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
         product (Product):  the Product instance
     """
     if product:
-        # orb.log.debug('[orb] refresh_componentz({})'.format(product.id))
+        # log.debug('* refresh_componentz({})'.format(product.id))
         componentz[product.oid] = [Comp._make((
                                         getattr(acu.component, 'oid', None),
                                         acu.quantity or 1,
@@ -149,7 +287,7 @@ def refresh_componentz(orb, product):
                                    if acu.component
                                    and acu.component.oid != 'pgefobjects:TBD']
 
-def refresh_req_allocz(orb, req_oid):
+def refresh_req_allocz(req):
     """
     Refresh the `req_allocz` cache for a Requirement instance.  This must be
     called whenever a Requirement instance is created, modified, or deleted or
@@ -191,17 +329,14 @@ def refresh_req_allocz(orb, req_oid):
           ['symmetric' | 'asymmetric']
 
     Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
-        req_oid (str):  the oid of a Requirement instance
+        req (Requirement):  a Requirement instance
     """
-    orb.log.debug('* refresh_req_allocz({})'.format(req_oid))
-    # first check whether req has been deleted
-    req = orb.get(req_oid)
-    if not req and req_oid in req_allocz:
+    # log.debug('* refresh_req_allocz({})'.format(req.oid))
+    if not req and req.oid in req_allocz:
         # the requirement is referenced in req_allocz but the requirement
         # has now been deleted: remove it from req_allocz
-        orb.log.debug('  req was deleted, removing from req_allocz ...')
-        del req_allocz[req_oid]
+        # log.debug('  req was deleted, removing from req_allocz ...')
+        del req_allocz[req.oid]
         return
     usage_oid = None
     alloc_ref = None
@@ -217,16 +352,16 @@ def refresh_req_allocz(orb, req_oid):
         usage_oid = psu.oid
         obj_oid = getattr(psu.system, 'oid', None)
     else:
-        # req is not allocated; if present, delete it
-        orb.log.debug('  req is not allocated')
-        if req_oid in req_allocz:
-            del req_allocz[req_oid]
-            orb.log.debug('  + removed from req_allocz.')
+        # req is not allocated; if present, remove it
+        # log.debug('  req is not allocated')
+        if req.oid in req_allocz:
+            del req_allocz[req.oid]
+            # log.debug('  + removed from req_allocz.')
         return
     if req.req_type == 'functional':
-        orb.log.debug('  functional req (no parameter or constraint).')
+        # log.debug('  functional req (no parameter or constraint).')
         if usage_oid:
-            req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+            req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
     relation = req.computable_form
     pid = None
     if relation:
@@ -237,15 +372,15 @@ def refresh_req_allocz(orb, req_oid):
             parm_def = parm_rels[0].correlates_parameter
             pid = parm_def.id
         else:
-            orb.log.debug('  no parameter found -> functional req.')
-            req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+            # log.debug('  no parameter found -> functional req.')
+            req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
             return
     else:
-        orb.log.debug('  no computable_form found -> functional req.')
-        req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+        # log.debug('  no computable_form found -> functional req.')
+        req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
         return
     if pid:
-        req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, pid,
+        req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, pid,
                                  Constraint._make((
                                      req.req_units,
                                      req.req_target_value,
@@ -258,8 +393,8 @@ def refresh_req_allocz(orb, req_oid):
                                      req.req_tolerance_type
                                      ))]
     else:
-        orb.log.debug('  no parameter found; treat as functional req.')
-        req_allocz[req_oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+        # log.debug('  no parameter found; treat as functional req.')
+        req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
 
 def node_count(product_oid):
     """
@@ -307,62 +442,11 @@ def split_pid(pid):
     else:
         return pid, ''
 
-def create_parm_defz(orb):
-    """
-    Create the `parm_defz` cache of ParameterDefinitions, in the format:
-
-        {parameter_id : {name, variable, context, context_type, description,
-                         dimensions, range_datatype, computed, mod_datetime},
-         data_element_id : {name, description, range_datatype, mod_datetime},
-         ...}
-
-    Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
-    """
-    orb.log.debug('[orb] create_parm_defz')
-    pds = orb.get_by_type('ParameterDefinition')
-    # first, the "simple variable" parameters ...
-    pd_dict = {pd.id :
-               {'name': pd.name,
-                'variable': pd.id,
-                'context': None,
-                'context_type': None,
-                'description': pd.description,
-                'dimensions': pd.dimensions,
-                'range_datatype': pd.range_datatype,
-                'computed': False,
-                'mod_datetime':
-                    str(getattr(pd, 'mod_datetime', '') or dtstamp())
-                } for pd in pds}
-    parm_defz.update(pd_dict)
-    orb.log.debug('      bases created: {}'.format(
-                                            str(list(pd_dict.keys()))))
-    # add PDs for the descriptive contexts (CBE, Contingency, MEV) for the
-    # variables (Mass, Power, Datarate) for which functions have been defined
-    # to compute the CBE and MEV values
-    all_contexts = orb.get_by_type('ParameterContext')
-    orb.log.debug('      adding context parms for: {}'.format(
-                                    str([c.id for c in all_contexts])))
-    for pid in ['m', 'P', 'R_D']:
-        pd = orb.select('ParameterDefinition', id=pid)
-        for c in all_contexts:
-            add_context_parm_def(orb, pd, c)
-    # all float-valued parameters should have associated Contingency parms
-    float_pds = [pd for pd in pds if pd.range_datatype == 'float']
-    contingency = orb.select('ParameterContext', name='Contingency')
-    orb.log.debug('      adding Ctgcy parms for float types: {}'.format(
-                                    str([pd.id for pd in float_pds])))
-    for float_pd in float_pds:
-        contingency_pid = get_parameter_id(float_pd.id, contingency.id)
-        if contingency_pid not in parm_defz:
-            add_context_parm_def(orb, float_pd, contingency)
-
-def add_context_parm_def(orb, pd, c):
+def add_context_parm_def(pd, c):
     """
     Add a context parameter definition to the `parm_defz` cache.
 
     Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
         pd (ParameterDefinition):  ParameterDefinition for the base parameter
         c (ParameterContext):  object representing the context
             of the parameter
@@ -379,16 +463,15 @@ def add_context_parm_def(orb, pd, c):
         'computed': c.computed,
         'mod_datetime': str(dtstamp())}
 
-def update_parm_defz(orb, pd):
+def update_parm_defz(pd):
     """
     Update the `parm_defz` cache when a new ParameterDefinition is created or
     modified.
 
     Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
         pd (ParameterDefinition):  ParameterDefinition being added
     """
-    # orb.log.debug('[orb] update_parm_defz')
+    # log.debug('* update_parm_defz')
     parm_defz[pd.id] = {
         'name': pd.name,
         'variable': pd.id,
@@ -400,39 +483,26 @@ def update_parm_defz(orb, pd):
         'computed': False,
         'mod_datetime': str(dtstamp())}
 
-def create_parmz_by_dimz(orb):
-    """
-    Create the `parmz_by_dimz` cache, where the cache has the form
-
-        {dimension : [ids of ParameterDefinitions having that dimension]}
-
-    Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
-    """
-    orb.log.debug('[orb] create_parmz_by_dimz')
-    pds = orb.get_by_type('ParameterDefinition')
-    dimz = set([pd.dimensions for pd in pds])
-    parmz_by_dimz.update({dim : [pd.id for pd in pds if pd.dimensions == dim]
-                          for dim in dimz})
-
-def update_parmz_by_dimz(orb, pd):
+def update_parmz_by_dimz(pd):
     """
     Refresh the `parmz_by_dimz` cache when a ParameterDefinition is created or
     modified.  The cache has the form
 
         {dimension : [ids of ParameterDefinitions having that dimension]}
 
+    NOTE:  see also the orb function 'create_parmz_by_dimz' ... it may move
+    here in the future.
+
     Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
         pd (ParameterDefinition):  ParameterDefinition being added or modified
     """
-    # orb.log.debug('[orb] refresh_parmz_by_dimz')
+    # log.debug('* refresh_parmz_by_dimz')
     if pd.dimensions in parmz_by_dimz:
         parmz_by_dimz[pd.dimensions].append(pd.id)
     else:
         parmz_by_dimz[pd.dimensions] = [pd.id]
 
-def add_parameter(orb, oid, pid):
+def add_parameter(oid, pid):
     """
     Add a new parameter to an object, which means adding a parameter's data
     structure to the `p.node.parametrics.parameterz` dictionary under that
@@ -446,7 +516,6 @@ def add_parameter(orb, oid, pid):
     base units.
 
     Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
         oid (str):  oid of the object that owns the parameter
         pid (str):  the id of the parameter
     """
@@ -459,42 +528,42 @@ def add_parameter(orb, oid, pid):
         is_context_parm = True
     else:
         variable = pid
-    # orb.log.debug('[orb] add_parameter "{!s}"'.format(pid))
+    # log.debug('* add_parameter "{!s}"'.format(pid))
     # [1] check if object already has that parameter
     if pid in parameterz[oid]:
         # if the object already has that parameter, do nothing
         return True
-    # [2] check for ParameterDefinition of base variable in db
-    pd = orb.get(get_parameter_definition_oid(variable))
+    # [2] check for ParameterDefinition of base variable
+    pd = parm_defz.get(variable)
     if not pd:
         # for now, if no ParameterDefinition exists for pid, pass
         # (maybe eventually raise TypeError)
-        orb.log.debug(
-            '* add_parameter(): variable "{}" is not defined.'.format(
-                                                              variable))
+        # log.debug(
+            # '* add_parameter(): variable "{}" is not defined.'.format(
+                                                              # variable))
         return False
     # [3] check if the variable (base parameter) has been assigned ...
     if not parameterz[oid].get(variable):
         # the variable (base parameter) has not been assigned ... this is
         # rare, so debug logging is ok
         # if is_context_parm:
-            # orb.log.debug('* adding base parameter "{}".'.format(variable))
+            # log.debug('* adding base parameter "{}".'.format(variable))
         # else:
-            # orb.log.debug('* adding parameter "{}".'.format(variable))
+            # log.debug('* adding parameter "{}".'.format(variable))
         pdz = parm_defz.get(variable)
         if not pdz:
             # if not in parm_defz, add it:
-            pdz = {pd.id :
-                   {'name': pd.name,
-                    'variable': pd.id,
+            pdz = {pd['id'] :
+                   {'name': pd['name'],
+                    'variable': pd['id'],
                     'context': None,
                     'context_type': None,
-                    'description': pd.description,
-                    'dimensions': pd.dimensions,
-                    'range_datatype': pd.range_datatype,
+                    'description': pd['description'],
+                    'dimensions': pd['dimensions'],
+                    'range_datatype': pd['range_datatype'],
                     'computed': False,
                     'mod_datetime':
-                        str(getattr(pd, 'mod_datetime', '') or dtstamp())
+                        str(pd.get('mod_datetime', '') or dtstamp())
                     }}
             parm_defz.update(pdz)
         # NOTE:  setting the parameter's value is a separate operation -- when a
@@ -546,16 +615,15 @@ def add_parameter(orb, oid, pid):
     else:
         return True
 
-def add_default_parameters(orb, obj):
+def add_default_parameters(obj):
     """
     Assign the configured or preferred default parameters to an object.
 
     Args:
-        orb (Uberorb):  the orb (singleton)
         obj (Identifiable):  the object to receive parameters
     """
-    orb.log.debug('* adding default parameters to object "{}"'.format(
-                                                                obj.id))
+    # log.debug('* adding default parameters to object "{}"'.format(
+                                                                # obj.id))
     # Configured Parameters are currently defined by the 'dashboard'
     # configuration (in future that may be augmented by Parameters
     # referenced by, e.g., a ProductType and/or a ModelTemplate, both of
@@ -564,7 +632,7 @@ def add_default_parameters(orb, obj):
     cname = obj.__class__.__name__
     pids |= OrderedSet(DEFAULT_CLASS_PARAMETERS.get(cname, []))
     # TODO: let user set default parameters in their prefs
-    if isinstance(obj, orb.classes['HardwareProduct']):
+    if cname == 'HardwareProduct':
         # default for "default_parms" in config:  mass, power, data rate
         # (config is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
@@ -573,23 +641,22 @@ def add_default_parameters(orb, obj):
                            or ['m', 'P', 'R_D'])
         if obj.product_type:
             pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
-                               obj.product_type.id, []))
+                               getattr(obj.product_type, 'id', '') or []))
     # add default parameters first ...
-    orb.log.debug('  - adding parameters {!s} ...'.format(str(pids)))
+    # log.debug('  - adding parameters {!s} ...'.format(str(pids)))
     for pid in pids:
-        add_parameter(orb, obj.oid, pid)
+        add_parameter(obj.oid, pid)
 
-def add_product_type_parameters(orb, obj, pt):
+def add_product_type_parameters(obj, pt):
     """
     Assign the parameters associated with the specified product type to an
     object.
 
     Args:
-        orb (Uberorb):  the orb (singleton)
         obj (Identifiable):  the object to receive parameters
         pt (ProductType):  the product type
     """
-    # orb.log.debug('* assigning parameters for product type "{}"'.format(pt.id))
+    # log.debug('* assigning parameters for product type "{}"'.format(pt.id))
     # then check for parameters specific to the product_type, if any
     if pt:
         # check if the product_type has parameters
@@ -599,14 +666,13 @@ def add_product_type_parameters(orb, obj, pt):
             for pid in pt_parmz:
                 parameterz[obj.oid][pid] = pt_parmz[pid].copy()
 
-def delete_parameter(orb, oid, pid):
+def delete_parameter(oid, pid):
     """
     Delete a parameter from an object.  This should be rare and would only be
     necessary if the parameter is irrelevant to the object; therefore, the base
     variable and all related context parameters would be deleted.
 
     Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
         oid (str):  oid of the object that owns the parameter
         pid (str):  `id` attribute of the parameter
     """
@@ -623,23 +689,22 @@ def delete_parameter(orb, oid, pid):
             if '[' in other_pid and base_pid == other_pid.split('[')[0]:
                 del parameterz[oid][other_pid]
 
-def get_pval(orb, oid, pid, units='', allow_nan=False):
+def get_pval(oid, pid, units='', allow_nan=False):
     """
     Return a cached parameter value in base units or in the units specified.
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
-        obj (Identifiable): the object that has the parameter
+        oid (str): the oid of the object that has the parameter
         pid (str): the parameter 'id' value
 
     Keyword Args:
         units (str):  units in which the return value should be expressed
     """
     # Too verbose -- only for extreme debugging ...
-    # orb.log.debug('* get_pval() ...')
+    # log.debug('* get_pval() ...')
     pdz = parm_defz.get(pid)
     if not pdz:
-        # orb.log.debug('* get_pval: "{}" does not have a definition.'.format(
+        # log.debug('* get_pval: "{}" does not have a definition.'.format(
                                                                         # pid))
         return
     try:
@@ -656,7 +721,7 @@ def get_pval(orb, oid, pid, units='', allow_nan=False):
                 return 100.0 * parameterz[oid][pid]['value']
             elif dims == 'money':
                 # round to 2 decimal places
-                val = get_pval(orb, oid, pid)
+                val = get_pval(oid, pid)
                 if val is None:
                     return 0.00
                 elif val:
@@ -671,15 +736,14 @@ def get_pval(orb, oid, pid, units='', allow_nan=False):
     except:
         return NULL.get(pdz.get('range_datatype', 'float'))
 
-def get_pval_as_str(orb, oid, pid, units='', allow_nan=False):
+def get_pval_as_str(oid, pid, units='', allow_nan=False):
     """
     Return a cached parameter value in the specified units (or in base units if
     not specified) as a formatted string, for display in UI.  (Used in the
     object editor, `p.node.gui.pgxnobject.PgxnObject` and the dashboard.)
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
-        obj (Identifiable): the object that owns the parameter
+        oid (str): the oid of the object that has the parameter
         pid (str): the `id` of the parameter
 
     Keyword Args:
@@ -687,10 +751,10 @@ def get_pval_as_str(orb, oid, pid, units='', allow_nan=False):
         allow_nan (bool):  allow numpy NaN as a return value
     """
     # Too verbose -- only for extreme debugging ...
-    # orb.log.debug('* get_pval_as_str(orb, {}, {})'.format(oid, pid))
+    # log.debug('* get_pval_as_str({}, {})'.format(oid, pid))
     pdz = parm_defz.get(pid)
     if not pdz:
-        # orb.log.debug('  - "{}" does not have a definition.'.format(pid))
+        # log.debug('  - "{}" does not have a definition.'.format(pid))
         return '-'
     try:
         # convert based on dimensions/units ...
@@ -699,10 +763,10 @@ def get_pval_as_str(orb, oid, pid, units='', allow_nan=False):
         if dims == 'percent':
             # show percentage values in interface -- they will
             # later be saved (by set_pval) as .01 * value
-            val = 100.0 * get_pval(orb, oid, pid)
+            val = 100.0 * get_pval(oid, pid)
         elif dims == 'money':
             # format with 2 decimal places
-            val = get_pval(orb, oid, pid)
+            val = get_pval(oid, pid)
             if val is None:
                 return ''
             elif val:
@@ -710,7 +774,7 @@ def get_pval_as_str(orb, oid, pid, units='', allow_nan=False):
             else:
                 return '0.00'
         else:
-            base_val = get_pval(orb, oid, pid)
+            base_val = get_pval(oid, pid)
             if units:
                 # TODO: ignore units if not compatible
                 quan = base_val * ureg.parse_expression(in_si[dims])
@@ -738,14 +802,14 @@ def get_pval_as_str(orb, oid, pid, units='', allow_nan=False):
     except:
         # FOR EXTREME DEBUGGING ONLY:
         # this logs an ERROR for every unpopulated parameter
-        # msg = '* get_pval_as_str(orb, {}, {})'.format(oid, pid)
+        # msg = '* get_pval_as_str({}, {})'.format(oid, pid)
         # msg += '  encountered an error.'
-        # orb.log.debug(msg)
+        # log.debug(msg)
 
         # for production use, return '-' if the value causes error
         return '-'
 
-def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
+def _compute_pval(oid, variable, context_id, allow_nan=False):
     """
     Get the value of a parameter of the specified object, computing it if it is
     'computed' and caching the computed value in parameterz; otherwise,
@@ -760,7 +824,6 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
     parameter or is not defined for the specified object.
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Identifiable that has the parameter
         variable (str): the variable whose context value is to be computed
         context_id (str): id of the context
@@ -771,9 +834,9 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
             not set
     """
     # NOTE: uncomment debug logging for EXTREMELY verbose debugging output
-    # orb.log.debug('* _compute_pval() for variable "{}"'.format(variable))
-    # orb.log.debug('                  of item with oid "{}"'.format(oid))
-    # orb.log.debug('                  in context "{}"'.format(context_id))
+    # log.debug('* _compute_pval() for variable "{}"'.format(variable))
+    # log.debug('                  of item with oid "{}"'.format(oid))
+    # log.debug('                  in context "{}"'.format(context_id))
     val = 0.0
     # NOTE:  THE OBJECT DOES NOT ALWAYS HAVE TO HAVE THE VARIABLE
     # if oid not in parameterz or not parameterz[oid].get(variable):
@@ -781,10 +844,11 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
     pid = get_parameter_id(variable, context_id)
     pdz = parm_defz.get(pid, {})
     if not pdz:
-        orb.log.debug('  "{}" not found in parm_defz'.format(pid))
-        orb.log.debug('  in _compute_pval for oid "{}"'.format(oid))
+        # log.debug('  "{}" not found in parm_defz'.format(pid))
+        # log.debug('  in _compute_pval for oid "{}"'.format(oid))
+        pass
     if pdz.get('computed'):
-        # orb.log.debug('  "{}" is computed ...'.format(pid))
+        # log.debug('  "{}" is computed ...'.format(pid))
         # look up compute function -- in the future, there may be a Relation
         # expression, found using the ParameterRelation relationship
         if not parameterz.get(oid, {}).get(variable):
@@ -798,13 +862,13 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
             return val
         compute = COMPUTES.get((variable, context_id))
         if compute:
-            # orb.log.debug('  compute function is {!s}'.format(getattr(
+            # log.debug('  compute function is {!s}'.format(getattr(
                                         # compute, '__name__', None)))
-            val = compute(orb, oid, variable) or 0.0
-            # orb.log.debug('  value is {}'.format(val))
+            val = compute(oid, variable) or 0.0
+            # log.debug('  value is {}'.format(val))
         else:
             return val
-            # orb.log.debug('  compute function not found.')
+            # log.debug('  compute function not found.')
             # val = 'undefined'
         dims = pdz.get('dimensions')
         units = in_si.get(dims)
@@ -813,12 +877,12 @@ def _compute_pval(orb, oid, variable, context_id, allow_nan=False):
                                         mod_datetime=str(dtstamp()))
     elif oid in parameterz:
         # msg = '  "{}" is not computed; getting value ...'.format(pid)
-        # orb.log.debug(msg)
+        # log.debug(msg)
         parm = parameterz[oid].get(pid) or {}
         val = parm.get('value') or 0.0
     return val
 
-def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
+def set_pval(oid, pid, value, units=None, mod_datetime=None, local=True):
     """
     Set the value of a parameter instance for the specified object to the
     specified value, as expressed in the specified units (or in base units if
@@ -827,7 +891,6 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
     value is converted to base units before setting.
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Modelable that has the parameter
         pid (str): the parameter 'id'
         value (TBD): value should be of the datatype specified by
@@ -843,16 +906,16 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
             -- i.e., someone else set the value [default: True]
     """
     # NOTE: uncomment debug logging for EXTREMELY verbose debugging output
-    # orb.log.debug('* set_pval({}, {}, {})'.format(oid, pid, str(value)))
+    # log.debug('* set_pval({}, {}, {})'.format(oid, pid, str(value)))
     if not oid:
-        # orb.log.debug('  no oid provided; ignoring.')
+        # log.debug('  no oid provided; ignoring.')
         return False
     pd = parm_defz.get(pid)
     if not pd:
-        # orb.log.debug('  parameter "{}" is not defined; ignoring.'.format(pid))
+        # log.debug('  parameter "{}" is not defined; ignoring.'.format(pid))
         return False
     if pd['computed']:
-        # orb.log.debug('  parameter is computed -- not setting.')
+        # log.debug('  parameter is computed -- not setting.')
         return False
     ######################################################################
     # NOTE: henceforth, if the parameter whose value is being set is not
@@ -862,19 +925,19 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
     if not parm:
         # NOTE:  add_parameter() now checks if base parameter has been assigned
         # and if not, assigns it and returns True
-        added = add_parameter(orb, oid, pid)
+        added = add_parameter(oid, pid)
         if not added:
             # if the parameter cannot be added, it normally implies that its
             # base parameter has not been defined ...
-            orb.log.debug('  parameter could not be added (see log).')
+            # log.debug('  parameter could not be added (see log).')
             return False
         # else:
-            # orb.log.debug('  parameter either exists or was added.')
+            # log.debug('  parameter either exists or was added.')
     try:
         # cast value to range_datatype before setting
         pdz = parm_defz.get(pid)
         if not pdz:
-            # orb.log.debug('  parameter definition not found, quitting.')
+            # log.debug('  parameter definition not found, quitting.')
             return False
         dt_name = pdz['range_datatype']
         dtype = DATATYPES[dt_name]
@@ -891,10 +954,10 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
             except:
                 # TODO: notify end user if units could not be parsed!
                 # ... for now, use base units
-                orb.log.debug('  could not parse units "{}" ...'.format(units))
+                # log.debug('  could not parse units "{}" ...'.format(units))
                 dims = pdz.get('dimensions')
                 units = in_si.get(dims)
-                orb.log.debug('  setting to base units: {}'.format(units))
+                # log.debug('  setting to base units: {}'.format(units))
                 # if units parse failed, assume base units
                 converted_value = value
             finally:
@@ -907,20 +970,20 @@ def set_pval(orb, oid, pid, value, units=None, mod_datetime=None, local=True):
             mod_datetime = str(dtstamp())
         parameterz[oid][pid]['mod_datetime'] = mod_datetime
         # dts = str(mod_datetime)
-        # orb.log.debug('  setting value: {}'.format(value))
-        # orb.log.debug('  setting mod_datetime: "{}"'.format(dts))
+        # log.debug('  setting value: {}'.format(value))
+        # log.debug('  setting mod_datetime: "{}"'.format(dts))
         return True
     except:
-        orb.log.debug('  *** set_pval() failed:')
-        msg = '      value {} of datatype {}'.format(value, type(value))
-        orb.log.debug(msg)
-        msg = '      caused something gnarly to happen ...'
-        orb.log.debug(msg)
-        msg = '      so parm "{}" was not set for oid "{}"'.format(pid, oid)
-        orb.log.debug(msg)
+        # log.debug('  *** set_pval() failed:')
+        # msg = '      value {} of datatype {}'.format(value, type(value))
+        # log.debug(msg)
+        # msg = '      caused something gnarly to happen ...'
+        # log.debug(msg)
+        # msg = '      so parm "{}" was not set for oid "{}"'.format(pid, oid)
+        # log.debug(msg)
         return False
 
-def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
+def get_pval_from_str(oid, pid, str_val, units=None, mod_datetime=None,
                       local=True):
     """
     Get the value of a parameter instance for the specified object from a
@@ -930,7 +993,6 @@ def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     `p.node.gui.pgxnobject.PgxnObject`.)
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Modelable that has the parameter
         pid (str): the parameter 'id'
         str_val (str): string value
@@ -946,7 +1008,7 @@ def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     """
     # This log msg is only needed for extreme debugging -- `set_pval()` is
     # called at the end and will log essentially the same information ...
-    # orb.log.debug('* get_pval_from_str({}, {}, {})'.format(oid, pid,
+    # log.debug('* get_pval_from_str({}, {}, {})'.format(oid, pid,
                                                            # str(str_val)))
     try:
         radt = parm_defz[pid].get('range_datatype')
@@ -967,10 +1029,11 @@ def get_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     except:
         # if unable to cast a value, do nothing (and log it)
         # TODO:  more form validation!
-        msg = 'get_pval_from_string() could not convert string "{}"'
-        orb.log.debug('* {}'.format(msg.format(str_val)))
+        # msg = 'get_pval_from_string() could not convert string "{}"'
+        # log.debug('* {}'.format(msg.format(str_val)))
+        pass
 
-def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
+def set_pval_from_str(oid, pid, str_val, units=None, mod_datetime=None,
                       local=True):
     """
     Set the value of a parameter instance for the specified object from a
@@ -979,7 +1042,6 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     editor, `p.node.gui.pgxnobject.PgxnObject`.)
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Modelable that has the parameter
         pid (str): the parameter 'id'
         str_val (str): string value
@@ -995,7 +1057,7 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
     """
     # This log msg is only needed for extreme debugging -- `set_pval()` is
     # called at the end and will log essentially the same information ...
-    # orb.log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
+    # log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
                                                            # str(str_val)))
     try:
         pd = parm_defz.get(pid, {})
@@ -1013,15 +1075,16 @@ def set_pval_from_str(orb, oid, pid, str_val, units=None, mod_datetime=None,
             val = str_val
         if pd.get('dimensions') == 'percent':
             val = 0.01 * float(val)
-        set_pval(orb, oid, pid, val, units=units, mod_datetime=mod_datetime,
+        set_pval(oid, pid, val, units=units, mod_datetime=mod_datetime,
                  local=local)
     except:
         # if unable to cast a value, do nothing (and log it)
         # TODO:  more form validation!
-        msg = 'set_pval_from_str() could not convert string "{}".'
-        orb.log.debug('* {}'.format(msg.format(str_val)))
+        # msg = 'set_pval_from_str() could not convert string "{}".'
+        # log.debug('* {}'.format(msg.format(str_val)))
+        pass
 
-def compute_assembly_parameter(orb, product_oid, variable):
+def compute_assembly_parameter(product_oid, variable):
     """
     Compute the total assembly value of a linearly additive variable (e.g.,
     mass, power consumption, data rate) for a product based on the recursively
@@ -1033,13 +1096,12 @@ def compute_assembly_parameter(orb, product_oid, variable):
     list of components in a specified assembly is incomplete.
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
         product_oid (str): the oid of the Product whose total parameter is
             being estimated
         variable (str): variable for which the assembly value is being computed
     """
     # This logging is VERY verbose, even for debugging!
-    # orb.log.debug('[parametrics] compute_assembly_parameter()')
+    # log.debug('* compute_assembly_parameter()')
     if (product_oid in parameterz and variable in parameterz[product_oid]):
         radt = parm_defz[variable]['range_datatype']
         dtype = DATATYPES[radt]
@@ -1049,48 +1111,47 @@ def compute_assembly_parameter(orb, product_oid, variable):
             # dtype cast is used here in case some component didn't have this
             # parameter or didn't exist and we got a 0.0 value for it ...
             summation = fsum(
-              [dtype(compute_assembly_parameter(orb, c.oid, variable) * c.quantity)
+              [dtype(compute_assembly_parameter(c.oid, variable) * c.quantity)
                for c in cz])
             return round_to(summation)
         else:
             # if the product has no known components, return its specified
             # value for the variable (note that the default here is 0.0)
-            return get_pval(orb, product_oid, variable)
+            return get_pval(product_oid, variable)
     else:
         return 0.0
 
 # NOTE: in the new parameter paradigm, the CBE and Contingency are context
 # parameters -- this function must be rewritten!
-def compute_mev(orb, oid, variable):
+def compute_mev(oid, variable):
     """
     Compute the Maximum Expected Value of a parameter based on its Current Best
     Estimate (CBE) value and the percent contingency specified for it.
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Modelable containing the parameters
         variable (str): the `variable` of the parameter
 
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
-    # orb.log.debug('* compute_mev "{}": "{}"'.format(oid, variable))
+    # log.debug('* compute_mev "{}": "{}"'.format(oid, variable))
     if oid not in parameterz or variable not in parameterz[oid]:
         return 0.0
-    ctgcy_val = get_pval(orb, oid, variable + '[Ctgcy]')
+    ctgcy_val = get_pval(oid, variable + '[Ctgcy]')
     if not ctgcy_val:
-        # orb.log.debug('  contingency not set --')
-        # orb.log.debug('  setting default value (30%) ...')
+        # log.debug('  contingency not set --')
+        # log.debug('  setting default value (30%) ...')
         # if Contingency value is 0 or not set, set to default value of 30%
         ctgcy_val = 0.3
         pid = variable + '[Ctgcy]'
         parameterz[oid][pid] = {'value': ctgcy_val, 'units': '%',
                                 'mod_datetime': str(dtstamp())}
     factor = ctgcy_val + 1.0
-    base_val = _compute_pval(orb, oid, variable, 'CBE')
+    base_val = _compute_pval(oid, variable, 'CBE')
     # extremely verbose logging -- uncomment only for intense debugging
-    # orb.log.debug('* compute_mev: base parameter value is {}'.format(base_val))
-    # orb.log.debug('           base parameter type is {}'.format(
+    # log.debug('* compute_mev: base parameter value is {}'.format(base_val))
+    # log.debug('           base parameter type is {}'.format(
                                                             # type(base_val)))
     if isinstance(base_val, int):
         return round_to(int(factor * base_val))
@@ -1099,7 +1160,7 @@ def compute_mev(orb, oid, variable):
     else:
         return 0.0
 
-def compute_margin(orb, usage_oid, variable, default=0):
+def compute_margin(usage_oid, variable, default=0):
     """
     Compute the "Margin" for the specified variable (base parameter) at the
     specified function or system role. So far, "Margin" is only defined for
@@ -1109,7 +1170,6 @@ def compute_margin(orb, usage_oid, variable, default=0):
     requirement is currently allocated.
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
         usage_oid (str): the oid of the usage (Acu or ProjectSystemUsage) to
             which a performance requirement for the specified variable is
             allocated
@@ -1119,8 +1179,8 @@ def compute_margin(orb, usage_oid, variable, default=0):
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
-    orb.log.debug('* compute_margin()')
-    orb.log.debug('  using req_allocz: {}'.format(str(req_allocz)))
+    # log.debug('* compute_margin()')
+    # log.debug('  using req_allocz: {}'.format(str(req_allocz)))
     # find requirements allocated to the specified usage and constraining the
     # specified variable
     allocated_req_oids = [req_oid for req_oid in req_allocz
@@ -1129,8 +1189,8 @@ def compute_margin(orb, usage_oid, variable, default=0):
     if not allocated_req_oids:
         # no requirement constraining the specified variable is allocated to
         # this usage
-        txt = 'usage "{}" has no reqt allocated to it constraining "{}".'
-        orb.log.debug('  {}'.format(txt.format(usage_oid, variable)))
+        # txt = 'usage "{}" has no reqt allocated to it constraining "{}".'
+        # log.debug('  {}'.format(txt.format(usage_oid, variable)))
         return 'undefined'
     # for now, assume there is only one reqt that satisfies
     req_oid = allocated_req_oids[0]
@@ -1143,27 +1203,27 @@ def compute_margin(orb, usage_oid, variable, default=0):
         quan_base = quan.to_base_units()
         converted_nte = quan_base.magnitude
     else:
-        txt = 'constraint_type is "{}"; ignored (for now).'
-        orb.log.debug('  {}'.format(txt.format(constraint.constraint_type)))
+        # txt = 'constraint_type is "{}"; ignored (for now).'
+        # log.debug('  {}'.format(txt.format(constraint.constraint_type)))
         return 'undefined'
-    mev = _compute_pval(orb, obj_oid, variable, 'MEV')
+    mev = _compute_pval(obj_oid, variable, 'MEV')
     # convert NTE value to base units, if necessary
     quan = nte * ureg.parse_expression(nte_units)
     quan_base = quan.to_base_units()
     converted_nte = quan_base.magnitude
-    # orb.log.debug('  compute_margin: nte is {}'.format(converted_nte))
-    # orb.log.debug('                  mev is {}'.format(mev))
+    # log.debug('  compute_margin: nte is {}'.format(converted_nte))
+    # log.debug('                  mev is {}'.format(mev))
     if mev == 0:   # NOTE: 0 == 0.0 evals to True
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
         return 'undefined'
-    msg = '- {} NTE specified for allocation to "{}" -- computing margin ...'
-    orb.log.debug(msg.format(pid, alloc_ref))
+    # msg = '- {} NTE specified for allocation to "{}" -- computing margin ...'
+    # log.debug(msg.format(pid, alloc_ref))
     margin = round_to(((converted_nte - mev) / converted_nte))
-    orb.log.debug('  ... margin is {}%'.format(margin * 100.0))
+    # log.debug('  ... margin is {}%'.format(margin * 100.0))
     return margin
 
-def compute_requirement_margin(orb, req_oid, default=0):
+def compute_requirement_margin(req_oid, default=0):
     """
     Compute the "Margin" for the specified performance requirement. So far,
     "Margin" is only defined for performance requirements that specify a
@@ -1172,7 +1232,6 @@ def compute_requirement_margin(orb, req_oid, default=0):
     system or component to which the requirement is currently allocated.
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
         req_oid (str): the oid of the performance requirement for which margin
             is to be computed
 
@@ -1184,7 +1243,7 @@ def compute_requirement_margin(orb, req_oid, default=0):
     Return:
         allocated_to_oid, parameter_id, margin (tuple)
     """
-    orb.log.debug('* compute_requirement_margin()')
+    # log.debug('* compute_requirement_margin()')
     if req_oid not in req_allocz:
         # TODO: notify user 
         msg = 'Requirement {} is not allocated.'.format(req_oid)
@@ -1201,29 +1260,29 @@ def compute_requirement_margin(orb, req_oid, default=0):
         quan_base = quan.to_base_units()
         converted_nte = quan_base.magnitude
     else:
-        msg = 'Constraint type is not "maximum" -- cannot handle (yet).'
-        txt = 'constraint_type is "{}"; ignored (for now).'
-        orb.log.debug('  {}'.format(txt.format(constraint.constraint_type)))
+        # msg = 'Constraint type is not "maximum" -- cannot handle (yet).'
+        # txt = 'constraint_type is "{}"; ignored (for now).'
+        # log.debug('  {}'.format(txt.format(constraint.constraint_type)))
         return (None, pid, None, None, msg)
     if not obj_oid:
-        msg = 'Requirement is not allocated properly (no Acu or PSU).'
+        # msg = 'Requirement is not allocated properly (no Acu or PSU).'
         return (None, pid, nte, nte_units, msg)
     elif obj_oid == 'pgefobjects:TBD':
-        msg = 'Margin cannot be computed for unknown or TBD object.'
+        # msg = 'Margin cannot be computed for unknown or TBD object.'
         return (usage_oid, pid, nte, nte_units, msg)
-    mev = _compute_pval(orb, obj_oid, pid, 'MEV')
-    # orb.log.debug('  compute_margin: nte is {}'.format(converted_nte))
-    # orb.log.debug('                  mev is {}'.format(mev))
+    mev = _compute_pval(obj_oid, pid, 'MEV')
+    # log.debug('  compute_margin: nte is {}'.format(converted_nte))
+    # log.debug('                  mev is {}'.format(mev))
     if mev == 0:   # NOTE: 0 == 0.0 evals to True
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
-        msg = 'MEV value for {} is 0; cannot compute margin.'.format(pid)
+        # msg = 'MEV value for {} is 0; cannot compute margin.'.format(pid)
         return (usage_oid, pid, nte, nte_units, msg)
-    msg = '- {} NTE specified for allocation to "{}" -- computing margin ...'
-    orb.log.debug(msg.format(pid, alloc_ref))
+    # msg = '- {} NTE specified for allocation to "{}" -- computing margin ...'
+    # log.debug(msg.format(pid, alloc_ref))
     # float cast is unnec. because python 3 division will do the right thing
     margin = round_to(((converted_nte - mev) / converted_nte))
-    orb.log.debug('  ... margin is {}%'.format(margin * 100.0))
+    # log.debug('  ... margin is {}%'.format(margin * 100.0))
     return (usage_oid, pid, nte, nte_units, margin)
 
 # the COMPUTES dict maps variable and context id to applicable compute
@@ -1276,6 +1335,110 @@ de_defz = {}
 # -------------------
 data_elementz = {}
 
+def serialize_des(oid):
+    """
+    Args:
+        oid (str):  the oid of the object whose data elements are to be
+            serialized.
+
+    Serialize the data elements associated with an object.  Basically, this
+    function is only required to serialize the `mod_datetime` value of each
+    data element.
+
+    IMPLEMENTATION NOTE:  uses deepcopy() to avoid side-effects to the
+    `data_elementz` dict.
+    """
+    if oid in data_elementz:
+        return deepcopy(data_elementz[oid])
+    else:
+        return {}
+
+def deserialize_des(oid, ser_des, cname=None):
+    """
+    Deserialize a serialized object's `data_elements` dictionary.
+
+    Args:
+        oid (str):  oid attr of the object to which the data elements are
+            assigned
+        ser_des (dict):  the serialized data elements dictionary
+
+    Keyword Args:
+        cname (str):  class name of the object to which the parameters are
+            assigned (only used for logging)
+    """
+    # if cname and ser_des:
+        # log.debug('* deserializing data elements for "{}" ({})...'.format(
+                                                                  # oid, cname))
+        # log.debug('  - data elements: {}'.format(ser_des))
+    # elif ser_des:
+        # log.debug('* deserializing data elements for oid "{}")...'.format(
+                                                                         # oid))
+        # log.debug('  - data elements: {}'.format(ser_des))
+    if not ser_des:
+        # log.debug('  object with oid "{}" has no data elements'.format(
+                                                                      # oid))
+        return
+    if oid not in data_elementz:
+        data_elementz[oid] = {}
+    for deid, de in ser_des.items():
+        mod_dt = de['mod_datetime']
+        if deid in de_defz:
+            if ((data_elementz[oid].get(deid) and
+                 mod_dt > data_elementz[oid][deid]['mod_datetime'])
+                or not data_elementz[oid].get(deid)):
+                # deserialized data element value is more recent or that
+                # data element was not previously assigned
+                data_elementz[oid] = ser_des
+        else:
+            # log_msg = 'unknown id found in data elements: "{}"'.format(deid)
+            # log.debug('  - {}'.format(log_msg))
+            # deid has no definition, so it should not be in data_elementz
+            if deid in data_elementz.get(oid, {}):
+                del data_elementz[oid][deid]
+    ### FIXME:  it's dangerous to remove deids not in new_des, but we
+    ### must deal with deleted parameters ...
+    # deids = list(data_elementz[oid])
+    # for deid in deids:
+        # if deid not in new_des:
+            # del data_elementz[oid][deid]
+    # if data_elementz.get(oid):
+        # log.debug('  - oid "{}" now has these data elements: {}.'.format(
+                                         # oid, str(list(data_elementz[oid]))))
+
+def load_data_elementz(json_path):
+    """
+    Load `data_elementz` dict from json file.
+    """
+    # log.debug('* _load_data_elementz() ...')
+    if os.path.exists(json_path):
+        with open(json_path) as f:
+            serialized_des = json.loads(f.read())
+        for oid, ser_des in serialized_des.items():
+            deserialize_des(oid, ser_des)
+        # log.debug('  - data_elementz cache loaded.')
+    else:
+        # log.debug('  - "data_elements.json" was not found.')
+        pass
+
+def save_data_elementz(json_path):
+    """
+    Save `data_elementz` dict to a json file.
+    """
+    # log.debug('* _save_data_elementz() ...')
+    serialized_data_elementz = {}
+    try:
+        for oid, obj_des in data_elementz.items():
+            # NOTE: serialize_des() uses deepcopy()
+            serialized_data_elementz[oid] = serialize_des(oid)
+        with open(json_path, 'w') as f:
+            f.write(json.dumps(serialized_data_elementz,
+                               separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        # log.debug('  ... data_elements.json file written.')
+    except:
+        # log.debug('  ... writing data_elements.json file failed!')
+        pass
+
 # entz:        persistent** cache of entities (dicts)
 #              ** persisted in the file 'ents.json' in the
 #              application home directory -- see the orb functions
@@ -1304,82 +1467,22 @@ ent_lookupz = {}
 # format:  {entity['oid'] : [list of previous versions of entity]}
 ent_histz = {}
 
-def create_de_defz(orb):
-    """
-    Create the `de_defz` cache of DataElementDefinitions, in the format:
-
-        {data_element_id : {name, description, range_datatype, mod_datetime},
-         ...}
-
-    Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
-    """
-    orb.log.debug('* create_de_defz')
-    # check for data element definition structures in state['de_defz']
-    new_ded_objs = []
-    orb.log.debug('  - checking for de defs in state["de_defz"] ...')
-    new_state_ded_ids = []
-    if state.get('de_defz'):
-        ded_ids = orb.get_ids('DataElementDefinition')
-        new_state_ded_ids = [deid for deid in state['de_defz']
-                              if deid not in ded_ids]
-        if new_state_ded_ids:
-            # if any are found, create DataElementDefinitions from them
-            dt = dtstamp()
-            admin = orb.get('pgefobjects:admin')
-            DataElementDefinition = orb.classes.get('DataElementDefinition')
-            for deid in new_state_ded_ids:
-                ded = state['de_defz'][deid]
-                ded_oid = 'pgef:DataElementDefinition.' + deid
-                dt = uncook_datetime(ded.get('mod_datetime')) or dt
-                descr = ded.get('description') or ded.get('name', deid)
-                ded_obj = DataElementDefinition(oid=ded_oid, id=deid,
-                                            name=ded.get('name', deid),
-                                            range_datatype=ded['range_datatype'],
-                                            creator=admin, modifier=admin,
-                                            description=descr,
-                                            create_datetime=dt,
-                                            mod_datetime=dt)
-                new_ded_objs.append(ded_obj)
-        if new_ded_objs:
-            orb.save(new_ded_objs)
-    de_def_objs = orb.get_by_type('DataElementDefinition')
-    de_defz.update(
-        {de_def_obj.id :
-         {'name': de_def_obj.name,
-          'description': de_def_obj.description,
-          'range_datatype': de_def_obj.range_datatype,
-          'mod_datetime':
-              str(getattr(de_def_obj, 'mod_datetime', '') or dtstamp())
-          } for de_def_obj in de_def_objs}
-          )
-    # update state_dedz with labels, if they have any
-    # TODO:  add labels as "external names" in p.core.meta
-    if new_state_ded_ids:
-        for deid in new_state_ded_ids:
-            ded = state['de_defz'][deid]
-            if de_defz.get(deid) and ded.get('label'):
-                de_defz[deid]['label'] = ded['label']
-    orb.log.debug('  - data element defs created: {}'.format(
-                                            str(list(de_defz.keys()))))
-
-def update_de_defz(orb, de_def_obj):
+def update_de_defz(de_def_obj):
     """
     Update the `de_defz` cache when a new DataElementDefinition is created or
     modified.
 
     Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
         de_def_obj (DataElementDefinition):  DataElementDefinition object
     """
-    # orb.log.debug('* update_de_defz')
+    # log.debug('* update_de_defz')
     de_defz[de_def_obj.id] = {
         'name': de_def_obj.name,
         'description': de_def_obj.description,
         'range_datatype': de_def_obj.range_datatype,
         'mod_datetime': str(dtstamp())}
 
-def add_data_element(orb, oid, deid):
+def add_data_element(oid, deid):
     """
     Add a new data element to an object, which means adding a data element's data
     structure to the `p.node.parametrics.data_elementz` dictionary under that
@@ -1389,40 +1492,27 @@ def add_data_element(orb, oid, deid):
         value, mod_datetime
 
     Args:
-        orb (Uberorb):  singleton imported from p.node.uberorb
         oid (str):  oid of the object that owns the data element
         deid (str):  the id of the data element
     """
     if oid not in data_elementz:
         data_elementz[oid] = {}
-    orb.log.debug('* add_data_element("{}")'.format(deid))
+    # log.debug('* add_data_element("{}")'.format(deid))
     # [1] check if object already has that data element
     if deid in data_elementz[oid]:
         # if the object already has that data element, do nothing
         return True
     # [2] check for DataElementDefinition in db
-    de_def_obj = orb.get(get_data_element_definition_oid(deid))
-    if not de_def_obj:
+    de_def = de_defz.get(deid)
+    if not de_def:
         # if no DataElementDefinition exists for deid, pass
         # (maybe eventually raise TypeError)
-        orb.log.debug('  - invalid: id "{}" has no definition.'.format(deid))
+        # log.debug('  - invalid: id "{}" has no definition.'.format(deid))
         return False
     # [3] check whether the data element has been assigned yet ...
     if not data_elementz[oid].get(deid):
         # the data element has not yet been assigned
-        orb.log.debug('  - adding data element "{}" ...'.format(deid))
-        de_def = de_defz.get(deid)
-        if not de_def:
-            # create it from the DataElementDefinition object
-            de_def = {de_def_obj.id :
-                   {'name': de_def_obj.name,
-                    'description': de_def_obj.description,
-                    'range_datatype': de_def_obj.range_datatype,
-                    'mod_datetime':
-                        str(getattr(
-                                de_def_obj, 'mod_datetime', '') or dtstamp())
-                    }}
-            de_defz.update(de_def)
+        # log.debug('  - adding data element "{}" ...'.format(deid))
         # NOTE:  setting the data element's value is a separate operation -- when a
         # data element is created, its value is initialized to the appropriate "null"
         radt = de_def.get('range_datatype', 'str')
@@ -1442,47 +1532,45 @@ def add_data_element(orb, oid, deid):
         data_elementz[oid][deid] = dict(
             value=value,   # consistent with dtype defined in `range_datatype`
             mod_datetime=str(dtstamp()))
-        orb.log.debug('    data element "{}" added.'.format(deid))
+        # log.debug('    data element "{}" added.'.format(deid))
         return True
     else:
-        orb.log.debug('    data element "{}" was already there.'.format(deid))
+        # log.debug('    data element "{}" was already there.'.format(deid))
         return True
 
-def get_dval(orb, oid, deid):
+def get_dval(oid, deid):
     """
     Return a cached data element value.
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
-        obj (Identifiable): the object that has the data element
+        oid (str): the oid of the object that has the parameter
         deid (str): the data element 'id' value
     """
     # Too verbose -- only for extreme debugging ...
-    # orb.log.debug('* get_dval() ...')
+    # log.debug('* get_dval() ...')
     dedef = de_defz.get(deid)
     if not dedef:
-        # orb.log.debug('* get_dval: "{}" does not have a definition.'.format(
+        # log.debug('* get_dval: "{}" does not have a definition.'.format(
                                                                         # deid))
         return None
     try:
         # for extreme debugging only ...
-        # orb.log.debug('  value of {} is {} ({})'.format(pid, val, type(val)))
+        # log.debug('  value of {} is {} ({})'.format(pid, val, type(val)))
         return data_elementz[oid][deid]['value']
     except:
         return NULL.get(dedef.get('range_datatype', 'str'))
 
-def get_dval_as_str(orb, oid, deid):
+def get_dval_as_str(oid, deid):
     """
     Return a cached data element value a string for display and editing in UI.
     (Used in the object editor, `p.node.gui.pgxnobject.PgxnObject`, the
     dashboard, and the DataGrid.)
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
-        obj (Identifiable): the object that owns the data element
+        oid (str): the oid of the object that has the parameter
         deid (str): the `id` of the data element
     """
-    str(get_dval(orb, oid, deid))
+    str(get_dval(oid, deid))
 
 def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
     """
@@ -1504,14 +1592,14 @@ def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
             -- i.e., someone else set the value [default: True]
     """
     # NOTE: uncomment debug logging for EXTREMELY verbose debugging output
-    # orb.log.debug('* set_dval({}, {}, {})'.format(oid, deid, str(value)))
+    # log.debug('* set_dval({}, {}, {})'.format(oid, deid, str(value)))
     if not oid:
-        # orb.log.debug('  no oid provided; ignoring.')
+        # log.debug('  no oid provided; ignoring.')
         return False
     dedef = de_defz.get(deid)
     if not dedef:
-        orb.log.debug('  data element "{}" is not defined; ignoring.'.format(
-                                                                       deid))
+        # log.debug('  data element "{}" is not defined; ignoring.'.format(
+                                                                       # deid))
         return False
     ######################################################################
     # NOTE: if the data element whose value is being set is not
@@ -1519,10 +1607,11 @@ def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
     ######################################################################
     data_element = data_elementz.get(oid, {}).get(deid, {})
     if not data_element:
-        if add_data_element(orb, oid, deid):
-            orb.log.debug('  data element either exists or was added.')
+        if add_data_element(oid, deid):
+            # log.debug('  data element either exists or was added.')
+            pass
         else:
-            orb.log.debug('  data element could not be added (see log).')
+            # log.debug('  data element could not be added (see log).')
             return False
     try:
         # cast value to range_datatype before setting
@@ -1537,18 +1626,18 @@ def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
             mod_datetime = str(dtstamp())
         data_elementz[oid][deid]['mod_datetime'] = mod_datetime
         # dts = str(mod_datetime)
-        # orb.log.debug('  setting value: {}'.format(value))
-        # orb.log.debug('  setting mod_datetime: "{}"'.format(dts))
+        # log.debug('  setting value: {}'.format(value))
+        # log.debug('  setting mod_datetime: "{}"'.format(dts))
         return True
     except:
-        orb.log.debug('  *** set_dval() failed:')
-        msg = '      setting value {} of type {}'.format(value, type(value))
-        orb.log.debug(msg)
-        msg = '      caused something gnarly to happen ...'
-        orb.log.debug(msg)
-        msg = '      so data element "{}" was not set for oid "{}"'.format(
-                                                                 deid, oid)
-        orb.log.debug(msg)
+        # log.debug('  *** set_dval() failed:')
+        # msg = '      setting value {} of type {}'.format(value, type(value))
+        # log.debug(msg)
+        # msg = '      caused something gnarly to happen ...'
+        # log.debug(msg)
+        # msg = '      so data element "{}" was not set for oid "{}"'.format(
+                                                                 # deid, oid)
+        # log.debug(msg)
         return False
 
 def set_dval_from_str(orb, oid, deid, str_val, mod_datetime=None, local=True):
@@ -1572,7 +1661,7 @@ def set_dval_from_str(orb, oid, deid, str_val, mod_datetime=None, local=True):
     """
     # This log msg is only needed for extreme debugging -- `set_pval()` is
     # called at the end and will log essentially the same information ...
-    # orb.log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
+    # log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
                                                            # str(str_val)))
     try:
         de_def = de_defz.get(deid, {})
@@ -1592,19 +1681,18 @@ def set_dval_from_str(orb, oid, deid, str_val, mod_datetime=None, local=True):
     except:
         # if unable to cast a value, do nothing (and log it)
         # TODO:  more form validation!
-        orb.log.debug('  could not convert string "{}" ...'.format(str_val))
-        orb.log.debug('  bailing out.')
+        # log.debug('  could not convert string "{}" ...'.format(str_val))
+        pass
 
-def add_default_data_elements(orb, obj):
+def add_default_data_elements(obj):
     """
     Assign the configured or preferred default data elements to an object.
 
     Args:
-        orb (Uberorb):  the orb (singleton)
         obj (Identifiable):  the object to receive data elements
     """
-    orb.log.debug('* adding default data elements to object "{}"'.format(
-                                                                 obj.id))
+    # log.debug('* adding default data elements to object "{}"'.format(
+                                                                 # obj.id))
     # Configured Parameters are currently defined by the 'dashboard'
     # configuration (in future that may be augmented by Parameters
     # referenced by, e.g., a ProductType and/or a ModelTemplate, both of
@@ -1613,20 +1701,20 @@ def add_default_data_elements(orb, obj):
     cname = obj.__class__.__name__
     deids |= OrderedSet(DEFAULT_CLASS_DATA_ELEMENTS.get(cname, []))
     # TODO: let user set default data elements in their prefs
-    if isinstance(obj, orb.classes['HardwareProduct']):
+    if cname == 'HardwareProduct':
         # default for "default_parms" in config:  mass, power, data rate
         # (config is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
         deids |= OrderedSet(prefs.get('default_data_elements')
-                           or config.get('default_data_elements')
-                           or ['TRL', 'Vendor'])
+                            or config.get('default_data_elements')
+                            or ['TRL', 'Vendor'])
         if obj.product_type:
             deids |= OrderedSet(DEFAULT_PRODUCT_TYPE_DATA_ELMTS.get(
                                 obj.product_type.id, []))
     # add default parameters first ...
-    # orb.log.debug('  - adding data elements {} ...'.format(str(deids)))
+    # log.debug('  - adding data elements {} ...'.format(str(deids)))
     for deid in deids:
-        add_data_element(orb, obj.oid, deid)
+        add_data_element(obj.oid, deid)
 
 #############################################################
 # ENTITY SECTION (see Entity class in the parametrics module)
@@ -1636,15 +1724,52 @@ def add_default_data_elements(orb, obj):
 
 # entz:        persistent** cache of Entity metadata
 #              ** persisted in the file 'ents.json' in the
-#              application home directory -- see the orb functions
-#              `_save_data_elementz` and `_load_entz`
-# format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
-#           ...}
-# ... where required data elements for the Entity are:
-# -------------------------------------------------------
-# owner, creator, modifier, create_datetime, mod_datetime
-# -------------------------------------------------------
+#              application home directory
 entz = {}
+
+def load_entz(json_path):
+    """
+    Load the `entz` dict from json file.
+    """
+    # log.debug('* _load_entz() ...')
+    if os.path.exists(json_path):
+        with open(json_path) as f:
+            entz.update(json.loads(f.read()))
+        # log.debug('  - entz cache loaded.')
+    else:
+        # log.debug('  - "ents.json" was not found.')
+        pass
+
+def save_entz(json_path):
+    """
+    Save `entz` dict to json file.
+    """
+    # log.debug('* _save_entz() ...')
+    try:
+        with open(json_path, 'w') as f:
+            ses = [e.serialize() for e in entz.values()]
+            f.write(json.dumps(ses, separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        # log.debug('  ... ents.json file written.')
+    except:
+        pass
+
+# RELATED CACHES #############################################################
+
+# dmz:         persistent** cache of DataMatrix instances
+#              ** persisted in the file 'dms.json' in the
+#              application home directory
+# format:  {oid : DataMatrix},
+#           ...}
+dmz = {}
+
+# schemaz:     persistent** cache of schemas (column views)
+#              ** persisted in the file 'schemas.json' in the
+#              application home directory
+# format:  {schema_name : [colname1, colname2, ...],
+#           ...}
+# -------------------------------------------------------
+schemaz = {}
 
 # ent_lookupz  runtime cache for reverse lookup of Entity instances
 #              maps tuples of values to entity oids
@@ -1658,29 +1783,35 @@ ent_lookupz = {}
 # ent_histz:  persistent** cache of previous versions of Entity states,
 #             saved as named tuples ...
 #              ** persisted in the file 'ent_hists.json' in the
-#              application home directory -- see the orb functions
-#              `_save_data_elementz` and `_load_entz`
-# format:  {entity['oid'] : [list of previous versions of entity]}
+#              application home directory
+# format:  {entity['oid'] : [list of serialized previous versions of entity]}
 ent_histz = {}
 
-# RELATED CACHES #############################################################
+def load_ent_histz(json_path):
+    """
+    Load the `ent_histz` dict from json file.
+    """
+    # log.debug('* _load_ent_histz() ...')
+    if os.path.exists(json_path):
+        with open(json_path) as f:
+            ent_histz.update(json.loads(f.read()))
+        # log.debug('  - ent_histz cache loaded.')
+    else:
+        # log.debug('  - "ent_hists.json" was not found.')
+        pass
 
-# dmz:         persistent** cache of DataMatrix metadata
-#              ** persisted in the file 'dms.json' in the
-#              application home directory
-# format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
-#           ...}
-# ... where supported metadata for a DataMatrix are:
-# -------------------------------------------------------
-# owner, creator, modifier, create_datetime, mod_datetime
-# -------------------------------------------------------
-dmz = {}
-
-# schemaz:     persistent** cache of schemas (column views)
-#              ** persisted in the file 'schemas.json' in the
-#              application home directory
-# format:  {schema_name : [colname1, colname2, ...],
-#           ...}
-# -------------------------------------------------------
-schemaz = {}
+def save_ent_histz(json_path):
+    """
+    Save `ent_histz` dict to json file.
+    """
+    # log.debug('* _save_ent_histz() ...')
+    try:
+        with open(json_path, 'w') as f:
+            f.write(json.dumps(ent_histz, separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        # log.debug('  ... ent_hists.json file written.')
+    except:
+        # log.debug('  ... unable to write to path "{}".'.format(
+                                                        # json_path))
+        pass
 

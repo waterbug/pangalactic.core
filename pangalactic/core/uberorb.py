@@ -22,31 +22,32 @@ from pangalactic.core             import config, read_config
 from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state
 from pangalactic.core             import trash, read_trash
+from pangalactic.core.entity      import DataMatrix, Entity
 from pangalactic.core.registry    import PanGalacticRegistry
 from pangalactic.core.utils.meta  import uncook_datetime
 from pangalactic.core.mapping     import schema_maps, schema_version
-from pangalactic.core.parametrics import (add_default_parameters,
+from pangalactic.core.parametrics import (add_context_parm_def,
+                                          add_default_parameters,
                                           add_default_data_elements,
                                           add_parameter, _compute_pval,
                                           componentz,
                                           compute_requirement_margin,
-                                          create_de_defz,
-                                          create_parm_defz,
-                                          create_parmz_by_dimz,
-                                          data_elementz,
+                                          data_elementz, de_defz,
                                           dmz, schemaz,
-                                          entz, ent_histz,
                                           get_parameter_id,
-                                          parameterz,
+                                          load_data_elementz,
+                                          save_data_elementz,
+                                          load_entz, save_entz,
+                                          load_ent_histz, save_ent_histz,
+                                          load_parmz, save_parmz,
+                                          parameterz, parm_defz,
+                                          parmz_by_dimz,
                                           refresh_componentz,
                                           refresh_req_allocz, req_allocz,
                                           update_de_defz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
-from pangalactic.core.serializers import (deserialize, deserialize_parms,
-                                          deserialize_des,
-                                          serialize, serialize_parms,
-                                          serialize_des)
+from pangalactic.core.serializers import serialize, deserialize
 from pangalactic.core             import refdata
 from pangalactic.core.test        import data as test_data_mod
 from pangalactic.core.test        import vault as test_vault_mod
@@ -284,7 +285,7 @@ class UberORB(object):
         self.role_product_types = {}
         # discipline_subsystems maps Discipline ids to ProductType ids
         discipline_subsystems = {}
-        for dpt in orb.get_by_type('DisciplineProductType'):
+        for dpt in self.get_by_type('DisciplineProductType'):
             did = getattr(dpt.used_in_discipline, 'id', '')
             ptid = getattr(dpt.relevant_product_type, 'id', '')
             if did in discipline_subsystems:
@@ -294,7 +295,7 @@ class UberORB(object):
                 discipline_subsystems[did] = [ptid]
         # role_disciplines maps Role ids to related Discipline ids
         role_disciplines = {}
-        for dr in orb.get_by_type('DisciplineRole'):
+        for dr in self.get_by_type('DisciplineRole'):
             rtdid = getattr(dr.related_to_discipline, 'id', '')
             rrid = getattr(dr.related_role, 'id', '')
             if rrid in role_disciplines:
@@ -312,10 +313,15 @@ class UberORB(object):
                         self.role_product_types[role_id] = set(
                             discipline_subsystems.get(discipline_id))
         self.started = True
-        self._save_data_elementz()
-        self._save_parmz()
-        self._save_entz()
-        self._save_ent_histz()
+        # TODO:  clean up boilerplate ...
+        data_elements_path = os.path.join(self.home, 'data_elements.json')
+        parameters_path = os.path.join(self.home, 'parameters.json')
+        ents_path = os.path.join(self.home, 'ents.json')
+        ent_hists_path = os.path.join(self.home, 'ent_hists.json')
+        save_data_elementz(data_elements_path)
+        save_parmz(parameters_path)
+        save_entz(ents_path)
+        save_ent_histz(ent_hists_path)
         return self.home
 
     def init_registry(self, home, db_url, force_new_core=False, version='',
@@ -432,117 +438,48 @@ class UberORB(object):
                                indent=4, sort_keys=True))
         self.log.debug('  ... diagrams.json file written.')
 
-    def _load_parmz(self):
+    def _load_dmz(self):
         """
-        Load the `parameterz` dict from json file in cache format.
+        Load the `dmz` dict from json file.  (Restores all DataMatrix
+        instances.)
         """
-        self.log.debug('* _load_parmz() ...')
-        json_path = os.path.join(self.home, 'parameters.json')
+        self.log.debug('* _load_dmz() ...')
+        json_path = os.path.join(self.home, 'dms.json')
+        dmz = {}
         if os.path.exists(json_path):
             with open(json_path) as f:
-                stored_parameterz = json.loads(f.read())
-            for oid, parms in stored_parameterz.items():
-                deserialize_parms(self, oid, parms)
-            self.log.debug('  - parameterz cache loaded and recomputed.')
+                ser_dms = json.loads(f.read())
+            dmz.update({oid: DataMatrix([
+                              Entity(oid=oid) for oid in sdm.get('ents', [])],
+                              project_id=sdm.get('project_id', ''),
+                              level_map=sdm.get('level_map', {}),
+                              creator=sdm.get('creator', ''),
+                              modifier=sdm.get('modifier', ''),
+                              create_datetime=sdm.get('create_datetime', ''),
+                              mod_datetime=sdm.get('mod_datetime', ''))
+                        for oid, sdm in ser_dms.items()})
+            self.log.debug('  - dmz cache loaded.')
         else:
-            self.log.debug('  - "parameters.json" was not found.')
+            self.log.debug('  - "dms.json" was not found.')
 
-    def _save_parmz(self):
+    def _save_dmz(self):
         """
-        Save `parameterz` dict to a json file in cache format.
+        Save `dmz` dict (all DataMatrix instances) to json file.
         """
-        self.log.debug('* _save_parmz() ...')
-        json_path = os.path.join(self.home, 'parameters.json')
-        stored_parameterz = {}
-        for oid, parms in parameterz.items():
-            # NOTE: serialize_parms() uses deepcopy()
-            stored_parameterz[oid] = serialize_parms(self, oid)
+        self.log.debug('* _save_dmz() ...')
+        ser_dms = {oid: dict(project_id=dm.project_id,
+                             ents=[e.oid for e in dm],
+                             level_map=dm.level_map,
+                             creator=str(dm.creator),
+                             modifier=str(dm.modifier),
+                             create_datetime=dm.create_datetime,
+                             mod_datetime=dm.mod_datetime)
+                   for oid, dm in dmz.items()}
+        json_path = os.path.join(self.home, 'dms.json')
         with open(json_path, 'w') as f:
-            f.write(json.dumps(stored_parameterz, separators=(',', ':'),
+            f.write(json.dumps(ser_dms, separators=(',', ':'),
                                indent=4, sort_keys=True))
-        self.log.debug('  ... parameters.json file written.')
-
-    def _load_data_elementz(self):
-        """
-        Load `data_elementz` dict from json file.
-        """
-        self.log.debug('* _load_data_elementz() ...')
-        json_path = os.path.join(self.home, 'data_elements.json')
-        if os.path.exists(json_path):
-            with open(json_path) as f:
-                serialized_des = json.loads(f.read())
-            for oid, ser_des in serialized_des.items():
-                deserialize_des(self, oid, ser_des)
-            self.log.debug('  - data_elementz cache loaded.')
-        else:
-            self.log.debug('  - "data_elements.json" was not found.')
-
-    def _save_data_elementz(self):
-        """
-        Save `data_elementz` dict to a json file.
-        """
-        self.log.debug('* _save_data_elementz() ...')
-        json_path = os.path.join(self.home, 'data_elements.json')
-        serialized_data_elementz = {}
-        try:
-            for oid, obj_des in data_elementz.items():
-                # NOTE: serialize_des() uses deepcopy()
-                serialized_data_elementz[oid] = serialize_des(self, oid)
-            with open(json_path, 'w') as f:
-                f.write(json.dumps(serialized_data_elementz,
-                                   separators=(',', ':'),
-                                   indent=4, sort_keys=True))
-            self.log.debug('  ... data_elements.json file written.')
-        except:
-            self.log.debug('  ... writing data_elements.json file failed!')
-
-    def _load_entz(self):
-        """
-        Load the `entz` dict from json file.
-        """
-        self.log.debug('* _load_entz() ...')
-        json_path = os.path.join(self.home, 'ents.json')
-        if os.path.exists(json_path):
-            with open(json_path) as f:
-                entz.update(json.loads(f.read()))
-            self.log.debug('  - entz cache loaded.')
-        else:
-            self.log.debug('  - "ents.json" was not found.')
-
-    def _save_entz(self):
-        """
-        Save `entz` dict to json file.
-        """
-        self.log.debug('* _save_entz() ...')
-        json_path = os.path.join(self.home, 'ents.json')
-        with open(json_path, 'w') as f:
-            f.write(json.dumps(entz, separators=(',', ':'),
-                               indent=4, sort_keys=True))
-        self.log.debug('  ... ents.json file written.')
-
-    def _load_ent_histz(self):
-        """
-        Load the `ent_histz` dict from json file.
-        """
-        self.log.debug('* _load_ent_histz() ...')
-        json_path = os.path.join(self.home, 'ent_hists.json')
-        if os.path.exists(json_path):
-            with open(json_path) as f:
-                ent_histz.update(json.loads(f.read()))
-            self.log.debug('  - ent_histz cache loaded.')
-        else:
-            self.log.debug('  - "ent_hists.json" was not found.')
-
-    def _save_ent_histz(self):
-        """
-        Save `ent_histz` dict to json file.
-        """
-        self.log.debug('* _save_ent_histz() ...')
-        json_path = os.path.join(self.home, 'ent_hists.json')
-        with open(json_path, 'w') as f:
-            f.write(json.dumps(ent_histz, separators=(',', ':'),
-                               indent=4, sort_keys=True))
-        self.log.debug('  ... ent_hists.json file written.')
+        self.log.debug('  ... dms.json file written.')
 
     def recompute_parmz(self):
         """
@@ -563,7 +500,7 @@ class UberORB(object):
         for context in d_contexts:
             for variable in variables:
                 for oid in componentz:
-                    _compute_pval(self, oid, variable, context)
+                    _compute_pval(oid, variable, context)
         # Recompute Margins for all performance requirements
         # [0] Remove any previously computed performance requirements (NTEs and
         #     Margins) in case any requirements have been deleted or
@@ -590,7 +527,7 @@ class UberORB(object):
             # 3: units of nte value
             # 4: margin [result] (expressed as a %)
             oid, pid, nte, nte_units, result = compute_requirement_margin(
-                                                                orb, req_oid)
+                                                                    req_oid)
             if oid:
                 margin_pid = get_parameter_id(pid, 'Margin')
                 nte_pid = get_parameter_id(pid, 'NTE')
@@ -623,17 +560,13 @@ class UberORB(object):
                 elements will be assigned to
         """
         self.log.debug('* assign_test_parameters()')
-        try:
-            for o in objs:
-                add_default_data_elements(self, o)
-                gen_test_dvals(data_elementz[o.oid])
-                add_default_parameters(self, o)
-                gen_test_pvals(parameterz[o.oid])
-            self.recompute_parmz()
-            self.log.debug('  ... done.')
-        except:
-            self.log.debug('  ... failed.')
-            pass
+        for o in objs:
+            add_default_data_elements(o)
+            gen_test_dvals(data_elementz.get(o.oid))
+            add_default_parameters(o)
+            gen_test_pvals(parameterz[o.oid])
+        self.recompute_parmz()
+        self.log.debug('  ... done.')
 
     def _build_componentz_cache(self):
         """
@@ -643,7 +576,7 @@ class UberORB(object):
         # self.log.debug('* _build_componentz_cache()')
         for product in self.get_all_subtypes('Product'):
             if product.components:
-                refresh_componentz(self, product)
+                refresh_componentz(product)
         # self.log.debug('  componentz cache ready.')
 
     def start_logging(self, home=None, console=False, debug=False):
@@ -748,9 +681,9 @@ class UberORB(object):
         # and then will check for data element definitions in state['de_defz']
         # -- if any are found, it will create DataElementDefinitions from them,
         # add them to the database, and then add them to 'de_defz'.
-        create_de_defz(self)
-        create_parm_defz(self)
-        create_parmz_by_dimz(self)
+        self.create_de_defz()
+        self.create_parm_defz()
+        self.create_parmz_by_dimz()
         # *** NOTE ***********************************************************
         # [3] run _load_parmz() and _load_data_elementz() before checking for
         # updates to data element definitions and parameter definitions and
@@ -759,10 +692,15 @@ class UberORB(object):
         # (parameters.json) -- e.g., some ref data objects might have updated
         # parameters
         # ********************************************************************
-        self._load_data_elementz()
-        self._load_parmz()
-        self._load_entz()
-        self._load_ent_histz()
+        data_elementz_path = os.path.join(self.home, 'data_elements.json')
+        load_data_elementz(data_elementz_path)
+        parms_path = os.path.join(self.home, 'parameters.json')
+        load_parmz(parms_path)
+        ents_path = os.path.join(self.home, 'ents.json')
+        load_entz(ents_path)
+        ent_hists_path = os.path.join(self.home, 'ent_hists.json')
+        load_ent_histz(ent_hists_path)
+        self._load_dmz()
         self.recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
         self.log.debug('  + checking for updates to parameter definitions ...')
@@ -830,12 +768,138 @@ class UberORB(object):
         # parameters ...
         self._build_componentz_cache()
         # update the req_allocz runtime cache (used in computing margins)
-        for req_oid in self.get_oids(cname='Requirement'):
-            refresh_req_allocz(self, req_oid)
+        for req in self.get_by_type('Requirement'):
+            refresh_req_allocz(req)
         self.recompute_parmz()
         self.log.info('  + all reference data loaded.')
 
-    # begin db functions
+    #########################################################################
+    # PARAMETER AND DATA ELEMENT STUFF
+    # Note:  ParameterDefinition and DataElementDefinition may eventually
+    # be removed from the db and become independent of the orb, and move back
+    # to the parametrics module ...
+    #########################################################################
+
+    def create_parm_defz(self):
+        """
+        Create the `parm_defz` cache of ParameterDefinitions, in the format:
+
+            {parameter_id : {name, variable, context, context_type, description,
+                             dimensions, range_datatype, computed, mod_datetime},
+             data_element_id : {name, description, range_datatype, mod_datetime},
+             ...}
+        """
+        self.log.debug('* create_parm_defz')
+        pds = self.get_by_type('ParameterDefinition')
+        # first, the "simple variable" parameters ...
+        pd_dict = {pd.id :
+                   {'name': pd.name,
+                    'variable': pd.id,
+                    'context': None,
+                    'context_type': None,
+                    'description': pd.description,
+                    'dimensions': pd.dimensions,
+                    'range_datatype': pd.range_datatype,
+                    'computed': False,
+                    'mod_datetime':
+                        str(getattr(pd, 'mod_datetime', '') or dtstamp())
+                    } for pd in pds}
+        parm_defz.update(pd_dict)
+        self.log.debug('      bases created: {}'.format(
+                                                str(list(pd_dict.keys()))))
+        # add PDs for the descriptive contexts (CBE, Contingency, MEV) for the
+        # variables (Mass, Power, Datarate) for which functions have been defined
+        # to compute the CBE and MEV values
+        all_contexts = self.get_by_type('ParameterContext')
+        self.log.debug('      adding context parms for: {}'.format(
+                                        str([c.id for c in all_contexts])))
+        for pid in ['m', 'P', 'R_D']:
+            pd = self.select('ParameterDefinition', id=pid)
+            for c in all_contexts:
+                add_context_parm_def(pd, c)
+        # all float-valued parameters should have associated Contingency parms
+        float_pds = [pd for pd in pds if pd.range_datatype == 'float']
+        contingency = self.select('ParameterContext', name='Contingency')
+        self.log.debug('      adding Ctgcy parms for float types: {}'.format(
+                                        str([pd.id for pd in float_pds])))
+        for float_pd in float_pds:
+            contingency_pid = get_parameter_id(float_pd.id, contingency.id)
+            if contingency_pid not in parm_defz:
+                add_context_parm_def(float_pd, contingency)
+
+    def create_parmz_by_dimz(self):
+        """
+        Create the `parmz_by_dimz` cache, where the cache has the form
+
+            {dimension : [ids of ParameterDefinitions having that dimension]}
+        """
+        self.log.debug('* create_parmz_by_dimz')
+        pds = self.get_by_type('ParameterDefinition')
+        dimz = set([pd.dimensions for pd in pds])
+        parmz_by_dimz.update({dim : [pd.id for pd in pds if pd.dimensions == dim]
+                              for dim in dimz})
+
+    def create_de_defz(self):
+        """
+        Create the `de_defz` cache of DataElementDefinitions, in the format:
+
+            {data_element_id : {name, description, range_datatype, mod_datetime},
+             ...}
+        """
+        self.log.debug('* create_de_defz')
+        # check for data element definition structures in state['de_defz']
+        new_ded_objs = []
+        self.log.debug('  - checking for de defs in state["de_defz"] ...')
+        new_state_ded_ids = []
+        if state.get('de_defz'):
+            ded_ids = self.get_ids('DataElementDefinition')
+            new_state_ded_ids = [deid for deid in state['de_defz']
+                                  if deid not in ded_ids]
+            if new_state_ded_ids:
+                # if any are found, create DataElementDefinitions from them
+                dt = dtstamp()
+                admin = 'pgefobjects:admin'
+                DataElementDefinition = self.classes.get(
+                                                    'DataElementDefinition')
+                for deid in new_state_ded_ids:
+                    ded = state['de_defz'][deid]
+                    ded_oid = 'pgef:DataElementDefinition.' + deid
+                    dt = uncook_datetime(ded.get('mod_datetime')) or dt
+                    descr = ded.get('description') or ded.get('name', deid)
+                    ded_obj = DataElementDefinition(oid=ded_oid, id=deid,
+                                                name=ded.get('name', deid),
+                                                range_datatype=ded[
+                                                            'range_datatype'],
+                                                creator=admin, modifier=admin,
+                                                description=descr,
+                                                create_datetime=dt,
+                                                mod_datetime=dt)
+                    new_ded_objs.append(ded_obj)
+            if new_ded_objs:
+                self.save(new_ded_objs)
+        de_def_objs = self.get_by_type('DataElementDefinition')
+        de_defz.update(
+            {de_def_obj.id :
+             {'name': de_def_obj.name,
+              'description': de_def_obj.description,
+              'range_datatype': de_def_obj.range_datatype,
+              'mod_datetime':
+                  str(getattr(de_def_obj, 'mod_datetime', '') or dtstamp())
+              } for de_def_obj in de_def_objs}
+              )
+        # update state_dedz with labels, if they have any
+        # TODO:  add labels as "external names" in p.core.meta
+        if new_state_ded_ids:
+            for deid in new_state_ded_ids:
+                ded = state['de_defz'][deid]
+                if de_defz.get(deid) and ded.get('label'):
+                    de_defz[deid]['label'] = ded['label']
+        self.log.debug('  - data element defs created: {}'.format(
+                                                str(list(de_defz.keys()))))
+
+    ##########################################################################
+    # DB FUNCTIONS
+    ##########################################################################
 
     def save(self, objs, recompute=True):
         """
@@ -893,16 +957,21 @@ class UberORB(object):
                     obj.owner = obj.creator.org
                 else:
                     # ultimate fallback:  owner is PGANA
-                    obj.owner = orb.get('pgefobjects:PGANA')
+                    obj.owner = self.get('pgefobjects:PGANA')
             if cname == 'Acu':
-                refresh_componentz(self, obj.assembly)
+                refresh_componentz(obj.assembly)
                 if not new:
                     # find all allocations to this Acu and refresh them ...
                     alloc_reqs = [req_oid for req_oid in req_allocz
                                   if req_allocz[req_oid][0] == obj.oid]
                     if alloc_reqs:
                         for req_oid in alloc_reqs:
-                            refresh_req_allocz(self, req_oid)
+                            req = self.get(req_oid)
+                            if req:
+                                refresh_req_allocz(req)
+                            else:
+                                # if requirement not there, remove alloc
+                                del alloc_reqs[req_oid]
                 recompute_required = True
             elif cname == 'HardwareProduct':
                 # make sure HW Products have mass, power, data rate parms
@@ -910,7 +979,7 @@ class UberORB(object):
                     parameterz[obj.oid] = {}
                 for pid in ['m', 'P', 'R_D']:
                     if not parameterz[obj.oid].get(pid):
-                         add_parameter(orb, obj.oid, pid)
+                         add_parameter(obj.oid, pid)
             elif cname == 'ProjectSystemUsage':
                 if not new:
                     # find all allocations to this PSU and refresh them ...
@@ -918,21 +987,26 @@ class UberORB(object):
                                   if req_allocz[req_oid][0] == obj.oid]
                     if alloc_reqs:
                         for req_oid in alloc_reqs:
-                            refresh_req_allocz(self, req_oid)
+                            req = self.get(req_oid)
+                            if req:
+                                refresh_req_allocz(req)
+                            else:
+                                # if requirement not there, remove alloc
+                                del alloc_reqs[req_oid]
                 # TODO: is recompute required here???
                 # recompute_required = True
             elif cname == 'Requirement' and obj.req_type == 'performance':
-                refresh_req_allocz(self, obj.oid)
+                refresh_req_allocz(obj)
                 recompute_required = True
             elif cname == 'DataElementDefinition':
                 # NOTE:  all DataElementDefinitions are public
                 obj.public = True
-                update_de_defz(self, obj)
+                update_de_defz(obj)
             elif cname == 'ParameterDefinition':
                 # NOTE:  all ParameterDefinitions are public
                 obj.public = True
-                update_parm_defz(self, obj)
-                update_parmz_by_dimz(self, obj)
+                update_parm_defz(obj)
+                update_parmz_by_dimz(obj)
         # self.log.debug('  orb.save:  committing db session.')
         self.db.commit()
         if recompute_required and recompute:
@@ -1098,7 +1172,7 @@ class UberORB(object):
                 next_sufx = str(next_int).zfill(7)
         owner_id = owner_id or 'Vendor'
         abbrev = getattr(obj.product_type, 'abbreviation', 'TBD') or 'TBD'
-        if isinstance(obj.product_type, orb.classes['ProductType']):
+        if isinstance(obj.product_type, self.classes['ProductType']):
             return '-'.join([owner_id, abbrev, next_sufx])
         else:
             # no product_type assigned yet
@@ -1284,14 +1358,14 @@ class UberORB(object):
         other_port_oids = [p.oid for p in reduce(lambda x, y: x+y,
                                         [o.ports for o in other_objs], [])]
         comp_port_oids = [p.oid for p in component.ports]
-        Port = orb.classes['Port']
-        Flow = orb.classes['Flow']
-        flows_from = orb.db.query(Flow).filter_by(
+        Port = self.classes['Port']
+        Flow = self.classes['Flow']
+        flows_from = self.db.query(Flow).filter_by(
                         flow_context=assembly).join(Flow.start_port).filter(
                         Port.oid.in_(comp_port_oids)).join(
                         Flow.end_port).filter(Port.oid.in_(
                         other_port_oids)).all()
-        flows_to = orb.db.query(Flow).filter_by(
+        flows_to = self.db.query(Flow).filter_by(
                         flow_context=assembly).join(Flow.start_port).filter(
                         Port.oid.in_(other_port_oids)).join(
                         Flow.end_port).filter(Port.oid.in_(
@@ -1369,7 +1443,7 @@ class UberORB(object):
         # also get Mission, if any, and its components (Acus) -- Activities
         # within the project are already included, since their "owner" is the
         # project ...
-        mission = orb.select('Mission', owner=project)
+        mission = self.select('Mission', owner=project)
         if mission:
             objs.append(mission)
             objs += mission.components  # Acus
@@ -1445,7 +1519,7 @@ class UberORB(object):
                     for ra in ras:
                         info.append('     id: {}, name: {})'.format(ra.id,
                                                                     ra.name))
-                        orb.db.delete(ra)
+                        self.db.delete(ra)
                 # delete any related system usages:
                 psus = self.search_exact(cname='ProjectSystemUsage',
                                          project=obj)
@@ -1455,12 +1529,12 @@ class UberORB(object):
                     for psu in psus:
                         info.append('     id: {}, name: {}'.format(psu.id,
                                                                    psu.name))
-                        orb.db.delete(psu)
+                        self.db.delete(psu)
                 # delete any flows that have this as their 'flow_context':
                 flows = self.search_exact(cname='Flow', flow_context=obj)
                 if flows:
                     for flow in flows:
-                        orb.db.delete(flow)
+                        self.db.delete(flow)
             if isinstance(obj, self.classes['Organization']):
                 # if an Organization (which includes projects) owns any
                 # objects, change their ownership to either its
@@ -1483,7 +1557,7 @@ class UberORB(object):
                                                                     flow.id,
                                                                     flow.name,
                                                                     flow.oid))
-                    orb.db.delete(flow)
+                    self.db.delete(flow)
             if isinstance(obj, self.classes['Product']):
                 # for Products, delete related acus, psus, and flows
                 psus = obj.projects_using_system
@@ -1520,7 +1594,7 @@ class UberORB(object):
                                                                     flow.id,
                                                                     flow.name,
                                                                     flow.oid))
-                        orb.db.delete(flow)
+                        self.db.delete(flow)
             if isinstance(obj, self.classes['Requirement']):
                 # delete any related Relation and ParameterRelation objects
                 rel = obj.computable_form
@@ -1528,9 +1602,9 @@ class UberORB(object):
                     prs = rel.correlates_parameters
                     if prs:
                         for pr in prs:
-                            orb.db.delete(pr)
+                            self.db.delete(pr)
                     obj.computable_form = None
-                    orb.db.delete(rel)
+                    self.db.delete(rel)
                     # computable_form -> require recompute
                     recompute_required = True
                 # if its oid is in req_allocz, remove it
@@ -1555,7 +1629,7 @@ class UberORB(object):
             self.log.debug(text)
         if refresh_assemblies:
             for assembly in refresh_assemblies:
-                refresh_componentz(self, assembly)
+                refresh_componentz(assembly)
         if recompute_required:
             self.recompute_parmz()
 
