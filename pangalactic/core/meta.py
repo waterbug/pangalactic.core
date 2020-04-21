@@ -342,6 +342,7 @@ SELECTABLE_VALUES = dict(
         ('float', float),
         ('int', intconv),
         ('text', str),
+        ('str', str),
         ('boolean', bool)]),
     dimensions=OrderedDict(
         [(dim, dim) for dim in in_si]),

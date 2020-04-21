@@ -58,6 +58,14 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install inflect'
 
+    - louie (latest released version -- "Louie-latest" on PyPI**)
+      Python application event signals
+      * NOTE: not in the default conda channel, use locally built conda pkg
+      ** NOTE:  the name of the imported pkg is "louie", as is the
+                name of the locally-built conda package
+
+          Configuration:  'conda install louie'
+
     - pint
       Units and quantities
 
@@ -187,14 +195,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
       * NOTE: not in the default conda channel, use locally built conda pkg
 
           Configuration:  'conda install qt5reactor'
-
-    - louie (latest released version -- "Louie-latest" on PyPI**)
-      Python application event signals
-      * NOTE: not in the default conda channel, use locally built conda pkg
-      ** NOTE:  the name of the imported pkg is "louie", as is the
-                name of the locally-built conda package
-
-          Configuration:  'conda install louie'
 
     - pythonocc-core
       (for CAD viewer functionality)

@@ -18,6 +18,17 @@ from pangalactic.core.meta            import (SELECTABLE_VALUES,
 from pangalactic.core.units           import in_si, ureg
 from pangalactic.core.utils.datetimes import dtstamp
 
+# dispatcher (Louie)
+from louie import dispatcher
+
+
+class logger:
+    def info(self, s):
+        dispatcher.send(signal='log info msg', msg=s)
+    def debug(self, s):
+        dispatcher.send(signal='log debug msg', msg=s)
+
+log = logger()
 
 DATATYPES = SELECTABLE_VALUES['range_datatype']
 # NULL values by dtype:
@@ -78,9 +89,6 @@ def serialize_parms(oid):
             parameters dictionary will be `parameterz[obj.oid]`).
 
     Serialize the dictionary of parameters associated with an object.
-    Basically, this function is only required to serialize the
-    `mod_datetime` value of each parameter -- the parameter's other values
-    do not require special serialization.
 
     IMPLEMENTATION NOTE:  uses deepcopy() to avoid side-effects to the
     `parameterz` dict.
@@ -898,7 +906,7 @@ def set_pval(oid, pid, value, units=None, mod_datetime=None, local=True):
     Keyword Args:
         units (str): the units in which `value` is expressed; None implies
             SI (mks) base units
-        mod_datetime (datetime): mod_datetime of the parameter (if the action
+        mod_datetime (str): mod_datetime string of the parameter (if the action
             originates locally, this will be None and a datetime stamp will be
             generated)
         local (bool):  if False, we were called as a result of a remote event
@@ -982,8 +990,7 @@ def set_pval(oid, pid, value, units=None, mod_datetime=None, local=True):
         # log.debug(msg)
         return False
 
-def get_pval_from_str(oid, pid, str_val, units=None, mod_datetime=None,
-                      local=True):
+def get_pval_from_str(oid, pid, str_val, units=None, local=True):
     """
     Get the value of a parameter instance for the specified object from a
     string value, as expressed in the specified units (or in base units if
@@ -999,9 +1006,6 @@ def get_pval_from_str(oid, pid, str_val, units=None, mod_datetime=None,
     Keyword Args:
         units (str): the units in which the parameter value is expressed; None
             SI (mks) base units
-        mod_datetime (datetime): mod_datetime of the parameter (if the action
-            originates locally, this will be None and a datetime stamp will be
-            generated)
         local (bool):  if False, we were called as a result of a remote event
             -- i.e., someone else set the value [default: True]
     """
@@ -1048,7 +1052,7 @@ def set_pval_from_str(oid, pid, str_val, units=None, mod_datetime=None,
     Keyword Args:
         units (str): the units in which the parameter value is expressed; None
             SI (mks) base units
-        mod_datetime (datetime): mod_datetime of the parameter (if the action
+        mod_datetime (str): mod_datetime string of the parameter (if the action
             originates locally, this will be None and a datetime stamp will be
             generated)
         local (bool):  if False, we were called as a result of a remote event
@@ -1074,7 +1078,7 @@ def set_pval_from_str(oid, pid, str_val, units=None, mod_datetime=None,
             val = str_val
         if pd.get('dimensions') == 'percent':
             val = 0.01 * float(val)
-        set_pval(oid, pid, val, units=units, mod_datetime=mod_datetime,
+        set_pval(oid, pid, val, units=units, mod_datetime=str(mod_datetime),
                  local=local)
     except:
         # if unable to cast a value, do nothing (and log it)
@@ -1535,15 +1539,18 @@ def get_dval(oid, deid):
     # log.debug('* get_dval() ...')
     dedef = de_defz.get(deid)
     if not dedef:
-        # log.debug('* get_dval: "{}" does not have a definition.'.format(
-                                                                        # deid))
+        # log.debug('* get_dval: "{}" does not have a definition.'.format(deid))
         return None
     try:
         # for extreme debugging only ...
-        # log.debug('  value of {} is {} ({})'.format(pid, val, type(val)))
-        return data_elementz[oid][deid]['value']
+        val = data_elementz[oid][deid]['value']
+        # log.debug('  value of {} is "{}" ({})'.format(deid, val, type(val)))
+        return val
     except:
-        return NULL.get(dedef.get('range_datatype', 'str'))
+        val = NULL.get(dedef.get('range_datatype', 'str'))
+        # log.debug('  [exception] value of {} is {} ({})'.format(deid,
+                                                          # val, type(val)))
+        return val
 
 def get_dval_as_str(oid, deid):
     """
@@ -1555,7 +1562,7 @@ def get_dval_as_str(oid, deid):
         oid (str): the oid of the object that has the parameter
         deid (str): the `id` of the data element
     """
-    str(get_dval(oid, deid))
+    return str(get_dval(oid, deid))
 
 def set_dval(oid, deid, value, mod_datetime=None, local=True):
     """
@@ -1569,9 +1576,9 @@ def set_dval(oid, deid, value, mod_datetime=None, local=True):
             the data element object's definition.range_datatype
 
     Keyword Args:
-        mod_datetime (datetime): mod_datetime of the data element (if the action
-            originates locally, this will be None and a datetime stamp will be
-            generated)
+        mod_datetime (str): string mod_datetime of the data element (if the
+            action originates locally, this will be None and a datetime stamp
+            will be generated)
         local (bool):  if False, we were called as a result of a remote event
             -- i.e., someone else set the value [default: True]
     """
@@ -1583,7 +1590,7 @@ def set_dval(oid, deid, value, mod_datetime=None, local=True):
     dedef = de_defz.get(deid)
     if not dedef:
         # log.debug('  data element "{}" is not defined; ignoring.'.format(
-                                                                       # deid))
+                                                                    # deid))
         return False
     ######################################################################
     # NOTE: if the data element whose value is being set is not
@@ -1636,7 +1643,7 @@ def set_dval_from_str(oid, deid, str_val, mod_datetime=None, local=True):
         str_val (str): string value
 
     Keyword Args:
-        mod_datetime (datetime): mod_datetime of the parameter (if the action
+        mod_datetime (str): mod_datetime string of the parameter (if the action
             originates locally, this will be None and a datetime stamp will be
             generated)
         local (bool):  if False, we were called as a result of a remote event
@@ -1644,7 +1651,7 @@ def set_dval_from_str(oid, deid, str_val, mod_datetime=None, local=True):
     """
     # This log msg is only needed for extreme debugging -- `set_pval()` is
     # called at the end and will log essentially the same information ...
-    # log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
+    # log.debug('* set_dval_from_str({}, {}, {})'.format(oid, deid,
                                                            # str(str_val)))
     try:
         de_def = de_defz.get(deid, {})
@@ -1660,7 +1667,7 @@ def set_dval_from_str(oid, deid, str_val, mod_datetime=None, local=True):
                 val = dtype(str_val)
         else:
             val = str_val
-        set_dval(oid, deid, val, mod_datetime=mod_datetime, local=local)
+        set_dval(oid, deid, val, mod_datetime=str(mod_datetime), local=local)
     except:
         # if unable to cast a value, do nothing (and log it)
         # TODO:  more form validation!
