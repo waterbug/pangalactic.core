@@ -104,7 +104,6 @@ def deserialize_parms(oid, ser_parms, cname=None):
     - SCW 2020-04-09.]
 
     Args:
-        orb (UberORB): the (singleton) `orb` instance
         oid (str):  oid attr of the object to which the parameters are assigned
         ser_parms (dict):  the serialized parms dictionary
 
@@ -1260,15 +1259,15 @@ def compute_requirement_margin(req_oid, default=0):
         quan_base = quan.to_base_units()
         converted_nte = quan_base.magnitude
     else:
-        # msg = 'Constraint type is not "maximum" -- cannot handle (yet).'
+        msg = 'Constraint type is not "maximum" -- cannot handle (yet).'
         # txt = 'constraint_type is "{}"; ignored (for now).'
         # log.debug('  {}'.format(txt.format(constraint.constraint_type)))
         return (None, pid, None, None, msg)
     if not obj_oid:
-        # msg = 'Requirement is not allocated properly (no Acu or PSU).'
+        msg = 'Requirement is not allocated properly (no Acu or PSU).'
         return (None, pid, nte, nte_units, msg)
     elif obj_oid == 'pgefobjects:TBD':
-        # msg = 'Margin cannot be computed for unknown or TBD object.'
+        msg = 'Margin cannot be computed for unknown or TBD object.'
         return (usage_oid, pid, nte, nte_units, msg)
     mev = _compute_pval(obj_oid, pid, 'MEV')
     # log.debug('  compute_margin: nte is {}'.format(converted_nte))
@@ -1276,7 +1275,7 @@ def compute_requirement_margin(req_oid, default=0):
     if mev == 0:   # NOTE: 0 == 0.0 evals to True
         # not defined (division by zero)
         # TODO:  implement a NaN or "Undefined" ...
-        # msg = 'MEV value for {} is 0; cannot compute margin.'.format(pid)
+        msg = 'MEV value for {} is 0; cannot compute margin.'.format(pid)
         return (usage_oid, pid, nte, nte_units, msg)
     # msg = '- {} NTE specified for allocation to "{}" -- computing margin ...'
     # log.debug(msg.format(pid, alloc_ref))
@@ -1439,34 +1438,6 @@ def save_data_elementz(json_path):
         # log.debug('  ... writing data_elements.json file failed!')
         pass
 
-# entz:        persistent** cache of entities (dicts)
-#              ** persisted in the file 'ents.json' in the
-#              application home directory -- see the orb functions
-#              `_save_data_elementz` and `_load_entz`
-# format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
-#           ...}
-# ... where required data elements for the entity are:
-# -------------------------------------------------------
-# owner, creator, modifier, create_datetime, mod_datetime
-# -------------------------------------------------------
-entz = {}
-
-# EXPERIMENTAL:  support for searching of entities by data element and
-#                parameter values (in base units)
-# ent_lookupz    runtime cache for reverse lookup of entities
-#              maps tuples of values to entity oids
-# format:  {de_values, p_values) : oid,
-#           ...}
-ent_lookupz = {}
-
-# ent_histz:  persistent** cache of previous versions of entities,
-#             saved as named tuples ...
-#              ** persisted in the file 'ent_hists.json' in the
-#              application home directory -- see the orb functions
-#              `_save_data_elementz` and `_load_entz`
-# format:  {entity['oid'] : [list of previous versions of entity]}
-ent_histz = {}
-
 def update_de_defz(de_def_obj):
     """
     Update the `de_defz` cache when a new DataElementDefinition is created or
@@ -1538,6 +1509,20 @@ def add_data_element(oid, deid):
         # log.debug('    data element "{}" was already there.'.format(deid))
         return True
 
+def delete_data_element(oid, deid):
+    """
+    Delete a parameter from an object.  This should be rare and would only be
+    necessary if the parameter is irrelevant to the object; therefore, the base
+    variable and all related context parameters would be deleted.
+
+    Args:
+        oid (str):  oid of the object that owns the parameter
+        deid (str):  `id` attribute of the parameter
+    """
+    # TODO: need to dispatch louie & pubsub messages!
+    if oid in data_elementz and data_elementz[oid].get(deid):
+        del parameterz[oid][deid]
+
 def get_dval(oid, deid):
     """
     Return a cached data element value.
@@ -1572,13 +1557,12 @@ def get_dval_as_str(oid, deid):
     """
     str(get_dval(oid, deid))
 
-def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
+def set_dval(oid, deid, value, mod_datetime=None, local=True):
     """
     Set the value of a data element instance for the specified object to the
     specified value.
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Modelable that has the data element
         deid (str): the data element 'id'
         value (TBD): value should be of the datatype specified by
@@ -1640,14 +1624,13 @@ def set_dval(orb, oid, deid, value, mod_datetime=None, local=True):
         # log.debug(msg)
         return False
 
-def set_dval_from_str(orb, oid, deid, str_val, mod_datetime=None, local=True):
+def set_dval_from_str(oid, deid, str_val, mod_datetime=None, local=True):
     """
     Set the value of a data element instance for the specified object from a
     string value.  (Mainly for use in saving input from the object editor,
     `p.node.gui.pgxnobject.PgxnObject`.)
 
     Args:
-        orb (Uberorb): the orb (see p.node.uberorb)
         oid (str): the oid of the Modelable that has the parameter
         pid (str): the parameter 'id'
         str_val (str): string value
@@ -1677,7 +1660,7 @@ def set_dval_from_str(orb, oid, deid, str_val, mod_datetime=None, local=True):
                 val = dtype(str_val)
         else:
             val = str_val
-        set_dval(orb, oid, deid, val, mod_datetime=mod_datetime, local=local)
+        set_dval(oid, deid, val, mod_datetime=mod_datetime, local=local)
     except:
         # if unable to cast a value, do nothing (and log it)
         # TODO:  more form validation!
@@ -1715,103 +1698,4 @@ def add_default_data_elements(obj):
     # log.debug('  - adding data elements {} ...'.format(str(deids)))
     for deid in deids:
         add_data_element(obj.oid, deid)
-
-#############################################################
-# ENTITY SECTION (see Entity class in the parametrics module)
-#############################################################
-
-# ENTITY DATA CACHES #########################################################
-
-# entz:        persistent** cache of Entity metadata
-#              ** persisted in the file 'ents.json' in the
-#              application home directory
-entz = {}
-
-def load_entz(json_path):
-    """
-    Load the `entz` dict from json file.
-    """
-    # log.debug('* _load_entz() ...')
-    if os.path.exists(json_path):
-        with open(json_path) as f:
-            entz.update(json.loads(f.read()))
-        # log.debug('  - entz cache loaded.')
-    else:
-        # log.debug('  - "ents.json" was not found.')
-        pass
-
-def save_entz(json_path):
-    """
-    Save `entz` dict to json file.
-    """
-    # log.debug('* _save_entz() ...')
-    try:
-        with open(json_path, 'w') as f:
-            ses = [e.serialize() for e in entz.values()]
-            f.write(json.dumps(ses, separators=(',', ':'),
-                               indent=4, sort_keys=True))
-        # log.debug('  ... ents.json file written.')
-    except:
-        pass
-
-# RELATED CACHES #############################################################
-
-# dmz:         persistent** cache of DataMatrix instances
-#              ** persisted in the file 'dms.json' in the
-#              application home directory
-# format:  {oid : DataMatrix},
-#           ...}
-dmz = {}
-
-# schemaz:     persistent** cache of schemas (column views)
-#              ** persisted in the file 'schemas.json' in the
-#              application home directory
-# format:  {schema_name : [colname1, colname2, ...],
-#           ...}
-# -------------------------------------------------------
-schemaz = {}
-
-# ent_lookupz  runtime cache for reverse lookup of Entity instances
-#              maps tuples of values to entity oids
-#              (EXPERIMENTAL) support for searching of Entity instance data by
-#              data element and parameter values (in base units)
-# format:  {(oid, de_value1, ..., p_value1, ...) : oid,
-#           ...}
-#          where 'oid' is inserted for uniqueness.
-ent_lookupz = {}
-
-# ent_histz:  persistent** cache of previous versions of Entity states,
-#             saved as named tuples ...
-#              ** persisted in the file 'ent_hists.json' in the
-#              application home directory
-# format:  {entity['oid'] : [list of serialized previous versions of entity]}
-ent_histz = {}
-
-def load_ent_histz(json_path):
-    """
-    Load the `ent_histz` dict from json file.
-    """
-    # log.debug('* _load_ent_histz() ...')
-    if os.path.exists(json_path):
-        with open(json_path) as f:
-            ent_histz.update(json.loads(f.read()))
-        # log.debug('  - ent_histz cache loaded.')
-    else:
-        # log.debug('  - "ent_hists.json" was not found.')
-        pass
-
-def save_ent_histz(json_path):
-    """
-    Save `ent_histz` dict to json file.
-    """
-    # log.debug('* _save_ent_histz() ...')
-    try:
-        with open(json_path, 'w') as f:
-            f.write(json.dumps(ent_histz, separators=(',', ':'),
-                               indent=4, sort_keys=True))
-        # log.debug('  ... ent_hists.json file written.')
-    except:
-        # log.debug('  ... unable to write to path "{}".'.format(
-                                                        # json_path))
-        pass
 

@@ -433,8 +433,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             # NOTE: special case for 'data_elements' section
             de_dict = d.get('data_elements')
             if de_dict:
-                orb.log.debug('  + data elements found: {}'.format(de_dict))
-                orb.log.debug('    deserializing data elements ...')
+                # orb.log.debug('  + data elements found: {}'.format(de_dict))
+                # orb.log.debug('    deserializing data elements ...')
                 deserialize_des(oid, de_dict, cname=cname)
             else:
                 pass

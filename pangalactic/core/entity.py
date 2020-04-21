@@ -2,6 +2,7 @@
 """
 Pan Galactic Entity and DataMatrix classes.
 """
+import json, os
 from copy            import deepcopy
 from collections     import UserList
 from collections.abc import MutableMapping
@@ -10,13 +11,113 @@ from uuid            import uuid4
 
 # pangalactic
 from pangalactic.core.parametrics     import (de_defz, parm_defz,
-                                              entz, ent_histz,
                                               data_elementz,
                                               parameterz,
-                                              schemaz, dmz,
                                               get_dval, get_pval,
                                               set_dval, set_pval)
 from pangalactic.core.utils.datetimes import dtstamp
+
+# -----------------------------------------------------------------------
+# ENTITY-RELATED CACHES
+# -----------------------------------------------------------------------
+# entz:        persistent** cache of entities (dicts)
+#              ** persisted in the file 'ents.json' in the
+#              application home directory -- see the orb functions
+#              `save_entz` and `load_entz`
+# format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
+#           ...}
+# ... where required data elements for the entity are:
+# -------------------------------------------------------
+# owner, creator, modifier, create_datetime, mod_datetime
+# -------------------------------------------------------
+entz = {}
+
+# EXPERIMENTAL:  support for searching of entities by data element and
+#                parameter values (in base units)
+# ent_lookupz    runtime cache for reverse lookup of entities
+#              maps tuples of values to entity oids
+# format:  {de_values, p_values) : oid,
+#           ...}
+ent_lookupz = {}
+
+# ent_histz:  persistent** cache of previous versions of entities,
+#             saved as named tuples ...
+#              ** persisted in the file 'ent_hists.json' in the
+#              application home directory -- see
+#              `save_ent_histz` and `load_ent_histz`
+# format:  {entity['oid'] : [list of previous versions of entity]}
+ent_histz = {}
+
+def load_entz(json_path):
+    """
+    Load the `entz` dict from json file.
+    """
+    # log.debug('* _load_entz() ...')
+    if os.path.exists(json_path):
+        with open(json_path) as f:
+            entz.update(json.loads(f.read()))
+        # log.debug('  - entz cache loaded.')
+    else:
+        # log.debug('  - "ents.json" was not found.')
+        pass
+
+def save_entz(json_path):
+    """
+    Save `entz` dict to json file.
+    """
+    # log.debug('* _save_entz() ...')
+    try:
+        with open(json_path, 'w') as f:
+            ses = [e.serialize() for e in entz.values()]
+            f.write(json.dumps(ses, separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        # log.debug('  ... ents.json file written.')
+    except:
+        pass
+
+# ent_lookupz  runtime cache for reverse lookup of Entity instances
+#              maps tuples of values to entity oids
+#              (EXPERIMENTAL) support for searching of Entity instance data by
+#              data element and parameter values (in base units)
+# format:  {(oid, de_value1, ..., p_value1, ...) : oid,
+#           ...}
+#          where 'oid' is inserted for uniqueness.
+ent_lookupz = {}
+
+# ent_histz:  persistent** cache of previous versions of Entity states,
+#             saved as named tuples ...
+#              ** persisted in the file 'ent_hists.json' in the
+#              application home directory
+# format:  {entity['oid'] : [list of serialized previous versions of entity]}
+ent_histz = {}
+
+def load_ent_histz(json_path):
+    """
+    Load the `ent_histz` dict from json file.
+    """
+    # log.debug('* _load_ent_histz() ...')
+    if os.path.exists(json_path):
+        with open(json_path) as f:
+            ent_histz.update(json.loads(f.read()))
+        # log.debug('  - ent_histz cache loaded.')
+    else:
+        # log.debug('  - "ent_hists.json" was not found.')
+        pass
+
+def save_ent_histz(json_path):
+    """
+    Save `ent_histz` dict to json file.
+    """
+    # log.debug('* _save_ent_histz() ...')
+    try:
+        with open(json_path, 'w') as f:
+            f.write(json.dumps(ent_histz, separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        # log.debug('  ... ent_hists.json file written.')
+    except:
+        # log.debug('  ... unable to write to path "{}".'.format(
+                                                        # json_path))
+        pass
 
 
 class Entity(MutableMapping):
@@ -133,7 +234,7 @@ class Entity(MutableMapping):
         element, or a parameter.  Note that this will add the key if it is not
         already present.
         """
-        log.debug('* __getitem__()')
+        # log.debug('* __getitem__()')
         if k == 'oid':
             object.__setattr__(self, 'oid', v)
         elif k in ('oid', 'owner', 'creator', 'modifier',
@@ -196,6 +297,73 @@ class Entity(MutableMapping):
             self[k] = v
 
 
+# -----------------------------------------------------------------------
+# DATAMATRIX-RELATED CACHES #################################################
+# -----------------------------------------------------------------------
+
+# dmz:         persistent** cache of DataMatrix instances
+#              ** persisted in the file 'dms.json' in the
+#              application home directory
+# format:  {oid : DataMatrix},
+#           ...}
+dmz = {}
+
+# schemaz:     persistent** cache of schemas (column views)
+#              ** persisted in the file 'schemas.json' in the
+#              application home directory
+# format:  {schema_name : [colname1, colname2, ...],
+#           ...}
+# -------------------------------------------------------
+schemaz = {}
+
+def load_dmz(json_path):
+    """
+    Load the `dmz` dict from json file.  (Restores all DataMatrix
+    instances.)
+
+    Args:
+        dmz_path (str):  location of file to read
+    """
+    # log.debug('* _load_dmz() ...')
+    if os.path.exists(json_path):
+        with open(json_path) as f:
+            ser_dms = json.loads(f.read())
+        dmz.update({oid: DataMatrix([
+                          Entity(oid=oid) for oid in sdm.get('ents', [])],
+                          project_id=sdm.get('project_id', ''),
+                          level_map=sdm.get('level_map', {}),
+                          creator=sdm.get('creator', ''),
+                          modifier=sdm.get('modifier', ''),
+                          create_datetime=sdm.get('create_datetime', ''),
+                          mod_datetime=sdm.get('mod_datetime', ''))
+                    for oid, sdm in ser_dms.items()})
+        # log.debug('  - dmz cache loaded.')
+    else:
+        # log.debug('  - "dms.json" was not found.')
+        pass
+
+def save_dmz(json_path):
+    """
+    Save `dmz` dict (all DataMatrix instances) to json file.
+
+    Args:
+        dmz_path (str):  location of file to write
+    """
+    # log.debug('* _save_dmz() ...')
+    ser_dms = {oid: dict(project_id=dm.project_id,
+                         ents=[e.oid for e in dm],
+                         level_map=dm.level_map,
+                         creator=str(dm.creator),
+                         modifier=str(dm.modifier),
+                         create_datetime=dm.create_datetime,
+                         mod_datetime=dm.mod_datetime)
+               for oid, dm in dmz.items()}
+    with open(json_path, 'w') as f:
+        f.write(json.dumps(ser_dms, separators=(',', ':'),
+                           indent=4, sort_keys=True))
+    # log.debug('  ... dms.json file written.')
+
+
 class DataMatrix(UserList):
     """
     A UserList subclass that contains instances of Entity as its items.  The
@@ -237,8 +405,8 @@ class DataMatrix(UserList):
             mod_datetime (str):  iso-format string of last mod datetime
         """
         super(DataMatrix, self).__init__(*data)
-        sig = 'project_id="{}", schema_name="{}"'.format(
-                                        project_id, schema_name or '[None]')
+        # sig = 'project_id="{}", schema_name="{}"'.format(
+                                        # project_id, schema_name or '[None]')
         # log.debug('* DataMatrix({})'.format(sig))
         # metadata
         dt = str(dtstamp())
