@@ -1480,7 +1480,10 @@ class UberORB(object):
                         info.append('     id: {}, name: {})'.format(ra.id,
                                                                     ra.name))
                         self.db.delete(ra)
-                        self.db.commit()
+                        try:
+                            self.db.commit()
+                        except:
+                            self.db.rollback()
                 # delete any related system usages:
                 psus = self.search_exact(cname='ProjectSystemUsage',
                                          project=obj)
@@ -1491,13 +1494,19 @@ class UberORB(object):
                         info.append('     id: {}, name: {}'.format(psu.id,
                                                                    psu.name))
                         self.db.delete(psu)
-                        self.db.commit()
+                        try:
+                            self.db.commit()
+                        except:
+                            self.db.rollback()
                 # delete any flows that have this as their 'flow_context':
                 flows = self.search_exact(cname='Flow', flow_context=obj)
                 if flows:
                     for flow in flows:
                         self.db.delete(flow)
-                        self.db.commit()
+                        try:
+                            self.db.commit()
+                        except:
+                            self.db.rollback()
             if isinstance(obj, self.classes['Organization']):
                 # if an Organization (which includes projects) owns any
                 # objects, change their ownership to either its
@@ -1521,7 +1530,10 @@ class UberORB(object):
                                                                     flow.name,
                                                                     flow.oid))
                     self.db.delete(flow)
-                    self.db.commit()
+                    try:
+                        self.db.commit()
+                    except:
+                        self.db.rollback()
             if isinstance(obj, self.classes['Product']):
                 # for Products, delete related acus, psus, and flows
                 psus = obj.projects_using_system
@@ -1530,7 +1542,10 @@ class UberORB(object):
                                                                    psu.name,
                                                                    psu.oid))
                     self.db.delete(psu)
-                    self.db.commit()
+                    try:
+                        self.db.commit()
+                    except:
+                        self.db.rollback()
                 child_acus = obj.components
                 if child_acus:
                     for acu in child_acus:
@@ -1539,7 +1554,10 @@ class UberORB(object):
                                                                     acu.name,
                                                                     acu.oid))
                         self.db.delete(acu)
-                        self.db.commit()
+                        try:
+                            self.db.commit()
+                        except:
+                            self.db.rollback()
                     if obj.oid in componentz:
                         del componentz[obj.oid]
                 parent_acus = obj.where_used
@@ -1551,7 +1569,10 @@ class UberORB(object):
                                                                     acu.oid))
                         assembly = acu.assembly
                         self.db.delete(acu)
-                        self.db.commit()
+                        try:
+                            self.db.commit()
+                        except:
+                            self.db.rollback()
                         if assembly.oid in componentz:
                             refresh_assemblies.append(assembly)
                 flows = self.get_internal_flows_of(obj)
@@ -1562,7 +1583,10 @@ class UberORB(object):
                                                                     flow.name,
                                                                     flow.oid))
                         self.db.delete(flow)
-                        self.db.commit()
+                        try:
+                            self.db.commit()
+                        except:
+                            self.db.rollback()
             if isinstance(obj, self.classes['Requirement']):
                 # delete any related Relation and ParameterRelation objects
                 rel = obj.computable_form
@@ -1571,10 +1595,16 @@ class UberORB(object):
                     if prs:
                         for pr in prs:
                             self.db.delete(pr)
-                            self.db.commit()
+                            try:
+                                self.db.commit()
+                            except:
+                                self.db.rollback()
                     obj.computable_form = None
                     self.db.delete(rel)
-                    self.db.commit()
+                    try:
+                        self.db.commit()
+                    except:
+                        self.db.rollback()
                     # computable_form -> require recompute
                     recompute_required = True
                 # if its oid is in req_allocz, remove it
@@ -1592,8 +1622,11 @@ class UberORB(object):
             if creator == local_user:
                 # if local_user created obj, add it to trash
                 trash[obj.oid] = serialize(self, [obj])
-            self.db.delete(obj)
-            self.db.commit()
+                self.db.delete(obj)
+                try:
+                    self.db.commit()
+                except:
+                    self.db.rollback()
         self.log.debug(' - objs deleted:')
         for text in info:
             self.log.debug(text)
