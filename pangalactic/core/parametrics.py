@@ -294,8 +294,8 @@ def refresh_req_allocz(req):
     'obj_oid' and/or 'alloc_ref' items.
 
     NOTE:  this function depends only on the database and does not use any
-    other caches, nor does it update the parameterz cache, so it can be used by
-    any margin computation function.
+    caches, nor does it update the parameterz cache, so it can be used by any
+    margin computation function.
 
     The 'req_allocz' dictionary has the form:
 
@@ -371,7 +371,7 @@ def refresh_req_allocz(req):
             parm_def = parm_rels[0].correlates_parameter
             pid = parm_def.id
         else:
-            # log.debug('  no parameter found -> functional req.')
+            # log.debug('  no ParameterRelation found -> functional req.')
             req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
             return
     else:

@@ -731,10 +731,10 @@ def create_test_project():
         dict(
             _cname='ParameterRelation',
             oid='test:H2G2:Spacecraft-Mass-Computable-Form-PR',
-            id='H2G2.1.0.Spacecraft-Mass-Computable-Form',
+            id='H2G2.1.0.SC-Mass-ParmRel',
             id_ns='test',
             name='H2G2 1.0 Spacecraft Mass Computable Form',
-            referenced_relation='H2G2:Spacecraft-Mass-Computable-Form',
+            referenced_relation='test:H2G2:Spacecraft-Mass-Computable-Form',
             correlates_parameter='pgef:ParameterDefinition.m',
             creator='test:steve',
             create_datetime=NOW,
@@ -744,7 +744,7 @@ def create_test_project():
         dict(
             _cname='Relation',
             oid='test:H2G2:Spacecraft-Mass-Computable-Form',
-            id='H2G2.1.0.Spacecraft-Mass-Computable-Form',
+            id='H2G2.1.0.SC-Mass-Comp-Form',
             id_ns='test',
             name='H2G2 1.0 Spacecraft Mass Computable Form',
             creator='test:steve',
