@@ -308,7 +308,7 @@ class OrbTest(unittest.TestCase):
             'version': obj.version,
             'version_sequence': obj.version_sequence
             },
-            6, 5)
+            7, 6)
         self.assertEqual(expected, value)
 
     def test_15_deserialize_simple(self):
@@ -627,47 +627,57 @@ class OrbTest(unittest.TestCase):
         sc = orb.get('test:spacecraft0')
         # perms on Assembly Component Usages are based on owner of assembly,
         # which determines the role context, and product type of the component
-        acu1 = orb.get('test:H2G2:acu-1')  # Oscillation Overthruster acu
-        acu2 = orb.get('test:H2G2:acu-2')  # Infinite Improbability Drive acu
-        acu4 = orb.get('test:H2G2:acu-4')  # Bambleweeny Sub-Meson Brain acu
+        acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
+        acu2 = orb.get('test:H2G2:acu-2')  # SC/Infinite Improbability Drive acu
+        acu4 = orb.get('test:H2G2:acu-4')  # SC/Bambleweeny Sub-Meson Brain acu
+        acu6 = orb.get('test:H2G2:acu-6')  # SC/Instrument0 acu
+        acu7 = orb.get('test:H2G2:acu-7')  # Instrument0/Mr. Fusion acu
         # perms on ProjectSystemUsage are determined by project roles: only the
         # Systems Engineer, Lead Engineer, and Administrator have full perms
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
         req = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
-        value = [set(get_perms(sc, user=steve)),          # Adm/sc: full perms
-                 set(get_perms(sc, user=carefulwalker)),  # SE/sc: full perms
-                 set(get_perms(sc, user=zaphod)),         # LE/sc: full perms
-                 set(get_perms(sc, user=buckaroo)),       # PE/sc: view only
-                 set(get_perms(acu1, user=steve)),        # Adm/acu: full perms
-                 set(get_perms(acu1, user=buckaroo)),     # PE/acu: full perms
-                 set(get_perms(acu2, user=buckaroo)),     # PE/acu: full perms
-                 set(get_perms(acu4, user=buckaroo)),     # PE/acu: view only
-                 set(get_perms(psu, user=steve)),         # Adm/psu: full perms
-                 set(get_perms(psu, user=carefulwalker)), # SE/psu: full perms
-                 set(get_perms(psu, user=zaphod)),        # LE/psu: full perms
-                 set(get_perms(psu, user=buckaroo)),      # PE/psu: view only
-                 set(get_perms(req, user=steve)),         # Adm/req: full perms
-                 set(get_perms(req, user=carefulwalker)), # SE/req: full perms
-                 set(get_perms(req, user=zaphod)),        # LE/req: full perms
-                 set(get_perms(req, user=buckaroo))       # PE/req: view only
-                 ]
-        expected = [set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view', 'modify', 'decloak', 'delete']),
-                    set(['view'])
-                    ]
+        value = [
+            set(get_perms(sc, user=steve)),           #  1 Adm/sc: full perms
+            set(get_perms(sc, user=carefulwalker)),   #  2 SE/sc: full perms
+            set(get_perms(sc, user=zaphod)),          #  3 LE/sc: full perms
+            set(get_perms(sc, user=buckaroo)),        #  4 PE/sc: view only
+            set(get_perms(acu1, user=steve)),         #  5 Adm/acu: full perms
+            set(get_perms(acu1, user=carefulwalker)), #  5a SE/acu: full perms
+            set(get_perms(acu1, user=buckaroo)),      #  6 PE/acu: full perms
+            set(get_perms(acu2, user=buckaroo)),      #  7 PE/acu: full perms
+            set(get_perms(acu4, user=buckaroo)),      #  8 PE/acu: view only
+            set(get_perms(acu6, user=carefulwalker)), #  8a SE/acu: full perms
+            set(get_perms(acu7, user=carefulwalker)), #  8b SE/acu: full perms
+            set(get_perms(psu, user=steve)),          #  9 Adm/psu: full perms
+            set(get_perms(psu, user=carefulwalker)),  # 10 SE/psu: full perms
+            set(get_perms(psu, user=zaphod)),         # 11 LE/psu: full perms
+            set(get_perms(psu, user=buckaroo)),       # 12 PE/psu: view only
+            set(get_perms(req, user=steve)),          # 13 Adm/req: full perms
+            set(get_perms(req, user=carefulwalker)),  # 14 SE/req: full perms
+            set(get_perms(req, user=zaphod)),         # 15 LE/req: full perms
+            set(get_perms(req, user=buckaroo))        # 16 PE/req: view only
+            ]
+        expected = [
+            set(['view', 'modify', 'decloak', 'delete']), #  1
+            set(['view', 'modify', 'decloak', 'delete']), #  2
+            set(['view', 'modify', 'decloak', 'delete']), #  3
+            set(['view']),                                #  4
+            set(['view', 'modify', 'decloak', 'delete']), #  5
+            set(['view', 'modify', 'decloak', 'delete']), #  5a
+            set(['view', 'modify', 'decloak', 'delete']), #  6
+            set(['view', 'modify', 'decloak', 'delete']), #  7
+            set(['view']),                                #  8
+            set(['view', 'modify', 'decloak', 'delete']), #  8a
+            set(['view', 'modify', 'decloak', 'delete']), #  8b
+            set(['view', 'modify', 'decloak', 'delete']), #  9
+            set(['view', 'modify', 'decloak', 'delete']), # 10
+            set(['view', 'modify', 'decloak', 'delete']), # 11
+            set(['view']),                                # 12
+            set(['view', 'modify', 'decloak', 'delete']), # 13
+            set(['view', 'modify', 'decloak', 'delete']), # 14
+            set(['view', 'modify', 'decloak', 'delete']), # 15
+            set(['view'])                                 # 16
+            ]
         self.assertEqual(expected, value)
 
     # TODO:  revise this test!

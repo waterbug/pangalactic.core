@@ -124,23 +124,23 @@ def get_perms(obj, user=None, permissive=False):
                            for r in role_ids]
                     if rpt:
                         subsystem_types = set.union(*rpt)
-                # orb.log.debug('  user is authorized for subsystem types:')
-                # orb.log.debug('  {}'.format(subsystem_types))
+                orb.log.debug('  user is authorized for subsystem types:')
+                orb.log.debug('  {}'.format(subsystem_types))
                 pt_id = getattr(obj.product_type, 'id', 'unknown')
                 # orb.log.debug('  this ProductType is "{}"'.format(pt_id))
                 if pt_id in subsystem_types:
-                    # orb.log.debug(
-                        # '  user is authorized for ProductType "{}".'.format(
-                        # pt_id))
+                    orb.log.debug(
+                        '  user is authorized for ProductType "{}".'.format(
+                        pt_id))
                     perms = ['view', 'modify', 'decloak', 'delete']
                     # orb.log.debug('  perms: {}'.format(perms))
                     return perms
                 else:
-                    # txt = '  user NOT authorized for ProductType "{}".'.format(
-                                                                         # pt_id)
-                    # orb.log.debug(txt)
+                    txt = '  user NOT authorized for ProductType "{}".'.format(
+                                                                         pt_id)
+                    orb.log.debug(txt)
                     perms = ['view']
-                    # orb.log.debug('  perms: {}'.format(perms))
+                    orb.log.debug('  perms: {}'.format(perms))
                     return perms
             elif isinstance(obj, orb.classes['Requirement']):
                 # Requirements (subclass of DigitalProduct) are a special case
