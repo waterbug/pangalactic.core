@@ -723,11 +723,15 @@ def get_pval(oid, pid, units='', allow_nan=False):
         # log.debug('* get_pval: "{}" does not have a definition.'.format(
                                                                         # pid))
         return
-    try:
-        if not units:
-            # if no units are specified, return the value in base units
+    if not units:
+        # if no units are specified, return the value in base units
+        try:
             return parameterz[oid][pid]['value']
-        else:
+        except:
+            # log.debug('  "{}" is not assigned'.format(pid))
+            return NULL.get(pdz.get('range_datatype', 'float'))
+    else:
+        try:
             # convert based on dimensions/units ...
             dims = pdz.get('dimensions')
             # special cases for 'percent' and 'money'
@@ -749,8 +753,10 @@ def get_pval(oid, pid, units='', allow_nan=False):
                 quan = base_val * ureg.parse_expression(in_si[dims])
                 quan_converted = quan.to(units)
                 return quan_converted.magnitude
-    except:
-        return NULL.get(pdz.get('range_datatype', 'float'))
+        except:
+            # log.debug('  "{}": something bad happened with units.'.format(
+                                                                      # pid))
+            return NULL.get(pdz.get('range_datatype', 'float'))
 
 def get_pval_as_str(oid, pid, units='', allow_nan=False):
     """

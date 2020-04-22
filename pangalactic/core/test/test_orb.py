@@ -421,8 +421,12 @@ class OrbTest(unittest.TestCase):
         """
         CASE:  test pangalactic.core.serializers.deserialize_parms function.
 
-        This tests parameter deserialization, including the comparison of
+        Tests parameter deserialization, including the comparison of
         'mod_datetime' strings to determine the precedence of values.
+
+        In this test, the 'P' and 'R_D' values in the deserialized data have
+        later datetime stamps, but the 'm' value has the same datetime stamp as
+        the current value, so it is ignored.
         """
         test_oid = 'test:iidrive'
         current_dt = parameterz[test_oid]['m']['mod_datetime']
@@ -447,7 +451,8 @@ class OrbTest(unittest.TestCase):
         # deserialized mass should be ignored since its dt string is the
         # same as that of the current mass parameter ...
         expected = [True, True, True, True, True, True, True,
-                    0.0, 0.0, 0.0, 100.0, 1000000.0, current_mass]
+                    100.0, 1000000.0, current_mass, 100.0, 1000000.0,
+                    current_mass]
         test_parms = parameterz.get(test_oid, {})
         actual = [('P[CBE]' in test_parms),
                   ('R_D[CBE]' in test_parms),
@@ -533,20 +538,34 @@ class OrbTest(unittest.TestCase):
             ]
         self.assertEqual(expected, value)
 
-    def test_22_compute_cbe(self):
+    def test_22_compute_cbe_with_components(self):
         """
         CASE:  compute the mass CBE (Current Best Estimate)
         """
         orb.recompute_parmz()
         value = get_pval('test:spacecraft3', 'm[CBE]')
         sc = orb.get('test:spacecraft3')
-        expected = fsum([get_pval(acu.component.oid, 'm')
-                         for acu in sc.components])
+        expected  = fsum([get_pval(acu.component.oid, 'm')
+                          for acu in sc.components])
         # but the Magic Twanger has components Flux Capacitor and Mr. Fusion,
         # so ...
         expected -= get_pval('test:twanger', 'm')
         expected += get_pval('test:flux_capacitor', 'm')
         expected += get_pval('test:mr_fusion', 'm')
+        self.assertEqual(expected, value)
+
+    def test_22_1_compute_cbe_without_components(self):
+        """
+        CASE:  compute the mass CBE (Current Best Estimate) of a product whose
+        components are not specified (i.e. it has no Acu's of components).  Its
+        CBE value ('m[CBE]') should be the same as its spec value ('m').
+        """
+        orb.recompute_parmz()
+        # NOTE:  get_pval() for a computed parameter will fetch the cached
+        # (pre-computed) value from the 'parameterz' cache (rather than
+        # computing it)
+        value = get_pval('test:iidrive', 'm[CBE]')
+        expected = get_pval('test:iidrive', 'm')
         self.assertEqual(expected, value)
 
     def test_23_compute_mev(self):

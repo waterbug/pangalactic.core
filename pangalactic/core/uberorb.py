@@ -446,20 +446,28 @@ class UberORB(object):
         contexts.  This is required at startup or when a parameter is created,
         modified, or deleted.
         """
-        # self.log.debug('* recompute_parmz()')
+        self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
         # default descriptive contexts:  CBE, MEV
         d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or []
         variables = config.get('variables', ['m', 'P', 'R_D']) or []
         # NOTE: this iterates only over assembly oids (i.e., keys in the
-        # 'componentz' dict), since _compute_pval is recursive and will
-        # recompute all lower-level component/subassembly values in each pass
+        # 'componentz' cache), because _compute_pval() is recursive and will
+        # recompute all lower-level component/subassembly values in each call
         # NOTE: a further implication is that non-products (e.g. Port,
         # PortTemplate, etc.) DO NOT HAVE COMPUTED PARAMETERS ...
         for context in d_contexts:
             for variable in variables:
-                for oid in componentz:
-                    _compute_pval(oid, variable, context)
+                # slightly kludgy, but ALL HW (and ONLY HW) should have ALL
+                # these variables and context parameters, period!
+                for oid in self.get_oids(cname='HardwareProduct'):
+                    pid = get_parameter_id(variable, context)
+                    val = _compute_pval(oid, variable, context)
+                    if oid not in parameterz:
+                        parameterz[oid] = {}
+                    if pid not in parameterz[oid]:
+                        add_parameter(oid, pid)
+                    parameterz[oid][pid]['value'] = val
         # Recompute Margins for all performance requirements
         # [0] Remove any previously computed performance requirements (NTEs and
         #     Margins) in case any requirements have been deleted or
@@ -508,6 +516,8 @@ class UberORB(object):
                 self.log.debug(' - margin comp. failed for req with oid:')
                 self.log.debug('   "{}"'.format(req_oid))
                 self.log.debug('   computation result: {}'.format(result))
+        parameters_path = os.path.join(self.home, 'parameters.json')
+        save_parmz(parameters_path)
 
     def assign_test_parameters(self, objs, parms=None, des=None):
         """
