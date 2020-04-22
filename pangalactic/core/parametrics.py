@@ -649,7 +649,7 @@ def add_default_parameters(obj):
                                'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
                                'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
                                'R_D[CBE]', 'R_D[Ctgcy]', 'R_D[MEV]',
-                               'Cost']
+                               'Cost'])
         if obj.product_type:
             pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
                                getattr(obj.product_type, 'id', '') or []))
