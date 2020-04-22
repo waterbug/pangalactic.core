@@ -645,7 +645,11 @@ def add_default_parameters(obj):
         # prefs['default_parms'] if it is set
         pids |= OrderedSet(prefs.get('default_parms')
                            or config.get('default_parms')
-                           or ['m', 'P', 'R_D'])
+                           or ['m', 'P', 'R_D',
+                               'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
+                               'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
+                               'R_D[CBE]', 'R_D[Ctgcy]', 'R_D[MEV]',
+                               'Cost']
         if obj.product_type:
             pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
                                getattr(obj.product_type, 'id', '') or []))
