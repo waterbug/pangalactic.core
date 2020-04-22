@@ -124,23 +124,23 @@ def get_perms(obj, user=None, permissive=False):
                            for r in role_ids]
                     if rpt:
                         subsystem_types = set.union(*rpt)
-                orb.log.debug('  user is authorized for subsystem types:')
-                orb.log.debug('  {}'.format(subsystem_types))
+                # orb.log.debug('  user is authorized for subsystem types:')
+                # orb.log.debug('  {}'.format(subsystem_types))
                 pt_id = getattr(obj.product_type, 'id', 'unknown')
                 # orb.log.debug('  this ProductType is "{}"'.format(pt_id))
                 if pt_id in subsystem_types:
-                    orb.log.debug(
-                        '  user is authorized for ProductType "{}".'.format(
-                        pt_id))
+                    # orb.log.debug(
+                        # '  user is authorized for ProductType "{}".'.format(
+                        # pt_id))
                     perms = ['view', 'modify', 'decloak', 'delete']
                     # orb.log.debug('  perms: {}'.format(perms))
                     return perms
                 else:
-                    txt = '  user NOT authorized for ProductType "{}".'.format(
-                                                                         pt_id)
-                    orb.log.debug(txt)
+                    # txt = '  user NOT authorized for ProductType "{}".'.format(
+                                                                         # pt_id)
+                    # orb.log.debug(txt)
                     perms = ['view']
-                    orb.log.debug('  perms: {}'.format(perms))
+                    # orb.log.debug('  perms: {}'.format(perms))
                     return perms
             elif isinstance(obj, orb.classes['Requirement']):
                 # Requirements (subclass of DigitalProduct) are a special case
@@ -249,7 +249,7 @@ def get_perms(obj, user=None, permissive=False):
                 # owner_id = getattr(obj.owner, 'id', None) or '[unknown]'
             # orb.log.debug('  - object owner: {}'.format(owner_id))
         # TODO:  more possible permissions for Administrators
-    orb.log.info('  perms: {}'.format(perms))
+    # orb.log.info('  perms: {}'.format(perms))
     return list(perms)
 
 def get_user_orgs(user):
@@ -294,12 +294,13 @@ def is_cloaked(obj):
     Returns:
         status (bool): True if cloaked
     """
-    orb.log.debug('* is_cloaked({})'.format(obj.name))
+    # orb.log.debug('* is_cloaked({})'.format(obj.name))
     obj_oid = getattr(obj, 'oid', None)
     if not obj or not obj_oid:
-        orb.log.debug('  [no object or object has no oid]')
+        # orb.log.debug('  [no object or object has no oid]')
         return False
     if hasattr(obj, 'public') and obj.public:
+        orb.log.debug('  object is public.')
         return False
     elif isinstance(obj, (orb.classes['Organization'],
                           orb.classes['ParameterDefinition'])):

@@ -631,7 +631,10 @@ class OrbTest(unittest.TestCase):
         acu2 = orb.get('test:H2G2:acu-2')  # SC/Infinite Improbability Drive acu
         acu4 = orb.get('test:H2G2:acu-4')  # SC/Bambleweeny Sub-Meson Brain acu
         acu6 = orb.get('test:H2G2:acu-6')  # SC/Instrument0 acu
-        acu7 = orb.get('test:H2G2:acu-7')  # Instrument0/Mr. Fusion acu
+                                           # carefulwalker is an SE in H2G2
+        acu7 = orb.get('test:H2G2:acu-7')  # Instrument0/Mr. Fusion acu **
+                                           # NOTE: Yoyodyne owns Instrument0
+                                           # carefulwalker not SE in Yoyodyne
         # perms on ProjectSystemUsage are determined by project roles: only the
         # Systems Engineer, Lead Engineer, and Administrator have full perms
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
@@ -647,7 +650,7 @@ class OrbTest(unittest.TestCase):
             set(get_perms(acu2, user=buckaroo)),      #  7 PE/acu: full perms
             set(get_perms(acu4, user=buckaroo)),      #  8 PE/acu: view only
             set(get_perms(acu6, user=carefulwalker)), #  8a SE/acu: full perms
-            set(get_perms(acu7, user=carefulwalker)), #  8b SE/acu: full perms
+            set(get_perms(acu7, user=carefulwalker)), #  8b acu: view only **
             set(get_perms(psu, user=steve)),          #  9 Adm/psu: full perms
             set(get_perms(psu, user=carefulwalker)),  # 10 SE/psu: full perms
             set(get_perms(psu, user=zaphod)),         # 11 LE/psu: full perms
@@ -668,7 +671,7 @@ class OrbTest(unittest.TestCase):
             set(['view', 'modify', 'decloak', 'delete']), #  7
             set(['view']),                                #  8
             set(['view', 'modify', 'decloak', 'delete']), #  8a
-            set(['view', 'modify', 'decloak', 'delete']), #  8b
+            set(['view']),                                #  8b
             set(['view', 'modify', 'decloak', 'delete']), #  9
             set(['view', 'modify', 'decloak', 'delete']), # 10
             set(['view', 'modify', 'decloak', 'delete']), # 11
