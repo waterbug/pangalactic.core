@@ -29,10 +29,10 @@ def gen_test_dvals(data_elements):
         if de_def.get('range_datatype') in ['text', 'str']:
             # make sure no non-null default has been set
             if not de.get('value'):
-                i = random.randint(0, 2)
-                j = random.randint(0, 2)
-                k = random.randint(0, 2)
-                de['value'] = i * 'spam' + j * 'eggs' + k * 'spam'
+                i = random.randint(0, 1)
+                j = random.randint(0, 1)
+                k = random.randint(0, 1)
+                de['value'] = i * 'Spam' + j * 'Eggs' + k * 'Spam'
         elif de_def.get('range_datatype') == 'int':
             # make sure no non-zero default has been set
             if not de['value']:
@@ -289,6 +289,8 @@ def create_test_project():
             owner='H2G2',
             name='Rocinante Spacecraft',
             description='A Martian Navy gunship',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='Prototype',
             public=True,
             creator='test:steve',
@@ -307,6 +309,8 @@ def create_test_project():
             owner='H2G2',
             name='Rocinante Spacecraft',
             description='A Martian Navy gunship',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='Prototype',
             public=True,
             creator='test:steve',
@@ -329,6 +333,8 @@ def create_test_project():
             owner='H2G2',
             name='Rocinante Spacecraft',
             description='A Martian Navy gunship',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='Prototype',
             public=True,
             creator='test:zaphod',
@@ -345,6 +351,8 @@ def create_test_project():
             owner='test:yoyodyne',
             name='Instrument, v.0',
             description='Instrument, Advanced',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='This instrument is quite advanced.',
             public=True,
             creator='test:steve',
@@ -363,6 +371,8 @@ def create_test_project():
             owner='test:yoyodyne',
             name='Instrument v.1',
             description='Instrument, Advanced',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='This instrument is quite advanced.',
             public=True,
             creator='test:steve',
@@ -381,6 +391,8 @@ def create_test_project():
             owner='test:yoyodyne',
             name='Gigawatt Magic Twanger',
             description='Twanger, Magic, Heavy-Duty',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='Prototype Plasma-Drive Magic Twanger',
             public=True,
             creator='test:steve',
@@ -397,6 +409,8 @@ def create_test_project():
             owner='test:yoyodyne',
             name='Photon Drive v1',
             description='Photon Drive, v1',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='Propagate! Propagate!',
             public=True,
             creator='test:zaphod',
@@ -413,6 +427,8 @@ def create_test_project():
             owner='test:yoyodyne',
             name='Infinite Improbability Drive',
             description='Infinite Improbability Drive',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='VROOM! VROOM!',
             public=True,
             creator='test:zaphod',
@@ -429,6 +445,8 @@ def create_test_project():
             owner='test:yoyodyne',
             name='Bambleweeny 52 Sub-Meson Brain',
             description='Computer, Hyper-Quantum, Subfemto',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='Ridiculously powerful microscopic computer',
             public=True,
             creator='test:zaphod',
@@ -445,6 +463,8 @@ def create_test_project():
             owner='test:yoyodyne',
             name='Flux Capacitor, 1.21 GW',
             description='Capacitor, Flux, 1.21 GW',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='Quantum Chromolytic Flux Capacitor',
             public=True,
             creator='test:steve',
@@ -461,6 +481,8 @@ def create_test_project():
             owner='test:yoyodyne',
             name='Mr. Fusion Series A',
             description='Power Generator, Fusion, Blender-Style',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='Fuels: banana peels, orange rinds, coffee grounds',
             public=True,
             creator='test:steve',
@@ -477,6 +499,8 @@ def create_test_project():
             owner='test:banzai',
             name='Oscillation Overthruster',
             description='Overthruster, Oscillation',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='Extreme overthrust levels are untested',
             public=True,
             creator='test:buckaroo',
@@ -493,6 +517,8 @@ def create_test_project():
             owner='test:yoyodyne',
             name='Oscillation Overthruster B',
             description='Overthruster, Oscillation (B Movie)',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='DO NOT USE THIS PART -- EXPLOSION RISK!',
             public=True,
             creator='test:whorfin',
@@ -509,6 +535,8 @@ def create_test_project():
             owner='test:yoyodyne',
             name='Illudium Q-36 Explosive Space Modulator',
             description='Space Modulator, Explosive, Illudium',
+            data_elements=deepcopy(test_data_elements),
+            parameters=deepcopy(test_parms),
             comment='Capable of clearing obstructed view of Venus.',
             public=True,
             creator='test:whorfin',
@@ -899,13 +927,11 @@ parametrized_summary_test_object = [
 test_data_elements = {
     "TRL":{
         "mod_datetime":NOW,
-        "units":"",
         "value":4
     },
     "Vendor":{
         "mod_datetime":NOW,
-        "units":"",
-        "value":""
+        "value":"Yoyodyne"
     }
 }
 
@@ -920,7 +946,27 @@ test_parms = {
         "units":"W",
         "value":0.0
     },
+    "P[CBE]":{
+        "mod_datetime":NOW,
+        "units":"W",
+        "value":0.0
+    },
+    "P[MEV]":{
+        "mod_datetime":NOW,
+        "units":"W",
+        "value":0.0
+    },
     "R_D":{
+        "mod_datetime":NOW,
+        "units":"bit/s",
+        "value":0
+    },
+    "R_D[CBE]":{
+        "mod_datetime":NOW,
+        "units":"bit/s",
+        "value":0
+    },
+    "R_D[MEV]":{
         "mod_datetime":NOW,
         "units":"bit/s",
         "value":0
@@ -936,6 +982,16 @@ test_parms = {
         "value":0.0
     },
     "m":{
+        "mod_datetime":NOW,
+        "units":"kg",
+        "value":0.0
+    },
+    "m[CBE]":{
+        "mod_datetime":NOW,
+        "units":"kg",
+        "value":0.0
+    },
+    "m[MEV]":{
         "mod_datetime":NOW,
         "units":"kg",
         "value":0.0
