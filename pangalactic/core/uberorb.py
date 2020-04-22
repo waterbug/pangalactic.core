@@ -509,7 +509,7 @@ class UberORB(object):
                 self.log.debug('   "{}"'.format(req_oid))
                 self.log.debug('   computation result: {}'.format(result))
 
-    def assign_test_parameters(self, objs):
+    def assign_test_parameters(self, objs, parms=None, des=None):
         """
         Assign a set of test parameters and data elements with
         randomly-generated values to an iterable of objects.
@@ -520,9 +520,9 @@ class UberORB(object):
         """
         self.log.debug('* assign_test_parameters()')
         for o in objs:
-            add_default_data_elements(o)
+            add_default_data_elements(o, des=des)
             gen_test_dvals(data_elementz.get(o.oid))
-            add_default_parameters(o)
+            add_default_parameters(o, parms=parms)
             gen_test_pvals(parameterz[o.oid])
         self.recompute_parmz()
         self.log.debug('  ... done.')

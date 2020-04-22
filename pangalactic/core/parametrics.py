@@ -622,12 +622,16 @@ def add_parameter(oid, pid):
     else:
         return True
 
-def add_default_parameters(obj):
+def add_default_parameters(obj, parms=None):
     """
-    Assign the configured or preferred default parameters to an object.
+    Assign the specified, configured, or preferred default parameters to an
+    object.
 
     Args:
         obj (Identifiable):  the object to receive parameters
+
+    Keyword Args:
+        parms (list):  list of parameter id's to add
     """
     # log.debug('* adding default parameters to object "{}"'.format(
                                                                 # obj.id))
@@ -643,7 +647,8 @@ def add_default_parameters(obj):
         # default for "default_parms" in config:  mass, power, data rate
         # (config is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
-        pids |= OrderedSet(prefs.get('default_parms')
+        pids |= OrderedSet(parms
+                           or prefs.get('default_parms')
                            or config.get('default_parms')
                            or ['m', 'P', 'R_D',
                                'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
@@ -1678,12 +1683,15 @@ def set_dval_from_str(oid, deid, str_val, mod_datetime=None, local=True):
         # log.debug('  could not convert string "{}" ...'.format(str_val))
         pass
 
-def add_default_data_elements(obj):
+def add_default_data_elements(obj, des=None):
     """
     Assign the configured or preferred default data elements to an object.
 
     Args:
         obj (Identifiable):  the object to receive data elements
+
+    Keyword Args:
+        des (list):  list of data element id's to add
     """
     # log.debug('* adding default data elements to object "{}"'.format(
                                                                  # obj.id))
@@ -1699,7 +1707,8 @@ def add_default_data_elements(obj):
         # default for "default_parms" in config:  mass, power, data rate
         # (config is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
-        deids |= OrderedSet(prefs.get('default_data_elements')
+        deids |= OrderedSet(des
+                            or prefs.get('default_data_elements')
                             or config.get('default_data_elements')
                             or ['TRL', 'Vendor'])
         if obj.product_type:
