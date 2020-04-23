@@ -1477,14 +1477,12 @@ class UberORB(object):
             if not obj:
                 info.append('   None (ignored)')
                 continue
-            info.append('   id: {}, name: {} (oid {})'.format(obj.id, obj.name,
-                                                              obj.oid))
             if isinstance(obj, self.classes['Project']):
                 # delete all related role assignments:
                 ras = self.search_exact(cname='RoleAssignment',
                                         role_assignment_context=obj)
                 if ras:
-                    txt = 'deleted role assignments for'
+                    txt = 'attempting to delete role assignments for'
                     info.append('   - {} "{}" ...'.format(txt, obj.id))
                     for ra in ras:
                         info.append('     id: {}, name: {})'.format(ra.id,
@@ -1492,8 +1490,10 @@ class UberORB(object):
                         self.db.delete(ra)
                         try:
                             self.db.commit()
+                            info.append('     ... deleted.')
                         except:
                             self.db.rollback()
+                            info.append('     ... delete failed, rolled back.')
                 # delete any related system usages:
                 psus = self.search_exact(cname='ProjectSystemUsage',
                                          project=obj)
@@ -1506,8 +1506,10 @@ class UberORB(object):
                         self.db.delete(psu)
                         try:
                             self.db.commit()
+                            info.append('     ... deleted.')
                         except:
                             self.db.rollback()
+                            info.append('     ... delete failed, rolled back.')
                 # delete any flows that have this as their 'flow_context':
                 flows = self.search_exact(cname='Flow', flow_context=obj)
                 if flows:
@@ -1515,8 +1517,10 @@ class UberORB(object):
                         self.db.delete(flow)
                         try:
                             self.db.commit()
+                            info.append('     ... deleted.')
                         except:
                             self.db.rollback()
+                            info.append('     ... delete failed, rolled back.')
             if isinstance(obj, self.classes['Organization']):
                 # if an Organization (which includes projects) owns any
                 # objects, change their ownership to either its
@@ -1542,8 +1546,10 @@ class UberORB(object):
                     self.db.delete(flow)
                     try:
                         self.db.commit()
+                        info.append('     ... deleted.')
                     except:
                         self.db.rollback()
+                        info.append('     ... delete failed, rolled back.')
             if isinstance(obj, self.classes['Product']):
                 # for Products, delete related acus, psus, and flows
                 psus = obj.projects_using_system
@@ -1554,8 +1560,10 @@ class UberORB(object):
                     self.db.delete(psu)
                     try:
                         self.db.commit()
+                        info.append('     ... deleted.')
                     except:
                         self.db.rollback()
+                        info.append('     ... delete failed, rolled back.')
                 child_acus = obj.components
                 if child_acus:
                     for acu in child_acus:
@@ -1566,8 +1574,10 @@ class UberORB(object):
                         self.db.delete(acu)
                         try:
                             self.db.commit()
+                            info.append('     ... deleted.')
                         except:
                             self.db.rollback()
+                            info.append('     ... delete failed, rolled back.')
                     if obj.oid in componentz:
                         del componentz[obj.oid]
                 parent_acus = obj.where_used
@@ -1581,8 +1591,10 @@ class UberORB(object):
                         self.db.delete(acu)
                         try:
                             self.db.commit()
+                            info.append('     ... deleted.')
                         except:
                             self.db.rollback()
+                            info.append('     ... delete failed, rolled back.')
                         if assembly.oid in componentz:
                             refresh_assemblies.append(assembly)
                 flows = self.get_internal_flows_of(obj)
@@ -1595,8 +1607,10 @@ class UberORB(object):
                         self.db.delete(flow)
                         try:
                             self.db.commit()
+                            info.append('     ... deleted.')
                         except:
                             self.db.rollback()
+                            info.append('     ... delete failed, rolled back.')
             if isinstance(obj, self.classes['Requirement']):
                 # delete any related Relation and ParameterRelation objects
                 rel = obj.computable_form
@@ -1613,8 +1627,10 @@ class UberORB(object):
                     self.db.delete(rel)
                     try:
                         self.db.commit()
+                        info.append('     ... deleted.')
                     except:
                         self.db.rollback()
+                        info.append('     ... delete failed, rolled back.')
                     # computable_form -> require recompute
                     recompute_required = True
                 # if its oid is in req_allocz, remove it
@@ -1631,12 +1647,20 @@ class UberORB(object):
             creator = getattr(obj, 'creator', None)
             if creator == local_user:
                 # if local_user created obj, add it to trash
+                # TODO:  use trash to enable undo of delete ...
                 trash[obj.oid] = serialize(self, [obj])
-                self.db.delete(obj)
-                try:
-                    self.db.commit()
-                except:
-                    self.db.rollback()
+            info.append('   obj id: {}, name: {} (oid "{}")'.format(
+                                        getattr(obj, 'id', 'no id'),
+                                        getattr(obj, 'name', 'no name'),
+                                        obj.oid))
+            info.append('   attempting to delete ...')
+            self.db.delete(obj)
+            try:
+                self.db.commit()
+                info.append('     ... object deleted.')
+            except:
+                self.db.rollback()
+                info.append('     ... delete failed, rolled back.')
         self.log.debug(' - objs deleted:')
         for text in info:
             self.log.debug(text)
