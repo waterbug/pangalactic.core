@@ -950,6 +950,7 @@ class UberORB(object):
                 for pid in ['m', 'P', 'R_D']:
                     if not parameterz[obj.oid].get(pid):
                          add_parameter(obj.oid, pid)
+                recompute_required = True
             elif cname == 'ProjectSystemUsage':
                 if not new:
                     # find all allocations to this PSU and refresh them ...
