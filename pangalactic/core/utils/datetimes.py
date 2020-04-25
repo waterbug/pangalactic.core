@@ -10,6 +10,9 @@ import pytz
 # tzlocal
 from tzlocal import get_localzone
 
+
+PGEF_FILE_DATETIME_FMT = '%Y-%m-%d-%H-%M'
+
 def dtstamp():
     """
     Generate a naive datetime stamp for the current date and time.
@@ -18,6 +21,15 @@ def dtstamp():
     @rtype:   C{datetime}
     """
     return datetime.utcnow()
+
+def file_dts():
+    """
+    Generate datetime stamp string that can be used in a file name.
+
+    @return:  a datetime stamp string
+    @rtype:   C{str}
+    """
+    return datetime.utcnow().strftime(PGEF_FILE_DATETIME_FMT)
 
 def to_local_tz(naive_utc_dt):
     """

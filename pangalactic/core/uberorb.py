@@ -23,7 +23,8 @@ from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
-from pangalactic.core.entity      import (dmz, load_dmz, save_dmz, schemaz,
+from pangalactic.core.entity      import (dmz, load_dmz, save_dmz,
+                                          schemaz, load_schemaz, save_schemaz,
                                           load_entz, save_entz,
                                           load_ent_histz, save_ent_histz)
 from pangalactic.core.registry    import PanGalacticRegistry
@@ -37,7 +38,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           _compute_pval,
                                           compute_requirement_margin,
                                           data_elementz, de_defz,
-                                          get_parameter_id,
+                                          get_dval, get_parameter_id,
                                           load_data_elementz,
                                           save_data_elementz,
                                           load_parmz, save_parmz,
@@ -52,7 +53,7 @@ from pangalactic.core.serializers import serialize, deserialize
 from pangalactic.core.test        import data as test_data_mod
 from pangalactic.core.test        import vault as test_vault_mod
 from pangalactic.core.test.utils  import gen_test_dvals, gen_test_pvals
-from pangalactic.core.utils.datetimes import dtstamp
+from pangalactic.core.utils.datetimes import dtstamp, file_dts
 from pangalactic.core.log         import get_loggers
 from pangalactic.core.validation  import get_assembly
 from functools import reduce
@@ -158,13 +159,6 @@ class UberORB(object):
             app_state = deepcopy(state)
         read_state(os.path.join(pgx_home, 'state'))
         state.update(app_state)
-        # ### NOTE:  any app preset state overrides current state
-        # e.g., if there are any app schemas or DataMatrix instances set by the
-        # app, they are update here ...
-        if state.get('schemaz'):
-            schemaz.update(state['schemaz'])
-        if state.get('dmz'):
-            dmz.update(state['dmz'])
         # --------------------------------------------------------------------
         # Saved prefs and trash are read here; will be overwritten by
         # any new prefs and trash set at runtime.
@@ -280,6 +274,15 @@ class UberORB(object):
         # [3] load (and update) ref data ... note that this must be done AFTER
         #     config and state have been created and updated
         self.load_reference_data()
+        # ---------------------------------------------------------------------
+        # ### NOTE:  any app preset state overrides current state and/or
+        # reference data ...  e.g., if there are any app schemas or DataMatrix
+        # instances set by the app, they are updated here ...
+        if state.get('schemaz'):
+            schemaz.update(state['schemaz'])
+        if state.get('dmz'):
+            dmz.update(state['dmz'])
+        # ---------------------------------------------------------------------
         self._load_diagramz()
         # create 'role_product_types' cache
         self.role_product_types = {}
@@ -318,11 +321,13 @@ class UberORB(object):
         parameters_path = os.path.join(self.home, 'parameters.json')
         ents_path = os.path.join(self.home, 'ents.json')
         ent_hists_path = os.path.join(self.home, 'ent_hists.json')
+        schemas_path = os.path.join(self.home, 'schemas.json')
         dms_path = os.path.join(self.home, 'dms.json')
         save_data_elementz(data_elements_path)
         save_parmz(parameters_path)
         save_entz(ents_path)
         save_ent_histz(ent_hists_path)
+        save_schemaz(schemas_path)
         save_dmz(dms_path)
         return self.home
 
@@ -359,8 +364,11 @@ class UberORB(object):
         Serialize the entire db and dump to `vault/db.yaml`.
         """
         self.log.info('* dump_db()')
+        dts = file_dts()
+        json_fname = 'db-dump-' + dts + '.json'
+        yaml_fname = 'db-dump-' + dts + '.yaml'
         if fmt == 'json':
-            f = open(os.path.join(self.vault, 'db.json'), 'w')
+            f = open(os.path.join(self.vault, json_fname), 'w')
             f.write(json.dumps(serialize(
                     self, self.get_all_subtypes('Identifiable')),
                     separators=(',', ':'),
@@ -368,7 +376,7 @@ class UberORB(object):
             f.close()
         elif fmt == 'yaml':
             self.log.info('  dumping database to yaml file ...')
-            f = open(os.path.join(self.vault, 'db.yaml'), 'w')
+            f = open(os.path.join(self.vault, yaml_fname), 'w')
             f.write(yaml.safe_dump(serialize(
                     self, self.get_all_subtypes('Identifiable'))))
             f.close()
@@ -665,11 +673,13 @@ class UberORB(object):
         parms_path = os.path.join(self.home, 'parameters.json')
         ents_path = os.path.join(self.home, 'ents.json')
         ent_hists_path = os.path.join(self.home, 'ent_hists.json')
+        schemas_path = os.path.join(self.home, 'schemas.json')
         dms_path = os.path.join(self.home, 'dms.json')
         load_data_elementz(data_elementz_path)
         load_parmz(parms_path)
         load_entz(ents_path)
         load_ent_histz(ent_hists_path)
+        load_schemaz(schemas_path)
         load_dmz(dms_path)
         self.recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
@@ -1115,7 +1125,12 @@ class UberORB(object):
         self.log.debug('  current_id_parts: {}'.format(str(current_id_parts)))
         if current_id_parts[-1] in hw_id_suffixes:
             hw_id_suffixes.remove(current_id_parts[-1])
-        owner_id = getattr(obj.owner, 'id', '')
+        # if the 'Vendor' data element has a non-blank value, the owner id is
+        # set to 'Vendor'
+        if get_dval(obj.oid, 'Vendor'):
+            owner_id = 'Vendor'
+        else:
+            owner_id = getattr(obj.owner, 'id', 'Owner-Unknown')
         self.log.debug('  owner_id: {}'.format(owner_id))
         pt_abbr = getattr(obj.product_type, 'abbreviation', 'TBD') or 'TBD'
         self.log.debug('  pt_abbr: {}'.format(pt_abbr))

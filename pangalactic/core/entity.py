@@ -17,6 +17,18 @@ from pangalactic.core.parametrics     import (de_defz, parm_defz,
                                               set_dval, set_pval)
 from pangalactic.core.utils.datetimes import dtstamp
 
+# dispatcher (Louie)
+from louie import dispatcher
+
+
+class logger:
+    def info(self, s):
+        dispatcher.send(signal='log info msg', msg=s)
+    def debug(self, s):
+        dispatcher.send(signal='log debug msg', msg=s)
+
+log = logger()
+
 # -----------------------------------------------------------------------
 # ENTITY-RELATED CACHES
 # -----------------------------------------------------------------------
@@ -52,26 +64,25 @@ def load_entz(json_path):
     """
     Load the `entz` dict from json file.
     """
-    # log.debug('* _load_entz() ...')
+    log.debug('* load_entz() ...')
     if os.path.exists(json_path):
         with open(json_path) as f:
             entz.update(json.loads(f.read()))
-        # log.debug('  - entz cache loaded.')
+        log.debug('  - entz cache loaded.')
     else:
-        # log.debug('  - "ents.json" was not found.')
-        pass
+        log.debug('  - "ents.json" was not found.')
 
 def save_entz(json_path):
     """
     Save `entz` dict to json file.
     """
-    # log.debug('* _save_entz() ...')
+    log.debug('* _save_entz() ...')
     try:
         with open(json_path, 'w') as f:
             ses = [e.serialize() for e in entz.values()]
             f.write(json.dumps(ses, separators=(',', ':'),
                                indent=4, sort_keys=True))
-        # log.debug('  ... ents.json file written.')
+        log.debug('  ... ents.json file written.')
     except:
         pass
 
@@ -95,28 +106,28 @@ def load_ent_histz(json_path):
     """
     Load the `ent_histz` dict from json file.
     """
-    # log.debug('* _load_ent_histz() ...')
+    log.debug('* _load_ent_histz() ...')
     if os.path.exists(json_path):
         with open(json_path) as f:
             ent_histz.update(json.loads(f.read()))
-        # log.debug('  - ent_histz cache loaded.')
+        log.debug('  - ent_histz cache loaded.')
     else:
-        # log.debug('  - "ent_hists.json" was not found.')
+        log.debug('  - "ent_hists.json" was not found.')
         pass
 
 def save_ent_histz(json_path):
     """
     Save `ent_histz` dict to json file.
     """
-    # log.debug('* _save_ent_histz() ...')
+    log.debug('* _save_ent_histz() ...')
     try:
         with open(json_path, 'w') as f:
             f.write(json.dumps(ent_histz, separators=(',', ':'),
                                indent=4, sort_keys=True))
-        # log.debug('  ... ent_hists.json file written.')
+        log.debug('  ... ent_hists.json file written.')
     except:
-        # log.debug('  ... unable to write to path "{}".'.format(
-                                                        # json_path))
+        log.debug('  ... unable to write to path "{}".'.format(
+                                                        json_path))
         pass
 
 
@@ -314,7 +325,38 @@ dmz = {}
 # format:  {schema_name : [colname1, colname2, ...],
 #           ...}
 # -------------------------------------------------------
-schemaz = {}
+schemaz = {'generic': ['system_name', 'assembly_level',
+                       'additional_information']}
+
+def load_schemaz(json_path):
+    """
+    Load the `schemaz` dict from json file.  (Restores all DataMatrix
+    instances.)
+
+    Args:
+        schemaz_path (str):  location of file to read
+    """
+    log.debug('* load_schemaz() ...')
+    if os.path.exists(json_path):
+        with open(json_path) as f:
+            schemaz.update(json.loads(f.read()))
+        log.debug('  - schemaz cache loaded.')
+    else:
+        log.debug('  - "schemas.json" was not found.')
+        pass
+
+def save_schemaz(json_path):
+    """
+    Save `schemaz` dict (all DataMatrix instances) to json file.
+
+    Args:
+        schemaz_path (str):  location of file to write
+    """
+    log.debug('* save_schemaz() ...')
+    with open(json_path, 'w') as f:
+        f.write(json.dumps(schemaz, separators=(',', ':'),
+                           indent=4, sort_keys=True))
+    log.debug('  ... schemas.json file written.')
 
 def load_dmz(json_path):
     """
