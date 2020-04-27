@@ -78,7 +78,7 @@ def save_entz(json_path):
     """
     Save `entz` dict to json file.
     """
-    log.debug('* _save_entz() ...')
+    log.debug('* save_entz() ...')
     try:
         with open(json_path, 'w') as f:
             ses = [e.serialize_meta() for e in entz.values()]
@@ -363,7 +363,8 @@ def load_schemaz(json_path):
     if os.path.exists(json_path):
         with open(json_path) as f:
             schemaz.update(json.loads(f.read()))
-        log.debug('  - schemaz cache loaded.')
+        nsch = len(schemaz)
+        log.debug(f'  - {nsch} schemas loaded into schemaz cache.')
     else:
         log.debug('  - "schemas.json" was not found.')
         pass
@@ -376,10 +377,11 @@ def save_schemaz(json_path):
         schemaz_path (str):  location of file to write
     """
     log.debug('* save_schemaz() ...')
+    nsch = len(schemaz)
     with open(json_path, 'w') as f:
         f.write(json.dumps(schemaz, separators=(',', ':'),
                            indent=4, sort_keys=True))
-    log.debug('  ... schemas.json file written.')
+    log.debug(f'  ... {nsch} schemas saved to schemas.json.')
 
 def load_dmz(json_path):
     """
@@ -389,7 +391,7 @@ def load_dmz(json_path):
     Args:
         dmz_path (str):  location of file to read
     """
-    # log.debug('* _load_dmz() ...')
+    log.debug('* load_dmz() ...')
     if os.path.exists(json_path):
         with open(json_path) as f:
             ser_dms = json.loads(f.read())
@@ -402,9 +404,10 @@ def load_dmz(json_path):
                           create_datetime=sdm.get('create_datetime', ''),
                           mod_datetime=sdm.get('mod_datetime', ''))
                     for oid, sdm in ser_dms.items()})
-        # log.debug('  - dmz cache loaded.')
+        ndmz = len(dmz)
+        log.debug(f'  - {ndmz} DataMatrix instances loaded into dmz cache.')
     else:
-        # log.debug('  - "dms.json" was not found.')
+        log.debug('  - "dms.json" was not found.')
         pass
 
 def save_dmz(json_path):
@@ -414,7 +417,7 @@ def save_dmz(json_path):
     Args:
         dmz_path (str):  location of file to write
     """
-    # log.debug('* _save_dmz() ...')
+    log.debug('* save_dmz() ...')
     ser_dms = {oid: dict(project_id=dm.project_id,
                          ents=[e.oid for e in dm],
                          level_map=dm.level_map,
@@ -423,10 +426,11 @@ def save_dmz(json_path):
                          create_datetime=dm.create_datetime,
                          mod_datetime=dm.mod_datetime)
                for oid, dm in dmz.items()}
+    ndms = len(ser_dms)
     with open(json_path, 'w') as f:
         f.write(json.dumps(ser_dms, separators=(',', ':'),
                            indent=4, sort_keys=True))
-    # log.debug('  ... dms.json file written.')
+    log.debug(f'  ... {ndms} DataMatrix instances saved to dms.json.')
 
 
 class DataMatrix(UserList):

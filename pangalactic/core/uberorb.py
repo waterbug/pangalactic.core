@@ -841,21 +841,30 @@ class UberORB(object):
              ...}
         """
         self.log.debug('* create_de_defz')
-        # check for data element definition structures in state['de_defz']
-        new_ded_objs = []
+        # check for data element definition structures in state['de_defz'] --
+        # these can be introduced by the app state
+        new_dedef_objs = []
         self.log.debug('  - checking for de defs in state["de_defz"] ...')
-        new_state_ded_ids = []
+        new_state_dedef_ids = []
+        # NEW: check for labels even if the dedef objects are not new, so that
+        # labels can be updated by new app state at startup ...
+        state_dedef_labels = {}
         if state.get('de_defz'):
             ded_ids = self.get_ids('DataElementDefinition')
-            new_state_ded_ids = [deid for deid in state['de_defz']
-                                  if deid not in ded_ids]
-            if new_state_ded_ids:
-                # if any are found, create DataElementDefinitions from them
+            new_state_dedef_ids = [deid for deid in state['de_defz']
+                                   if deid not in ded_ids]
+            state_dedef_labels.update({deid: de_def.get('label')
+                                for deid, de_def in state['de_defz'].items()
+                                if de_def.get('label')})
+            if new_state_dedef_ids:
+                # if any are found, create DataElementDefinitions from them,
+                # making sure to save their 'label' fields separately since
+                # they are not yet supported by DataElementDefinition ...
                 dt = dtstamp()
                 admin = orb.get('pgefobjects:admin')
                 DataElementDefinition = self.classes.get(
                                                     'DataElementDefinition')
-                for deid in new_state_ded_ids:
+                for deid in new_state_dedef_ids:
                     ded = state['de_defz'][deid]
                     ded_oid = 'pgef:DataElementDefinition.' + deid
                     dt = uncook_datetime(ded.get('mod_datetime')) or dt
@@ -868,9 +877,9 @@ class UberORB(object):
                                                 description=descr,
                                                 create_datetime=dt,
                                                 mod_datetime=dt)
-                    new_ded_objs.append(ded_obj)
-            if new_ded_objs:
-                self.save(new_ded_objs)
+                    new_dedef_objs.append(ded_obj)
+            if new_dedef_objs:
+                self.save(new_dedef_objs)
         de_def_objs = self.get_by_type('DataElementDefinition')
         de_defz.update(
             {de_def_obj.id :
@@ -883,11 +892,14 @@ class UberORB(object):
               )
         # update state_dedz with labels, if they have any
         # TODO:  add labels as "external names" in p.core.meta
-        if new_state_ded_ids:
-            for deid in new_state_ded_ids:
-                ded = state['de_defz'][deid]
-                if de_defz.get(deid) and ded.get('label'):
-                    de_defz[deid]['label'] = ded['label']
+        # if new_state_dedef_ids:
+            # for deid in new_state_dedef_ids:
+                # ded = state['de_defz'][deid]
+                # if de_defz.get(deid) and ded.get('label'):
+                    # de_defz[deid]['label'] = ded['label']
+        if state_dedef_labels:
+            for deid in state_dedef_labels:
+                de_defz[deid]['label'] = state_dedef_labels[deid]
         self.log.debug('  - data element defs created: {}'.format(
                                                 str(list(de_defz.keys()))))
 
