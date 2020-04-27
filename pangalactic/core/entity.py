@@ -14,7 +14,9 @@ from pangalactic.core.parametrics     import (de_defz, parm_defz,
                                               data_elementz,
                                               parameterz,
                                               get_dval, get_pval,
-                                              set_dval, set_pval)
+                                              set_dval, set_pval,
+                                              serialize_des,
+                                              serialize_parms)
 from pangalactic.core.utils.datetimes import dtstamp
 
 # dispatcher (Louie)
@@ -79,7 +81,7 @@ def save_entz(json_path):
     log.debug('* _save_entz() ...')
     try:
         with open(json_path, 'w') as f:
-            ses = [e.serialize() for e in entz.values()]
+            ses = [e.serialize_meta() for e in entz.values()]
             f.write(json.dumps(ses, separators=(',', ':'),
                                indent=4, sort_keys=True))
         log.debug('  ... ents.json file written.')
@@ -307,6 +309,27 @@ class Entity(MutableMapping):
         for k, v in dict(*args, **kwargs).iteritems():
             self[k] = v
 
+    def serialize_meta(self):
+        """
+        Serialize only the metadata for the Entity.  (Used when saving the
+        'entz' cache.)
+        """
+        d = dict(oid=self.oid, owner=self.get('owner', ''),
+                 creator=self.get('creator', ''),
+                 modifier=self.get('modifier', ''),
+                 create_datetime=self.get('create_datetime', ''),
+                 mod_datetime=self.get('mod_datetime', ''))
+        return d
+
+    def serialize(self):
+        """
+        Serialize the complete "contents" of the Entity.  (Used when exchanging
+        complete entities, such as in messages between the client and server.)
+        """
+        d = self.serialize_meta()
+        d.update(serialize_des(self.oid))
+        d.update(serialize_parms(self.oid))
+        return d
 
 # -----------------------------------------------------------------------
 # DATAMATRIX-RELATED CACHES #################################################
@@ -427,6 +450,7 @@ class DataMatrix(UserList):
         level_map (dict):  maps entity oids to assembly levels (ints > 0)
         project_id (str): id a project (owner of the DataMatrix)
         schema (list): list of data element ids and parameter ids
+        schema_name (str): name of a schema for lookup in 'schemaz' cache
     """
     def __init__(self, *data, project_id='', schema_name=None, level_map=None,
                  creator=None, modifier=None, create_datetime=None,
@@ -481,7 +505,7 @@ class DataMatrix(UserList):
 
     @property
     def oid(self):
-        return '-'.join([self.project.id, self.schema_name])
+        return '-'.join([self.project_id, self.schema_name])
 
     def row(self, i):
         """
