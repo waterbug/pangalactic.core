@@ -554,20 +554,24 @@ class DataMatrix(UserList):
         self.level_map[e.oid] = level
         return e
 
-    def insert_new_row(self, i, child=False):
+    def insert_new_row(self, i, child_of=False):
         """
         Inserts an empty Entity with a new oid, in the ith position, using
         'child' flag to compute the level.  To support
         GridTreeItem.insertChildren(), use child=True.
+
+        Keyword Args:
+            child_of (Entity):  the parent Entity (or None if same level as
+                preceding row)
         """
         e = Entity()
         self.insert(i, e)
-        if child:
-            # assembly level 1 higher than preceding row if a child
-            level = (self.level_map.get(self[i-1].get('oid')) or 0) + 1
-        else:
+        if child_of is False:
             # assembly level same as preceding row if a peer
             level = self.level_map.get(self[i-1].get('oid')) or 0
+        else:
+            # assembly level 1 higher than the specified "child_of"
+            level = (self.level_map.get(self[i-1].get('oid')) or 0) + 1
         self.level_map[e.oid] = level
         return e
 
