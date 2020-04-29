@@ -277,7 +277,7 @@ ONE2M = {
 PGXN_HIDE = list(ONE2M.keys()) + list(M2M.keys())
 
 # PGXN_MASK:  Fields that should not be displayed for the specified classes in
-# the pangalaxian object editor
+# the object editor
 PGXN_MASK = dict(
     ParameterDefinition=(PGXN_HIDE + ['base_parameters', 'computed_by_default',
                          'generating_function', 'used_in_disciplines']),
@@ -286,6 +286,13 @@ PGXN_MASK = dict(
                  'specification_number']),
     Test=(PGXN_HIDE + ['components', 'fsc_code', 'product_type'])
     )
+
+# PGXN_DATA_VIEW:  Data Elements that can be displayed in the object editor
+PGXN_DATA_VIEW = [
+                  'TRL',
+                  'directionality',
+                  'Vendor'
+                  ]
 
 # PGXN_HIDE_PARMS:  Subclasses of Modelable for which 'parameters' and 'data'
 # panels should be hidden

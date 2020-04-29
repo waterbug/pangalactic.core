@@ -34,7 +34,7 @@ log = logger()
 # -----------------------------------------------------------------------
 # ENTITY-RELATED CACHES
 # -----------------------------------------------------------------------
-# entz:        persistent** cache of entities (dicts)
+# entz:        persistent** cache of entity metadata
 #              ** persisted in the file 'ents.json' in the
 #              application home directory -- see the orb functions
 #              `save_entz` and `load_entz`
@@ -69,7 +69,9 @@ def load_entz(json_path):
     log.debug('* load_entz() ...')
     if os.path.exists(json_path):
         with open(json_path) as f:
-            entz.update(json.loads(f.read()))
+            data = f.read()
+            if data:
+                entz.update(json.loads(data))
         log.debug('  - entz cache loaded.')
     else:
         log.debug('  - "ents.json" was not found.')
@@ -81,12 +83,14 @@ def save_entz(json_path):
     log.debug('* save_entz() ...')
     try:
         with open(json_path, 'w') as f:
-            ses = [e.serialize_meta() for e in entz.values()]
-            f.write(json.dumps(ses, separators=(',', ':'),
-                               indent=4, sort_keys=True))
+            if entz:
+                f.write(json.dumps(entz, separators=(',', ':'),
+                                   indent=4, sort_keys=True))
+            else:
+                log.debug('  ... entz was empty.')
         log.debug('  ... ents.json file written.')
     except:
-        pass
+        log.debug('  ... exception encountered.')
 
 # ent_lookupz  runtime cache for reverse lookup of Entity instances
 #              maps tuples of values to entity oids
@@ -108,10 +112,12 @@ def load_ent_histz(json_path):
     """
     Load the `ent_histz` dict from json file.
     """
-    log.debug('* _load_ent_histz() ...')
+    log.debug('* load_ent_histz() ...')
     if os.path.exists(json_path):
         with open(json_path) as f:
-            ent_histz.update(json.loads(f.read()))
+            data = f.read()
+            if data:
+                ent_histz.update(json.loads(data))
         log.debug('  - ent_histz cache loaded.')
     else:
         log.debug('  - "ent_hists.json" was not found.')
@@ -121,11 +127,14 @@ def save_ent_histz(json_path):
     """
     Save `ent_histz` dict to json file.
     """
-    log.debug('* _save_ent_histz() ...')
+    log.debug('* save_ent_histz() ...')
     try:
         with open(json_path, 'w') as f:
-            f.write(json.dumps(ent_histz, separators=(',', ':'),
-                               indent=4, sort_keys=True))
+            if ent_histz:
+                f.write(json.dumps(ent_histz, separators=(',', ':'),
+                                   indent=4, sort_keys=True))
+            else:
+                log.debug('  ... ent_histz was empty.')
         log.debug('  ... ent_hists.json file written.')
     except:
         log.debug('  ... unable to write to path "{}".'.format(
@@ -332,7 +341,7 @@ class Entity(MutableMapping):
         return d
 
 # -----------------------------------------------------------------------
-# DATAMATRIX-RELATED CACHES #################################################
+# DATAMATRIX-RELATED CACHES #############################################
 # -----------------------------------------------------------------------
 
 # dmz:         persistent** cache of DataMatrix instances
@@ -362,7 +371,9 @@ def load_schemaz(json_path):
     log.debug('* load_schemaz() ...')
     if os.path.exists(json_path):
         with open(json_path) as f:
-            schemaz.update(json.loads(f.read()))
+            data = f.read()
+            if data:
+                schemaz.update(json.loads(data))
         nsch = len(schemaz)
         log.debug(f'  - {nsch} schemas loaded into schemaz cache.')
     else:
@@ -381,7 +392,7 @@ def save_schemaz(json_path):
     with open(json_path, 'w') as f:
         f.write(json.dumps(schemaz, separators=(',', ':'),
                            indent=4, sort_keys=True))
-    log.debug(f'  ... {nsch} schemas saved to schemas.json.')
+    log.debug(f'  ... {nsch} schema(s) saved to schemas.json.')
 
 def load_dmz(json_path):
     """
@@ -394,18 +405,24 @@ def load_dmz(json_path):
     log.debug('* load_dmz() ...')
     if os.path.exists(json_path):
         with open(json_path) as f:
-            ser_dms = json.loads(f.read())
-        dmz.update({oid: DataMatrix([
-                          Entity(oid=oid) for oid in sdm.get('ents', [])],
-                          project_id=sdm.get('project_id', ''),
-                          level_map=sdm.get('level_map', {}),
-                          creator=sdm.get('creator', ''),
-                          modifier=sdm.get('modifier', ''),
-                          create_datetime=sdm.get('create_datetime', ''),
-                          mod_datetime=sdm.get('mod_datetime', ''))
-                    for oid, sdm in ser_dms.items()})
+            ser_dms = json.loads(f.read()) or {}
+        try:
+            deser_dms = {oid: DataMatrix([
+                              Entity(oid=oid) for oid in sdm.get('ents', [])],
+                              project_id=sdm['project_id'],
+                              schema_name=sdm['schema_name'],
+                              level_map=sdm['level_map'],
+                              creator=sdm['creator'],
+                              modifier=sdm['modifier'],
+                              create_datetime=sdm['create_datetime'],
+                              mod_datetime=sdm['mod_datetime'])
+                         for oid, sdm in ser_dms.items()}
+        except:
+            log.debug('  - Parsing of dms.json failed.')
+            return
+        dmz.update(deser_dms)
         ndmz = len(dmz)
-        log.debug(f'  - {ndmz} DataMatrix instances loaded into dmz cache.')
+        log.debug(f'  - {ndmz} DataMatrix instance(s) loaded into dmz cache.')
     else:
         log.debug('  - "dms.json" was not found.')
         pass
@@ -419,10 +436,11 @@ def save_dmz(json_path):
     """
     log.debug('* save_dmz() ...')
     ser_dms = {oid: dict(project_id=dm.project_id,
+                         schema_name=dm.schema_name,
                          ents=[e.oid for e in dm],
                          level_map=dm.level_map,
-                         creator=str(dm.creator),
-                         modifier=str(dm.modifier),
+                         creator=dm.creator,
+                         modifier=dm.modifier,
                          create_datetime=dm.create_datetime,
                          mod_datetime=dm.mod_datetime)
                for oid, dm in dmz.items()}
@@ -430,7 +448,7 @@ def save_dmz(json_path):
     with open(json_path, 'w') as f:
         f.write(json.dumps(ser_dms, separators=(',', ':'),
                            indent=4, sort_keys=True))
-    log.debug(f'  ... {ndms} DataMatrix instances saved to dms.json.')
+    log.debug(f'  ... {ndms} DataMatrix instance(s) saved to dms.json.')
 
 
 class DataMatrix(UserList):
@@ -539,7 +557,8 @@ class DataMatrix(UserList):
     def insert_new_row(self, i, child=False):
         """
         Inserts an empty Entity with a new oid, in the ith position, using
-        'child' flag to compute the level.
+        'child' flag to compute the level.  To support
+        GridTreeItem.insertChildren(), use child=True.
         """
         e = Entity()
         self.insert(i, e)

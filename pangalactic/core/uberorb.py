@@ -24,8 +24,8 @@ from pangalactic.core             import state, read_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
 from pangalactic.core.entity      import (dmz, load_dmz, save_dmz,
+                                          entz, load_entz, save_entz,
                                           schemaz, load_schemaz, save_schemaz,
-                                          load_entz, save_entz,
                                           load_ent_histz, save_ent_histz)
 from pangalactic.core.registry    import PanGalacticRegistry
 from pangalactic.core.utils.meta  import uncook_datetime
@@ -691,10 +691,14 @@ class UberORB(object):
         dms_path = os.path.join(self.home, 'dms.json')
         load_data_elementz(data_elementz_path)
         load_parmz(parms_path)
+        self.log.debug('* loading entz ...')
         load_entz(ents_path)
+        self.log.debug('  entz: {}'.format(str(entz)))
         load_ent_histz(ent_hists_path)
         load_schemaz(schemas_path)
+        self.log.debug('* loading dmz ...')
         load_dmz(dms_path)
+        self.log.debug('  dmz: {}'.format(str(dmz)))
         self.recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
         self.log.debug('  + checking for updates to parameter definitions ...')

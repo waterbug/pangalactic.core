@@ -32,11 +32,26 @@ PGEF "DataGrid" Widget
   - a dict that is semantically analogous to a domain object (and may be
     "linked" to one), and whose items are parameters and data elements
   - has a unique "oid", same as an object, so can also have parameters
+  - history tracking (for undo):
+    + `ent_histz` cache
+    + edits datetime-stamped (`mod_datetime` of the parameter or data element)
+      and are tracked by user ('modifier')
   - future:
-    + if mirroring a Product (same oid), parameter fields will be synced
+    + if "mirroring" a Product (same oid), items are automatically synced with
+      the Product, since both the Product and the Entity access their data
+      element and parameter values by lookup in the same caches
     + can reference a ProductType and use associated parameters / templates
 
-* DataMatrix (grid: rows and columns)
+* DataMatrix (a list of entities ... equivalent to a grid: rows and columns)
+  - a DataMatrix is basically a way of saying "show me *this* information about
+    *these* entities".  The information to be shown is specified by the
+    'schema' of the DataMatrix -- conceptually, a "view" -- which specifies the
+    columns (ids of data elements and parameters) to be displayed.  The
+    entities do not all have to have the same set of data elements and
+    parameters, nor do they have to have everything that is in the DataMatrix
+    schema -- if they are missing anything in the schema, that cell will just
+    be displayed as empty (and the DataGrid will enable it to be assigned a
+    value, updating the underlying Entity).
   - attrs:
     + 'oid': ([`project_id`]-[`system_id`]) -- unique
     + `level_map`:  maps entity oids to assembly level (an integer) --
@@ -49,14 +64,9 @@ PGEF "DataGrid" Widget
     + 'schema': list of data element ids
     + 'data': its internal list, a list of entity oids
   - methods:
-    + serialize (returns a list of dicts)
-    + dump (save to a .tsv file)
-    + load (read from a .tsv file)
-  - history tracking (for undo):
-    + entity-level history:  `ent_histz` cache
-    + edits are tracked by cell for each user
-    + cell-specific undo (as long as the edit is not "obe" -- i.e. no other
-      edits have a later time-date stamp)
+    + "cell-specific" undo based on Entity 'undo' method, which uses the
+      Entity's history (as long as the edit is not "obe" -- i.e. no other edits
+      have a later datetime stamp)
 
 * GridTreeView(QTreeView)
   - cells addressable by row + column
