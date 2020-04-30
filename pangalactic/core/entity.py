@@ -469,7 +469,7 @@ class DataMatrix(UserList):
 
     Attributes:
         data (iterable):  an iterable of entities
-        level_map (dict):  maps entity oids to assembly levels (ints > 0)
+        level_map (dict):  maps entity oids to assembly levels (1-based)
         project_id (str): id a project (owner of the DataMatrix)
         schema (list): list of data element ids and parameter ids
         schema_name (str): name of a schema for lookup in 'schemaz' cache
@@ -486,7 +486,7 @@ class DataMatrix(UserList):
         Keyword Args:
             project_id (str): id of a project (owner of the DataMatrix)
             schema_name (str): name of a schema for lookup in 'schemaz' cache
-            level_map (dict):  maps entity oids to assembly levels (ints > 0)
+            level_map (dict):  maps entity oids to assembly levels (1-based)
             creator (str):  oid of the entity's creator
             modifier (str):  oid of the entity's last modifier
             create_datetime (str):  iso-format string of creation datetime
@@ -547,10 +547,10 @@ class DataMatrix(UserList):
         self.append(e)
         if child:
             # assembly level 1 higher than preceding row if a child
-            level = (self.level_map.get(self[i-1].get('oid')) or 0) + 1
+            level = (self.level_map.get(self[i-1].get('oid')) or 1) + 1
         else:
             # assembly level same as preceding row if a peer
-            level = self.level_map.get(self[i-1].get('oid')) or 0
+            level = self.level_map.get(self[i-1].get('oid')) or 1
         self.level_map[e.oid] = level
         return e
 
@@ -568,10 +568,10 @@ class DataMatrix(UserList):
         self.insert(i, e)
         if child_of is False:
             # assembly level same as preceding row if a peer
-            level = self.level_map.get(self[i-1].get('oid')) or 0
+            level = self.level_map.get(self[i-1].get('oid')) or 1
         else:
             # assembly level 1 higher than the specified "child_of"
-            level = (self.level_map.get(self[i-1].get('oid')) or 0) + 1
+            level = (self.level_map.get(self[i-1].get('oid')) or 1) + 1
         self.level_map[e.oid] = level
         return e
 
@@ -594,6 +594,8 @@ class DataMatrix(UserList):
         if oid not in oids:
             return False
         del self[oids.index(oid)]
+        if oid in self.level_map:
+            del self.level_map[oid]
         return True
 
     # NOTE: this code is just a copy of the code in reports.py for MEL
