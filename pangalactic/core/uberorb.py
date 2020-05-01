@@ -1387,6 +1387,18 @@ class UberORB(object):
                         comp_port_oids)).all()
         return flows_from + flows_to
 
+    def get_all_port_flows(self, port):
+        """
+        For a Port instance, get all flows defined to or from it (gazintas and
+        gazoutas).
+
+        Args:
+            port (Port):  the specified Port
+        """
+        gazoutas = orb.search_exact(cname='Flow', start_port=port)
+        gazintas = orb.search_exact(cname='Flow', end_port=port)
+        return gazoutas + gazintas
+
     def get_objects_for_project(self, project):
         """
         Get all the objects relevant to the specified project, including
@@ -1596,7 +1608,40 @@ class UberORB(object):
                         self.db.rollback()
                         info.append('     ... delete failed, rolled back.')
             if isinstance(obj, self.classes['Product']):
-                # for Products, delete related acus, psus, and flows
+                # for Products, first delete related Flows, Ports, Acus, and
+                # ProjectSystemUsages
+                # NOTE: for flows, only need to worry about internal flows --
+                # if the deletion is allowed, all of the Product's usages in
+                # assemblies or projects have been already deleted, so there
+                # are no external flows
+                flows = self.get_internal_flows_of(obj)
+                if flows:
+                    for flow in flows:
+                        info.append('   id: {}, name: {} (oid {})'.format(
+                                                                    flow.id,
+                                                                    flow.name,
+                                                                    flow.oid))
+                        self.db.delete(flow)
+                        try:
+                            self.db.commit()
+                            info.append('     ... deleted.')
+                        except:
+                            self.db.rollback()
+                            info.append('     ... delete failed, rolled back.')
+                ports = obj.ports
+                if ports:
+                    for port in ports:
+                        info.append('   id: {}, name: {} (oid {})'.format(
+                                                                    port.id,
+                                                                    port.name,
+                                                                    port.oid))
+                        self.db.delete(port)
+                        try:
+                            self.db.commit()
+                            info.append('     ... deleted.')
+                        except:
+                            self.db.rollback()
+                            info.append('     ... delete failed, rolled back.')
                 psus = obj.projects_using_system
                 for psu in psus:
                     info.append('   id: {}, name: {} (oid {})'.format(psu.id,
@@ -1642,7 +1687,10 @@ class UberORB(object):
                             info.append('     ... delete failed, rolled back.')
                         if assembly.oid in componentz:
                             refresh_assemblies.append(assembly)
-                flows = self.get_internal_flows_of(obj)
+            if isinstance(obj, self.classes['Port']):
+                # for Ports, first delete all related Flows, both outgoing and
+                # incoming (in which it is the start or end)
+                flows = self.get_all_port_flows(obj)
                 if flows:
                     for flow in flows:
                         info.append('   id: {}, name: {} (oid {})'.format(
