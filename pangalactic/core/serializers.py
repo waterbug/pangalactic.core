@@ -151,12 +151,13 @@ def serialize(orb, objs, view=None, include_components=False,
                 datatype = schema['fields'][name]['range']
                 d[name] = cookers[datatype](getattr(obj, name))
         serialized.append(d)
-        if hasattr(obj, 'creator'):
+        if (hasattr(obj, 'creator') and obj.creator
+            and obj.creator is not obj):
             # for Modelables, creator and modifier must be included
-            if obj.creator:
-                person_objs.add(obj.creator)
-            if obj.modifier:
-                person_objs.add(obj.modifier)
+            person_objs.add(obj.creator)
+        if (hasattr(obj, 'modifier') and obj.modifier
+            and obj.modifier is not obj):
+            person_objs.add(obj.modifier)
         owner_org = getattr(obj, 'owner', None)
         if (owner_org and owner_org.oid != obj.oid
             and owner_org.oid not in org_oids):
