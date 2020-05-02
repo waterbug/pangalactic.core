@@ -1031,6 +1031,8 @@ def get_pval_from_str(oid, pid, str_val, units=None, local=True):
     try:
         radt = parm_defz[pid].get('range_datatype')
         if radt in ['int', 'float']:
+            # if null string or None, replace with zero
+            str_val = str_val or '0'
             dtype = DATATYPES.get(radt)
             num_fmt = prefs.get('numeric_format')
             if num_fmt == 'Thousands Commas' or not num_fmt:
