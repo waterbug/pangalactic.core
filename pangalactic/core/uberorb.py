@@ -1690,6 +1690,7 @@ class UberORB(object):
             if isinstance(obj, self.classes['Port']):
                 # for Ports, first delete all related Flows, both outgoing and
                 # incoming (in which it is the start or end)
+                skip_port = False
                 flows = self.get_all_port_flows(obj)
                 if flows:
                     for flow in flows:
@@ -1697,13 +1698,17 @@ class UberORB(object):
                                                                     flow.id,
                                                                     flow.name,
                                                                     flow.oid))
-                        self.db.delete(flow)
                         try:
+                            self.db.delete(flow)
                             self.db.commit()
                             info.append('     ... deleted.')
                         except:
                             self.db.rollback()
-                            info.append('     ... delete failed, rolled back.')
+                            info.append('     ... flow delete failed,')
+                            info.append('     port will not be deleted.')
+                            skip_port = True
+                if skip_port:
+                    continue
             if isinstance(obj, self.classes['Requirement']):
                 # delete any related Relation and ParameterRelation objects
                 rel = obj.computable_form
@@ -1716,6 +1721,9 @@ class UberORB(object):
                                 self.db.commit()
                             except:
                                 self.db.rollback()
+                                info.append('     ... ParameterRelation')
+                                info.append('         delete failed,')
+                                info.append('         rolled back.')
                     obj.computable_form = None
                     self.db.delete(rel)
                     try:
@@ -1723,7 +1731,8 @@ class UberORB(object):
                         info.append('     ... deleted.')
                     except:
                         self.db.rollback()
-                        info.append('     ... delete failed, rolled back.')
+                        info.append('     ... Relation')
+                        info.append('         delete failed, rolled back.')
                     # computable_form -> require recompute
                     recompute_required = True
                 # if its oid is in req_allocz, remove it
