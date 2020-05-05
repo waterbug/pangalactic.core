@@ -1180,6 +1180,29 @@ def compute_mev(oid, variable):
     else:
         return 0.0
 
+def get_flight_units(product_oid, assembly_oid, default=1):
+    """
+    Find the number of units of the specified product in the specified
+    assembly.
+
+    Args:
+        product_oid (str): the oid of the product
+        assembly_oid (str): the oid of the assembly in which the product is a
+            component
+
+    Keyword Args:
+        default (any): a value to be returned if the parameter is not found
+    """
+    # log.debug('* compute_margin()')
+    # log.debug('  using req_allocz: {}'.format(str(req_allocz)))
+    # find requirements allocated to the specified usage and constraining the
+    # specified variable
+    if assembly_oid in componentz:
+        for component in componentz[assembly_oid]:
+            if component['oid'] == product_oid:
+                return component['quantity']
+    return default
+
 def compute_margin(usage_oid, variable, default=0):
     """
     Compute the "Margin" for the specified variable (base parameter) at the

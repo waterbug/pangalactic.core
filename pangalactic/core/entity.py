@@ -10,6 +10,7 @@ from itertools       import chain
 from uuid            import uuid4
 
 # pangalactic
+from pangalactic.core                 import prefs
 from pangalactic.core.parametrics     import (de_defz, parm_defz,
                                               data_elementz,
                                               parameterz,
@@ -354,7 +355,8 @@ dmz = {}
 # schemaz:     persistent** cache of schemas (column views)
 #              ** persisted in the file 'schemas.json' in the
 #              application home directory
-# format:  {schema_name : [colname1, colname2, ...],
+# format:  {name1 : [colname1, colname2, ...],
+#           name2 : [colname3, colname4, ...],
 #           ...}
 # -------------------------------------------------------
 schemaz = {'generic': ['system_name', 'assembly_level',
@@ -410,7 +412,7 @@ def load_dmz(json_path):
             deser_dms = {oid: DataMatrix([
                               Entity(oid=oid) for oid in sdm.get('ents', [])],
                               project_id=sdm['project_id'],
-                              schema_name=sdm['schema_name'],
+                              name=sdm['name'],
                               level_map=sdm['level_map'],
                               creator=sdm['creator'],
                               modifier=sdm['modifier'],
@@ -436,7 +438,7 @@ def save_dmz(json_path):
     """
     log.debug('* save_dmz() ...')
     ser_dms = {oid: dict(project_id=dm.project_id,
-                         schema_name=dm.schema_name,
+                         name=dm.name,
                          ents=[e.oid for e in dm],
                          level_map=dm.level_map,
                          creator=dm.creator,
@@ -460,7 +462,7 @@ class DataMatrix(UserList):
 
     A DataMatrix's list ('data') contents and its metadata are cached in the
     `dmz` cache in which its key is its unique identifier ('oid'), which is
-    composed from the 'id' of its owner Project and its `schema_name` (which is
+    composed from the 'id' of its owner Project and its `name` (which is
     the key used to look up its schema in the `schemaz' cache).
 
     When a DataMatrix is instantiated, its initialization will first check the
@@ -470,13 +472,13 @@ class DataMatrix(UserList):
     Attributes:
         data (iterable):  an iterable of entities
         level_map (dict):  maps entity oids to assembly levels (1-based)
+        name (str): name (which may or may not exist in the 'schemaz' cache)
         project_id (str): id a project (owner of the DataMatrix)
         schema (list): list of data element ids and parameter ids
-        schema_name (str): name of a schema for lookup in 'schemaz' cache
     """
-    def __init__(self, *data, project_id='', schema_name=None, level_map=None,
-                 creator=None, modifier=None, create_datetime=None,
-                 mod_datetime=None):
+    def __init__(self, *data, project_id='', name=None, schema=None,
+                 level_map=None, creator=None, modifier=None,
+                 create_datetime=None, mod_datetime=None):
         """
         Initialize.
 
@@ -485,7 +487,8 @@ class DataMatrix(UserList):
 
         Keyword Args:
             project_id (str): id of a project (owner of the DataMatrix)
-            schema_name (str): name of a schema for lookup in 'schemaz' cache
+            name (str): name (which may or may not exist in 'schemaz')
+            schema (list): list of data element ids and parameter ids
             level_map (dict):  maps entity oids to assembly levels (1-based)
             creator (str):  oid of the entity's creator
             modifier (str):  oid of the entity's last modifier
@@ -493,8 +496,8 @@ class DataMatrix(UserList):
             mod_datetime (str):  iso-format string of last mod datetime
         """
         super(DataMatrix, self).__init__(*data)
-        # sig = 'project_id="{}", schema_name="{}"'.format(
-                                        # project_id, schema_name or '[None]')
+        # sig = 'project_id="{}", name="{}"'.format(
+                                        # project_id, name or '[None]')
         # log.debug('* DataMatrix({})'.format(sig))
         # metadata
         dt = str(dtstamp())
@@ -505,10 +508,24 @@ class DataMatrix(UserList):
         self.project_id = project_id or 'SANDBOX'
         self.level_map = level_map or {}
         # log.debug('  - project id: {}'.format(project_id))
-        self.schema_name = schema_name or 'generic'
-        # log.debug('  - schema_name set to: "{}"'.format(schema_name))
-        # log.debug('  - looking up schema ...')
-        self.schema = schemaz.get(schema_name, [])
+        self.name = name or ''
+        # log.debug('  - name set to: "{}"'.format(name))
+        # log.debug('    checking for schema with that name ...')
+        if schema:
+            # if a schema is passed in, use it
+            self.schema = schema
+        elif schemaz.get(name):
+            # else check 'schemaz' for a schema by the name
+            self.schema = schemaz[name]
+        elif prefs.get('schemas', {}).get(name):
+            # else check prefs["schemas"] for that name ...
+            self.schema = prefs['schemas'][name]
+        else:
+            # if schema lookup in 'schemaz' and 'prefs["schemas"]' is
+            # unsuccessful, use 'generic' schema of last resort ...
+            self.name = 'generic'
+            self.schema = schemaz.get(self.name) or ['system_name']
+        # look for pre-defined column labels, or use names/ids as defaults
         if self.schema:
             self.column_labels = [
                 (de_defz.get(col_id, {}).get('label', '')
@@ -517,17 +534,12 @@ class DataMatrix(UserList):
                  or parm_defz.get(col_id, {}).get('name', '')
                  or col_id)
                 for col_id in self.schema]
-        else:
-            # if schema lookup is unsuccessful, use the supplied schema, if
-            # any, or a generic schema of last resort ...
-            self.schema = ['name', 'desc']
-            self.column_labels = ['Name', 'Description']
         # add myself to the dmz cache
         dmz[self.oid] = self
 
     @property
     def oid(self):
-        return '-'.join([self.project_id, self.schema_name])
+        return '-'.join([self.project_id, self.name])
 
     def row(self, i):
         """

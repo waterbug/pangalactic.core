@@ -360,8 +360,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts, level,
                                             qty=qty_by_name[comp_name])
     return row
 
-def write_mel_tsv(context, is_project=True,
-                  file_path='mel_data.tsv'):
+def write_mel_tsv(context, is_project=True, file_path='mel_data.tsv'):
     """
     Output Master Equipment List (MEL) data to a .tsv file (suitable for
     loading into a DataMatrix).
