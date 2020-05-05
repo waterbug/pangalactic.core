@@ -5,7 +5,6 @@ Pan Galactic Entity and DataMatrix classes.
 import json, os
 from copy            import deepcopy
 from collections     import UserList
-from collections.abc import MutableMapping
 from itertools       import chain
 from uuid            import uuid4
 
@@ -143,7 +142,7 @@ def save_ent_histz(json_path):
         pass
 
 
-class Entity(MutableMapping):
+class Entity(dict):
     """
     An interface to access a set of Data Elements and Parameters in the
     `data_elementz` and `parameterz` caches, respectively.  The concept behind
@@ -176,7 +175,7 @@ class Entity(MutableMapping):
         Initialize.
 
         Args:
-            args (tuple):  optional positional arguments (0 or 1).  If a
+            args (tuple):  optional positional argument (0 or 1).  If a
                 positional arg is present, it must be either a mapping or an
                 iterable in which each element is an iterable containing 2
                 elements (e.g. a list of 2-tuples).
@@ -192,7 +191,8 @@ class Entity(MutableMapping):
                 initialization
         """
         # log.debug('* Entity()')
-        super(Entity, self).__init__(*args, **kw)
+        super().__init__(*args)
+        # self.update(dict(*args))
         if not oid:
             oid = str(uuid4())
         self.oid = oid
@@ -314,10 +314,6 @@ class Entity(MutableMapping):
     def undo(self):
         if self.oid in ent_histz and ent_histz[self.oid]:
             self = ent_histz[self.oid].pop()
-
-    def update(self, *args, **kwargs):
-        for k, v in dict(*args, **kwargs).iteritems():
-            self[k] = v
 
     def serialize_meta(self):
         """
@@ -495,7 +491,7 @@ class DataMatrix(UserList):
             create_datetime (str):  iso-format string of creation datetime
             mod_datetime (str):  iso-format string of last mod datetime
         """
-        super(DataMatrix, self).__init__(*data)
+        super().__init__(*data)
         # sig = 'project_id="{}", name="{}"'.format(
                                         # project_id, name or '[None]')
         # log.debug('* DataMatrix({})'.format(sig))
@@ -536,6 +532,10 @@ class DataMatrix(UserList):
                 for col_id in self.schema]
         # add myself to the dmz cache
         dmz[self.oid] = self
+
+    def clear(self):
+        super().clear()
+        self.level_map.clear()
 
     @property
     def oid(self):
