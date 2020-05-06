@@ -128,6 +128,8 @@ def deserialize_parms(oid, ser_parms, cname=None):
         return
     if oid not in parameterz:
         parameterz[oid] = {}
+    pids_to_delete = []
+    deids_to_delete = []
     for pid, parm in ser_parms.items():
         mod_dt = parm['mod_datetime']
         if pid in parm_defz:
@@ -156,16 +158,27 @@ def deserialize_parms(oid, ser_parms, cname=None):
                 data_elementz[oid][pid] = de
             # pid refers to a data element, so it should not be in parameterz
             if pid in parameterz[oid]:
-                del parameterz[oid][pid]
+                pids_to_delete.append(pid)
         else:
             # log_msg = 'unknown id found in parameters: "{}"'.format(pid)
             # log.debug('  - {}'.format(log_msg))
             # pid has no definition, so it should not be in parameterz or
             # data_elementz
             if pid in parameterz.get(oid, {}):
-                del parameterz[oid][pid]
+                pids_to_delete.append(pid)
             if pid in data_elementz.get(oid, {}):
-                del data_elementz[oid][pid]
+                deids_to_delete.append(pid)
+    # delete any undefined parameters or data elements
+    de_oids = list(data_elementz)
+    parm_oids = list(parameterz)
+    for pid in pids_to_delete:
+        for oid in parm_oids:
+            if pid in parameterz[oid]:
+                del parameterz[oid][pid]
+    for deid in deids_to_delete:
+        for oid in de_oids:
+            if deid in data_elementz[oid]:
+                del data_elementz[oid][deid]
     ### FIXME (?): it's dangerous to remove pids not in new_parms, but we
     ### may need at some point to deal with deleted parameters ... (i.e.
     ### remove them from the cache).
@@ -1423,6 +1436,7 @@ def deserialize_des(oid, ser_des, cname=None):
         return
     if oid not in data_elementz:
         data_elementz[oid] = {}
+    deids_to_delete = []
     for deid, de in ser_des.items():
         mod_dt = de['mod_datetime']
         if deid in de_defz:
@@ -1437,6 +1451,12 @@ def deserialize_des(oid, ser_des, cname=None):
             # log.debug('  - {}'.format(log_msg))
             # deid has no definition, so it should not be in data_elementz
             if deid in data_elementz.get(oid, {}):
+                deids_to_delete.append(deid)
+    # delete any undefined data elements
+    de_oids = list(data_elementz)
+    for deid in deids_to_delete:
+        for oid in de_oids:
+            if deid in data_elementz[oid]:
                 del data_elementz[oid][deid]
     ### FIXME:  it's dangerous to remove deids not in new_des, but we
     ### must deal with deleted parameters ...
