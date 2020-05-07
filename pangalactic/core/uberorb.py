@@ -21,7 +21,6 @@ from pangalactic.core             import diagramz
 from pangalactic.core             import config, read_config
 from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state
-from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
 from pangalactic.core.entity      import (dmz, load_dmz, save_dmz,
                                           entz, load_entz, save_entz,
@@ -160,10 +159,9 @@ class UberORB(object):
         read_state(os.path.join(pgx_home, 'state'))
         state.update(app_state)
         # --------------------------------------------------------------------
-        # Saved prefs and trash are read here; will be overwritten by
-        # any new prefs and trash set at runtime.
+        # Saved prefs are read here; will be overwritten by any new prefs set
+        # at runtime.
         read_prefs(os.path.join(pgx_home, 'prefs'))
-        read_trash(os.path.join(pgx_home, 'trash'))
         # create "file vault"
         self.vault = os.path.join(pgx_home, 'vault')
         if not os.path.exists(self.vault):
@@ -174,7 +172,6 @@ class UberORB(object):
         # self.log.debug('  prefs: {}'.format(str(prefs)))
         self.log.debug('* state read ...')
         # self.log.debug('  state: {}'.format(str(state)))
-        self.log.debug('* trash read ({} objects).'.format(len(trash)))
         if 'units' not in prefs:
             prefs['units'] = {}
         # create in-memory cache for DataMatrix instances
@@ -1747,10 +1744,6 @@ class UberORB(object):
                     refresh_assemblies.append(obj.assembly)
                 recompute_required = True
             creator = getattr(obj, 'creator', None)
-            if creator == local_user:
-                # if local_user created obj, add it to trash
-                # TODO:  use trash to enable undo of delete ...
-                trash[obj.oid] = serialize(self, [obj])
             info.append('   obj id: {}, name: {} (oid "{}")'.format(
                                         getattr(obj, 'id', 'no id'),
                                         getattr(obj, 'name', 'no name'),
