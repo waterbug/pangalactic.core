@@ -15,6 +15,32 @@ PID_FMT = """letters and numbers separated by a single underscore "_"
  ... Examples: "X_y", "Angle_32", "XXX_Range"."""
 
 
+def check_for_cycles(product):
+    """
+    Check for cyclical data structures among all [known] components used at
+    every level of assembly of the specified product.
+
+    Args:
+        product (Product): the Product in which to look for cycles
+    """
+    if product:
+        comps = [acu.component for acu in product.components]
+        if product.oid in [c.oid for c in comps]:
+            txt = 'is a component of itself.'
+            return 'product {} (id: "{}" {}'.format(
+                                            product.oid, product.id, txt)
+        if comps:
+            try:
+                comps = reduce(lambda x,y: x+y, [get_bom(c) for c in comps],
+                               comps)
+            except RecursionError:
+                txt = 'occurs in a lower level of its own assembly.'
+                return 'product {} (id: "{}" {}'.format(
+                                            product.oid, product.id, txt)
+        return ''
+    return ''
+
+
 def get_bom(product):
     """
     Return a list (a.k.a. "Bill of Materials") of all [known] components used
@@ -23,6 +49,7 @@ def get_bom(product):
     Args:
         product (Product): the Product whose bom is to be computed
     """
+    # NOTE: this will explode if assembly is circular!!
     if product:
         comps = [acu.component for acu in product.components]
         if comps:
