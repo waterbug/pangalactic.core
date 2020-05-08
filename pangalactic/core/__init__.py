@@ -120,12 +120,13 @@ xsd_datatypes = {  #  (schema->python, python->schema)  Does not validate.
     URIRef('http://www.w3.org/2001/XMLSchema#anyURI') : ('str', str),
 }
 
-# `config`, `prefs`, and `state` are module-level vars for application
+# `config`, `prefs`, `state`, and `trash` are module-level vars for application
 # configuration, user preferences, state, and deleted objects, respectively.
 # (See NOTES_FOR_DEVELOPERS.md for more detail.)
 config = {}
 prefs = {}
 state = {}
+trash = {}
 
 def my_unicode_repr(self, data):
     """
@@ -212,4 +213,28 @@ def write_state(statepath):
     f.close()
     # except:
     # raise ValueError, 'Could not write state.'
+
+def read_trash(trashpath):
+    """
+    Read `trash` dictionary from the trash file.
+    """
+    # TODO:  add checksum check for security
+    if os.path.exists(trashpath):
+        f = open(trashpath)
+        data = f.read()
+        if data:
+            trash.update(yaml.safe_load(data))
+        f.close()
+
+def write_trash(trashpath):
+    """
+    Write `trash` dictionary to the trash file.
+    """
+    # try:
+    f = open(trashpath, 'w')
+    f.write(yaml.safe_dump(trash, allow_unicode=True,
+                           default_flow_style=False))
+    f.close()
+    # except:
+    # raise ValueError, 'Could not write trash.'
 
