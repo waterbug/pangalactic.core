@@ -2188,6 +2188,9 @@ dict(
 
 core_objs = {so['oid'] : so for so in core}
 
+# oids of all reference objects (do not need to be synced with clients)
+ref_oids = [d['oid'] for d in initial + core + deds + pdc]
+
 # oids of reference Parameter Definitions -- used by the repository to identify
 # ParameterDefinition objects that do not need to be synced with clients
 ref_pd_oids = [d['oid'] for d in core

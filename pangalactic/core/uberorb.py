@@ -1518,7 +1518,12 @@ class UberORB(object):
 
     def delete(self, objs):
         """
-        Delete the specified objects from the local db.
+        Delete the specified objects from the local db.  Note that the orb does
+        not check permissions here -- the assumption is that permissions were
+        checked before orb.delete() was called and that every done here is
+        authorized.  Also note that in deleting some types of objects, it may
+        be required to delete many related objects, some of which may have been
+        created by other users.
 
         Args:
             objs (Iterable of Identifiable or subtype): objects in the local db
