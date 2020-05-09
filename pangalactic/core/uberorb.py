@@ -55,7 +55,7 @@ from pangalactic.core.test        import vault as test_vault_mod
 from pangalactic.core.test.utils  import gen_test_dvals, gen_test_pvals
 from pangalactic.core.utils.datetimes import dtstamp, file_dts
 from pangalactic.core.log         import get_loggers
-from pangalactic.core.validation  import check_for_cycles, get_assembly
+from pangalactic.core.validation  import get_assembly
 from functools import reduce
 
 
@@ -1148,7 +1148,7 @@ class UberORB(object):
         all_ids = self.get_ids(cname='HardwareProduct')
         self.log.debug('  all_ids:')
         self.log.debug('  {}'.format(str(all_ids)))
-        hw_id_suffixes = [i.split('-')[-1] for i in all_ids]
+        hw_id_suffixes = [(i or '').split('-')[-1] for i in all_ids]
         self.log.debug('  hw_id_suffixes:')
         self.log.debug('  {}'.format(str(hw_id_suffixes)))
         current_id_parts = (obj.id or '').split('-')
@@ -1425,11 +1425,11 @@ class UberORB(object):
             # get all assemblies
             # TODO: possibly have a "lazy" option (only top-level assemblies)
             assemblies = []
-            # check for cycles
-            for system in systems:
-                cycles = check_for_cycles(system)
-                if cycles:
-                    self.log.info(f'  - {cycles}')
+            # TODO: check for cycles
+            # for system in systems:
+                # cycles = check_for_cycles(system)
+                # if cycles:
+                    # self.log.info(f'  - {cycles}')
             for system in systems:
                 # NOTE:  get_assembly is recursive, gets *all* sub-assemblies
                 assemblies += get_assembly(system)

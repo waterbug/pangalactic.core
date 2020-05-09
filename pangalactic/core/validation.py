@@ -18,27 +18,85 @@ PID_FMT = """letters and numbers separated by a single underscore "_"
 def check_for_cycles(product):
     """
     Check for cyclical data structures among all [known] components used at
-    every level of assembly of the specified product.
+    up to 5 levels of assembly of the specified product.
 
     Args:
         product (Product): the Product in which to look for cycles
+
+    Keyword Args:
+        levels (int):  number of levels to recurse before giving up
     """
-    if product:
+    # print('* checking product with id "{}" ({})'.format(str(product.id),
+                                                        # product.oid))
+    if product and product.components:
         comps = [acu.component for acu in product.components]
+        # acus_by_comp_oid = {acu.component.oid : acu
+                            # for acu in product.components}
         if product.oid in [c.oid for c in comps]:
             txt = 'is a component of itself.'
-            return 'product {} (id: "{}" {}'.format(
-                                            product.oid, product.id, txt)
-        if comps:
-            try:
-                comps = reduce(lambda x,y: x+y, [get_bom(c) for c in comps],
-                               comps)
-            except RecursionError:
-                txt = 'occurs in a lower level of its own assembly.'
-                return 'product {} (id: "{}" {}'.format(
-                                            product.oid, product.id, txt)
-        return ''
-    return ''
+            print('product {} (id: "{}" {}'.format(
+                  product.oid, product.id or 'no id', txt))
+            return
+        # else:
+            # print('  - level 1 components ok.')
+        comps1 = []
+        acus1_by_comp_oid = {}
+        for comp in comps:
+            comps1 += [acu.component for acu in comp.components]
+            acus1_by_comp_oid.update({acu.component.oid : acu
+                                      for acu in comp.components})
+        if comps1:
+            comps += comps1
+        else:
+            # print('  - no more levels.')
+            return
+        if product.oid in [c.oid for c in comps1]:
+            txt = 'is a 2nd-level component of itself.'
+            print(' *** product {} (id: "{}" {}'.format(
+                  product.oid, product.id or 'no id', txt))
+            acu1 = acus1_by_comp_oid[product.oid]
+            print(' *** offending Acu is:')
+            print('     id: {}'.format(str(acu1.id)))
+            print('     creator: {}'.format(acu1.creator.id))
+            assy1 = acu1.assembly
+            print('     assembly: {}'.format(str(assy1.id)))
+            print('     assembly oid: {}'.format(str(assy1.oid)))
+            # acu = acus_by_comp_oid[assy1.oid]
+            return
+        # else:
+            # print('  - level 2 components ok.')
+        comps2 = []
+        for comp in comps1:
+            comps2 += [acu.component for acu in comp.components]
+        if comps2:
+            comps += comps2
+        else:
+            # print('  - no more levels.')
+            return
+        if product.oid in [c.oid for c in comps2]:
+            txt = 'is a 3nd-level component of itself.'
+            print('product {} (id: "{}" {}'.format(
+                  product.oid, product.id or 'no id', txt))
+            return
+        # else:
+            # print('  - level 3 components ok.')
+        comps3 = []
+        for comp in comps2:
+            comps3 += [acu.component for acu in comp.components]
+        if comps3:
+            comps += comps3
+        else:
+            # print('  - no more levels.')
+            return
+        if product.oid in [c.oid for c in comps3]:
+            txt = 'is a 4th-level component of itself.'
+            print('product {} (id: "{}" {}'.format(
+                  product.oid, product.id or 'no id', txt))
+            return
+        else:
+            # print('no cycles')
+            return
+    # print('no cycles')
 
 
 def get_bom(product):
