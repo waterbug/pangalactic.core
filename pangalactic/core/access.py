@@ -305,7 +305,6 @@ def is_cloaked(obj):
     if hasattr(obj, 'public') and obj.public:
         orb.log.debug('  object is public.')
         return False
-    elif obj.oid == '
     elif isinstance(obj, (orb.classes['Organization'],
                           orb.classes['ParameterDefinition'])):
         # NOTE: Parameter Definitions and Organizations/Projects are always
