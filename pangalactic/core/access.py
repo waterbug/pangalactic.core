@@ -41,6 +41,9 @@ def get_perms(obj, user=None, permissive=False):
         # cname = obj.__class__.__name__
         # orb.log.debug('  for {} object, id: {}, oid: {}'.format(cname,
                                                         # obj.id, obj.oid))
+    if obj.oid == 'pgefobjects:SANDBOX':
+        # anyone can "modify" the SANDBOX (i.e. add systems to it)
+        return ['view', 'modify']
     if config.get('local_admin') or permissive:
         # orb.log.debug('  "local_admin" or "permissive" configured.')
         perms = ['view', 'modify', 'decloak', 'delete']
@@ -81,7 +84,7 @@ def get_perms(obj, user=None, permissive=False):
     if isinstance(obj, orb.classes['ProjectSystemUsage']):
         # access is determined by project/system access for PSU
         if obj.project.oid == 'pgefobjects:SANDBOX':
-            # orb.log.debug('  ******* SANDBOX PSUs are modifiable by user')
+            # orb.log.debug('  *** SANDBOX PSUs are modifiable by any user')
             perms = ['view', 'modify', 'decloak', 'delete']
             return perms
     # if we get this far, we have a user_oid and a user object
@@ -302,6 +305,7 @@ def is_cloaked(obj):
     if hasattr(obj, 'public') and obj.public:
         orb.log.debug('  object is public.')
         return False
+    elif obj.oid == '
     elif isinstance(obj, (orb.classes['Organization'],
                           orb.classes['ParameterDefinition'])):
         # NOTE: Parameter Definitions and Organizations/Projects are always
