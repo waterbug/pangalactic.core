@@ -299,6 +299,7 @@ PGXN_DATA_VIEW = [
 PGXN_HIDE_PARMS = [
                    'Actor',
                    'Acu',
+                   'DataElementDefinition',
                    'Organization',
                    'ParameterDefinition',
                    'ParameterRelation',

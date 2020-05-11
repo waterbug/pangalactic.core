@@ -1137,24 +1137,27 @@ class UberORB(object):
 
     def gen_product_id(self, obj):
         """
-        Create a unique 'id' attribute for a new HardwareProduct.
+        Create a unique 'id' attribute for a new HardwareProduct or Template.
 
         Args:
-            obj (HardwareProduct):  obj for which to generate an 'id'
+            obj (HardwareProduct or Template):  obj for which to generate an
+                'id'
         """
         self.log.debug('* gen_product_id')
-        if not isinstance(obj, self.classes['HardwareProduct']):
+        if not isinstance(obj, (self.classes['HardwareProduct'],
+                                self.classes['Template'])):
             return ''
         all_ids = self.get_ids(cname='HardwareProduct')
+        all_ids += self.get_ids(cname='Template')
         self.log.debug('  all_ids:')
         self.log.debug('  {}'.format(str(all_ids)))
-        hw_id_suffixes = [(i or '').split('-')[-1] for i in all_ids]
-        self.log.debug('  hw_id_suffixes:')
-        self.log.debug('  {}'.format(str(hw_id_suffixes)))
+        id_suffixes = [(i or '').split('-')[-1] for i in all_ids]
+        self.log.debug('  id_suffixes:')
+        self.log.debug('  {}'.format(str(id_suffixes)))
         current_id_parts = (obj.id or '').split('-')
         self.log.debug('  current_id_parts: {}'.format(str(current_id_parts)))
-        if current_id_parts[-1] in hw_id_suffixes:
-            hw_id_suffixes.remove(current_id_parts[-1])
+        if current_id_parts[-1] in id_suffixes:
+            id_suffixes.remove(current_id_parts[-1])
         # if the 'Vendor' data element has a non-blank value, the owner id is
         # set to 'Vendor'
         if get_dval(obj.oid, 'Vendor'):
@@ -1169,18 +1172,18 @@ class UberORB(object):
         # and last part (suffix) is unique
         if (len(current_id_parts) >= 3 and
             ((obj.id or '').startswith(owner_id + '-' + pt_abbr + '-')) and
-            # suffix is unique (has been removed from hw_id_suffixes once)
-            current_id_parts[-1] not in hw_id_suffixes):
+            # suffix is unique (has been removed from id_suffixes once)
+            current_id_parts[-1] not in id_suffixes):
             return obj.id
         hw_id_ints = [0]
-        for i in hw_id_suffixes:
+        for i in id_suffixes:
             try:
                 hw_id_ints.append(int(i))
             except:
                 continue
         next_sufx = str(max(hw_id_ints)).zfill(7)
         while 1:
-            if next_sufx not in hw_id_suffixes:
+            if next_sufx not in id_suffixes:
                 break
             else:
                 next_int = max(hw_id_ints) + 1
