@@ -1190,11 +1190,12 @@ class UberORB(object):
                 next_sufx = str(next_int).zfill(7)
         owner_id = owner_id or 'Vendor'
         abbrev = getattr(obj.product_type, 'abbreviation', 'TBD') or 'TBD'
-        if isinstance(obj.product_type, self.classes['ProductType']):
-            return '-'.join([owner_id, abbrev, next_sufx])
-        else:
+        if not isinstance(obj.product_type, self.classes['ProductType']):
             # no product_type assigned yet
-            return '-'.join([owner_id, 'TBD', next_sufx])
+            abbrev = 'TBD'
+        if isinstance(obj, self.classes['Template']):
+            abbrev += '-Template'
+        return '-'.join([owner_id, abbrev, next_sufx])
 
     def get_idvs(self, cname=None):
         """
