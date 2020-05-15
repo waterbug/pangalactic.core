@@ -6,6 +6,7 @@ Serializers / deserializers for pangalactic domain objects and parameters.
 from sqlalchemy import ForeignKey
 
 # PanGalactic
+from pangalactic.core.refdata          import ref_oids
 from pangalactic.core.utils.meta       import (asciify, cookers, uncookers,
                                                uncook_datetime)
 from pangalactic.core.utils.datetimes  import earlier
@@ -353,7 +354,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     if not include_refdata:
         # ignore reference data objects ('pgefobjects' namespace)
         serialized = [so for so in serialized
-                  if not asciify(so.get('oid', '')).startswith('pgefobjects:')]
+                      if not asciify(so.get('oid', '')) in ref_oids]
     # if len(serialized) < new_len:
         # orb.log.info('  {} ref data object(s) found, ignored.'.format(
                                                # new_len - len(serialized)))
