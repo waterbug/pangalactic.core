@@ -384,7 +384,8 @@ class UberORB(object):
         if fmt == 'json':
             f = open(os.path.join(self.vault, json_fname), 'w')
             f.write(json.dumps(serialize(
-                    self, self.get_all_subtypes('Identifiable')),
+                    self, self.get_all_subtypes('Identifiable'),
+                    include_refdata=True),
                     separators=(',', ':'),
                     indent=4, sort_keys=True))
             f.close()
@@ -392,7 +393,8 @@ class UberORB(object):
             self.log.info('  dumping database to yaml file ...')
             f = open(os.path.join(self.vault, yaml_fname), 'w')
             f.write(yaml.safe_dump(serialize(
-                    self, self.get_all_subtypes('Identifiable'))))
+                    self, self.get_all_subtypes('Identifiable'),
+                    include_refdata=True)))
             f.close()
         self.log.info('  dump to {} completed.'.format(fmt))
 
