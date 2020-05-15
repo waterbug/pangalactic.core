@@ -22,7 +22,7 @@ from pangalactic.core.parametrics import (add_parameter,
 
 
 def serialize(orb, objs, view=None, include_components=False,
-              include_inverse_attrs=False):
+              include_refdata=False, include_inverse_attrs=False):
     """
     Args:
         orb (UberORB): the (singleton) `orb` instance
@@ -49,6 +49,12 @@ def serialize(orb, objs, view=None, include_components=False,
             * 'assigned_to' (Person) object will always be included
             * 'role_assignment_context' (Org) object will always be included
             ******************************************************************
+        include_refdata (bool):  [default: False] if True, serialize
+            reference data -- in general, it is not necessary to include
+            reference data, since it is known to both client and server; it is
+            only desirable to include reference data when data is to be
+            exchanged with an external application, in which case a standard
+            data exchange format would be preferable.
 
     Serialize a collection or iterable of objects into a data structure
     consisting of primitive types; specifically, into a list of canonical
@@ -248,6 +254,10 @@ def serialize(orb, objs, view=None, include_components=False,
     # orb.log.info('  serialized {} objects.'.format(len(serialized)))
     # make sure there is only 1 serialized object per oid ...
     so_by_oid = {so['oid'] : so for so in serialized}
+    if not include_refdata:
+        # exclude reference data objects
+        so_by_oid = {oid: so_by_oid[oid] for oid in so_by_oid
+                     if oid not in ref_oids}
     return list(so_by_oid.values())
 
 # DESERIALIZATION_ORDER:  order in which to deserialize classes so that
@@ -352,7 +362,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     if dictify:
         output = dict(new=[], modified=[], unmodified=[], error=[])
     if not include_refdata:
-        # ignore reference data objects ('pgefobjects' namespace)
+        # exclude reference data objects
         serialized = [so for so in serialized
                       if not asciify(so.get('oid', '')) in ref_oids]
     # if len(serialized) < new_len:
