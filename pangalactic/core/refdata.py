@@ -56,7 +56,7 @@ initial = [
 
 {   '_cname': 'Role',
     'oid': 'pgefobjects:Role.Observer',
-    'description': 'Read-only accesss in an organizational context',
+    'description': 'Read-only access in an organizational context',
     'id': 'Observer',
     'name': 'Observer',
     'create_datetime': epoch,

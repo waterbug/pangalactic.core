@@ -131,7 +131,7 @@
     product:          (str)  oid of currently selected Product -- refers to the
                              product selected in 'product modeler'
     project:          (str)  oid of currently selected Project
-    synced[3]:        (bool) keeps track of whether session has been synced
+    synced[3]:        (str)  keeps track of when a session was last synced
     synced_oids[4]:   (list) oids of user-created objects that have been synced
     synced_projects[5]: (list) oids of projects that have been synced
     sys_trees[6]:     (dict) maps project ids to system tree attributes
@@ -154,11 +154,12 @@
         NOTE:  for project-independent role assignments, 'global' is used in
         place of a project oid.
 
-    [3]: `synced` is set to False when the mbus is first joined upon login, and
-         set to True when initial sync operations are completed.  (This enabled
-         sync operations to be factored into a separate `sync_with_services`
-         method so it could be called by `check_version`, which is only done on
-         Windows [the `win32` platform] for now.)
+    [3]: `synced` is set to an empty string when the mbus is first joined upon
+         login, and then set to a datetime stamp string when initial sync
+         operations are completed.  In order to prevent excessive sync
+         operations, which can be caused by reconnects after a lost connection,
+         the datetime stamp is checked before syncing and if a sync has been
+         done within the past 10 minutes, it will be skipped.
 
     [4]: the "synced_oids" list is used in determining whether an object may be
          deleted while the client is offline (not connected to the repository):

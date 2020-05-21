@@ -16,6 +16,8 @@ PGEF_FILE_DATETIME_FMT = '%Y-%m-%d-%H-%M'
 def dtstamp():
     """
     Generate a naive datetime stamp for the current date and time.
+    If converted to a string using str(), the datetime can be recovered from
+    the string using datetime.fromisoformat().
 
     @return:  a datetime stamp for the current (UTC) date and time
     @rtype:   C{datetime}
