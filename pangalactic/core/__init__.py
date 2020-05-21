@@ -15,7 +15,7 @@ from sqlalchemy import (Boolean, Date, DateTime, Float, Integer, LargeBinary,
 import ruamel_yaml as yaml
 
 # pangalactic version
-__version__ = '1.3.8'
+__version__ = '1.3.9'
 
 # `diagramz` is a module-level variable for the diagram cache
 # (see pangalactic.node.gui.diagrams.view for more detail)
@@ -59,7 +59,7 @@ datatypes = {
 
 # The following copyright and permission notice are included from sparta.py:
 
-# Copyright (c) 2001.3.85 Mark Nottingham <mnot@pobox.com>
+# Copyright (c) 2001.3.95 Mark Nottingham <mnot@pobox.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
