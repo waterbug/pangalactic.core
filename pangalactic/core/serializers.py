@@ -111,11 +111,15 @@ def serialize(orb, objs, view=None, include_components=False,
     if not objs:
         return []
     serialized = []
+    # NOTE:  all Organization objects are being synced first [SCW 2020-05-22]
     # org_objs = set()
     # org_oids = set()
+    # NOTE:  all Person objects are being synced first [SCW 2020-05-22]
     # person_objs = set()
+    # NOTE: all ProductTypes are refdata [SCW 2020-05-22]
     # product_type_objs = set()
-    activity_type_objs = set()
+    # NOTE:  all ActivityTypes are refdata [SCW 2020-05-22]
+    # activity_type_objs = set()
     for obj in objs:
         if not obj:
             # orb.log.debug('  - null object "{}"'.format(obj))
@@ -177,8 +181,7 @@ def serialize(orb, objs, view=None, include_components=False,
             # # orb.log.debug(' + adding org {}'.format(owner_org.id))
             # org_objs.add(owner_org)
             # org_oids.add(owner_org.oid)
-        # NOTE:  product_type and product_type_hint objects are not necessary
-        # because all ProductTypes are refdata [SCW 2020-05-22]
+        # NOTE: all ProductTypes are refdata [SCW 2020-05-22]
         # if hasattr(obj, 'product_type'):
             # # for Products, product_type must be included
             # if obj.product_type:
@@ -187,10 +190,11 @@ def serialize(orb, objs, view=None, include_components=False,
             # # for Acus, product_type_hint must be included
             # if obj.product_type_hint:
                 # product_type_objs.add(obj.product_type_hint)
-        if hasattr(obj, 'activity_type'):
-            # for Activity instances, activity_type must be included
-            if obj.activity_type:
-                activity_type_objs.add(obj.activity_type)
+        # NOTE:  all ActivityTypes are refdata [SCW 2020-05-22]
+        # if hasattr(obj, 'activity_type'):
+            # # for Activity instances, activity_type must be included
+            # if obj.activity_type:
+                # activity_type_objs.add(obj.activity_type)
         if getattr(obj, 'component', None):
             # Acu:  always include both assembly and component ...
             serialized += serialize(orb, [obj.assembly, obj.component])
@@ -239,23 +243,27 @@ def serialize(orb, objs, view=None, include_components=False,
                 if obj.computable_form.correlates_parameters:
                     for pr in obj.computable_form.correlates_parameters:
                         serialized += serialize(orb, [pr])
+    # NOTE:  all Person objects are being synced first [SCW 2020-05-22]
     # if person_objs:
         # orb.log.debug('  including {} Person objects.'.format(
                                                     # len(person_objs)))
         # serialized += serialize(orb, person_objs)
+    # NOTE:  owner_org is not necessary now that all Organization
+    # objects are being synced first [SCW 2020-05-22]
     # if org_objs:
         # values of "owner" attributes
         # orb.log.debug('  including {} Organization objects.'.format(
                                                     # len(org_objs)))
         # serialized += serialize(orb, org_objs)
+    # NOTE: all ProductTypes are refdata [SCW 2020-05-22]
     # if product_type_objs:
         # orb.log.debug('  including {} ProductType objects.'.format(
                                                 # len(product_type_objs)))
         # serialized += serialize(orb, product_type_objs)
-    if activity_type_objs:
+    # if activity_type_objs:
         # orb.log.debug('  including {} ActivityType objects.'.format(
                                                 # len(activity_type_objs)))
-        serialized += serialize(orb, activity_type_objs)
+        # serialized += serialize(orb, activity_type_objs)
     # orb.log.info('  serialized {} objects.'.format(len(serialized)))
     # make sure there is only 1 serialized object per oid ...
     so_by_oid = {so['oid'] : so for so in serialized}
