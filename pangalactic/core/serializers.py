@@ -111,10 +111,10 @@ def serialize(orb, objs, view=None, include_components=False,
     if not objs:
         return []
     serialized = []
-    org_objs = set()
-    org_oids = set()
-    person_objs = set()
-    product_type_objs = set()
+    # org_objs = set()
+    # org_oids = set()
+    # person_objs = set()
+    # product_type_objs = set()
     activity_type_objs = set()
     for obj in objs:
         if not obj:
@@ -158,31 +158,36 @@ def serialize(orb, objs, view=None, include_components=False,
                 datatype = schema['fields'][name]['range']
                 d[name] = cookers[datatype](getattr(obj, name))
         serialized.append(d)
-        if (hasattr(obj, 'creator') and obj.creator
-            and obj.creator is not obj):
-            # for Modelables, creator and modifier must be included
-            person_objs.add(obj.creator)
-        if (hasattr(obj, 'modifier') and obj.modifier
-            and obj.modifier is not obj):
-            person_objs.add(obj.modifier)
-        owner_org = getattr(obj, 'owner', None)
-        if (owner_org and owner_org.oid != obj.oid
-            and owner_org.oid not in org_oids):
-            # for ManagedObjects, owner must be included
-            # NOTE:  IMPORTANT!! used for access control / authorization,
-            # and for identification of project requirements, etc.
-            # orb.log.debug(' + adding org {}'.format(owner_org.id))
-            org_objs.add(owner_org)
-            org_oids.add(owner_org.oid)
-        if hasattr(obj, 'product_type'):
-            # for Products, product_type must be included
-            if obj.product_type:
-                product_type_objs.add(obj.product_type)
-        elif hasattr(obj, 'product_type_hint'):
-            # for Acus, product_type_hint must be included
-            if obj.product_type_hint:
-                product_type_objs.add(obj.product_type_hint)
-        elif hasattr(obj, 'activity_type'):
+        # NOTE:  creator & modifier are not necessary now that all Person
+        # objects are being synced first [SCW 2020-05-22]
+        # if (hasattr(obj, 'creator') and obj.creator
+            # and obj.creator is not obj):
+            # person_objs.add(obj.creator)
+        # if (hasattr(obj, 'modifier') and obj.modifier
+            # and obj.modifier is not obj):
+            # person_objs.add(obj.modifier)
+        # NOTE:  owner_org is not necessary now that all Organization
+        # objects are being synced first [SCW 2020-05-22]
+        # owner_org = getattr(obj, 'owner', None)
+        # if (owner_org and owner_org.oid != obj.oid
+            # and owner_org.oid not in org_oids):
+            # # for ManagedObjects, owner must be included
+            # # NOTE:  IMPORTANT!! used for access control / authorization,
+            # # and for identification of project requirements, etc.
+            # # orb.log.debug(' + adding org {}'.format(owner_org.id))
+            # org_objs.add(owner_org)
+            # org_oids.add(owner_org.oid)
+        # NOTE:  product_type and product_type_hint objects are not necessary
+        # because all ProductTypes are refdata [SCW 2020-05-22]
+        # if hasattr(obj, 'product_type'):
+            # # for Products, product_type must be included
+            # if obj.product_type:
+                # product_type_objs.add(obj.product_type)
+        # elif hasattr(obj, 'product_type_hint'):
+            # # for Acus, product_type_hint must be included
+            # if obj.product_type_hint:
+                # product_type_objs.add(obj.product_type_hint)
+        if hasattr(obj, 'activity_type'):
             # for Activity instances, activity_type must be included
             if obj.activity_type:
                 activity_type_objs.add(obj.activity_type)
@@ -234,19 +239,19 @@ def serialize(orb, objs, view=None, include_components=False,
                 if obj.computable_form.correlates_parameters:
                     for pr in obj.computable_form.correlates_parameters:
                         serialized += serialize(orb, [pr])
-    if person_objs:
+    # if person_objs:
         # orb.log.debug('  including {} Person objects.'.format(
                                                     # len(person_objs)))
-        serialized += serialize(orb, person_objs)
-    if org_objs:
+        # serialized += serialize(orb, person_objs)
+    # if org_objs:
         # values of "owner" attributes
         # orb.log.debug('  including {} Organization objects.'.format(
                                                     # len(org_objs)))
-        serialized += serialize(orb, org_objs)
-    if product_type_objs:
+        # serialized += serialize(orb, org_objs)
+    # if product_type_objs:
         # orb.log.debug('  including {} ProductType objects.'.format(
                                                 # len(product_type_objs)))
-        serialized += serialize(orb, product_type_objs)
+        # serialized += serialize(orb, product_type_objs)
     if activity_type_objs:
         # orb.log.debug('  including {} ActivityType objects.'.format(
                                                 # len(activity_type_objs)))

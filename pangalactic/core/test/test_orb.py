@@ -228,7 +228,8 @@ class OrbTest(unittest.TestCase):
                 value.append(sobj['name'])
                 value.append(sobj['name_code'])
                 value.append(bool(sobj['parameters']))
-        expected = [2,
+        # serialized form includes only the original object
+        expected = [1,
                     obj.__class__.__name__,
                     str(obj.create_datetime),
                     str(obj.mod_datetime),
@@ -257,8 +258,10 @@ class OrbTest(unittest.TestCase):
                 value['port_oid'] = 'test:port.twanger.0'
                 value['port_of_product'] = 'test:twanger'
                 value['type_of_port'] = 'pgefobjects:PortType.electrical_power'
+        # serialized form includes 2 objects:
+        # the twanger + 1 port
         expected = dict(
-            length=7,
+            length=2,
             twanger_id=obj.id,
             twanger_parameters=serialize_parms(obj.oid),
             twanger_product_type=obj.product_type.oid,
