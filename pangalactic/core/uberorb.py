@@ -470,7 +470,7 @@ class UberORB(object):
         contexts.  This is required at startup or when a parameter is created,
         modified, or deleted.
         """
-        self.log.debug('* recompute_parmz()')
+        # self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
         # default descriptive contexts:  CBE, MEV
         d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or []
@@ -522,8 +522,8 @@ class UberORB(object):
             if oid:
                 margin_pid = get_parameter_id(pid, 'Margin')
                 nte_pid = get_parameter_id(pid, 'NTE')
-                self.log.debug('  - {} at {}: {}'.format(pid, oid,
-                                                               result))
+                # self.log.debug('  - {} at {}: {}'.format(pid, oid,
+                                                               # result))
                 if oid not in parameterz:
                     parameterz[oid] = {}
                 if isinstance(result, (int, float)):
@@ -537,9 +537,10 @@ class UberORB(object):
                                                 mod_datetime=str(dtstamp()))
             else:
                 # if oid is empty, reason for failure will be in "result"
-                self.log.debug(' - margin comp. failed for req with oid:')
-                self.log.debug('   "{}"'.format(req_oid))
-                self.log.debug('   computation result: {}'.format(result))
+                # self.log.debug(' - margin comp. failed for req with oid:')
+                # self.log.debug('   "{}"'.format(req_oid))
+                # self.log.debug('   computation result: {}'.format(result))
+                pass
         parameters_path = os.path.join(self.home, 'parameters.json')
         save_parmz(parameters_path)
 

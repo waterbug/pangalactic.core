@@ -131,10 +131,9 @@
     product:          (str)  oid of currently selected Product -- refers to the
                              product selected in 'product modeler'
     project:          (str)  oid of currently selected Project
-    synced[3]:        (str)  keeps track of when a session was last synced
-    synced_oids[4]:   (list) oids of user-created objects that have been synced
-    synced_projects[5]: (list) oids of projects that have been synced
-    sys_trees[6]:     (dict) maps project ids to system tree attributes
+    synced_oids[3]:   (list) oids of user-created objects that have been synced
+    synced_projects[4]: (list) oids of projects that have been synced
+    sys_trees[5]:     (dict) maps project ids to system tree attributes
     system:           (str)  oid of currently selected system (Product or
                              Project) -- may be selected by clicking on an item
                              in the system tree or drilling down into
@@ -154,21 +153,14 @@
         NOTE:  for project-independent role assignments, 'global' is used in
         place of a project oid.
 
-    [3]: `synced` is set to an empty string when the mbus is first joined upon
-         login, and then set to a datetime stamp string when initial sync
-         operations are completed.  In order to prevent excessive sync
-         operations, which can be caused by reconnects after a lost connection,
-         the datetime stamp is checked before syncing and if a sync has been
-         done within the past 10 minutes, it will be skipped.
-
-    [4]: the "synced_oids" list is used in determining whether an object may be
+    [3]: the "synced_oids" list is used in determining whether an object may be
          deleted while the client is offline (not connected to the repository):
          any object that has been synced to the repository *cannot* be deleted
          while offline, because it may be used in an assembly by another user
          and deleting it before removing it from the assembly would break
          referential integrity.
 
-    [5]: Projects only need to be synced when a project is first used during an
+    [4]: Projects only need to be synced when a project is first used during an
          online session because objects may have been added, deleted, or
          modified while the user was offline. During a session, the bulk
          project sync is only done once because during the online session all
@@ -180,7 +172,7 @@
          "synced_projects".  The "synced_projects" list is cleared when the
          session ends.
 
-    [6]: `sys_trees` data structure:
+    [5]: `sys_trees` data structure:
 
         {project id : {nodes : (int) # of nodes in sys tree (used in
                                calculating progress bar for tree rebuilds)
