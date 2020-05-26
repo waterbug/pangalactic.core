@@ -317,18 +317,12 @@ class UberORB(object):
                             discipline_subsystems.get(discipline_id))
         self.started = True
         # TODO:  clean up boilerplate ...
-        data_elements_path = os.path.join(self.home, 'data_elements.json')
-        parameters_path = os.path.join(self.home, 'parameters.json')
-        ents_path = os.path.join(self.home, 'ents.json')
-        ent_hists_path = os.path.join(self.home, 'ent_hists.json')
-        schemas_path = os.path.join(self.home, 'schemas.json')
-        dms_path = os.path.join(self.home, 'dms.json')
-        save_data_elementz(data_elements_path)
-        save_parmz(parameters_path)
-        save_entz(ents_path)
-        save_ent_histz(ent_hists_path)
-        save_schemaz(schemas_path)
-        save_dmz(dms_path)
+        save_data_elementz(self.home)
+        save_parmz(self.home)
+        save_entz(self.home)
+        save_ent_histz(self.home)
+        save_schemaz(self.home)
+        save_dmz(self.home)
         return self.home
 
     def init_registry(self, home, db_url, force_new_core=False, version='',
@@ -365,19 +359,12 @@ class UberORB(object):
         caches (data_elementz, parameterz, entz, ent_histz, schemaz, and dmz).
         """
         self.log.info('* dump_db()')
-        data_elements_path = os.path.join(self.home, 'data_elements.json')
-        parameters_path = os.path.join(self.home, 'parameters.json')
-        ents_path = os.path.join(self.home, 'ents.json')
-        ent_hists_path = os.path.join(self.home, 'ent_hists.json')
-        schemas_path = os.path.join(self.home, 'schemas.json')
-        dms_path = os.path.join(self.home, 'dms.json')
-        save_data_elementz(data_elements_path)
-        save_parmz(parameters_path)
-        save_entz(ents_path)
-        save_ent_histz(ent_hists_path)
-        save_schemaz(schemas_path)
-        save_dmz(dms_path)
-        self.log.info('  all caches saved.')
+        save_data_elementz(self.home)
+        save_parmz(self.home)
+        save_entz(self.home)
+        save_ent_histz(self.home)
+        save_schemaz(self.home)
+        save_dmz(self.home)
         dts = file_dts()
         json_fname = 'db-dump-' + dts + '.json'
         yaml_fname = 'db-dump-' + dts + '.yaml'
@@ -541,8 +528,7 @@ class UberORB(object):
                 # self.log.debug('   "{}"'.format(req_oid))
                 # self.log.debug('   computation result: {}'.format(result))
                 pass
-        parameters_path = os.path.join(self.home, 'parameters.json')
-        save_parmz(parameters_path)
+        save_parmz(self.home)
 
     def assign_test_parameters(self, objs, parms=None, des=None):
         """

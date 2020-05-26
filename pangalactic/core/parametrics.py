@@ -196,22 +196,22 @@ def deserialize_parms(oid, ser_parms, cname=None):
             # log.debug('  - {}'.format(log_msg))
             set_pval(oid, base_pid, 0.0)
 
-def load_parmz(json_path):
+def load_parmz(home_path):
     """
     Load the `parameterz` dict from json file in cache format.
     """
     # log.debug('* load_parmz() ...')
-    if os.path.exists(json_path):
-        with open(json_path) as f:
+    if os.path.exists(home_path):
+        fpath = os.path.join(home_path, 'parameters.json')
+        with open(fpath) as f:
             stored_parameterz = json.loads(f.read())
         for oid, parms in stored_parameterz.items():
             deserialize_parms(oid, parms)
-        # log.debug('  - parameterz cache loaded and recomputed.')
+        log.debug('  - parameterz cache loaded.')
     else:
-        # log.debug('  - "parameters.json" was not found.')
-        pass
+        log.debug('  - "parameters.json" was not found.')
 
-def save_parmz(json_path):
+def save_parmz(home_path):
     """
     Save `parameterz` dict to a json file in cache format.
     """
@@ -220,10 +220,11 @@ def save_parmz(json_path):
     for oid, parms in parameterz.items():
         # NOTE: serialize_parms() uses deepcopy()
         stored_parameterz[oid] = serialize_parms(oid)
-    with open(json_path, 'w') as f:
+    fpath = os.path.join(home_path, 'parameters.json')
+    with open(fpath) as f:
         f.write(json.dumps(stored_parameterz, separators=(',', ':'),
                            indent=4, sort_keys=True))
-    # log.debug('  ... parameters.json file written.')
+    log.debug('  ... parameters.json file written.')
 
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
 # format:  {dimension : [ids of ParameterDefinitions having that dimension]}
@@ -1468,22 +1469,22 @@ def deserialize_des(oid, ser_des, cname=None):
         # log.debug('  - oid "{}" now has these data elements: {}.'.format(
                                          # oid, str(list(data_elementz[oid]))))
 
-def load_data_elementz(json_path):
+def load_data_elementz(home_path):
     """
     Load `data_elementz` dict from json file.
     """
     # log.debug('* _load_data_elementz() ...')
-    if os.path.exists(json_path):
-        with open(json_path) as f:
+    if os.path.exists(home_path):
+        fpath = os.path.join(home_path, 'data_elements.json')
+        with open(fpath) as f:
             serialized_des = json.loads(f.read())
         for oid, ser_des in serialized_des.items():
             deserialize_des(oid, ser_des)
-        # log.debug('  - data_elementz cache loaded.')
+        log.debug('  - data_elementz cache loaded.')
     else:
-        # log.debug('  - "data_elements.json" was not found.')
-        pass
+        log.debug('  - "data_elements.json" was not found.')
 
-def save_data_elementz(json_path):
+def save_data_elementz(home_path):
     """
     Save `data_elementz` dict to a json file.
     """
@@ -1493,14 +1494,14 @@ def save_data_elementz(json_path):
         for oid, obj_des in data_elementz.items():
             # NOTE: serialize_des() uses deepcopy()
             serialized_data_elementz[oid] = serialize_des(oid)
-        with open(json_path, 'w') as f:
+        fpath = os.path.join(home_path, 'data_elements.json')
+        with open(fpath) as f:
             f.write(json.dumps(serialized_data_elementz,
                                separators=(',', ':'),
                                indent=4, sort_keys=True))
-        # log.debug('  ... data_elements.json file written.')
+        log.debug('  ... data_elements.json file written.')
     except:
-        # log.debug('  ... writing data_elements.json file failed!')
-        pass
+        log.debug('  ... writing data_elements.json file failed!')
 
 def update_de_defz(de_def_obj):
     """

@@ -10,9 +10,9 @@ from uuid            import uuid4
 
 # pangalactic
 from pangalactic.core                 import prefs
-from pangalactic.core.parametrics     import (de_defz, parm_defz,
-                                              data_elementz,
-                                              parameterz,
+from pangalactic.core.parametrics     import (componentz,
+                                              data_elementz, de_defz,
+                                              parameterz, parm_defz,
                                               get_dval, get_pval,
                                               set_dval, set_pval,
                                               serialize_des,
@@ -36,7 +36,7 @@ log = logger()
 # -----------------------------------------------------------------------
 # entz:        persistent** cache of entity metadata
 #              ** persisted in the file 'ents.json' in the
-#              application home directory -- see the orb functions
+#              application home directory -- see the functions
 #              `save_entz` and `load_entz`
 # format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
 #           ...}
@@ -62,13 +62,26 @@ ent_lookupz = {}
 # format:  {entity['oid'] : [list of previous versions of entity]}
 ent_histz = {}
 
-def load_entz(json_path):
+# pliz:        persistent** cache of PartsListItem metadata
+#              ** persisted in the file 'plis.json' in the
+#              application home directory -- see the functions
+#              `save_pliz` and `load_pliz`
+# format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
+#           ...}
+# ... where required data elements for the entity are:
+# -------------------------------------------------------
+# owner, creator, modifier, create_datetime, mod_datetime
+# -------------------------------------------------------
+pliz = {}
+
+def load_entz(home_path):
     """
     Load the `entz` dict from json file.
     """
     log.debug('* load_entz() ...')
-    if os.path.exists(json_path):
-        with open(json_path) as f:
+    if os.path.exists(home_path):
+        fpath = os.path.join(home_path, 'ents.json')
+        with open(fpath) as f:
             data = f.read()
             if data:
                 entz.update(json.loads(data))
@@ -76,13 +89,14 @@ def load_entz(json_path):
     else:
         log.debug('  - "ents.json" was not found.')
 
-def save_entz(json_path):
+def save_entz(home_path):
     """
     Save `entz` dict to json file.
     """
     log.debug('* save_entz() ...')
     try:
-        with open(json_path, 'w') as f:
+        fpath = os.path.join(home_path, 'ents.json')
+        with open(fpath, 'w') as f:
             if entz:
                 f.write(json.dumps(entz, separators=(',', ':'),
                                    indent=4, sort_keys=True))
@@ -108,13 +122,14 @@ ent_lookupz = {}
 # format:  {entity['oid'] : [list of serialized previous versions of entity]}
 ent_histz = {}
 
-def load_ent_histz(json_path):
+def load_ent_histz(home_path):
     """
     Load the `ent_histz` dict from json file.
     """
     log.debug('* load_ent_histz() ...')
-    if os.path.exists(json_path):
-        with open(json_path) as f:
+    if os.path.exists(home_path):
+        fpath = os.path.join(home_path, 'ent_hists.json')
+        with open(fpath) as f:
             data = f.read()
             if data:
                 ent_histz.update(json.loads(data))
@@ -123,13 +138,14 @@ def load_ent_histz(json_path):
         log.debug('  - "ent_hists.json" was not found.')
         pass
 
-def save_ent_histz(json_path):
+def save_ent_histz(home_path):
     """
     Save `ent_histz` dict to json file.
     """
     log.debug('* save_ent_histz() ...')
     try:
-        with open(json_path, 'w') as f:
+        fpath = os.path.join(home_path, 'ent_hists.json')
+        with open(fpath, 'w') as f:
             if ent_histz:
                 f.write(json.dumps(ent_histz, separators=(',', ':'),
                                    indent=4, sort_keys=True))
@@ -138,8 +154,40 @@ def save_ent_histz(json_path):
         log.debug('  ... ent_hists.json file written.')
     except:
         log.debug('  ... unable to write to path "{}".'.format(
-                                                        json_path))
+                                                        home_path))
         pass
+
+def load_pliz(home_path):
+    """
+    Load the `pliz` dict from json file.
+    """
+    log.debug('* load_pliz() ...')
+    if os.path.exists(home_path):
+        fpath = os.path.join(home_path, 'plis.json')
+        with open(fpath) as f:
+            data = f.read()
+            if data:
+                pliz.update(json.loads(data))
+        log.debug('  - pliz cache loaded.')
+    else:
+        log.debug('  - "plis.json" was not found.')
+
+def save_pliz(home_path):
+    """
+    Save `pliz` dict to json file.
+    """
+    log.debug('* save_pliz() ...')
+    try:
+        fpath = os.path.join(home_path, 'plis.json')
+        with open(fpath, 'w') as f:
+            if pliz:
+                f.write(json.dumps(pliz, separators=(',', ':'),
+                                   indent=4, sort_keys=True))
+            else:
+                log.debug('  ... pliz was empty.')
+        log.debug('  ... plis.json file written.')
+    except:
+        log.debug('  ... exception encountered.')
 
 
 class Entity(dict):
@@ -192,7 +240,6 @@ class Entity(dict):
         """
         # log.debug('* Entity()')
         super().__init__(*args)
-        # self.update(dict(*args))
         if not oid:
             oid = str(uuid4())
         self.oid = oid
@@ -337,6 +384,72 @@ class Entity(dict):
         d.update(serialize_parms(self.oid))
         return d
 
+
+class PartsListItem(Entity):
+    """
+    A PartsListItem represents a line item in a parts list, and corresponds to
+    a "usage" of a product (spec) in a system assembly.  It is implemented as a
+    specialized Entity that corresponds to an instance of Acu or
+    ProjectSystemUsage.  Its parameters and data elements are those of the
+    associated 'system' or 'component' attribute (a Product instance).
+
+    Attributes:
+        oid (str):  a unique identifier [of the associated usage]
+        parent_pli_oid (str):  oid of the "parent" PartsListItem (assembly)
+        usage_oid (str):  oid of the usage
+        system_oid (str):  oid of the usage's 'system' or 'component'
+        system_name (str):  [property] 'reference_designator' attr of the usage
+        quantity (int):  [property] the 'quantity' attr of the usage
+        assembly_level (int):  [property] derived as 1 + 'assembly_level' of
+            the "parent" PartsListItem
+        owner (str):  oid of an Organization
+        creator (str):  oid of the entity's creator
+        modifier (str):  oid of the entity's last modifier
+        create_datetime (str):  iso-format string of creation datetime
+        mod_datetime (str):  iso-format string of last mod datetime
+    """
+    def __init__(self, *args, oid=None, parent_pli_oid=None, usage_oid=None,
+                 system_oid=None, owner=None, creator=None, modifier=None,
+                 create_datetime=None, mod_datetime=None, **kw):
+        """
+        Initialize.
+
+        Args:
+            args (tuple):  optional positional argument (0 or 1).  If a
+                positional arg is present, it must be either a mapping or an
+                iterable in which each element is an iterable containing 2
+                elements (e.g. a list of 2-tuples).
+
+        Keyword Args:
+            oid (str):  a unique identifier
+            parent_pli_oid (str):  oid of the "parent" PartsListItem (assembly)
+            usage_oid (str):  oid of the usage
+            system_oid (str):  oid of the usage's 'system' or 'component'
+            owner (str):  oid of an Organization
+            creator (str):  oid of the entity's creator
+            modifier (str):  oid of the entity's last modifier
+            create_datetime (str):  iso-format string of creation datetime
+            mod_datetime (str):  iso-format string of last mod datetime
+            kw (dict):  keyword args, passed to superclass (dict)
+                initialization
+        """
+        log.debug('* PartsListItem()')
+        super().__init__(*args, oid=oid, owner=owner, creator=creator,
+                 modifier=modifier, create_datetime=create_datetime,
+                 mod_datetime=mod_datetime, **kw)
+        self.usage_oid = usage_oid
+        self.system_oid = system_oid
+
+        @property
+        def system_name(self):
+            return componentz.get(self.system_oid, {}).get(
+                      'reference_designator', 'Unknown') or 'TBD'
+
+        @property
+        def assembly_level(self):
+            return pliz.get(self.parent_pli_oid, {}).getattr(
+                            'assembly_level', 0) or 0
+
 # -----------------------------------------------------------------------
 # DATAMATRIX-RELATED CACHES #############################################
 # -----------------------------------------------------------------------
@@ -358,7 +471,7 @@ dmz = {}
 schemaz = {'generic': ['system_name', 'assembly_level',
                        'additional_information']}
 
-def load_schemaz(json_path):
+def load_schemaz(home_path):
     """
     Load the `schemaz` dict from json file.  (Restores all DataMatrix
     instances.)
@@ -367,8 +480,9 @@ def load_schemaz(json_path):
         schemaz_path (str):  location of file to read
     """
     log.debug('* load_schemaz() ...')
-    if os.path.exists(json_path):
-        with open(json_path) as f:
+    if os.path.exists(home_path):
+        fpath = os.path.join(home_path, 'schemas.json')
+        with open(fpath) as f:
             data = f.read()
             if data:
                 schemaz.update(json.loads(data))
@@ -378,7 +492,7 @@ def load_schemaz(json_path):
         log.debug('  - "schemas.json" was not found.')
         pass
 
-def save_schemaz(json_path):
+def save_schemaz(home_path):
     """
     Save `schemaz` dict (all DataMatrix instances) to json file.
 
@@ -387,12 +501,13 @@ def save_schemaz(json_path):
     """
     log.debug('* save_schemaz() ...')
     nsch = len(schemaz)
-    with open(json_path, 'w') as f:
+    fpath = os.path.join(home_path, 'schemas.json')
+    with open(fpath) as f:
         f.write(json.dumps(schemaz, separators=(',', ':'),
                            indent=4, sort_keys=True))
     log.debug(f'  ... {nsch} schema(s) saved to schemas.json.')
 
-def load_dmz(json_path):
+def load_dmz(home_path):
     """
     Load the `dmz` dict from json file.  (Restores all DataMatrix
     instances.)
@@ -401,8 +516,9 @@ def load_dmz(json_path):
         dmz_path (str):  location of file to read
     """
     log.debug('* load_dmz() ...')
-    if os.path.exists(json_path):
-        with open(json_path) as f:
+    if os.path.exists(home_path):
+        fpath = os.path.join(home_path, 'dms.json')
+        with open(fpath) as f:
             ser_dms = json.loads(f.read()) or {}
         try:
             deser_dms = {oid: DataMatrix([
@@ -425,7 +541,7 @@ def load_dmz(json_path):
         log.debug('  - "dms.json" was not found.')
         pass
 
-def save_dmz(json_path):
+def save_dmz(home_path):
     """
     Save `dmz` dict (all DataMatrix instances) to json file.
 
@@ -443,7 +559,8 @@ def save_dmz(json_path):
                          mod_datetime=dm.mod_datetime)
                for oid, dm in dmz.items()}
     ndms = len(ser_dms)
-    with open(json_path, 'w') as f:
+    fpath = os.path.join(home_path, 'dms.json')
+    with open(fpath) as f:
         f.write(json.dumps(ser_dms, separators=(',', ':'),
                            indent=4, sort_keys=True))
     log.debug(f'  ... {ndms} DataMatrix instance(s) saved to dms.json.')

@@ -148,9 +148,8 @@ class OrbTest(unittest.TestCase):
         # subsequent tests ...
         objs = orb.get_by_type('HardwareProduct')
         orb.assign_test_parameters(objs)
-        save_parmz(os.path.join('pangalaxian_test', 'parameters.json'))
-        save_data_elementz(os.path.join('pangalaxian_test',
-                                        'data_elements.json'))
+        save_parmz('pangalaxian_test')
+        save_data_elementz('pangalaxian_test')
         value = orb.db.query(Identifiable).filter(
                              Identifiable.oid.in_(oids)).count()
         expected = len(oids)
