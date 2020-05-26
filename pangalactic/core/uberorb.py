@@ -672,21 +672,15 @@ class UberORB(object):
         # (parameters.json) -- e.g., some ref data objects might have updated
         # parameters
         # ********************************************************************
-        data_elementz_path = os.path.join(self.home, 'data_elements.json')
-        parms_path = os.path.join(self.home, 'parameters.json')
-        ents_path = os.path.join(self.home, 'ents.json')
-        ent_hists_path = os.path.join(self.home, 'ent_hists.json')
-        schemas_path = os.path.join(self.home, 'schemas.json')
-        dms_path = os.path.join(self.home, 'dms.json')
-        load_data_elementz(data_elementz_path)
-        load_parmz(parms_path)
+        load_data_elementz(self.home)
+        load_parmz(self.home)
         self.log.debug('* loading entz ...')
-        load_entz(ents_path)
+        load_entz(self.home)
         self.log.debug('  entz: {}'.format(str(entz)))
-        load_ent_histz(ent_hists_path)
-        load_schemaz(schemas_path)
+        load_ent_histz(self.home)
+        load_schemaz(self.home)
         self.log.debug('* loading dmz ...')
-        load_dmz(dms_path)
+        load_dmz(self.home)
         self.log.debug('  dmz: {}'.format(str(dmz)))
         self.recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
