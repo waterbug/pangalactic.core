@@ -221,7 +221,7 @@ def save_parmz(home_path):
         # NOTE: serialize_parms() uses deepcopy()
         stored_parameterz[oid] = serialize_parms(oid)
     fpath = os.path.join(home_path, 'parameters.json')
-    with open(fpath) as f:
+    with open(fpath, 'w') as f:
         f.write(json.dumps(stored_parameterz, separators=(',', ':'),
                            indent=4, sort_keys=True))
     log.debug('  ... parameters.json file written.')
@@ -1495,7 +1495,7 @@ def save_data_elementz(home_path):
             # NOTE: serialize_des() uses deepcopy()
             serialized_data_elementz[oid] = serialize_des(oid)
         fpath = os.path.join(home_path, 'data_elements.json')
-        with open(fpath) as f:
+        with open(fpath, 'w') as f:
             f.write(json.dumps(serialized_data_elementz,
                                separators=(',', ':'),
                                indent=4, sort_keys=True))

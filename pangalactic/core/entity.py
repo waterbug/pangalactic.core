@@ -502,7 +502,7 @@ def save_schemaz(home_path):
     log.debug('* save_schemaz() ...')
     nsch = len(schemaz)
     fpath = os.path.join(home_path, 'schemas.json')
-    with open(fpath) as f:
+    with open(fpath, 'w') as f:
         f.write(json.dumps(schemaz, separators=(',', ':'),
                            indent=4, sort_keys=True))
     log.debug(f'  ... {nsch} schema(s) saved to schemas.json.')
@@ -560,7 +560,7 @@ def save_dmz(home_path):
                for oid, dm in dmz.items()}
     ndms = len(ser_dms)
     fpath = os.path.join(home_path, 'dms.json')
-    with open(fpath) as f:
+    with open(fpath, 'w') as f:
         f.write(json.dumps(ser_dms, separators=(',', ':'),
                            indent=4, sort_keys=True))
     log.debug(f'  ... {ndms} DataMatrix instance(s) saved to dms.json.')
