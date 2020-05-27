@@ -79,8 +79,8 @@ def load_entz(home_path):
     Load the `entz` dict from json file.
     """
     log.debug('* load_entz() ...')
-    if os.path.exists(home_path):
-        fpath = os.path.join(home_path, 'ents.json')
+    fpath = os.path.join(home_path, 'ents.json')
+    if os.path.exists(fpath):
         with open(fpath) as f:
             data = f.read()
             if data:
@@ -127,8 +127,8 @@ def load_ent_histz(home_path):
     Load the `ent_histz` dict from json file.
     """
     log.debug('* load_ent_histz() ...')
-    if os.path.exists(home_path):
-        fpath = os.path.join(home_path, 'ent_hists.json')
+    fpath = os.path.join(home_path, 'ent_hists.json')
+    if os.path.exists(fpath):
         with open(fpath) as f:
             data = f.read()
             if data:
@@ -162,8 +162,8 @@ def load_pliz(home_path):
     Load the `pliz` dict from json file.
     """
     log.debug('* load_pliz() ...')
-    if os.path.exists(home_path):
-        fpath = os.path.join(home_path, 'plis.json')
+    fpath = os.path.join(home_path, 'plis.json')
+    if os.path.exists(fpath):
         with open(fpath) as f:
             data = f.read()
             if data:
@@ -480,8 +480,8 @@ def load_schemaz(home_path):
         schemaz_path (str):  location of file to read
     """
     log.debug('* load_schemaz() ...')
-    if os.path.exists(home_path):
-        fpath = os.path.join(home_path, 'schemas.json')
+    fpath = os.path.join(home_path, 'schemas.json')
+    if os.path.exists(fpath):
         with open(fpath) as f:
             data = f.read()
             if data:
@@ -516,8 +516,8 @@ def load_dmz(home_path):
         dmz_path (str):  location of file to read
     """
     log.debug('* load_dmz() ...')
-    if os.path.exists(home_path):
-        fpath = os.path.join(home_path, 'dms.json')
+    fpath = os.path.join(home_path, 'dms.json')
+    if os.path.exists(fpath):
         with open(fpath) as f:
             ser_dms = json.loads(f.read()) or {}
         try:

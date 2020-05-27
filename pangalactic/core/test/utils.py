@@ -4,7 +4,7 @@ Create PGEF test data.
 """
 from copy import deepcopy
 import random
-from pangalactic.core.parametrics import de_defz, parm_defz
+from pangalactic.core.parametrics import de_defz, parm_defz, round_to
 from pangalactic.core.utils.meta import get_port_id, get_port_name
 from pangalactic.core.utils.datetimes import dtstamp
 
@@ -61,7 +61,9 @@ def gen_test_pvals(parms):
             # ignore computed parameters
             continue
         if '[Ctgcy]' in pid:
-            parm['value'] = 0.30
+            # assign a random contingency of 10%, 20%, or 30%
+            x = random.randint(1, 3)
+            parm['value'] = round_to(x * 0.10, n=3)
         elif pdz.get('range_datatype') == 'float':
             if not parm['value']:
                 parm['value'] = float(random.randint(1, 1000))

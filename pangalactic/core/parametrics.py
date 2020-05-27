@@ -200,9 +200,9 @@ def load_parmz(home_path):
     """
     Load the `parameterz` dict from json file in cache format.
     """
-    # log.debug('* load_parmz() ...')
-    if os.path.exists(home_path):
-        fpath = os.path.join(home_path, 'parameters.json')
+    log.debug('* load_parmz() ...')
+    fpath = os.path.join(home_path, 'parameters.json')
+    if os.path.exists(fpath):
         with open(fpath) as f:
             stored_parameterz = json.loads(f.read())
         for oid, parms in stored_parameterz.items():
@@ -215,7 +215,7 @@ def save_parmz(home_path):
     """
     Save `parameterz` dict to a json file in cache format.
     """
-    # log.debug('* save_parmz() ...')
+    log.debug('* save_parmz() ...')
     stored_parameterz = {}
     for oid, parms in parameterz.items():
         # NOTE: serialize_parms() uses deepcopy()
@@ -265,7 +265,7 @@ Constraint = namedtuple('Constraint',
 
 def round_to(x, n=4):
     """
-    Round the number x to n digits.  (Default: 3)
+    Round the number x to n digits.  (Default: 4)
 
     Args:
         x (float or int):  input number
@@ -1155,12 +1155,15 @@ def compute_assembly_parameter(product_oid, variable):
     else:
         return 0.0
 
-# NOTE: in the new parameter paradigm, the CBE and Contingency are context
-# parameters -- this function must be rewritten!
 def compute_mev(oid, variable):
     """
-    Compute the Maximum Expected Value of a parameter based on its Current Best
-    Estimate (CBE) value and the percent contingency specified for it.
+    Compute the Maximum Expected Value of a parameter based on either [1] if it
+    has components, the sum of their MEVs or [2] if it does not have
+    components, its Current Best Estimate (CBE) value and the percent
+    contingency specified for it.
+
+    NOTE: MEV was redefined as a conditionally recursive computation in a new
+    requirement. [2020-05-26 SCW]
 
     Args:
         oid (str): the oid of the Modelable containing the parameters
@@ -1172,27 +1175,40 @@ def compute_mev(oid, variable):
     # log.debug('* compute_mev "{}": "{}"'.format(oid, variable))
     if oid not in parameterz or variable not in parameterz[oid]:
         return 0.0
-    ctgcy_val = get_pval(oid, variable + '[Ctgcy]')
-    if not ctgcy_val:
-        # log.debug('  contingency not set --')
-        # log.debug('  setting default value (30%) ...')
-        # if Contingency value is 0 or not set, set to default value of 30%
-        ctgcy_val = 0.3
-        pid = variable + '[Ctgcy]'
-        parameterz[oid][pid] = {'value': ctgcy_val, 'units': '%',
-                                'mod_datetime': str(dtstamp())}
-    factor = ctgcy_val + 1.0
-    base_val = _compute_pval(oid, variable, 'CBE')
-    # extremely verbose logging -- uncomment only for intense debugging
-    # log.debug('* compute_mev: base parameter value is {}'.format(base_val))
-    # log.debug('           base parameter type is {}'.format(
-                                                            # type(base_val)))
-    if isinstance(base_val, int):
-        return round_to(int(factor * base_val))
-    elif isinstance(base_val, float):
-        return round_to(factor * base_val)
+    radt = parm_defz[variable]['range_datatype']
+    dtype = DATATYPES[radt]
+    # cz, if it exists, will be a list of namedtuples ...
+    cz = componentz.get(oid)
+    # if components, use recursive sum of MEVs; else compute locally
+    if cz:
+        # dtype cast is used here in case some component didn't have this
+        # parameter or didn't exist and we got a 0.0 value for it ...
+        summation = fsum(
+          [dtype(compute_mev(c.oid, variable) * c.quantity)
+           for c in cz])
+        return round_to(summation)
     else:
-        return 0.0
+        ctgcy_val = get_pval(oid, variable + '[Ctgcy]')
+        if not ctgcy_val:
+            # log.debug('  contingency not set --')
+            # log.debug('  setting default value (30%) ...')
+            # if Contingency value is 0 or not set, set to default value of 30%
+            ctgcy_val = 0.3
+            pid = variable + '[Ctgcy]'
+            parameterz[oid][pid] = {'value': ctgcy_val, 'units': '%',
+                                    'mod_datetime': str(dtstamp())}
+        factor = ctgcy_val + 1.0
+        base_val = _compute_pval(oid, variable, 'CBE')
+        # extremely verbose logging -- uncomment only for intense debugging
+        # log.debug('* compute_mev: base parameter value is {}'.format(base_val))
+        # log.debug('           base parameter type is {}'.format(
+                                                                # type(base_val)))
+        if isinstance(base_val, int):
+            return round_to(int(factor * base_val))
+        elif isinstance(base_val, float):
+            return round_to(factor * base_val)
+        else:
+            return 0.0
 
 def get_flight_units(product_oid, assembly_oid, default=1):
     """
@@ -1473,9 +1489,9 @@ def load_data_elementz(home_path):
     """
     Load `data_elementz` dict from json file.
     """
-    # log.debug('* _load_data_elementz() ...')
-    if os.path.exists(home_path):
-        fpath = os.path.join(home_path, 'data_elements.json')
+    log.debug('* load_data_elementz() ...')
+    fpath = os.path.join(home_path, 'data_elements.json')
+    if os.path.exists(fpath):
         with open(fpath) as f:
             serialized_des = json.loads(f.read())
         for oid, ser_des in serialized_des.items():
@@ -1488,7 +1504,7 @@ def save_data_elementz(home_path):
     """
     Save `data_elementz` dict to a json file.
     """
-    # log.debug('* _save_data_elementz() ...')
+    log.debug('* save_data_elementz() ...')
     serialized_data_elementz = {}
     try:
         for oid, obj_des in data_elementz.items():

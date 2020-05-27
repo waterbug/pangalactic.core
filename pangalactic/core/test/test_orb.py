@@ -577,14 +577,8 @@ class OrbTest(unittest.TestCase):
         orb.recompute_parmz()
         value = get_pval('test:spacecraft3', 'm[MEV]')
         sc = orb.get('test:spacecraft3')
-        expected = fsum([get_pval(acu.component.oid, 'm')
-                         for acu in sc.components])
-        # but the Magic Twanger has components Flux Capacitor and Mr. Fusion,
-        # so ...
-        expected -= get_pval('test:twanger', 'm')
-        expected += get_pval('test:flux_capacitor', 'm')
-        expected += get_pval('test:mr_fusion', 'm')
-        expected = round_to(1.3 * expected)
+        expected = round_to(fsum([get_pval(acu.component.oid, 'm[MEV]')
+                                  for acu in sc.components]))
         self.assertEqual(expected, value)
 
     def test_24_compute_margin(self):
