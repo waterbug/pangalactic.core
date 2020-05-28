@@ -1186,7 +1186,12 @@ def compute_mev(oid, variable):
         summation = fsum(
           [dtype(compute_mev(c.oid, variable) * c.quantity)
            for c in cz])
-        return round_to(summation)
+        mev = round_to(summation)
+        cbe = get_pval(oid, variable + '[CBE]')
+        if cbe:
+            ctgcy_val = round_to((mev - cbe)/cbe)
+            set_pval(oid, variable + '[Ctgcy]', ctgcy_val)
+        return mev
     else:
         ctgcy_val = get_pval(oid, variable + '[Ctgcy]')
         if not ctgcy_val:
