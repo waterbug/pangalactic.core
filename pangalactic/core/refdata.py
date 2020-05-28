@@ -71,6 +71,7 @@ deds = [
     'name': 'Vendor',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'range_datatype': 'str',
@@ -82,6 +83,7 @@ deds = [
     'name': 'TRL',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': None,
@@ -94,6 +96,7 @@ deds = [
     'name': 'Directionality',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'range_datatype': 'str',
@@ -108,6 +111,7 @@ pdc = [
     'name': 'Mass',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'mass',
@@ -121,6 +125,7 @@ pdc = [
     'name': 'Height',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
@@ -133,6 +138,7 @@ pdc = [
     'name': 'Width',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
@@ -145,6 +151,7 @@ pdc = [
     'name': 'Depth',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
@@ -157,6 +164,7 @@ pdc = [
     'name': 'X Center of Mass',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
@@ -169,6 +177,7 @@ pdc = [
     'name': 'Y Center of Mass',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
@@ -181,6 +190,7 @@ pdc = [
     'name': 'Z Center of Mass',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
@@ -193,6 +203,7 @@ pdc = [
     'name': 'Cost',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'money',
@@ -205,6 +216,7 @@ pdc = [
     'name': 'Data Capacity',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2019-10-12 00:00:00',
     'dimensions': 'data',
@@ -217,6 +229,7 @@ pdc = [
     'name': 'Data Rate',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2019-10-12 00:00:00',
     'dimensions': 'bitrate',
@@ -230,6 +243,7 @@ pdc = [
     'name': 'Power',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'power',
@@ -243,6 +257,7 @@ pdc = [
     'name': 'Voltage',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2018-05-25 00:00:00',
     'dimensions': 'electrical potential',
@@ -256,6 +271,7 @@ pdc = [
     'name': 'Active Area',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'area',
@@ -268,6 +284,7 @@ pdc = [
     'name': 'Substrate Area',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'area',
@@ -280,6 +297,7 @@ pdc = [
     'name': 'Duration',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'time',
@@ -292,6 +310,7 @@ pdc = [
     'name': 'Start Time',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'time',
@@ -304,6 +323,7 @@ pdc = [
     'name': 'End Time',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'time',
@@ -316,6 +336,7 @@ pdc = [
     'name': 'Downlink Frequency',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'frequency',
@@ -328,6 +349,7 @@ pdc = [
     'name': 'Uplink Frequency',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'frequency',
@@ -342,6 +364,7 @@ pdc = [
     'context_type': 'descriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -357,6 +380,7 @@ pdc = [
     'context_type': 'descriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -372,6 +396,7 @@ pdc = [
     'context_type': 'descriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': 'percent',
@@ -387,6 +412,7 @@ pdc = [
     'context_type': 'descriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -402,6 +428,7 @@ pdc = [
     'context_type': 'prescriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -417,6 +444,7 @@ pdc = [
     'context_type': 'prescriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -432,6 +460,7 @@ pdc = [
     'context_type': 'prescriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -447,6 +476,7 @@ pdc = [
     'context_type': 'prescriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -462,6 +492,7 @@ pdc = [
     'context_type': 'prescriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -477,6 +508,7 @@ pdc = [
     'context_type': 'prescriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -492,6 +524,7 @@ pdc = [
     'context_type': 'prescriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -507,6 +540,7 @@ pdc = [
     'context_type': 'prescriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': None,
@@ -522,6 +556,7 @@ pdc = [
     'context_type': 'prescriptive',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'context_dimensions': 'percent',
@@ -538,6 +573,8 @@ core = [
     'name_code': 'SANDBOX',
     'description': 'Sandbox for experimentation',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -575,6 +612,8 @@ core = [
     'name': 'TBD',
     'public': True,
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -860,6 +899,8 @@ dict(
     'abbreviation': 'Instrument',
     'description': 'Instrument',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -871,6 +912,8 @@ dict(
     'abbreviation': 'Observ',
     'description': 'Observatory',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -882,6 +925,8 @@ dict(
     'abbreviation': 'SC',
     'description': 'Spacecraft',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -892,6 +937,8 @@ dict(
     'name': 'Launch Vehicle',
     'abbreviation': 'LaunchVeh',
     'description': 'Launch Vehicle',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -903,6 +950,8 @@ dict(
     'abbreviation': 'ACS',
     'description': 'Attitude Control Systems',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -914,6 +963,8 @@ dict(
     'abbreviation': 'CDH',
     'description': 'Command and Data Handling System',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -925,6 +976,8 @@ dict(
     'abbreviation': 'CryoSys',
     'description': 'Cryogenic System',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-03-24 00:00:00'
     },
@@ -936,6 +989,8 @@ dict(
     'abbreviation': 'Detector',
     'description': 'Type for detectors (electonic, photonic, baryonic, etc.)',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-03-24 01:00:00'
     },
@@ -947,6 +1002,8 @@ dict(
     'abbreviation': 'HybridDiv',
     'description': 'Hybrid Divider',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -958,6 +1015,8 @@ dict(
     'abbreviation': 'ElecMech',
     'description': 'Electro Mechanical Devices',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -969,6 +1028,8 @@ dict(
     'abbreviation': 'OpticCmp',
     'description': 'Optical Components',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -980,6 +1041,8 @@ dict(
     'abbreviation': 'OpticSys',
     'description': 'Optical Systems',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -991,6 +1054,8 @@ dict(
     'abbreviation': 'Diplexer',
     'description': 'Diplexer',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1002,6 +1067,8 @@ dict(
     'abbreviation': 'Box',
     'description': 'Electronics Box',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1013,6 +1080,8 @@ dict(
     'abbreviation': 'Board',
     'description': 'Electronic Circuit Board',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1024,6 +1093,8 @@ dict(
     'abbreviation': 'EEEPart',
     'description': 'Electrical, Electronic, or Electromechanical Component',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1035,6 +1106,8 @@ dict(
     'abbreviation': 'CommSys',
     'description': 'Communications System',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1046,6 +1119,8 @@ dict(
     'abbreviation': 'CommCmp',
     'description': 'Communications Component',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1057,6 +1132,8 @@ dict(
     'abbreviation': 'MetEqpt',
     'description': 'Metrology Equipment',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1068,6 +1145,8 @@ dict(
     'abbreviation': 'PowerSys',
     'description': 'Power System',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1079,6 +1158,8 @@ dict(
     'abbreviation': 'MechSys',
     'description': 'Mechanical System',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1090,6 +1171,8 @@ dict(
     'abbreviation': 'PropSys',
     'description': 'Propulsion System',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1101,6 +1184,8 @@ dict(
     'abbreviation': 'ThermSys',
     'description': 'Thermal Control System',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1112,6 +1197,8 @@ dict(
     'abbreviation': 'CompSys',
     'description': 'Computer System',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1123,6 +1210,8 @@ dict(
     'abbreviation': 'StarTrack',
     'description': 'Star Tracker',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1134,6 +1223,8 @@ dict(
     'abbreviation': 'IMU',
     'description': 'Inertial Measurement Unit',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1145,6 +1236,8 @@ dict(
     'abbreviation': 'IRU',
     'description': 'Inertial Rate Unit',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1156,6 +1249,8 @@ dict(
     'abbreviation': 'CMG',
     'description': 'Control Moment Gyro',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1167,6 +1262,8 @@ dict(
     'abbreviation': 'RW',
     'description': 'Reaction Wheel',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1178,6 +1275,8 @@ dict(
     'abbreviation': 'MW',
     'description': 'Momentum Wheel',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1189,6 +1288,8 @@ dict(
     'abbreviation': 'MT',
     'description': 'Magnetic Torquer',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1200,6 +1301,8 @@ dict(
     'abbreviation': 'Magnetomtr',
     'description': 'Magnetometer',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1211,6 +1314,8 @@ dict(
     'abbreviation': 'DSS',
     'description': 'Digital Sun Sensor',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1222,6 +1327,8 @@ dict(
     'abbreviation': 'CSS',
     'description': 'Coarse Sun Sensor',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1233,6 +1340,8 @@ dict(
     'abbreviation': 'HS',
     'description': 'Horizon Sensor',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1244,6 +1353,8 @@ dict(
     'abbreviation': 'Tank',
     'description': 'Tank',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1255,6 +1366,8 @@ dict(
     'abbreviation': 'Fuel',
     'description': 'Fuel',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1265,6 +1378,8 @@ dict(
     'name': 'Oxidizer',
     'abbreviation': 'Oxidizer',
     'description': 'Oxidizer',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1276,6 +1391,8 @@ dict(
     'abbreviation': 'PyroValve',
     'description': 'Pyro Isolation Valve',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1287,6 +1404,8 @@ dict(
     'abbreviation': 'LatchValve',
     'description': 'Latch Valve',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1298,6 +1417,8 @@ dict(
     'abbreviation': 'PrplntFltr',
     'description': 'Propellant Filter',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1309,6 +1430,8 @@ dict(
     'abbreviation': 'Manifold',
     'description': 'Manifold',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 01:00:00'
     },
@@ -1320,6 +1443,8 @@ dict(
     'abbreviation': 'FDValve',
     'description': 'Fill/Drain Valve',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1331,6 +1456,8 @@ dict(
     'abbreviation': 'Thruster',
     'description': 'Thruster',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1342,6 +1469,8 @@ dict(
     'abbreviation': 'PressXducr',
     'description': 'Pressure Transducer',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1353,6 +1482,8 @@ dict(
     'abbreviation': 'PPU',
     'description': 'Power Processing Unit',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1364,6 +1495,8 @@ dict(
     'abbreviation': 'SEPEng',
     'description': 'SEP Engine',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1375,6 +1508,8 @@ dict(
     'abbreviation': 'SEPEngGmbl',
     'description': 'SEP Engine Gimbal',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1386,6 +1521,8 @@ dict(
     'abbreviation': 'Heater',
     'description': 'Heater',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1397,6 +1534,8 @@ dict(
     'abbreviation': 'Thermostat',
     'description': 'Thermostat',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1408,6 +1547,8 @@ dict(
     'abbreviation': 'TempSensor',
     'description': 'Temperature Sensor',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1419,6 +1560,8 @@ dict(
     'abbreviation': 'ThermCtrlr',
     'description': 'Thermal Controller',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-02 00:00:00'
     },
@@ -1430,6 +1573,8 @@ dict(
     'abbreviation': 'MltLyrInsl',
     'description': 'Multi Layer Insulation',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1441,6 +1586,8 @@ dict(
     'abbreviation': 'ThermCtng',
     'description': 'Thermal Coating',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1452,6 +1599,8 @@ dict(
     'abbreviation': 'RadtrPnl',
     'description': 'Radiator Panel',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1463,6 +1612,8 @@ dict(
     'abbreviation': 'HeatPipe',
     'description': 'Heat Pipe',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1474,6 +1625,8 @@ dict(
     'abbreviation': 'ThermStrap',
     'description': 'Thermal Strap',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1485,6 +1638,8 @@ dict(
     'abbreviation': 'ThermLver',
     'description': 'Thermal Louver',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1496,6 +1651,8 @@ dict(
     'abbreviation': 'MechStruct',
     'description': 'Mechanical Structure',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1507,6 +1664,8 @@ dict(
     'abbreviation': 'InstrAccom',
     'description': 'Instrument Accomodation',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1518,6 +1677,8 @@ dict(
     'abbreviation': 'PldAchFtng',
     'description': 'Payload Attach Fitting',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1529,6 +1690,8 @@ dict(
     'abbreviation': 'Actuator',
     'description': 'Actuator',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1540,6 +1703,8 @@ dict(
     'abbreviation': 'SolrAryAct',
     'description': 'Solar Array Actuator',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1551,6 +1716,8 @@ dict(
     'abbreviation': 'AntGimbl',
     'description': 'Antenna Gimbal',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1562,6 +1729,8 @@ dict(
     'abbreviation': 'Boom',
     'description': 'Boom',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1573,6 +1742,8 @@ dict(
     'abbreviation': 'DplmtSys',
     'description': 'Deployment System',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1584,6 +1755,8 @@ dict(
     'abbreviation': 'SolarArray',
     'description': 'Solar Array',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1595,6 +1768,8 @@ dict(
     'abbreviation': 'Battery',
     'description': 'Battery',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1606,6 +1781,8 @@ dict(
     'abbreviation': 'FPGA',
     'description': 'Field Programmable Gate Array',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1617,6 +1794,8 @@ dict(
     'abbreviation': 'PCB',
     'description': 'Printed Circuit Board',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1628,6 +1807,8 @@ dict(
     'abbreviation': 'RTG',
     'owner': 'pgefobjects:PGANA',
     'description': 'Pu-238 based very hot power thingy',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1639,6 +1820,8 @@ dict(
     'abbreviation': 'PwrHarness',
     'description': 'Power Harness',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1651,6 +1834,8 @@ dict(
     'description': 'Communications Security: a box to prevent unauthorized '
                     'access',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-02 00:00:00'
     },
@@ -1662,6 +1847,8 @@ dict(
     'abbreviation': 'RMU',
     'description': 'Redundancy Management Unit',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1673,6 +1860,8 @@ dict(
     'abbreviation': 'OmniAnt',
     'description': 'Omni Antenna',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1684,6 +1873,8 @@ dict(
     'abbreviation': 'MGA',
     'description': 'Medium Gain Antenna (MGA)',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1695,6 +1886,8 @@ dict(
     'abbreviation': 'HGA',
     'description': 'High Gain Antenna (HGA)',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1706,6 +1899,8 @@ dict(
     'abbreviation': 'Antenna',
     'description': 'Antenna',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1717,6 +1912,8 @@ dict(
     'abbreviation': 'Xponder',
     'description': 'Transponder',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1728,6 +1925,8 @@ dict(
     'abbreviation': 'Xmitter',
     'description': 'Transmitter',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1739,6 +1938,8 @@ dict(
     'abbreviation': 'Receiver',
     'description': 'Receiver',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1750,6 +1951,8 @@ dict(
     'abbreviation': 'PowerAmp',
     'description': 'Power Amplifier',
     'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
     },
@@ -1981,6 +2184,8 @@ dict(
     'id': 'analog_data',
     'name': 'Analog Data',
     'abbreviation': 'Analog',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -1991,6 +2196,8 @@ dict(
     'id': 'digital_data',
     'name': 'Digital Data',
     'abbreviation': 'Digital',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -2001,6 +2208,8 @@ dict(
     'id': 'comm',
     'name': 'Communications',
     'abbreviation': 'Comm',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -2011,6 +2220,8 @@ dict(
     'id': 'thermal',
     'name': 'Thermal',
     'abbreviation': 'Thermal',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -2021,6 +2232,8 @@ dict(
     'id': 'gas',
     'name': 'Gas',
     'abbreviation': 'Gas',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -2038,6 +2251,8 @@ dict(
           'mod_datetime': '2020-01-01 00:00:00',
           'units': 'Mbit/s'}
           },
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-01 00:00:00',
     },
@@ -2055,6 +2270,8 @@ dict(
           'mod_datetime': '2020-01-01 00:00:00',
           'units': 'Mbit/s'}
           },
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-01 00:00:00',
     },
@@ -2072,6 +2289,8 @@ dict(
           'mod_datetime': '2020-01-01 00:00:00',
           'units': 'Mbit/s'}
           },
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-01 00:00:00',
     },
@@ -2089,6 +2308,8 @@ dict(
           'units': 'Mbit/s'}
           },
     'type_of_port': 'pgefobjects:PortType.digital_data',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -2112,6 +2333,8 @@ dict(
           'mod_datetime': epoch,
           'units': 'V'}
           },
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2019-12-15 00:00:00'
     },
@@ -2135,6 +2358,8 @@ dict(
           'mod_datetime': epoch,
           'units': 'V'}
           },
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2019-12-15 00:00:00'
     },
@@ -2158,6 +2383,8 @@ dict(
           'mod_datetime': epoch,
           'units': 'V'}
           },
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2019-12-15 00:00:00'
     },
@@ -2181,6 +2408,8 @@ dict(
           'mod_datetime': epoch,
           'units': 'V'}
           },
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2019-12-15 00:00:00'
     }
