@@ -229,6 +229,7 @@ DESERIALIZATION_ORDER = [
                     'Project',
                     'Person',
                     'RoleAssignment',
+                    'DataElementDefinition',
                     'ParameterDefinition',
                     'ParameterRelation',
                     'PortType',
