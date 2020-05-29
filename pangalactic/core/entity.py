@@ -774,6 +774,102 @@ class DataMatrix(UserList):
             pass
 
     def set_components_parms(self, level, row, name, component, qty=1):
+        """
+        Set parameter and data element values for the components in a Master
+        Equipment List (MEL) DataMatrix based on their positions in the system
+        assembly.
+        """
+        oid = component.oid
+        if row < len(self) and self[row].get('oid') == oid:
+            # this component corresponds to its index -- update the entity:
+            entity = self[row]
+        else:
+            # create a new entity for it (note that if there is already
+            # metadata for it in 'entz', it will use that instead of the
+            # arguments supplied here ...)
+            entity = Entity(oid=component.oid,
+                            owner=component.owner.oid,
+                            creator=component.creator.oid,
+                            create_datetime=str(component.create_datetime),
+                            modifier=component.modifier.oid,
+                            mod_datetime=str(component.mod_datetime))
+        if row < len(self):
+            self[row] = entity
+        else:
+            self.append(entity)
+        # map data element values to parameter values where appropriate ...
+        entity['m_unit'] = get_pval(oid, 'm[CBE]') or 0
+        entity['m_cbe'] = qty * entity['m_unit']
+        entity['m_ctgcy'] = get_pval(oid, 'm[Ctgcy]') or 0
+        entity['m_mev'] = qty * (get_pval(oid, 'm[MEV]') or 0)
+        entity['nom_p_unit_cbe'] = get_pval(oid, 'P[CBE]') or 0
+        entity['nom_p_cbe'] = qty * (entity['nom_p_unit_cbe'] or 0)
+        entity['nom_p_ctgcy'] = get_pval(oid, 'P[Ctgcy]') or 0
+        entity['nom_p_mev'] = qty * (get_pval(oid, 'P[MEV]') or 0)
+        # columns in spreadsheet MEL:
+        #   0: Level
+        #   1: Name
+        #   2: Unit MASS CBE
+        #   9: Mass CBE
+        #  10: Mass Contingency (%)
+        #  11: Mass MEV
+        #  12: Unit Power CBE
+        #  13: Power CBE
+        #  14: Power Contingency (%)
+        #  15: Power MEV
+        # then write the "LEVEL" cell
+        entity['assembly_level'] = level
+        entity['system_name'] = name
+        print(f' + writing {name} in row {row}')
+        if component.components:
+            next_level = level + 1
+            for acu in component.components:
+                if acu.component.oid == 'pgefobjects:TBD':
+                    continue
+                row += 1
+                self.level_map.append(next_level)
+                component = acu.component
+                qty = acu.quantity or 1
+                name = f'{acu.reference_designator} [{component.name}]'
+                end_row = self.set_components_parms(next_level, row, name,
+                                                    component, qty=qty)
+                row += end_row
+        return row
+
+    def refresh_mel_pli_data(self, context):
+        """
+        Refresh generated MEL (Master Equipment List) parameters related to a
+        'context' (Project or Product) from which the generated values are
+        obtained.  This is a rewrite of 'refresh_mel_data' to use PartsListItem
+        instances instead of Entity instances as the items in the DataMatrix.
+
+        Args:
+            context (Project or Product):  the project or system to which the
+                generated MEL parameters pertain
+        """
+        self.level_map = [1]
+        row = 0
+        if context.__class__.__name__ == 'Project':
+            # context is Project, so may include several systems
+            project = context
+            for psu in project.systems:
+                end_row = self.set_components_parms(1, row, psu.system_role,
+                                                    psu.system)
+                row += end_row
+        elif context.__class__.__name__ == 'HardwareProduct':
+            # context is Product -> a single system MEL
+            name = f'{context.name} [{context.id}]'
+            self.set_components_parms(1, 0, name, context)
+        else:
+            # not a Project or HardwareProduct
+            pass
+
+    def set_pli_parms(self, level, row, name, component, qty=1):
+        """
+        Set parameter and data element values for the components in a Master
+        Equipment List (MEL) DataMatrix based on their positions in the system
+        assembly.
+        """
         oid = component.oid
         if row < len(self) and self[row].get('oid') == oid:
             # this component corresponds to its index -- update the entity:
