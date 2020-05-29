@@ -394,7 +394,7 @@ class PartsListItem(Entity):
     associated 'system' or 'component' attribute (a Product instance).
 
     Attributes:
-        oid (str):  a unique identifier [of the associated usage]
+        oid (str):  a unique identifier for this instance
         parent_pli_oid (str):  oid of the "parent" PartsListItem (assembly)
         usage_oid (str):  oid of the usage
         system_oid (str):  oid of the usage's 'system' or 'component'
@@ -421,7 +421,7 @@ class PartsListItem(Entity):
                 elements (e.g. a list of 2-tuples).
 
         Keyword Args:
-            oid (str):  a unique identifier
+            oid (str):  a unique identifier for this instance
             parent_pli_oid (str):  oid of the "parent" PartsListItem (assembly)
             usage_oid (str):  oid of the usage
             system_oid (str):  oid of the usage's 'system' or 'component'
@@ -584,7 +584,7 @@ class DataMatrix(UserList):
 
     Attributes:
         data (iterable):  an iterable of entities
-        level_map (dict):  maps entity oids to assembly levels (1-based)
+        level_map (list):  rows to assembly levels
         name (str): name (which may or may not exist in the 'schemaz' cache)
         project_id (str): id a project (owner of the DataMatrix)
         schema (list): list of data element ids and parameter ids
@@ -652,7 +652,7 @@ class DataMatrix(UserList):
 
     def clear(self):
         super().clear()
-        self.level_map.clear()
+        self.level_map = []
 
     @property
     def oid(self):
@@ -672,15 +672,23 @@ class DataMatrix(UserList):
         indicate what the level should be.
         """
         e = Entity()
-        i = len(self)
         self.append(e)
         if child:
             # assembly level 1 higher than preceding row if a child
-            level = (self.level_map.get(self[i-1].get('oid')) or 1) + 1
+            if self.level_map:
+                level = self.level_map[-1] + 1
+                self.level_map.append(level)
+            else:
+                level = 1
+                self.level_map = [1]
         else:
             # assembly level same as preceding row if a peer
-            level = self.level_map.get(self[i-1].get('oid')) or 1
-        self.level_map[e.oid] = level
+            if self.level_map:
+                level = self.level_map[-1]
+                self.level_map.append(level)
+            else:
+                level = 1
+                self.level_map = [1]
         return e
 
     def insert_new_row(self, i, child_of=False):
@@ -697,10 +705,20 @@ class DataMatrix(UserList):
         self.insert(i, e)
         if child_of is False:
             # assembly level same as preceding row if a peer
-            level = self.level_map.get(self[i-1].get('oid')) or 1
+            if self.level_map:
+                level = self.level_map[-1]
+                self.level_map.append(level)
+            else:
+                level = 1
+                self.level_map = [1]
         else:
             # assembly level 1 higher than the specified "child_of"
-            level = (self.level_map.get(self[i-1].get('oid')) or 1) + 1
+            if self.level_map:
+                level = self.level_map[-1] + 1
+                self.level_map.append(level)
+            else:
+                level = 1
+                self.level_map = [1]
         self.level_map[e.oid] = level
         return e
 
@@ -710,9 +728,9 @@ class DataMatrix(UserList):
         """
         if i >= len(self):
             return False
-        if getattr(self[i], 'oid') in self.level_map:
-            del self.level_map[getattr(self[i], 'oid')]
-        del self[i]
+        else:
+            self.level_map.pop(i)
+        self.pop(i)
         return True
 
     def remove_row_by_oid(self, oid):
@@ -720,15 +738,14 @@ class DataMatrix(UserList):
         Remove the row with the specified oid.
         """
         oids = [e.oid for e in self]
-        if oid not in oids:
+        if oid in oids:
+            i = self.index(oid)
+        else:
             return False
-        del self[oids.index(oid)]
-        if oid in self.level_map:
-            del self.level_map[oid]
+        self.pop(i)
+        self.level_map.pop(i)
         return True
 
-    # NOTE: this code is just a copy of the code in reports.py for MEL
-    # generation -- needs to be adapted/generalized ...
     def refresh_mel_data(self, context):
         """
         Refresh generated MEL (Master Equipment List) parameters related to a
@@ -739,43 +756,48 @@ class DataMatrix(UserList):
             context (Project or Product):  the project or system to which the
                 generated MEL parameters pertain
         """
-        new = False
-        if not self.data:
-            new = True
-            row = 1
-        if new:
-            if context.__class__.__name__ == 'Project':
-                # context is Project, so may include several systems
-                project = context
-                system_names = [psu.system.name.lower() for psu in project.systems]
-                system_names.sort()
-                systems_by_name = {psu.system.name.lower() : psu.system
-                                   for psu in project.systems}
-                for system_name in system_names:
-                    system = systems_by_name[system_name]
-                    row = self.get_components_parms(self.data, 1, row, system)
-            elif context.__class__.__name__ == 'HardwareProduct':
-                # context is Product -> a single system MEL
-                system = context
-                row = self.get_components_parms(self.data, 1, row, system)
-            else:
-                # not a Project or HardwareProduct
-                pass
+        self.level_map = [1]
+        if context.__class__.__name__ == 'Project':
+            # context is Project, so may include several systems
+            project = context
+            for psu in project.systems:
+                self.set_components_parms(1, 0, psu.system_role, psu.system)
+        elif context.__class__.__name__ == 'HardwareProduct':
+            # context is Product -> a single system MEL
+            name = f'{context.name} [{context.id}]'
+            self.set_components_parms(1, 0, name, context)
         else:
-            # [1] add/remove oids as necessary
-            # [2] update existing oids
+            # not a Project or HardwareProduct
             pass
 
-    def get_components_parms(self, level, row, component, qty=1):
+    def set_components_parms(self, level, row, name, component, qty=1):
         oid = component.oid
-        self.data['m_unit'] = get_pval(oid, 'm[CBE]')
-        self.data['m_cbe'] = qty * self.data['m_unit']
-        self.data['m_ctgcy'] = get_pval(oid, 'm[Ctgcy]')
-        self.data['m_mev'] = qty * get_pval(oid, 'm[MEV]')
-        self.data['nom_p_unit_cbe'] = get_pval(oid, 'P[CBE]')
-        self.data['nom_p_cbe'] = qty * self.data['nom_p_unit_cbe']
-        self.data['nom_p_ctgcy'] = get_pval(oid, 'P[Ctgcy]')
-        self.data['nom_p_mev'] = qty * get_pval(oid, 'P[MEV]')
+        if row < len(self) and self[row].get('oid') == oid:
+            # this component corresponds to its index -- update the entity:
+            entity = self[row]
+        else:
+            # create a new entity for it (note that if there is already
+            # metadata for it in 'entz', it will use that instead of the
+            # arguments supplied here ...)
+            entity = Entity(oid=component.oid,
+                            owner=component.owner.oid,
+                            creator=component.creator.oid,
+                            create_datetime=str(component.create_datetime),
+                            modifier=component.modifier.oid,
+                            mod_datetime=str(component.mod_datetime))
+        if row < len(self):
+            self[row] = entity
+        else:
+            self.append(entity)
+        # map data element values to parameter values where appropriate ...
+        entity['m_unit'] = get_pval(oid, 'm[CBE]') or 0
+        entity['m_cbe'] = qty * entity['m_unit']
+        entity['m_ctgcy'] = get_pval(oid, 'm[Ctgcy]') or 0
+        entity['m_mev'] = qty * (get_pval(oid, 'm[MEV]') or 0)
+        entity['nom_p_unit_cbe'] = get_pval(oid, 'P[CBE]') or 0
+        entity['nom_p_cbe'] = qty * (entity['nom_p_unit_cbe'] or 0)
+        entity['nom_p_ctgcy'] = get_pval(oid, 'P[Ctgcy]') or 0
+        entity['nom_p_mev'] = qty * (get_pval(oid, 'P[MEV]') or 0)
         # columns in spreadsheet MEL:
         #   0: Level
         #   1: Name
@@ -787,24 +809,20 @@ class DataMatrix(UserList):
         #  13: Power CBE
         #  14: Power Contingency (%)
         #  15: Power MEV
-        row += 1
-        print('writing {} in row {}'.format(component.name, row))
         # then write the "LEVEL" cell
-        self.data[oid]['level'] = level
-        self.data[oid]['name'] = component.name
+        entity['assembly_level'] = level
+        entity['system_name'] = name
+        print(f' + writing {name} in row {row}')
         if component.components:
             next_level = level + 1
-            comp_names = [acu.component.name.lower()
-                          for acu in component.components]
-            comp_names.sort()
-            comps_by_name = {acu.component.name.lower() : acu.component
-                             for acu in component.components}
-            qty_by_name = {acu.component.name.lower() : acu.quantity or 1
-                           for acu in component.components}
-            for comp_name in comp_names:
-                comp = comps_by_name[comp_name]
-                qty = qty_by_name[comp_name]
-                row = self.get_components_parms(self.data, next_level, row,
-                                                comp, qty)
-        return row
+            for acu in component.components:
+                if acu.component.oid == 'pgefobjects:TBD':
+                    continue
+                row += 1
+                self.level_map.append(next_level)
+                component = acu.component
+                qty = acu.quantity or 1
+                name = f'{acu.reference_designator} [{component.name}]'
+                self.set_components_parms(next_level, row, name, component,
+                                          qty=qty)
 
