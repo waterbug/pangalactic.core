@@ -757,11 +757,14 @@ class DataMatrix(UserList):
                 generated MEL parameters pertain
         """
         self.level_map = [1]
+        row = 0
         if context.__class__.__name__ == 'Project':
             # context is Project, so may include several systems
             project = context
             for psu in project.systems:
-                self.set_components_parms(1, 0, psu.system_role, psu.system)
+                end_row = self.set_components_parms(1, row, psu.system_role,
+                                                    psu.system)
+                row += end_row
         elif context.__class__.__name__ == 'HardwareProduct':
             # context is Product -> a single system MEL
             name = f'{context.name} [{context.id}]'
@@ -823,6 +826,8 @@ class DataMatrix(UserList):
                 component = acu.component
                 qty = acu.quantity or 1
                 name = f'{acu.reference_designator} [{component.name}]'
-                self.set_components_parms(next_level, row, name, component,
-                                          qty=qty)
+                end_row = self.set_components_parms(next_level, row, name,
+                                                    component, qty=qty)
+                row += end_row
+        return row
 
