@@ -1189,12 +1189,14 @@ def compute_mev(oid, variable):
         mev = round_to(summation)
         cbe = get_pval(oid, variable + '[CBE]')
         if cbe:
-            ctgcy_val = round_to((mev - cbe)/cbe)
+            ctgcy_val = round_to((mev - cbe)/cbe, n=3)
             set_pval(oid, variable + '[Ctgcy]', ctgcy_val)
         return mev
     else:
         ctgcy_val = get_pval(oid, variable + '[Ctgcy]')
-        if not ctgcy_val:
+        if ctgcy_val:
+            ctgcy_val = round_to(ctgcy_val, n=3)
+        else:
             # log.debug('  contingency not set --')
             # log.debug('  setting default value (30%) ...')
             # if Contingency value is 0 or not set, set to default value of 30%
