@@ -41,6 +41,16 @@ PGEF "DataGrid" Widget
       the Product, since both the Product and the Entity access their data
       element and parameter values by lookup in the same caches
     + can reference a ProductType and use associated parameters / templates
+  - Entity subclass:  PartsListItem
+    + specifically addresses use case of a DataMatrix that represents a parts
+      list, such as the GSFC "Master Equipment List" (MEL)
+    + solves the "assembly level" problem for the corner-case of a component
+      that occurs at more than one level in an assembly -- e.g., a thermal
+      sensor that is placed at arbitrary locations in an assembly or a chip
+      that occurs in multiple boards or boxes (NOTE that the "where-used"
+      function reports which assemblies a given part occurs in but does not
+      have "assembly level" information, since an assembly in general may occur
+      at different levels in different systems).
 
 * DataMatrix (a list of entities ... equivalent to a grid: rows and columns)
   - a DataMatrix is basically a way of saying "show me *this* information about

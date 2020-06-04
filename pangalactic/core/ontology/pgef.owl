@@ -260,16 +260,6 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/data_sets -->
-
-    <owl:ObjectProperty rdf:about="&pgef;data_sets">
-        <rdfs:comment rdf:datatype="&xsd;string">The data sets contained in a data package.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;DataPackage"/>
-        <rdfs:range rdf:resource="&pgef;DataSet"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/derived_from -->
 
     <owl:ObjectProperty rdf:about="&pgef;derived_from">
@@ -723,39 +713,6 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/parent_parts_list -->
-
-    <owl:ObjectProperty rdf:about="&pgef;parent_parts_list">
-        <rdfs:comment rdf:datatype="&xsd;string">The parts list that contains this parts list item.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;PartsListItem"/>
-        <rdfs:range rdf:resource="&pgef;PartsList"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/parts_list_items -->
-
-    <owl:ObjectProperty rdf:about="&pgef;parts_list_items">
-        <owl:inverseOf rdf:resource="&pgef;parent_parts_list"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The parts list items contained in this parts list.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;PartsList"/>
-        <rdfs:range rdf:resource="&pgef;PartsListItem"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/pli_component_usage -->
-    <!-- inverse property is unnecessary-->
-
-    <owl:ObjectProperty rdf:about="&pgef;pli_component_usage">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The assembly role or position (and possibly reference designator referenced by a parts list item.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;PartsListItem"/>
-        <rdfs:range rdf:resource="&pgef;Acu"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/role_assignment_context -->
 
     <owl:ObjectProperty rdf:about="&pgef;role_assignment_context">
@@ -1157,7 +1114,7 @@
     <owl:DatatypeProperty rdf:about="&pgef;generic_part_number">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The generic identifier for a EEE part, which in some cases is specified by a standard (e.g., JEDEC for electronic parts).</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;EeePart"/>
+        <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -1501,7 +1458,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <owl:DatatypeProperty rdf:about="&pgef;military_specification">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The identifier of the military specification (a.k.a. MIL Spec) that applies to a EEE part.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;EeePart"/>
+        <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -1545,7 +1502,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <owl:DatatypeProperty rdf:about="&pgef;nsn">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The National Stock Number (NSN) for a EEE part.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;EeePart"/>
+        <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -1579,17 +1536,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">Identifier for an organization in the DoD Commercial And Government Entity (CAGE) database.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/originating_system -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;originating_system">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The system from which the data in a data set originated.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;DataSet"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -1672,39 +1618,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
-    <!-- http://pangalactic.us/pgef/pl_status -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;pl_status">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The state of a parts list relative to some possibly extensible set of standard states, e.g. in-process, reviewed, etc.  The set of standard states should be agreed upon by the project(s) or organization(s) using the parts list.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;PartsList"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/pl_type -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;pl_type">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The type of a parts list, selected from a set of standard parts list types, such as &apos;as-designed&apos; (ADPL), &apos;as-built&apos; (ABPL), &apos;preliminary&apos; (PRPL), etc., which should be agreed upon by the Project(s) or Organization(s) using the parts list.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;PartsList"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/processor_version -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;processor_version">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The version of the software application that was used to produce a DataSet.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;DataSet"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/publish_datetime -->
 
     <owl:DatatypeProperty rdf:about="&pgef;publish_datetime">
@@ -1765,7 +1678,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <owl:DatatypeProperty rdf:about="&pgef;screening_specification_number">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The identifier for a screening specification that applies to a EEE part.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;EeePart"/>
+        <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -1986,24 +1899,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
-    <!-- http://pangalactic.us/pgef/DataPackage -->
-
-    <owl:Class rdf:about="&pgef;DataPackage">
-        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A collection of one or more DataSets, each of which can contain one or more digital products.  The primary purpose of the DataPackage class is to enable the tracking and management of arbitrary collections of exchanged data.</rdfs:comment>
-    </owl:Class>
-
-
-
-    <!-- http://pangalactic.us/pgef/DataSet -->
-
-    <owl:Class rdf:about="&pgef;DataSet">
-        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A data set is a digital product whose purpose is to contain a population of serialized objects governed by a schema.  The content can be any representation, such as STEP (ISO 10303), HDF, JSON, CSV (comma-separated-values), or in general any data exchange or serialization format.</rdfs:comment>
-    </owl:Class>
-
-
-
     <!-- http://pangalactic.us/pgef/DigitalProduct -->
 
     <owl:Class rdf:about="&pgef;DigitalProduct">
@@ -2054,16 +1949,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <owl:Class rdf:about="&pgef;Document">
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:comment rdf:datatype="&xsd;string">The digital (computer-sensible) representation of a human-readable document.</rdfs:comment>
-    </owl:Class>
-
-
-
-    <!-- http://pangalactic.us/pgef/EeePart -->
-
-    <owl:Class rdf:about="&pgef;EeePart">
-        <rdfs:subClassOf rdf:resource="&pgef;HardwareProduct"/>
-        <rdfs:comment rdf:datatype="&xsd;string">An Electrical, Electronic, or Electromechanical (EEE) part.
-</rdfs:comment>
     </owl:Class>
 
 
@@ -2198,24 +2083,6 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <owl:Class rdf:about="&pgef;ProductInstance">
         <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
         <rdfs:comment rdf:datatype="&xsd;string">A physical object that is purported to be a physical realization of a part concept, or, formally, of a part specification.</rdfs:comment>
-    </owl:Class>
-
-
-
-    <!-- http://pangalactic.us/pgef/PartsList -->
-
-    <owl:Class rdf:about="&pgef;PartsList">
-        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A documented collection of parts and related information.  Parts lists occur in various contexts in the product life cycle, e.g.: to document component technology research, to document candidate parts for assemblies, to document parts used in model development, to track parts procurement information, to document part stocks and inventory, etc.</rdfs:comment>
-    </owl:Class>
-
-
-
-    <!-- http://pangalactic.us/pgef/PartsListItem -->
-
-    <owl:Class rdf:about="&pgef;PartsListItem">
-        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A parts list item is a document that is a component of a parts list, and represents a single line or item on its parent parts list.  The parts list item may reference an assembly role or position (assembly component usage, with associated reference designator.</rdfs:comment>
     </owl:Class>
 
 

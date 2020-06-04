@@ -25,6 +25,8 @@ from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
 from pangalactic.core.entity      import (dmz, load_dmz, save_dmz,
                                           entz, load_entz, save_entz,
+                                          plz, load_plz, save_plz,
+                                          pliz, load_pliz, save_pliz,
                                           schemaz, load_schemaz, save_schemaz,
                                           load_ent_histz, save_ent_histz)
 from pangalactic.core.registry    import PanGalacticRegistry
@@ -321,6 +323,8 @@ class UberORB(object):
         save_parmz(self.home)
         save_entz(self.home)
         save_ent_histz(self.home)
+        save_pliz(self.home)
+        save_plz(self.home)
         save_schemaz(self.home)
         save_dmz(self.home)
         return self.home
@@ -356,13 +360,16 @@ class UberORB(object):
     def dump_db(self, fmt='yaml'):
         """
         Serialize the entire db and dump to `vault/db.yaml`.  Also save all
-        caches (data_elementz, parameterz, entz, ent_histz, schemaz, and dmz).
+        caches (data_elementz, parameterz, entz, ent_histz, pliz, schemaz, and
+        dmz).
         """
         self.log.info('* dump_db()')
         save_data_elementz(self.home)
         save_parmz(self.home)
         save_entz(self.home)
         save_ent_histz(self.home)
+        save_pliz(self.home)
+        save_plz(self.home)
         save_schemaz(self.home)
         save_dmz(self.home)
         dts = file_dts()
@@ -676,6 +683,12 @@ class UberORB(object):
         self.log.debug('* loading entz ...')
         load_entz(self.home)
         self.log.debug('  entz: {}'.format(str(entz)))
+        self.log.debug('* loading pliz ...')
+        load_pliz(self.home)
+        self.log.debug('  pliz: {}'.format(str(pliz)))
+        self.log.debug('* loading plz ...')
+        load_plz(self.home)
+        self.log.debug('  plz: {}'.format(str(pliz)))
         load_ent_histz(self.home)
         load_schemaz(self.home)
         self.log.debug('* loading dmz ...')
