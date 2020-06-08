@@ -14,6 +14,7 @@ from pangalactic.core.parametrics     import (data_elementz, de_defz,
                                               parameterz, parm_defz,
                                               get_dval, get_pval,
                                               set_dval, set_pval,
+                                              round_to,
                                               serialize_des,
                                               serialize_parms)
 from pangalactic.core.utils.datetimes import dtstamp
@@ -455,7 +456,7 @@ class PartsListItem(Entity):
         """
         Get the value of a key.
         """
-        log.debug(f'* PLI.__getitem__({k})')
+        # log.debug(f'* PLI.__getitem__({k})')
         if k == 'assembly_level':
             return pliz.get(self.pli_oid, {}).get(k, 1)
         elif k in ['system_oid', 'system_name', 'parent_pli_oid']:
@@ -466,7 +467,7 @@ class PartsListItem(Entity):
             return get_dval(self.oid, k)
 
     def get(self, k, *default):
-        log.debug(f'* PLI.get({k})')
+        # log.debug(f'* PLI.get({k})')
         if k == 'assembly_level':
             return pliz.get(self.pli_oid, {}).get('assembly_level', 1)
         elif k in ['system_oid', 'system_name', 'parent_pli_oid']:
@@ -488,7 +489,7 @@ class PartsListItem(Entity):
         table; for data elements, use set_dval; parameters are not settable
         through the PLI interface and will be ignored.
         """
-        log.debug(f'* PLI.__setitem__({k}, {v})')
+        # log.debug(f'* PLI.__setitem__({k}, {v})')
         if k in ['system_oid', 'system_name', 'assembly_level',
                  'parent_pli_oid']:
             if not self.pli_oid in pliz:
@@ -932,11 +933,11 @@ class PartsList(DataMatrix):
         pli['m_unit'] = get_pval(oid, 'm[CBE]') or 0
         log.debug('  pli["m_unit"] = {}'.format(pli['m_unit']))
         pli['m_cbe'] = qty * pli['m_unit']
-        pli['m_ctgcy'] = get_pval(oid, 'm[Ctgcy]') or 0
+        pli['m_ctgcy'] = round_to(100 * get_pval(oid, 'm[Ctgcy]'), n=3) or 0
         pli['m_mev'] = qty * (get_pval(oid, 'm[MEV]') or 0)
         pli['nom_p_unit_cbe'] = get_pval(oid, 'P[CBE]') or 0
         pli['nom_p_cbe'] = qty * (pli['nom_p_unit_cbe'] or 0)
-        pli['nom_p_ctgcy'] = get_pval(oid, 'P[Ctgcy]') or 0
+        pli['nom_p_ctgcy'] = round_to(100 * get_pval(oid, 'P[Ctgcy]')) or 0
         pli['nom_p_mev'] = qty * (get_pval(oid, 'P[MEV]') or 0)
         # columns in spreadsheet MEL:
         #   0: Level

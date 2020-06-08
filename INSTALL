@@ -82,7 +82,7 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install pytz'
 
-    - RDFlib (version 3.0.0 or greater)
+    - rdflib (version 3.0.0 or greater)
       <http://rdflib.net/>
       * NOTE:  not in the default conda channel, use 'conda-forge' channel
 

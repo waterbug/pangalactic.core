@@ -1,10 +1,14 @@
-1.3.8:
+1.3.9 (05/21/20):
+
+* More sync performance optimizations
+
+1.3.8 (05/15/20):
 
 * BUG fix:  fixed Reqt. Wizard reqt. id generation regression
 * BUG fix:  Reqt Mgr:  parameter edit dialog brought up multiple copies
 * BUG fix:  Reqt Mgr: on closing wizard it popped up again.
 
-1.3.7:
+1.3.7 (05/12/20):
 
 * Bug fix:  fixed crash when generating a product (deal with null ids)
 * Bug fix:  component mode delete of subject product now displays placeholders
@@ -14,11 +18,11 @@
 * Bug fix:  cloning in component mode now displays the diagram of the clone
 * Bug fix:  fixed crash when setting units on a blank field
 
-1.3.6:
+1.3.6 (05/06/20):
 
 * Bug fixes:  fixed critical db problems when deleting Ports/Flows
 
-1.3.5:
+1.3.5 (04/24/20):
 
 * Bug fixes:  fixed regressions introduced by parameter / data element split
 
