@@ -82,23 +82,27 @@
 ## Settings
 
 * config
-    admin_package_name: (str)  name of admin package
-    admin_script_name:  (str)  name of admin script
-    app_channel:        (str)  app channel url or name
-    app_name:           (str)  app name
-    app_package_name:   (str)  app package name
-    dashboards:         (dict) named dashboards (lists of parameter ids)
-    dashboard_names:    (list) ordering of keys in `dashboards`
-    db_url:             (str)  sqlalchemy-style db url (only used by vger)
-    default_parms:      (list) ids of default parameters to assign to objs
-    host:               (list) fqdn of message bus host
-    local_admin:        (bool) if `true`, user can edit any item locally
-    load_extra_data[1]: (list) names of files containing data to load
-    logo:               (str)  logo icon file name
-    p_defaults:         (dict) default parameter values {id: val (string)}
-    port:               (str)  port to use for message bus host connection
-    tall_logo:          (str)  "tall" logo icon file name
-    units:              (str)  unit system (default: 'mks')
+    admin_package_name:    (str)  name of admin package
+    admin_script_name:     (str)  name of admin script
+    app_channel:           (str)  app channel url or name
+    app_name:              (str)  app name
+    app_package_name:      (str)  app package name
+    dashboards:            (dict) named dashboards (lists of parameter ids)
+    dashboard_names:       (list) ordering of keys in `dashboards`
+    db_url:                (str)  sqlalchemy-style db url (only used by vger)
+    default_parms:         (list) ids of default parameters
+    default_data_elements: (list) ids of default data elements
+    de_defz:               (dict) pre-configured data element definitions
+    host:                  (list) fqdn of message bus host
+    ldap_schema:           (dict) schema for use with local ldap service
+    local_admin:           (bool) if `true`, user can edit any item locally
+    load_extra_data[1]:    (list) names of files containing data to load
+    logo:                  (str)  logo icon file name
+    p_defaults:            (dict) default parameter values {id: val (string)}
+    port:                  (str)  port to use for message bus host connection
+    schemaz:               (list) pre-configured schemas
+    tall_logo:             (str)  "tall" logo icon file name
+    units:                 (str)  unit system (default: 'mks')
 
 * prefs
     dashboards:         (dict) named dashboards (lists of parameter ids)

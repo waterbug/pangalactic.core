@@ -1406,7 +1406,7 @@ de_defz = {}
 # data_elementz:  persistent** cache of assigned data element values
 #              ** persisted in the file 'data_elements.json' in the
 #              application home directory -- see the orb functions
-#              `_save_data_elementz` and `_load_data_elementz`
+#              `save_data_elementz` and `load_data_elementz`
 # format:  {oid : {'data element id': {data element properties}
 #                   ...}}
 # ... where data element properties are:

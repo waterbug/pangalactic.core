@@ -633,9 +633,9 @@ class DataMatrix(UserList):
         project_id (str): id a project (owner of the DataMatrix)
         schema (list): list of data element ids and parameter ids
     """
-    def __init__(self, *data, project_id='', name=None, schema=None,
-                 creator=None, modifier=None, create_datetime=None,
-                 mod_datetime=None):
+    def __init__(self, *data, project_id='', name=None,
+                 schema=None, creator=None, modifier=None,
+                 create_datetime=None, mod_datetime=None):
         """
         Initialize.
 
@@ -655,20 +655,22 @@ class DataMatrix(UserList):
         # sig = 'project_id="{}", name="{}"'.format(
                                         # project_id, name or '[None]')
         # log.debug('* DataMatrix({})'.format(sig))
-        # metadata
+        # NOTE:  self.project_id and self.name MUST be set before accessing
+        # self.oid, which is computed from them ...
+        self.project_id = project_id or 'SANDBOX'
+        # log.debug('  - project id: {}'.format(project_id))
+        self.name = name or 'custom'
+        # log.debug('  - name set to: "{}"'.format(name))
         dt = str(dtstamp())
         self.creator = creator or 'pgefobjects:admin'
         self.modifier = modifier or 'pgefobjects:admin'
         self.create_datetime = create_datetime or dt
         self.mod_datetime = mod_datetime or dt
-        self.project_id = project_id or 'SANDBOX'
-        # log.debug('  - project id: {}'.format(project_id))
-        self.name = name or ''
-        # log.debug('  - name set to: "{}"'.format(name))
         # log.debug('    checking for schema with that name ...')
         if schema:
-            # if a schema is passed in, use it
+            # if a schema is passed in, use it and register it in schemaz ...
             self.schema = schema
+            schemaz[self.oid] = schema
         elif schemaz.get(name):
             # else check 'schemaz' for a schema by the name
             self.schema = schemaz[name]
@@ -825,11 +827,12 @@ class PartsList(DataMatrix):
         data (iterable):  an iterable of entities
         name (str): name (which may or may not exist in the 'schemaz' cache)
         project_id (str): id a project (owner of the PartsList)
+        systems (list of str): oids of systems of the project
         schema (list): list of data element ids and parameter ids
     """
-    def __init__(self, *data, project_id='', name=None, schema=None,
-                 creator=None, modifier=None, create_datetime=None,
-                 mod_datetime=None):
+    def __init__(self, *data, project_id='', systems=None, name=None,
+                 schema=None, creator=None, modifier=None,
+                 create_datetime=None, mod_datetime=None):
         """
         Initialize.
 
@@ -838,6 +841,7 @@ class PartsList(DataMatrix):
 
         Keyword Args:
             project_id (str): id of a project (owner of the DataMatrix)
+            systems (list of str): oids of systems of the project
             name (str): name (which may or may not exist in 'schemaz')
             schema (list): list of data element ids and parameter ids
             creator (str):  oid of the entity's creator
@@ -849,6 +853,7 @@ class PartsList(DataMatrix):
                          schema=schema, creator=creator, modifier=modifier,
                          create_datetime=create_datetime,
                          mod_datetime=mod_datetime)
+        self.systems = systems or []
 
     def append_new_row(self, child=False):
         """

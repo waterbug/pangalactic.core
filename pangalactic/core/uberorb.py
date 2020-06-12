@@ -25,7 +25,7 @@ from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
 from pangalactic.core.entity      import (dmz, load_dmz, save_dmz,
                                           entz, load_entz, save_entz,
-                                          plz, load_plz, save_plz,
+                                          load_plz, save_plz,
                                           pliz, load_pliz, save_pliz,
                                           schemaz, load_schemaz, save_schemaz,
                                           load_ent_histz, save_ent_histz)
@@ -277,13 +277,10 @@ class UberORB(object):
         #     config and state have been created and updated
         self.load_reference_data()
         # ---------------------------------------------------------------------
-        # ### NOTE:  any app preset state overrides current state and/or
-        # reference data ...  e.g., if there are any app schemas or DataMatrix
-        # instances set by the app, they are updated here ...
-        if state.get('schemaz'):
-            schemaz.update(state['schemaz'])
-        if state.get('dmz'):
-            dmz.update(state['dmz'])
+        # ### NOTE:  user or app configured schemas can override reference data
+        # -- if there are any pre-configured schemas, they are updated here ...
+        if config.get('schemaz'):
+            schemaz.update(config['schemaz'])
         # ---------------------------------------------------------------------
         self._load_diagramz()
         # create 'role_product_types' cache
@@ -663,10 +660,13 @@ class UberORB(object):
         # ('parm_defz' and 'parmz_by_dimz') before loading parameters from
         # 'parameters.json' -- the deserializer uses these caches.  Note that
         # create_de_defz will first populate 'de_defz' from
-        # DataElementDefinitions found in the database (created from refdata)
-        # and then will check for data element definitions in state['de_defz']
-        # -- if any are found, it will create DataElementDefinitions from them,
-        # add them to the database, and then add them to 'de_defz'.
+        # DataElementDefinitions found in the database (some are initially
+        # created from refdata and additional ones may be created at runtime
+        # and saved in the db) and then will check for data element definitions
+        # in config['de_defz'], which may be part of the app config or a
+        # user-edited config -- if any are found, it will create
+        # DataElementDefinitions from them, add them to the database, and then
+        # add them to 'de_defz'.
         self.create_de_defz()
         self.create_parm_defz()
         self.create_parmz_by_dimz()
@@ -689,7 +689,9 @@ class UberORB(object):
         self.log.debug('* loading plz ...')
         load_plz(self.home)
         self.log.debug('  plz: {}'.format(str(pliz)))
+        self.log.debug('* loading ent_histz ...')
         load_ent_histz(self.home)
+        self.log.debug('* loading schemaz ...')
         load_schemaz(self.home)
         self.log.debug('* loading dmz ...')
         load_dmz(self.home)
@@ -840,22 +842,22 @@ class UberORB(object):
              ...}
         """
         self.log.debug('* create_de_defz')
-        # check for data element definition structures in state['de_defz'] --
-        # these can be introduced by the app state
+        # check for localized data element definition structures in
+        # config['de_defz'] -- these can be introduced by an app
         new_dedef_objs = []
-        self.log.debug('  - checking for de defs in state["de_defz"] ...')
-        new_state_dedef_ids = []
+        self.log.debug('  - checking for de defs in config["de_defz"] ...')
+        new_config_dedef_ids = []
         # NEW: check for labels even if the dedef objects are not new, so that
-        # labels can be updated by new app state at startup ...
-        state_dedef_labels = {}
-        if state.get('de_defz'):
+        # labels can be updated by new app config at startup ...
+        config_dedef_labels = {}
+        if config.get('de_defz'):
             ded_ids = self.get_ids('DataElementDefinition')
-            new_state_dedef_ids = [deid for deid in state['de_defz']
-                                   if deid not in ded_ids]
-            state_dedef_labels.update({deid: de_def.get('label')
-                                for deid, de_def in state['de_defz'].items()
+            new_config_dedef_ids = [deid for deid in config['de_defz']
+                                    if deid not in ded_ids]
+            config_dedef_labels.update({deid: de_def.get('label')
+                                for deid, de_def in config['de_defz'].items()
                                 if de_def.get('label')})
-            if new_state_dedef_ids:
+            if new_config_dedef_ids:
                 # if any are found, create DataElementDefinitions from them,
                 # making sure to save their 'label' fields separately since
                 # they are not yet supported by DataElementDefinition ...
@@ -863,8 +865,8 @@ class UberORB(object):
                 admin = orb.get('pgefobjects:admin')
                 DataElementDefinition = self.classes.get(
                                                     'DataElementDefinition')
-                for deid in new_state_dedef_ids:
-                    ded = state['de_defz'][deid]
+                for deid in new_config_dedef_ids:
+                    ded = config['de_defz'][deid]
                     ded_oid = 'pgef:DataElementDefinition.' + deid
                     dt = uncook_datetime(ded.get('mod_datetime')) or dt
                     descr = ded.get('description') or ded.get('name', deid)
@@ -889,16 +891,16 @@ class UberORB(object):
                   str(getattr(de_def_obj, 'mod_datetime', '') or dtstamp())
               } for de_def_obj in de_def_objs}
               )
-        # update state_dedz with labels, if they have any
+        # update config_dedz with labels, if they have any
         # TODO:  add labels as "external names" in p.core.meta
-        # if new_state_dedef_ids:
-            # for deid in new_state_dedef_ids:
-                # ded = state['de_defz'][deid]
+        # if new_config_dedef_ids:
+            # for deid in new_config_dedef_ids:
+                # ded = config['de_defz'][deid]
                 # if de_defz.get(deid) and ded.get('label'):
                     # de_defz[deid]['label'] = ded['label']
-        if state_dedef_labels:
-            for deid in state_dedef_labels:
-                de_defz[deid]['label'] = state_dedef_labels[deid]
+        if config_dedef_labels:
+            for deid in config_dedef_labels:
+                de_defz[deid]['label'] = config_dedef_labels[deid]
         self.log.debug('  - data element defs created: {}'.format(
                                                 str(list(de_defz.keys()))))
 
