@@ -6,7 +6,6 @@ NOTE:  Only the `orb` instance created in this module should be imported (it is
 intended to be a singleton).
 """
 import json, os, shutil, sys, traceback
-from copy import deepcopy
 
 # ruamel_yaml
 import ruamel_yaml as yaml
@@ -24,9 +23,8 @@ from pangalactic.core             import state, read_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
 from pangalactic.core.entity      import (dmz, load_dmz, save_dmz,
-                                          entz, load_entz, save_entz,
-                                          load_plz, save_plz,
-                                          pliz, load_pliz, save_pliz,
+                                          entz, load_entz, save_entz, load_plz,
+                                          save_plz, pliz, load_pliz, save_pliz,
                                           schemaz, load_schemaz, save_schemaz,
                                           load_ent_histz, save_ent_histz)
 from pangalactic.core.registry    import PanGalacticRegistry
@@ -139,28 +137,15 @@ class UberORB(object):
             os.makedirs(pgx_home, mode=0o755)
         pgx_home = os.path.abspath(pgx_home)
         # --------------------------------------------------------------------
-        # ### NOTE:  any user-set config overrides app config
-        # If config values have been edited, they will take precedence over any
-        # config set by app start-up defaults.
-        app_config = {}
-        # config file is read here -- it is initially created with app
-        # defaults, and later may be edited by the user
-        read_config(os.path.join(pgx_home, 'config'))
-        if config:
-            app_config.update(config)
-        config.update(app_config)
-        # ### NOTE:  any user-set config overrides app config
+        # ### NOTE:  user-set config overrides app config
         # --------------------------------------------------------------------
-        # ### NOTE:  any app preset state overrides current state
-        # if there is any current state, it was set by the app, and it should
-        # override current state, so copy it to 'app_state' before reading new
-        # state, and then update the new state from the app_state (overwriting
-        # current stuff) ...
-        app_state = {}
-        if state:
-            app_state = deepcopy(state)
+        # If values in the "config" file have been edited, they will take
+        # precedence over any config set by app defaults:  'read_config()' does
+        # config.update() from the "config" file contents.
+        read_config(os.path.join(pgx_home, 'config'))
+        # --------------------------------------------------------------------
+        # ### NOTE:  saved "state" file represents most recent state of app
         read_state(os.path.join(pgx_home, 'state'))
-        state.update(app_state)
         # --------------------------------------------------------------------
         # Saved prefs and trash are read here; will be overwritten by
         # any new prefs and trash set at runtime.
@@ -172,10 +157,11 @@ class UberORB(object):
             os.makedirs(self.vault, mode=0o755)
         self.logging_initialized = False
         self.start_logging(home=pgx_home, console=console, debug=debug)
-        self.log.debug('* prefs read ...')
-        # self.log.debug('  prefs: {}'.format(str(prefs)))
+        self.log.debug('* config read ...')
         self.log.debug('* state read ...')
         # self.log.debug('  state: {}'.format(str(state)))
+        self.log.debug('* prefs read ...')
+        # self.log.debug('  prefs: {}'.format(str(prefs)))
         self.log.debug('* trash read ({} objects).'.format(len(trash)))
         if 'units' not in prefs:
             prefs['units'] = {}
@@ -870,8 +856,10 @@ class UberORB(object):
                     ded_oid = 'pgef:DataElementDefinition.' + deid
                     dt = uncook_datetime(ded.get('mod_datetime')) or dt
                     descr = ded.get('description') or ded.get('name', deid)
+                    name = ded.get('name', deid)
                     ded_obj = DataElementDefinition(oid=ded_oid, id=deid,
-                                                name=ded.get('name', deid),
+                                                name=name,
+                                                label=ded.get('label', name),
                                                 range_datatype=ded[
                                                             'range_datatype'],
                                                 creator=admin, modifier=admin,
@@ -885,6 +873,7 @@ class UberORB(object):
         de_defz.update(
             {de_def_obj.id :
              {'name': de_def_obj.name,
+              'label': de_def_obj.label,
               'description': de_def_obj.description,
               'range_datatype': de_def_obj.range_datatype,
               'mod_datetime':
@@ -898,9 +887,9 @@ class UberORB(object):
                 # ded = config['de_defz'][deid]
                 # if de_defz.get(deid) and ded.get('label'):
                     # de_defz[deid]['label'] = ded['label']
-        if config_dedef_labels:
-            for deid in config_dedef_labels:
-                de_defz[deid]['label'] = config_dedef_labels[deid]
+        # if config_dedef_labels:
+            # for deid in config_dedef_labels:
+                # de_defz[deid]['label'] = config_dedef_labels[deid]
         self.log.debug('  - data element defs created: {}'.format(
                                                 str(list(de_defz.keys()))))
 

@@ -1539,6 +1539,7 @@ def update_de_defz(de_def_obj):
         'name': de_def_obj.name,
         'description': de_def_obj.description,
         'range_datatype': de_def_obj.range_datatype,
+        'label': de_def_obj.label or '',
         'mod_datetime': str(dtstamp())}
 
 def add_data_element(oid, deid):

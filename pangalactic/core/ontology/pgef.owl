@@ -1552,6 +1552,17 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
+    <!-- http://pangalactic.us/pgef/label -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;label">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A label for display, for example as a header when the data element occurs as a column in a table.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DataElementDefinition"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/context_datatype -->
 
     <owl:DatatypeProperty rdf:about="&pgef;context_datatype">
