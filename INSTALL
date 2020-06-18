@@ -261,11 +261,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install psycopg2'
 
-    - bcrypt
-      [used by authenticator.py to hash passwords]
-
-        Configuration: 'conda install bcrypt'
-
     - python-ldap
       [to enable LDAP searches of enterprise directories, as part of
       administration of users]
