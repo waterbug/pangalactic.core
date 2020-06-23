@@ -710,6 +710,8 @@ def delete_parameter(oid, pid):
     if '[' in pid:
         # find the base pid (variable)
         base_pid = pid.split('[')[0]
+    else:
+        base_pid = pid
     if oid in parameterz:
         if parameterz[oid].get(base_pid):
             del parameterz[oid][base_pid]
