@@ -106,11 +106,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install tzlocal'
 
-    - unidecode (latest released version)
-      ASCII transliterations of Unicode text
-
-          Configuration:  'conda install unidecode'
-
     - xlrd
       Reads .xls files
 
