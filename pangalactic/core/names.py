@@ -3,12 +3,12 @@
 Objects and services for handling identifiers, addresses, and namespaces.
 """
 from collections import OrderedDict
-from unidecode import unidecode
 from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
 from rdflib.term import URIRef
 
 from pangalactic.core.datastructures import OrderedSet
+from pangalactic.core.utils.meta     import asciify
 
 
 class NS(OrderedSet):
@@ -141,19 +141,19 @@ def register_ns(ns):
         namespaces[ns.uri] = ns
 
 
-def transliterate_unicode(s):
+def namify(s):
     """
     Transliterate a unicode string into a Python lexical name.
     """
     try:
-        s = unidecode(s)
+        s = asciify(s)
         if s.istitle():
             return unicode(''.join(s.split(' ')))
         else:
             return unicode('_'.join(s.split(' ')))
     except:
         # Python 3: str IS unicode
-        s = unidecode(s)
+        s = asciify(s)
         if s.istitle():
             return ''.join(s.split(' '))
         else:
@@ -195,8 +195,8 @@ def register_namespaces(rdfdataset):
             if elem[0] == '':
                 localnsuri = elem[1]
             else:
-                # map the (transliterated) prefix to its uri
-                rdfdataset_nsdict[transliterate_unicode(elem[0])] = elem[1]
+                # map the prefix to its uri
+                rdfdataset_nsdict[namify(elem[0])] = elem[1]
         elif event == "start":
             # check if this is a local name; if so, add it to 'localnames'
             if root is None:
@@ -208,8 +208,8 @@ def register_namespaces(rdfdataset):
                      '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}nodeID'))
             if (about and localnsuri is not None
                 and about.startswith(localnsuri)):
-                # add the (transliterated) local name minus the local ns uri
-                localnames.add(transliterate_unicode(about[len(localnsuri):]))
+                # add the local name minus the local ns uri
+                localnames.add(namify(about[len(localnsuri):]))
     for prefix, uri in list(rdfdataset_nsdict.items()):
         ns = NS(prefix, uri)
         register_ns(ns)

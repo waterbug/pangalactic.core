@@ -66,19 +66,6 @@ class NamesTests(unittest.TestCase):
         expected = names.namespaces['spam']
         self.assertEqual(expected, value)
 
-    def test_04_transliterate_unicode(self):
-        """CASE:  transliterate_unicode"""
-        # this is essentially a rehash of the unidecode tests
-        a = names.transliterate_unicode("Hello World Wooo")
-        tu_a = "HelloWorldWooo"
-        b = names.transliterate_unicode("hello world woooo")
-        tu_b = "hello_world_woooo"
-        c = names.transliterate_unicode(u"\u5317\u4EB0")
-        tu_c = "BeiJing"
-        value = [a, b, c]
-        expected = [tu_a, tu_b, tu_c]
-        self.assertEqual(expected, value)
-
     def test_05_u2q(self):
         """CASE:  u2q"""
         a = names.u2q("http://pangalactic.us/objects/chumble")

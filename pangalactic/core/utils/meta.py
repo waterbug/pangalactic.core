@@ -41,7 +41,7 @@ def asciify(u):
     Returns:
         str
     """
-    # Python 3: return utf-8 string
+    # Python 3: returns utf-8 string
     if isinstance(u, str):
         return unicodedata.normalize('NFKD', u).encode(
                                 'ASCII', 'ignore').decode('utf-8')
