@@ -307,13 +307,22 @@ def write_mel_xlsx(context, is_project=True,
                                   1, hrow3, system)
     book.close()
 
+def fix_ctgcy(ctgcy):
+    if len(ctgcy) > 3:
+        # string form of contingency may "explode"; if so, truncate
+        ctgcy = ctgcy[0:4]
+    # Excel doesn't like space between the number and "%"
+    return ctgcy + '%'
+
 def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts, level,
                               row, component, qty=1):
     mcbe = get_pval(component.oid, 'm[CBE]')
-    ctgcy_m = str(100 * get_pval(component.oid, 'm[Ctgcy]')) + ' %'
+    ctgcy_m = fix_ctgcy(str(100 * get_pval(component.oid, 'm[Ctgcy]')))
+    print(f' * ctgcy_m: {ctgcy_m}')
     mmev = get_pval(component.oid, 'm[MEV]')
     pcbe = get_pval(component.oid, 'P[CBE]')
-    ctgcy_P = str(100 * get_pval(component.oid, 'P[Ctgcy]')) + ' %'
+    # Excel doesn't like space between the number and "%"
+    ctgcy_P = fix_ctgcy(str(100 * get_pval(component.oid, 'P[Ctgcy]')))
     pmev = get_pval(component.oid, 'P[MEV]')
     # columns:
     #   0: Level
@@ -452,10 +461,12 @@ def write_component_rows_tsv(level, row, component, qty=1):
     """
     # NB:  levels are 1-based; rows are 0-based
     mcbe = get_pval(component.oid, 'm[CBE]')
-    ctgcy_m = str(100 * get_pval(component.oid, 'm[Ctgcy]')) + ' %'
+    # Excel doesn't like space between the number and "%"
+    ctgcy_m = fix_ctgcy(str(100 * get_pval(component.oid, 'm[Ctgcy]')))
     mmev = get_pval(component.oid, 'm[MEV]')
     pcbe = get_pval(component.oid, 'P[CBE]')
-    ctgcy_P = str(100 * get_pval(component.oid, 'P[Ctgcy]')) + ' %'
+    # Excel doesn't like space between the number and "%"
+    ctgcy_P = fix_ctgcy(str(100 * get_pval(component.oid, 'P[Ctgcy]')))
     pmev = get_pval(component.oid, 'P[MEV]')
     # columns:
     #   0: Level

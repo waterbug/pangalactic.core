@@ -97,7 +97,8 @@ class UberORB(object):
     startup_msg = '* orb starting up ...'
     new_oids = []
 
-    def start(self, home=None, db_url=None, console=False, debug=False, **kw):
+    def start(self, home=None, db_url=None, console=False, debug=False,
+              log_msgs=None, **kw):
         """
         Initialization logic.
 
@@ -109,9 +110,11 @@ class UberORB(object):
                 if True: send output to console
                 if False: redirect stdout/stderr to log file
             debug (bool):  (default: False) log in debug mode
+            log_msgs (list of str):  initial log message(s)
         """
         if self.started:
             return
+        self.log_msgs = log_msgs or []
         # set home directory -- in order of precedence:
         # [1] 'home' kw arg (this should be set by the application, if any)
         if home:
@@ -347,6 +350,7 @@ class UberORB(object):
         dmz).
         """
         self.log.info('* dump_db()')
+        self.dump_complete = False
         save_data_elementz(self.home)
         save_parmz(self.home)
         save_entz(self.home)
@@ -374,6 +378,7 @@ class UberORB(object):
                     include_refdata=True)))
             f.close()
         self.log.info('  dump to {} completed.'.format(fmt))
+        self.dump_complete = True
 
     # def drop_and_create_db(self, home):
         # """
@@ -569,6 +574,10 @@ class UberORB(object):
             self.error_log.propagate = False
             self.log.info('* orb logging initialized ...')
             self.logging_initialized = True
+            # log any initial 'log_msg' passed in at start()
+            if self.log_msgs:
+                for log_msg in self.log_msgs:
+                    self.log.info(log_msg)
 
     def load_and_transform_data(self):
         """

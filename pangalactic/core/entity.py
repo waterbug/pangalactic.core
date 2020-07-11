@@ -76,7 +76,7 @@ pliz = {}
 
 def load_entz(home_path):
     """
-    Load the `entz` dict from json file.
+    Load the `entz` cache from json file.
     """
     log.debug('* load_entz() ...')
     fpath = os.path.join(home_path, 'ents.json')
@@ -124,7 +124,7 @@ ent_histz = {}
 
 def load_ent_histz(home_path):
     """
-    Load the `ent_histz` dict from json file.
+    Load the `ent_histz` cache from json file.
     """
     log.debug('* load_ent_histz() ...')
     fpath = os.path.join(home_path, 'ent_hists.json')
@@ -159,7 +159,7 @@ def save_ent_histz(home_path):
 
 def load_pliz(home_path):
     """
-    Load the `pliz` dict from json file.
+    Load the `pliz` cache from json file.
     """
     log.debug('* load_pliz() ...')
     fpath = os.path.join(home_path, 'plis.json')
@@ -521,7 +521,7 @@ schemaz = {'generic': ['system_name', 'assembly_level',
 
 def load_schemaz(home_path):
     """
-    Load the `schemaz` dict from json file.
+    Load the `schemaz` cache from json file.
 
     Args:
         schemaz_path (str):  location of file to read
@@ -556,7 +556,7 @@ def save_schemaz(home_path):
 
 def load_dmz(home_path):
     """
-    Load the `dmz` dict from json file.  (Restores all DataMatrix
+    Load the `dmz` cache from json file.  (Restores all DataMatrix
     instances.)
 
     Args:
@@ -762,7 +762,7 @@ plz = {}
 
 def load_plz(home_path):
     """
-    Load the `plz` dict from json file.  (Restores all PartsList
+    Load the `plz` cache from json file.  (Restores all PartsList
     instances.)
 
     Args:
