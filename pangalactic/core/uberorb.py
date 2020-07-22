@@ -343,27 +343,23 @@ class UberORB(object):
             # NOTE:  DO NOT *EVER* USE 'expire_on_commit = False' here!!!
             #        -> it causes VERY weird behavior ...
 
-    def dump_db(self, fmt='yaml'):
+    def dump_db(self, fmt='yaml', dir_path='backup'):
         """
-        Serialize the entire db and dump to `vault/db.yaml`.  Also save all
-        caches (data_elementz, parameterz, entz, ent_histz, pliz, schemaz, and
-        dmz).
+        Serialize all db objects, along with all their parameters and data
+        elements, and write to `db.yaml` in the specified directory.
         """
         self.log.info('* dump_db()')
-        self.dump_complete = False
-        save_data_elementz(self.home)
-        save_parmz(self.home)
-        save_entz(self.home)
-        save_ent_histz(self.home)
-        save_pliz(self.home)
-        save_plz(self.home)
-        save_schemaz(self.home)
-        save_dmz(self.home)
+        self.db_dump_complete = False
         dts = file_dts()
+        if not dir_path:
+            # if no dir_path specified, assume backup
+            dir_path = os.path.join(self.home, 'backup')
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
         json_fname = 'db-dump-' + dts + '.json'
         yaml_fname = 'db-dump-' + dts + '.yaml'
         if fmt == 'json':
-            f = open(os.path.join(self.vault, json_fname), 'w')
+            f = open(os.path.join(dir_path, json_fname), 'w')
             f.write(json.dumps(serialize(
                     self, self.get_all_subtypes('Identifiable'),
                     include_refdata=True),
@@ -372,13 +368,42 @@ class UberORB(object):
             f.close()
         elif fmt == 'yaml':
             self.log.info('  dumping database to yaml file ...')
-            f = open(os.path.join(self.vault, yaml_fname), 'w')
+            f = open(os.path.join(dir_path, yaml_fname), 'w')
             f.write(yaml.safe_dump(serialize(
                     self, self.get_all_subtypes('Identifiable'),
                     include_refdata=True)))
             f.close()
         self.log.info('  dump to {} completed.'.format(fmt))
-        self.dump_complete = True
+        self.db_dump_complete = True
+
+    def dump_caches(self, dir_path=None):
+        """
+        Serialize all caches (data_elementz, parameterz, entz, ent_histz, pliz,
+        schemaz, and dmz) to files in the specified directory.
+        """
+        self.log.info('* dump_caches()')
+        self.cache_dump_complete = False
+        dts = file_dts()
+        if not dir_path:
+            # if no dir_path specified, assume backup
+            backup_path = os.path.join(self.home, 'backup')
+            dir_path = os.path.join(backup_path, 'caches-' + dts)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        save_data_elementz(dir_path)
+        save_parmz(dir_path)
+        save_entz(dir_path)
+        save_ent_histz(dir_path)
+        save_pliz(dir_path)
+        save_plz(dir_path)
+        save_schemaz(dir_path)
+        save_dmz(dir_path)
+        self.cache_dump_complete = True
+        self.log.info('  cache dump completed.')
+
+    def dump_all(self, dir_path=None):
+        self.dump_caches(dir_path=dir_path)
+        self.dump_db(dir_path=dir_path)
 
     # def drop_and_create_db(self, home):
         # """

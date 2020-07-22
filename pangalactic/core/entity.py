@@ -74,12 +74,12 @@ ent_histz = {}
 # -------------------------------------------------------
 pliz = {}
 
-def load_entz(home_path):
+def load_entz(dir_path):
     """
     Load the `entz` cache from json file.
     """
     log.debug('* load_entz() ...')
-    fpath = os.path.join(home_path, 'ents.json')
+    fpath = os.path.join(dir_path, 'ents.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
             data = f.read()
@@ -89,13 +89,13 @@ def load_entz(home_path):
     else:
         log.debug('  - "ents.json" was not found.')
 
-def save_entz(home_path):
+def save_entz(dir_path):
     """
     Save `entz` dict to json file.
     """
     log.debug('* save_entz() ...')
     try:
-        fpath = os.path.join(home_path, 'ents.json')
+        fpath = os.path.join(dir_path, 'ents.json')
         with open(fpath, 'w') as f:
             if entz:
                 f.write(json.dumps(entz, separators=(',', ':'),
@@ -122,12 +122,12 @@ ent_lookupz = {}
 # format:  {entity['oid'] : [list of serialized previous versions of entity]}
 ent_histz = {}
 
-def load_ent_histz(home_path):
+def load_ent_histz(dir_path):
     """
     Load the `ent_histz` cache from json file.
     """
     log.debug('* load_ent_histz() ...')
-    fpath = os.path.join(home_path, 'ent_hists.json')
+    fpath = os.path.join(dir_path, 'ent_hists.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
             data = f.read()
@@ -138,13 +138,13 @@ def load_ent_histz(home_path):
         log.debug('  - "ent_hists.json" was not found.')
         pass
 
-def save_ent_histz(home_path):
+def save_ent_histz(dir_path):
     """
     Save `ent_histz` dict to json file.
     """
     log.debug('* save_ent_histz() ...')
     try:
-        fpath = os.path.join(home_path, 'ent_hists.json')
+        fpath = os.path.join(dir_path, 'ent_hists.json')
         with open(fpath, 'w') as f:
             if ent_histz:
                 f.write(json.dumps(ent_histz, separators=(',', ':'),
@@ -154,15 +154,15 @@ def save_ent_histz(home_path):
         log.debug('  ... ent_hists.json file written.')
     except:
         log.debug('  ... unable to write to path "{}".'.format(
-                                                        home_path))
+                                                        dir_path))
         pass
 
-def load_pliz(home_path):
+def load_pliz(dir_path):
     """
     Load the `pliz` cache from json file.
     """
     log.debug('* load_pliz() ...')
-    fpath = os.path.join(home_path, 'plis.json')
+    fpath = os.path.join(dir_path, 'plis.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
             data = f.read()
@@ -172,13 +172,13 @@ def load_pliz(home_path):
     else:
         log.debug('  - "plis.json" was not found.')
 
-def save_pliz(home_path):
+def save_pliz(dir_path):
     """
     Save `pliz` dict to json file.
     """
     log.debug('* save_pliz() ...')
     try:
-        fpath = os.path.join(home_path, 'plis.json')
+        fpath = os.path.join(dir_path, 'plis.json')
         with open(fpath, 'w') as f:
             if pliz:
                 f.write(json.dumps(pliz, separators=(',', ':'),
@@ -519,7 +519,7 @@ dmz = {}
 schemaz = {'generic': ['system_name', 'assembly_level',
                        'additional_information']}
 
-def load_schemaz(home_path):
+def load_schemaz(dir_path):
     """
     Load the `schemaz` cache from json file.
 
@@ -527,7 +527,7 @@ def load_schemaz(home_path):
         schemaz_path (str):  location of file to read
     """
     log.debug('* load_schemaz() ...')
-    fpath = os.path.join(home_path, 'schemas.json')
+    fpath = os.path.join(dir_path, 'schemas.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
             data = f.read()
@@ -539,7 +539,7 @@ def load_schemaz(home_path):
         log.debug('  - "schemas.json" was not found.')
         pass
 
-def save_schemaz(home_path):
+def save_schemaz(dir_path):
     """
     Save `schemaz` dict to json file.
 
@@ -548,13 +548,13 @@ def save_schemaz(home_path):
     """
     log.debug('* save_schemaz() ...')
     nsch = len(schemaz)
-    fpath = os.path.join(home_path, 'schemas.json')
+    fpath = os.path.join(dir_path, 'schemas.json')
     with open(fpath, 'w') as f:
         f.write(json.dumps(schemaz, separators=(',', ':'),
                            indent=4, sort_keys=True))
     log.debug(f'  ... {nsch} schema(s) saved to schemas.json.')
 
-def load_dmz(home_path):
+def load_dmz(dir_path):
     """
     Load the `dmz` cache from json file.  (Restores all DataMatrix
     instances.)
@@ -563,7 +563,7 @@ def load_dmz(home_path):
         dmz_path (str):  location of file to read
     """
     log.debug('* load_dmz() ...')
-    fpath = os.path.join(home_path, 'dms.json')
+    fpath = os.path.join(dir_path, 'dms.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
             ser_dms = json.loads(f.read()) or {}
@@ -587,7 +587,7 @@ def load_dmz(home_path):
         log.debug('  - "dms.json" was not found.')
         pass
 
-def save_dmz(home_path):
+def save_dmz(dir_path):
     """
     Save `dmz` dict (all DataMatrix instances) to json file.
 
@@ -604,7 +604,7 @@ def save_dmz(home_path):
                          mod_datetime=dm.mod_datetime)
                for oid, dm in dmz.items()}
     ndms = len(ser_dms)
-    fpath = os.path.join(home_path, 'dms.json')
+    fpath = os.path.join(dir_path, 'dms.json')
     with open(fpath, 'w') as f:
         f.write(json.dumps(ser_dms, separators=(',', ':'),
                            indent=4, sort_keys=True))
@@ -760,7 +760,7 @@ class DataMatrix(UserList):
 #           ...}
 plz = {}
 
-def load_plz(home_path):
+def load_plz(dir_path):
     """
     Load the `plz` cache from json file.  (Restores all PartsList
     instances.)
@@ -769,7 +769,7 @@ def load_plz(home_path):
         plz_path (str):  location of file to read
     """
     log.debug('* load_plz() ...')
-    fpath = os.path.join(home_path, 'pls.json')
+    fpath = os.path.join(dir_path, 'pls.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
             ser_pls = json.loads(f.read()) or {}
@@ -793,7 +793,7 @@ def load_plz(home_path):
         log.debug('  - "pls.json" was not found.')
         pass
 
-def save_plz(home_path):
+def save_plz(dir_path):
     """
     Save `plz` dict (all PartsList instances) to json file.
 
@@ -810,7 +810,7 @@ def save_plz(home_path):
                          mod_datetime=pl.mod_datetime)
                for oid, pl in plz.items()}
     npls = len(ser_pls)
-    fpath = os.path.join(home_path, 'pls.json')
+    fpath = os.path.join(dir_path, 'pls.json')
     with open(fpath, 'w') as f:
         f.write(json.dumps(ser_pls, separators=(',', ':'),
                            indent=4, sort_keys=True))

@@ -196,12 +196,12 @@ def deserialize_parms(oid, ser_parms, cname=None):
             # log.debug('  - {}'.format(log_msg))
             set_pval(oid, base_pid, 0.0)
 
-def load_parmz(home_path):
+def load_parmz(dir_path):
     """
     Load the `parameterz` dict from json file in cache format.
     """
     log.debug('* load_parmz() ...')
-    fpath = os.path.join(home_path, 'parameters.json')
+    fpath = os.path.join(dir_path, 'parameters.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
             stored_parameterz = json.loads(f.read())
@@ -211,7 +211,7 @@ def load_parmz(home_path):
     else:
         log.debug('  - "parameters.json" was not found.')
 
-def save_parmz(home_path):
+def save_parmz(dir_path):
     """
     Save `parameterz` dict to a json file in cache format.
     """
@@ -220,7 +220,7 @@ def save_parmz(home_path):
     for oid, parms in parameterz.items():
         # NOTE: serialize_parms() uses deepcopy()
         stored_parameterz[oid] = serialize_parms(oid)
-    fpath = os.path.join(home_path, 'parameters.json')
+    fpath = os.path.join(dir_path, 'parameters.json')
     with open(fpath, 'w') as f:
         f.write(json.dumps(stored_parameterz, separators=(',', ':'),
                            indent=4, sort_keys=True))
@@ -1494,12 +1494,12 @@ def deserialize_des(oid, ser_des, cname=None):
         # log.debug('  - oid "{}" now has these data elements: {}.'.format(
                                          # oid, str(list(data_elementz[oid]))))
 
-def load_data_elementz(home_path):
+def load_data_elementz(dir_path):
     """
     Load `data_elementz` dict from json file.
     """
     log.debug('* load_data_elementz() ...')
-    fpath = os.path.join(home_path, 'data_elements.json')
+    fpath = os.path.join(dir_path, 'data_elements.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
             serialized_des = json.loads(f.read())
@@ -1509,7 +1509,7 @@ def load_data_elementz(home_path):
     else:
         log.debug('  - "data_elements.json" was not found.')
 
-def save_data_elementz(home_path):
+def save_data_elementz(dir_path):
     """
     Save `data_elementz` dict to a json file.
     """
@@ -1519,7 +1519,7 @@ def save_data_elementz(home_path):
         for oid, obj_des in data_elementz.items():
             # NOTE: serialize_des() uses deepcopy()
             serialized_data_elementz[oid] = serialize_des(oid)
-        fpath = os.path.join(home_path, 'data_elements.json')
+        fpath = os.path.join(dir_path, 'data_elements.json')
         with open(fpath, 'w') as f:
             f.write(json.dumps(serialized_data_elementz,
                                separators=(',', ':'),
