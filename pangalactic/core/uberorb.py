@@ -376,12 +376,12 @@ class UberORB(object):
         self.log.info('  dump to {} completed.'.format(fmt))
         self.db_dump_complete = True
 
-    def dump_caches(self, dir_path=None):
+    def save_caches(self, dir_path=None):
         """
         Serialize all caches (data_elementz, parameterz, entz, ent_histz, pliz,
         schemaz, and dmz) to files in the specified directory.
         """
-        self.log.info('* dump_caches()')
+        self.log.info('* save_caches()')
         self.cache_dump_complete = False
         dts = file_dts()
         if not dir_path:
@@ -402,7 +402,7 @@ class UberORB(object):
         self.log.info('  cache dump completed.')
 
     def dump_all(self, dir_path=None):
-        self.dump_caches(dir_path=dir_path)
+        self.save_caches(dir_path=dir_path)
         self.dump_db(dir_path=dir_path)
 
     # def drop_and_create_db(self, home):
