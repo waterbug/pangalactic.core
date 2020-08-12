@@ -116,6 +116,7 @@
 
 * state
     admin_of:         (list) oids of Projects in which user has admin role
+    active_users:     (list) ids of users that have registered public keys
     assigned_roles[2]: (dict) maps proj/org oids to assigned role names for user
     cloaked:          (list) oids of local cloaked objects
     connected:        (bool) true if logged in to message bus
