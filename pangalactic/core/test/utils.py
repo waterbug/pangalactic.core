@@ -77,10 +77,9 @@ def gen_test_pvals(parms):
 
 def create_test_users():
     """
-    Return standard test users from 2 Organizations (Yoyodyne Propulsion
-    Systems and Banzai Aerospace).
+    Return a list of standard test users as serialized Person objects.
     """
-    objs = [
+    return [
         dict(
              _cname='Organization', oid='test:yoyodyne', id='YOYODYNE',
              id_ns='pangalactic', name='Yoyodyne Propulsion Systems',
@@ -163,7 +162,6 @@ def create_test_users():
             first_name='John', mi_or_name='', last_name='Manyjars',
             phone='1-Z00-MANYJAR', owner='pgefobjects:PGANA')
             ]
-    return objs
 
 def create_test_project():
     """

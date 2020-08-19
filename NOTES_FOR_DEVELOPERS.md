@@ -143,6 +143,7 @@
                              Project) -- may be selected by clicking on an item
                              in the system tree or drilling down into
                              (double-clicking on) a block in the diagram
+    test_project_loaded (bool) H2G2 test project loaded (server-side only) [6]
     userid:           (str)  most recent userid used in login
     version:          (str)  version of client
     width:            (int)  current pixel width of pangalaxian gui
@@ -184,6 +185,11 @@
                        expanded : (list) indexes of expanded nodes in sys tree
                                   (used in restoring state when tree is rebuilt)
                       }}
+
+    [6]: (server only) for vger, if "test" arg is true and
+         state["test_project_loaded"] is false, the H2G2 test project and its
+         data will be loaded; if true, H2G2 has already been loaded -- see
+         pangalactic.vger.vger.RepositoryService.
 
 ## Modes and Views
 
