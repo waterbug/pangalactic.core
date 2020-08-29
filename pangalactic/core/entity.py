@@ -31,6 +31,7 @@ class logger:
 
 log = logger()
 
+
 # -----------------------------------------------------------------------
 # ENTITY-RELATED CACHES
 # -----------------------------------------------------------------------
@@ -88,6 +89,7 @@ def load_entz(dir_path):
         log.debug('  - entz cache loaded.')
     else:
         log.debug('  - "ents.json" was not found.')
+        pass
 
 def save_entz(dir_path):
     """
@@ -102,9 +104,11 @@ def save_entz(dir_path):
                                    indent=4, sort_keys=True))
             else:
                 log.debug('  ... entz was empty.')
+                pass
         log.debug('  ... ents.json file written.')
     except:
         log.debug('  ... exception encountered.')
+        pass
 
 # ent_lookupz  runtime cache for reverse lookup of Entity instances
 #              maps tuples of values to entity oids
@@ -151,10 +155,10 @@ def save_ent_histz(dir_path):
                                    indent=4, sort_keys=True))
             else:
                 log.debug('  ... ent_histz was empty.')
+                pass
         log.debug('  ... ent_hists.json file written.')
     except:
-        log.debug('  ... unable to write to path "{}".'.format(
-                                                        dir_path))
+        log.debug('  ... unable to write to path "{}".'.format(dir_path))
         pass
 
 def load_pliz(dir_path):
@@ -171,6 +175,7 @@ def load_pliz(dir_path):
         log.debug('  - pliz cache loaded.')
     else:
         log.debug('  - "plis.json" was not found.')
+        pass
 
 def save_pliz(dir_path):
     """
@@ -185,9 +190,11 @@ def save_pliz(dir_path):
                                    indent=4, sort_keys=True))
             else:
                 log.debug('  ... pliz was empty.')
+                pass
         log.debug('  ... plis.json file written.')
     except:
         log.debug('  ... exception encountered.')
+        pass
 
 
 class Entity(dict):
@@ -216,6 +223,9 @@ class Entity(dict):
         create_datetime (str):  iso-format string of creation datetime
         mod_datetime (str):  iso-format string of last mod datetime
     """
+    metadata = ['owner', 'creator', 'modifier', 'create_datetime',
+                'mod_datetime']
+
     def __init__(self, *args, oid=None, owner=None, creator=None,
                  modifier=None, create_datetime=None, mod_datetime=None,
                  **kw):
@@ -238,22 +248,43 @@ class Entity(dict):
             kw (dict):  keyword args, passed to superclass (dict)
                 initialization
         """
-        # log.debug('* Entity()')
+        log.debug('* Entity()')
         super().__init__(*args)
+        # TODO:  check if oid is that of an object
         if not oid:
             oid = str(uuid4())
         self.oid = oid
-        # TODO:  also check if oid is that of an object
-        if oid not in entz:
-            dt = str(dtstamp())
-            creator = creator or 'pgefobjects:admin'
-            modifier = modifier or 'pgefobjects:admin'
-            create_datetime = create_datetime or dt
-            mod_datetime = mod_datetime or dt
-            owner = owner or 'pgefobjects:PGANA'
-            entz[oid] = dict(oid=oid, owner=owner, creator=creator,
-                             modifier=modifier, create_datetime=create_datetime,
-                             mod_datetime=mod_datetime)
+        d = locals()
+        kw_meta = {a: d.get(a) for a in self.metadata}
+        self.load_meta(**kw_meta)
+
+    def load_meta(self, **meta):
+        """
+        Get my metadata from the 'entz' cache, or if it does not exist in the
+        cache, create it from the metadata arguments and save it to the cache.
+        """
+        dt = str(dtstamp())
+        if self.oid in entz:
+            self.creator = entz[self.oid].get('creator', 'pgefobjects:admin')
+            self.modifier = entz[self.oid].get('modifier', 'pgefobjects:admin')
+            self.create_datetime = entz[self.oid].get('create_datetime', dt)
+            self.mod_datetime = entz[self.oid].get('mod_datetime',
+                                                   self.create_datetime)
+            self.owner = entz[self.oid].get('owner', 'pgefobjects:PGANA')
+        else:
+            self.creator = meta.get('creator', 'pgefobjects:admin')
+            self.modifier = meta.get('modifier', 'pgefobjects:admin')
+            self.create_datetime = meta.get('create_datetime', dt)
+            self.mod_datetime = meta.get('mod_datetime', self.create_datetime)
+            self.owner = meta.get('owner', 'pgefobjects:PGANA')
+            self.save_meta()
+
+    def save_meta(self):
+        """
+        Add myself to the 'entz' cache -- this method should be overridden in
+        subclasses to use the cache relevant to the subclass.
+        """
+        entz[self.oid] = {a: getattr(self, a, None) for a in self.metadata}
 
     def __getitem__(self, k):
         """
@@ -282,19 +313,19 @@ class Entity(dict):
         if k in ('oid', 'owner', 'creator', 'modifier', 'create_datetime',
                  'mod_datetime'):
             # metadata
-            # log.debug('  - got metadata.')
+            log.debug('  - got metadata.')
             return entz[self.oid].get(k)
         elif k in parm_defz:
-            # log.debug('  - got parameter.')
+            log.debug('  - got parameter.')
             return get_pval(self.oid, k)
         elif k in de_defz:
-            # log.debug('  - got data element.')
+            log.debug('  - got data element.')
             return get_dval(self.oid, k)
         elif default:
-            # log.debug('  - got default: {}.'.format(str(default)))
+            log.debug('  - got default: {}.'.format(str(default)))
             return default[0]
         else:
-            # log.debug('  - got nothin.')
+            log.debug('  - got nothin.')
             return get_dval(self.oid, k)
 
     def __setitem__(self, k, v):
@@ -410,6 +441,9 @@ class PartsListItem(Entity):
         create_datetime (str):  iso-format string of creation datetime
         mod_datetime (str):  iso-format string of last mod datetime
     """
+    metadata = ['parent_pli_oid', 'system_oid', 'system_name', 'owner',
+                'creator', 'modifier', 'create_datetime', 'mod_datetime']
+
     def __init__(self, *args, oid=None, parent_pli_oid=None, system_oid=None,
                  system_name=None, owner=None, creator=None, modifier=None,
                  create_datetime=None, mod_datetime=None, **kw):
@@ -438,19 +472,61 @@ class PartsListItem(Entity):
         log.debug('* PartsListItem()')
         # NOTE:  the superclass (Entity) __init__ will generate a unique oid if
         # one is not provided
-        self.pli_oid = oid
-        oid = system_oid
-        super().__init__(*args, oid=oid, owner=owner, creator=creator,
+        self.pli_oid = oid or str(uuid4())
+        self.oid = system_oid
+        self.system_name = system_name
+        self.parent_pli_oid = parent_pli_oid
+        super().__init__(*args, oid=self.oid, owner=owner, creator=creator,
                  modifier=modifier, create_datetime=create_datetime,
                  mod_datetime=mod_datetime, **kw)
-        if self.pli_oid not in pliz:
-            # if the supplied pli_oid is in the 'pliz' cache, use it;
-            # if not, generate a new one
-            self.pli_oid = str(uuid4())
-        pliz[self.pli_oid] = {}
-        pliz[self.pli_oid]['system_oid'] = system_oid
-        pliz[self.pli_oid]['system_name'] = system_name
-        pliz[self.pli_oid]['parent_pli_oid'] = parent_pli_oid
+
+    def load_meta(self, **meta):
+        """
+        Get my metadata from the 'pliz' cache.  This method is called in the
+        __init__ of the direct superclass, Entity, so it is necessary for
+        PartsListItem to override Entity's 'load_meta()' so that PartsListItem
+        uses its own cache, 'pliz', rather than Entity's cache, 'entz'.
+        """
+        dt = str(dtstamp())
+        if self.pli_oid in pliz:
+            self.creator = pliz[self.pli_oid].get('creator',
+                                                  'pgefobjects:admin')
+            self.modifier = pliz[self.pli_oid].get('modifier',
+                                                   'pgefobjects:admin')
+            self.create_datetime = pliz[self.pli_oid].get('create_datetime',
+                                                          dt)
+            self.mod_datetime = pliz[self.pli_oid].get('mod_datetime',
+                                                       self.create_datetime)
+            self.owner = pliz[self.pli_oid].get('owner', 'pgefobjects:PGANA')
+            self.oid = pliz[self.pli_oid].get('system_oid')
+            self.system_name = pliz[self.pli_oid].get('system_name')
+            self.parent_pli_oid = pliz[self.pli_oid].get('parent_pli_oid')
+        else:
+            self.creator = meta.get('creator', 'pgefobjects:admin')
+            self.modifier = meta.get('modifier', 'pgefobjects:admin')
+            self.create_datetime = meta.get('create_datetime', dt)
+            self.mod_datetime = meta.get('mod_datetime', self.create_datetime)
+            self.owner = meta.get('owner', 'pgefobjects:PGANA')
+            self.oid = meta.get('system_oid')
+            self.system_name = meta.get('system_name')
+            self.parent_pli_oid = meta.get('parent_pli_oid')
+            self.save_meta()
+
+    def save_meta(self):
+        """
+        Add myself to the 'pliz' cache.  It is necessary for PartsListItem
+        to override Entity's 'save_meta()' so that PartsListItem uses its own
+        cache, 'pliz', rather than Entity's cache, 'entz'.
+        """
+        pliz[self.pli_oid] = {a: getattr(self, a, None) for a in self.metadata}
+        # pliz[self.pli_oid]['creator'] = self.creator
+        # pliz[self.pli_oid]['modifier'] = self.modifier
+        # pliz[self.pli_oid]['create_datetime'] = self.create_datetime
+        # pliz[self.pli_oid]['mod_datetime'] = self.mod_datetime
+        # pliz[self.pli_oid]['owner'] = self.owner
+        # pliz[self.pli_oid]['system_oid'] = self.oid
+        # pliz[self.pli_oid]['system_name'] = self.system_name
+        # pliz[self.pli_oid]['parent_pli_oid'] = self.parent_pli_oid
 
     def __getitem__(self, k):
         """
@@ -477,10 +553,10 @@ class PartsListItem(Entity):
         elif k in parm_defz:
             return get_pval(self.oid, k)
         elif default:
-            # log.debug('  - got default: {}.'.format(str(default)))
+            log.debug('  - got default: {}.'.format(str(default)))
             return default[0]
         else:
-            # log.debug('  - got nothin.')
+            log.debug('  - got nothin.')
             return get_dval(self.oid, k)
 
     def __setitem__(self, k, v):
@@ -652,21 +728,21 @@ class DataMatrix(UserList):
             mod_datetime (str):  iso-format string of last mod datetime
         """
         super().__init__(*data)
-        # sig = 'project_id="{}", name="{}"'.format(
-                                        # project_id, name or '[None]')
-        # log.debug('* DataMatrix({})'.format(sig))
+        sig = 'project_id="{}", name="{}"'.format(
+                                        project_id, name or '[None]')
+        log.debug('* DataMatrix({})'.format(sig))
         # NOTE:  self.project_id and self.name MUST be set before accessing
         # self.oid, which is computed from them ...
         self.project_id = project_id or 'SANDBOX'
-        # log.debug('  - project id: {}'.format(project_id))
+        log.debug('  - project id: {}'.format(project_id))
         self.name = name or 'custom'
-        # log.debug('  - name set to: "{}"'.format(name))
+        log.debug('  - name set to: "{}"'.format(name))
         dt = str(dtstamp())
         self.creator = creator or 'pgefobjects:admin'
         self.modifier = modifier or 'pgefobjects:admin'
         self.create_datetime = create_datetime or dt
         self.mod_datetime = mod_datetime or dt
-        # log.debug('    checking for schema with that name ...')
+        log.debug('    checking for schema with that name ...')
         if schema:
             # if a schema is passed in, use it and register it in schemaz ...
             self.schema = schema
@@ -691,7 +767,13 @@ class DataMatrix(UserList):
                  or parm_defz.get(col_id, {}).get('name', '')
                  or col_id)
                 for col_id in self.schema]
-        # add myself to the dmz cache
+        self.save_meta()
+
+    def save_meta(self):
+        """
+        Add myself to the 'dmz' cache -- this method should be overridden in
+        subclasses to use the cache relevant to the subclass.
+        """
         dmz[self.oid] = self
 
     @property
@@ -775,7 +857,8 @@ def load_plz(dir_path):
             ser_pls = json.loads(f.read()) or {}
         try:
             deser_pls = {oid: PartsList([
-                              PartsListItem(oid=oid) for oid in spl.get('plis', [])],
+                              PartsListItem(oid=oid)
+                                            for oid in spl.get('plis', [])],
                               project_id=spl['project_id'],
                               name=spl['name'],
                               creator=spl['creator'],
@@ -855,6 +938,12 @@ class PartsList(DataMatrix):
                          mod_datetime=mod_datetime)
         self.systems = systems or []
 
+    def save_meta(self):
+        """
+        Add myself to the 'plz' cache.
+        """
+        plz[self.oid] = self
+
     def append_new_row(self, child=False):
         """
         Appends an "empty" PartsListItem with a new oid, using 'child' flag to
@@ -920,7 +1009,7 @@ class PartsList(DataMatrix):
             pli = self[row]
         else:
             # create a new pli for it (note that the PartsListItem __init__()
-            # will check if there is already metadata for  in 'entz', and if
+            # will check if there is already metadata for it in 'pliz', and if
             # found, use that instead of the arguments supplied here ...)
             pli = PartsListItem(parent_pli_oid=parent_pli_oid,
                             system_oid=component.oid, 
@@ -958,7 +1047,7 @@ class PartsList(DataMatrix):
         pli['assembly_level'] = level
         pli['system_oid'] = component.oid
         pli['system_name'] = name
-        print(f' + writing {name} in row {row}')
+        log.debug(f' + writing {name} in row {row}')
         if component.components:
             next_level = level + 1
             for acu in component.components:
