@@ -7,7 +7,8 @@ test_uncook.py \
 test_names.py \
 test_kb.py \
 test_registry.py \
-test_orb.py
+test_orb.py \
+test_entity.py
 # test_objectcache.py \
 # test_remember.py \
 # test_vger_changePassword.py \
@@ -55,11 +56,11 @@ done
 
 # clean up home directory used in tests
 
-if [ -d pangalaxian_test ]; then
-    # echo '\npreserving test home dir (pangalaxian_test) ...\n'
-    echo '\nremoving test home dir (pangalaxian_test) ...\n'
-    rm -r ./pangalaxian_test
-fi
+# if [ -d pangalaxian_test ]; then
+    # # echo '\npreserving test home dir (pangalaxian_test) ...\n'
+    # echo '\nremoving test home dir (pangalaxian_test) ...\n'
+    # rm -r ./pangalaxian_test
+# fi
 
 # TESTS TO SKIP:
 

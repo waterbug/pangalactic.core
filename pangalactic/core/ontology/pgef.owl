@@ -1662,17 +1662,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
-    <!-- http://pangalactic.us/pgef/assembly_level -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;assembly_level">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The assembly level is a name selected from a customizable vocabulary for the naming of levels in an assembly architecture.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Acu"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/representation_purpose -->
 
     <owl:DatatypeProperty rdf:about="&pgef;representation_purpose">

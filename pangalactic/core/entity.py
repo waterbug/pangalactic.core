@@ -9,7 +9,7 @@ from itertools       import chain
 from uuid            import uuid4
 
 # pangalactic
-from pangalactic.core                 import prefs
+from pangalactic.core                 import config
 from pangalactic.core.parametrics     import (data_elementz, de_defz,
                                               parameterz, parm_defz,
                                               get_dval, get_pval,
@@ -47,14 +47,6 @@ log = logger()
 # -------------------------------------------------------
 entz = {}
 
-# EXPERIMENTAL:  support for searching of entities by data element and
-#                parameter values (in base units)
-# ent_lookupz    runtime cache for reverse lookup of entities
-#              maps tuples of values to entity oids
-# format:  {de_values, p_values) : oid,
-#           ...}
-ent_lookupz = {}
-
 # ent_histz:  persistent** cache of previous versions of entities,
 #             saved as named tuples ...
 #              ** persisted in the file 'ent_hists.json' in the
@@ -62,18 +54,6 @@ ent_lookupz = {}
 #              `save_ent_histz` and `load_ent_histz`
 # format:  {entity['oid'] : [list of previous versions of entity]}
 ent_histz = {}
-
-# pliz:        persistent** cache of PartsListItem-specific metadata
-#              ** persisted in the file 'plis.json' in the
-#              application home directory -- see the functions
-#              `save_pliz` and `load_pliz`
-# format:  {pli_oid : {'system_oid': 'x', 'system_name': 'y', ...},
-#           ...}
-# ... where required data elements for the PLI instance are:
-# -------------------------------------------------------
-# system_oid, system_name, assembly_level, parent_pli_oid
-# -------------------------------------------------------
-pliz = {}
 
 def load_entz(dir_path):
     """
@@ -110,22 +90,6 @@ def save_entz(dir_path):
         log.debug('  ... exception encountered.')
         pass
 
-# ent_lookupz  runtime cache for reverse lookup of Entity instances
-#              maps tuples of values to entity oids
-#              (EXPERIMENTAL) support for searching of Entity instance data by
-#              data element and parameter values (in base units)
-# format:  {(oid, de_value1, ..., p_value1, ...) : oid,
-#           ...}
-#          where 'oid' is inserted for uniqueness.
-ent_lookupz = {}
-
-# ent_histz:  persistent** cache of previous versions of Entity states,
-#             saved as named tuples ...
-#              ** persisted in the file 'ent_hists.json' in the
-#              application home directory
-# format:  {entity['oid'] : [list of serialized previous versions of entity]}
-ent_histz = {}
-
 def load_ent_histz(dir_path):
     """
     Load the `ent_histz` cache from json file.
@@ -161,47 +125,15 @@ def save_ent_histz(dir_path):
         log.debug('  ... unable to write to path "{}".'.format(dir_path))
         pass
 
-def load_pliz(dir_path):
-    """
-    Load the `pliz` cache from json file.
-    """
-    log.debug('* load_pliz() ...')
-    fpath = os.path.join(dir_path, 'plis.json')
-    if os.path.exists(fpath):
-        with open(fpath) as f:
-            data = f.read()
-            if data:
-                pliz.update(json.loads(data))
-        log.debug('  - pliz cache loaded.')
-    else:
-        log.debug('  - "plis.json" was not found.')
-        pass
-
-def save_pliz(dir_path):
-    """
-    Save `pliz` dict to json file.
-    """
-    log.debug('* save_pliz() ...')
-    try:
-        fpath = os.path.join(dir_path, 'plis.json')
-        with open(fpath, 'w') as f:
-            if pliz:
-                f.write(json.dumps(pliz, separators=(',', ':'),
-                                   indent=4, sort_keys=True))
-            else:
-                log.debug('  ... pliz was empty.')
-                pass
-        log.debug('  ... plis.json file written.')
-    except:
-        log.debug('  ... exception encountered.')
-        pass
-
 
 class Entity(dict):
     """
     An interface to access a set of Data Elements and Parameters in the
-    `data_elementz` and `parameterz` caches, respectively.  The concept behind
-    Entity is essentially synonymous with "record" as in database records,
+    `data_elementz` and `parameterz` caches, respectively.  An Entity can
+    represent a component in an assembly, a model in a collection of models, a
+    line item in a parts list, etc.
+
+    The concept behind Entity is similar to "record" as in database records,
     "row" as in tables or matrices, anonymous Class instances in an ontology,
     or "Item" in a PyQt QAbstractItemModel.  Its metadata (owner, creator,
     modifier, create_datetime, and mod_datetime) are maintained in the 'entz'
@@ -222,13 +154,19 @@ class Entity(dict):
         modifier (str):  oid of the entity's last modifier
         create_datetime (str):  iso-format string of creation datetime
         mod_datetime (str):  iso-format string of last mod datetime
+        assembly_level (int):  indicates the entity's "assembly_level" within
+            the context of its DataMatrix
+        parent_oid (str):  oid of the entity's "parent" entity within the
+            context of its DataMatrix
+        system_oid (str):  [optional] oid of a system (Project or Product) to
+            which the entity is mapped
     """
     metadata = ['owner', 'creator', 'modifier', 'create_datetime',
-                'mod_datetime']
+                'mod_datetime', 'assembly_level', 'parent_oid', 'system_oid']
 
     def __init__(self, *args, oid=None, owner=None, creator=None,
                  modifier=None, create_datetime=None, mod_datetime=None,
-                 **kw):
+                 system_oid=None, **kw):
         """
         Initialize.
 
@@ -245,6 +183,10 @@ class Entity(dict):
             modifier (str):  oid of the entity's last modifier
             create_datetime (str):  iso-format string of creation datetime
             mod_datetime (str):  iso-format string of last mod datetime
+            parent_oid (str):  oid of the entity's "parent" entity within the
+                context of its DataMatrix
+            system_oid (str):  [optional] oid of a system (Project or Product)
+                to which the entity is mapped
             kw (dict):  keyword args, passed to superclass (dict)
                 initialization
         """
@@ -255,36 +197,18 @@ class Entity(dict):
             oid = str(uuid4())
         self.oid = oid
         d = locals()
-        kw_meta = {a: d.get(a) for a in self.metadata}
-        self.load_meta(**kw_meta)
-
-    def load_meta(self, **meta):
-        """
-        Get my metadata from the 'entz' cache, or if it does not exist in the
-        cache, create it from the metadata arguments and save it to the cache.
-        """
-        dt = str(dtstamp())
-        if self.oid in entz:
-            self.creator = entz[self.oid].get('creator', 'pgefobjects:admin')
-            self.modifier = entz[self.oid].get('modifier', 'pgefobjects:admin')
-            self.create_datetime = entz[self.oid].get('create_datetime', dt)
-            self.mod_datetime = entz[self.oid].get('mod_datetime',
-                                                   self.create_datetime)
-            self.owner = entz[self.oid].get('owner', 'pgefobjects:PGANA')
-        else:
-            self.creator = meta.get('creator', 'pgefobjects:admin')
-            self.modifier = meta.get('modifier', 'pgefobjects:admin')
-            self.create_datetime = meta.get('create_datetime', dt)
-            self.mod_datetime = meta.get('mod_datetime', self.create_datetime)
-            self.owner = meta.get('owner', 'pgefobjects:PGANA')
-            self.save_meta()
-
-    def save_meta(self):
-        """
-        Add myself to the 'entz' cache -- this method should be overridden in
-        subclasses to use the cache relevant to the subclass.
-        """
-        entz[self.oid] = {a: getattr(self, a, None) for a in self.metadata}
+        meta = {a: d.get(a) for a in self.metadata}
+        if self.oid not in entz:
+            dt = str(dtstamp())
+            entz[self.oid] = dict(
+                creator=meta.get('creator') or 'pgefobjects:admin',
+                modifier=meta.get('modifier') or 'pgefobjects:admin',
+                create_datetime=meta.get('create_datetime') or dt,
+                mod_datetime=meta.get('mod_datetime') or dt,
+                owner=meta.get('owner') or 'pgefobjects:PGANA',
+                assembly_level=meta.get('assembly_level') or 1,
+                parent_oid=meta.get('parent_oid'),
+                system_oid=meta.get('system_oid'))
 
     def __getitem__(self, k):
         """
@@ -293,14 +217,18 @@ class Entity(dict):
         parameter, a value in base units, [3] if none of those are present,
         None or whatever is provided in the 'default' arg.
         """
-        log.debug(f'* Entity.__getitem__({k})')
-        if k in ('oid', 'owner', 'creator', 'modifier', 'create_datetime',
-                 'mod_datetime'):
-            # metadata
+        # log.debug(f'* Entity.__getitem__({k})')
+        # print(f'* Entity.__getitem__({k})')
+        if k in self.metadata:
+            # print('  - got metadata.')
             return entz[self.oid].get(k)
         elif k in parm_defz:
+            # k is a parameter
+            # print('  - got parameter.')
             return get_pval(self.oid, k)
         else:
+            # k is a data element
+            # print('  - got data element.')
             return get_dval(self.oid, k)
 
     def get(self, k, *default):
@@ -310,22 +238,25 @@ class Entity(dict):
         parameter, a value in base units, [3] if none of those are present,
         None or whatever is provided in the 'default' arg.
         """
-        if k in ('oid', 'owner', 'creator', 'modifier', 'create_datetime',
-                 'mod_datetime'):
-            # metadata
-            log.debug('  - got metadata.')
+        if k in self.metadata:
+            # log.debug('  - got metadata.')
+            # print('  - got metadata.')
             return entz[self.oid].get(k)
         elif k in parm_defz:
-            log.debug('  - got parameter.')
+            # log.debug('  - got parameter.')
+            # print('  - got parameter.')
             return get_pval(self.oid, k)
         elif k in de_defz:
-            log.debug('  - got data element.')
+            # log.debug('  - got data element.')
+            # print('  - got data element.')
             return get_dval(self.oid, k)
         elif default:
-            log.debug('  - got default: {}.'.format(str(default)))
+            # log.debug('  - got default: {}.'.format(str(default)))
+            # print('  - got default: {}.'.format(str(default)))
             return default[0]
         else:
-            log.debug('  - got nothin.')
+            # log.debug('  - got nothin.')
+            # print('  - got nothin.')
             return get_dval(self.oid, k)
 
     def __setitem__(self, k, v):
@@ -334,13 +265,12 @@ class Entity(dict):
         element, or a parameter.  Note that this will add the key if it is not
         already present.
         """
-        log.debug(f'* Entity.__setitem__({k}, {v})')
+        # log.debug(f'* Entity.__setitem__({k}, {v})')
+        # print(f'* Entity.__setitem__({k}, {v})')
         # NOTE: for 'oid', it is both an object attribute and a dict key
         if k == 'oid':
             object.__setattr__(self, 'oid', v)
-        if k in ('oid', 'owner', 'creator', 'modifier', 'create_datetime',
-                 'mod_datetime'):
-            # metadata
+        if k in self.metadata:
             if not self.oid in entz:
                 entz[self.oid] = {}
             entz[self.oid][k] = v
@@ -368,26 +298,23 @@ class Entity(dict):
                      data_elementz.get(self.oid, {}))
 
     def __len__(self):
-        return len(parameterz.get(self.oid, {})) + len(data_elementz.get(
-                                                            self.oid, {}))
+        return (len(parameterz.get(self.oid, {}))
+                + len(data_elementz.get(self.oid, {})))
 
     def __str__(self):
-        parms = None
+        parms = 'PARAMETERS: '
         if parameterz.get(self.oid, {}).items():
-            parms = ', '.join(['{}: {}'.format(k, get_pval(self.oid, k))
+            parms += ', '.join(['{}: {}'.format(k, get_pval(self.oid, k))
                                for k in parameterz.get(self.oid, {})])
-        des = None
-        if data_elementz.get(self.oid, {}).items():
-            des = ', '.join(['{}: {}'.format(k, get_dval(self.oid, k))
-                             for k in data_elementz.get(self.oid, {})])
-        if parms and des:
-            return '{' + ', '.join([parms, des]) + '}'
-        elif parms:
-            return '{' + parms + '}'
-        elif des:
-            return '{' + des + '}'
         else:
-            return '{}'
+            parms += 'None'
+        des = 'DATA ELEMENTS: '
+        if data_elementz.get(self.oid, {}).items():
+            des += ', '.join(['{}: {}'.format(k, get_dval(self.oid, k))
+                             for k in data_elementz.get(self.oid, {})])
+        else:
+            des += 'None'
+        return '{' + ', '.join([parms, des]) + '}'
 
     def undo(self):
         if self.oid in ent_histz and ent_histz[self.oid]:
@@ -415,164 +342,6 @@ class Entity(dict):
         d.update(serialize_parms(self.oid))
         return d
 
-
-class PartsListItem(Entity):
-    """
-    A PartsListItem represents a line item in a parts list, and corresponds to
-    an occurrence of a Product (spec) in a system assembly.  Its parameters and
-    data elements are those of the Product.  It is implemented as a subclass of
-    Entity.
-
-    The reasons for PLI to exist are: [1] to provide a read-only dictionary
-    view of its Product's parameters, [2] to provide an editable dictionary
-    view of its Product's data elements, and [3] to track the "assembly_level"
-    of its Product occurrence in the context of its parts list (a DataMatrix --
-    literally, a list of PLI's), since a Product may occur more than once in an
-    assembly and could have occurrences at different assembly levels.
-
-    The values of a set of special keys, namely ['system_oid', 'system_name',
-    'assembly_level', 'parent_pli_oid'], are maintained in the `pliz` cache.
-
-    Attributes:
-        oid (str):  unique identifier for the PLI
-        owner (str):  oid of an Organization
-        creator (str):  oid of the entity's creator
-        modifier (str):  oid of the entity's last modifier
-        create_datetime (str):  iso-format string of creation datetime
-        mod_datetime (str):  iso-format string of last mod datetime
-    """
-    metadata = ['parent_pli_oid', 'system_oid', 'system_name', 'owner',
-                'creator', 'modifier', 'create_datetime', 'mod_datetime']
-
-    def __init__(self, *args, oid=None, parent_pli_oid=None, system_oid=None,
-                 system_name=None, owner=None, creator=None, modifier=None,
-                 create_datetime=None, mod_datetime=None, **kw):
-        """
-        Initialize.
-
-        Args:
-            args (tuple):  optional positional argument (0 or 1).  If a
-                positional arg is present, it must be either a mapping or an
-                iterable in which each element is an iterable containing 2
-                elements (e.g. a list of 2-tuples).
-
-        Keyword Args:
-            oid (str):  a unique identifier for this PLI instance
-            parent_pli_oid (str):  oid of the "parent" PLI (the assembly)
-            system_oid (str):  oid of the 'system' (Product)
-            system_name (str):  derived from name and reference_designator
-            owner (str):  oid of an Organization
-            creator (str):  oid of the entity's creator
-            modifier (str):  oid of the entity's last modifier
-            create_datetime (str):  iso-format string of creation datetime
-            mod_datetime (str):  iso-format string of last mod datetime
-            kw (dict):  keyword args, passed to superclass (dict)
-                initialization
-        """
-        log.debug('* PartsListItem()')
-        # NOTE:  the superclass (Entity) __init__ will generate a unique oid if
-        # one is not provided
-        self.pli_oid = oid or str(uuid4())
-        self.oid = system_oid
-        self.system_name = system_name
-        self.parent_pli_oid = parent_pli_oid
-        super().__init__(*args, oid=self.oid, owner=owner, creator=creator,
-                 modifier=modifier, create_datetime=create_datetime,
-                 mod_datetime=mod_datetime, **kw)
-
-    def load_meta(self, **meta):
-        """
-        Get my metadata from the 'pliz' cache.  This method is called in the
-        __init__ of the direct superclass, Entity, so it is necessary for
-        PartsListItem to override Entity's 'load_meta()' so that PartsListItem
-        uses its own cache, 'pliz', rather than Entity's cache, 'entz'.
-        """
-        dt = str(dtstamp())
-        if self.pli_oid in pliz:
-            self.creator = pliz[self.pli_oid].get('creator',
-                                                  'pgefobjects:admin')
-            self.modifier = pliz[self.pli_oid].get('modifier',
-                                                   'pgefobjects:admin')
-            self.create_datetime = pliz[self.pli_oid].get('create_datetime',
-                                                          dt)
-            self.mod_datetime = pliz[self.pli_oid].get('mod_datetime',
-                                                       self.create_datetime)
-            self.owner = pliz[self.pli_oid].get('owner', 'pgefobjects:PGANA')
-            self.oid = pliz[self.pli_oid].get('system_oid')
-            self.system_name = pliz[self.pli_oid].get('system_name')
-            self.parent_pli_oid = pliz[self.pli_oid].get('parent_pli_oid')
-        else:
-            self.creator = meta.get('creator', 'pgefobjects:admin')
-            self.modifier = meta.get('modifier', 'pgefobjects:admin')
-            self.create_datetime = meta.get('create_datetime', dt)
-            self.mod_datetime = meta.get('mod_datetime', self.create_datetime)
-            self.owner = meta.get('owner', 'pgefobjects:PGANA')
-            self.oid = meta.get('system_oid')
-            self.system_name = meta.get('system_name')
-            self.parent_pli_oid = meta.get('parent_pli_oid')
-            self.save_meta()
-
-    def save_meta(self):
-        """
-        Add myself to the 'pliz' cache.  It is necessary for PartsListItem
-        to override Entity's 'save_meta()' so that PartsListItem uses its own
-        cache, 'pliz', rather than Entity's cache, 'entz'.
-        """
-        pliz[self.pli_oid] = {a: getattr(self, a, None) for a in self.metadata}
-        # pliz[self.pli_oid]['creator'] = self.creator
-        # pliz[self.pli_oid]['modifier'] = self.modifier
-        # pliz[self.pli_oid]['create_datetime'] = self.create_datetime
-        # pliz[self.pli_oid]['mod_datetime'] = self.mod_datetime
-        # pliz[self.pli_oid]['owner'] = self.owner
-        # pliz[self.pli_oid]['system_oid'] = self.oid
-        # pliz[self.pli_oid]['system_name'] = self.system_name
-        # pliz[self.pli_oid]['parent_pli_oid'] = self.parent_pli_oid
-
-    def __getitem__(self, k):
-        """
-        Get the value of a key.
-        """
-        # log.debug(f'* PLI.__getitem__({k})')
-        if k == 'assembly_level':
-            return pliz.get(self.pli_oid, {}).get(k, 1)
-        elif k in ['system_oid', 'system_name', 'parent_pli_oid']:
-            return pliz.get(self.pli_oid, {}).get(k)
-        elif k in parm_defz:
-            return get_pval(self.oid, k)
-        else:
-            return get_dval(self.oid, k)
-
-    def get(self, k, *default):
-        # log.debug(f'* PLI.get({k})')
-        if k == 'assembly_level':
-            return pliz.get(self.pli_oid, {}).get('assembly_level', 1)
-        elif k in ['system_oid', 'system_name', 'parent_pli_oid']:
-            return pliz.get(self.pli_oid, {}).get(k)
-        elif k in de_defz:
-            return get_dval(self.oid, k)
-        elif k in parm_defz:
-            return get_pval(self.oid, k)
-        elif default:
-            log.debug('  - got default: {}.'.format(str(default)))
-            return default[0]
-        else:
-            log.debug('  - got nothin.')
-            return get_dval(self.oid, k)
-
-    def __setitem__(self, k, v):
-        """
-        Set the value of an entity key.  For special keys, use the 'pliz'
-        table; for data elements, use set_dval; parameters are not settable
-        through the PLI interface and will be ignored.
-        """
-        # log.debug(f'* PLI.__setitem__({k}, {v})')
-        if k in ['system_oid', 'system_name', 'assembly_level',
-                 'parent_pli_oid']:
-            if not self.pli_oid in pliz:
-                pliz[self.pli_oid] = {}
-            pliz[self.pli_oid][k] = v
-        elif k in de_defz:
-            set_dval(self.oid, k, v)
 
 # -----------------------------------------------------------------------
 # DATAMATRIX-RELATED CACHES #############################################
@@ -750,9 +519,9 @@ class DataMatrix(UserList):
         elif schemaz.get(name):
             # else check 'schemaz' for a schema by the name
             self.schema = schemaz[name]
-        elif prefs.get('schemas', {}).get(name):
-            # else check prefs["schemas"] for that name ...
-            self.schema = prefs['schemas'][name]
+        elif config.get('schemas', {}).get(name):
+            # else check config["schemas"] for that name ...
+            self.schema = config['schemas'][name]
         else:
             # if schema lookup in 'schemaz' and 'prefs["schemas"]' is
             # unsuccessful, use 'generic' schema of last resort ...
@@ -767,9 +536,9 @@ class DataMatrix(UserList):
                  or parm_defz.get(col_id, {}).get('name', '')
                  or col_id)
                 for col_id in self.schema]
-        self.save_meta()
+        self.cache_meta()
 
-    def save_meta(self):
+    def cache_meta(self):
         """
         Add myself to the 'dmz' cache -- this method should be overridden in
         subclasses to use the cache relevant to the subclass.
@@ -832,150 +601,14 @@ class DataMatrix(UserList):
         self.pop(i)
         return True
 
-# -----------------------------------------------------------------------
-# PartsList class and related cache #####################################
-# -----------------------------------------------------------------------
-# plz:         persistent** cache of PartsList instances
-#              ** persisted in the file 'pls.json' in the
-#              application home directory
-# format:  {oid : PartsList},
-#           ...}
-plz = {}
-
-def load_plz(dir_path):
-    """
-    Load the `plz` cache from json file.  (Restores all PartsList
-    instances.)
-
-    Args:
-        plz_path (str):  location of file to read
-    """
-    log.debug('* load_plz() ...')
-    fpath = os.path.join(dir_path, 'pls.json')
-    if os.path.exists(fpath):
-        with open(fpath) as f:
-            ser_pls = json.loads(f.read()) or {}
-        try:
-            deser_pls = {oid: PartsList([
-                              PartsListItem(oid=oid)
-                                            for oid in spl.get('plis', [])],
-                              project_id=spl['project_id'],
-                              name=spl['name'],
-                              creator=spl['creator'],
-                              modifier=spl['modifier'],
-                              create_datetime=spl['create_datetime'],
-                              mod_datetime=spl['mod_datetime'])
-                         for oid, spl in ser_pls.items()}
-        except:
-            log.debug('  - Parsing of pls.json failed.')
-            return
-        plz.update(deser_pls)
-        nplz = len(plz)
-        log.debug(f'  - {nplz} PartsList instance(s) loaded into plz cache.')
-    else:
-        log.debug('  - "pls.json" was not found.')
-        pass
-
-def save_plz(dir_path):
-    """
-    Save `plz` dict (all PartsList instances) to json file.
-
-    Args:
-        plz_path (str):  location of file to write
-    """
-    log.debug('* save_plz() ...')
-    ser_pls = {oid: dict(project_id=pl.project_id,
-                         name=pl.name,
-                         plis=[pli.oid for pli in pl],
-                         creator=pl.creator,
-                         modifier=pl.modifier,
-                         create_datetime=pl.create_datetime,
-                         mod_datetime=pl.mod_datetime)
-               for oid, pl in plz.items()}
-    npls = len(ser_pls)
-    fpath = os.path.join(dir_path, 'pls.json')
-    with open(fpath, 'w') as f:
-        f.write(json.dumps(ser_pls, separators=(',', ':'),
-                           indent=4, sort_keys=True))
-    log.debug(f'  ... {npls} PartsList instance(s) saved to pls.json.')
-
-
-class PartsList(DataMatrix):
-    """
-    A subclass of DataMatrix that contains instances of PartsListItem (an
-    Entity subclass) as its items.  It is cached in the "plz" dict and its
-    metadata are saved in "pls.json".
-
-    Attributes:
-        data (iterable):  an iterable of entities
-        name (str): name (which may or may not exist in the 'schemaz' cache)
-        project_id (str): id a project (owner of the PartsList)
-        systems (list of str): oids of systems of the project
-        schema (list): list of data element ids and parameter ids
-    """
-    def __init__(self, *data, project_id='', systems=None, name=None,
-                 schema=None, creator=None, modifier=None,
-                 create_datetime=None, mod_datetime=None):
+    def recompute_mel(self, context):
         """
-        Initialize.
-
-        Args:
-            data (iterable):  (optional) an iterable of entities
-
-        Keyword Args:
-            project_id (str): id of a project (owner of the DataMatrix)
-            systems (list of str): oids of systems of the project
-            name (str): name (which may or may not exist in 'schemaz')
-            schema (list): list of data element ids and parameter ids
-            creator (str):  oid of the entity's creator
-            modifier (str):  oid of the entity's last modifier
-            create_datetime (str):  iso-format string of creation datetime
-            mod_datetime (str):  iso-format string of last mod datetime
-        """
-        super().__init__(*data, project_id=project_id, name=name,
-                         schema=schema, creator=creator, modifier=modifier,
-                         create_datetime=create_datetime,
-                         mod_datetime=mod_datetime)
-        self.systems = systems or []
-
-    def save_meta(self):
-        """
-        Add myself to the 'plz' cache.
-        """
-        plz[self.oid] = self
-
-    def append_new_row(self, child=False):
-        """
-        Appends an "empty" PartsListItem with a new oid, using 'child' flag to
-        indicate what the level should be.
-        """
-        pli = PartsListItem()
-        self.append(pli)
-        return pli
-
-    def insert_new_row(self, i, child_of=False):
-        """
-        Inserts an empty PartsListItem with a new oid, in the ith position,
-        using 'child' flag to compute the level.  To support
-        GridTreeItem.insertChildren(), use child=True.
-
-        Keyword Args:
-            child_of (PartsListItem):  the parent PartsListItem (or None if
-                same level as preceding row)
-        """
-        pli = PartsListItem()
-        self.insert(i, pli)
-        return pli
-
-    def refresh_mel_pli_data(self, context):
-        """
-        Refresh generated MEL (Master Equipment List) parameters related to a
-        'context' (Project or Product) from which the generated values are
-        obtained.
+        Compute parameters / data elements for a the MEL (Master Equipment
+        List) in a 'context' (Project or Product).
 
         Args:
             context (Project or Product):  the project or system to which the
-                generated MEL parameters pertain
+                MEL parameters pertain
         """
         row = 0
         if context.__class__.__name__ == 'Project':
@@ -983,35 +616,35 @@ class PartsList(DataMatrix):
             project = context
             for psu in project.systems:
                 name = f'{psu.system_role} [{psu.system.id}]'
-                end_row = self.set_pli_parms(1, row, name, psu.system)
+                end_row = self.compute_mel_parms(1, row, name, psu.system)
                 row += end_row
         elif context.__class__.__name__ == 'HardwareProduct':
             # context is Product -> a single system MEL
             name = f'{context.name} [{context.id}]'
-            self.set_pli_parms(1, 0, name, context)
+            self.compute_mel_parms(1, 0, name, context)
         else:
             # not a Project or HardwareProduct
             pass
 
-    def set_pli_parms(self, level, row, name, component, qty=1,
-                      parent_pli_oid=None):
+    def compute_mel_parms(self, level, row, name, component, qty=1,
+                      parent_oid=None):
         """
-        Set parameter and data element values for the components in a Master
-        Equipment List (MEL) PartsList based on their positions in the system
+        Compute parameter and data element values for the components in a
+        Master Equipment List (MEL) based on their positions in the system
         assembly.
         """
-        log.debug(f'* set_pli_parms({level}, {row}, {name}, qty={qty},')
-        log.debug(f'                parent_pli_oid={parent_pli_oid}')
+        log.debug(f'* set_parm_values({level}, {row}, {name}, qty={qty},')
+        log.debug(f'                  parent_oid={parent_oid}')
         oid = component.oid
         if (row < len(self) and self[row].get('oid') == oid
-            and isinstance(self[row], PartsListItem)):
+            and isinstance(self[row], Entity)):
             # this row corresponds to its index and is a PLI:
-            pli = self[row]
+            entity = self[row]
         else:
-            # create a new pli for it (note that the PartsListItem __init__()
+            # create a new entity for it (note that the PartsListItem __init__()
             # will check if there is already metadata for it in 'pliz', and if
             # found, use that instead of the arguments supplied here ...)
-            pli = PartsListItem(parent_pli_oid=parent_pli_oid,
+            entity = Entity(parent_oid=parent_oid,
                             system_oid=component.oid, 
                             system_name=name, 
                             owner=component.owner.oid,
@@ -1020,19 +653,19 @@ class PartsList(DataMatrix):
                             modifier=component.modifier.oid,
                             mod_datetime=str(component.mod_datetime))
         if row < len(self):
-            self[row] = pli
+            self[row] = entity
         else:
-            self.append(pli)
+            self.append(entity)
         # map data element values to parameter values where appropriate ...
-        pli['m_unit'] = get_pval(oid, 'm[CBE]') or 0
-        log.debug('  pli["m_unit"] = {}'.format(pli['m_unit']))
-        pli['m_cbe'] = qty * pli['m_unit']
-        pli['m_ctgcy'] = round_to(100 * get_pval(oid, 'm[Ctgcy]'), n=3) or 0
-        pli['m_mev'] = qty * (get_pval(oid, 'm[MEV]') or 0)
-        pli['nom_p_unit_cbe'] = get_pval(oid, 'P[CBE]') or 0
-        pli['nom_p_cbe'] = qty * (pli['nom_p_unit_cbe'] or 0)
-        pli['nom_p_ctgcy'] = round_to(100 * get_pval(oid, 'P[Ctgcy]')) or 0
-        pli['nom_p_mev'] = qty * (get_pval(oid, 'P[MEV]') or 0)
+        entity['m_unit'] = get_pval(oid, 'm[CBE]') or 0
+        log.debug('  entity["m_unit"] = {}'.format(entity['m_unit']))
+        entity['m_cbe'] = qty * entity['m_unit']
+        entity['m_ctgcy'] = round_to(100 * get_pval(oid, 'm[Ctgcy]'), n=3) or 0
+        entity['m_mev'] = qty * (get_pval(oid, 'm[MEV]') or 0)
+        entity['nom_p_unit_cbe'] = get_pval(oid, 'P[CBE]') or 0
+        entity['nom_p_cbe'] = qty * (entity['nom_p_unit_cbe'] or 0)
+        entity['nom_p_ctgcy'] = round_to(100 * get_pval(oid, 'P[Ctgcy]')) or 0
+        entity['nom_p_mev'] = qty * (get_pval(oid, 'P[MEV]') or 0)
         # columns in spreadsheet MEL:
         #   0: Level
         #   1: Name
@@ -1044,9 +677,9 @@ class PartsList(DataMatrix):
         #  13: Power CBE
         #  14: Power Contingency (%)
         #  15: Power MEV
-        pli['assembly_level'] = level
-        pli['system_oid'] = component.oid
-        pli['system_name'] = name
+        entity['assembly_level'] = level
+        entity['system_oid'] = component.oid
+        entity['system_name'] = name
         log.debug(f' + writing {name} in row {row}')
         if component.components:
             next_level = level + 1
@@ -1057,7 +690,8 @@ class PartsList(DataMatrix):
                 component = acu.component
                 qty = acu.quantity or 1
                 name = f'{acu.reference_designator} [{component.name}]'
-                row = self.set_pli_parms(next_level, row, name, component,
-                                         qty=qty, parent_pli_oid=pli.pli_oid)
+                row = self.compute_mel_parms(next_level, row, name, component,
+                                             qty=qty, parent_oid=entity.oid)
         return row
+
 

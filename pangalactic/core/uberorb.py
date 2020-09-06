@@ -23,8 +23,10 @@ from pangalactic.core             import state, read_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
 from pangalactic.core.entity      import (dmz, load_dmz, save_dmz,
-                                          entz, load_entz, save_entz, load_plz,
-                                          save_plz, pliz, load_pliz, save_pliz,
+                                          entz, load_entz, save_entz,
+                                          ## NOTE: deactivating PartsList stuff
+                                          # load_plz, save_plz,
+                                          # pliz, load_pliz, save_pliz,
                                           schemaz, load_schemaz, save_schemaz,
                                           load_ent_histz, save_ent_histz)
 from pangalactic.core.registry    import PanGalacticRegistry
@@ -309,8 +311,8 @@ class UberORB(object):
         save_parmz(self.home)
         save_entz(self.home)
         save_ent_histz(self.home)
-        save_pliz(self.home)
-        save_plz(self.home)
+        # save_pliz(self.home)
+        # save_plz(self.home)
         save_schemaz(self.home)
         save_dmz(self.home)
         return self.home
@@ -378,7 +380,7 @@ class UberORB(object):
 
     def save_caches(self, dir_path=None):
         """
-        Serialize all caches (data_elementz, parameterz, entz, ent_histz, pliz,
+        Serialize all caches (data_elementz, parameterz, entz, ent_histz,
         schemaz, and dmz) to files in the specified directory.
         """
         self.log.info('* save_caches()')
@@ -394,8 +396,8 @@ class UberORB(object):
         save_parmz(dir_path)
         save_entz(dir_path)
         save_ent_histz(dir_path)
-        save_pliz(dir_path)
-        save_plz(dir_path)
+        # save_pliz(dir_path)
+        # save_plz(dir_path)
         save_schemaz(dir_path)
         save_dmz(dir_path)
         self.cache_dump_complete = True
@@ -703,12 +705,12 @@ class UberORB(object):
         self.log.debug('* loading entz ...')
         load_entz(self.home)
         self.log.debug('  entz: {}'.format(str(entz)))
-        self.log.debug('* loading pliz ...')
-        load_pliz(self.home)
-        self.log.debug('  pliz: {}'.format(str(pliz)))
-        self.log.debug('* loading plz ...')
-        load_plz(self.home)
-        self.log.debug('  plz: {}'.format(str(pliz)))
+        # self.log.debug('* loading pliz ...')
+        # load_pliz(self.home)
+        # self.log.debug('  pliz: {}'.format(str(pliz)))
+        # self.log.debug('* loading plz ...')
+        # load_plz(self.home)
+        # self.log.debug('  plz: {}'.format(str(pliz)))
         self.log.debug('* loading ent_histz ...')
         load_ent_histz(self.home)
         self.log.debug('* loading schemaz ...')
