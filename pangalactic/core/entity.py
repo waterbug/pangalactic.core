@@ -615,8 +615,8 @@ class DataMatrix(UserList):
 
     def recompute_mel(self, context):
         """
-        Compute parameters / data elements for a the MEL (Master Equipment
-        List) in a 'context' (Project or Product).
+        Compute parameters / data elements for a MEL (Master Equipment List) in
+        a 'context' (Project or Product).
 
         Args:
             context (Project or Product):  the project or system to which the
