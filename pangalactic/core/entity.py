@@ -185,6 +185,7 @@ class Entity(dict):
         """
         log.debug('* Entity()')
         super().__init__(*args)
+        self.mapped = False
         # TODO:  check if oid is that of an object
         if not oid:
             oid = str(uuid4())
@@ -343,6 +344,20 @@ class Entity(dict):
         d.update(serialize_parms(self.oid))
         return d
 
+    def delete(self):
+        """
+        Delete the entity, removing all references to it from entz, ent_histz,
+        parameterz, and data_elementz.
+        """
+        if self.oid in ent_histz:
+            del ent_histz[self.oid]
+        if self.oid in entz:
+            del entz[self.oid]
+        if self.oid in parameterz:
+            del parameterz[self.oid]
+        if self.oid in data_elementz:
+            del data_elementz[self.oid]
+
 
 # -----------------------------------------------------------------------
 # DATAMATRIX-RELATED CACHES #############################################
@@ -457,9 +472,10 @@ def save_dmz(dir_path):
     log.debug(f'  ... {ndms} DataMatrix instance(s) saved to dms.json.')
 
 
-class DataMatrix(UserList):
+# class DataMatrix(UserList):
+class DataMatrix(list):
     """
-    A UserList subclass that contains instances of Entity as its items.  The
+    A list subclass that contains instances of Entity as its items.  The
     DataMatrix has an attribute "schema" that is a list of identifiers that
     reference DataElementDefinitions or ParameterDefinitions (which are cached
     in the "de_defz" dict and "parm_defz" dict, respectively).
@@ -478,6 +494,9 @@ class DataMatrix(UserList):
         name (str): name (which may or may not exist in the 'schemaz' cache)
         project_id (str): id a project (owner of the DataMatrix)
         schema (list): list of data element ids and parameter ids
+        mapped_ents (list): used when recomputing a MEL DataMatrix to keep
+            track of which entities have been mapped from the assembly
+            structure(s)
     """
     def __init__(self, *data, project_id='', name=None,
                  schema=None, creator=None, modifier=None,
@@ -542,18 +561,25 @@ class DataMatrix(UserList):
     def __str__(self):
         s = 'DataMatrix: '
         if self:
-            s += '['
-            for e in self:
-                s += '{}, '.format(e.oid)
+            s = '['
+            s += ', '.join([e.oid for e in self])
             s += ']'
         else:
             s += '[]'
         return s
 
+    def ent_utuples(self):
+        """
+        Return a list containing the unique tuple of (system_oid, parent_oid,
+        system_name) for each entity in the DataMatrix.
+        """
+        return [(entity.get('system_oid'),
+                 entity.get('parent_oid'),
+                 entity.get('system_name')) for entity in self]
+
     def cache_meta(self):
         """
-        Add myself to the 'dmz' cache -- this method should be overridden in
-        subclasses to use the cache relevant to the subclass.
+        Add myself to the 'dmz' cache.
         """
         dmz[self.oid] = self
 
@@ -607,7 +633,7 @@ class DataMatrix(UserList):
         """
         oids = [e.oid for e in self]
         if oid in oids:
-            i = self.index(oid)
+            i = oids.index(oid)
         else:
             return False
         self.pop(i)
@@ -624,20 +650,41 @@ class DataMatrix(UserList):
         """
         log.debug(f'* recompute_mel({context.id})')
         row = 0
+        # re-mapping, so set all entities as not mapped
+        for e in self:
+            e.mapped = False
         if context.__class__.__name__ == 'Project':
+            log.debug(f'  MEL for Project "{context.id}"')
             # context is Project, so may include several systems
             project = context
             for psu in project.systems:
                 name = f'{psu.system_role} [{psu.system.id}]'
-                end_row = self.compute_mel_parms(1, row, name, psu.system)
-                row += end_row
+                end = self.compute_mel_parms(1, row, name, psu.system)
+                row += end
         elif context.__class__.__name__ == 'HardwareProduct':
             # context is Product -> a single system MEL
+            log.debug(f'  MEL for System "{context.id}"')
             name = f'{context.name} [{context.id}]'
             self.compute_mel_parms(1, 0, name, context)
         else:
             # not a Project or HardwareProduct
-            pass
+            log.debug('  context specified is neither Project nor System.')
+            return
+        # after a recompute, remove and delete any unmapped entities ...
+        log.debug('  checking for unmapped entities ...')
+        unmapped = 0
+        for entity in self:
+            if not entity.mapped:
+                row = self.index(entity)
+                log.debug(f'  removing unmapped entity "{entity.oid}"')
+                self.remove_row_by_oid(entity.oid)
+                entity.delete()
+                unmapped += 1
+        if unmapped:
+            log.debug(f'  {unmapped} unmapped entities removed.')
+            dispatcher.send('mel rearranged')
+        else:
+            log.debug(f'  no unmapped entities found.')
 
     def compute_mel_parms(self, level, row, name, component, qty=1,
                           parent_oid=None):
@@ -649,13 +696,30 @@ class DataMatrix(UserList):
         log.debug(f'* compute_mel_parms({level}, {row}, {name}, qty={qty},')
         log.debug(f'                    parent_oid={parent_oid}')
         oid = component.oid
-        if (row < len(self) and self[row].get('system_oid') == oid
-            and self[row].get('parent_oid') == parent_oid
-            and self[row].get('system_name') == name):
-            # this row is an entity that corresponds to its index
-            entity = self[row]
+        etuple = (oid, parent_oid, name)
+        log.debug(f'  for etuple: ({oid}, {parent_oid}, {name})')
+        # get the current set of entity "tuples" (which may change during
+        # updating of the MEL DataMatrix)
+        utups = self.ent_utuples()
+        # [1] check whether there is an entity anywhere in the DataMatrix that
+        # corresponds to the current assembly item
+        if etuple in utups:
+            if row < len(utups) and etuple == utups[row]:
+                log.debug('  etuple maps to the entity in this row.')
+                entity = self[row]
+            else:
+                log.debug('  etuple maps to an entity in another row ...')
+                entity = self.pop(utups.index(etuple))
+                if row < len(self):
+                    # row index is "inside" the DataMatrix, insert the entity there
+                    self.insert(row, entity)
+                else:
+                    # otherwise, append it
+                    self.append(entity)
+        # [3] there is no corresponding entity in the current DataMatrix;
+        # create a new entity (with an auto-generated oid)
         else:
-            # create a new entity (with an auto-generated oid)
+            log.debug('  etuple not yet mapped to an entity, creating ...')
             entity = Entity(parent_oid=parent_oid,
                             assembly_level=level,
                             system_oid=component.oid, 
@@ -665,10 +729,13 @@ class DataMatrix(UserList):
                             create_datetime=str(component.create_datetime),
                             modifier=component.modifier.oid,
                             mod_datetime=str(component.mod_datetime))
-        if row < len(self):
-            self[row] = entity
-        else:
-            self.append(entity)
+            if row < len(self):
+                # row index is "inside" the DataMatrix, insert the entity there
+                self.insert(row, entity)
+            else:
+                # otherwise, append it
+                self.append(entity)
+        entity.mapped = True
         # map data element values to parameter values where appropriate ...
         entity['m_unit'] = get_pval(oid, 'm[CBE]') or 0
         log.debug('  entity["m_unit"] = {}'.format(entity['m_unit']))
@@ -703,5 +770,4 @@ class DataMatrix(UserList):
                 row = self.compute_mel_parms(next_level, row, name, component,
                                              qty=qty, parent_oid=entity.oid)
         return row
-
 
