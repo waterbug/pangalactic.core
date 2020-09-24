@@ -1010,6 +1010,8 @@ def set_pval(oid, pid, value, units=None, mod_datetime=None, local=True):
         # dts = str(mod_datetime)
         # log.debug('  setting value: {}'.format(value))
         # log.debug('  setting mod_datetime: "{}"'.format(dts))
+        dispatcher.send('pval set', oid=oid, pid=pid, value=value,
+                        units=units, mod_datetime=mod_datetime, local=local)
         return True
     except:
         # log.debug('  *** set_pval() failed:')
@@ -1706,6 +1708,8 @@ def set_dval(oid, deid, value, mod_datetime=None, local=True):
         # dts = str(mod_datetime)
         # log.debug('  setting value: {}'.format(value))
         # log.debug('  setting mod_datetime: "{}"'.format(dts))
+        dispatcher.send('dval set', oid, deid, value,
+                        mod_datetime=mod_datetime, local=local)
         return True
     except:
         # log.debug('  *** set_dval() failed:')

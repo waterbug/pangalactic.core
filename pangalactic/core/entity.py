@@ -4,7 +4,6 @@ Pan Galactic Entity and DataMatrix classes.
 """
 import json, os
 from copy            import deepcopy
-from collections     import UserList
 from itertools       import chain
 from uuid            import uuid4
 
@@ -191,22 +190,36 @@ class Entity(dict):
             oid = str(uuid4())
         self.oid = oid
         d = locals()
-        meta = {a: d.get(a) for a in self.metadata}
+        self.meta = {a: d.get(a) for a in self.metadata}
         if self.oid in entz:
             log.debug(f'  entity oid "{oid}" was in "entz", using ...')
         else:
-            log.debug(f'  entity oid "{oid}" was NOT in "entz", creating ...')
-            dt = str(dtstamp())
-            entz[self.oid] = dict(
-                creator=meta.get('creator') or 'pgefobjects:admin',
-                modifier=meta.get('modifier') or 'pgefobjects:admin',
-                create_datetime=meta.get('create_datetime') or dt,
-                mod_datetime=meta.get('mod_datetime') or dt,
-                owner=meta.get('owner') or 'pgefobjects:PGANA',
-                assembly_level=meta.get('assembly_level') or 1,
-                parent_oid=meta.get('parent_oid'),
-                system_oid=meta.get('system_oid'),
-                system_name=meta.get('system_name'))
+            log.debug(f'  entity oid was NOT in "entz", registering ...')
+            self.register()
+
+    def register(self):
+        dt = str(dtstamp())
+        entz[self.oid] = dict(
+            creator=self.meta.get('creator') or 'pgefobjects:admin',
+            modifier=self.meta.get('modifier') or 'pgefobjects:admin',
+            create_datetime=self.meta.get('create_datetime') or dt,
+            mod_datetime=self.meta.get('mod_datetime') or dt,
+            owner=self.meta.get('owner') or 'pgefobjects:PGANA',
+            assembly_level=self.meta.get('assembly_level') or 1,
+            parent_oid=self.meta.get('parent_oid'),
+            system_oid=self.meta.get('system_oid'),
+            system_name=self.meta.get('system_name'))
+        dispatcher.send('new entity',
+            oid=self.oid,
+            creator=self.meta.get('creator') or 'pgefobjects:admin',
+            modifier=self.meta.get('modifier') or 'pgefobjects:admin',
+            create_datetime=self.meta.get('create_datetime') or dt,
+            mod_datetime=self.meta.get('mod_datetime') or dt,
+            owner=self.meta.get('owner') or 'pgefobjects:PGANA',
+            assembly_level=self.meta.get('assembly_level') or 1,
+            parent_oid=self.meta.get('parent_oid'),
+            system_oid=self.meta.get('system_oid'),
+            system_name=self.meta.get('system_name'))
 
     def __getitem__(self, k):
         """
@@ -472,7 +485,6 @@ def save_dmz(dir_path):
     log.debug(f'  ... {ndms} DataMatrix instance(s) saved to dms.json.')
 
 
-# class DataMatrix(UserList):
 class DataMatrix(list):
     """
     A list subclass that contains instances of Entity as its items.  The
@@ -682,7 +694,7 @@ class DataMatrix(list):
                 unmapped += 1
         if unmapped:
             log.debug(f'  {unmapped} unmapped entities removed.')
-            dispatcher.send('mel rearranged')
+            dispatcher.send('mel modified')
         else:
             log.debug(f'  no unmapped entities found.')
 
@@ -737,6 +749,10 @@ class DataMatrix(list):
                 self.append(entity)
         entity.mapped = True
         # map data element values to parameter values where appropriate ...
+        # NOTE: not using set_dval() because these values are computed from the
+        # model (they are still stored in data_elementz, so the values will
+        # still be returned by get_dval())
+        # TODO:  define these Data Elements as "computed"
         entity['m_unit'] = get_pval(oid, 'm[CBE]') or 0
         log.debug('  entity["m_unit"] = {}'.format(entity['m_unit']))
         entity['m_cbe'] = qty * entity['m_unit']
