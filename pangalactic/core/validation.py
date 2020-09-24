@@ -32,7 +32,7 @@ def check_for_cycles(product):
         comps = [acu.component for acu in product.components]
         # acus_by_comp_oid = {acu.component.oid : acu
                             # for acu in product.components}
-        if product.oid in [c.oid for c in comps]:
+        if product.oid in [getattr(c, 'oid', None) for c in comps]:
             txt = 'is a component of itself.'
             print('product {} (id: "{}" {}'.format(
                   product.oid, product.id or 'no id', txt))
@@ -42,9 +42,10 @@ def check_for_cycles(product):
         comps1 = []
         acus1_by_comp_oid = {}
         for comp in comps:
-            comps1 += [acu.component for acu in comp.components]
-            acus1_by_comp_oid.update({acu.component.oid : acu
-                                      for acu in comp.components})
+            if comp:
+                comps1 += [acu.component for acu in comp.components]
+                acus1_by_comp_oid.update({acu.component.oid : acu
+                                          for acu in comp.components})
         if comps1:
             comps += comps1
         else:
