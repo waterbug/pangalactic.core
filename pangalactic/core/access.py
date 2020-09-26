@@ -63,20 +63,20 @@ def get_perms(obj, user=None, permissive=False):
         # user specified -> server-side
         user_oid = getattr(user, 'oid', None)
         if not user_oid:
-            # orb.log.debug('  specified user has no "oid".')
-            # orb.log.debug('  perms: {}'.format(perms))
+            orb.log.debug('  specified user has no "oid".')
+            orb.log.debug('  perms: {}'.format(perms))
             return list(perms)
     else:
         # user not provided -> find local user (client-side)
         user_oid = state.get('local_user_oid')
         if not user_oid:
-            # orb.log.debug('  no local user configured.')
-            # orb.log.debug('  perms: {}'.format(perms))
+            orb.log.debug('  no local user configured.')
+            orb.log.debug('  perms: {}'.format(perms))
             return list(perms)
         user = orb.get(user_oid)
         if not user:
-            # orb.log.debug('  no user object found.')
-            # orb.log.debug('  perms: {}'.format(perms))
+            orb.log.debug('  no user object found.')
+            orb.log.debug('  perms: {}'.format(perms))
             return list(perms)
     if isinstance(obj, orb.classes['ProjectSystemUsage']):
         # access is determined by project/system access for PSU
@@ -87,9 +87,9 @@ def get_perms(obj, user=None, permissive=False):
     # if we get this far, we have a user_oid and a user object
     if is_global_admin(user):
         # global admin is omnipotent, except for deleting projects ...
-        # orb.log.debug('  ******* user is a global admin.')
+        orb.log.debug('  ******* user is a global admin.')
         perms = ['view', 'modify', 'decloak', 'delete']
-        # orb.log.debug('  perms: {}'.format(perms))
+        orb.log.debug('  perms: {}'.format(perms))
         return perms
     # user has write permissions if Admin for owner org or if user has a
     # discipline role in the owner org that corresponds to the object's
