@@ -1383,6 +1383,9 @@ class UberORB(object):
                           if psu is not usage]
         else:
             return []
+        # in case we're dealing with a corrupted "usage" ...
+        if not component:
+            return []
         other_port_oids = [p.oid for p in reduce(lambda x, y: x+y,
                                         [o.ports for o in other_objs], [])]
         comp_port_oids = [p.oid for p in component.ports]
