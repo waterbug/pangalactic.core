@@ -56,10 +56,6 @@ def get_perms(obj, user=None, permissive=False):
             # Product is "public" -> everyone has 'view' access;
             # determine other perms by logic below ...
             perms.add('view')
-        else:
-            if obj.owner is None:
-                # non-public Product with no owner -> no permissions
-                return list(perms)
     else:
         # not a Product -> everyone has 'view' access
         perms.add('view')
