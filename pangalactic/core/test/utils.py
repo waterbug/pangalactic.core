@@ -160,7 +160,16 @@ def create_test_users():
             org='test:yoyodyne', create_datetime=NOW, mod_datetime=NOW,
             email='manyjars@redlectroids.planet10.univ',
             first_name='John', mi_or_name='', last_name='Manyjars',
-            phone='1-Z00-MANYJAR', owner='pgefobjects:PGANA')
+            phone='1-Z00-MANYJAR', owner='pgefobjects:PGANA'),
+        dict(
+            _cname='RoleAssignment',
+            creator='pgefobjects:admin', modifier='pgefobjects:admin',
+            create_datetime=NOW, mod_datetime=NOW,
+            oid='test:RA.steve_admin',
+            id='steve_admin',
+            id_ns='test',
+            assigned_role='pgefobjects:Role.Administrator',
+            assigned_to='test:steve')
             ]
 
 def create_test_project():
@@ -215,15 +224,6 @@ def create_test_project():
             assigned_role='pgefobjects:Role.Administrator',
             assigned_to='test:steve',
             role_assignment_context='H2G2'),
-        dict(
-            _cname='RoleAssignment',
-            creator='pgefobjects:admin', modifier='pgefobjects:admin',
-            create_datetime=NOW, mod_datetime=NOW,
-            oid='test:RA.steve_admin',
-            id='steve_admin',
-            id_ns='test',
-            assigned_role='pgefobjects:Role.Administrator',
-            assigned_to='test:steve'),
         dict(
             _cname='RoleAssignment',
             creator='pgefobjects:admin', modifier='pgefobjects:admin',
