@@ -47,7 +47,10 @@ def asciify(u):
                                 'ASCII', 'ignore').decode('utf-8')
     elif isinstance(u, bytes):
         return u.decode('utf-8')
-    return str(u)
+    # allow only printable chars
+    printable = set(string.printable)
+    clean = filter(lambda x: x in printable, str(u))
+    return clean
 
 def property_to_field(name, pe):
     """
