@@ -6,9 +6,8 @@ Serializers / deserializers for pangalactic domain objects and parameters.
 from sqlalchemy import ForeignKey
 
 # PanGalactic
-from pangalactic.core.refdata          import ref_oids
-from pangalactic.core.utils.meta       import (asciify, cookers, uncookers,
-                                               uncook_datetime)
+from pangalactic.core.refdata     import ref_oids
+from pangalactic.core.utils.meta  import cookers, uncookers, uncook_datetime
 from pangalactic.core.utils.datetimes  import earlier
 from pangalactic.core.parametrics import (add_parameter,
                                           deserialize_des,
@@ -152,11 +151,13 @@ def serialize(orb, objs, view=None, include_components=False,
                         # d[name] = '[inverse property]'  # <- for testing
                         rel_objs = getattr(obj, name)
                         if rel_objs:
-                            d[name] = [asciify(o.oid) for o in rel_objs]
+                            # d[name] = [asciify(o.oid) for o in rel_objs]
+                            d[name] = [o.oid for o in rel_objs]
                     else:
                         continue
                 else:
-                    d[name] = asciify(getattr(getattr(obj, name), 'oid'))
+                    # d[name] = asciify(getattr(getattr(obj, name), 'oid'))
+                    d[name] = getattr(getattr(obj, name), 'oid')
             else:
                 datatype = schema['fields'][name]['range']
                 d[name] = cookers[datatype](getattr(obj, name))
@@ -323,7 +324,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     if not include_refdata:
         # exclude reference data objects
         serialized = [so for so in serialized
-                      if not asciify(so.get('oid', '')) in ref_oids]
+                      if not so.get('oid', '') in ref_oids]
+                      # if not asciify(so.get('oid', '')) in ref_oids]
     # if len(serialized) < new_len:
         # orb.log.info('  {} ref data object(s) found, ignored.'.format(
                                                # new_len - len(serialized)))
@@ -360,7 +362,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 raise TypeError('class name not specified')
             # orb.log.debug('* deserializing serialized object:')
             # orb.log.debug('  %s' % str(d))
-            oid = asciify(d['oid'])
+            # oid = asciify(d['oid'])
+            oid = d['oid']
             # if oid:
             if oid in current_oids:
                 # orb.log.debug('  - object exists in db ...')
@@ -433,9 +436,11 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     # get the related object by its oid (i.e. d[fk])
                     # orb.log.debug('    * rel obj oid: "{}"'.format(
                                    # asciify(d.get(asciify(fk)))))
-                    if d.get(asciify(fk)):
+                    # if d.get(asciify(fk)):
+                    if d.get(fk):
                         # orb.log.debug('      rel obj found.')
-                        kw[asciify(fk)] = orb.get(asciify(d[asciify(fk)]))
+                        # kw[asciify(fk)] = orb.get(asciify(d[asciify(fk)]))
+                        kw[fk] = orb.get(d[fk])
                     # else:
                         # orb.log.debug('      rel obj NOT found.')
             cls = orb.classes[cname]
