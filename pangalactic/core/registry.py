@@ -159,7 +159,7 @@ class PanGalacticRegistry(object):
         self.nses = {}
         if db_url:
             self.log.info('* initializing db at "{}"'.format(db_url))
-            self.db_engine = create_engine(db_url)
+            self.db_engine = create_engine(db_url, encoding='utf-8')
         else:
             # if no db_url is specified, set up a local (sqlite) db in home
             self.log.info('* initializing local sqlite db.')
