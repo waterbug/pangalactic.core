@@ -340,7 +340,7 @@ class UberORB(object):
             # NOTE:  DO NOT *EVER* USE 'expire_on_commit = False' here!!!
             #        -> it causes VERY weird behavior ...
 
-    def dump_db(self, fmt='yaml', dir_path='backup'):
+    def dump_db(self, fmt='yaml', dir_path=None):
         """
         Serialize all db objects, along with all their parameters and data
         elements, and write to `db.yaml` in the specified directory.

@@ -58,10 +58,10 @@ Comp = namedtuple('Comp', 'oid quantity reference_designator')
 # format:  {'parameter id': {parameter properties}
 #                            ...}}
 # ... where parameter properties are:
-# ---------------------------------------------------------------------------
-# name, variable, context, description, dimensions, range_datatype, computed,
-# mod_datetime
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# name, label, variable, context, description, dimensions, range_datatype,
+# computed, mod_datetime
+# -----------------------------------------------------------------------------
 parm_defz = {}
 
 # parameterz:  persistent** cache of assigned parameter values
@@ -1397,9 +1397,10 @@ COMPUTES = {
 # format:  {data element id: {data element properties}
 #                             ...}}
 # ... where data element properties are:
-# ------------------------------------------------------
-# name, description, label, range_datatype, mod_datetime
-# ------------------------------------------------------
+# -----------------------------------------------------------------------------
+# name, label, variable, context, description, dimensions, range_datatype,
+# computed, mod_datetime
+# -----------------------------------------------------------------------------
 # NOTE:  although "label" (a formatted label to use as a column header) is not
 # an attribute of DataElementDefinition, the label item can be set from a data
 # element structure that is set in the application's "config" file, which
@@ -1414,9 +1415,9 @@ de_defz = {}
 # format:  {oid : {'data element id': {data element properties}
 #                   ...}}
 # ... where data element properties are:
-# -------------------
-# value, mod_datetime
-# -------------------
+# --------------------------
+# value, units, mod_datetime
+# --------------------------
 data_elementz = {}
 
 def serialize_des(oid):
