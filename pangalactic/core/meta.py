@@ -18,9 +18,10 @@ from pangalactic.core.units import in_si
 IDENTITY = ['id', 'name', 'description']
 PRODUCT_ID = ['id', 'version', 'name', 'description']
 PGXN_REQD = dict(
+    HardwareProduct=['name', 'description', 'owner', 'product_type'],
     ParameterDefinition=['id', 'name', 'description', 'dimensions',
                          'range_datatype'],
-    Product=(PRODUCT_ID + ['owner', 'product_type']),
+    Product=['id', 'name', 'description', 'owner'],
     Project=IDENTITY,
     ProductType=IDENTITY,
     Requirement=(IDENTITY + ['rationale']),
@@ -41,7 +42,8 @@ MAIN_VIEWS = dict(
     DisciplineProductType=['used_in_discipline', 'relevant_product_type'],
     DisciplineRole=['related_to_discipline', 'related_role'],
     Flow=['flow_context', 'start_port', 'end_port'],
-    HardwareProduct=(PGXN_REQD['Product'] + ['public'] + SYSTEM),
+    HardwareProduct=(PGXN_REQD['Product'] + ['product_type', 'public']
+                     + SYSTEM),
     Model=(IDENTITY + ['type_of_model', 'of_thing']),
     ModelFamily=IDENTITY,
     ModelType=(IDENTITY + ['model_type_family']),
