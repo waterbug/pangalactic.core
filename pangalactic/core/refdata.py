@@ -1217,6 +1217,19 @@ dict(
     },
 
 {   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.gps',
+    'id': 'gps',
+    'name': 'GPS',
+    'abbreviation': 'GPS',
+    'description': 'Global Positioning System',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
+    'create_datetime': epoch,
+    'mod_datetime': '2020-10-22 00:01:00'
+    },
+
+{   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.imu',
     'id': 'imu',
     'name': 'Inertial Measurement Unit',
@@ -2540,6 +2553,7 @@ acs_discipline_obj = core_objs['pgefobjects:Discipline.acs']
 for pt_oid in [
     'pgefobjects:ProductType.attitude_control_system',
     'pgefobjects:ProductType.actuator',
+    'pgefobjects:ProductType.gps',
     'pgefobjects:ProductType.star_tracker',
     'pgefobjects:ProductType.imu',
     'pgefobjects:ProductType.iru',
