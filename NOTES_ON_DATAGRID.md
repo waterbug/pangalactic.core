@@ -28,7 +28,7 @@ PGEF "DataGrid" Widget
     + label: "external" name (table column label; may contain line breaks)
     + description: definition
 
-* Entity == row == GridTreeItem
+* Entity == row -> GridTreeItem
   - a dict that is semantically analogous to a domain object (and may be
     "linked" to one), and whose items are parameters and data elements
   - has a unique "oid", same as an object, so can also have parameters
@@ -41,18 +41,24 @@ PGEF "DataGrid" Widget
       the Product, since both the Product and the Entity access their data
       element and parameter values by lookup in the same caches
     + can reference a ProductType and use associated parameters / templates
-  - Entity subclass:  PartsListItem
-    + specifically addresses use case of a DataMatrix that represents a parts
+    + can address the use case of a DataMatrix that represents a parts
       list, such as the GSFC "Master Equipment List" (MEL)
-    + solves the "assembly level" problem for the corner-case of a component
+    + solves the "assembly level" problem for the use case of a component
       that occurs at more than one level in an assembly -- e.g., a thermal
       sensor that is placed at arbitrary locations in an assembly or a chip
-      that occurs in multiple boards or boxes (NOTE that the "where-used"
-      function reports which assemblies a given part occurs in but does not
-      have "assembly level" information, since an assembly in general may occur
-      at different levels in different systems).
+      that occurs in multiple boards or boxes.
 
-* DataMatrix (a list of entities ... equivalent to a grid: rows and columns)
+      NOTE 1: the "where-used" function reports which assemblies a given part
+      occurs in but does not have "assembly level" information, since a given
+      assembly may occur as a component at different levels in different
+      systems.
+
+      NOTE 2: this use case occurs in the STEP example file as1-oc-214.stp, in
+      which the 'nut' product occurs in both the 'nut-bolt-assembly' [level 3]
+      and the 'rod-assembly' [level 2].
+
+* DataMatrix
+  - a list of Entity instances ... equivalent to a grid: rows and columns)
   - a DataMatrix is basically a way of saying "show me *this* information about
     *these* entities".  The information to be shown is specified by the
     'schema' of the DataMatrix -- conceptually, a "view" -- which specifies the
@@ -63,7 +69,11 @@ PGEF "DataGrid" Widget
     be displayed as empty (and the DataGrid will enable it to be assigned a
     value, updating the underlying Entity).
   - attrs:
-    + 'oid': ([`project_id`]-[`system_id`]) -- unique
+    + 'oid': ([`project_id`]-[`system_id`]) -- unique identifier, implemented
+      as a read-only property
+    + 'schema': list of data element ids
+    -------------------------------------------------------------------------
+    `level_map` is CURRENTLY NOT IMPLEMENTED (not clear that it was needed)
     + `level_map`:  maps entity oids to assembly level (an integer) --
       "level" will be used to identify "child" nodes, etc.:
       - level 0 ................................ root (not assembly)
@@ -71,8 +81,7 @@ PGEF "DataGrid" Widget
       - next node level = this level ........... peer
       - next node level = this level + 1 ....... child
       - next node level > this level + 1 ....... error
-    + 'schema': list of data element ids
-    + 'data': its internal list, a list of entity oids
+    -------------------------------------------------------------------------
   - methods:
     + "cell-specific" undo based on Entity 'undo' method, which uses the
       Entity's history (as long as the edit is not "obe" -- i.e. no other edits
@@ -114,9 +123,14 @@ PGEF "DataGrid" Widget
     where roles vector is a list of [project-role, ...]
 
 * persistence
-  - data storage is the `app_home/data` directory
-  - datamatrices are stored as tsv files
-  - data element definitions ('dedz' dict cache) is stored as a yaml file
+  - data is persisted in files in the `app_home` directory
+    + dms.json .............. metadata for DataMatrix instances
+    + data_elements.json .... serialized data elemenets
+    + ent_hists.json ........ serialized entity histories
+    + ents.json ............. metadata for entity instances
+    + parameters.json ....... serialized parameters
+    + schemas.json .......... schemas for DataMatrix instances
+  - data element definitions are cached at runtime in the 'dedz' dict
 
 * RPC / PubSub signatures
 
