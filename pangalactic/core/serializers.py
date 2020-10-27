@@ -470,10 +470,10 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                                 ports_and_flows_to_be_deleted.append(flow)
                     recompute_parmz_required = True
                 elif cname == 'ParameterDefinition':
-                    update_parm_defz(orb, obj)
-                    update_parmz_by_dimz(orb, obj)
+                    update_parm_defz(obj)
+                    update_parmz_by_dimz(obj)
                 elif cname == 'DataElementDefinition':
-                    update_de_defz(orb, obj)
+                    update_de_defz(obj)
                 orb.log.debug('* updated object: [{}] {}'.format(cname,
                                                           obj.id or '(no id)'))
             elif d['oid'] not in ignores:
