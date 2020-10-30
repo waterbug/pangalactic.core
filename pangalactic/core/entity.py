@@ -722,9 +722,9 @@ class DataMatrix(list):
         """
         log.debug(f'* compute_mel_parms({row}, {name}, qty={qty},')
         log.debug(f'                    parent_oid={parent_oid}')
-        oid = component.oid
-        etuple = (oid, parent_oid, name)
-        log.debug(f'  for etuple: ({oid}, {parent_oid}, {name})')
+        system_oid = component.oid
+        etuple = (system_oid, parent_oid, name)
+        log.debug(f'  for etuple: ({system_oid}, {parent_oid}, {name})')
         # get the current set of entity "tuples" (which may change during
         # updating of the MEL DataMatrix)
         utups = self.ent_utuples()
@@ -768,15 +768,18 @@ class DataMatrix(list):
         # still be returned by get_dval())
         log.debug('  entity["system_name"] = {}'.format(entity['system_name']))
         # TODO:  define these Data Elements as "computed"
-        entity['m_unit'] = get_pval(oid, 'm[CBE]') or 0
+        entity['m_unit'] = get_pval(system_oid, 'm[CBE]') or 0
         log.debug('  entity["m_unit"] = {}'.format(entity['m_unit']))
         entity['m_cbe'] = qty * entity['m_unit']
-        entity['m_ctgcy'] = round_to(100 * get_pval(oid, 'm[Ctgcy]'), n=3) or 0
-        entity['m_mev'] = qty * (get_pval(oid, 'm[MEV]') or 0)
-        entity['nom_p_unit_cbe'] = get_pval(oid, 'P[CBE]') or 0
+        entity['m_ctgcy'] = (round_to(100 * get_pval(system_oid, 'm[Ctgcy]'),
+                                      n=3) or 0)
+        entity['m_mev'] = qty * (get_pval(system_oid, 'm[MEV]') or 0)
+        entity['nom_p_unit_cbe'] = get_pval(system_oid, 'P[CBE]') or 0
         entity['nom_p_cbe'] = qty * (entity['nom_p_unit_cbe'] or 0)
-        entity['nom_p_ctgcy'] = round_to(100 * get_pval(oid, 'P[Ctgcy]')) or 0
-        entity['nom_p_mev'] = qty * (get_pval(oid, 'P[MEV]') or 0)
+        entity['nom_p_ctgcy'] = (round_to(100 * get_pval(system_oid,
+                                                         'P[Ctgcy]')) or 0)
+        entity['nom_p_mev'] = (round_to(qty * (get_pval(system_oid, 'P[MEV]')))
+                               or 0)
         # columns in spreadsheet MEL:
         #   0: Name
         #   1: Level
