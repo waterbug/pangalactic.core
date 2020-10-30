@@ -148,15 +148,20 @@ class Entity(dict):
 
     Attributes:
         oid (str):  a unique identifier
+        parent_oid (str):  oid of the entity's "parent" entity
+        system_oid (str):  [optional] oid of a system (Project or Product)
+            to which the entity is mapped
+        assembly_level (int):  [computed] level of assembly at which the Entity
+            occurs in its DataMatrix (if no DataMatrix, it is 1).
+        system_name (str):  derived from the library product name and
+            reference_designator within its assembly
     """
     metadata = ['owner', 'creator', 'modifier', 'create_datetime',
-                'mod_datetime', 'assembly_level', 'parent_oid', 'system_oid',
-                'system_name']
+                'mod_datetime', 'system_name']
 
-    def __init__(self, *args, oid=None, owner=None, creator=None,
-                 modifier=None, create_datetime=None, mod_datetime=None,
-                 assembly_level=1, parent_oid=None, system_oid=None,
-                 system_name=None, **kw):
+    def __init__(self, *args, oid=None, parent_oid=None, system_oid=None,
+                 system_name=None, owner=None, creator=None, modifier=None,
+                 create_datetime=None, mod_datetime=None, **kw):
         """
         Initialize.
 
@@ -168,17 +173,18 @@ class Entity(dict):
 
         Keyword Args:
             oid (str):  a unique identifier
+            parent_oid (str):  oid of the entity's "parent" entity (NOTE that
+                if the parent_oid argument is not the oid of an entity in the
+                'entz' cache, then None will be set as the parent_oid)
+            system_oid (str):  [optional] oid of a system (Project or Product)
+                to which the entity is mapped
+            system_name (str):  derived from the library product name and
+                reference_designator within its assembly
             owner (str):  oid of an Organization
             creator (str):  oid of the entity's creator
             modifier (str):  oid of the entity's last modifier
             create_datetime (str):  iso-format string of creation datetime
             mod_datetime (str):  iso-format string of last mod datetime
-            parent_oid (str):  oid of the entity's "parent" entity within the
-                context of its DataMatrix
-            system_oid (str):  [optional] oid of a system (Project or Product)
-                to which the entity is mapped
-            system_name (str):  derived from the library product name and
-                reference_designator within its assembly
             kw (dict):  keyword args, passed to superclass (dict)
                 initialization
         """
@@ -189,8 +195,17 @@ class Entity(dict):
         if not oid:
             oid = str(uuid4())
         self.oid = oid
-        d = locals()
-        self.meta = {a: d.get(a) for a in self.metadata}
+        self.parent_oid = parent_oid
+        self.system_oid = system_oid
+        self.parent_oid = parent_oid
+        self.system_oid = system_oid
+        self.system_name = system_name
+        self.owner = owner or 'pgefobjects:PGANA'
+        self.creator = creator or 'pgefobjects:admin'
+        self.modifier = modifier or 'pgefobjects:admin'
+        dt = str(dtstamp())
+        self.create_datetime = create_datetime or dt
+        self.mod_datetime = mod_datetime or dt
         if self.oid in entz:
             log.debug(f'  entity oid "{oid}" was in "entz", using ...')
         else:
@@ -198,43 +213,48 @@ class Entity(dict):
             self.register()
 
     def register(self):
-        dt = str(dtstamp())
-        entz[self.oid] = dict(
-            creator=self.meta.get('creator') or 'pgefobjects:admin',
-            modifier=self.meta.get('modifier') or 'pgefobjects:admin',
-            create_datetime=self.meta.get('create_datetime') or dt,
-            mod_datetime=self.meta.get('mod_datetime') or dt,
-            owner=self.meta.get('owner') or 'pgefobjects:PGANA',
-            assembly_level=self.meta.get('assembly_level') or 1,
-            parent_oid=self.meta.get('parent_oid'),
-            system_oid=self.meta.get('system_oid'),
-            system_name=self.meta.get('system_name'))
-        dispatcher.send('new entity',
-            oid=self.oid,
-            creator=self.meta.get('creator') or 'pgefobjects:admin',
-            modifier=self.meta.get('modifier') or 'pgefobjects:admin',
-            create_datetime=self.meta.get('create_datetime') or dt,
-            mod_datetime=self.meta.get('mod_datetime') or dt,
-            owner=self.meta.get('owner') or 'pgefobjects:PGANA',
-            assembly_level=self.meta.get('assembly_level') or 1,
-            parent_oid=self.meta.get('parent_oid'),
-            system_oid=self.meta.get('system_oid'),
-            system_name=self.meta.get('system_name'))
+        entz[self.oid] = self
+        dispatcher.send('entity saved', e=self)
+
+    @property
+    def parent_oid(self):
+        """
+        Getter for `parent_oid` (returns None if the value of __parent_oid is
+        not in the `entz` cache).
+        """
+        if self.__parent_oid in entz:
+            return self.__parent_oid
+        else:
+            return None
+
+    @parent_oid.setter
+    def parent_oid(self, value):
+        """
+        Setter for `parent_oid` (note that if the value is an oid that is not
+        present in the `entz` cache, it will be ignored and the value of
+        self.parent_oid will be None).
+        """
+        self.__parent_oid = value
+
+    @property
+    def assembly_level(self):
+        if self.parent_oid in entz:
+            return entz[self.parent_oid].assembly_level + 1
+        return 1
 
     def __getitem__(self, k):
         """
-        Get the value of an entity key, returning [0] for a metadata key, a
-        metadata value, [1] for a data element, a simple value, [2] for a
-        parameter, a value in base units, [3] if none of those are present,
-        None or whatever is provided in the 'default' arg.
+        Get the value of an entity key, returning [1] for a data element, a
+        simple value, [2] for a parameter, a value in base units, [3] if none
+        of those are present, None or whatever is provided in the 'default'
+        arg.
         """
         # log.debug(f'* Entity.__getitem__({k})')
         # print(f'* Entity.__getitem__({k})')
-        if k == 'oid':
-            return self.oid
-        elif k in self.metadata:
-            # print('  - got metadata.')
-            return entz[self.oid].get(k)
+        # NOTE: for special attrs 'oid', 'assembly_level' and 'system_name',
+        # they are both object attributes and dict keys
+        if k in ['oid', 'assembly_level', 'system_name']:
+            return getattr(self, k)
         elif k in parm_defz:
             # k is a parameter
             # print('  - got parameter.')
@@ -246,17 +266,15 @@ class Entity(dict):
 
     def get(self, k, *default):
         """
-        Get the value of an entity key, returning [0] for a metadata key, a
-        metadata value, [1] for a data element, a simple value, [2] for a
-        parameter, a value in base units, [3] if none of those are present,
-        None or whatever is provided in the 'default' arg.
+        Get the value of an entity key, returning [1] for a data element, a
+        simple value, [2] for a parameter, a value in base units, [3] if none
+        of those are present, None or whatever is provided in the 'default'
+        arg.
         """
-        if k == 'oid':
-            return self.oid
-        elif k in self.metadata:
-            # log.debug('  - got metadata.')
-            # print('  - got metadata.')
-            return entz[self.oid].get(k)
+        # NOTE: for special attrs 'oid', 'assembly_level' and 'system_name',
+        # they are both object attributes and dict keys
+        if k in ['oid', 'assembly_level', 'system_name']:
+            return getattr(self, k)
         elif k in parm_defz:
             # log.debug('  - got parameter.')
             # print('  - got parameter.')
@@ -285,10 +303,6 @@ class Entity(dict):
         # NOTE: for 'oid', it is both an object attribute and a dict key
         if k == 'oid':
             object.__setattr__(self, 'oid', v)
-        elif k in self.metadata:
-            if not self.oid in entz:
-                entz[self.oid] = {}
-            entz[self.oid][k] = v
         else:
             previous_self = deepcopy(self)
             if k in parm_defz:
@@ -340,7 +354,10 @@ class Entity(dict):
         Serialize only the metadata for the Entity.  (Used when saving the
         'entz' cache.)
         """
-        d = dict(oid=self.oid, owner=self.get('owner', ''),
+        d = dict(oid=self.oid,
+                 parent_oid=self.parent_oid,
+                 system_oid=self.system_oid,
+                 owner=self.get('owner', ''),
                  creator=self.get('creator', ''),
                  modifier=self.get('modifier', ''),
                  create_datetime=self.get('create_datetime', ''),
@@ -510,9 +527,9 @@ class DataMatrix(list):
             track of which entities have been mapped from the assembly
             structure(s)
     """
-    def __init__(self, *data, project_id='', name=None,
-                 schema=None, creator=None, modifier=None,
-                 create_datetime=None, mod_datetime=None):
+    def __init__(self, *data, project_id='', name=None, schema=None,
+                 creator=None, modifier=None, create_datetime=None,
+                 mod_datetime=None):
         """
         Initialize.
 
@@ -585,9 +602,9 @@ class DataMatrix(list):
         Return a list containing the unique tuple of (system_oid, parent_oid,
         system_name) for each entity in the DataMatrix.
         """
-        return [(entity.get('system_oid'),
-                 entity.get('parent_oid'),
-                 entity.get('system_name')) for entity in self]
+        return [(entity.system_oid,
+                 entity.parent_oid,
+                 entity.system_name) for entity in self]
 
     def cache_meta(self):
         """
@@ -609,8 +626,7 @@ class DataMatrix(list):
 
     def append_new_row(self, child=False):
         """
-        Appends an "empty" Entity with a new oid, using 'child' flag to
-        indicate what the level should be.
+        Appends an "empty" Entity with a new oid.
         """
         e = Entity()
         self.append(e)
@@ -618,15 +634,14 @@ class DataMatrix(list):
 
     def insert_new_row(self, i, child_of=False):
         """
-        Inserts an empty Entity with a new oid, in the ith position, using
-        'child' flag to compute the level.  To support
-        GridTreeItem.insertChildren(), use child=True.
+        Inserts an empty Entity with a new oid, in the ith position.  To
+        support GridTreeItem.insertChildren(), use child_of=True.
 
         Keyword Args:
             child_of (Entity):  the parent Entity (or None if same level as
                 preceding row)
         """
-        e = Entity()
+        e = Entity(parent_oid=child_of.oid)
         self.insert(i, e)
         return e
 
@@ -661,6 +676,7 @@ class DataMatrix(list):
                 MEL parameters pertain
         """
         log.debug(f'* recompute_mel({context.id})')
+        log.debug(f'  using schema: {self.schema}')
         row = 0
         # re-mapping, so set all entities as not mapped
         for e in self:
@@ -671,13 +687,13 @@ class DataMatrix(list):
             project = context
             for psu in project.systems:
                 name = f'{psu.system_role} [{psu.system.id}]'
-                end = self.compute_mel_parms(1, row, name, psu.system)
+                end = self.compute_mel_parms(row, name, psu.system)
                 row += end
         elif context.__class__.__name__ == 'HardwareProduct':
             # context is Product -> a single system MEL
             log.debug(f'  MEL for System "{context.id}"')
             name = f'{context.name} [{context.id}]'
-            self.compute_mel_parms(1, 0, name, context)
+            self.compute_mel_parms(0, name, context)
         else:
             # not a Project or HardwareProduct
             log.debug('  context specified is neither Project nor System.')
@@ -698,14 +714,13 @@ class DataMatrix(list):
         else:
             log.debug(f'  no unmapped entities found.')
 
-    def compute_mel_parms(self, level, row, name, component, qty=1,
-                          parent_oid=None):
+    def compute_mel_parms(self, row, name, component, qty=1, parent_oid=None):
         """
         Compute parameter and data element values for the components in a
         Master Equipment List (MEL) based on their positions in the system
         assembly.
         """
-        log.debug(f'* compute_mel_parms({level}, {row}, {name}, qty={qty},')
+        log.debug(f'* compute_mel_parms({row}, {name}, qty={qty},')
         log.debug(f'                    parent_oid={parent_oid}')
         oid = component.oid
         etuple = (oid, parent_oid, name)
@@ -733,7 +748,6 @@ class DataMatrix(list):
         else:
             log.debug('  etuple not yet mapped to an entity, creating ...')
             entity = Entity(parent_oid=parent_oid,
-                            assembly_level=level,
                             system_oid=component.oid, 
                             system_name=name, 
                             owner=component.owner.oid,
@@ -752,6 +766,7 @@ class DataMatrix(list):
         # NOTE: not using set_dval() because these values are computed from the
         # model (they are still stored in data_elementz, so the values will
         # still be returned by get_dval())
+        log.debug('  entity["system_name"] = {}'.format(entity['system_name']))
         # TODO:  define these Data Elements as "computed"
         entity['m_unit'] = get_pval(oid, 'm[CBE]') or 0
         log.debug('  entity["m_unit"] = {}'.format(entity['m_unit']))
@@ -763,8 +778,8 @@ class DataMatrix(list):
         entity['nom_p_ctgcy'] = round_to(100 * get_pval(oid, 'P[Ctgcy]')) or 0
         entity['nom_p_mev'] = qty * (get_pval(oid, 'P[MEV]') or 0)
         # columns in spreadsheet MEL:
-        #   0: Level
-        #   1: Name
+        #   0: Name
+        #   1: Level
         #   2: Unit MASS CBE
         #   9: Mass CBE
         #  10: Mass Contingency (%)
@@ -775,7 +790,6 @@ class DataMatrix(list):
         #  15: Power MEV
         log.debug(f' + writing {name} in row {row}')
         if component.components:
-            next_level = level + 1
             for acu in component.components:
                 if acu.component.oid == 'pgefobjects:TBD':
                     continue
@@ -783,7 +797,7 @@ class DataMatrix(list):
                 component = acu.component
                 qty = acu.quantity or 1
                 name = f'{acu.reference_designator} [{component.name}]'
-                row = self.compute_mel_parms(next_level, row, name, component,
-                                             qty=qty, parent_oid=entity.oid)
+                row = self.compute_mel_parms(row, name, component, qty=qty,
+                                             parent_oid=entity.oid)
         return row
 

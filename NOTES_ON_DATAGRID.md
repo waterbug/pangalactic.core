@@ -29,33 +29,45 @@ PGEF "DataGrid" Widget
     + description: definition
 
 * Entity == row -> GridTreeItem
-  - a dict that is semantically analogous to a domain object (and may be
-    "linked" to one), and whose items are parameters and data elements
-  - has a unique "oid", same as an object, so can also have parameters
+  - a dict subclass that is semantically analogous to a domain object (and may
+    be "linked" to one by way of its "system_oid" metadata), and whose items
+    are parameters and data elements
+
+  - attributes:
+    + `oid`: same implementation as for domain objects, so an entity can also
+      have parameters and data elements, to which [set|get][_pval|_dval] can be
+      applied, as with objects
+    + `parent_oid`: can either be None or can reference an existing Entity oid
+    + `system_oid`: can either be None or can reference an existing Product oid
+    + `assembly_level`: a property, computed by following the chain of
+      `parent_oid` attributes, ending with a None (level 1).
+
+      NOTE 0: `assembly_level` takes into account the contingency that a
+      component can occur at more than one level in an assembly -- e.g., a
+      thermal sensor that is placed at arbitrary locations in an assembly or a
+      chip that occurs in multiple boards or boxes:  multiple Entity instances
+      in an assembly can reference the same product via their `system_oid`, and
+      each can have its own value of the `assembly_level` attribute.
+
+      NOTE 1: the "where-used" function reports which assemblies a given part
+      occurs in but does not have level information, since a given assembly
+      may occur as a component at different levels in different systems.
+
+      NOTE 2: this use case occurs in the STEP example file as1-oc-214.stp, in
+      which the 'nut' product occurs in both the 'nut-bolt-assembly' [level 3]
+      and the 'rod-assembly' [level 2].
+
+      NOTE 3: `assembly_level` is returned from the Entity dictionary as the
+      value of the `level` key.
+
+  - can address the use case of a DataMatrix that represents a parts list, such
+    as the GSFC "Master Equipment List" (MEL)
   - history tracking (for undo):
     + `ent_histz` cache
     + edits datetime-stamped (`mod_datetime` of the parameter or data element)
       and are tracked by user ('modifier')
   - future:
-    + if "mirroring" a Product (same oid), items are automatically synced with
-      the Product, since both the Product and the Entity access their data
-      element and parameter values by lookup in the same caches
     + can reference a ProductType and use associated parameters / templates
-    + can address the use case of a DataMatrix that represents a parts
-      list, such as the GSFC "Master Equipment List" (MEL)
-    + solves the "assembly level" problem for the use case of a component
-      that occurs at more than one level in an assembly -- e.g., a thermal
-      sensor that is placed at arbitrary locations in an assembly or a chip
-      that occurs in multiple boards or boxes.
-
-      NOTE 1: the "where-used" function reports which assemblies a given part
-      occurs in but does not have "assembly level" information, since a given
-      assembly may occur as a component at different levels in different
-      systems.
-
-      NOTE 2: this use case occurs in the STEP example file as1-oc-214.stp, in
-      which the 'nut' product occurs in both the 'nut-bolt-assembly' [level 3]
-      and the 'rod-assembly' [level 2].
 
 * DataMatrix
   - a list of Entity instances ... equivalent to a grid: rows and columns)
@@ -132,39 +144,50 @@ PGEF "DataGrid" Widget
     + schemas.json .......... schemas for DataMatrix instances
   - data element definitions are cached at runtime in the 'dedz' dict
 
-* RPC / PubSub signatures
+* RPC and PubSub message signatures
 
-  - data_dm_save(project_id, datamatrix, schema)
-    + saves and publishes a serialized DataMatrix object and schema
+  - [rpc] `save_dm(project_id, datamatrix)`
+    + saves a serialized DataMatrix object
+    + [pubsub] subject: "dm saved" content: serialized dm
     + perm:  Admin, LE, SE
 
-  - data_create_element(project_id, element, metadata)
-    + saves and publishes a new data element definition (metadata)
+  - [rpc] `save_dm_schema(serialized schema)`
+    + a dm schema is a list of registered Parameter and DataElement ids
+    + creates or modifies a dm schema
+    + [pubsub] subject: "new dm schema", content: schema
     + perm:  Admin, LE, SE
 
-  - data_dm_schema_add_element(project_id, dm_id, element)
-    + adds element to datamatrix schema / publishes
+  - [rpc] `add_dm_entity(dm_oid, entity_oid)`
+    + adds an entity to a DataMatrix
+    + [pubsub] subject: "dm entity added", content: `(dm_oid, entity_oid)`
     + perm:  Admin, LE, SE
 
-  - data_dm_schema_del_element(project_id, dm_id, element)
-    + deletes element from dm schema / publishes
+  - [rpc] `rm_dm_entity(dm_oid, entity_oid)`
+    + removes an entity from a DataMatrix
+    + [pubsub] subject: "dm entity removed", content: `(dm_oid, entity_oid)`
     + perm:  Admin, LE, SE
 
-  - data_dm_add_row(project_id, dm_id, row_oid)
-    + adds row oid to a datamatrix
+  - [rpc] `save_entity(serialized entity)`
+    + creates or modifies an entity
+    + [pubsub] subject: "entity saved", content: serialized entity
     + perm:  Admin, LE, SE
 
-  - data_dm_remove_row_from_dm(project_id, dm_id, row_oid)
-    + deletes row from the specified dm
+  - [rpc] `delete_entity(entity_oid)`
+    + deletes an entity and removes it from any DataMatrix in which it occurs
+    + [pubsub] subject: "entity deleted", content: `entity_oid`
     + perm:  Admin, LE, SE
 
-  - data_delete_row(project_id, row_oid)
-    + deletes row oid from any dm(s) in which it occurs
+  - [rpc] `set_parameter(oid, pid, value, units, mod_datetime)`
+    + sets parameter value
+    + [pubsub] subject: "parameter set",
+               content: `(oid, pid, value, units, mod_datetime)`
     + perm:  Admin, LE, SE
 
-  - data_update_item(project_id, row_oid, element_id**, value)
-    + saves element value / publishes to project
-    + perm:  Admin, LE, SE, Discipline of row
+  - [rpc] `set_data_element(oid, deid, value, units, mod_datetime)`
+    + sets data element value
+    + [pubsub] subject: "data element set",
+               content: `(oid, deid, value, units, mod_datetime)`
+    + perm:  Admin, LE, SE
 
 * dispatcher signal signatures
 
@@ -173,44 +196,26 @@ PGEF "DataGrid" Widget
   - "dm saved" (serialized dm)
     + deserialize dm, add to dm store
 
-  - "data element created" (element_id, value)
-    + add element definition to data element dictionary
+  - "entity saved" (serialized entity)
+    + deserialize entity, add to `entz` cache
 
-  - "dm element added" (dm_id, element_id)
-    + add element_id to dm schema
+  - "dval set" `(oid, deid, value, units, mod_datetime)`
+    + add a data element and value to an entity or object
 
-  - "dm row added" (dm_id, row_oid)
-    + add to specified dm
+  - "pval set" `(oid, pid, value, units, mod_datetime)`
+    + add a parameter and value to an entity or object
 
-  - "dm row removed" (dm_id, row_oid)
-    + remove row from specified dm
-
-  - "row deleted" (row_oid)
-    + remove row from all dm's
-
-  - "item updated" (row_oid, element_id, value)
-    + update item in all instances of row
-
-  Remote events:
+  Remote events (corresponding to pubsub messages):
 
   - "remote dm saved" (serialized dm)
     + deserialize dm, add to dm store
 
-  - "remote data element created" (element_id, value)
-    + add element definition to data element dictionary ('dedz')
+  - "remote entity saved" (serialized entity)
+    + deserialize entity, add to `entz` cache
 
-  - "remote dm element added" (dm_id, element_id)
-    + add element_id to dm schema
+  - "remote dval set" `(oid, deid, value, units, mod_datetime)`
+    + add a data element and value to an entity or object
 
-  - "remote dm row added" (dm_id, row_oid)
-    + add row to specified dm
-
-  - "remote dm row removed" (dm_id, row_oid)
-    + remove row from specified dm
-
-  - "remote row deleted" (row_oid)
-    + remove row from all dm's
-
-  - "remote item updated" (row_oid, element_id, value)
-    + update item in all instances of row
+  - "remote pval set" `(oid, pid, value, units, mod_datetime)`
+    + add a parameter and value to an entity or object
 

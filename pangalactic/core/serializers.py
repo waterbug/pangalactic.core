@@ -91,9 +91,9 @@ def serialize(orb, objs, view=None, include_components=False,
     ... where the field schemas (field-n-attrs) are of the form specified
     in `pangalactic.meta.utils.property_to_field`.
 
-    The serialization has the following form (where the 'parameters'
-    attribute is a special case to enable the object's parameter-objects to
-    be deserialized along with the object):
+    The serialization has the following form (where the 'parameters' attribute
+    is a special case to enable the object's parameters to be deserialized
+    along with the object):
 
         {'_cname'      : [class name for the object],
          field-1-name  : [field-1-value],

@@ -13,7 +13,8 @@ from pangalactic.core.utils.datetimes import dtstamp
 orb.start(home='pangalaxian_test')
 
 # create a test entity
-e = Entity()
+e_parent = Entity()
+e = Entity(parent_oid=e_parent.oid)
 
 class EntityTest(unittest.TestCase):
     maxDiff = None
@@ -22,9 +23,15 @@ class EntityTest(unittest.TestCase):
         """
         CASE:  check default metadata for a new Entity instance.
         """
-        value = [e.get('creator'), e.get('modifier'), e.get('assembly_level'),
-                 e.get('parent_oid')]
-        expected = ['pgefobjects:admin', 'pgefobjects:admin', 1, None]
+        value = [e.creator,
+                 e.modifier,
+                 e_parent.get('level'),
+                 e.get('level'),
+                 e.parent_oid,
+                 e_parent.parent_oid
+                 ]
+        expected = ['pgefobjects:admin', 'pgefobjects:admin', 1, 2,
+                    e_parent.oid, None]
         self.assertEqual(expected, value)
 
     def test_01_new_entity_is_cached(self):
@@ -54,6 +61,12 @@ class EntityTest(unittest.TestCase):
         value = e['Vendor']
         expected = 'Yoyodyne Propulsion Systems'
         self.assertEqual(expected, value)
+
+    def test_04_entity_cannot_set_value_for_undefined_key(self):
+        """
+        CASE:  an Entity instance cannot have a value for a key if the key has
+        neither a ParameterDefinition nor a DataElementDefinition.
+        """
 
     def test_04_entity_cannot_set_value_for_undefined_key(self):
         """

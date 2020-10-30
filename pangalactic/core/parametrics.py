@@ -224,7 +224,7 @@ def save_parmz(dir_path):
     with open(fpath, 'w') as f:
         f.write(json.dumps(stored_parameterz, separators=(',', ':'),
                            indent=4, sort_keys=True))
-    log.debug('  ... parameters.json file written.')
+    log.debug(f'  ... parameters.json file written to {dir_path}.')
 
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
 # format:  {dimension : [ids of ParameterDefinitions having that dimension]}
@@ -1654,7 +1654,7 @@ def get_dval_as_str(oid, deid):
     """
     return str(get_dval(oid, deid))
 
-def set_dval(oid, deid, value, mod_datetime=None, local=True):
+def set_dval(oid, deid, value, units=None, mod_datetime=None, local=True):
     """
     Set the value of a data element instance for the specified object to the
     specified value.
@@ -1666,6 +1666,8 @@ def set_dval(oid, deid, value, mod_datetime=None, local=True):
             the data element object's definition.range_datatype
 
     Keyword Args:
+        units (str): the units in which `value` is expressed; None implies
+            SI (mks) base units
         mod_datetime (str): string mod_datetime of the data element (if the
             action originates locally, this will be None and a datetime stamp
             will be generated)
@@ -1723,7 +1725,8 @@ def set_dval(oid, deid, value, mod_datetime=None, local=True):
         # log.debug(msg)
         return False
 
-def set_dval_from_str(oid, deid, str_val, mod_datetime=None, local=True):
+def set_dval_from_str(oid, deid, str_val, units=None, mod_datetime=None,
+                      local=True):
     """
     Set the value of a data element instance for the specified object from a
     string value.  (Mainly for use in saving input from the object editor,
@@ -1735,6 +1738,8 @@ def set_dval_from_str(oid, deid, str_val, mod_datetime=None, local=True):
         str_val (str): string value
 
     Keyword Args:
+        units (str): the units in which `value` is expressed; None implies
+            SI (mks) base units
         mod_datetime (str): mod_datetime string of the parameter (if the action
             originates locally, this will be None and a datetime stamp will be
             generated)

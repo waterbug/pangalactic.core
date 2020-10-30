@@ -381,6 +381,14 @@ class UberORB(object):
         self.log.info('* save_caches()')
         self.cache_dump_complete = False
         dts = file_dts()
+        # [1] save all caches to home
+        save_data_elementz(self.home)
+        save_parmz(self.home)
+        save_entz(self.home)
+        save_ent_histz(self.home)
+        save_schemaz(self.home)
+        save_dmz(self.home)
+        # [2] save all caches to backup dir
         if not dir_path:
             # if no dir_path specified, assume backup
             backup_path = os.path.join(self.home, 'backup')
