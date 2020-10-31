@@ -688,7 +688,7 @@ class DataMatrix(list):
             for psu in project.systems:
                 name = f'{psu.system_role} [{psu.system.id}]'
                 end = self.compute_mel_parms(row, name, psu.system)
-                row += end
+                row += end + 1
         elif context.__class__.__name__ == 'HardwareProduct':
             # context is Product -> a single system MEL
             log.debug(f'  MEL for System "{context.id}"')
