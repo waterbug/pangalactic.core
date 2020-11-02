@@ -31,6 +31,13 @@ class logger:
 log = logger()
 
 
+class DummyAcu:
+    def __init__(self):
+        self.assembly = None
+        self.component = None
+        self.quantity = None
+        self.reference_designator = None
+
 # -----------------------------------------------------------------------
 # ENTITY-RELATED CACHES
 # -----------------------------------------------------------------------
@@ -597,14 +604,34 @@ class DataMatrix(list):
             s += '[]'
         return s
 
-    def ent_utuples(self):
+    def etuples(self):
         """
-        Return a list containing the unique tuple of (system_oid, parent_oid,
-        system_name) for each entity in the DataMatrix.
+        Return a list containing the unique tuple of
+
+            (system_oid, parent_oid)
+
+        for each entity in the DataMatrix, where "system_oid" is the oid of the
+        product that maps to the entity and "parent_oid" is the oid of the
+        entity's parent entity.
+
+        The purpose of these tuples is to maintain the mapping of assembly
+        items to entities in the Master Equipment List (MEL) as much as
+        possible when a subassembly name, reference designator, or other
+        attributes change, so that the information maintained in the MEL for an
+        assembly item is not lost.
+
+        NOTE: since the MEL is a *flattened* representation of the system
+        assembly model -- i.e., all usages of a given product within a given
+        subsystem are represented by a single line item in the MEL, even if the
+        the usages may be distinguished by unique reference designators and
+        positions in the system assembly model (e.g., RF wheel, LF wheel, RR
+        wheel, LR wheel in a car chassis, all populated by the same "wheel"
+        product) -- information in the MEL can only be associated with a single
+        line item that represents all usages of a given product within a
+        subsystem.
         """
         return [(entity.system_oid,
-                 entity.parent_oid,
-                 entity.system_name) for entity in self]
+                 entity.parent_oid) for entity in self]
 
     def cache_meta(self):
         """
@@ -719,24 +746,38 @@ class DataMatrix(list):
         Compute parameter and data element values for the components in a
         Master Equipment List (MEL) based on their positions in the system
         assembly.
+
+        If there are multiple occurrences of a given product in the assembly of
+        a system or subsystem, they will be collapsed into a single line item
+        in the MEL.
+
+        Args:
+            row (int):  the (0-based) row index within the parent DataMatrix
+            name (str):  the structured name:
+                '{acu.reference_designator} {component.name}'
+            component (Product):  the system Product instance
+            qty (int):  quantity of this item in its parent assembly
+            parent_oid (str):  oid of this item's parent entity (NOT the oid of
+                the component's parent assembly!)
         """
         log.debug(f'* compute_mel_parms({row}, {name}, qty={qty},')
         log.debug(f'                    parent_oid={parent_oid}')
         system_oid = component.oid
-        etuple = (system_oid, parent_oid, name)
-        log.debug(f'  for etuple: ({system_oid}, {parent_oid}, {name})')
+        etuple = (system_oid, parent_oid)
+        log.debug(f'  for (system "{component.name}": {system_oid},')
+        log.debug(f'       parent entity oid: {parent_oid})')
         # get the current set of entity "tuples" (which may change during
         # updating of the MEL DataMatrix)
-        utups = self.ent_utuples()
+        etups = self.etuples()
         # [1] check whether there is an entity anywhere in the DataMatrix that
         # corresponds to the current assembly item
-        if etuple in utups:
-            if row < len(utups) and etuple == utups[row]:
+        if etuple in etups:
+            if row < len(etups) and etuple == etups[row]:
                 log.debug('  etuple maps to the entity in this row.')
                 entity = self[row]
             else:
                 log.debug('  etuple maps to an entity in another row ...')
-                entity = self.pop(utups.index(etuple))
+                entity = self.pop(etups.index(etuple))
                 if row < len(self):
                     # row index is "inside" the DataMatrix, insert the entity there
                     self.insert(row, entity)
@@ -769,6 +810,8 @@ class DataMatrix(list):
         log.debug('  entity["system_name"] = {}'.format(entity['system_name']))
         # TODO:  define these Data Elements as "computed"
         entity['m_unit'] = get_pval(system_oid, 'm[CBE]') or 0
+        entity['hot_units'] = qty
+        entity['flight_units'] = qty
         log.debug('  entity["m_unit"] = {}'.format(entity['m_unit']))
         entity['m_cbe'] = qty * entity['m_unit']
         entity['m_ctgcy'] = (round_to(100 * get_pval(system_oid, 'm[Ctgcy]'),
@@ -780,10 +823,12 @@ class DataMatrix(list):
                                                          'P[Ctgcy]')) or 0)
         entity['nom_p_mev'] = (round_to(qty * (get_pval(system_oid, 'P[MEV]')))
                                or 0)
-        # columns in spreadsheet MEL:
+        # columns in spreadsheet MEL computed from the model:
         #   0: Name
         #   1: Level
         #   2: Unit MASS CBE
+        #   4: Hot Units
+        #   5: Flight Units
         #   9: Mass CBE
         #  10: Mass Contingency (%)
         #  11: Mass MEV
@@ -793,14 +838,54 @@ class DataMatrix(list):
         #  15: Power MEV
         log.debug(f' + writing {name} in row {row}')
         if component.components:
-            for acu in component.components:
-                if acu.component.oid == 'pgefobjects:TBD':
-                    continue
+            log.debug('   - it has components ...')
+            # ignore None and "TBD" components
+            acus = [acu for acu in component.components
+                    if (acu.component and
+                        getattr(acu.component, 'oid', None) and
+                        acu.component.oid != 'pgefobjects:TBD')]
+            # consolidate acus if there are multiple usages of the same product
+            consolidated_acus = acus
+            acu_comp_oids = [acu.component.oid for acu in acus]
+            if len(acu_comp_oids) > len(set(acu_comp_oids)):
+                log.debug('     some collapsing is needed ...')
+                # -> there are multiple usages of at least one product --
+                #    collapse each such set of acus into a "dummy_acu"
+                consolidated_acus = []
+                comp_oid_to_acus = {}
+                for acu in acus:
+                    if comp_oid_to_acus.get(acu.component.oid):
+                        comp_oid_to_acus[acu.component.oid].append(acu)
+                    else:
+                        comp_oid_to_acus[acu.component.oid] = [acu]
+                for comp_oid, comp_acus in comp_oid_to_acus.items():
+                    n = len(comp_acus)
+                    if n > 1:
+                        log.debug(f'     collapsing {n} components')
+                        log.debug(f'     of "{acu.assembly.name}" ...')
+                        dummy_acu = DummyAcu()
+                        dummy_acu.assembly = comp_acus[0].assembly
+                        dummy_acu.component = comp_acus[0].component
+                        dummy_acu.quantity = sum([acu.quantity or 1
+                                                  for acu in comp_acus])
+                        dummy_acu.reference_designator = getattr(
+                                            dummy_acu.component.product_type,
+                                            'abbreviation')
+                        consolidated_acus.append(dummy_acu)
+                    else:
+                        consolidated_acus.append(comp_acus[0])
+            else:
+                log.debug('     no collapsing needed.')
+            # sort consolidated acus by reference designator
+            # iterate over sorted acus
+            for acu in consolidated_acus:
                 row += 1
                 component = acu.component
                 qty = acu.quantity or 1
                 name = f'{acu.reference_designator} [{component.name}]'
                 row = self.compute_mel_parms(row, name, component, qty=qty,
                                              parent_oid=entity.oid)
+        else:
+            log.debug('   - no components found.')
         return row
 

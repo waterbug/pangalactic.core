@@ -338,12 +338,14 @@ def get_next_ref_des(assembly, component, prefix=None):
 
 def get_ra_name(ra_context_id, role_id, fname, mi, lname):
     """
-    Create a 'name' for a new Acu.
+    Create a 'name' for a new RoleAssignment.
 
     Args:
-        assembly_name:  the 'name' of the assembly (Product)
-        ref_des:  the reference_designator of the Acu, created using
-            get_next_ref_des()
+        ra_context_id:  the id of the ra 'context' (Org or Project)
+        role_id:  the id of the assigned Role
+        fname:  first name of the assignee
+        mi:  middle initial of the assignee
+        lname:  last name of the assignee
     """
     if ra_context_id:
         return ': '.join([ra_context_id, role_id,
