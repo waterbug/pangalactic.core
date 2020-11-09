@@ -41,16 +41,11 @@ class DummyAcu:
 # -----------------------------------------------------------------------
 # ENTITY-RELATED CACHES
 # -----------------------------------------------------------------------
-# entz:        persistent** cache of entity metadata
-#              ** persisted in the file 'ents.json' in the
+# entz:        persistent** cache of Entity instances
+#              ** serialized into the file 'ents.json' in the
 #              application home directory -- see the functions
 #              `save_entz` and `load_entz`
-# format:  {oid : {'owner': 'x', 'creator': 'y', 'modifier': 'z', ...},
-#           ...}
-# ... where required data elements for the entity are:
-# -------------------------------------------------------
-# owner, creator, modifier, create_datetime, mod_datetime
-# -------------------------------------------------------
+# format:  {oid : entity, ...}
 entz = {}
 
 # ent_histz:  persistent** cache of previous versions of entities,
@@ -63,7 +58,8 @@ ent_histz = {}
 
 def load_entz(dir_path):
     """
-    Load the `entz` cache from json file.
+    Load the `entz` cache from json file, instantiating an Entity for each
+    metadata entry.
     """
     log.debug('* load_entz() ...')
     fpath = os.path.join(dir_path, 'ents.json')
@@ -71,7 +67,18 @@ def load_entz(dir_path):
         with open(fpath) as f:
             data = f.read()
             if data:
-                entz.update(json.loads(data))
+                ent_dict = json.loads(data)
+                for se in ent_dict.values():
+                    # entities will register themselves when initialized
+                    Entity(**se)
+                    # Entity(oid=se.get('oid'),
+                           # parent_oid=se.get('parent_oid'),
+                           # system_oid=se.get('system_oid'),
+                           # owner=se.get('owner'),
+                           # creator=se.get('creator'),
+                           # modifier=se.get('modifier'),
+                           # create_datetime=se.get('create_datetime'),
+                           # mod_datetime=se.get('mod_datetime'))
         log.debug('  - entz cache loaded.')
     else:
         log.debug('  - "ents.json" was not found.')
@@ -82,19 +89,20 @@ def save_entz(dir_path):
     Save `entz` dict to json file.
     """
     log.debug('* save_entz() ...')
-    try:
-        fpath = os.path.join(dir_path, 'ents.json')
-        with open(fpath, 'w') as f:
-            if entz:
-                f.write(json.dumps(entz, separators=(',', ':'),
-                                   indent=4, sort_keys=True))
-            else:
-                log.debug('  ... entz was empty.')
-                pass
-        log.debug('  ... ents.json file written.')
-    except:
-        log.debug('  ... exception encountered.')
-        pass
+    # try:
+    fpath = os.path.join(dir_path, 'ents.json')
+    with open(fpath, 'w') as f:
+        if entz:
+            ent_dict = {e.oid : e.serialize_meta() for e in entz.values()}
+            f.write(json.dumps(ent_dict, separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        else:
+            log.debug('  ... entz was empty.')
+            pass
+    log.debug('  ... ents.json file written.')
+    # except:
+        # log.debug('  ... exception encountered.')
+        # pass
 
 def load_ent_histz(dir_path):
     """
@@ -139,6 +147,10 @@ class Entity(dict):
     represent a component in an assembly, a model in a collection of models, a
     line item in a parts list, etc.
 
+    By design, an Entity is always created within the context of a DataMatrix
+    (a list of Entities) and can only exist within its containing DataMatrix
+    because some or all of its data may only be meaningful within that context.
+
     The concept behind Entity is similar to "record" as in database records,
     "row" as in tables or matrices, anonymous Class instances in an ontology,
     or "Item" in a PyQt QAbstractItemModel.  Its metadata (owner, creator,
@@ -148,10 +160,9 @@ class Entity(dict):
     store any data locally other than its 'oid', which is used as a key when
     interfacing to the caches.
 
-    Note that no serializer or deserializer is needed for Entity because all of
-    its data are maintained in the entz, data_elementz, and parameterz caches,
-    which are all persisted -- all known Entities can be recreated by calling
-    Entity(oid=oid) with each of the oids in the 'entz' cache.
+    All data for an Entity are accessed using the Entity's 'oid' as a key in
+    the entz (metadata), data_elementz, and parameterz caches.  Any Entity
+    can be recreated using its oid by calling Entity(oid=oid).
 
     Attributes:
         oid (str):  a unique identifier
@@ -163,8 +174,8 @@ class Entity(dict):
         system_name (str):  derived from the library product name and
             reference_designator within its assembly
     """
-    metadata = ['owner', 'creator', 'modifier', 'create_datetime',
-                'mod_datetime', 'system_name']
+    metadata = ['parent_oid', 'system_oid', 'system_name', 'owner', 'creator',
+                'modifier', 'create_datetime', 'mod_datetime']
 
     def __init__(self, *args, oid=None, parent_oid=None, system_oid=None,
                  system_name=None, owner=None, creator=None, modifier=None,
@@ -361,14 +372,7 @@ class Entity(dict):
         Serialize only the metadata for the Entity.  (Used when saving the
         'entz' cache.)
         """
-        d = dict(oid=self.oid,
-                 parent_oid=self.parent_oid,
-                 system_oid=self.system_oid,
-                 owner=self.get('owner', ''),
-                 creator=self.get('creator', ''),
-                 modifier=self.get('modifier', ''),
-                 create_datetime=self.get('create_datetime', ''),
-                 mod_datetime=self.get('mod_datetime', ''))
+        d = {a : getattr(self, a, '') for a in self.metadata}
         return d
 
     def serialize(self):
@@ -468,7 +472,7 @@ def load_dmz(dir_path):
         try:
             deser_dms = {oid: DataMatrix([
                               Entity(oid=oid) for oid in sdm['ents']],
-                              project_id=sdm['project_id'],
+                              project_oid=sdm['project_oid'],
                               name=sdm['name'],
                               creator=sdm['creator'],
                               modifier=sdm['modifier'],
@@ -493,7 +497,7 @@ def save_dmz(dir_path):
         dmz_path (str):  location of file to write
     """
     log.debug('* save_dmz() ...')
-    ser_dms = {oid: dict(project_id=dm.project_id,
+    ser_dms = {oid: dict(project_oid=dm.project_oid,
                          name=dm.name,
                          ents=[e.oid for e in dm],
                          creator=dm.creator,
@@ -511,30 +515,26 @@ def save_dmz(dir_path):
 
 class DataMatrix(list):
     """
-    A list subclass that contains instances of Entity as its items.  The
-    DataMatrix has an attribute "schema" that is a list of identifiers that
-    reference DataElementDefinitions or ParameterDefinitions (which are cached
-    in the "de_defz" dict and "parm_defz" dict, respectively).
+    A list subclass that contains instances of Entity as its items.  A
+    DataMatrix has an attribute `schema` that is a list of identifiers that
+    reference DataElementDefinitions or ParameterDefinitions, which are cached
+    in the `de_defz` dict and `parm_defz` dict, respectively.
 
-    A DataMatrix's list ('data') contents and its metadata are cached in the
-    `dmz` cache in which its key is its unique identifier ('oid'), which is
-    composed from the 'id' of its owner Project and its `name` (which is
-    the key used to look up its schema in the `schemaz' cache).
-
-    When a DataMatrix is instantiated, its initialization will first check the
-    `dmz` to see if it already exists; if not, it will create a new metadata
-    record for itself there.
+    All DataMatrix instances are cached in the `dmz` dict cache, in which the
+    key is the DataMatrix instance `oid`, a property composed from its
+    `project_oid` (the `oid` of its owner Project) and its `name` (which is
+    also the key used to look up its `schema` in the `schemaz` cache).
 
     Attributes:
         data (iterable):  an iterable of entities
         name (str): name (which may or may not exist in the 'schemaz' cache)
-        project_id (str): id a project (owner of the DataMatrix)
+        project_oid (str): oid of a project (owner of the DataMatrix)
         schema (list): list of data element ids and parameter ids
         mapped_ents (list): used when recomputing a MEL DataMatrix to keep
             track of which entities have been mapped from the assembly
             structure(s)
     """
-    def __init__(self, *data, project_id='', name=None, schema=None,
+    def __init__(self, *data, project_oid=None, name=None, schema=None,
                  creator=None, modifier=None, create_datetime=None,
                  mod_datetime=None):
         """
@@ -544,7 +544,7 @@ class DataMatrix(list):
             data (iterable):  (optional) an iterable of entities
 
         Keyword Args:
-            project_id (str): id of a project (owner of the DataMatrix)
+            project_oid (str): oid of a project (owner of the DataMatrix)
             name (str): name (which may or may not exist in 'schemaz')
             schema (list): list of data element ids and parameter ids
             creator (str):  oid of the entity's creator
@@ -553,38 +553,44 @@ class DataMatrix(list):
             mod_datetime (str):  iso-format string of last mod datetime
         """
         super().__init__(*data)
-        sig = 'project_id="{}", name="{}"'.format(
-                                        project_id, name or '[None]')
+        sig = f'project_oid="{project_oid}", name="{name}"'
         log.debug('* DataMatrix({})'.format(sig))
-        # NOTE:  self.project_id and self.name MUST be set before accessing
-        # self.oid, which is computed from them ...
-        self.project_id = project_id or 'SANDBOX'
-        log.debug('  - project id: {}'.format(project_id))
-        self.name = name or 'custom'
-        log.debug('  - name set to: "{}"'.format(name))
         dt = str(dtstamp())
         self.creator = creator or 'pgefobjects:admin'
         self.modifier = modifier or 'pgefobjects:admin'
         self.create_datetime = create_datetime or dt
         self.mod_datetime = mod_datetime or dt
-        log.debug('    checking for schema with that name ...')
+        # NOTE:  self.project_oid and self.name MUST be set before accessing
+        # self.oid, which is computed from them ...
+        self.project_oid = project_oid or 'pgefobjects:SANDBOX'
+        log.debug(f'  - project_oid set to: {self.project_oid}')
+        self.name = name or 'custom'
+        log.debug('  - name set to: "{}"'.format(name))
+        # check for a cached DataMatrix instance with our computed oid ...
+        log.debug(f'  checking `dmz` cache for oid "{self.oid}" ...')
+        log.debug('  dmz cache is: {}'.format(str(dmz)))
+        if self.oid in dmz:
+            log.debug('  - found in cache ...')
+            del dmz[self.oid]
+            log.debug('    removed.')
+        self.schema = schema
         if schema:
+            log.debug('    registering new schema in schemaz cache ...')
             # if a schema is passed in, use it and register it in schemaz ...
-            self.schema = schema
-            schemaz[self.oid] = schema
+            schemaz[self.oid] = self.schema
         elif schemaz.get(name):
-            # else check 'schemaz' for a schema by the name
+            log.debug(f'    found "{name}" schema in schemaz cache ...')
             self.schema = schemaz[name]
         elif config.get('schemas', {}).get(name):
-            # else check config["schemas"] for that name ...
+            log.debug(f'    found "{name}" schema in config ...')
             self.schema = config['schemas'][name]
         else:
-            # if schema lookup in 'schemaz' and 'prefs["schemas"]' is
-            # unsuccessful, use 'generic' schema of last resort ...
-            self.name = 'generic'
+            log.debug(f'    "{name}" schema not found, using generic ...')
+            self.name = config.get('default_schema_name') or 'generic'
             self.schema = schemaz.get(self.name) or ['system_name']
         # look for pre-defined column labels, or use names/ids as defaults
         if self.schema:
+            log.debug(f'    setting column labels for "{name}" schema ...')
             self.column_labels = [
                 (de_defz.get(col_id, {}).get('label', '')
                  or parm_defz.get(col_id, {}).get('label', '')
@@ -592,7 +598,11 @@ class DataMatrix(list):
                  or parm_defz.get(col_id, {}).get('name', '')
                  or col_id)
                 for col_id in self.schema]
-        self.cache_meta()
+        self.add_to_cache()
+
+    @property
+    def oid(self):
+        return '-'.join([self.project_oid, self.name])
 
     def __str__(self):
         s = 'DataMatrix: '
@@ -633,15 +643,11 @@ class DataMatrix(list):
         return [(entity.system_oid,
                  entity.parent_oid) for entity in self]
 
-    def cache_meta(self):
+    def add_to_cache(self):
         """
         Add myself to the 'dmz' cache.
         """
         dmz[self.oid] = self
-
-    @property
-    def oid(self):
-        return '-'.join([self.project_id, self.name])
 
     def row(self, i):
         """
@@ -703,7 +709,6 @@ class DataMatrix(list):
                 MEL parameters pertain
         """
         log.debug(f'* recompute_mel({context.id})')
-        log.debug(f'  using schema: {self.schema}')
         row = 0
         # re-mapping, so set all entities as not mapped
         for e in self:
@@ -730,7 +735,6 @@ class DataMatrix(list):
         unmapped = 0
         for entity in self:
             if not entity.mapped:
-                row = self.index(entity)
                 log.debug(f'  removing unmapped entity "{entity.oid}"')
                 self.remove_row_by_oid(entity.oid)
                 entity.delete()
@@ -756,6 +760,8 @@ class DataMatrix(list):
             name (str):  the structured name:
                 '{acu.reference_designator} {component.name}'
             component (Product):  the system Product instance
+
+        Keyword Args:
             qty (int):  quantity of this item in its parent assembly
             parent_oid (str):  oid of this item's parent entity (NOT the oid of
                 the component's parent assembly!)

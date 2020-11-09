@@ -633,6 +633,18 @@ class UberORB(object):
             self.log.debug('  - file "db.yaml" not found.')
         return sdata
 
+    def prune_entities(self):
+        """
+        Delete Entity instances that are no longer referenced from a DataMatrix
+        instance.
+        """
+        dm_e_oids = [e.oid for e in reduce(lambda x,y: x+y,
+                                           [dm for dm in dmz.values()])]
+        e_oids = list(entz)
+        for e_oid in e_oids:
+            if e_oid not in dm_e_oids:
+                entz[e_oid].delete()
+
     def load_reference_data(self):
         """
         Create reference data objects.  Performed at orb start up, since new
@@ -713,6 +725,8 @@ class UberORB(object):
         self.log.debug('* loading dmz ...')
         load_dmz(self.home)
         self.log.debug('  dmz: {}'.format(str(dmz)))
+        # cut down any proliferating entities ...
+        self.prune_entities()
         self.recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
         self.log.debug('  + checking for updates to parameter definitions ...')

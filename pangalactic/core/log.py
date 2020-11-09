@@ -29,31 +29,33 @@ def get_loggers(home, name, console=False, debug=False):
     if debug:
         logger.setLevel(logging.DEBUG)
     if console:
-        handler = logging.StreamHandler(stream=sys.stdout)
-    else:
-        log_filename = os.path.join(logdir, name+'_log')
-        handler = RotatingFileHandler(log_filename,
-                                      maxBytes=250000,
-                                      backupCount=10)
-    logger.addHandler(handler)
+        # console -> streams logging to stdout
+        stream_handler = logging.StreamHandler(stream=sys.stdout)
+        logger.addHandler(stream_handler)
+    # always add a file handler, even if streaming to stdout
+    log_filename = os.path.join(logdir, name+'_log')
+    file_handler = RotatingFileHandler(log_filename,
+                                       maxBytes=250000,
+                                       backupCount=10)
+    logger.addHandler(file_handler)
     message_format = u"%(asctime)s %(message)s"
     date_time_format = u"%Y-%m-%d %H:%M"
     formatter = logging.Formatter(message_format, date_time_format)
-    handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
     # error logger ...
     error_logger = logging.getLogger(name+'_error')
     error_logger.setLevel(logging.INFO)
     if debug:
         error_logger.setLevel(logging.DEBUG)
     if console:
-        error_handler = logging.StreamHandler(stream=sys.stdout)
-    else:
-        error_log_filename = os.path.join(logdir, name+'_error_log')
-        error_handler = RotatingFileHandler(error_log_filename,
-                                            maxBytes=250000,
-                                            backupCount=10)
-    error_logger.addHandler(error_handler)
-    error_handler.setFormatter(formatter)
+        error_stream_handler = logging.StreamHandler(stream=sys.stdout)
+        error_logger.addHandler(error_stream_handler)
+    error_log_filename = os.path.join(logdir, name+'_error_log')
+    error_file_handler = RotatingFileHandler(error_log_filename,
+                                             maxBytes=250000,
+                                             backupCount=10)
+    error_logger.addHandler(error_file_handler)
+    error_file_handler.setFormatter(formatter)
     return logger, error_logger
 
 
