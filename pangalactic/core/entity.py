@@ -49,53 +49,6 @@ class DummyAcu:
 # format:  {entity['oid'] : [list of previous versions of entity]}
 ent_histz = {}
 
-# def load_entz(dir_path):
-    # """
-    # Load the `entz` cache from json file, instantiating an Entity for each
-    # metadata entry.
-    # """
-    # log.debug('* load_entz() ...')
-    # fpath = os.path.join(dir_path, 'ents.json')
-    # if os.path.exists(fpath):
-        # with open(fpath) as f:
-            # data = f.read()
-            # if data:
-                # ent_dict = json.loads(data)
-                # for se in ent_dict.values():
-                    # Entity(**se)
-                    # # Entity(oid=se.get('oid'),
-                           # # parent_oid=se.get('parent_oid'),
-                           # # system_oid=se.get('system_oid'),
-                           # # owner=se.get('owner'),
-                           # # creator=se.get('creator'),
-                           # # modifier=se.get('modifier'),
-                           # # create_datetime=se.get('create_datetime'),
-                           # # mod_datetime=se.get('mod_datetime'))
-        # log.debug('  - entz cache loaded.')
-    # else:
-        # log.debug('  - "ents.json" was not found.')
-        # pass
-
-# def save_entz(dir_path):
-    # """
-    # Save `entz` dict to json file.
-    # """
-    # log.debug('* save_entz() ...')
-    # # try:
-    # fpath = os.path.join(dir_path, 'ents.json')
-    # with open(fpath, 'w') as f:
-        # if entz:
-            # ent_dict = {e.oid : e.serialize_meta() for e in entz.values()}
-            # f.write(json.dumps(ent_dict, separators=(',', ':'),
-                               # indent=4, sort_keys=True))
-        # else:
-            # log.debug('  ... entz was empty.')
-            # pass
-    # log.debug('  ... ents.json file written.')
-    # except:
-        # log.debug('  ... exception encountered.')
-        # pass
-
 def load_ent_histz(dir_path):
     """
     Load the `ent_histz` cache from json file.
@@ -147,7 +100,7 @@ class Entity(dict):
     "row" as in tables or matrices, anonymous Class instances in an ontology,
     or "Item" in a PyQt QAbstractItemModel.  Its metadata are maintained in the
     'dmz' (DataMatrix) cache along with its containing DataMatrix.  Attributes
-    other than its 'oid' and metadata are accessed via the `data_elementz` and
+    other than its metadata are accessed via the `data_elementz` and
     `parameterz` caches; therefore, an Entity does not store any data locally
     other than its metadata, and its 'oid' is used as a key when interfacing to
     the caches.
@@ -163,8 +116,9 @@ class Entity(dict):
         system_name (str):  derived from the library product name and
             reference_designator within its assembly
     """
-    metadata = ['dm_oid', 'parent_oid', 'system_oid', 'system_name', 'owner',
-                'creator', 'modifier', 'create_datetime', 'mod_datetime']
+    metadata = ['oid', 'dm_oid', 'parent_oid', 'system_oid', 'system_name',
+                'owner', 'creator', 'modifier', 'create_datetime',
+                'mod_datetime']
 
     def __init__(self, *args, oid=None, dm_oid=None, parent_oid=None,
                  system_oid=None, system_name=None, owner=None, creator=None,
@@ -194,7 +148,10 @@ class Entity(dict):
             kw (dict):  keyword args, passed to superclass (dict)
                 initialization
         """
-        log.debug('* Entity()')
+        log.debug(f'* Entity(oid={oid}, dm_oid={dm_oid},')
+        log.debug(f'         parent_oid={parent_oid},')
+        log.debug(f'         system_oid={system_oid},')
+        log.debug(f'         system_name={system_name}, ...)')
         super().__init__(*args)
         self.mapped = False
         # TODO:  check for oid collisions
@@ -431,19 +388,19 @@ def load_dmz(dir_path):
     if os.path.exists(fpath):
         with open(fpath) as f:
             ser_dms = json.loads(f.read()) or {}
-        try:
-            deser_dms = {oid: DataMatrix([
-                              Entity(**se) for se in sdm['ents'].values()],
-                              project_oid=sdm['project_oid'],
-                              name=sdm['name'],
-                              creator=sdm['creator'],
-                              modifier=sdm['modifier'],
-                              create_datetime=sdm['create_datetime'],
-                              mod_datetime=sdm['mod_datetime'])
-                         for oid, sdm in ser_dms.items()}
-        except:
-            log.debug('  - Parsing of dms.json failed.')
-            return
+        # try:
+        deser_dms = {oid: DataMatrix([
+                          Entity(**se) for se in sdm['ents']],
+                          project_oid=sdm['project_oid'],
+                          name=sdm['name'],
+                          creator=sdm['creator'],
+                          modifier=sdm['modifier'],
+                          create_datetime=sdm['create_datetime'],
+                          mod_datetime=sdm['mod_datetime'])
+                     for oid, sdm in ser_dms.items()}
+        # except:
+            # log.debug('  - Parsing of dms.json failed.')
+            # return
         dmz.update(deser_dms)
         ndmz = len(dmz)
         log.debug(f'  - {ndmz} DataMatrix instance(s) loaded into dmz cache.')
@@ -461,8 +418,7 @@ def save_dmz(dir_path):
     log.debug('* save_dmz() ...')
     ser_dms = {oid: dict(project_oid=dm.project_oid,
                          name=dm.name,
-                         ents={e.oid : e.serialize_meta()
-                               for e in dm},
+                         ents=[e.serialize_meta() for e in dm],
                          creator=dm.creator,
                          modifier=dm.modifier,
                          create_datetime=dm.create_datetime,

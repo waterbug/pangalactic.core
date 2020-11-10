@@ -3,9 +3,11 @@
 Unit tests for pangalactic.core.entity
 """
 import unittest
+from copy import deepcopy
 
 # pangalactic
-from pangalactic.core.entity          import DataMatrix
+from pangalactic.core.entity import DataMatrix, dmz, load_dmz, save_dmz
+
 from pangalactic.core.parametrics     import DATATYPES
 from pangalactic.core.uberorb         import orb
 from pangalactic.core.utils.datetimes import dtstamp
@@ -81,5 +83,18 @@ class EntityTest(unittest.TestCase):
         e['bogus'] = 5.0
         value = e['bogus']
         expected = None
+        self.assertEqual(expected, value)
+
+    def test_06_data_matrix_save_and_load(self):
+        """
+        CASE:  a DataMatrix instance must be identical after a save/load
+        round-trip.
+        """
+        value = [e.oid for e in dm]
+        save_dmz(orb.home)
+        load_dmz(orb.home)
+        new_dm = dmz[dm.oid]
+        value += [e.oid for e in new_dm]
+        expected = []
         self.assertEqual(expected, value)
 
