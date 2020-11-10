@@ -23,7 +23,6 @@ from pangalactic.core             import state, read_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
 from pangalactic.core.entity      import (dmz, load_dmz, save_dmz,
-                                          entz, load_entz, save_entz,
                                           schemaz, load_schemaz, save_schemaz,
                                           load_ent_histz, save_ent_histz)
 from pangalactic.core.registry    import PanGalacticRegistry
@@ -306,7 +305,7 @@ class UberORB(object):
         # TODO:  clean up boilerplate ...
         save_data_elementz(self.home)
         save_parmz(self.home)
-        save_entz(self.home)
+        # save_entz(self.home)
         save_ent_histz(self.home)
         save_schemaz(self.home)
         save_dmz(self.home)
@@ -375,8 +374,8 @@ class UberORB(object):
 
     def save_caches(self, dir_path=None):
         """
-        Serialize all caches (data_elementz, parameterz, entz, ent_histz,
-        schemaz, and dmz) to files in the specified directory.
+        Serialize all caches (data_elementz, parameterz, ent_histz, schemaz,
+        and dmz) to files in the specified directory.
         """
         self.log.info('* save_caches()')
         self.cache_dump_complete = False
@@ -384,7 +383,7 @@ class UberORB(object):
         # [1] save all caches to home
         save_data_elementz(self.home)
         save_parmz(self.home)
-        save_entz(self.home)
+        # save_entz(self.home)
         save_ent_histz(self.home)
         save_schemaz(self.home)
         save_dmz(self.home)
@@ -397,7 +396,7 @@ class UberORB(object):
             os.makedirs(dir_path)
         save_data_elementz(dir_path)
         save_parmz(dir_path)
-        save_entz(dir_path)
+        # save_entz(dir_path)
         save_ent_histz(dir_path)
         save_schemaz(dir_path)
         save_dmz(dir_path)
@@ -633,18 +632,6 @@ class UberORB(object):
             self.log.debug('  - file "db.yaml" not found.')
         return sdata
 
-    def prune_entities(self):
-        """
-        Delete Entity instances that are no longer referenced from a DataMatrix
-        instance.
-        """
-        dm_e_oids = [e.oid for e in reduce(lambda x,y: x+y,
-                                           [dm for dm in dmz.values()])]
-        e_oids = list(entz)
-        for e_oid in e_oids:
-            if e_oid not in dm_e_oids:
-                entz[e_oid].delete()
-
     def load_reference_data(self):
         """
         Create reference data objects.  Performed at orb start up, since new
@@ -715,9 +702,6 @@ class UberORB(object):
         # ********************************************************************
         load_data_elementz(self.home)
         load_parmz(self.home)
-        self.log.debug('* loading entz ...')
-        load_entz(self.home)
-        self.log.debug('  entz: {}'.format(str(entz)))
         self.log.debug('* loading ent_histz ...')
         load_ent_histz(self.home)
         self.log.debug('* loading schemaz ...')
@@ -725,8 +709,6 @@ class UberORB(object):
         self.log.debug('* loading dmz ...')
         load_dmz(self.home)
         self.log.debug('  dmz: {}'.format(str(dmz)))
-        # cut down any proliferating entities ...
-        self.prune_entities()
         self.recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
         self.log.debug('  + checking for updates to parameter definitions ...')

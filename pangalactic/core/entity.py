@@ -41,13 +41,6 @@ class DummyAcu:
 # -----------------------------------------------------------------------
 # ENTITY-RELATED CACHES
 # -----------------------------------------------------------------------
-# entz:        persistent** cache of Entity instances
-#              ** serialized into the file 'ents.json' in the
-#              application home directory -- see the functions
-#              `save_entz` and `load_entz`
-# format:  {oid : entity, ...}
-entz = {}
-
 # ent_histz:  persistent** cache of previous versions of entities,
 #             saved as named tuples ...
 #              ** persisted in the file 'ent_hists.json' in the
@@ -56,50 +49,49 @@ entz = {}
 # format:  {entity['oid'] : [list of previous versions of entity]}
 ent_histz = {}
 
-def load_entz(dir_path):
-    """
-    Load the `entz` cache from json file, instantiating an Entity for each
-    metadata entry.
-    """
-    log.debug('* load_entz() ...')
-    fpath = os.path.join(dir_path, 'ents.json')
-    if os.path.exists(fpath):
-        with open(fpath) as f:
-            data = f.read()
-            if data:
-                ent_dict = json.loads(data)
-                for se in ent_dict.values():
-                    # entities will register themselves when initialized
-                    Entity(**se)
-                    # Entity(oid=se.get('oid'),
-                           # parent_oid=se.get('parent_oid'),
-                           # system_oid=se.get('system_oid'),
-                           # owner=se.get('owner'),
-                           # creator=se.get('creator'),
-                           # modifier=se.get('modifier'),
-                           # create_datetime=se.get('create_datetime'),
-                           # mod_datetime=se.get('mod_datetime'))
-        log.debug('  - entz cache loaded.')
-    else:
-        log.debug('  - "ents.json" was not found.')
-        pass
+# def load_entz(dir_path):
+    # """
+    # Load the `entz` cache from json file, instantiating an Entity for each
+    # metadata entry.
+    # """
+    # log.debug('* load_entz() ...')
+    # fpath = os.path.join(dir_path, 'ents.json')
+    # if os.path.exists(fpath):
+        # with open(fpath) as f:
+            # data = f.read()
+            # if data:
+                # ent_dict = json.loads(data)
+                # for se in ent_dict.values():
+                    # Entity(**se)
+                    # # Entity(oid=se.get('oid'),
+                           # # parent_oid=se.get('parent_oid'),
+                           # # system_oid=se.get('system_oid'),
+                           # # owner=se.get('owner'),
+                           # # creator=se.get('creator'),
+                           # # modifier=se.get('modifier'),
+                           # # create_datetime=se.get('create_datetime'),
+                           # # mod_datetime=se.get('mod_datetime'))
+        # log.debug('  - entz cache loaded.')
+    # else:
+        # log.debug('  - "ents.json" was not found.')
+        # pass
 
-def save_entz(dir_path):
-    """
-    Save `entz` dict to json file.
-    """
-    log.debug('* save_entz() ...')
-    # try:
-    fpath = os.path.join(dir_path, 'ents.json')
-    with open(fpath, 'w') as f:
-        if entz:
-            ent_dict = {e.oid : e.serialize_meta() for e in entz.values()}
-            f.write(json.dumps(ent_dict, separators=(',', ':'),
-                               indent=4, sort_keys=True))
-        else:
-            log.debug('  ... entz was empty.')
-            pass
-    log.debug('  ... ents.json file written.')
+# def save_entz(dir_path):
+    # """
+    # Save `entz` dict to json file.
+    # """
+    # log.debug('* save_entz() ...')
+    # # try:
+    # fpath = os.path.join(dir_path, 'ents.json')
+    # with open(fpath, 'w') as f:
+        # if entz:
+            # ent_dict = {e.oid : e.serialize_meta() for e in entz.values()}
+            # f.write(json.dumps(ent_dict, separators=(',', ':'),
+                               # indent=4, sort_keys=True))
+        # else:
+            # log.debug('  ... entz was empty.')
+            # pass
+    # log.debug('  ... ents.json file written.')
     # except:
         # log.debug('  ... exception encountered.')
         # pass
@@ -153,19 +145,16 @@ class Entity(dict):
 
     The concept behind Entity is similar to "record" as in database records,
     "row" as in tables or matrices, anonymous Class instances in an ontology,
-    or "Item" in a PyQt QAbstractItemModel.  Its metadata (owner, creator,
-    modifier, create_datetime, and mod_datetime) are maintained in the 'entz'
-    cache.  Attributes other than its 'oid' and metadata are accessed via the
-    `data_elementz` and `parameterz` caches; therefore, an Entity does not
-    store any data locally other than its 'oid', which is used as a key when
-    interfacing to the caches.
-
-    All data for an Entity are accessed using the Entity's 'oid' as a key in
-    the entz (metadata), data_elementz, and parameterz caches.  Any Entity
-    can be recreated using its oid by calling Entity(oid=oid).
+    or "Item" in a PyQt QAbstractItemModel.  Its metadata are maintained in the
+    'dmz' (DataMatrix) cache along with its containing DataMatrix.  Attributes
+    other than its 'oid' and metadata are accessed via the `data_elementz` and
+    `parameterz` caches; therefore, an Entity does not store any data locally
+    other than its metadata, and its 'oid' is used as a key when interfacing to
+    the caches.
 
     Attributes:
         oid (str):  a unique identifier
+        dm_oid (str):  oid of the entity's containing DataMatrix
         parent_oid (str):  oid of the entity's "parent" entity
         system_oid (str):  [optional] oid of a system (Project or Product)
             to which the entity is mapped
@@ -174,12 +163,12 @@ class Entity(dict):
         system_name (str):  derived from the library product name and
             reference_designator within its assembly
     """
-    metadata = ['parent_oid', 'system_oid', 'system_name', 'owner', 'creator',
-                'modifier', 'create_datetime', 'mod_datetime']
+    metadata = ['dm_oid', 'parent_oid', 'system_oid', 'system_name', 'owner',
+                'creator', 'modifier', 'create_datetime', 'mod_datetime']
 
-    def __init__(self, *args, oid=None, parent_oid=None, system_oid=None,
-                 system_name=None, owner=None, creator=None, modifier=None,
-                 create_datetime=None, mod_datetime=None, **kw):
+    def __init__(self, *args, oid=None, dm_oid=None, parent_oid=None,
+                 system_oid=None, system_name=None, owner=None, creator=None,
+                 modifier=None, create_datetime=None, mod_datetime=None, **kw):
         """
         Initialize.
 
@@ -191,9 +180,8 @@ class Entity(dict):
 
         Keyword Args:
             oid (str):  a unique identifier
-            parent_oid (str):  oid of the entity's "parent" entity (NOTE that
-                if the parent_oid argument is not the oid of an entity in the
-                'entz' cache, then None will be set as the parent_oid)
+            dm_oid (str):  oid of the entity's containing DataMatrix
+            parent_oid (str):  oid of the entity's "parent" entity
             system_oid (str):  [optional] oid of a system (Project or Product)
                 to which the entity is mapped
             system_name (str):  derived from the library product name and
@@ -209,12 +197,11 @@ class Entity(dict):
         log.debug('* Entity()')
         super().__init__(*args)
         self.mapped = False
-        # TODO:  check if oid is that of an object
+        # TODO:  check for oid collisions
         if not oid:
             oid = str(uuid4())
         self.oid = oid
-        self.parent_oid = parent_oid
-        self.system_oid = system_oid
+        self.dm_oid = dm_oid
         self.parent_oid = parent_oid
         self.system_oid = system_oid
         self.system_name = system_name
@@ -224,40 +211,14 @@ class Entity(dict):
         dt = str(dtstamp())
         self.create_datetime = create_datetime or dt
         self.mod_datetime = mod_datetime or dt
-        if self.oid in entz:
-            log.debug(f'  entity oid "{oid}" was in "entz", using ...')
-        else:
-            log.debug(f'  entity oid was NOT in "entz", registering ...')
-            self.register()
-
-    def register(self):
-        entz[self.oid] = self
-        dispatcher.send('entity saved', e=self)
-
-    @property
-    def parent_oid(self):
-        """
-        Getter for `parent_oid` (returns None if the value of __parent_oid is
-        not in the `entz` cache).
-        """
-        if self.__parent_oid in entz:
-            return self.__parent_oid
-        else:
-            return None
-
-    @parent_oid.setter
-    def parent_oid(self, value):
-        """
-        Setter for `parent_oid` (note that if the value is an oid that is not
-        present in the `entz` cache, it will be ignored and the value of
-        self.parent_oid will be None).
-        """
-        self.__parent_oid = value
 
     @property
     def assembly_level(self):
-        if self.parent_oid in entz:
-            return entz[self.parent_oid].assembly_level + 1
+        dm = dmz.get(self.dm_oid)
+        if dm:
+            entities = {e.oid : e for e in dm}
+            if self.parent_oid in entities:
+                return entities[self.parent_oid].assembly_level + 1
         return 1
 
     def __getitem__(self, k):
@@ -370,7 +331,7 @@ class Entity(dict):
     def serialize_meta(self):
         """
         Serialize only the metadata for the Entity.  (Used when saving the
-        'entz' cache.)
+        entity as part of a serialized DataMatrix.)
         """
         d = {a : getattr(self, a, '') for a in self.metadata}
         return d
@@ -387,17 +348,18 @@ class Entity(dict):
 
     def delete(self):
         """
-        Delete the entity, removing all references to it from entz, ent_histz,
-        parameterz, and data_elementz.
+        Delete the entity, removing all references to it from ent_histz,
+        parameterz, data_elementz, and dmz.
         """
         if self.oid in ent_histz:
             del ent_histz[self.oid]
-        if self.oid in entz:
-            del entz[self.oid]
         if self.oid in parameterz:
             del parameterz[self.oid]
         if self.oid in data_elementz:
             del data_elementz[self.oid]
+        dm = dmz.get(self.dm_oid)
+        if dm and self in dm:
+            dm.remove(self)
 
 
 # -----------------------------------------------------------------------
@@ -471,7 +433,7 @@ def load_dmz(dir_path):
             ser_dms = json.loads(f.read()) or {}
         try:
             deser_dms = {oid: DataMatrix([
-                              Entity(oid=oid) for oid in sdm['ents']],
+                              Entity(**se) for se in sdm['ents'].values()],
                               project_oid=sdm['project_oid'],
                               name=sdm['name'],
                               creator=sdm['creator'],
@@ -499,7 +461,8 @@ def save_dmz(dir_path):
     log.debug('* save_dmz() ...')
     ser_dms = {oid: dict(project_oid=dm.project_oid,
                          name=dm.name,
-                         ents=[e.oid for e in dm],
+                         ents={e.oid : e.serialize_meta()
+                               for e in dm},
                          creator=dm.creator,
                          modifier=dm.modifier,
                          create_datetime=dm.create_datetime,
@@ -661,21 +624,25 @@ class DataMatrix(list):
         """
         Appends an "empty" Entity with a new oid.
         """
-        e = Entity()
+        e = Entity(dm_oid=self.oid)
         self.append(e)
         return e
 
-    def insert_new_row(self, i, child_of=False):
+    def insert_new_row(self, pos=None, child_of=False):
         """
         Inserts an empty Entity with a new oid, in the ith position.  To
         support GridTreeItem.insertChildren(), use child_of=True.
 
         Keyword Args:
+            pos (int):  position at which to insert
             child_of (Entity):  the parent Entity (or None if same level as
                 preceding row)
         """
-        e = Entity(parent_oid=child_of.oid)
-        self.insert(i, e)
+        e = Entity(dm_oid=self.oid, parent_oid=child_of.oid)
+        if pos and pos < len(self):
+            self.insert(pos, e)
+        else:
+            self.append(e)
         return e
 
     def remove_row(self, i):
@@ -714,7 +681,7 @@ class DataMatrix(list):
         for e in self:
             e.mapped = False
         if context.__class__.__name__ == 'Project':
-            log.debug(f'  MEL for Project "{context.id}"')
+            log.debug(f'  recomputing MEL for Project "{context.id}" ...')
             # context is Project, so may include several systems
             project = context
             for psu in project.systems:
@@ -723,7 +690,7 @@ class DataMatrix(list):
                 row += end + 1
         elif context.__class__.__name__ == 'HardwareProduct':
             # context is Product -> a single system MEL
-            log.debug(f'  MEL for System "{context.id}"')
+            log.debug(f'  recomputing MEL for System "{context.id}" ...')
             name = f'{context.name} [{context.id}]'
             self.compute_mel_parms(0, name, context)
         else:
@@ -741,7 +708,8 @@ class DataMatrix(list):
                 unmapped += 1
         if unmapped:
             log.debug(f'  {unmapped} unmapped entities removed.')
-            dispatcher.send('mel modified')
+            ### NOTE:  this causes cycles -- find another way ...
+            # dispatcher.send('mel modified')
         else:
             log.debug(f'  no unmapped entities found.')
 
@@ -790,11 +758,12 @@ class DataMatrix(list):
                 else:
                     # otherwise, append it
                     self.append(entity)
-        # [3] there is no corresponding entity in the current DataMatrix;
+        # [2] there is no corresponding entity in the current DataMatrix;
         # create a new entity (with an auto-generated oid)
         else:
             log.debug('  etuple not yet mapped to an entity, creating ...')
-            entity = Entity(parent_oid=parent_oid,
+            entity = Entity(dm_oid=self.oid,
+                            parent_oid=parent_oid,
                             system_oid=component.oid, 
                             system_name=name, 
                             owner=component.owner.oid,

@@ -2,10 +2,10 @@
 """
 Unit tests for pangalactic.core.entity
 """
-import json, os, unittest
+import unittest
 
 # pangalactic
-from pangalactic.core.entity          import Entity, entz, save_entz
+from pangalactic.core.entity          import DataMatrix
 from pangalactic.core.parametrics     import DATATYPES
 from pangalactic.core.uberorb         import orb
 from pangalactic.core.utils.datetimes import dtstamp
@@ -13,9 +13,11 @@ from pangalactic.core.utils.datetimes import dtstamp
 
 orb.start(home='pangalaxian_test')
 
-# create a test entity
-e_parent = Entity()
-e = Entity(parent_oid=e_parent.oid)
+# create a test DataMatrix and add 2 Entities
+dm = DataMatrix()
+e_parent = dm.append_new_row()
+e = dm.insert_new_row(child_of=e_parent)
+
 
 class EntityTest(unittest.TestCase):
     maxDiff = None
@@ -35,28 +37,20 @@ class EntityTest(unittest.TestCase):
                     e_parent.oid, None]
         self.assertEqual(expected, value)
 
-    def test_01_new_entity_is_cached(self):
+    def test_01_entity_in_datamatrix(self):
         """
-        CASE:  Entity instance is cached in 'entz'.
+        CASE:  an Entity instance exists within its containing DataMatrix.
         """
-        value = e.oid in entz
+        value = e in dm
         expected = True
         self.assertEqual(expected, value)
 
-    def test_02_entz_cache_structure(self):
+    def test_02_dmz_cache_structure(self):
         """
-        CASE:  Entity cache 'entz' is serialized correctly.
+        CASE:  DataMatrix cache 'dmz' is serialized correctly.
         """
-        save_entz(orb.home)
-        fpath = os.path.join(orb.home, 'ents.json')
-        with open(fpath) as f:
-            data = f.read()
-        ent_dict = json.loads(data)
-        value = []
-        value.append(ent_dict[e.oid]['creator'] == 'pgefobjects:admin')
-        value.append(ent_dict[e.oid]['modifier'] == 'pgefobjects:admin')
-        value.append(ent_dict[e.oid]['owner'] == 'pgefobjects:PGANA')
-        expected = [True, True, True]
+        value = True
+        expected = True
         self.assertEqual(expected, value)
 
     def test_03_entity_set_value_for_defined_parameter(self):
@@ -80,12 +74,6 @@ class EntityTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     def test_05_entity_cannot_set_value_for_undefined_key(self):
-        """
-        CASE:  an Entity instance cannot have a value for a key if the key has
-        neither a ParameterDefinition nor a DataElementDefinition.
-        """
-
-    def test_06_entity_cannot_set_value_for_undefined_key(self):
         """
         CASE:  an Entity instance cannot have a value for a key if the key has
         neither a ParameterDefinition nor a DataElementDefinition.
