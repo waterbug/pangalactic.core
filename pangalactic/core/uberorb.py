@@ -51,7 +51,7 @@ from pangalactic.core.serializers import serialize, deserialize
 from pangalactic.core.test        import data as test_data_mod
 from pangalactic.core.test        import vault as test_vault_mod
 from pangalactic.core.test.utils  import gen_test_dvals, gen_test_pvals
-from pangalactic.core.utils.datetimes import dtstamp, file_dts
+from pangalactic.core.utils.datetimes import dtstamp, file_dts, file_date_stamp
 from pangalactic.core.log         import get_loggers
 from pangalactic.core.validation  import get_assembly
 from functools import reduce
@@ -375,33 +375,56 @@ class UberORB(object):
     def save_caches(self, dir_path=None):
         """
         Serialize all caches (data_elementz, parameterz, ent_histz, schemaz,
-        and dmz) to files in the specified directory.
+        and dmz) to files and:
+
+            1. if no directory is specified, save the files in the home
+               directory and save copies to a backup directory named with the
+               date stamp.
+
+            2. if a directory is specified, save the files in the home
+               directory and save copies in the specified directory.
+
+        If "local.db" exists (sqlite), it will be copied to the backup
+        directory along with the caches.
+
+        Note that only one backup for any given day will be preserved, because
+        the backup directory name is the date so the last backup on a given day
+        will overwrite any previous backups for that day.
         """
         self.log.info('* save_caches()')
         self.cache_dump_complete = False
-        dts = file_dts()
+        backup = False
         # [1] save all caches to home
         save_data_elementz(self.home)
         save_parmz(self.home)
-        # save_entz(self.home)
         save_ent_histz(self.home)
         save_schemaz(self.home)
         save_dmz(self.home)
+        self.log.info('  cache saves completed ...')
         # [2] save all caches to backup dir
         if not dir_path:
-            # if no dir_path specified, assume backup
+            # if no dir_path specified, backup
+            backup = True
             backup_path = os.path.join(self.home, 'backup')
-            dir_path = os.path.join(backup_path, 'caches-' + dts)
+            dts = file_date_stamp()
+            dir_path = os.path.join(backup_path, dts)
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         save_data_elementz(dir_path)
         save_parmz(dir_path)
-        # save_entz(dir_path)
         save_ent_histz(dir_path)
         save_schemaz(dir_path)
         save_dmz(dir_path)
         self.cache_dump_complete = True
-        self.log.info('  cache dump completed.')
+        if backup:
+            self.log.info('  cache backup completed.')
+        else:
+            self.log.info('  cache dump completed.')
+        # [3] if doing a backup and local.db exists, save a copy to backup dir
+        local_db_path = os.path.join(self.home, 'local.db')
+        if backup and os.path.exists(local_db_path) and dir_path != self.home:
+            shutil.copy2(local_db_path, dir_path)
+            self.log.info('  local.db backed up along with caches.')
 
     def dump_all(self, dir_path=None):
         self.save_caches(dir_path=dir_path)

@@ -33,6 +33,15 @@ def file_dts():
     """
     return datetime.utcnow().strftime(PGEF_FILE_DATETIME_FMT)
 
+def file_date_stamp():
+    """
+    Generate date string that can be used in a file name.
+
+    @return:  a date string
+    @rtype:   C{str}
+    """
+    return datetime.today().strftime(PGEF_DATE_FMT)
+
 def to_local_tz(naive_utc_dt):
     """
     Convert a naive UTC datetime stamp to a local datetime.
