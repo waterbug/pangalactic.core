@@ -108,7 +108,7 @@ DEFAULT_PRODUCT_TYPE_PARAMETERS = {'': []}
 # PGXN_PLACEHOLDERS:  Placeholder text for fields in PgxnObject forms
 PGXN_PLACEHOLDERS = {'id': 'unique identifier; no spaces',
                      'id_ns': 'namespace for id',
-                     'name': 'verbose name; spaces ok',
+                     'name': '~25 characters; spaces ok',
                      'version': 'blank ok; id+version must be unique'
                      }
 
