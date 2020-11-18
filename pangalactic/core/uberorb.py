@@ -342,7 +342,8 @@ class UberORB(object):
     def dump_db(self, fmt='yaml', dir_path=None):
         """
         Serialize all db objects, along with all their parameters and data
-        elements, and write to `db.yaml` in the specified directory.
+        elements, and write to `db-dump-[dts].yaml` (or '.json', if specified)
+        in the specified directory.
         """
         self.log.info('* dump_db()')
         self.db_dump_complete = False
@@ -367,7 +368,7 @@ class UberORB(object):
             f = open(os.path.join(dir_path, yaml_fname), 'w')
             f.write(yaml.safe_dump(serialize(
                     self, self.get_all_subtypes('Identifiable'),
-                    include_refdata=True)))
+                    include_refdata=True), default_flow_style=False))
             f.close()
         self.log.info('  dump to {} completed.'.format(fmt))
         self.db_dump_complete = True
@@ -427,8 +428,8 @@ class UberORB(object):
             self.log.info('  local.db backed up along with caches.')
 
     def dump_all(self, dir_path=None):
-        self.save_caches(dir_path=dir_path)
         self.dump_db(dir_path=dir_path)
+        self.save_caches(dir_path=dir_path)
 
     # def drop_and_create_db(self, home):
         # """
@@ -1631,7 +1632,7 @@ class UberORB(object):
                         except:
                             self.db.rollback()
                             info.append('     ... delete failed, rolled back.')
-            if isinstance(obj, self.classes['Organization']):
+            elif isinstance(obj, self.classes['Organization']):
                 # if an Organization (which includes projects) owns any
                 # objects, change their ownership to either its
                 # 'parent_organization', or if none, to PGANA (if PGANA they
@@ -1643,7 +1644,7 @@ class UberORB(object):
                     new_owner = obj.parent_organization or pgana
                     for owned_obj in obj.owned_objects:
                         owned_obj.owner = new_owner
-            if isinstance(obj, (self.classes['Acu'],
+            elif isinstance(obj, (self.classes['Acu'],
                                 self.classes['ProjectSystemUsage'])):
                 # delete any related flows to/from its component/system in
                 # the context of its assembly/project
@@ -1660,7 +1661,7 @@ class UberORB(object):
                     except:
                         self.db.rollback()
                         info.append('     ... delete failed, rolled back.')
-            if isinstance(obj, self.classes['Product']):
+            elif isinstance(obj, self.classes['Product']):
                 # for Products, first delete related Flows, Ports, Acus, and
                 # ProjectSystemUsages
                 # NOTE: for flows, only need to worry about internal flows --
@@ -1740,7 +1741,7 @@ class UberORB(object):
                             info.append('     ... delete failed, rolled back.')
                         if assembly.oid in componentz:
                             refresh_assemblies.append(assembly)
-            if isinstance(obj, self.classes['Port']):
+            elif isinstance(obj, self.classes['Port']):
                 # for Ports, first delete all related Flows, both outgoing and
                 # incoming (in which it is the start or end)
                 skip_port = False
