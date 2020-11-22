@@ -94,7 +94,6 @@ class EntityTest(unittest.TestCase):
         save_dmz(orb.home)
         load_dmz(orb.home)
         new_dm = dmz[dm.oid]
-        value += [e.oid for e in new_dm]
-        expected = []
+        expected = [e.oid for e in new_dm]
         self.assertEqual(expected, value)
 
