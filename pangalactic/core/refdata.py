@@ -1,6 +1,7 @@
 """
 PanGalactic reference data
 """
+import datetime
 epoch = '2017-01-01 00:00:00'
 
 initial = [
@@ -2452,6 +2453,11 @@ se_role_obj = core_objs['gsfc:Role.systems_engineer']
 # Lead Engineer Role object (related to same disciplines as SE)
 le_role_obj = core_objs['gsfc:Role.lead_engineer']
 
+# [SCW] datetime stamp for create_datetime / mod_datetime of new
+# DisciplineProductType relationships created for electro_mechanical and
+# eee_part on 2020-11-24
+dts = datetime.datetime(2020, 11, 24)
+
 for discipline_oid in [
     'pgefobjects:Discipline.acs',
     'pgefobjects:Discipline.avionics',
@@ -2553,6 +2559,8 @@ acs_discipline_obj = core_objs['pgefobjects:Discipline.acs']
 for pt_oid in [
     'pgefobjects:ProductType.attitude_control_system',
     'pgefobjects:ProductType.actuator',
+    'pgefobjects:ProductType.eee_part',
+    'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.gps',
     'pgefobjects:ProductType.star_tracker',
     'pgefobjects:ProductType.imu',
@@ -2573,11 +2581,15 @@ for pt_oid in [
     core.append(
         dict(_cname='DisciplineProductType', oid=dpt_oid, id=dpt_id,
              relevant_product_type=pt_obj['oid'],
-             used_in_discipline=acs_discipline_obj['oid']))
+             used_in_discipline=acs_discipline_obj['oid'],
+             create_datetime=dts, mod_datetime=dts))
 
 # Propulsion ProductTypes
 prop_discipline_obj = core_objs['pgefobjects:Discipline.propulsion']
 for pt_oid in [
+    'pgefobjects:ProductType.actuator',
+    'pgefobjects:ProductType.eee_part',
+    'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.propulsion_system',
     'pgefobjects:ProductType.tank',
     'pgefobjects:ProductType.fuel',
@@ -2600,13 +2612,16 @@ for pt_oid in [
     core.append(
         dict(_cname='DisciplineProductType', oid=dpt_oid, id=dpt_id,
              relevant_product_type=pt_obj['oid'],
-             used_in_discipline=prop_discipline_obj['oid']))
+             used_in_discipline=prop_discipline_obj['oid'],
+             create_datetime=dts, mod_datetime=dts))
 
 # Thermal ProductTypes
 thermal_discipline_obj = core_objs['pgefobjects:Discipline.thermal']
 for pt_oid in [
     'pgefobjects:ProductType.thermal_control_system',
     'pgefobjects:ProductType.actuator',
+    'pgefobjects:ProductType.eee_part',
+    'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.heater',
     'pgefobjects:ProductType.thermostat',
     'pgefobjects:ProductType.temperature_sensor',
@@ -2625,11 +2640,13 @@ for pt_oid in [
     core.append(
         dict(_cname='DisciplineProductType', oid=dpt_oid, id=dpt_id,
              relevant_product_type=pt_obj['oid'],
-             used_in_discipline=thermal_discipline_obj['oid']))
+             used_in_discipline=thermal_discipline_obj['oid'],
+             create_datetime=dts, mod_datetime=dts))
 
 # Mechanical ProductTypes
 mech_discipline_obj = core_objs['pgefobjects:Discipline.mechanical']
 for pt_oid in [
+    'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.mechanical_system',
     'pgefobjects:ProductType.mechanical_structure',
     'pgefobjects:ProductType.instrument_accomodation',
@@ -2647,11 +2664,14 @@ for pt_oid in [
     core.append(
         dict(_cname='DisciplineProductType', oid=dpt_oid, id=dpt_id,
              relevant_product_type=pt_obj['oid'],
-             used_in_discipline=mech_discipline_obj['oid']))
+             used_in_discipline=mech_discipline_obj['oid'],
+             create_datetime=dts, mod_datetime=dts))
 
 # Electrical Power ProductTypes
 power_discipline_obj = core_objs['pgefobjects:Discipline.power']
 for pt_oid in [
+    'pgefobjects:ProductType.eee_part',
+    'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.power_system',
     'pgefobjects:ProductType.solar_array',
     'pgefobjects:ProductType.solar_array_actuator',
@@ -2666,14 +2686,17 @@ for pt_oid in [
     core.append(
         dict(_cname='DisciplineProductType', oid=dpt_oid, id=dpt_id,
              relevant_product_type=pt_obj['oid'],
-             used_in_discipline=power_discipline_obj['oid']))
+             used_in_discipline=power_discipline_obj['oid'],
+             create_datetime=dts, mod_datetime=dts))
 
 # Avionics (C&DH) ProductTypes
 avionics_discipline_obj = core_objs['pgefobjects:Discipline.avionics']
 for pt_oid in [
     'pgefobjects:ProductType.c_and_dh_system',   # C&DH System
     'pgefobjects:ProductType.board',
+    'pgefobjects:ProductType.eee_part',
     'pgefobjects:ProductType.electronics_box',
+    'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.comsec',
     'pgefobjects:ProductType.computer',
     'pgefobjects:ProductType.redundancy_management_unit'
@@ -2685,12 +2708,15 @@ for pt_oid in [
     core.append(
         dict(_cname='DisciplineProductType', oid=dpt_oid, id=dpt_id,
              relevant_product_type=pt_obj['oid'],
-             used_in_discipline=avionics_discipline_obj['oid']))
+             used_in_discipline=avionics_discipline_obj['oid'],
+             create_datetime=dts, mod_datetime=dts))
 
 # Comm ProductTypes
 comm_discipline_obj = core_objs['pgefobjects:Discipline.rf_comm']
 for pt_oid in [
     'pgefobjects:ProductType.communications_system',
+    'pgefobjects:ProductType.eee_part',
+    'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.omni_antenna',
     'pgefobjects:ProductType.medium_gain_antenna',
     'pgefobjects:ProductType.high_gain_antenna',
@@ -2706,7 +2732,8 @@ for pt_oid in [
     core.append(
         dict(_cname='DisciplineProductType', oid=dpt_oid, id=dpt_id,
              relevant_product_type=pt_obj['oid'],
-             used_in_discipline=comm_discipline_obj['oid']))
+             used_in_discipline=comm_discipline_obj['oid'],
+             create_datetime=dts, mod_datetime=dts))
 
 # Systems ProductTypes
 systems_discipline_obj = core_objs['pgefobjects:Discipline.systems']
@@ -2718,7 +2745,9 @@ for pt_oid in [
     'pgefobjects:ProductType.c_and_dh_system',   # C&DH System
     'pgefobjects:ProductType.communications_system',
     'pgefobjects:ProductType.mechanical_system',
+    'pgefobjects:ProductType.eee_part',
     'pgefobjects:ProductType.electronics_box',
+    'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.observatory',
     'pgefobjects:ProductType.power_system',
     'pgefobjects:ProductType.propulsion_system',
@@ -2731,7 +2760,8 @@ for pt_oid in [
     core.append(
         dict(_cname='DisciplineProductType', oid=dpt_oid, id=dpt_id,
              relevant_product_type=pt_obj['oid'],
-             used_in_discipline=systems_discipline_obj['oid']))
+             used_in_discipline=systems_discipline_obj['oid'],
+             create_datetime=dts, mod_datetime=dts))
 
 science_discipline_obj = core_objs['pgefobjects:Discipline.science']
 for pt_oid in [
