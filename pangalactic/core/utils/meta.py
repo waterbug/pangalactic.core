@@ -6,6 +6,7 @@ import codecs
 import inflect
 import json
 import re
+import string
 import unicodedata
 from datetime import date, datetime
 from textwrap import wrap
@@ -306,7 +307,7 @@ def get_ra_id(ra_context_id, role_id, fname, mi, lname):
     else:
         return '-'.join([role_id, '_'.join([lname, fname, mi])])
 
-def get_next_ref_des(assembly, component, prefix=None):
+def get_next_ref_des(assembly, component, prefix=None, product_type=None):
     """
     Get the next reference designator for the specified assembly and component.
 
@@ -320,11 +321,17 @@ def get_next_ref_des(assembly, component, prefix=None):
     Keyword Args:
         prefix (str): a string to be used as the prefix of the reference
             designator
+        product_type (ProductType): a product type to use if component is None
+            or does not have a product_type
     """
-    prefix = 'Generic'
-    if component.product_type:
+    prefix = ''
+    if getattr(component, 'product_type', None):
         prefix = (component.product_type.abbreviation or
-                  component.product_type.name or 'Generic')
+                  component.product_type.name)
+    if not prefix and product_type:
+        prefix = product_type.abbreviation or product_type.name
+    if not prefix:
+        prefix = 'Generic'
     acus = assembly.components
     if acus:
         rds = [acu.reference_designator for acu in acus]
