@@ -95,9 +95,10 @@ def get_perms(obj, user=None, permissive=False):
     # discipline role in the owner org that corresponds to the object's
     # 'product_type'
     else:
-        # did the user create the object?  if so, full perms ...
-        if (hasattr(obj, 'creator') and
-            obj.creator is user):
+        # did the user create the object?  if so, and the object is not an
+        # instance of Person, then full perms ...
+        if (hasattr(obj, 'creator') and obj.creator is user and
+            not isinstance(obj, orb.classes['Person'])):
             # orb.log.debug('  user is object creator.')
             # any object can be deleted by its creator
             perms = ['view', 'modify', 'decloak', 'delete']

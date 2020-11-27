@@ -1569,7 +1569,7 @@ class UberORB(object):
         """
         Delete the specified objects from the local db.  Note that the orb does
         not check permissions here -- the assumption is that permissions were
-        checked before orb.delete() was called and that every done here is
+        checked before orb.delete() was called and that everything done here is
         authorized.  Also note that in deleting some types of objects, it may
         be required to delete many related objects, some of which may have been
         created by other users.
@@ -1632,6 +1632,17 @@ class UberORB(object):
                         except:
                             self.db.rollback()
                             info.append('     ... delete failed, rolled back.')
+            elif isinstance(obj, self.classes['Person']):
+                # Note that it is assumed the permissions of the user have been
+                # checked and the user is a Global Administrator -- only they
+                # can delete Person objects -- and that the Person object does
+                # not have any objects of which it is the creator
+                # ("created_objects").
+                # Delete all related RoleAssignments ...
+                if obj.roles:
+                    for ra in obj.roles:
+                        self.db.delete(ra)
+                    self.db.commit()
             elif isinstance(obj, self.classes['Organization']):
                 # if an Organization (which includes projects) owns any
                 # objects, change their ownership to either its
