@@ -148,6 +148,8 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
     - autobahn
       * NOTE: requires 'conda-forge' channel
+        **IMPORTANT**:  minimum autobahn version is 20.7.1 (client fails to
+                        connect to crossbar with earlier versions)
 
           Configuration:  'conda install autobahn'
 
