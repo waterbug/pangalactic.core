@@ -388,19 +388,19 @@ def load_dmz(dir_path):
     if os.path.exists(fpath):
         with open(fpath) as f:
             ser_dms = json.loads(f.read()) or {}
-        # try:
-        deser_dms = {oid: DataMatrix([
-                          Entity(**se) for se in sdm['ents']],
-                          project_oid=sdm['project_oid'],
-                          name=sdm['name'],
-                          creator=sdm['creator'],
-                          modifier=sdm['modifier'],
-                          create_datetime=sdm['create_datetime'],
-                          mod_datetime=sdm['mod_datetime'])
-                     for oid, sdm in ser_dms.items()}
-        # except:
-            # log.debug('  - Parsing of dms.json failed.')
-            # return
+        try:
+            deser_dms = {oid: DataMatrix([
+                              Entity(**se) for se in sdm['ents']],
+                              project_oid=sdm['project_oid'],
+                              name=sdm['name'],
+                              creator=sdm['creator'],
+                              modifier=sdm['modifier'],
+                              create_datetime=sdm['create_datetime'],
+                              mod_datetime=sdm['mod_datetime'])
+                         for oid, sdm in ser_dms.items()}
+        except:
+            log.debug('  - Parsing of dms.json failed.')
+            return
         dmz.update(deser_dms)
         ndmz = len(dmz)
         log.debug(f'  - {ndmz} DataMatrix instance(s) loaded into dmz cache.')

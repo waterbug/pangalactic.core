@@ -34,7 +34,7 @@ from pangalactic.core.test.utils  import (create_test_users,
                                           related_test_objects)
 from pangalactic.core.uberorb     import orb
 from pangalactic.core.utils.datetimes import dtstamp
-from pangalactic.core.utils.reports   import write_mel_xlsx
+from pangalactic.core.utils.reports   import write_mel_xlsx_from_model
 
 orb.start(home='pangalaxian_test', debug=True)
 serialized_test_objects = create_test_users()
@@ -700,12 +700,12 @@ class OrbTest(unittest.TestCase):
 
     def test_50_write_mel(self):
         """
-        CASE:  test output of mel_writer
+        CASE:  test success of mel_writer
         """
-        # This test verifies that the `write_mel_xlsx` function succeeds
+        # verify that the `write_mel_xlsx_from_model` function succeeds
         obj = orb.get('H2G2')   # Project 'H2G2' test object
         fpath = os.path.join(orb.vault, 'mel_writer_output.xlsx')
-        write_mel_xlsx(obj, file_path=fpath)
+        write_mel_xlsx_from_model(obj, file_path=fpath)
         expected = 1
         value = 1
         self.assertEqual(expected, value)
