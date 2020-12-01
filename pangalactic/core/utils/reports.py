@@ -280,12 +280,14 @@ def write_mel_xlsx_from_datagrid(context, is_project=True,
                  2: fmts['left_gray_bold_12'],
                  3: fmts['left_12']
                  }
-    data_fmts = {1: fmts['right_black_bg_12'],
-                 2: fmts['right_gray_bold_12'],
-                 3: fmts['right_12']
+    data_fmts = {1: fmts['float_right_black_bg_12'],
+                 2: fmts['float_right_gray_bold_12'],
+                 3: fmts['float_right_12']
                  }
-    for fmt in data_fmts.values():
-        fmt.set_num_format('#,##0.00')
+    int_fmts = {1: fmts['int_right_black_bg_12'],
+                2: fmts['int_right_gray_bold_12'],
+                3: fmts['int_right_12']
+                }
     # system level
     # (note that system.name overwrites the template "NAME..." placeholder)
     ### NOTE: for now, only support "is_project" case
@@ -309,7 +311,7 @@ def write_mel_xlsx_from_datagrid(context, is_project=True,
         orb.log.info(f'  - found data matrix "{project.id}", writing data ...')
         for i, entity in enumerate(dm):
             write_entity_xlsx(entity, worksheet, level_fmts, name_fmts,
-                              data_fmts, start_row + i)
+                              data_fmts, int_fmts, start_row + i)
     else:
         orb.log.info(f'  - no data matrix found for "{project.id}".')
     ### NOTE: for now, the "single system" MEL case is not supported
@@ -318,7 +320,7 @@ def write_mel_xlsx_from_datagrid(context, is_project=True,
         # system = context
         # worksheet.write(hrow1, 1, system.name, fmts['left_pale_blue_bold_12'])
         # write_entity_xlsx(dm, worksheet, level_fmts, name_fmts, data_fmts,
-                          # hrow3)
+                          # int_fmts, hrow3)
     book.close()
 
 
@@ -330,7 +332,8 @@ def fix_ctgcy(ctgcy):
     return ctgcy + '%'
 
 
-def write_entity_xlsx(entity, sheet, level_fmts, name_fmts, data_fmts, row):
+def write_entity_xlsx(entity, sheet, level_fmts, name_fmts, data_fmts,
+                      int_fmts, row):
     """
     Write an Entity instance out to Excel format.
 
@@ -339,7 +342,8 @@ def write_entity_xlsx(entity, sheet, level_fmts, name_fmts, data_fmts, row):
         sheet (xlsx worksheet):  current worksheet instance
         level_fmts (dict):  formats for each level
         name_fmts (dict):  formats for cells in the "name" column
-        data_fmts (dict):  formats for cells in the data columns
+        data_fmts (dict):  formats for cells with float values
+        int_fmts (dict):  formats for cells with integer values
         row (int):  current row to write into the worksheet
     """
     orb.log.info(f'  - write_entity_xlsx() called for "{entity.system_name}"')
@@ -418,8 +422,7 @@ def write_entity_xlsx(entity, sheet, level_fmts, name_fmts, data_fmts, row):
     sheet.write(row, 1, spaces + entity.system_name,
                 name_fmts.get(entity.assembly_level, name_fmts[3]))
     data_fmt = data_fmts.get(entity.assembly_level, data_fmts[3])
-    int_fmt = workbook.add_format()
-    int_fmt.set_num_format('#,##0')
+    int_fmt = int_fmts.get(entity.assembly_level, int_fmts[3])
     sheet.write(row, 2, m_unit, data_fmt)        # Unit Mass
     sheet.write(row, 3, cold_units, int_fmt)     # Cold Units
     sheet.write(row, 4, hot_units, int_fmt)      # Hot Units
@@ -649,12 +652,14 @@ def write_mel_xlsx_from_model(context, is_project=True,
                  2: fmts['left_gray_bold_12'],
                  3: fmts['left_12']
                  }
-    data_fmts = {1: fmts['right_black_bg_12'],
-                 2: fmts['right_gray_bold_12'],
-                 3: fmts['right_12']
+    data_fmts = {1: fmts['float_right_black_bg_12'],
+                 2: fmts['float_right_gray_bold_12'],
+                 3: fmts['float_right_12']
                  }
-    for fmt in data_fmts.values():
-        fmt.set_num_format('#,##0.00')
+    int_fmts = {1: fmts['int_right_black_bg_12'],
+                2: fmts['int_right_gray_bold_12'],
+                3: fmts['int_right_12']
+                }
     # system level
     # (note that system.name overwrites the template "NAME..." placeholder)
     if is_project:
@@ -669,8 +674,8 @@ def write_mel_xlsx_from_model(context, is_project=True,
                            for psu in project.systems}
         for system_name in system_names:
             last_row = write_component_rows_xlsx(worksheet, level_fmts,
-                                                 name_fmts, data_fmts, 1,
-                                                 start_row,
+                                                 name_fmts, data_fmts,
+                                                 int_fmts, 1, start_row,
                                                  systems_by_name[system_name])
             start_row = last_row + 1
     else:
@@ -678,12 +683,28 @@ def write_mel_xlsx_from_model(context, is_project=True,
         system = context
         worksheet.write(hrow1, 1, system.name, fmts['left_pale_blue_bold_12'])
         write_component_rows_xlsx(worksheet, level_fmts, name_fmts, data_fmts,
-                                  1, hrow3, system)
+                                  int_fmts, 1, hrow3, system)
     book.close()
 
 
-def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts, level,
-                              row, component, qty=1):
+def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
+                              int_fmts, level, row, component, qty=1):
+    """
+    Write a row in the MEL for a component in the system model.
+
+    Args:
+        sheet (xlsx worksheet):  current worksheet instance
+        level_fmts (dict):  formats for each level
+        name_fmts (dict):  formats for cells in the "name" column
+        data_fmts (dict):  formats for cells with float values
+        int_fmts (dict):  formats for cells with integer values
+        level (int):  level of the current component
+        row (int):  current row to write into the worksheet
+        component (Product):  the product mapped to the current row
+
+    Keyword Args:
+        qty (int):  the number of instances of the component in the assembly
+    """
     mcbe = get_pval(component.oid, 'm[CBE]')
     ctgcy_m = fix_ctgcy(str(100 * get_pval(component.oid, 'm[Ctgcy]')))
     print(f' * ctgcy_m: {ctgcy_m}')
@@ -710,12 +731,12 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts, level,
     sheet.write(row, 0, level, level_fmts.get(level, level_fmts[3]))
     # level-based indentation
     spaces = '   ' * level
-    sheet.write(row, 1, spaces + component.name, name_fmts.get(level, name_fmts[3]))
+    sheet.write(row, 1, spaces + component.name,
+                name_fmts.get(level, name_fmts[3]))
     data_fmt = data_fmts.get(level, data_fmts[3])
-    int_fmt = workbook.add_format()
-    int_fmt.set_num_format('#,##0')
+    int_fmt = int_fmts.get(level, int_fmts[3])
     sheet.write(row, 2, mcbe, data_fmt)        # Unit Mass
-    sheet.write(row, 5, int(qty), int_fmt)    # Flight Units
+    sheet.write(row, 5, int(qty), int_fmt)     # Flight Units
     sheet.write(row, 9, mcbe * qty, data_fmt)  # Total Mass
     sheet.write(row, 10, ctgcy_m, data_fmt)
     sheet.write(row, 11, mmev * qty, data_fmt) # Mass MEV
@@ -739,8 +760,8 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts, level,
                        for acu in real_comps}
         for comp_name in comp_names:
             row = write_component_rows_xlsx(sheet, level_fmts, name_fmts,
-                                            data_fmts, next_level, row,
-                                            comps_by_name[comp_name],
+                                            data_fmts, int_fmts, next_level,
+                                            row, comps_by_name[comp_name],
                                             qty=qty_by_name[comp_name])
     return row
 
