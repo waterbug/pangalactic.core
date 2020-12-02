@@ -49,7 +49,7 @@ def product_type_report(output=None):
         for col in range(len(headers)):
             cell_widths.append([len(rec[col]) for rec in headers + records])
         col_widths = [max(widths) for widths in cell_widths]
-        print('col_widths = {}'.format(str(col_widths)))
+        # print('col_widths = {}'.format(str(col_widths)))
         for i, width in enumerate(col_widths):
             worksheet.set_column(i, i, width)
         worksheet.write('A1', 'Discipline', bold)
@@ -88,25 +88,25 @@ def write_mel_xlsx_from_datagrid(context, is_project=True,
     col_widths[3] = 6     # Cold Units       [# of Units]
     col_widths[4] = 6     # Hot Units        [# of Units]
     col_widths[5] = 6     # Flight Units     [# of Units]
-    col_widths[6] = 6     # Flight Spares    [# of Units]
+    col_widths[6] = 12    # Flight Spares    [# of Units]
     col_widths[7] = 6     # ETU/Qual Units   [# of Units]
-    col_widths[8] = 6     # EM/EDU Prototype [# of Units]
+    col_widths[8] = 9     # EM/EDU Prototype [# of Units]
     col_widths[9] = 9     # Total Mass [kg] (CBE)
-    col_widths[10] = 12   # Mass Contingency [%]
-    col_widths[11] = 12   # Total Mass w/ Contingency (MEV)
+    col_widths[10] = 14   # Mass Contingency [%]
+    col_widths[11] = 14   # Total Mass w/ Contingency (MEV)
     col_widths[12] = 12   # Nominal Unit Power (W)
     col_widths[13] = 12   # Nominal Total Power (W)
-    col_widths[14] = 12   # Nominal Power Contingency [%]
-    col_widths[15] = 12   # Nominal Total Power w/ Contingency (MEV)
+    col_widths[14] = 14   # Nominal Power Contingency [%]
+    col_widths[15] = 14   # Nominal Total Power w/ Contingency (MEV)
     col_widths[16] = 12   # Peak Unit Power (W)
     col_widths[17] = 12   # Peak Total Power (W)
-    col_widths[18] = 12   # Peak Power Contingency [%]
-    col_widths[19] = 12   # Peak Total Power w/ Contingency (MEV)
+    col_widths[18] = 14   # Peak Power Contingency [%]
+    col_widths[19] = 14   # Peak Total Power w/ Contingency (MEV)
     col_widths[20] = 16   # QUIESCENT Total Power [W] (CBE)
     col_widths[21] = 12   # Quoted Unit Price ($K)
     col_widths[22] = 24   # Composition
     col_widths[23] = 40   # ADDITIONAL INFORMATION
-    col_widths[24] = 16   # TRL
+    col_widths[24] = 20   # TRL
     col_widths[25] = 12   # Similarity to Existing
     col_widths[26] =  5   # Design        [Heritage Summary]
     col_widths[27] =  5   # Manufacture   [Heritage Summary]
@@ -402,7 +402,7 @@ def write_entity_xlsx(entity, sheet, level_fmts, name_fmts, data_fmts,
     # fix_ctgcy(): because Excel doesn't like space between the number and "%"
     # NOTE: this make ctgcy a str, unlike the other columns!
     ctgcy_m = fix_ctgcy(str(entity.get('m_ctgcy', 30.0)))
-    print(f' * ctgcy_m: {ctgcy_m}')
+    # print(f' * ctgcy_m: {ctgcy_m}')
     mmev = entity.get('m_mev', '')
     pcbe = entity.get('nom_p_cbe', '')
     # fix_ctgcy(): because Excel doesn't like space between the number and "%"
@@ -410,7 +410,7 @@ def write_entity_xlsx(entity, sheet, level_fmts, name_fmts, data_fmts,
     ctgcy_P = fix_ctgcy(str(entity.get('nom_p_ctgcy', 30.0)))
     pmev = entity.get('nom_p_mev', '')
 
-    print('writing {} in row {}'.format(entity.system_name, row))
+    # print('writing {} in row {}'.format(entity.system_name, row))
     # first write the formatting to the whole row to set the bg color
     sheet.write_row(row, 0, [' ']*48, level_fmts.get(entity.assembly_level,
                                                      level_fmts[3]))
@@ -707,7 +707,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
     """
     mcbe = get_pval(component.oid, 'm[CBE]')
     ctgcy_m = fix_ctgcy(str(100 * get_pval(component.oid, 'm[Ctgcy]')))
-    print(f' * ctgcy_m: {ctgcy_m}')
+    # print(f' * ctgcy_m: {ctgcy_m}')
     mmev = get_pval(component.oid, 'm[MEV]')
     pcbe = get_pval(component.oid, 'P[CBE]')
     # Excel doesn't like space between the number and "%"
@@ -724,7 +724,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
     #  13: Power Contingency (Margin)
     #  14: Power MEV
     row += 1
-    print('writing {} in row {}'.format(component.name, row))
+    # print('writing {} in row {}'.format(component.name, row))
     # first write the formatting to the whole row to set the bg color
     sheet.write_row(row, 0, [' ']*48, level_fmts.get(level, level_fmts[3]))
     # then write the "LEVEL" cell
