@@ -6,6 +6,7 @@ NOTE:  Only the `orb` instance created in this module should be imported (it is
 intended to be a singleton).
 """
 import json, os, shutil, sys, traceback
+# from functools import reduce
 
 # ruamel_yaml
 import ruamel_yaml as yaml
@@ -54,7 +55,6 @@ from pangalactic.core.test.utils  import gen_test_dvals, gen_test_pvals
 from pangalactic.core.utils.datetimes import dtstamp, file_dts, file_date_stamp
 from pangalactic.core.log         import get_loggers
 from pangalactic.core.validation  import get_assembly
-from functools import reduce
 
 
 class UberORB(object):
@@ -188,7 +188,7 @@ class UberORB(object):
                                and not s.startswith('__pycache__'))
                                ])
         test_data_to_copy = test_data_files - current_test_files
-        self.log.debug('  - data files to be installed: '.format(
+        self.log.debug('  - {} data files to be installed: '.format(
                        len(test_data_to_copy)))
         if test_data_to_copy:
             self.log.debug('  - copying data files into test_data dir...')
@@ -1401,35 +1401,51 @@ class UberORB(object):
         if isinstance(usage, self.classes['Acu']):
             assembly = usage.assembly
             component = usage.component
-            other_objs = [usage.assembly]
-            other_objs += [acu.component for acu in usage.assembly.components
-                           if acu is not usage]
         elif isinstance(usage, self.classes['ProjectSystemUsage']):
             assembly = usage.project
             component = usage.system
-            other_objs = [psu.system for psu in usage.project.systems
-                          if psu is not usage]
         else:
             return []
         # in case we're dealing with a corrupted "usage" ...
         if not component:
             return []
-        other_port_oids = [p.oid for p in reduce(lambda x, y: x+y,
-                                        [o.ports for o in other_objs], [])]
-        comp_port_oids = [p.oid for p in component.ports]
-        Port = self.classes['Port']
-        Flow = self.classes['Flow']
-        flows_from = self.db.query(Flow).filter_by(
-                        flow_context=assembly).join(Flow.start_port).filter(
-                        Port.oid.in_(comp_port_oids)).join(
-                        Flow.end_port).filter(Port.oid.in_(
-                        other_port_oids)).all()
-        flows_to = self.db.query(Flow).filter_by(
-                        flow_context=assembly).join(Flow.start_port).filter(
-                        Port.oid.in_(other_port_oids)).join(
-                        Flow.end_port).filter(Port.oid.in_(
-                        comp_port_oids)).all()
-        return flows_from + flows_to
+        context_flows = self.search_exact(cname='Flow', flow_context=assembly)
+        ports = component.ports
+        return [flow for flow in context_flows
+                if flow.start_port in ports or flow.end_port in ports]
+        # OLD IMPLEMENTATION: DEPRECATED
+        # if isinstance(usage, self.classes['Acu']):
+            # assembly = usage.assembly
+            # component = usage.component
+            # other_objs = [usage.assembly]
+            # other_objs += [acu.component for acu in usage.assembly.components
+                           # if acu is not usage]
+        # elif isinstance(usage, self.classes['ProjectSystemUsage']):
+            # assembly = usage.project
+            # component = usage.system
+            # other_objs = [psu.system for psu in usage.project.systems
+                          # if psu is not usage]
+        # else:
+            # return []
+        # # in case we're dealing with a corrupted "usage" ...
+        # if not component:
+            # return []
+        # other_port_oids = [p.oid for p in reduce(lambda x, y: x+y,
+                                        # [o.ports for o in other_objs], [])]
+        # comp_port_oids = [p.oid for p in component.ports]
+        # Port = self.classes['Port']
+        # Flow = self.classes['Flow']
+        # flows_from = self.db.query(Flow).filter_by(
+                        # flow_context=assembly).join(Flow.start_port).filter(
+                        # Port.oid.in_(comp_port_oids)).join(
+                        # Flow.end_port).filter(Port.oid.in_(
+                        # other_port_oids)).all()
+        # flows_to = self.db.query(Flow).filter_by(
+                        # flow_context=assembly).join(Flow.start_port).filter(
+                        # Port.oid.in_(other_port_oids)).join(
+                        # Flow.end_port).filter(Port.oid.in_(
+                        # comp_port_oids)).all()
+        # return flows_from + flows_to
 
     def get_all_port_flows(self, port):
         """
@@ -1593,7 +1609,7 @@ class UberORB(object):
                 ras = self.search_exact(cname='RoleAssignment',
                                         role_assignment_context=obj)
                 if ras:
-                    txt = 'attempting to delete role assignments for'
+                    txt = 'attempting to delete RoleAssignments for'
                     info.append('   - {} "{}" ...'.format(txt, obj.id))
                     for ra in ras:
                         info.append('     id: {}, name: {})'.format(ra.id,
@@ -1608,30 +1624,12 @@ class UberORB(object):
                 # delete any related system usages:
                 psus = self.search_exact(cname='ProjectSystemUsage',
                                          project=obj)
-                if psus:
-                    txt = 'deleted system usages for'
+                if obj.systems:
+                    txt = 'deleting systems (ProjectSystemUsages) for'
                     info.append('   - {} "{}" ...'.format(txt, obj.id))
-                    for psu in psus:
-                        info.append('     id: {}, name: {}'.format(psu.id,
-                                                                   psu.name))
-                        self.db.delete(psu)
-                        try:
-                            self.db.commit()
-                            info.append('     ... deleted.')
-                        except:
-                            self.db.rollback()
-                            info.append('     ... delete failed, rolled back.')
-                # delete any flows that have this as their 'flow_context':
-                flows = self.search_exact(cname='Flow', flow_context=obj)
-                if flows:
-                    for flow in flows:
-                        self.db.delete(flow)
-                        try:
-                            self.db.commit()
-                            info.append('     ... deleted.')
-                        except:
-                            self.db.rollback()
-                            info.append('     ... delete failed, rolled back.')
+                    # NOTE: this will also delete any Flows that have this
+                    # Project as their 'flow_context':
+                    self.delete([obj.systems])
             elif isinstance(obj, self.classes['Person']):
                 # Note that it is assumed the permissions of the user have been
                 # checked and the user is a Global Administrator -- only they
@@ -1656,23 +1654,21 @@ class UberORB(object):
                     for owned_obj in obj.owned_objects:
                         owned_obj.owner = new_owner
             elif isinstance(obj, (self.classes['Acu'],
-                                self.classes['ProjectSystemUsage'])):
-                # delete any related flows to/from its component/system in
-                # the context of its assembly/project
+                                  self.classes['ProjectSystemUsage'])):
+                # delete any Flows to/from its component/system in the context
+                # of its assembly/project
                 flows = self.get_all_usage_flows(obj)
-                for flow in flows:
-                    info.append('   id: {}, name: {} (oid {})'.format(
-                                                                    flow.id,
-                                                                    flow.name,
-                                                                    flow.oid))
-                    self.db.delete(flow)
-                    try:
-                        self.db.commit()
+                if flows:
+                    for flow in flows:
+                        info.append('   id: {}, name: {} (oid {})'.format(
+                                    flow.id, flow.name, flow.oid))
+                        self.db.delete(flow)
                         info.append('     ... deleted.')
-                    except:
-                        self.db.rollback()
-                        info.append('     ... delete failed, rolled back.')
+                    self.db.commit()
             elif isinstance(obj, self.classes['Product']):
+                if obj.where_used:
+                    self.log.debug('    used in assemblies; cannot delete.')
+                    return
                 # for Products, first delete related Flows, Ports, Acus, and
                 # ProjectSystemUsages
                 # NOTE: for flows, only need to worry about internal flows --
@@ -1683,97 +1679,32 @@ class UberORB(object):
                 if flows:
                     for flow in flows:
                         info.append('   id: {}, name: {} (oid {})'.format(
-                                                                    flow.id,
-                                                                    flow.name,
-                                                                    flow.oid))
+                                    flow.id, flow.name, flow.oid))
                         self.db.delete(flow)
-                        try:
-                            self.db.commit()
-                            info.append('     ... deleted.')
-                        except:
-                            self.db.rollback()
-                            info.append('     ... delete failed, rolled back.')
+                        info.append('   ... deleted.')
+                    self.db.commit()
                 ports = obj.ports
                 if ports:
-                    for port in ports:
-                        info.append('   id: {}, name: {} (oid {})'.format(
-                                                                    port.id,
-                                                                    port.name,
-                                                                    port.oid))
-                        self.db.delete(port)
-                        try:
-                            self.db.commit()
-                            info.append('     ... deleted.')
-                        except:
-                            self.db.rollback()
-                            info.append('     ... delete failed, rolled back.')
+                    self.delete(ports)
                 psus = obj.projects_using_system
-                for psu in psus:
-                    info.append('   id: {}, name: {} (oid {})'.format(psu.id,
-                                                                   psu.name,
-                                                                   psu.oid))
-                    self.db.delete(psu)
-                    try:
-                        self.db.commit()
-                        info.append('     ... deleted.')
-                    except:
-                        self.db.rollback()
-                        info.append('     ... delete failed, rolled back.')
-                child_acus = obj.components
-                if child_acus:
-                    for acu in child_acus:
-                        info.append('   id: {}, name: {} (oid {})'.format(
-                                                                    acu.id,
-                                                                    acu.name,
-                                                                    acu.oid))
-                        self.db.delete(acu)
-                        try:
-                            self.db.commit()
-                            info.append('     ... deleted.')
-                        except:
-                            self.db.rollback()
-                            info.append('     ... delete failed, rolled back.')
-                    if obj.oid in componentz:
-                        del componentz[obj.oid]
-                parent_acus = obj.where_used
-                if parent_acus:
-                    for acu in parent_acus:
-                        info.append('   id: {}, name: {} (oid {})'.format(
-                                                                    acu.id,
-                                                                    acu.name,
-                                                                    acu.oid))
-                        assembly = acu.assembly
-                        self.db.delete(acu)
-                        try:
-                            self.db.commit()
-                            info.append('     ... deleted.')
-                        except:
-                            self.db.rollback()
-                            info.append('     ... delete failed, rolled back.')
-                        if assembly.oid in componentz:
-                            refresh_assemblies.append(assembly)
+                if psus:
+                    self.delete(psus)
+                comp_acus = obj.components
+                if comp_acus:
+                    self.delete(comp_acus)
+                if obj.oid in componentz:
+                    del componentz[obj.oid]
             elif isinstance(obj, self.classes['Port']):
                 # for Ports, first delete all related Flows, both outgoing and
                 # incoming (in which it is the start or end)
-                skip_port = False
                 flows = self.get_all_port_flows(obj)
                 if flows:
                     for flow in flows:
                         info.append('   id: {}, name: {} (oid {})'.format(
-                                                                    flow.id,
-                                                                    flow.name,
-                                                                    flow.oid))
-                        try:
-                            self.db.delete(flow)
-                            self.db.commit()
-                            info.append('     ... deleted.')
-                        except:
-                            self.db.rollback()
-                            info.append('     ... flow delete failed,')
-                            info.append('     port will not be deleted.')
-                            skip_port = True
-                if skip_port:
-                    continue
+                                    flow.id, flow.name, flow.oid))
+                        self.db.delete(flow)
+                        self.db.commit()
+                        info.append('   ... deleted.')
             if isinstance(obj, self.classes['Requirement']):
                 # delete any related Relation and ParameterRelation objects
                 rel = obj.computable_form
