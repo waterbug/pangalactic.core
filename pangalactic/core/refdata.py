@@ -5,15 +5,6 @@ import datetime
 epoch = '2017-01-01 00:00:00'
 
 initial = [
-{   '_cname': 'Actor',
-    'oid': 'pgefobjects:system',
-    'description': 'A really huge infundibulum',
-    'id': 'Infundibulum',
-    'name': 'The Chronosynclastic Infundibulum',
-    'create_datetime': epoch,
-    'mod_datetime': epoch
-    },
-
 {   '_cname': 'Organization',
     'oid': 'pgefobjects:PGANA',
     'description': 'The mysterious cabal behind it all',

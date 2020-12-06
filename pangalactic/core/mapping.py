@@ -18,10 +18,24 @@ Examples of schema mods that require a conversion function include:
 
 `schema_mods`:  a list of the releases that include schema modifications
 
-`fns`: a dictionary that maps release numbers to the data conversion functions
-they require
+`schema_maps`: a dictionary that maps release numbers to the data conversion
+               functions they require
 """
-schema_version = '1.0.4'
+# NOTES:
+# version 1.5.0:
+#   * mods:
+#     - Actor was subclass of ManagedObject; now subclass of Identifiable
+#     - Organization was subclass of Actor;  now subclass of Modelable
+#   * reason:
+#     These changes fix a sqlalchemy warning about the multiple fk rels between
+#     the 'actor_', 'managed_object_', and 'organization_' tables, which is now
+#     eliminated.  As a result of these mods, Actor and Person objects do not
+#     have a 'creator' or 'modifier' attribute, but that is not a problem
+#     because they will always be created by a global admin.
+schema_mods = ['1.0.4', '1.5.0']
+
+schema_version = '1.5.0'
+
 
 def to_01devXX(sos):
     """

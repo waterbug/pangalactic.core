@@ -41,15 +41,17 @@ TWOPLACES = Decimal('0.01')
 
 # PARAMETER CACHES ##########################################################
 
-# componentz:  runtime component cache
-# purpose:  enable fast computation of assembly parameters
+# componentz:  runtime assembly component cache
+# purpose:  enable fast computation of assembly parameters *and* determine
+#           whether an existing Acu has had its component changed
 # format:  {product.oid : list of Comp namedtuples}
-#          ... where:
+#          ... where each Comp is:
 #            oid (str): Acu.component.oid
+#            usage_oid (str): Acu.oid
 #            quantity (int): Acu.quantity
 #            reference_designator (str): Acu.reference_designator
 componentz = {}
-Comp = namedtuple('Comp', 'oid quantity reference_designator')
+Comp = namedtuple('Comp', 'oid usage_oid quantity reference_designator')
 
 # parm_defz:  runtime cache of parameter definitions (both base and context
 #             parameter definitions are included)
@@ -289,7 +291,7 @@ def refresh_componentz(product):
     The 'componentz' dictionary has the form
 
         {product.oid :
-          list of Comp('oid', 'quantity', 'reference_designator')}
+          list of Comp('oid', 'usage_oid', 'quantity', 'reference_designator')}
 
     where the list of `Comp` namedtuples is created from `product.components`
     (Acus of the product), using Acu.component.oid, Acu.oid, Acu.quantity, and
@@ -302,11 +304,12 @@ def refresh_componentz(product):
         # log.debug('* refresh_componentz({})'.format(product.id))
         componentz[product.oid] = [Comp._make((
                                         getattr(acu.component, 'oid', None),
+                                        acu.oid,
                                         acu.quantity or 1,
                                         acu.reference_designator))
                                    for acu in product.components
-                                   if acu.component
-                                   and acu.component.oid != 'pgefobjects:TBD']
+                                   if acu.component]
+                                 # and acu.component.oid != 'pgefobjects:TBD']
 
 def refresh_req_allocz(req):
     """

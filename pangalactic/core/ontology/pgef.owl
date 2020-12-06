@@ -2019,7 +2019,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/Actor -->
 
     <owl:Class rdf:about="&pgef;Actor">
-        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A well-defined, persistent, and identifiable entity that can create and modify Identifiable things.  Subclasses include Person, Organization, and Project.  (Other subclasses may be added, such as Application or ArtificialLifeForm.)</rdfs:comment>
     </owl:Class>
 
@@ -2028,7 +2028,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/Organization -->
 
     <owl:Class rdf:about="&pgef;Organization">
-        <rdfs:subClassOf rdf:resource="&pgef;Actor"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A well-defined, persistent, and identifiable collection of Person instances.</rdfs:comment>
     </owl:Class>
 

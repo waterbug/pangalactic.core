@@ -226,7 +226,6 @@ class OrbTest(unittest.TestCase):
                 value.append(sobj['id'])
                 value.append(sobj['name'])
                 value.append(sobj['name_code'])
-                value.append(bool(sobj['parameters']))
         # serialized form includes only the original object
         expected = [1,
                     obj.__class__.__name__,
@@ -234,8 +233,7 @@ class OrbTest(unittest.TestCase):
                     str(obj.mod_datetime),
                     obj.id,
                     obj.name,
-                    obj.name_code,
-                    False]
+                    obj.name_code]
         self.assertEqual(expected, value)
 
     def test_13_serialize_with_parameters_no_components(self):

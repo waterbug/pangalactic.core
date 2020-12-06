@@ -1006,19 +1006,44 @@ class UberORB(object):
                     # ultimate fallback:  owner is PGANA
                     obj.owner = self.get('pgefobjects:PGANA')
             if cname == 'Acu':
+                comp_oid = getattr(obj.component, 'oid', None)
+                # use 'componentz' cache to determine whether the Acu's
+                # component has changed
+                cur_assembly_acu_comps = []
+                if obj.assembly.oid in componentz:
+                    cur_assembly_acu_comps = [(c.usage_oid, c.oid) for c
+                                              in componentz[obj.assembly.oid]]
+                if (obj.oid, comp_oid) in cur_assembly_acu_comps:
+                    comp_changed = False
+                else:
+                    comp_changed = True
+                # after checking for a changed component, refresh 'componentz'
                 refresh_componentz(obj.assembly)
                 if not new:
-                    # find all allocations to this Acu and refresh them ...
-                    alloc_reqs = [req_oid for req_oid in req_allocz
-                                  if req_allocz[req_oid][0] == obj.oid]
-                    if alloc_reqs:
-                        for req_oid in alloc_reqs:
-                            req = self.get(req_oid)
-                            if req:
-                                refresh_req_allocz(req)
-                            else:
-                                # if requirement not there, remove alloc
-                                del alloc_reqs[req_oid]
+                    # NOTE: when an existing Acu is modified and the component
+                    # is changed, the associated Flows must be deleted first,
+                    # so it is assumed that has been done ...
+                    if comp_changed:
+                        # find all req allocations to this Acu them ...
+                        msg = 'component was changed, checking for '
+                        msg += 'allocated requirements ...'
+                        self.log.debug(f'   {msg}')
+                        alloc_reqs = [req_oid for req_oid in req_allocz
+                                      if req_allocz[req_oid][0] == obj.oid]
+                        if alloc_reqs:
+                            for req_oid in alloc_reqs:
+                                req = self.get(req_oid)
+                                if req:
+                                    self.log.debug('   alloc reqts found ...')
+                                    refresh_req_allocz(req)
+                                    self.log.debug('   refreshed.')
+                                else:
+                                    # if requirement not there, remove alloc
+                                    del alloc_reqs[req_oid]
+                        else:
+                            self.log.debug('   no allocated reqts found.')
+                    else:
+                        self.log.debug('   component not changed.')
                 recompute_required = True
             elif cname == 'HardwareProduct':
                 # make sure HW Products have mass, power, data rate parms
@@ -1382,6 +1407,7 @@ class UberORB(object):
             managed_object (ManagedObject):  the specified object
         """
         # handle exception in case we get something that's not a Product
+        self.log.debug('* get_internal_flows_of()')
         try:
             flows = self.search_exact(cname='Flow',
                                       flow_context=managed_object)
@@ -1398,6 +1424,13 @@ class UberORB(object):
         Args:
             usage (Acu or ProjectSystemUsage):  the specified usage
         """
+        self.log.debug('* get_all_usage_flows()')
+        if usage:
+            oid = getattr(usage, 'oid', 'None')
+            self.log.debug(f'* get_all_usage_flows(<{oid}>)')
+        else:
+            self.log.debug('* get_all_usage_flows(None)')
+            return []
         if isinstance(usage, self.classes['Acu']):
             assembly = usage.assembly
             component = usage.component
@@ -1407,12 +1440,25 @@ class UberORB(object):
         else:
             return []
         # in case we're dealing with a corrupted "usage" ...
-        if not component:
+        if not component or not component.ports:
             return []
+        self.log.debug(f'  - assembly id: "{assembly.id}"')
+        self.log.debug(f'  - component id: "{component.id}"')
         context_flows = self.search_exact(cname='Flow', flow_context=assembly)
+        self.log.debug(f'  - # of context flows: {len(context_flows)}')
         ports = component.ports
-        return [flow for flow in context_flows
-                if flow.start_port in ports or flow.end_port in ports]
+        np = len(ports)
+        port_ids = [p.id for p in component.ports]
+        self.log.debug(f'  - {np} component ports: {port_ids}')
+        flows = [flow for flow in context_flows
+                 if flow.start_port in ports or flow.end_port in ports]
+        if flows:
+            flow_ids = [flow.id for flow in flows]
+            nf = len(flow_ids)
+            self.log.debug(f'  - {nf} associated flows: {flow_ids}')
+        else:
+            self.log.debug('  - no associated flows found.')
+        return flows
         # OLD IMPLEMENTATION: DEPRECATED
         # if isinstance(usage, self.classes['Acu']):
             # assembly = usage.assembly
@@ -1455,6 +1501,7 @@ class UberORB(object):
         Args:
             port (Port):  the specified Port
         """
+        self.log.debug('* get_all_port_flows()')
         gazoutas = orb.search_exact(cname='Flow', start_port=port)
         gazintas = orb.search_exact(cname='Flow', end_port=port)
         return gazoutas + gazintas
@@ -1593,7 +1640,7 @@ class UberORB(object):
         Args:
             objs (Iterable of Identifiable or subtype): objects in the local db
         """
-        self.log.debug('* delete() called ...')
+        self.log.debug('* orb.delete() called ...')
         # TODO: make sure appropriate relationships in which these objects
         # are the parent or child are also deleted
         info = []
@@ -1655,16 +1702,21 @@ class UberORB(object):
                         owned_obj.owner = new_owner
             elif isinstance(obj, (self.classes['Acu'],
                                   self.classes['ProjectSystemUsage'])):
-                # delete any Flows to/from its component/system in the context
-                # of its assembly/project
+                # check for and delete any Flows to/from its component/system
+                # in the context of its assembly/project
+                self.log.debug('    - orb checking for flows ...')
                 flows = self.get_all_usage_flows(obj)
                 if flows:
+                    n = len(flows)
+                    self.log.debug(f'      deleting {n} flows ...')
                     for flow in flows:
                         info.append('   id: {}, name: {} (oid {})'.format(
                                     flow.id, flow.name, flow.oid))
                         self.db.delete(flow)
                         info.append('     ... deleted.')
                     self.db.commit()
+                else:
+                    self.log.debug('      no flows found.')
             elif isinstance(obj, self.classes['Product']):
                 if obj.where_used:
                     self.log.debug('    used in assemblies; cannot delete.')
@@ -1675,14 +1727,19 @@ class UberORB(object):
                 # if the deletion is allowed, all of the Product's usages in
                 # assemblies or projects have been already deleted, so there
                 # are no external flows
+                self.log.debug('    - orb checking for internal flows ...')
                 flows = self.get_internal_flows_of(obj)
                 if flows:
+                    n = len(flows)
+                    self.log.debug(f'      deleting {n} flows ...')
                     for flow in flows:
                         info.append('   id: {}, name: {} (oid {})'.format(
                                     flow.id, flow.name, flow.oid))
                         self.db.delete(flow)
                         info.append('   ... deleted.')
                     self.db.commit()
+                else:
+                    self.log.debug('      no flows found.')
                 ports = obj.ports
                 if ports:
                     self.delete(ports)
@@ -1697,14 +1754,19 @@ class UberORB(object):
             elif isinstance(obj, self.classes['Port']):
                 # for Ports, first delete all related Flows, both outgoing and
                 # incoming (in which it is the start or end)
+                self.log.debug('    - orb checking for associated flows ...')
                 flows = self.get_all_port_flows(obj)
                 if flows:
+                    n = len(flows)
+                    self.log.debug(f'      deleting {n} flows ...')
                     for flow in flows:
                         info.append('   id: {}, name: {} (oid {})'.format(
                                     flow.id, flow.name, flow.oid))
                         self.db.delete(flow)
                         self.db.commit()
                         info.append('   ... deleted.')
+                else:
+                    self.log.debug('      no flows found.')
             if isinstance(obj, self.classes['Requirement']):
                 # delete any related Relation and ParameterRelation objects
                 rel = obj.computable_form
