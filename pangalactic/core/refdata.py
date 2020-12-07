@@ -359,7 +359,6 @@ pdc = [
     'name': 'Radius',
     'oid': 'pgef:ParameterDefinition.r',
     'owner': 'pgefobjects:PGANA',
-    'public': 'true',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -373,7 +372,6 @@ pdc = [
     'name': 'Diameter',
     'oid': 'pgef:ParameterDefinition.d',
     'owner': 'pgefobjects:PGANA',
-    'public': 'true',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -387,7 +385,6 @@ pdc = [
     'name': 'Velocity',
     'oid': 'pgef:ParameterDefinition.v',
     'owner': 'pgefobjects:PGANA',
-    'public': 'true',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -401,7 +398,6 @@ pdc = [
     'name': 'Angular Velocity',
     'oid': 'pgef:ParameterDefinition.omega',
     'owner': 'pgefobjects:PGANA',
-    'public': 'true',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -415,7 +411,6 @@ pdc = [
     'name': 'Frequency',
     'oid': 'pgef:ParameterDefinition.f',
     'owner': 'pgefobjects:PGANA',
-    'public': 'true',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterContext',
@@ -628,7 +623,7 @@ pdc = [
 
 {   '_cname': 'ParameterContext',
     'abbreviation': 'Avg',
-    'computed': 'false',
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
@@ -643,7 +638,7 @@ pdc = [
 
 {   '_cname': 'ParameterContext',
     'abbreviation': 'Peak',
-    'computed': 'false',
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
@@ -658,7 +653,7 @@ pdc = [
 
 {   '_cname': 'ParameterContext',
     'abbreviation': 'Nominal',
-    'computed': 'false',
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
@@ -673,7 +668,7 @@ pdc = [
 
 {   '_cname': 'ParameterContext',
     'abbreviation': 'RMS',
-    'computed': 'false',
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
@@ -688,7 +683,7 @@ pdc = [
 
 {   '_cname': 'ParameterContext',
     'abbreviation': 'max',
-    'computed': 'false',
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
@@ -703,7 +698,7 @@ pdc = [
 
 {   '_cname': 'ParameterContext',
     'abbreviation': 'min',
-    'computed': 'false',
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
@@ -718,7 +713,7 @@ pdc = [
 
 {   '_cname': 'ParameterContext',
     'abbreviation': 'Orbital',
-    'computed': 'false',
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
@@ -733,7 +728,7 @@ pdc = [
 
 {   '_cname': 'ParameterContext',
     'abbreviation': 'outer',
-    'computed': 'false',
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
@@ -748,7 +743,7 @@ pdc = [
 
 {   '_cname': 'ParameterContext',
     'abbreviation': 'inner',
-    'computed': 'false',
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
