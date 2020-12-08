@@ -1596,7 +1596,7 @@ class UberORB(object):
         # TODO:  get the files too (fpath = rep_file.url)
         # use set() to eliminate dups
         res = [o for o in set(objs) if o]
-        self.log.debug('  - returning {} object(s).'.format(len(res)))
+        self.log.debug('  - total project objects found: {}'.format(len(res)))
         # if res:
             # for o in res:
                 # self.log.debug('  - {}: {}'.format(
@@ -1616,7 +1616,7 @@ class UberORB(object):
             self.log.debug('  no project provided -- returning empty list.')
             return []
         reqts = self.search_exact(cname='Requirement', owner=project)
-        self.log.debug('  - returning {} reqt(s).'.format(len(reqts)))
+        self.log.debug('  - reqt(s) found: {}'.format(len(reqts)))
         return reqts
 
     def count_reqts_for_project(self, project):
@@ -1632,8 +1632,10 @@ class UberORB(object):
             self.log.debug('  - no project provided -- returning 0.')
             return 0
         # return self.db.query(self.classes['Requirement']).count()
-        return self.db.query(self.classes['Requirement']).filter_by(
+        n = self.db.query(self.classes['Requirement']).filter_by(
                                                         owner=project).count()
+        self.log.debug('  - reqts count: {n}')
+        return n
 
     def delete(self, objs):
         """
