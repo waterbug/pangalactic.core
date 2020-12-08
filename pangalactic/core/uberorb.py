@@ -1407,7 +1407,7 @@ class UberORB(object):
             managed_object (ManagedObject):  the specified object
         """
         # handle exception in case we get something that's not a Product
-        self.log.debug('* get_internal_flows_of()')
+        # self.log.debug('* get_internal_flows_of()')
         try:
             flows = self.search_exact(cname='Flow',
                                       flow_context=managed_object)

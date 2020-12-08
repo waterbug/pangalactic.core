@@ -514,10 +514,21 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     orb.db.commit()
     if ports_and_flows_to_be_deleted:
         orb.log.debug('  need to delete some ports and flows ...')
+        ports = []
+        n_ports = 0
+        n_flows = 0
         for obj in ports_and_flows_to_be_deleted:
-            orb.db.delete(obj)
+            if obj.__class__.__name__ == 'Flow':
+                n_flows += 1
+                orb.db.delete(obj)
+            else:
+                ports.append(obj)
         orb.db.commit()
-        orb.log.debug('  ports and flows deleted.')
+        n_ports = len(ports)
+        for p in ports:
+            orb.db.delete(p)
+        orb.db.commit()
+        orb.log.debug(f'  {n_ports} ports and {n_flows} flows deleted.')
     # log_txt = '* deserializer:'
     # if created:
         # orb.log.info('{} new object(s) deserialized: {}'.format(
