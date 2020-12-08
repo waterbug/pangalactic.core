@@ -1279,7 +1279,7 @@ class UberORB(object):
                 s = sql.select([ident]).where(ident.c.pgef_type == cname)
             return [(row['id'], '') for row in self.db.execute(s)]
 
-    def get_mod_dts(self, cname=None, oids=None):
+    def get_mod_dts(self, cname=None, oids=None, datetimes=False):
         """
         Get a dict that maps oids of objects to their 'mod_datetime' stamps as
         strings:
@@ -1292,6 +1292,9 @@ class UberORB(object):
         Keyword Args:
             cname (str):  class name of the objects to be used
             oids (list):  oids of objects to be used
+            datetimes (bool):  if True, use datetime objects for
+                datetime-stamp values; if False (default) convert them to
+                strings
 
         Returns:
             dict:  mapping of oids to 'mod_datetime' strings.
@@ -1309,8 +1312,12 @@ class UberORB(object):
                                         ident.c.mod_datetime != None,
                                         ident.c.oid.in_(oids)
                                         ))
-        return {row['oid'] : str(row['mod_datetime'])
-                for row in self.db.execute(s)}
+        if datetimes:
+            return {row['oid'] : row['mod_datetime']
+                    for row in self.db.execute(s)}
+        else:
+            return {row['oid'] : str(row['mod_datetime'])
+                    for row in self.db.execute(s)}
 
     def get_oid_cnames(self, oids=None, cname=None):
         """
