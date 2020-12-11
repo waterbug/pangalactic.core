@@ -1109,7 +1109,8 @@ class UberORB(object):
             return self.db.query(entity).filter_by(oid=oid[0]).first()
         elif kw:
             oids = kw.get('oids')
-            self.log.debug('* get(oids=%s)' % str(oids))
+            # self.log.debug('* get(oids=%s)' % str(oids))
+            self.log.debug('* get(oids=({} oids))'.format(len(oids)))
             if oids:
                 return self.db.query(entity).filter(
                                         entity.oid.in_(oids)).all()
@@ -1814,9 +1815,12 @@ class UberORB(object):
                     refresh_assemblies.append(obj.assembly)
                 recompute_required = True
             creator = getattr(obj, 'creator', None)
-            if creator == local_user:
-                # if local_user created obj, add it to trash
+            if (isinstance(obj, self.classes['Product'])
+                and creator == local_user):
+                # if local_user created Product, add it to trash
                 # TODO:  use trash to enable undo of delete ...
+                # [NOTE: this adds the object to trash for the client;
+                # server-side trash management is handled by "vger".]
                 trash[obj.oid] = serialize(self, [obj])
             info.append('   obj id: {}, name: {} (oid "{}")'.format(
                                         getattr(obj, 'id', 'no id'),
