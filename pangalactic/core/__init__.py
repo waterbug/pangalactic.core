@@ -120,10 +120,12 @@ xsd_datatypes = {  #  (schema->python, python->schema)  Does not validate.
     URIRef('http://www.w3.org/2001/XMLSchema#anyURI') : ('str', str),
 }
 
-# `config`, `prefs`, `state`, and `trash` are module-level vars for application
-# configuration, user preferences, state, and deleted objects, respectively.
+# `config`, `deleted`, `prefs`, `state`, and `trash` are module-level vars for
+# application configuration, oids of deleted objects, user preferences, state,
+# and deleted objects, respectively.
 # (See NOTES_FOR_DEVELOPERS.md for more detail.)
 config = {}
+deleted = {}
 prefs = {}
 state = {}
 trash = {}
@@ -160,6 +162,33 @@ def write_config(configpath):
     f.close()
     # except:
     # raise ValueError, 'Could not write config.'
+
+def read_deleted(deletedpath):
+    """
+    Read data from the deleted file.  NOTE: the 'deleted' cache is only used on
+    the server side (vger), where it is used to ensure permanence of deletions.
+    """
+    # TODO:  add checksum check for security
+    if os.path.exists(deletedpath):
+        f = open(deletedpath)
+        data = f.read()
+        if data:
+            deleted.update(yaml.safe_load(data))
+        f.close()
+
+def write_deleted(deletedpath):
+    """
+    Write data to the deleted file.  NOTE: the 'deleted' cache is only used on
+    the server side (vger), where it is used to ensure permanence of deletions.
+    """
+    # TODO:  create checksum for security
+    # try:
+    f = open(deletedpath, 'w')
+    f.write(yaml.safe_dump(deleted, allow_unicode=True,
+                           default_flow_style=False))
+    f.close()
+    # except:
+    # raise ValueError, 'Could not write deleted.'
 
 def read_prefs(prefspath):
     """
