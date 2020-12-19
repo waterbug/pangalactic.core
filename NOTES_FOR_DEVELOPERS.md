@@ -43,192 +43,233 @@
 * note that if schemas change between versions, some of this data may need
   to be modified to conform to the new schemas
 
-    `cache/ ............ internal metadata structures (used by registry)`
+    `cache/ ........... internal metadata structures derived from the ontology, and used by the "registry" module to generate the domain classes and properties that sqlalchemy uses to define the database structure`
 
-    `config ............ config file (yaml) -- see *Settings* section below`
+    `config ..........  config file (yaml) -- see *Settings* section below`
 
-    `diagrams.json ..... diagram geometry storage`
+    `data_elements.json ... data element storage`
 
-    `icons/ ............ "built-in" icons (icons generated at runtime are saved
-                         in vault/icons; all other data files are simply
-                         added to the `vault` directory`)
+    `diagrams.json .... diagram geometry storage`
 
-    `images/ ........... images  (application-specific images)`
+    `icons/ ........... "built-in" icons (icons generated at runtime are saved in vault/icons; all other data files are simply added to the "vault" directory)`
 
-    `local.db .......... node local object store (sqlite db)`
+    `images/ .......... images  (application-specific images)`
 
-    `log/ .............. logs`
+    `local.db ......... node local object store (sqlite db)`
 
-    `onto/ ............. contains pgef.owl (OWL ontology file)`
+    `log/ ............. logs`
 
-    `parameters.json ... parameter storage`
+    `onto/ ............ contains pgef.owl (OWL ontology file)`
 
-    `prefs ............. saved preferences (yaml) -- see *Settings* section below`
+    `parameters.json .. parameter storage`
 
-    `server_cert.pem ... certificate for message bus host (enables TLS connection)`
+    `prefs ............ saved preferences (yaml) -- see *Settings* section below`
 
-    `state ............. saved state (yaml) -- see *Settings* section below`
+    `schemas.json ..... schemas for data matrix`
 
-    `test_data/ ........ files for user access in testing of data importing, etc.`
+    `server_cert.pem .. certificate for message bus host (enables TLS connection)`
 
-    `trash ............. trash file (yaml) containing serialized deleted objects
-                         {obj.oid : orb.serialize([obj]), ...}`
+    `state ............ saved state (yaml) -- see *Settings* section below`
 
-    `vault/ ............ files created/accessed internally by pangalactic
-                         applications (includes icons generated at runtime and
-                         files referenced by the database, e.g. files
-                         corresponding to DigitalFile objects)`
+    `test_data/ ....... files for user access in testing of data importing, etc.`
+
+    `trash ............ trash file (yaml) containing serialized deleted objects {obj.oid : orb.serialize([obj]), ...}`
+
+    `vault/ ........... files created/accessed internally by pangalactic applications (includes icons generated at runtime and files referenced by the database, e.g. files corresponding to DigitalFile objects)`
 
 ## Settings
 
-* config
-    admin_package_name:    (str)  name of admin package
-    admin_script_name:     (str)  name of admin script
-    app_channel:           (str)  app channel url or name
-    app_name:              (str)  app name
-    app_package_name:      (str)  app package name
-    dashboards:            (dict) named dashboards (lists of parameter ids)
-    dashboard_names:       (list) ordering of keys in `dashboards`
-    db_url:                (str)  sqlalchemy-style db url (only used by vger)
-    default_parms:         (list) ids of default parameters
-    default_data_elements: (list) ids of default data elements
-    de_defz:               (dict) pre-configured data element definitions
-    host:                  (list) fqdn of message bus host
-    ldap_schema:           (dict) schema for use with local ldap service
-    local_admin:           (bool) if `true`, user can edit any item locally
-    load_extra_data[1]:    (list) names of files containing data to load
-    logo:                  (str)  logo icon file name
-    p_defaults:            (dict) default parameter values {id: val (string)}
-    port:                  (str)  port to use for message bus host connection
-    schemaz:               (list) pre-configured schemas
-    tall_logo:             (str)  "tall" logo icon file name
-    units:                 (str)  unit system (default: 'mks')
+* **config**
 
-* prefs
-    dashboards:         (dict) named dashboards (lists of parameter ids)
-    dashboard_names:    (list) ordering of keys in `dashboards`
-    default_parms:      (list) ids of default parameters to assign to objs
-    editor:
-        parameters:     (list) [ids] order of parameters in pgxnobject panels
-    model_types:        (list) oids of ModelTypes that pangalaxian can "render"
-    views:              (dict) preferred ordering of table columns by class
-                               (maps class name to list of field names)
+    `admin_package_name:    (str)  name of admin package`
 
-* state
-    admin_of:         (list) oids of Projects in which user has admin role
-    active_users:     (list) ids of users that have registered public keys
-    assigned_roles[2]: (dict) maps proj/org oids to assigned role names for user
-    cloaked:          (list) oids of local cloaked objects
-    connected:        (bool) true if logged in to message bus
-    current_cname:    (str)  name of currently selected db table class
-    dashboard_name:   (str)  name of currently selected dashboard
-    dataset:          (str)  name of currently selected dataset
-    datasets:         (list) names of currently stored datasets
-    height:           (int)  pixel height of pangalaxian gui
-    width:            (int)  pixel width of pangalaxian gui
-    disabled:         (bool) true if user has `Disabled` role (global)
-    height:           (int)  current pixel height of pangalaxian gui
-    icon_type:        (str)  suffix for platform-specific icons [e.g., '.ico']
-    last_path:        (str)  most recent path in file selections
-    local_user_oid:   (str)  oid of Person object for local user 
-    mode:             (str)  current Pangalaxian gui mode
-                             ('system', 'component', 'db', or 'data')
-    product:          (str)  oid of currently selected Product -- refers to the
-                             product selected in 'product modeler'
-    project:          (str)  oid of currently selected Project
-    synced_oids[3]:   (list) oids of user-created objects that have been synced
-    synced_projects[4]: (list) oids of projects that have been synced
-    sys_trees[5]:     (dict) maps project ids to system tree attributes
-    system:           (str)  oid of currently selected system (Product or
-                             Project) -- may be selected by clicking on an item
-                             in the system tree or drilling down into
-                             (double-clicking on) a block in the diagram
-    test_project_loaded (bool) H2G2 test project loaded (server-side only) [6]
-    userid:           (str)  most recent userid used in login
-    version:          (str)  version of client
-    width:            (int)  current pixel width of pangalaxian gui
+    `admin_script_name:     (str)  name of admin script`
 
-    [1]: `load_extra_data` is intended for use primarily on the server (vger)
-         for special data not included in `refdata`, such as data specific to
-         local organizations, etc.
+    `app_channel:           (str)  app channel url or name`
 
-    [2]: `assigned_roles` data structure:
+    `app_name:              (str)  app name`
 
-        {project oid: [list of names of assigned roles on the project]}
+    `app_package_name:      (str)  app package name`
 
-        NOTE:  for project-independent role assignments, 'global' is used in
-        place of a project oid.
+    `dashboards:            (dict) named dashboards (lists of parameter ids)`
 
-    [3]: the "synced_oids" list is used in determining whether an object may be
-         deleted while the client is offline (not connected to the repository):
-         any object that has been synced to the repository *cannot* be deleted
-         while offline, because it may be used in an assembly by another user
-         and deleting it before removing it from the assembly would break
-         referential integrity.
+    `dashboard_names:       (list) ordering of keys in "dashboards"`
 
-    [4]: Projects only need to be synced when a project is first used during an
-         online session because objects may have been added, deleted, or
-         modified while the user was offline. During a session, the bulk
-         project sync is only done once because during the online session all
-         objects are kept in sync by messages. The "synced_projects" list is
-         used to keep track of which projects have been synced during the
-         current online session.  The 'vger.sync_project' rpc is only called
-         when the user selects a project using the project selector -- after
-         the sync completes, the oid for that project is added to
-         "synced_projects".  The "synced_projects" list is cleared when the
-         session ends.
+    `db_url:                (str)  sqlalchemy-style db url (only used by vger)`
 
-    [5]: `sys_trees` data structure:
+    `default_parms:         (list) ids of default parameters`
 
-        {project id : {nodes : (int) # of nodes in sys tree (used in
-                               calculating progress bar for tree rebuilds)
-                       expanded : (list) indexes of expanded nodes in sys tree
-                                  (used in restoring state when tree is rebuilt)
-                      }}
+    `default_data_elements: (list) ids of default data elements`
 
-    [6]: (server only) for vger, if "test" arg is true and
-         state["test_project_loaded"] is false, the H2G2 test project and its
-         data will be loaded; if true, H2G2 has already been loaded -- see
-         pangalactic.vger.vger.RepositoryService.
+    `de_defz:               (dict) pre-configured data element definitions`
+
+    `host:                  (list) fqdn of message bus host`
+
+    `ldap_schema:           (dict) schema for use with local ldap service`
+
+    `local_admin:           (bool) if "true", user can edit any item locally`
+
+    `load_extra_data[1]:    (list) names of files containing data to load`
+
+    `logo:                  (str)  logo icon file name`
+
+    `p_defaults:            (dict) default parameter values {id: val (string)}`
+
+    `port:                  (str)  port to use for message bus host connection`
+
+    `schemaz:               (list) pre-configured schemas`
+
+    `tall_logo:             (str)  "tall" logo icon file name`
+
+    `units:                 (str)  unit system (default: 'mks')`
+
+* **prefs**
+
+    `dashboards:         (dict) named dashboards (lists of parameter ids)`
+
+    `dashboard_names:    (list) ordering of keys in "dashboards"`
+
+    `default_parms:      (list) ids of default parameters to assign to objs`
+
+    `editor:`
+
+    `    parameters:     (list) [ids] order of parameters in pgxnobject panels`
+
+    `model_types:        (list) oids of ModelTypes that pangalaxian can "render"`
+
+    `views:              (dict) preferred ordering of table columns by class (maps class name to list of field names)`
+
+* **state**
+
+    `admin_of:         (list) oids of Projects in which user has admin role`
+
+    `active_users:     (list) ids of users that have registered public keys`
+
+    `assigned_roles[2]: (dict) maps proj/org oids to assigned role names for user`
+
+    `cloaked:          (list) oids of local cloaked objects`
+
+    `connected:        (bool) true if logged in to message bus`
+
+    `current_cname:    (str)  name of currently selected db table class`
+
+    `dashboard_name:   (str)  name of currently selected dashboard`
+
+    `dataset:          (str)  name of currently selected dataset`
+
+    `datasets:         (list) names of currently stored datasets`
+
+    `height:           (int)  pixel height of pangalaxian gui`
+
+    `width:            (int)  pixel width of pangalaxian gui`
+
+    `disabled:         (bool) true if user has Disabled role (global)`
+
+    `height:           (int)  current pixel height of pangalaxian gui`
+
+    `icon_type:        (str)  suffix for platform-specific icons [e.g., '.ico']`
+
+    `last_path:        (str)  most recent path in file selections`
+
+    `local_user_oid:   (str)  oid of Person object for local user `
+
+    `mode:             (str)  current Pangalaxian gui mode`
+    `                         ('system', 'component', 'db', or 'data')`
+
+    `product:          (str)  oid of currently selected Product -- refers to the`
+    `                         product selected in 'product modeler'`
+
+    `project:          (str)  oid of currently selected Project`
+
+    `synced_oids[3]:   (list) oids of user-created objects that have been synced`
+
+    `synced_projects[4]: (list) oids of projects that have been synced`
+
+    `sys_trees[5]:     (dict) maps project ids to system tree attributes`
+
+    `system:           (str)  oid of currently selected system (Product or`
+    `                         Project) -- may be selected by clicking on an item`
+    `                         in the system tree or drilling down into`
+    `                         (double-clicking on) a block in the diagram`
+
+    `test_project_loaded (bool) H2G2 test project loaded (server-side only) [6]`
+
+    `userid:           (str)  most recent userid used in login`
+
+    `version:          (str)  version of client`
+
+    `width:            (int)  current pixel width of pangalaxian gui`
+
+    `[1]: "load_extra_data" is intended for use primarily on the server (vger)`
+    `     for special data not included in "refdata", such as data specific to`
+    `     local organizations, etc.`
+
+    `[2]: "assigned_roles" data structure:`
+
+    `    {project oid: [list of names of assigned roles on the project]}`
+
+    `    NOTE:  for project-independent role assignments, 'global' is used in`
+    `    place of a project oid.`
+
+    `[3]: the "synced_oids" list is used in determining whether an object may be`
+    `     deleted while the client is offline (not connected to the repository):`
+    `     any object that has been synced to the repository *cannot* be deleted`
+    `     while offline, because it may be used in an assembly by another user`
+    `     and deleting it before removing it from the assembly would break`
+    `     referential integrity.`
+
+    `[4]: Projects only need to be synced when a project is first used during an`
+    `     online session because objects may have been added, deleted, or`
+    `     modified while the user was offline. During a session, the bulk`
+    `     project sync is only done once because during the online session all`
+    `     objects are kept in sync by messages. The "synced_projects" list is`
+    `     used to keep track of which projects have been synced during the`
+    `     current online session.  The 'vger.sync_project' rpc is only called`
+    `     when the user selects a project using the project selector -- after`
+    `     the sync completes, the oid for that project is added to`
+    `     "synced_projects".  The "synced_projects" list is cleared when the`
+    `     session ends.`
+
+    `[5]: "sys_trees" data structure:`
+
+    `    {project id : {nodes : (int) # of nodes in sys tree (used in`
+    `                           calculating progress bar for tree rebuilds)`
+    `                   expanded : (list) indexes of expanded nodes in sys tree`
+    `                              (used in restoring state when tree is rebuilt)`
+    `                  }}`
+
+    `[6]: (server only) for vger, if "test" arg is true and`
+    `     state["test_project_loaded"] is false, the H2G2 test project and its`
+    `     data will be loaded; if true, H2G2 has already been loaded -- see`
+    `     pangalactic.vger.vger.RepositoryService.`
 
 ## Modes and Views
 
 * Modes are set by selecting one of the mode icons at top right corner of the
   main window
-* `mode` is a state of the main pangalaxian main window
-* `view` [not implemented yet] is orthogonal to `mode`, set using `view` combo
+* "mode" is a state of the main pangalaxian main window
 
-### Modes
-
-mode            context                     types
-----            -------                     -----
-System          system modeler              Mission, System
-Component       component modeler, library  Part, etc.
-Data            structured data             DataMatrix
-DB              database                    All Types
-Admin           admin                       Project, Mission Study, Role
-
-#### Mode: `data`
-
-* Main widget is DataGrid, which uses a `DataMatrix` as its underlying model
-
-#### Mode:  `db`
-
-* View/edit objects in local db
-
-#### Modes:  `system` and `component`
+#### Modes:  "system" and "component"
 
 * Component Modeler and System Modeler
 
 * Create/modify systems and component models
   + MainWindow layout:
-    - if no models ... left: `No Model`, center: empty
+    - if no models ... left: "No Model", center: empty
     - if 1 model ..... left:  tree structure + metadata,
                        center: diagram
     - if > 1 model ... left:  tree structure + metadata of selected model,
                        center: diagram
 
-## Diagrams (used in `system` and `component` modes)
+#### Mode:  "db"
+
+* View/edit objects in local db
+
+#### Mode: "data"
+
+* Main widget is DataGrid, which uses a "DataMatrix" as its underlying model
+
+## Diagrams (used in "system" and "component" modes)
 
 * See `NOTES_ON_DIAGRAMS`
 
@@ -265,10 +306,10 @@ Note that in pangalactic, `louie` is used *only* on the client side
     * `local_user` -- exists solely in the client environment
     * any awareness of the network or network-related events
 
-(1) orb.save() *NEVER* changes the `mod_datetime` of objects, because it
+(1) orb.save() *NEVER* sets the `mod_datetime` of objects, because it
     saves both local objects and those received from remote sources --
-    therefore, locally created or modified objects must be time-stamped before
-    they are passed to orb.save().
+    therefore, locally created or modified objects must be time-stamped
+    *before* they are passed to orb.save().
 
 (2) orb.clone() *ALWAYS* sets the `mod_datetime` of the clone
 
@@ -540,8 +581,8 @@ interface.
 
 ### Notes on Deserialization Profiling and Optimization
 
-It would be great if 'deserialize()' performance could be improved, but it is a
-tough nut.  Profiling shows that about 62% of its time is spent in sqlalchemy
+It would be great if 'deserialize()' performance could be improved, but that is
+difficult.  Profiling shows that about 62% of its time is spent in sqlalchemy
 operations, which are not amenable to optimization, so even if everything else
 could be optimized to zero time (unlikely!) it would not even be a 50%
 improvement.
@@ -550,8 +591,6 @@ A simple experiment with directly compiling 'deserialize()' using Cython
 yielded no noticeable gain (less than 1%), and it is difficult to see any
 operations within the function that could be formulated to compile into pure C,
 anyway.
-
-### Notes on Deserialization Profiling and Optimization
 
 ## Windows Desktop Application Installation and Management
 
@@ -562,19 +601,14 @@ admin privileges.
 
 ### Process for Building Windows Desktop App Releases / Installers
 
-1. Bump version for all packages:
-
-   * pangalactic.core
-   * pangalactic.node
-   * pangalactic.vger
-   * any application-level packages
+1. Bump version for all packages (pangalactic.core, pangalactic.node, pangalactic.vger, any application-level packages):
 
    * Edit the `sedscr` sed script to increment the version string
    * Run the `bump_version.sh` shell script (which runs the sed script)
    * git commit
    * git push
 
-2. Build all conda packages
+2. Build all conda packages:
 
    * Remove all __pycache__ directories inside packages:
  
