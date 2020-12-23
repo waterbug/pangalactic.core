@@ -584,7 +584,7 @@ class DataMatrix(list):
         self.append(e)
         return e
 
-    def insert_new_row(self, pos=None, child_of=False):
+    def insert_new_row(self, pos=None, child_of=None):
         """
         Inserts an empty Entity with a new oid, in the ith position.  To
         support GridTreeItem.insertChildren(), use child_of=True.
@@ -594,7 +594,10 @@ class DataMatrix(list):
             child_of (Entity):  the parent Entity (or None if same level as
                 preceding row)
         """
-        e = Entity(dm_oid=self.oid, parent_oid=child_of.oid)
+        if child_of is not None:
+            e = Entity(dm_oid=self.oid, parent_oid=child_of.oid)
+        else:
+            e = Entity(dm_oid=self.oid)
         if pos and pos < len(self):
             self.insert(pos, e)
         else:
@@ -667,7 +670,7 @@ class DataMatrix(list):
             ### NOTE:  this causes cycles -- find another way ...
             # dispatcher.send('mel modified')
         else:
-            log.debug(f'  no unmapped entities found.')
+            log.debug('  no unmapped entities found.')
 
     def compute_mel_parms(self, row, name, component, qty=1, parent_oid=None):
         """
