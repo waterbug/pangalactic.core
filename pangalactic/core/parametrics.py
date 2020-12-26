@@ -702,27 +702,15 @@ def add_product_type_parameters(obj, pt):
 def delete_parameter(oid, pid):
     """
     Delete a parameter from an object.  This should be rare and would only be
-    necessary if the parameter is irrelevant to the object; therefore, the base
-    variable and all related context parameters would be deleted.
+    necessary if the parameter is irrelevant to the object.
 
     Args:
         oid (str):  oid of the object that owns the parameter
         pid (str):  `id` attribute of the parameter
     """
-    # TODO: need to dispatch louie & pubsub messages!
-    if '[' in pid:
-        # find the base pid (variable)
-        base_pid = pid.split('[')[0]
-    else:
-        base_pid = pid
-    if oid in parameterz:
-        if parameterz[oid].get(base_pid):
-            del parameterz[oid][base_pid]
-        # look for all context parameters of that object with that base pid
-        for other_pid in parameterz[oid]:
-            # if it's a context parameter with the same base pid, delete it
-            if '[' in other_pid and base_pid == other_pid.split('[')[0]:
-                del parameterz[oid][other_pid]
+    # dispatcher 'modified object' msg is sent by pgxnobject
+    if parameterz.get(oid, {}).get(pid):
+        del parameterz[oid][pid]
 
 def get_pval(oid, pid, units='', allow_nan=False):
     """
