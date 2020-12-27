@@ -823,7 +823,7 @@ class UberORB(object):
         """
         self.log.debug('* create_parm_defz')
         pds = self.get_by_type('ParameterDefinition')
-        # first, the "simple variable" parameters ...
+        # first, the "variable" parameters ...
         pd_dict = {pd.id :
                    {'name': pd.name,
                     'variable': pd.id,
@@ -837,6 +837,7 @@ class UberORB(object):
                         str(getattr(pd, 'mod_datetime', '') or dtstamp())
                     } for pd in pds}
         parm_defz.update(pd_dict)
+        # var_ids = sorted(list(pd_dict), key=str.lower)
         self.log.debug('      bases created: {}'.format(
                                                 str(list(pd_dict.keys()))))
         # add PDs for the descriptive contexts (CBE, Contingency, MEV) for the
@@ -845,19 +846,22 @@ class UberORB(object):
         all_contexts = self.get_by_type('ParameterContext')
         self.log.debug('      adding context parms for: {}'.format(
                                         str([c.id for c in all_contexts])))
-        for pid in ['m', 'P', 'R_D']:
-            pd = self.select('ParameterDefinition', id=pid)
+        for pd in pds:
             for c in all_contexts:
                 add_context_parm_def(pd, c)
+
+        # NOTE: separately adding Contingency contexts is not necessary now
+        # that all contexts are added to all variables ... which are ALL float
+        # types anyway!
         # all float-valued parameters should have associated Contingency parms
-        float_pds = [pd for pd in pds if pd.range_datatype == 'float']
-        contingency = self.select('ParameterContext', name='Contingency')
-        self.log.debug('      adding Ctgcy parms for float types: {}'.format(
-                                        str([pd.id for pd in float_pds])))
-        for float_pd in float_pds:
-            contingency_pid = get_parameter_id(float_pd.id, contingency.id)
-            if contingency_pid not in parm_defz:
-                add_context_parm_def(float_pd, contingency)
+        # float_pds = [pd for pd in pds if pd.range_datatype == 'float']
+        # contingency = self.select('ParameterContext', name='Contingency')
+        # self.log.debug('      adding Ctgcy parms for float types: {}'.format(
+                                        # str([pd.id for pd in float_pds])))
+        # for float_pd in float_pds:
+            # contingency_pid = get_parameter_id(float_pd.id, contingency.id)
+            # if contingency_pid not in parm_defz:
+                # add_context_parm_def(float_pd, contingency)
 
     def create_parmz_by_dimz(self):
         """
