@@ -884,21 +884,24 @@ class UberORB(object):
         """
         self.log.debug('* create_de_defz')
         # check for localized data element definition structures in
-        # config['de_defz'] -- these can be introduced by an app
+        # state['de_defz'] -- these can be introduced by an app
         new_dedef_objs = []
-        self.log.debug('  - checking for de defs in config["de_defz"] ...')
-        new_config_dedef_ids = []
-        # NEW: check for labels even if the dedef objects are not new, so that
-        # labels can be updated by new app config at startup ...
-        config_dedef_labels = {}
-        if config.get('de_defz'):
+        self.log.debug('  - checking for de defs in state["de_defz"] ...')
+        new_state_dedef_ids = []
+        # NEW: check for labels even if the de def objects are not new, so that
+        # labels can be updated by new version of app at startup ...
+        state_dedef_labels = {}
+        if state.get('de_defz'):
+            self.log.debug('    de defs found in state["de_defz"]')
+            self.log.debug('    checking for *new* de ids ...')
             ded_ids = self.get_ids('DataElementDefinition')
-            new_config_dedef_ids = [deid for deid in config['de_defz']
+            new_state_dedef_ids = [deid for deid in state['de_defz']
                                     if deid not in ded_ids]
-            config_dedef_labels.update({deid: de_def.get('label')
-                                for deid, de_def in config['de_defz'].items()
+            state_dedef_labels.update({deid: de_def.get('label')
+                                for deid, de_def in state['de_defz'].items()
                                 if de_def.get('label')})
-            if new_config_dedef_ids:
+            if new_state_dedef_ids:
+                self.log.debug('    *new* de ids found, adding ...')
                 # if any are found, create DataElementDefinitions from them,
                 # making sure to save their 'label' fields separately since
                 # they are not yet supported by DataElementDefinition ...
@@ -906,8 +909,8 @@ class UberORB(object):
                 admin = orb.get('pgefobjects:admin')
                 DataElementDefinition = self.classes.get(
                                                     'DataElementDefinition')
-                for deid in new_config_dedef_ids:
-                    ded = config['de_defz'][deid]
+                for deid in new_state_dedef_ids:
+                    ded = state['de_defz'][deid]
                     ded_oid = 'pgef:DataElementDefinition.' + deid
                     dt = uncook_datetime(ded.get('mod_datetime')) or dt
                     descr = ded.get('description') or ded.get('name', deid)
@@ -924,6 +927,28 @@ class UberORB(object):
                     new_dedef_objs.append(ded_obj)
             if new_dedef_objs:
                 self.save(new_dedef_objs)
+            # update any existing DataElementDefinitions if the one pulled in
+            # from state has a later mod_datetime
+            self.log.debug('    checking for *updated* de defs ...')
+            n_updated = 0
+            for deid in state['de_defz']:
+                if deid in ded_ids:
+                    # self.log.debug(f'    - "{deid}"')
+                    cur_ded = self.select('DataElementDefinition', id=deid)
+                    cur_dts = str(getattr(cur_ded, 'mod_datetime', '0'))
+                    # self.log.debug(f'      + current dts: "{cur_dts}"')
+                    new_dts = state['de_defz'][deid].get('mod_datetime', '0')
+                    # self.log.debug(f'      + state dts: "{new_dts}"')
+                    if new_dts > cur_dts:
+                        self.log.debug(f'    - updating de def for "{deid}"')
+                        for a, val in state['de_defz'][deid].items():
+                            if a == 'mod_datetime':
+                                val = uncook_datetime(val)
+                            setattr(cur_ded, a, val)
+                        self.db.commit()
+                        n_updated += 1
+            if not n_updated:
+                self.log.debug('    no updated de defs found.')
         de_def_objs = self.get_by_type('DataElementDefinition')
         de_defz.update(
             {de_def_obj.id :
@@ -935,16 +960,16 @@ class UberORB(object):
                   str(getattr(de_def_obj, 'mod_datetime', '') or dtstamp())
               } for de_def_obj in de_def_objs}
               )
-        # update config_dedz with labels, if they have any
+        # update state_dedz with labels, if they have any
         # TODO:  add labels as "external names" in p.core.meta
-        # if new_config_dedef_ids:
-            # for deid in new_config_dedef_ids:
-                # ded = config['de_defz'][deid]
+        # if new_state_dedef_ids:
+            # for deid in new_state_dedef_ids:
+                # ded = state['de_defz'][deid]
                 # if de_defz.get(deid) and ded.get('label'):
                     # de_defz[deid]['label'] = ded['label']
-        # if config_dedef_labels:
-            # for deid in config_dedef_labels:
-                # de_defz[deid]['label'] = config_dedef_labels[deid]
+        # if state_dedef_labels:
+            # for deid in state_dedef_labels:
+                # de_defz[deid]['label'] = state_dedef_labels[deid]
         self.log.debug('  - data element defs created: {}'.format(
                                                 str(list(de_defz.keys()))))
 

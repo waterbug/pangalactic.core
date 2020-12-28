@@ -289,7 +289,8 @@ PGXN_MASK = dict(
     Test=(PGXN_HIDE + ['components', 'fsc_code', 'product_type'])
     )
 
-# PGXN_DATA_VIEW:  Data Elements that can be displayed in the object editor
+# PGXN_DATA_VIEW:  minimal set of Data Elements to be displayed in the object
+# editor
 PGXN_DATA_VIEW = [
                   'TRL',
                   'directionality',
