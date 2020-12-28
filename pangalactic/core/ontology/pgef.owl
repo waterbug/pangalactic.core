@@ -950,7 +950,7 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The number of instances or measured quantity of the component object(s) used.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Acu"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
     </owl:DatatypeProperty>
 
 
