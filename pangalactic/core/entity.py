@@ -672,7 +672,7 @@ class DataMatrix(list):
         else:
             log.debug('  no unmapped entities found.')
 
-    def compute_mel_parms(self, row, name, component, qty=1.0,
+    def compute_mel_parms(self, row, name, component, qty=1,
                           parent_oid=None):
         """
         Compute parameter and data element values for the components in a
@@ -690,7 +690,7 @@ class DataMatrix(list):
             component (Product):  the system Product instance
 
         Keyword Args:
-            qty (float):  quantity of this item in its parent assembly
+            qty (int):  quantity of this item in its parent assembly
             parent_oid (str):  oid of this item's parent entity (NOT the oid of
                 the component's parent assembly!)
         """
@@ -816,7 +816,7 @@ class DataMatrix(list):
             for acu in consolidated_acus:
                 row += 1
                 component = acu.component
-                qty = acu.quantity or 1.0
+                qty = acu.quantity or 1
                 name = f'{acu.reference_designator} [{component.name}]'
                 row = self.compute_mel_parms(row, name, component, qty=qty,
                                              parent_oid=entity.oid)

@@ -48,7 +48,7 @@ TWOPLACES = Decimal('0.01')
 #          ... where each Comp is:
 #            oid (str): Acu.component.oid
 #            usage_oid (str): Acu.oid
-#            quantity (float): Acu.quantity
+#            quantity (int): Acu.quantity
 #            reference_designator (str): Acu.reference_designator
 componentz = {}
 Comp = namedtuple('Comp', 'oid usage_oid quantity reference_designator')
@@ -305,7 +305,7 @@ def refresh_componentz(product):
         componentz[product.oid] = [Comp._make((
                                         getattr(acu.component, 'oid', None),
                                         acu.oid,
-                                        acu.quantity or 1.0,
+                                        acu.quantity or 1,
                                         acu.reference_designator))
                                    for acu in product.components
                                    if acu.component]

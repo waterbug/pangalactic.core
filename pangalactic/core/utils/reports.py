@@ -688,7 +688,7 @@ def write_mel_xlsx_from_model(context, is_project=True,
 
 
 def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
-                              int_fmts, level, row, component, qty=1.0):
+                              int_fmts, level, row, component, qty=1):
     """
     Write a row in the MEL for a component in the system model.
 
@@ -703,7 +703,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
         component (Product):  the product mapped to the current row
 
     Keyword Args:
-        qty (float):  the number of instances of the component in the assembly
+        qty (int):  the number of instances of the component in the assembly
     """
     mcbe = get_pval(component.oid, 'm[CBE]')
     ctgcy_m = fix_ctgcy(str(100 * get_pval(component.oid, 'm[Ctgcy]')))
@@ -736,7 +736,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
     data_fmt = data_fmts.get(level, data_fmts[3])
     int_fmt = int_fmts.get(level, int_fmts[3])
     sheet.write(row, 2, mcbe, data_fmt)        # Unit Mass
-    sheet.write(row, 5, qty, data_fmt)     # Flight Units
+    sheet.write(row, 5, qty, int_fmt)          # Flight Units
     sheet.write(row, 9, mcbe * qty, data_fmt)  # Total Mass
     sheet.write(row, 10, ctgcy_m, data_fmt)
     sheet.write(row, 11, mmev * qty, data_fmt) # Mass MEV
@@ -756,7 +756,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
         comp_names.sort()
         comps_by_name = {acu.component.name.lower() : acu.component
                          for acu in real_comps}
-        qty_by_name = {acu.component.name.lower() : acu.quantity or 1.0
+        qty_by_name = {acu.component.name.lower() : acu.quantity or 1
                        for acu in real_comps}
         for comp_name in comp_names:
             row = write_component_rows_xlsx(sheet, level_fmts, name_fmts,
@@ -848,7 +848,7 @@ def write_mel_tsv(context, is_project=True, file_path='mel_data.tsv'):
     # book.close()
 
 
-def write_component_rows_tsv(level, row, component, qty=1.0):
+def write_component_rows_tsv(level, row, component, qty=1):
     """
     Write a set of component rows.
 
@@ -858,7 +858,7 @@ def write_component_rows_tsv(level, row, component, qty=1.0):
         component (HardwareProduct): component object
 
     Keyword Args:
-        qty (float): quantity of component in its next higher assembly
+        qty (int): quantity of component in its next higher assembly
     """
     # NB:  levels are 1-based; rows are 0-based
     # mcbe = get_pval(component.oid, 'm[CBE]')
@@ -888,7 +888,7 @@ def write_component_rows_tsv(level, row, component, qty=1.0):
     # sheet.write(row, 1, component.name, name_fmts.get(level, name_fmts[3]))
     # data_fmt = data_fmts.get(level, data_fmts[3])
     # sheet.write(row, 2, mcbe, data_fmt)        # Unit Mass
-    # sheet.write(row, 5, qty, data_fmt)    # Flight Units
+    # sheet.write(row, 5, qty, int_fmt)          # Flight Units
     # sheet.write(row, 9, mcbe * qty, data_fmt)  # Total Mass
     # sheet.write(row, 10, ctgcy_m, data_fmt)
     # sheet.write(row, 11, mmev * qty, data_fmt) # Mass MEV
@@ -903,7 +903,7 @@ def write_component_rows_tsv(level, row, component, qty=1.0):
         # comp_names.sort()
         # comps_by_name = {acu.component.name.lower() : acu.component
                          # for acu in component.components}
-        # qty_by_name = {acu.component.name.lower() : acu.quantity or 1.0
+        # qty_by_name = {acu.component.name.lower() : acu.quantity or 1
                        # for acu in component.components}
         # for comp_name in comp_names:
             # row = write_component_rows_tsv(next_level, row,
