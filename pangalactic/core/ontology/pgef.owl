@@ -94,6 +94,61 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/q_assembly -->
+
+    <owl:ObjectProperty rdf:about="&pgef;q_assembly">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The assembly to which a quantified assembly component usage (Qacu) points.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Qacu"/>
+        <rdfs:range rdf:resource="&pgef;ContinuousProduct"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/q_components -->
+
+    <owl:ObjectProperty rdf:about="&pgef;q_components">
+        <owl:inverseOf rdf:resource="&pgef;q_assembly"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The slots or roles (quantified assembly component usages [Qacu]) of the products used to assemble this product.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ContinuousProduct"/>
+        <rdfs:range rdf:resource="&pgef;Qacu"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/q_component -->
+
+    <owl:ObjectProperty rdf:about="&pgef;q_component">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The continuous product in a quantified assembly component usage (Qacu).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Qacu"/>
+        <rdfs:range rdf:resource="&pgef;ContinuousProduct"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/q_where_used -->
+
+    <owl:ObjectProperty rdf:about="&pgef;q_where_used">
+        <owl:inverseOf rdf:resource="&pgef;q_component"/>
+        <rdfs:comment rdf:datatype="&xsd;string">Where this continuous product is used (quantified assembly component usages) in any assemblies.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ContinuousProduct"/>
+        <rdfs:range rdf:resource="&pgef;Qacu"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/q_type_hint -->
+
+    <owl:ObjectProperty rdf:about="&pgef;q_type_hint">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A suggested continuous product type to use in the assembly position of a Qacu (quantified assembly component usage).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Qacu"/>
+        <rdfs:range rdf:resource="&pgef;ContinuousProductType"/>
+    </owl:ObjectProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/related_role -->
 
     <owl:ObjectProperty rdf:about="&pgef;related_role">
@@ -955,6 +1010,28 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/amount -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;amount">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The measured amount of the continuous product used, expressed in the amount_units.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Qacu"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/amount_units -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;amount_units">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The units in which the amount of the continuous product is expressed.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Qacu"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/formulation -->
 
     <owl:DatatypeProperty rdf:about="&pgef;formulation">
@@ -1005,6 +1082,17 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">A narrative about the characteristics and identifying features of an object.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/amount_dimensions -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;amount_dimensions">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The dimensions of the amounts in which a Continuous Product is purchased or used.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ContinuousProduct"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -1662,6 +1750,17 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
+    <!-- http://pangalactic.us/pgef/qacu_reference_designator -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;qacu_reference_designator">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The reference designator is a symbolic name that serves as an identifier for a component usage within the context of an assembly.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Qacu"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/representation_purpose -->
 
     <owl:DatatypeProperty rdf:about="&pgef;representation_purpose">
@@ -1885,7 +1984,16 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
     <owl:Class rdf:about="&pgef;Acu">
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The relationship between a product (the component) and an assembled product (the assembly) of which it is a constituent; the Acu is a many-to-many relationship in that an assembly contains multiple products, and any given product may be used in many assemblies.  N.B.:  product here refers to a conceptual product, as opposed to a physical product (product instance) of a product specification -- the ACU relationship between physical products and assemblies, though related, is logically different, since a physical product can only be in one physical location in an assembly, whereas a conceptual product can be used at multiple locations (distinguished by reference designator, a property of the Acu) in an assembly.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The Acu (assembly component usage) is the relationship between a discrete product (the component) and an assembled product (the assembly) of which it is a constituent; an Acu is a many-to-many relationship in that an assembly contains multiple products, and any given product may be used in many assemblies.  N.B.:  product here refers to a conceptual product, as opposed to a physical product (product instance) of a product specification -- the ACU relationship between physical products and assemblies, though related, is logically different, since a physical product can only be in one physical location in an assembly, whereas a conceptual product can be used at multiple locations (distinguished by reference designator, a property of the Acu) in an assembly.</rdfs:comment>
+    </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/Qacu -->
+
+    <owl:Class rdf:about="&pgef;Qacu">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Qacu (quantified assembly constituent usage) is the relationship between a continuous product (the constituent) and an assembled product (the assembly) of which it is a constituent; a Qacu is a many-to-many relationship in that an assembly may contain multiple continuous products, and any given product may be a constituent in many assemblies.</rdfs:comment>
     </owl:Class>
 
 
@@ -2096,6 +2204,15 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
 
 
+    <!-- http://pangalactic.us/pgef/ContinuousProductType -->
+
+    <owl:Class rdf:about="&pgef;ContinuousProductType">
+        <rdfs:subClassOf rdf:resource="&pgef;ProductType"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A functional category or classification of a continuous product (e.g., fuel, coating, paint, etc.).</rdfs:comment>
+    </owl:Class>
+
+
+
     <!-- http://pangalactic.us/pgef/RequirementAncestry -->
 
     <owl:Class rdf:about="&pgef;RequirementAncestry">
@@ -2197,6 +2314,16 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <owl:Class rdf:about="&pgef;HardwareProduct">
         <rdfs:subClassOf rdf:resource="&pgef;Product"/>
         <rdfs:comment rdf:datatype="&xsd;string">A hardware product represents a design concept or specification that when realized (manufactured) in a physically sensible and measurable instance (i.e., product instance) manifests some specified functionality. Note that a hardware product may contain digital product elements (non-hardware), such as software and firmware, etc.
+</rdfs:comment>
+    </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/ContinuousProduct -->
+
+    <owl:Class rdf:about="&pgef;ContinuousProduct">
+        <rdfs:subClassOf rdf:resource="&pgef;HardwareProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A hardware product that is continuous in nature (e.g., fuel, coating, paint, etc.), as opposed to discrete hardware products such as electronics boxes, spacecraft, etc.  A primary characteristic of continuous products is that they are purchased and used in bulk quantities such as volumes or areas, so their quantities are specified in non-integer measures with units, in contrast to quantities of discrete products, which are always integers.
 </rdfs:comment>
     </owl:Class>
 
