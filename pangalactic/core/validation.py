@@ -35,9 +35,6 @@ def check_for_cycles(product):
 
     Args:
         product (Product): the Product in which to look for cycles
-
-    Keyword Args:
-        levels (int):  number of levels to recurse before giving up
     """
     # log.debug('* checking product with id "{}" ({})'.format(str(product.id),
                                                         # product.oid))
@@ -47,9 +44,10 @@ def check_for_cycles(product):
                             # for acu in product.components}
         if product.oid in [getattr(c, 'oid', None) for c in comps]:
             txt = 'is a component of itself.'
-            log.debug('product {} (id: "{}" {}'.format(
-                      product.oid, product.id or 'no id', txt))
-            return
+            msg = 'product oid "{}" (id: "{}" {}'.format(
+                      product.oid, product.id or 'no id', txt)
+            log.debug(msg)
+            return msg
         # else:
             # log.debug('  - level 1 components ok.')
         comps1 = []
@@ -68,17 +66,30 @@ def check_for_cycles(product):
             return
         if product.oid in [c.oid for c in comps1]:
             txt = 'is a 2nd-level component of itself.'
-            log.debug(' *** product {} (id: "{}" {}'.format(
-                      product.oid, product.id or 'no id', txt))
+            msgs = []
+            msg = ' *** product {} (id: "{}" {}'.format(
+                      product.oid, product.id or 'no id', txt)
+            msgs.append(msg)
+            log.debug(msg)
             acu1 = acus1_by_comp_oid[product.oid]
-            log.debug(' *** offending Acu is:')
-            log.debug('     id: {}'.format(str(acu1.id)))
-            log.debug('     creator: {}'.format(acu1.creator.id))
+            msg1 = ' *** offending Acu is:'
+            msgs.append(msg1)
+            log.debug(msg1)
+            msg2 = '     id: {}'.format(str(acu1.id))
+            msgs.append(msg2)
+            log.debug(msg2)
+            msg3 = '     creator: {}'.format(acu1.creator.id)
+            msgs.append(msg3)
+            log.debug(msg3)
             assy1 = acu1.assembly
-            log.debug('     assembly: {}'.format(str(assy1.id)))
-            log.debug('     assembly oid: {}'.format(str(assy1.oid)))
+            msg4 = '     assembly: {}'.format(str(assy1.id))
+            msgs.append(msg4)
+            log.debug(msg4)
+            msg5 = '     assembly oid: {}'.format(str(assy1.oid))
+            msgs.append(msg5)
+            log.debug(msg5)
             # acu = acus_by_comp_oid[assy1.oid]
-            return
+            return '<br>'.join(msgs)
         # else:
             # log.debug('  - level 2 components ok.')
         comps2 = []
@@ -91,9 +102,10 @@ def check_for_cycles(product):
             return
         if product.oid in [c.oid for c in comps2]:
             txt = 'is a 3nd-level component of itself.'
-            log.debug('product {} (id: "{}" {}'.format(
-                      product.oid, product.id or 'no id', txt))
-            return
+            msg = 'product {} (id: "{}" {}'.format(
+                      product.oid, product.id or 'no id', txt)
+            log.debug(msg)
+            return msg
         # else:
             # log.debug('  - level 3 components ok.')
         comps3 = []
@@ -106,13 +118,93 @@ def check_for_cycles(product):
             return
         if product.oid in [c.oid for c in comps3]:
             txt = 'is a 4th-level component of itself.'
-            log.debug('product {} (id: "{}" {}'.format(
-                      product.oid, product.id or 'no id', txt))
-            return
+            msg = 'product {} (id: "{}" {}'.format(
+                      product.oid, product.id or 'no id', txt)
+            log.debug(msg)
+            return msg
         else:
             # log.debug('no cycles')
             return
     # log.debug('no cycles')
+
+
+def check_serialized_for_cycles(sobjs):
+    """
+    Check for cyclical data structures among all [known] components used at
+    up to 2 levels of assembly in the Acu assemblies in the collection of
+    serialized objects.
+
+    Args:
+        sobjs (list of dict): a list of serialized objects
+    """
+    log.debug('* check_serialized_for_cycles()')
+    if not isinstance(sobjs, list):
+        log.debug('  incorrect arg: should be list of dicts.')
+        return
+    sacus = [so for so in sobjs if so['_cname'] == 'Acu']
+    if not sacus:
+        log.debug('  serialized objs contain no Acus.')
+        return
+    for sacu in sacus:
+        product_oid = sacu.get('assembly')
+        comp_oids = [a['component'] for a in sacus
+                     if a['assembly'] == product_oid]
+        if product_oid in comp_oids:
+            txt = 'is a component of itself.'
+            msg = 'product with oid "{}" {}'.format(
+                      product_oid, txt)
+            log.debug(msg)
+            return msg
+        comp_oids_1 = []
+        for comp_oid in comp_oids:
+            if comp_oid:
+                comp_oids_1 += [sacu['component'] for sacu in sacus
+                                if sacu['assembly'] == comp_oid]
+        if comp_oids_1:
+            comp_oids += comp_oids_1
+        else:
+            log.debug('  - no more levels for acu "{}".')
+        if product_oid in comp_oids_1:
+            txt = 'is a 2nd-level component of itself.'
+            msg = ' *** product with oid "{}" {}'.format(
+                      product_oid, txt)
+            log.debug(msg)
+            return msg
+    log.debug('  no cycles found.')
+
+        # comps2 = []
+        # for comp in comps1:
+            # comps2 += [acu.component for acu in comp.components]
+        # if comps2:
+            # comps += comps2
+        # else:
+            # # log.debug('  - no more levels.')
+            # return
+        # if product.oid in [c.oid for c in comps2]:
+            # txt = 'is a 3nd-level component of itself.'
+            # msg = 'product {} (id: "{}" {}'.format(
+                      # product.oid, product.id or 'no id', txt)
+            # log.debug(msg)
+            # return msg
+        # # else:
+            # # log.debug('  - level 3 components ok.')
+        # comps3 = []
+        # for comp in comps2:
+            # comps3 += [acu.component for acu in comp.components]
+        # if comps3:
+            # comps += comps3
+        # else:
+            # # log.debug('  - no more levels.')
+            # return
+        # if product.oid in [c.oid for c in comps3]:
+            # txt = 'is a 4th-level component of itself.'
+            # msg = 'product {} (id: "{}" {}'.format(
+                      # product.oid, product.id or 'no id', txt)
+            # log.debug(msg)
+            # return msg
+        # else:
+            # # log.debug('no cycles')
+            # return
 
 
 def get_bom(product):
@@ -124,12 +216,16 @@ def get_bom(product):
         product (Product): the Product whose bom is to be computed
     """
     # NOTE: this will explode if assembly is circular!!
-    if product:
-        comps = [acu.component for acu in product.components]
-        if comps:
-            comps = reduce(lambda x,y: x+y, [get_bom(c) for c in comps], comps)
-        return comps
-    return []
+    try:
+        if product:
+            comps = [acu.component for acu in product.components]
+            if comps:
+                comps = reduce(lambda x,y: x+y, [get_bom(c) for c in comps], comps)
+            return comps
+        return []
+    except:
+        log.debug("bom exploded ... cycle encountered.")
+        return []
 
 
 def get_bom_oids(product):
