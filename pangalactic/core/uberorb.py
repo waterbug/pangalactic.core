@@ -1711,7 +1711,7 @@ class UberORB(object):
                 psus = self.search_exact(cname='ProjectSystemUsage',
                                          project=obj)
                 if obj.systems:
-                    txt = 'deleting systems (ProjectSystemUsages) for'
+                    txt = 'attempting to delete systems for PSU'
                     info.append('   - {} "{}" ...'.format(txt, obj.id))
                     # NOTE: this will also delete any Flows that have this
                     # Project as their 'flow_context':
@@ -1743,19 +1743,19 @@ class UberORB(object):
                                   self.classes['ProjectSystemUsage'])):
                 # check for and delete any Flows to/from its component/system
                 # in the context of its assembly/project
-                self.log.debug('    - orb checking for flows ...')
+                self.log.debug('   - orb checking for flows ...')
                 flows = self.get_all_usage_flows(obj)
                 if flows:
                     n = len(flows)
-                    self.log.debug(f'      deleting {n} flows ...')
+                    self.log.debug(f'     deleting {n} flows ...')
                     for flow in flows:
                         info.append('   id: {}, name: {} (oid {})'.format(
                                     flow.id, flow.name, flow.oid))
                         self.db.delete(flow)
-                        info.append('     ... deleted.')
+                        info.append('    ... deleted.')
                     self.db.commit()
                 else:
-                    self.log.debug('      no flows found.')
+                    self.log.debug('     no flows found.')
             elif isinstance(obj, self.classes['Product']):
                 if obj.where_used:
                     self.log.debug('    used in assemblies; cannot delete.')
@@ -1766,11 +1766,11 @@ class UberORB(object):
                 # if the deletion is allowed, all of the Product's usages in
                 # assemblies or projects have been already deleted, so there
                 # are no external flows
-                self.log.debug('    - orb checking for internal flows ...')
+                self.log.debug('   - orb checking for internal flows ...')
                 flows = self.get_internal_flows_of(obj)
                 if flows:
                     n = len(flows)
-                    self.log.debug(f'      deleting {n} flows ...')
+                    self.log.debug(f'     deleting {n} flows ...')
                     for flow in flows:
                         info.append('   id: {}, name: {} (oid {})'.format(
                                     flow.id, flow.name, flow.oid))
@@ -1778,7 +1778,7 @@ class UberORB(object):
                         info.append('   ... deleted.')
                     self.db.commit()
                 else:
-                    self.log.debug('      no flows found.')
+                    self.log.debug('     no flows found.')
                 ports = obj.ports
                 if ports:
                     self.delete(ports)
@@ -1807,28 +1807,33 @@ class UberORB(object):
                 else:
                     self.log.debug('      no flows found.')
             if isinstance(obj, self.classes['Requirement']):
+                txt = 'object to be deleted is Requirement'
+                info.append('   - {} "{}" ...'.format(txt, obj.id))
                 # delete any related Relation and ParameterRelation objects
                 rel = obj.computable_form
                 if rel:
                     prs = rel.correlates_parameters
                     if prs:
                         for pr in prs:
+                            txt = 'attempting to delete ParameterRelation'
+                            info.append('   - {} "{}" ...'.format(txt, pr.id))
                             self.db.delete(pr)
                             try:
                                 self.db.commit()
+                                info.append('         deleted.')
                             except:
                                 self.db.rollback()
-                                info.append('     ... ParameterRelation')
                                 info.append('         delete failed,')
                                 info.append('         rolled back.')
                     obj.computable_form = None
+                    txt = 'attempting to delete Relation'
+                    info.append('   - {} "{}" ...'.format(txt, rel.id))
                     self.db.delete(rel)
                     try:
                         self.db.commit()
                         info.append('     ... deleted.')
                     except:
                         self.db.rollback()
-                        info.append('     ... Relation')
                         info.append('         delete failed, rolled back.')
                     # computable_form -> require recompute
                     recompute_required = True
@@ -1863,7 +1868,6 @@ class UberORB(object):
             except:
                 self.db.rollback()
                 info.append('     ... delete failed, rolled back.')
-        self.log.debug(' - objs deleted:')
         for text in info:
             self.log.debug(text)
         if refresh_assemblies:
