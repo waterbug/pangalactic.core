@@ -1606,7 +1606,7 @@ def delete_data_element(oid, deid):
     """
     # TODO: need to dispatch louie & pubsub messages!
     if oid in data_elementz and data_elementz[oid].get(deid):
-        del parameterz[oid][deid]
+        del data_elementz[oid][deid]
 
 def get_dval(oid, deid):
     """

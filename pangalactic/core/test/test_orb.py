@@ -236,6 +236,30 @@ class OrbTest(unittest.TestCase):
                     obj.name_code]
         self.assertEqual(expected, value)
 
+    def test_12_1_yaml_dump_and_load_numeric_string_attr(self):
+        """
+        CASE:  Use yaml to dump and load a serialized object that has an
+        attribute whose value is a string consisting of all numeric characters
+        with a leading zero (0).  This case is needed to test the dump and load
+        of Person instances for which the 'oid' attribute is a string that is
+        sometimes required to have that format (numeric characters with a
+        leading zero) and retain its leading zero in the dump/load round trip
+        -- in the field, this has caused errors when the yaml dump does not
+        quote the string and it is then loaded by yaml as an integer rather
+        than a string.
+        """
+        Person = orb.classes['Person']
+        obj = Person(oid='0123456789', name='John Icecicleboy')
+        res = serialize(orb, [obj])
+        data = yaml.safe_dump(res)
+        out_data = yaml.safe_load(data)
+        out_objs = deserialize(orb, res)
+        # serialized form includes only the original object
+        out_obj = out_objs[0]
+        value = out_obj.oid
+        expected = obj.oid
+        self.assertEqual(expected, value)
+
     def test_13_serialize_with_parameters_no_components(self):
         """
         CASE:  serialize an object with parameters but do not include
