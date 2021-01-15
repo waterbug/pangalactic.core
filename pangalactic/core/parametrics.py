@@ -911,7 +911,7 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
         val = parm.get('value') or 0.0
     return val
 
-def set_pval(oid, pid, value, units=None, mod_datetime=None, local=True):
+def set_pval(oid, pid, value, units='', mod_datetime=None, local=True):
     """
     Set the value of a parameter instance for the specified object to the
     specified value, as expressed in the specified units (or in base units if
@@ -926,8 +926,8 @@ def set_pval(oid, pid, value, units=None, mod_datetime=None, local=True):
             the parameter object's definition.range_datatype
 
     Keyword Args:
-        units (str): the units in which `value` is expressed; None implies
-            SI (mks) base units
+        units (str): the units in which the parameter value is expressed;
+            None -> SI (mks) base units
         mod_datetime (str): mod_datetime string of the parameter (if the action
             originates locally, this will be None and a datetime stamp will be
             generated)
@@ -1014,7 +1014,7 @@ def set_pval(oid, pid, value, units=None, mod_datetime=None, local=True):
         # log.debug(msg)
         return False
 
-def get_pval_from_str(oid, pid, str_val, units=None, local=True):
+def get_pval_from_str(oid, pid, str_val, units='', local=True):
     """
     Get the value of a parameter instance for the specified object from a
     string value, as expressed in the specified units (or in base units if
@@ -1062,7 +1062,7 @@ def get_pval_from_str(oid, pid, str_val, units=None, local=True):
         # log.debug('* {}'.format(msg.format(str_val)))
         pass
 
-def set_pval_from_str(oid, pid, str_val, units=None, mod_datetime=None,
+def set_pval_from_str(oid, pid, str_val, units='', mod_datetime=None,
                       local=True):
     """
     Set the value of a parameter instance for the specified object from a
@@ -1076,8 +1076,8 @@ def set_pval_from_str(oid, pid, str_val, units=None, mod_datetime=None,
         str_val (str): string value
 
     Keyword Args:
-        units (str): the units in which the parameter value is expressed; None
-            SI (mks) base units
+        units (str): the units in which the parameter value is expressed;
+            None -> SI (mks) base units
         mod_datetime (str): mod_datetime string of the parameter (if the action
             originates locally, this will be None and a datetime stamp will be
             generated)
@@ -1608,13 +1608,17 @@ def delete_data_element(oid, deid):
     if oid in data_elementz and data_elementz[oid].get(deid):
         del data_elementz[oid][deid]
 
-def get_dval(oid, deid):
+def get_dval(oid, deid, units=''):
     """
     Return a cached data element value.
 
     Args:
         oid (str): the oid of the object that has the parameter
         deid (str): the data element 'id' value
+
+    Keyword Args:
+        units (str): the units in which the data element value is expressed;
+            empty -> SI (mks) base units
     """
     # Too verbose -- only for extreme debugging ...
     # log.debug('* get_dval() ...')
@@ -1633,7 +1637,7 @@ def get_dval(oid, deid):
                                                           # val, type(val)))
         return val
 
-def get_dval_as_str(oid, deid):
+def get_dval_as_str(oid, deid, units=''):
     """
     Return a cached data element value a string for display and editing in UI.
     (Used in the object editor, `p.node.gui.pgxnobject.PgxnObject`, the
@@ -1642,10 +1646,14 @@ def get_dval_as_str(oid, deid):
     Args:
         oid (str): the oid of the object that has the parameter
         deid (str): the `id` of the data element
+
+    Keyword Args:
+        units (str): the units in which the data element value is expressed;
+            empty -> SI (mks) base units
     """
     return str(get_dval(oid, deid))
 
-def set_dval(oid, deid, value, units=None, mod_datetime=None, local=True):
+def set_dval(oid, deid, value, units='', mod_datetime=None, local=True):
     """
     Set the value of a data element instance for the specified object to the
     specified value.
@@ -1657,7 +1665,7 @@ def set_dval(oid, deid, value, units=None, mod_datetime=None, local=True):
             the data element object's definition.range_datatype
 
     Keyword Args:
-        units (str): the units in which `value` is expressed; None implies
+        units (str): the units in which `value` is expressed; empty implies
             SI (mks) base units
         mod_datetime (str): string mod_datetime of the data element (if the
             action originates locally, this will be None and a datetime stamp
@@ -1716,7 +1724,7 @@ def set_dval(oid, deid, value, units=None, mod_datetime=None, local=True):
         # log.debug(msg)
         return False
 
-def set_dval_from_str(oid, deid, str_val, units=None, mod_datetime=None,
+def set_dval_from_str(oid, deid, str_val, units='', mod_datetime=None,
                       local=True):
     """
     Set the value of a data element instance for the specified object from a
@@ -1729,7 +1737,7 @@ def set_dval_from_str(oid, deid, str_val, units=None, mod_datetime=None,
         str_val (str): string value
 
     Keyword Args:
-        units (str): the units in which `value` is expressed; None implies
+        units (str): the units in which `value` is expressed; empty implies
             SI (mks) base units
         mod_datetime (str): mod_datetime string of the parameter (if the action
             originates locally, this will be None and a datetime stamp will be
