@@ -1687,6 +1687,7 @@ class UberORB(object):
         refresh_assemblies = []
         local_user = self.get(state.get('local_user_oid', 'me'))
         for obj in objs:
+            delete_not_allowed = False
             if not obj:
                 info.append('   None (ignored)')
                 continue
@@ -1707,6 +1708,9 @@ class UberORB(object):
                         except:
                             self.db.rollback()
                             info.append('     ... delete failed, rolled back.')
+                            info.append('         role assgt deletion failed,')
+                            info.append(f'         cannot delete "{obj.id}"')
+                            delete_not_allowed = True
                 # delete any related system usages:
                 psus = self.search_exact(cname='ProjectSystemUsage',
                                          project=obj)
@@ -1719,9 +1723,14 @@ class UberORB(object):
             elif isinstance(obj, self.classes['Person']):
                 # Note that it is assumed the permissions of the user have been
                 # checked and the user is a Global Administrator -- only they
-                # can delete Person objects -- and that the Person object does
-                # not have any objects of which it is the creator
+                # can delete Person objects.  First check whether the Person
+                # object has any existing objects of which it is the creator
                 # ("created_objects").
+                if obj.created_objects:
+                    txt = 'has created objects -- must delete them first.'
+                    info.append('   - "{}" {} ...'.format(obj.id, txt))
+                    info.append('     not deleting "{}".'.format(obj.id))
+                    continue
                 # Delete all related RoleAssignments ...
                 if obj.roles:
                     for ra in obj.roles:
@@ -1759,7 +1768,7 @@ class UberORB(object):
             elif isinstance(obj, self.classes['Product']):
                 if obj.where_used:
                     self.log.debug('    used in assemblies; cannot delete.')
-                    return
+                    continue
                 # for Products, first delete related Flows, Ports, Acus, and
                 # ProjectSystemUsages
                 # NOTE: for flows, only need to worry about internal flows --
@@ -1860,14 +1869,18 @@ class UberORB(object):
                                         getattr(obj, 'id', 'no id'),
                                         getattr(obj, 'name', 'no name'),
                                         obj.oid))
-            info.append('   attempting to delete ...')
-            self.db.delete(obj)
-            try:
-                self.db.commit()
-                info.append('     ... object deleted.')
-            except:
-                self.db.rollback()
-                info.append('     ... delete failed, rolled back.')
+            if delete_not_allowed:
+                info.append(f'   cannot delete object "{obj.id}".')
+                continue
+            else:
+                info.append('   attempting to delete ...')
+                self.db.delete(obj)
+                try:
+                    self.db.commit()
+                    info.append('     ... object deleted.')
+                except:
+                    self.db.rollback()
+                    info.append('     ... delete failed, rolled back.')
         for text in info:
             self.log.debug(text)
         if refresh_assemblies:
