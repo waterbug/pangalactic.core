@@ -339,38 +339,38 @@ class UberORB(object):
             # NOTE:  DO NOT *EVER* USE 'expire_on_commit = False' here!!!
             #        -> it causes VERY weird behavior ...
 
-    def dump_db(self, fmt='yaml', dir_path=None):
+    def dump_db(self, fpath=None, dir_path=None):
         """
         Serialize all db objects, along with all their parameters and data
         elements, and write to `db-dump-[dts].yaml` (or '.json', if specified)
         in the specified directory.
+
+        Keyword Args:
+            fpath (str):  file path to save to (overrides dir_path)
+            dir_path (str):  directory path to save to
         """
         self.log.info('* dump_db()')
         self.db_dump_complete = False
         dts = file_dts()
-        if not dir_path:
-            # if no dir_path specified, assume backup
-            dir_path = os.path.join(self.home, 'backup')
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-        json_fname = 'db-dump-' + dts + '.json'
-        yaml_fname = 'db-dump-' + dts + '.yaml'
-        if fmt == 'json':
-            f = open(os.path.join(dir_path, json_fname), 'w')
-            f.write(json.dumps(serialize(
-                    self, self.get_all_subtypes('Identifiable'),
-                    include_refdata=True),
-                    separators=(',', ':'),
-                    indent=4, sort_keys=True))
-            f.close()
-        elif fmt == 'yaml':
-            self.log.info('  dumping database to yaml file ...')
-            f = open(os.path.join(dir_path, yaml_fname), 'w')
-            f.write(yaml.safe_dump(serialize(
-                    self, self.get_all_subtypes('Identifiable'),
-                    include_refdata=True), default_flow_style=False))
-            f.close()
-        self.log.info('  dump to {} completed.'.format(fmt))
+        if fpath:
+            dir_path, fname = os.path.split(fpath)
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+        else:
+            if not dir_path:
+                # if neither fpath nor dir_path specified, assume backup
+                dir_path = os.path.join(self.home, 'backup')
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+            fname = 'db-dump-' + dts + '.yaml'
+        self.log.info('  dumping database to yaml ...')
+        s_objs = serialize(orb, orb.get_all_subtypes('Identifiable'),
+                           include_refdata=True)
+        f = open(os.path.join(dir_path, fname), 'w')
+        f.write(yaml.safe_dump(s_objs, default_flow_style=False))
+        f.close()
+        self.log.info('  dump to yaml completed.')
+        orb.log.debug('  {} db objects written.'.format(len(s_objs)))
         self.db_dump_complete = True
 
     def save_caches(self, dir_path=None):
