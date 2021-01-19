@@ -281,6 +281,7 @@ PGXN_HIDE = list(ONE2M.keys()) + list(M2M.keys())
 # PGXN_MASK:  Fields that should not be displayed for the specified classes in
 # the object editor
 PGXN_MASK = dict(
+    DataElementDefinition=(PGXN_HIDE + ['owner']),
     ParameterDefinition=(PGXN_HIDE + ['base_parameters', 'computed_by_default',
                          'generating_function', 'used_in_disciplines']),
     Requirement=(PGXN_HIDE + ['components', 'derived_from', 'fsc_code',

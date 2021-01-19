@@ -1110,6 +1110,7 @@ class UberORB(object):
                 update_parm_defz(obj)
                 update_parmz_by_dimz(obj)
         # self.log.debug('  orb.save:  committing db session.')
+        # obj has already been "added" to the db (session) above, so commit ...
         self.db.commit()
         if recompute_required and recompute:
             self.recompute_parmz()
