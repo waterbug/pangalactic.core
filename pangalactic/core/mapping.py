@@ -37,9 +37,9 @@ schema_mods = ['1.0.4', '1.5.0']
 schema_version = '1.5.0'
 
 
-def to_01devXX(sos):
+def to_x_x_x(sos):
     """
-    Convert data to 0.1.devXX schema.
+    Convert serialized data to x.x.x schema.
 
     Args:
         sos (list):  serialized objects to be transformed
@@ -48,5 +48,5 @@ def to_01devXX(sos):
         pass
 
 # `schema_maps` dictionary maps versions to conversion functions
-schema_maps = {'0.1.devXX' : to_01devXX}
+schema_maps = {}
 

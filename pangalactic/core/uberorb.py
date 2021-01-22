@@ -6,7 +6,7 @@ NOTE:  Only the `orb` instance created in this module should be imported (it is
 intended to be a singleton).
 """
 import json, os, shutil, sys, traceback
-# from functools import reduce
+from pathlib import Path
 
 # ruamel_yaml
 import ruamel_yaml as yaml
@@ -20,7 +20,7 @@ from pangalactic.core             import __version__
 from pangalactic.core             import diagramz
 from pangalactic.core             import config, read_config
 from pangalactic.core             import prefs, read_prefs
-from pangalactic.core             import state, read_state
+from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
 from pangalactic.core.entity      import (dmz, load_dmz, save_dmz,
@@ -113,14 +113,14 @@ class UberORB(object):
         if self.started:
             return
         self.log_msgs = log_msgs or []
-        # set home directory -- in order of precedence:
-        # [1] 'home' kw arg (this should be set by the application, if any)
+        # set home directory -- in order of precedence (A, B, C):
+        # [A] 'home' kw arg (this should be set by the application, if any)
         if home:
             pgx_home = home
-        # [2] from 'PANGALACTIC_HOME' env var
+        # [B] from 'PANGALACTIC_HOME' env var
         elif 'PANGALACTIC_HOME' in os.environ:
             pgx_home = os.environ['PANGALACTIC_HOME']
-        # [3] create a 'pangalaxian' directory in the user's home dir
+        # [C] create a 'pangalaxian' directory in the user's home dir
         else:
             if sys.platform == 'win32':
                 default_home = os.path.join(os.environ.get('HOMEPATH'))
@@ -166,6 +166,73 @@ class UberORB(object):
         self.log.debug('* trash read ({} objects).'.format(len(trash)))
         if 'units' not in prefs:
             prefs['units'] = {}
+        self.cache_path = os.path.join(pgx_home, 'cache')
+        if not db_url:
+            # if no db_url is specified, create a local sqlite db
+            local_db_path = os.path.join(pgx_home, 'local.db')
+            db_url = 'sqlite:///{}'.format(local_db_path)
+        state['db_url'] = db_url
+        home_schema_version = state.get('schema_version')
+        if home_schema_version == schema_version:
+            # if the schema_version in the current home dir matches the app
+            # schema_version, just initialize the registry
+            # NOTE:  registry 'debug' is set to False regardless of the
+            # client's log level because its debug logging is INSANELY verbose
+            # ...  if the registry needs debugging, just hack this and set
+            # debug=True.
+            self.log.debug(f'* schema version {schema_version} matches ...')
+            self.init_registry(pgx_home, db_url, version=schema_version,
+                               log=self.log, debug=False, console=console)
+        else:
+            self.log.debug('* schema versions do not match:')
+            self.log.debug(f'    app schema version =  {schema_version}')
+            self.log.debug(f'    home schema version = {home_schema_version}')
+            # if the state 'schema_version' does not match the current
+            # package's schema_version:
+            dump_path = os.path.join(pgx_home, 'db.yaml')
+            # [1] remove .json caches and "cache" directory:
+            self.log.debug('  [1] removing caches ...')
+            for prefix in ['data_elements', 'diagrams', 'dms', 'ent_hists',
+                           'parameters', 'schemas']:
+                fpath = os.path.join(pgx_home, prefix + '.json')
+                if os.path.exists(fpath):
+                    os.remove(fpath)
+            self.log.debug('      + json caches removed.')
+            if os.path.exists(self.cache_path):
+                shutil.rmtree(self.cache_path, ignore_errors=True)
+            self.log.debug('      + class/property caches removed.')
+            # [2] drop and create database:
+            self.log.debug('  [2] dropping and recreating db ...')
+            self.drop_and_create_db(pgx_home)
+            # [3] initialize registry with "force_new_core" to create the new
+            #     classes and db tables:
+            self.log.debug('  [3] initializing registry ...')
+            self.init_registry(pgx_home, db_url, force_new_core=True,
+                               version=schema_version, debug=False,
+                               console=console)
+            # [4] load reference data (needed before deserializing the db dump)
+            self.load_reference_data()
+            # [5] transform and import data that was dumped previously:
+            self.log.debug('  [4] reloading data ...')
+            serialized_data = self.load_and_transform_data(dump_path)
+            if serialized_data:
+                deserialize(self, serialized_data, include_refdata=True)
+            state['schema_version'] = schema_version
+            write_state(os.path.join(pgx_home, 'state'))
+            # check for private key in old key path
+            self.log.debug('  [5] checking for private key ...')
+            old_key_path = os.path.join(pgx_home, '.creds', 'private.key')
+            if os.path.exists(old_key_path):
+                self.log.debug('      found key, moving to new location ...')
+                # if found, copy key to user home dir and remove '.creds' dir
+                p = Path(pgx_home)
+                absp = p.resolve()
+                user_home = absp.parent
+                new_key_path = os.path.join(str(user_home), 'cattens.key')
+                shutil.copyfile(old_key_path, new_key_path)
+                shutil.rmtree(os.path.join(pgx_home, '.creds'),
+                              ignore_errors=True)
+                self.log.debug('      done -- should be able to log in now.')
         # create in-memory cache for DataMatrix instances
         self.data = {}
         # create storage area for serialized DataMatrix instances (.tsv files)
@@ -227,41 +294,11 @@ class UberORB(object):
                            # str(vault_files_copied)))
         else:
             self.log.debug('  - all test vault files already installed.')
-        self.cache_path = os.path.join(pgx_home, 'cache')
-        if not db_url:
-            # if no db_url is specified, create a local sqlite db
-            local_db_path = os.path.join(pgx_home, 'local.db')
-            db_url = 'sqlite:///{}'.format(local_db_path)
-        state['db_url'] = db_url
-        state['schema_version'] = schema_version
-        # if __version__ != schema_version:
-            # if the state 'schema_version' does not match the current
-            # package's schema_version:
-            # [a] drop and create database:
-            #     self.drop_and_create_db(pgx_home)
-            # [b] initialize registry with "force_new_core" to create the new
-            #     classes and db tables:
-            # self.init_registry(pgx_home, db_url, force_new_core=True,
-                               # version=schema_version, debug=False,
-                               # console=console)
-            # [c] transform and import data that was dumped previously:
-            # serialized_data = self.load_and_transform_data()
-            # if serialized_data:
-                # deserialize(self, serialized_data, include_refdata=True)
-            # state['schema_version'] = schema_version
-        # else:
-            # if there were no schema mods, just initialize the registry with
-            # the current schema
-        # NOTE:  registry 'debug' is set to False regardless of the client's
-        # log level because its debug logging is INSANELY verbose ...  if the
-        # registry needs debugging, just hack this.
-        self.init_registry(pgx_home, db_url, version=schema_version,
-                           log=self.log, debug=False, console=console)
         # basically, versionables == {Product and all its subclasses}
         self.versionables = [cname for cname in self.classes if 'version' in
                              self.schemas[cname]['field_names']]
-        # [3] load (and update) ref data ... note that this must be done AFTER
-        #     config and state have been created and updated
+        # load (and update) ref data ... note that this must be done AFTER
+        # config and state have been created and updated
         self.load_reference_data()
         # ---------------------------------------------------------------------
         # ### NOTE:  user or app configured schemas can override reference data
@@ -431,47 +468,47 @@ class UberORB(object):
         self.dump_db(dir_path=dir_path)
         self.save_caches(dir_path=dir_path)
 
-    # def drop_and_create_db(self, home):
-        # """
-        # Drop the database and create a new one -- used when the schema has
-        # changed.
+    def drop_and_create_db(self, home):
+        """
+        Drop the database and create a new one -- used when the schema has
+        changed.
 
-        # Args:
-            # home (str):  home directory (full path)
-        # """
-        # self.log.debug('* drop_and_create_db() ...')
-        # db_url = state.get('db_url')
-        # if db_url and db_url.startswith('postgresql:'):
-            # # pyscopg2 (only used here, when schema changes)
-            # import psycopg2
-            # db_name = 'pgerdb'
-            # try:
-                # with psycopg2.connect(database='postgres') as conn:
-                    # conn.autocommit = True
-                    # with conn.cursor() as cur:
-                        # cur.execute('DROP DATABASE {};'.format(db_name))
-                        # self.log.debug('  database "{}" dropped.'.format(
-                                                                 # db_name))
-                        # cur.execute('CREATE DATABASE {};'.format(db_name))
-                # self.log.debug('  database "{}" created.'.format(db_name))
-            # except:
-                # self.log.debug('  problem encountered -- see error log.')
-                # self.error_log.info('* error in drop_and_create_db():')
-                # self.error_log.info(traceback.format_exc())
-        # elif db_url and db_url.startswith('sqlite:'):
-            # # if the db is sqlite, simply remove its file; the registry will
-            # # create a new one when it starts up
-            # try:
-                # db_path = os.path.join(home, 'local.db')
-                # if os.path.exists(db_path):
-                    # os.remove(db_path)
-                    # self.log.debug('  db file removed.')
-                # else:
-                    # self.log.debug('  file "local.db" not found.')
-            # except:
-                # self.log.debug('  error encounterd in removing db file.')
-                # self.error_log.info('* error in drop_and_create_db():')
-                # self.error_log.info(traceback.format_exc())
+        Args:
+            home (str):  home directory (full path)
+        """
+        self.log.debug('* drop_and_create_db() ...')
+        db_url = state.get('db_url')
+        if db_url and db_url.startswith('postgresql:'):
+            # pyscopg2 (only used here, when schema changes)
+            import psycopg2
+            db_name = 'vgerdb'
+            try:
+                with psycopg2.connect(database='postgres') as conn:
+                    conn.autocommit = True
+                    with conn.cursor() as cur:
+                        cur.execute('DROP DATABASE {};'.format(db_name))
+                        self.log.debug('  database "{}" dropped.'.format(
+                                                                 db_name))
+                        cur.execute('CREATE DATABASE {};'.format(db_name))
+                self.log.debug('  database "{}" created.'.format(db_name))
+            except:
+                self.log.debug('  problem encountered -- see error log.')
+                self.error_log.info('* error in drop_and_create_db():')
+                self.error_log.info(traceback.format_exc())
+        elif db_url and db_url.startswith('sqlite:'):
+            # if the db is sqlite, simply remove its file; the registry will
+            # create a new one when it starts up
+            try:
+                db_path = os.path.join(home, 'local.db')
+                if os.path.exists(db_path):
+                    os.remove(db_path)
+                    self.log.debug('  db file removed.')
+                else:
+                    self.log.debug('  file "local.db" not found.')
+            except:
+                self.log.debug('  error encounterd in removing db file.')
+                self.error_log.info('* error in drop_and_create_db():')
+                self.error_log.info(traceback.format_exc())
 
     def _load_diagramz(self):
         """
@@ -519,12 +556,14 @@ class UberORB(object):
                 # these variables and context parameters, period!
                 for oid in self.get_oids(cname='HardwareProduct'):
                     pid = get_parameter_id(variable, context)
-                    val = _compute_pval(oid, variable, context)
-                    if oid not in parameterz:
-                        parameterz[oid] = {}
-                    if pid not in parameterz[oid]:
-                        add_parameter(oid, pid)
-                    parameterz[oid][pid]['value'] = val
+                    _compute_pval(oid, variable, context)
+                    # val = _compute_pval(oid, variable, context)
+                    # NOTE: this should be superfluous: "_compute_pval" sets it
+                    # if oid not in parameterz:
+                        # parameterz[oid] = {}
+                    # if pid not in parameterz[oid]:
+                        # add_parameter(oid, pid)
+                    # parameterz[oid][pid]['value'] = val
         # Recompute Margins for all performance requirements
         # [0] Remove any previously computed performance requirements (NTEs and
         #     Margins) in case any requirements have been deleted or
@@ -630,14 +669,16 @@ class UberORB(object):
                 for log_msg in self.log_msgs:
                     self.log.info(log_msg)
 
-    def load_and_transform_data(self):
+    def load_and_transform_data(self, data_path):
         """
         Load and transform all dumped serialized data to the new schema.
         Called when restarting after an upgrade that includes a schema change.
+
+        Args:
+            data_path (str):  path to yaml file containing dumped db data
         """
         self.log.info('* transforming all data to new schema ...')
         sdata = ''
-        data_path = os.path.join(self.vault, 'db.yaml')
         if os.path.exists(data_path):
             try:
                 f = open(data_path)
@@ -647,7 +688,7 @@ class UberORB(object):
                     sdata = map_fn(sdata)
                     self.log.debug('  - data loaded and transformed.')
                 else:
-                    self.log.debug('  - data loaded (no transformation).')
+                    self.log.debug('  - data loaded (transformation unnec.).')
             except:
                 self.log.debug('  - an error ocurred (see error log).')
                 self.error_log.info('* error in load_and_transform_data():')
@@ -1497,39 +1538,6 @@ class UberORB(object):
         else:
             self.log.debug('  - no associated flows found.')
         return flows
-        # OLD IMPLEMENTATION: DEPRECATED
-        # if isinstance(usage, self.classes['Acu']):
-            # assembly = usage.assembly
-            # component = usage.component
-            # other_objs = [usage.assembly]
-            # other_objs += [acu.component for acu in usage.assembly.components
-                           # if acu is not usage]
-        # elif isinstance(usage, self.classes['ProjectSystemUsage']):
-            # assembly = usage.project
-            # component = usage.system
-            # other_objs = [psu.system for psu in usage.project.systems
-                          # if psu is not usage]
-        # else:
-            # return []
-        # # in case we're dealing with a corrupted "usage" ...
-        # if not component:
-            # return []
-        # other_port_oids = [p.oid for p in reduce(lambda x, y: x+y,
-                                        # [o.ports for o in other_objs], [])]
-        # comp_port_oids = [p.oid for p in component.ports]
-        # Port = self.classes['Port']
-        # Flow = self.classes['Flow']
-        # flows_from = self.db.query(Flow).filter_by(
-                        # flow_context=assembly).join(Flow.start_port).filter(
-                        # Port.oid.in_(comp_port_oids)).join(
-                        # Flow.end_port).filter(Port.oid.in_(
-                        # other_port_oids)).all()
-        # flows_to = self.db.query(Flow).filter_by(
-                        # flow_context=assembly).join(Flow.start_port).filter(
-                        # Port.oid.in_(other_port_oids)).join(
-                        # Flow.end_port).filter(Port.oid.in_(
-                        # comp_port_oids)).all()
-        # return flows_from + flows_to
 
     def get_all_port_flows(self, port):
         """
