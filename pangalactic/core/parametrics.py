@@ -100,7 +100,7 @@ def serialize_parms(oid):
     else:
         return {}
 
-def deserialize_parms(oid, ser_parms, cname=None):
+def deserialize_parms(oid, ser_parms, cname=None, force_update=False):
     """
     Output the serialized format for parameters. Note that the values are
     *always* expressed in base units and the 'units' field contains the
@@ -120,6 +120,9 @@ def deserialize_parms(oid, ser_parms, cname=None):
     Keyword Args:
         cname (str):  class name of the object to which the parameters are
             assigned (only used for logging)
+        force_update (bool):  force parameters to update regardless of
+            mod_datetimes (used in conjunction with a
+            force_load_serialized_objects() call)
     """
     # if cname:
         # log.debug('* deserializing parms for {} ({})...'.format(oid,
@@ -135,8 +138,10 @@ def deserialize_parms(oid, ser_parms, cname=None):
     for pid, parm in ser_parms.items():
         mod_dt = parm['mod_datetime']
         if pid in parm_defz:
-            # this is a parameter (has a ParameterDefinition)
-            if ((parameterz[oid].get(pid) and
+            # yes, this is a valid parameter (has a ParameterDefinition)
+            if force_update:
+                parameterz[oid][pid] = parm
+            elif ((parameterz[oid].get(pid) and
                  mod_dt > parameterz[oid][pid]['mod_datetime'])
                 or not parameterz[oid].get(pid)):
                 # deserialized parameter value is more recent or that parameter
@@ -149,13 +154,20 @@ def deserialize_parms(oid, ser_parms, cname=None):
             if oid not in data_elementz:
                 data_elementz[oid] = {}
             de = data_elementz[oid].get(pid)
+            if force_update:
+                de = dict(value=parm['value'],
+                          units=parm['units'],
+                          mod_datetime=parm['mod_datetime'])
+                data_elementz[oid][pid] = de
             if (de and mod_dt > de['mod_datetime']):
                 # deserialized value is more recent
                 de['mod_datetime'] = parm['mod_datetime']
                 de['value'] = parm['value']
+                de['units'] = parm['units']
             elif not data_elementz[oid].get(pid):
                 # that data element was not previously assigned
                 de = dict(value=parm['value'],
+                          units=parm['units'],
                           mod_datetime=parm['mod_datetime'])
                 data_elementz[oid][pid] = de
             # pid refers to a data element, so it should not be in parameterz
@@ -1429,7 +1441,7 @@ def serialize_des(oid):
     else:
         return {}
 
-def deserialize_des(oid, ser_des, cname=None):
+def deserialize_des(oid, ser_des, cname=None, force_update=False):
     """
     Deserialize a serialized object's `data_elements` dictionary.
 
@@ -1441,6 +1453,9 @@ def deserialize_des(oid, ser_des, cname=None):
     Keyword Args:
         cname (str):  class name of the object to which the parameters are
             assigned (only used for logging)
+        force_update (bool):  force data elements to update regardless of
+            mod_datetimes (used in conjunction with a
+            force_load_serialized_objects() call)
     """
     # if cname and ser_des:
         # log.debug('* deserializing data elements for "{}" ({})...'.format(
@@ -1462,7 +1477,8 @@ def deserialize_des(oid, ser_des, cname=None):
         if deid in de_defz:
             if ((data_elementz[oid].get(deid) and
                  mod_dt > data_elementz[oid][deid]['mod_datetime'])
-                or not data_elementz[oid].get(deid)):
+                or not data_elementz[oid].get(deid)
+                or force_update):
                 # deserialized data element value is more recent or that
                 # data element was not previously assigned
                 data_elementz[oid] = ser_des

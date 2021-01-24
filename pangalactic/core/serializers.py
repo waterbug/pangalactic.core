@@ -95,16 +95,21 @@ def serialize(orb, objs, view=None, include_components=False,
     is a special case to enable the object's parameters to be deserialized
     along with the object):
 
-        {'_cname'      : [class name for the object],
-         field-1-name  : [field-1-value],
-         field-2-name  : [field-2-value],
-         ...           
-         'parameters'  : serialized parameters dictionary
+        {'_cname'        : [class name for the object],
+         field-1-name    : [field-1-value],
+         field-2-name    : [field-2-value],
+         ...
+         'data_elements' : serialized data elements dictionary
+         'parameters'    : serialized parameters dictionary
          }
 
-    If an object has parameters in parms, their dictionary (the value of
-    parameterz[obj.oid]) is serialized and assigned to the serialized
-    object as the 'parameters' key.
+    If an object has data elements in 'data_elementz', their dictionary (the value of
+    data_elementz[obj.oid]) is serialized and assigned to the serialized object as
+    the 'data_elements' key.
+
+    If an object has parameters in 'parameterz', their dictionary (the value of
+    parameterz[obj.oid]) is serialized and assigned to the serialized object as
+    the 'parameters' key.
     """
     # orb.log.info('* serializing objects ...')
     if not objs:
@@ -254,7 +259,7 @@ DESERIALIZATION_ORDER = [
                     ]
 
 def deserialize(orb, serialized, include_refdata=False, dictify=False,
-                force_no_recompute=False):
+                force_no_recompute=False, force_update=False):
     """
     Args:
         orb (UberORB): the (singleton) `orb` instance
@@ -371,8 +376,14 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 db_obj = orb.get(oid)
                 # check against db object's mod_datetime
                 so_datetime = uncook_datetime(d.get('mod_datetime'))
-                if not (so_datetime and
-                        earlier(db_obj.mod_datetime, so_datetime)):
+                if force_update:
+                    # orb.log.debug('    forcing update ... ')
+                    updates[oid] = db_obj
+                    orb.db.add(db_obj)
+                    if dictify:
+                        output['modified'].append(db_obj)
+                elif not (so_datetime and
+                          earlier(db_obj.mod_datetime, so_datetime)):
                     # txt = '    object "{}" has same or older'.format(oid)
                     # orb.log.debug('{} mod_datetime, ignoring.'.format(txt))
                     # if not, ignore it
@@ -409,17 +420,19 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             if de_dict:
                 # orb.log.debug('  + data elements found: {}'.format(de_dict))
                 # orb.log.debug('    deserializing data elements ...')
-                deserialize_des(oid, de_dict, cname=cname)
+                deserialize_des(oid, de_dict, cname=cname,
+                                force_update=force_update)
             else:
                 pass
-                # orb.log.debug('  + no parameters found for this object.')
+                # orb.log.debug('  + no data elements found for this object.')
             # NOTE: special case for 'parameters' section
             parm_dict = d.get('parameters')
             if parm_dict:
                 recompute_parmz_required = True
                 # orb.log.debug('  + parameters found: {}'.format(parm_dict))
                 # orb.log.debug('    deserializing parameters ...')
-                deserialize_parms(oid, parm_dict, cname=cname)
+                deserialize_parms(oid, parm_dict, cname=cname,
+                                  force_update=force_update)
             else:
                 pass
                 # orb.log.debug('  + no parameters found for this object.')

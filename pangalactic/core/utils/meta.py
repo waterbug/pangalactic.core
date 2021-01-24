@@ -335,13 +335,13 @@ def get_next_ref_des(assembly, component, prefix=None, product_type=None):
     acus = assembly.components
     if acus:
         rds = [acu.reference_designator for acu in acus]
-        # allow product_type to contain '-' (but it shouldn't)
-        all_prefixes = [(' '.join(rd.split(' ')[:-1])) for rd in rds if rd]
+        # product_type abbreviation should not contain '-', but it can
+        all_prefixes = [(''.join(rd.split('-')[:-1])) for rd in rds if rd]
         these_prefixes = [p for p in all_prefixes if p == prefix]
         new_nbr = len(these_prefixes) + 1
-        return prefix + ' ' + str(new_nbr)
+        return prefix + '-' + str(new_nbr)
     else:
-        return prefix + ' 1'
+        return prefix + '-1'
 
 def get_ra_name(ra_context_id, role_id, fname, mi, lname):
     """
