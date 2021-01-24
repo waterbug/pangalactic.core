@@ -414,6 +414,7 @@ def write_entity_xlsx(entity, sheet, level_fmts, name_fmts, data_fmts,
     # NOTE: this make ctgcy a str, unlike the other columns!
     ctgcy_P = fix_ctgcy(str(entity.get('nom_p_ctgcy', 30.0)))
     pmev = entity.get('nom_p_mev', '')
+    cost = entity.get('Cost', '')
 
     # print('writing {} in row {}'.format(entity.system_name, row))
     # first write the formatting to the whole row to set the bg color
@@ -441,6 +442,7 @@ def write_entity_xlsx(entity, sheet, level_fmts, name_fmts, data_fmts,
     sheet.write(row, 13, pcbe, data_fmt)         # Total Power
     sheet.write(row, 14, ctgcy_P, data_fmt)      # Power Contingency
     sheet.write(row, 15, pmev, data_fmt)         # Power MEV
+    sheet.write(row, 21, cost, data_fmt)         # Quoted Unit Price
 
 
 def write_mel_xlsx_from_model(context, is_project=True,
@@ -727,6 +729,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
     # Excel doesn't like space between the number and "%"
     ctgcy_P = fix_ctgcy(str(100 * get_pval(component.oid, 'P[Ctgcy]')))
     pmev = get_pval(component.oid, 'P[MEV]')
+    cost = get_pval(component.oid, 'Cost')  # Quoted Unit Price
     # -------------------------------------------
     # columns
     # -------------------------------------------
@@ -837,7 +840,8 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
     sheet.write(row, 13, pcbe * qty, data_fmt) # Total Power
     sheet.write(row, 14, ctgcy_P, data_fmt)
     sheet.write(row, 15, pmev * qty, data_fmt) # Power MEV
-    predefined_rows = [1,2,5,9,10,11,12,13,14,15]
+    sheet.write(row, 21, cost, data_fmt)       # Quoted Unit Price
+    predefined_rows = [1,2,5,9,10,11,12,13,14,15,21]
     dt_map = {'float': data_fmt,
               'int': int_fmt,
               'str': txt_fmt,
