@@ -173,9 +173,10 @@ class UberORB(object):
             db_url = 'sqlite:///{}'.format(local_db_path)
         state['db_url'] = db_url
         home_schema_version = state.get('schema_version')
-        if home_schema_version == schema_version:
-            # if the schema_version in the current home dir matches the app
-            # schema_version, just initialize the registry
+        if (home_schema_version is None or
+            home_schema_version == schema_version):
+            # if home_schema_version is None or matches the app schema_version,
+            # just initialize the registry.
             # NOTE:  registry 'debug' is set to False regardless of the
             # client's log level because its debug logging is INSANELY verbose
             # ...  if the registry needs debugging, just hack this and set
