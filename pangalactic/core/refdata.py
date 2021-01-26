@@ -1150,6 +1150,19 @@ dict(
     },
 
 {   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.avionics_system',
+    'id': 'avionics_system',
+    'name': 'Avionics System',
+    'abbreviation': 'Avionics',
+    'description': 'Avionics System',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
+    'create_datetime': epoch,
+    'mod_datetime': '2021-01-25 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.c_and_dh_system',
     'id': 'c_and_dh_system',
     'name': 'Command and Data Handling System',
@@ -1342,6 +1355,19 @@ dict(
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2020-04-01 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.PSE',
+    'id': 'PSE',
+    'name': 'Power Sourcing Equipment',
+    'abbreviation': 'PSE',
+    'description': 'Power Sourcing Equipment',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
+    'create_datetime': epoch,
+    'mod_datetime': '2021-01-25 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2879,6 +2905,7 @@ for pt_oid in [
     'pgefobjects:ProductType.eee_part',
     'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.power_system',
+    'pgefobjects:ProductType.PSE',
     'pgefobjects:ProductType.solar_array',
     'pgefobjects:ProductType.solar_array_actuator',
     'pgefobjects:ProductType.battery',
@@ -2898,6 +2925,7 @@ for pt_oid in [
 # Avionics (C&DH) ProductTypes
 avionics_discipline_obj = core_objs['pgefobjects:Discipline.avionics']
 for pt_oid in [
+    'pgefobjects:ProductType.avionics_system',
     'pgefobjects:ProductType.c_and_dh_system',   # C&DH System
     'pgefobjects:ProductType.board',
     'pgefobjects:ProductType.eee_part',
@@ -2905,6 +2933,7 @@ for pt_oid in [
     'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.comsec',
     'pgefobjects:ProductType.computer',
+    'pgefobjects:ProductType.PSE',
     'pgefobjects:ProductType.redundancy_management_unit'
     ]:
     pt_obj = core_objs[pt_oid]
@@ -2948,6 +2977,7 @@ for pt_oid in [
     'pgefobjects:ProductType.spacecraft',
     'pgefobjects:ProductType.instrument',
     'pgefobjects:ProductType.attitude_control_system',
+    'pgefobjects:ProductType.avionics_system',
     'pgefobjects:ProductType.c_and_dh_system',   # C&DH System
     'pgefobjects:ProductType.communications_system',
     'pgefobjects:ProductType.mechanical_system',
@@ -2957,6 +2987,7 @@ for pt_oid in [
     'pgefobjects:ProductType.observatory',
     'pgefobjects:ProductType.power_system',
     'pgefobjects:ProductType.propulsion_system',
+    'pgefobjects:ProductType.PSE',
     'pgefobjects:ProductType.thermal_control_system'
     ]:
     pt_obj = core_objs[pt_oid]
