@@ -224,19 +224,29 @@ class UberORB(object):
             state['schema_version'] = schema_version
             write_state(os.path.join(pgx_home, 'state'))
             # check for private key in old key path
-            self.log.debug('  [5] checking for private key ...')
+            self.log.debug('  [5] checking for old private keys ...')
+            self.log.debug('      (for transition from 1.4.x versions)')
             old_key_path = os.path.join(pgx_home, '.creds', 'private.key')
             if os.path.exists(old_key_path):
-                self.log.debug('      found key, moving to new location ...')
+                self.log.debug('      found old "private.key" ...')
                 # if found, copy key to user home dir and remove '.creds' dir
                 p = Path(pgx_home)
                 absp = p.resolve()
                 user_home = absp.parent
                 new_key_path = os.path.join(str(user_home), 'cattens.key')
-                shutil.copyfile(old_key_path, new_key_path)
+                # only copy key to new_key_path if there is no key there ...
+                # i.e. if user has not used a new dev version
+                if os.path.exists(new_key_path):
+                    self.log.debug('      found "cattens.key", not replacing.')
+                    self.log.debug('      may need to submit public key.')
+                else:
+                    shutil.copyfile(old_key_path, new_key_path)
+                    self.log.debug('      copying old key to new location ...')
+                    self.log.debug('      should be able to log in now.')
+                # in any case, remove the old key, since it's not used now
                 shutil.rmtree(os.path.join(pgx_home, '.creds'),
                               ignore_errors=True)
-                self.log.debug('      done -- should be able to log in now.')
+                self.log.debug('      done with keys.')
         # create in-memory cache for DataMatrix instances
         self.data = {}
         # create storage area for serialized DataMatrix instances (.tsv files)
