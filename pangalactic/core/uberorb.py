@@ -8,6 +8,9 @@ intended to be a singleton).
 import json, os, shutil, sys, traceback
 from pathlib import Path
 
+# Louie: dispatcher
+from louie import dispatcher
+
 # ruamel_yaml
 import ruamel_yaml as yaml
 
@@ -614,6 +617,7 @@ class UberORB(object):
                 # self.log.debug('   "{}"'.format(req_oid))
                 # self.log.debug('   computation result: {}'.format(result))
                 pass
+        dispatcher.send('parameters recomputed')
 
     def assign_test_parameters(self, objs, parms=None, des=None):
         """
