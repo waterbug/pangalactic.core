@@ -11,6 +11,7 @@ requirements:
     - setuptools
 
   run:
+    - openpyxl
     - pint
     - pynacl
     - python {{PY_VER}}

@@ -227,6 +227,14 @@ def serialize(orb, objs, view=None, include_components=False,
 # DESERIALIZATION_ORDER:  order in which to deserialize classes so that
 # object properties (relationships) are assigned properly (i.e., assemblies are
 # assigned their components, etc.)
+# ****************************************************************************
+# NOTE: this ordering is EXTREMELY important in that if it is not correct, the
+# deserialization process will encounter ForeignKeyViolation errors from the
+# database if expected objects do not exist when an object that depends on
+# them is being deserialized -- obviously, the ordering is from the simplest
+# objects to the most complex, but it must specifically take into account the
+# relationships in the schema.
+# ****************************************************************************
 DESERIALIZATION_ORDER = [
                     'Relation',
                     'Discipline',
@@ -239,6 +247,7 @@ DESERIALIZATION_ORDER = [
                     'ParameterDefinition',
                     'ParameterRelation',
                     'PortType',
+                    'PortTemplate',
                     'ProductType',
                     'Mission',
                     'ActivityType',
@@ -335,7 +344,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         # orb.log.info('  {} ref data object(s) found, ignored.'.format(
                                                # new_len - len(serialized)))
     current_oids = orb.get_oids()
-    incoming_oids = [so['oid'] for so in serialized]
+    # incoming_oids = [so['oid'] for so in serialized]
     for so in serialized:
         so_cname = so.get('_cname')
         if not so_cname:
@@ -357,7 +366,9 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             loadable['other'].append(so)
     order = [c for c in DESERIALIZATION_ORDER if c in loadable]
     order.append('other')
-    ports_and_flows_to_be_deleted = []
+    # ports_and_flows_to_be_deleted = []
+    ports_to_be_removed = []
+    flows_to_be_removed = []
     for group in order:
         for d in loadable[group]:
             cname = d.get('_cname', '')
@@ -468,19 +479,17 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     refresh_componentz_required = True
                 if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                     recompute_parmz_required = True
-                elif issubclass(cls, orb.classes['Product']):
-                    # NOTE:  the following assumes "white box" Product, which
-                    # includes the internals: ports, flows, components.
-                    # Removed components are covered by deleted Acus; ports and
-                    # flows are handled here ...
-                    for port in obj.ports:
-                        if port.oid not in incoming_oids:
-                            ports_and_flows_to_be_deleted.append(port)
-                    flows = orb.get_internal_flows_of(obj)
-                    if flows:
-                        for flow in flows:
-                            if flow.oid not in incoming_oids:
-                                ports_and_flows_to_be_deleted.append(flow)
+                elif cname == 'Port':
+                    # if "of_product" does not exist, port should be deleted
+                    # but first check for related flows, and if there are any
+                    # they must be deleted first!
+                    if not obj.of_product:
+                        ports_to_be_removed.append(obj)
+                elif cname == 'Flow':
+                    if (not obj.start_port
+                        or not obj.end_port
+                        or not obj.flow_context):
+                        flows_to_be_removed.append(obj)
                     recompute_parmz_required = True
                 elif cname == 'ParameterDefinition':
                     update_parm_defz(obj)
@@ -525,23 +534,20 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     refresh_componentz(obj.assembly)
                     refresh_componentz_required = False
     orb.db.commit()
-    if ports_and_flows_to_be_deleted:
-        orb.log.debug('  need to delete some ports and flows ...')
-        ports = []
-        n_ports = 0
-        n_flows = 0
-        for obj in ports_and_flows_to_be_deleted:
-            if obj.__class__.__name__ == 'Flow':
-                n_flows += 1
-                orb.db.delete(obj)
-            else:
-                ports.append(obj)
+    if flows_to_be_removed:
+        orb.log.debug('  some received flows were not valid ...')
+        n_flows = len(flows_to_be_removed)
+        for flow in flows_to_be_removed:
+            orb.db.delete(flow)
         orb.db.commit()
-        n_ports = len(ports)
-        for p in ports:
-            orb.db.delete(p)
+        orb.log.debug(f'  {n_flows} flows deleted.')
+    if ports_to_be_removed:
+        orb.log.debug('  some received ports were not valid ...')
+        n_ports = len(ports_to_be_removed)
+        for port in ports_to_be_removed:
+            orb.db.delete(port)
         orb.db.commit()
-        orb.log.debug(f'  {n_ports} ports and {n_flows} flows deleted.')
+        orb.log.debug(f'  {n_ports} ports deleted.')
     # log_txt = '* deserializer:'
     # if created:
         # orb.log.info('{} new object(s) deserialized: {}'.format(
