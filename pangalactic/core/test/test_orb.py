@@ -113,12 +113,15 @@ class OrbTest(unittest.TestCase):
         # always been run before this test runs.  It is possible to delete a
         # refdata object in an installed application, but this test always
         # starts with a fresh test "installation" so should always pass.)
-        oids = [o['oid'] for o in refdata.initial]
-        oids += [o['oid'] for o in refdata.core]
+        # oids = [o['oid'] for o in refdata.initial]
+        # oids += [o['oid'] for o in refdata.core]
+        oids = refdata.ref_oids
         Identifiable = orb.classes['Identifiable']
-        value = orb.db.query(Identifiable).filter(
-                                            Identifiable.oid.in_(oids)).count()
-        expected = len(oids)
+        res = orb.db.query(Identifiable).filter(
+                                            Identifiable.oid.in_(oids))
+        found_oids = [o.oid for o in res]
+        value = set(oids) - set(found_oids)
+        expected = set()
         self.assertEqual(expected, value)
 
     def test_05_check_serialized_test_objects(self):

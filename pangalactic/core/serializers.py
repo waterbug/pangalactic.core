@@ -326,11 +326,22 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     req_oids = set()
     acus = set()
     psus = set()
+    # objs: list of all deserialized objects
     objs = []
+    # products: list of deserialized objects that are instances of Product
+    # subclasses
     products = []
+    # created: list of all deserialized objects which are new
     created = []
+    # updates: list of all deserialized objects which are updates
     updates = {}
+    # ignores: list of serialized object oids for which local objects exist
+    # that have the same or later mod_datetime or should be ignored for some
+    # other reason (e.g. invalid Port and Flow instances)
     ignores = []
+    # loadable: dict mapping class names to lists of serialized objects of the
+    # class, used to implement DESERIALIZATION_ORDER for the objects to be
+    # deserialized
     loadable = {}
     loadable['other'] = []
     if dictify:
@@ -366,9 +377,6 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             loadable['other'].append(so)
     order = [c for c in DESERIALIZATION_ORDER if c in loadable]
     order.append('other')
-    # ports_and_flows_to_be_deleted = []
-    ports_to_be_removed = []
-    flows_to_be_removed = []
     for group in order:
         for d in loadable[group]:
             cname = d.get('_cname', '')
@@ -465,10 +473,28 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         # orb.log.debug('      rel obj found.')
                         # kw[asciify(fk)] = orb.get(asciify(d[asciify(fk)]))
                         kw[fk] = orb.get(d[fk])
-                    # else:
-                        # orb.log.debug('      rel obj NOT found.')
+                    else:
+                        # "of_product" is REQUIRED for a Port (it is NOT
+                        # required for a PortTemplate, a subtype of Port)
+                        if fk == 'of_product' and cname == 'Port':
+                            orb.log.debug('      invalid Port instance:')
+                            oid = d['oid']
+                            orb.log.debug(f'      - oid: "{oid}"')
+                            orb.log.debug('        is missing of_product;')
+                            orb.log.debug('        will be ignored.')
+                            ignores.append(oid)
+                        # a Flow MUST have "start_port", "end_port" and
+                        # "flow_context" objects
+                        if fk in ["start_port", "end_port", "flow_context"]:
+                            orb.log.debug('      invalid Flow instance:')
+                            oid = d['oid']
+                            orb.log.debug(f'      - oid: "{oid}"')
+                            orb.log.debug('        is missing start_port,')
+                            orb.log.debug('        end_port, or flow_context;')
+                            orb.log.debug('        will be ignored.')
+                            ignores.append(oid)
             cls = orb.classes[cname]
-            if d['oid'] in updates:
+            if d['oid'] in updates and d['oid'] not in ignores:
                 # orb.log.debug('* updating object with oid "{}"'.format(
                                                              # d['oid']))
                 obj = updates[d['oid']]
@@ -478,18 +504,6 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 if cname == 'Acu':
                     refresh_componentz_required = True
                 if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
-                    recompute_parmz_required = True
-                elif cname == 'Port':
-                    # if "of_product" does not exist, port should be deleted
-                    # but first check for related flows, and if there are any
-                    # they must be deleted first!
-                    if not obj.of_product:
-                        ports_to_be_removed.append(obj)
-                elif cname == 'Flow':
-                    if (not obj.start_port
-                        or not obj.end_port
-                        or not obj.flow_context):
-                        flows_to_be_removed.append(obj)
                     recompute_parmz_required = True
                 elif cname == 'ParameterDefinition':
                     update_parm_defz(obj)
@@ -534,20 +548,6 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     refresh_componentz(obj.assembly)
                     refresh_componentz_required = False
     orb.db.commit()
-    if flows_to_be_removed:
-        orb.log.debug('  some received flows were not valid ...')
-        n_flows = len(flows_to_be_removed)
-        for flow in flows_to_be_removed:
-            orb.db.delete(flow)
-        orb.db.commit()
-        orb.log.debug(f'  {n_flows} flows deleted.')
-    if ports_to_be_removed:
-        orb.log.debug('  some received ports were not valid ...')
-        n_ports = len(ports_to_be_removed)
-        for port in ports_to_be_removed:
-            orb.db.delete(port)
-        orb.db.commit()
-        orb.log.debug(f'  {n_ports} ports deleted.')
     # log_txt = '* deserializer:'
     # if created:
         # orb.log.info('{} new object(s) deserialized: {}'.format(
