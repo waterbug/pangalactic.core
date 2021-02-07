@@ -285,7 +285,8 @@ def validate_all(fields_dict, cname, schema, view, required=None, idvs=None,
                 msg = '{} with id + version '.format(cname)
                 msg += '"{}.v.{}" exists.'.format(idv[0], idv[1])
                 msg_dict['Duplicate id + version'] = msg
-        else:
+        elif cname != 'Port':
+            # Ports are allowed to have duplicate ids
             ids = set([idv[0] for idv in idvs])
             if id_value in ids:
                 msg_dict['Duplicate id'] = '{} with id "{}" exists.'.format(
