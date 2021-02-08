@@ -234,8 +234,8 @@ def get_perms(obj, user=None, permissive=False):
             # access will depend on the user's permissions on 'of_product'
             return get_perms(obj.of_product)
         # [5] is it a Flow?
-            # access will depend on the user's permissions on 'flow_context'
         elif isinstance(obj, orb.classes['Flow']):
+            # access depends on the user's permissions on 'flow_context'
             return get_perms(obj.flow_context)
         # [6] if none of the above, log the relevant info for debugging ...
         else:
