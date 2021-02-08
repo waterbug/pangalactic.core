@@ -1520,21 +1520,27 @@ class UberORB(object):
         """
         self.log.debug('* get_all_usage_flows()')
         if usage:
-            oid = getattr(usage, 'oid', 'None')
-            self.log.debug(f'* get_all_usage_flows(<{oid}>)')
+            oid = getattr(usage, 'oid', None)
+            if oid:
+                self.log.debug(f'  for usage <{oid}>')
+            else:
+                self.log.debug('  object provided had no "oid" -> no flows.')
+                return []
         else:
-            self.log.debug('* get_all_usage_flows(None)')
+            self.log.debug('  no usage provided -> no flows.')
+            return []
+        if isinstance(usage, self.classes['ProjectSystemUsage']):
+            self.log.debug('  - no flows (Project context cannot have flows).')
             return []
         if isinstance(usage, self.classes['Acu']):
             assembly = usage.assembly
             component = usage.component
-        elif isinstance(usage, self.classes['ProjectSystemUsage']):
-            assembly = usage.project
-            component = usage.system
         else:
+            self.log.debug('  usage was not an Acu -> no flows.')
             return []
         # in case we're dealing with a corrupted "usage" ...
         if not component or not component.ports:
+            self.log.debug('  usage had no components/ports -> no flows.')
             return []
         self.log.debug(f'  - assembly id: "{assembly.id}"')
         self.log.debug(f'  - component id: "{component.id}"')
@@ -1889,19 +1895,19 @@ class UberORB(object):
                 # [NOTE: this adds the object to trash for the client;
                 # server-side trash management is handled by "vger".]
                 trash[obj.oid] = serialize(self, [obj])
+            obj_id = getattr(obj, 'id', 'no id')
+            obj_name = getattr(obj, 'name', 'no name')
             info.append('   obj id: {}, name: {} (oid "{}")'.format(
-                                        getattr(obj, 'id', 'no id'),
-                                        getattr(obj, 'name', 'no name'),
-                                        obj.oid))
+                                        obj_id, obj_name, obj.oid))
             if delete_not_allowed:
-                info.append(f'   cannot delete object "{obj.id}".')
+                info.append(f'   cannot delete "{obj_id}".')
                 continue
             else:
-                info.append('   attempting to delete ...')
+                info.append('   attempting to delete "{obj_id}" ...')
                 self.db.delete(obj)
                 try:
                     self.db.commit()
-                    info.append('     ... object deleted.')
+                    info.append('     ... deleted.')
                 except:
                     self.db.rollback()
                     info.append('     ... delete failed, rolled back.')
