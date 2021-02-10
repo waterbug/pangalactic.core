@@ -148,9 +148,9 @@ def namify(s):
     try:
         s = asciify(s)
         if s.istitle():
-            return unicode(''.join(s.split(' ')))
+            return ''.join(s.split(' '))
         else:
-            return unicode('_'.join(s.split(' ')))
+            return '_'.join(s.split(' '))
     except:
         # Python 3: str IS unicode
         s = asciify(s)
@@ -189,7 +189,7 @@ def register_namespaces(rdfdataset):
     localnames = set()
     root = None
     rdfdataset_nsdict = {}
-    print('* names: calling iterparse() ...')
+    # print('* names: calling iterparse() ...')
     for event, elem in ET.iterparse(rdfdataset, events):
         if event == 'start-ns':
             if elem[0] == '':

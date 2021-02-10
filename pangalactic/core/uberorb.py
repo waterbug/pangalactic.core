@@ -26,7 +26,7 @@ from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
-from pangalactic.core.entity      import (dmz, load_dmz, save_dmz,
+from pangalactic.core.entity      import (load_dmz, save_dmz,
                                           schemaz, load_schemaz, save_schemaz,
                                           load_ent_histz, save_ent_histz)
 from pangalactic.core.registry    import PanGalacticRegistry
@@ -161,10 +161,10 @@ class UberORB(object):
             os.makedirs(self.vault, mode=0o755)
         self.logging_initialized = False
         self.start_logging(home=pgx_home, console=console, debug=debug)
-        self.log.debug('* config read ...')
-        self.log.debug('* state read ...')
+        # self.log.debug('* config read ...')
+        # self.log.debug('* state read ...')
         # self.log.debug('  state: {}'.format(str(state)))
-        self.log.debug('* prefs read ...')
+        # self.log.debug('* prefs read ...')
         # self.log.debug('  prefs: {}'.format(str(prefs)))
         self.log.debug('* trash read ({} objects).'.format(len(trash)))
         if 'units' not in prefs:
@@ -261,18 +261,18 @@ class UberORB(object):
             os.makedirs(self.test_data_dir)
         else:
             current_test_files = set(os.listdir(self.test_data_dir))
-        self.log.debug('  - found {} data files'.format(
-                       len(current_test_files)))
+        # self.log.debug('  - found {} data files'.format(
+                       # len(current_test_files)))
         test_data_mod_path = test_data_mod.__path__[0]
         test_data_files = set([s for s in os.listdir(test_data_mod_path)
                                if (not s.startswith('__init__')
                                and not s.startswith('__pycache__'))
                                ])
         test_data_to_copy = test_data_files - current_test_files
-        self.log.debug('  - {} data files to be installed: '.format(
-                       len(test_data_to_copy)))
+        # self.log.debug('  - {} data files to be installed: '.format(
+                       # len(test_data_to_copy)))
         if test_data_to_copy:
-            self.log.debug('  - copying data files into test_data dir...')
+            # self.log.debug('  - copying data files into test_data dir...')
             test_data_cpd = []
             for p in test_data_to_copy:
                 shutil.copy(os.path.join(test_data_mod_path, p),
@@ -280,13 +280,13 @@ class UberORB(object):
                 test_data_cpd.append(p)
             # self.log.debug('  - new test data files installed: %s'
                           # % str(test_data_cpd))
-        else:
-            self.log.debug('  - all test data files already installed.')
+        # else:
+            # self.log.debug('  - all test data files already installed.')
         # * copy files from 'p.test.vault' module to vault_dir
-        self.log.debug('* checking for files in [pgx_home]/vault ...')
+        # self.log.debug('* checking for files in [pgx_home]/vault ...')
         current_vault_files = set(os.listdir(self.vault))
-        self.log.debug('  - found {} vault files:'.format(
-                       len(current_vault_files)))
+        # self.log.debug('  - found {} vault files:'.format(
+                       # len(current_vault_files)))
         # if current_vault_files:
             # for fpath in current_vault_files:
                 # self.log.debug('    {}'.format(fpath))
@@ -296,18 +296,18 @@ class UberORB(object):
                                and not s.startswith('__pycache__'))
                                ])
         vault_files_to_copy = test_vault_files - current_vault_files
-        self.log.debug('  - new test vault files to be installed: {}'.format(
-                       len(vault_files_to_copy)))
+        # self.log.debug('  - new test vault files to be installed: {}'.format(
+                       # len(vault_files_to_copy)))
         if vault_files_to_copy:
-            self.log.debug('  - copying test vault files into vault dir...')
+            # self.log.debug('  - copying test vault files into vault dir...')
             vault_files_copied = []
             for p in vault_files_to_copy:
                 shutil.copy(os.path.join(vault_mod_path, p), self.vault)
                 vault_files_copied.append(p)
             # self.log.debug('  - new test vault files installed: {}'.format(
                            # str(vault_files_copied)))
-        else:
-            self.log.debug('  - all test vault files already installed.')
+        # else:
+            # self.log.debug('  - all test vault files already installed.')
         # basically, versionables == {Product and all its subclasses}
         self.versionables = [cname for cname in self.classes if 'version' in
                              self.schemas[cname]['field_names']]
@@ -421,7 +421,7 @@ class UberORB(object):
         f.write(yaml.safe_dump(s_objs, default_flow_style=False))
         f.close()
         self.log.info('  dump to yaml completed.')
-        orb.log.debug('  {} db objects written.'.format(len(s_objs)))
+        self.log.debug('  {} db objects written.'.format(len(s_objs)))
         self.db_dump_complete = True
 
     def save_caches(self, dir_path=None):
@@ -541,12 +541,12 @@ class UberORB(object):
         """
         Save `diagramz` cache to diagrams.json file.
         """
-        self.log.debug('* _save_diagramz() ...')
+        # self.log.debug('* _save_diagramz() ...')
         json_path = os.path.join(self.home, 'diagrams.json')
         with open(json_path, 'w') as f:
             f.write(json.dumps(diagramz, separators=(',', ':'),
                                indent=4, sort_keys=True))
-        self.log.debug('  ... diagrams.json file written.')
+        # self.log.debug('  ... diagrams.json file written.')
 
     def recompute_parmz(self):
         """
@@ -717,15 +717,15 @@ class UberORB(object):
         Create reference data objects.  Performed at orb start up, since new
         objects created at runtime refer to some of the reference objects.
         """
-        self.log.info('* checking reference data ...')
+        # self.log.info('* checking reference data ...')
         # first get the oids of everything in the db ...
         db_oids = self.get_oids()
         # [0] load initial reference data (Orgs, Persons, Roles,
         # RoleAssignments)
         missing_i = [so for so in refdata.initial if so['oid'] not in db_oids]
         if missing_i:
-            self.log.debug('  + missing some initial reference data:')
-            self.log.debug('  {}'.format([so['oid'] for so in missing_i]))
+            # self.log.debug('  + missing some initial reference data:')
+            # self.log.debug('  {}'.format([so['oid'] for so in missing_i]))
             i_objs = deserialize(self, [so for so in missing_i],
                                  include_refdata=True,
                                  force_no_recompute=True)
@@ -735,14 +735,14 @@ class UberORB(object):
             # self.db.commit()
         admin = self.get('pgefobjects:admin')
         pgana = self.get('pgefobjects:PGANA')
-        self.log.info('  + initial reference data loaded.')
+        # self.log.info('  + initial reference data loaded.')
         # [1] load any parameter definitions and contexts that may be missing
         #     from the current db (in a first-time installation, this will of
         #     course be *all* parameter definitions and contexts)
         missing_p = [so for so in refdata.pdc if so['oid'] not in db_oids]
         if missing_p:
-            self.log.debug('  + missing some reference parameters/contexts:')
-            self.log.debug('  {}'.format([so['oid'] for so in missing_p]))
+            # self.log.debug('  + missing some reference parameters/contexts:')
+            # self.log.debug('  {}'.format([so['oid'] for so in missing_p]))
             p_objs = deserialize(self, [so for so in missing_p],
                                  include_refdata=True,
                                  force_no_recompute=True)
@@ -752,8 +752,8 @@ class UberORB(object):
         #     course be *all* data element definitions)
         missing_d = [so for so in refdata.deds if so['oid'] not in db_oids]
         if missing_d:
-            self.log.debug('  + missing some reference data elements:')
-            self.log.debug('  {}'.format([so['oid'] for so in missing_d]))
+            # self.log.debug('  + missing some reference data elements:')
+            # self.log.debug('  {}'.format([so['oid'] for so in missing_d]))
             d_objs = deserialize(self, [so for so in missing_d],
                                  include_refdata=True,
                                  force_no_recompute=True)
@@ -782,16 +782,16 @@ class UberORB(object):
         # ********************************************************************
         load_data_elementz(self.home)
         load_parmz(self.home)
-        self.log.debug('* loading ent_histz ...')
+        # self.log.debug('* loading ent_histz ...')
         load_ent_histz(self.home)
-        self.log.debug('* loading schemaz ...')
+        # self.log.debug('* loading schemaz ...')
         load_schemaz(self.home)
-        self.log.debug('* loading dmz ...')
+        # self.log.debug('* loading dmz ...')
         load_dmz(self.home)
-        self.log.debug('  dmz: {}'.format(str(dmz)))
+        # self.log.debug('  dmz: {}'.format(str(dmz)))
         self.recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
-        self.log.debug('  + checking for updates to parameter definitions ...')
+        # self.log.debug('  + checking for updates to parameter definitions ...')
         all_pds = refdata.pdc
         all_pd_oids = [so['oid'] for so in all_pds]
         # get mod_datetimes of all current ref data objects
@@ -803,17 +803,17 @@ class UberORB(object):
                            (uncook_datetime(so.get('mod_datetime')) >
                            uncook_datetime(pd_mod_dts.get(so['oid']))))] 
         if updated_pds:
-            self.log.debug('    {} updates found ...'.format(len(updated_pds)))
+            # self.log.debug('    {} updates found ...'.format(len(updated_pds)))
             deserialize(self, updated_pds, include_refdata=True)
-            self.log.debug('    parameter definition updates completed.')
-        else:
-            self.log.debug('    no updates found.')
+            # self.log.debug('    parameter definition updates completed.')
+        # else:
+            # self.log.debug('    no updates found.')
         # [5] load balance of any reference data missiong from db
         missing_c = [so for so in refdata.core if so['oid'] not in db_oids]
         objs = []
         if missing_c:
-            self.log.debug('  + missing some core reference data:')
-            self.log.debug('  {}'.format([so['oid'] for so in missing_c]))
+            # self.log.debug('  + missing some core reference data:')
+            # self.log.debug('  {}'.format([so['oid'] for so in missing_c]))
             objs = deserialize(self, [so for so in missing_c],
                                include_refdata=True,
                                force_no_recompute=True)
@@ -823,7 +823,7 @@ class UberORB(object):
                 o.creator = o.modifier = admin
             self.db.add(o)
         # [6] check for updates to reference data other than parameter defs
-        self.log.debug('  + checking for updates to reference data ...')
+        # self.log.debug('  + checking for updates to reference data ...')
         all_ref = refdata.initial + refdata.core
         all_ref_oids = [so['oid'] for so in all_ref]
         # get mod_datetimes of all current ref data objects
@@ -835,11 +835,11 @@ class UberORB(object):
                          (uncook_datetime(so.get('mod_datetime')) >
                          uncook_datetime(mod_dts.get(so['oid']))))] 
         if updated_r:
-            self.log.debug('    {} updates found ...'.format(len(updated_r)))
+            # self.log.debug('    {} updates found ...'.format(len(updated_r)))
             deserialize(self, updated_r, include_refdata=True)
-            self.log.debug('    updates completed.')
-        else:
-            self.log.debug('    no updates found.')
+            # self.log.debug('    updates completed.')
+        # else:
+            # self.log.debug('    no updates found.')
         # [7] delete deprecated reference data
         #     **********************************************************
         #     NOTE:  DON'T DO THIS STEP UNTIL ALL DATA RELATED TO THE
@@ -877,7 +877,7 @@ class UberORB(object):
              data_element_id : {name, description, range_datatype, mod_datetime},
              ...}
         """
-        self.log.debug('* create_parm_defz')
+        # self.log.debug('* create_parm_defz')
         pds = self.get_by_type('ParameterDefinition')
         # first, the "variable" parameters ...
         pd_dict = {pd.id :
@@ -894,14 +894,14 @@ class UberORB(object):
                     } for pd in pds}
         parm_defz.update(pd_dict)
         # var_ids = sorted(list(pd_dict), key=str.lower)
-        self.log.debug('      bases created: {}'.format(
-                                                str(list(pd_dict.keys()))))
+        # self.log.debug('      bases created: {}'.format(
+                                                # str(list(pd_dict.keys()))))
         # add PDs for the descriptive contexts (CBE, Contingency, MEV) for the
         # variables (Mass, Power, Datarate) for which functions have been defined
         # to compute the CBE and MEV values
         all_contexts = self.get_by_type('ParameterContext')
-        self.log.debug('      adding context parms for: {}'.format(
-                                        str([c.id for c in all_contexts])))
+        # self.log.debug('      adding context parms for: {}'.format(
+                                        # str([c.id for c in all_contexts])))
         for pd in pds:
             for c in all_contexts:
                 add_context_parm_def(pd, c)
@@ -925,7 +925,7 @@ class UberORB(object):
 
             {dimension : [ids of ParameterDefinitions having that dimension]}
         """
-        self.log.debug('* create_parmz_by_dimz')
+        # self.log.debug('* create_parmz_by_dimz')
         pds = self.get_by_type('ParameterDefinition')
         dimz = set([pd.dimensions for pd in pds])
         parmz_by_dimz.update({dim : [pd.id for pd in pds if pd.dimensions == dim]
@@ -938,18 +938,18 @@ class UberORB(object):
             {data_element_id : {name, description, range_datatype, mod_datetime},
              ...}
         """
-        self.log.debug('* create_de_defz')
+        # self.log.debug('* create_de_defz')
         # check for localized data element definition structures in
         # state['de_defz'] -- these can be introduced by an app
         new_dedef_objs = []
-        self.log.debug('  - checking for de defs in state["de_defz"] ...')
+        # self.log.debug('  - checking for de defs in state["de_defz"] ...')
         new_state_dedef_ids = []
         # NEW: check for labels even if the de def objects are not new, so that
         # labels can be updated by new version of app at startup ...
         state_dedef_labels = {}
         if state.get('de_defz'):
-            self.log.debug('    de defs found in state["de_defz"]')
-            self.log.debug('    checking for *new* de ids ...')
+            # self.log.debug('    de defs found in state["de_defz"]')
+            # self.log.debug('    checking for *new* de ids ...')
             ded_ids = self.get_ids('DataElementDefinition')
             new_state_dedef_ids = [deid for deid in state['de_defz']
                                     if deid not in ded_ids]
@@ -957,7 +957,7 @@ class UberORB(object):
                                 for deid, de_def in state['de_defz'].items()
                                 if de_def.get('label')})
             if new_state_dedef_ids:
-                self.log.debug('    *new* de ids found, adding ...')
+                # self.log.debug('    *new* de ids found, adding ...')
                 # if any are found, create DataElementDefinitions from them,
                 # making sure to save their 'label' fields separately since
                 # they are not yet supported by DataElementDefinition ...
@@ -985,8 +985,8 @@ class UberORB(object):
                 self.save(new_dedef_objs)
             # update any existing DataElementDefinitions if the one pulled in
             # from state has a later mod_datetime
-            self.log.debug('    checking for *updated* de defs ...')
-            n_updated = 0
+            # self.log.debug('    checking for *updated* de defs ...')
+            # n_updated = 0
             for deid in state['de_defz']:
                 if deid in ded_ids:
                     # self.log.debug(f'    - "{deid}"')
@@ -996,15 +996,15 @@ class UberORB(object):
                     new_dts = state['de_defz'][deid].get('mod_datetime', '0')
                     # self.log.debug(f'      + state dts: "{new_dts}"')
                     if new_dts > cur_dts:
-                        self.log.debug(f'    - updating de def for "{deid}"')
+                        # self.log.debug(f'    - updating de def for "{deid}"')
                         for a, val in state['de_defz'][deid].items():
                             if a == 'mod_datetime':
                                 val = uncook_datetime(val)
                             setattr(cur_ded, a, val)
                         self.db.commit()
-                        n_updated += 1
-            if not n_updated:
-                self.log.debug('    no updated de defs found.')
+                        # n_updated += 1
+            # if not n_updated:
+                # self.log.debug('    no updated de defs found.')
         de_def_objs = self.get_by_type('DataElementDefinition')
         de_defz.update(
             {de_def_obj.id :
@@ -1026,8 +1026,8 @@ class UberORB(object):
         # if state_dedef_labels:
             # for deid in state_dedef_labels:
                 # de_defz[deid]['label'] = state_dedef_labels[deid]
-        self.log.debug('  - data element defs created: {}'.format(
-                                                str(list(de_defz.keys()))))
+        # self.log.debug('  - data element defs created: {}'.format(
+                                                # str(list(de_defz.keys()))))
 
     ##########################################################################
     # DB FUNCTIONS
@@ -1196,14 +1196,14 @@ class UberORB(object):
         elif kw:
             oids = kw.get('oids')
             # self.log.debug('* get(oids=%s)' % str(oids))
-            self.log.debug('* get(oids=({} oids))'.format(len(oids)))
+            # self.log.debug('* get(oids=({} oids))'.format(len(oids)))
             if oids:
                 return self.db.query(entity).filter(
                                         entity.oid.in_(oids)).all()
             else:
                 return []
         else:
-            self.log.debug('* get() [no arguments provided]')
+            # self.log.debug('* get() [no arguments provided]')
             return None
 
     def get_count(self, cname):
@@ -1298,13 +1298,13 @@ class UberORB(object):
             return ''
         all_ids = self.get_ids(cname='HardwareProduct')
         all_ids += self.get_ids(cname='Template')
-        self.log.debug('  all_ids:')
-        self.log.debug('  {}'.format(str(all_ids)))
+        # self.log.debug('  all_ids:')
+        # self.log.debug('  {}'.format(str(all_ids)))
         id_suffixes = [(i or '').split('-')[-1] for i in all_ids]
-        self.log.debug('  id_suffixes:')
-        self.log.debug('  {}'.format(str(id_suffixes)))
+        # self.log.debug('  id_suffixes:')
+        # self.log.debug('  {}'.format(str(id_suffixes)))
         current_id_parts = (obj.id or '').split('-')
-        self.log.debug('  current_id_parts: {}'.format(str(current_id_parts)))
+        # self.log.debug('  current_id_parts: {}'.format(str(current_id_parts)))
         if current_id_parts[-1] in id_suffixes:
             id_suffixes.remove(current_id_parts[-1])
         # if the 'Vendor' data element has a non-blank value, the owner id is
@@ -1313,9 +1313,9 @@ class UberORB(object):
             owner_id = 'Vendor'
         else:
             owner_id = getattr(obj.owner, 'id', 'Owner-Unknown')
-        self.log.debug('  owner_id: {}'.format(owner_id))
+        # self.log.debug('  owner_id: {}'.format(owner_id))
         pt_abbr = getattr(obj.product_type, 'abbreviation', 'TBD') or 'TBD'
-        self.log.debug('  pt_abbr: {}'.format(pt_abbr))
+        # self.log.debug('  pt_abbr: {}'.format(pt_abbr))
         # test whether current id already conforms -- i.e., first part is
         # [owner.id or "Vendor"] + '-' + [product_type.abbrev.] + '-'
         # and last part (suffix) is unique
@@ -1612,7 +1612,7 @@ class UberORB(object):
                                len(assemblies)))
             objs += assemblies
         else:
-            self.log.debug('  - no ProjectSystemUsages found')
+            self.log.debug('  - no project-level systems found')
         objs.append(project)
         models = []
         for o in objs:
@@ -1715,7 +1715,7 @@ class UberORB(object):
         info = []
         recompute_required = False
         refresh_assemblies = []
-        local_user = self.get(state.get('local_user_oid', 'me'))
+        local_user_obj = self.get(state.get('local_user_oid', 'me'))
         for obj in objs:
             delete_not_allowed = False
             if not obj:
@@ -1784,6 +1784,7 @@ class UberORB(object):
                 # in the context of its assembly/project
                 self.log.debug('   - orb checking for flows ...')
                 flows = self.get_all_usage_flows(obj)
+                # *** NOTE: CAUTION! Acu should not be deleted if flows exist!
                 if flows:
                     n = len(flows)
                     self.log.debug(f'     deleting {n} flows ...')
@@ -1888,13 +1889,14 @@ class UberORB(object):
                     refresh_assemblies.append(obj.assembly)
                 recompute_required = True
             creator = getattr(obj, 'creator', None)
-            if (isinstance(obj, self.classes['Product'])
-                and creator == local_user):
-                # if local_user created Product, add it to trash
-                # TODO:  use trash to enable undo of delete ...
-                # [NOTE: this adds the object to trash for the client;
-                # server-side trash management is handled by "vger".]
+            # if local_user created Product, add it to trash
+            # TODO:  use trash to enable undo of delete ...
+            # [NOTE: this adds the object to trash for the client;
+            # server-side trash management is handled by "vger".]
+            if creator is local_user_obj:
                 trash[obj.oid] = serialize(self, [obj])
+                txt = 'local user was creator -- obj recorded in trash.'
+                info.append(f'   {txt}')
             obj_id = getattr(obj, 'id', 'no id')
             obj_name = getattr(obj, 'name', 'no name')
             info.append('   obj id: {}, name: {} (oid "{}")'.format(

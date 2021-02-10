@@ -1013,8 +1013,10 @@ def set_pval(oid, pid, value, units='', mod_datetime=None, local=True):
         # dts = str(mod_datetime)
         # log.debug('  setting value: {}'.format(value))
         # log.debug('  setting mod_datetime: "{}"'.format(dts))
-        dispatcher.send('pval set', oid=oid, pid=pid, value=value,
-                        units=units, mod_datetime=mod_datetime, local=local)
+        if local:
+            dispatcher.send('pval set', oid=oid, pid=pid, value=value,
+                            units=units, mod_datetime=mod_datetime,
+                            local=local)
         return True
     except:
         # log.debug('  *** set_pval() failed:')
@@ -1045,7 +1047,7 @@ def get_pval_from_str(oid, pid, str_val, units='', local=True):
         local (bool):  if False, we were called as a result of a remote event
             -- i.e., someone else set the value [default: True]
     """
-    # This log msg is only needed for extreme debugging -- `set_pval()` is
+    # This log msg is only needed for extreme debugging -- `get_pval()` is
     # called at the end and will log essentially the same information ...
     # log.debug('* get_pval_from_str({}, {}, {})'.format(oid, pid,
                                                            # str(str_val)))
