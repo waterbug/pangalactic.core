@@ -18,6 +18,7 @@ def get_perms(obj, user=None, permissive=False):
 
     Keyword Args:
         user (Person):  the user object (None -> local user)
+        permissive (bool):  sets "permissive" mode
 
     Returns:
         permissions (list of str):  a list that is either empty or
@@ -45,6 +46,11 @@ def get_perms(obj, user=None, permissive=False):
         # anyone can "modify" the SANDBOX (i.e. add systems to it)
         return ['view', 'modify']
     if config.get('local_admin') or permissive:
+        # *********************************************************************
+        # NOTE: USE WITH EXTREME CAUTION! These settings can lead to database
+        # corruption and major malfunctions if repository objects are edited or
+        # deleted offline and then the client is synced with a repository!
+        # *********************************************************************
         # orb.log.debug('  "local_admin" or "permissive" configured.')
         perms = ['view', 'modify', 'decloak', 'delete']
         # orb.log.debug('  perms: {}'.format(perms))
@@ -88,6 +94,11 @@ def get_perms(obj, user=None, permissive=False):
     if is_global_admin(user):
         # global admin is omnipotent, except for deleting projects ...
         # orb.log.debug('  ******* user is a global admin.')
+        # *********************************************************************
+        # NOTE: ADMINS MUST USE EXTREME CAUTION! Deletions can lead to database
+        # corruption and major malfunctions if repository objects are edited or
+        # deleted offline and then the client is synced with a repository!
+        # *********************************************************************
         perms = ['view', 'modify', 'decloak', 'delete']
         # orb.log.debug('  perms: {}'.format(perms))
         return perms
@@ -100,8 +111,16 @@ def get_perms(obj, user=None, permissive=False):
         if (hasattr(obj, 'creator') and obj.creator is user and
             not isinstance(obj, orb.classes['Person'])):
             # orb.log.debug('  user is object creator.')
-            # any object can be deleted by its creator
-            perms = ['view', 'modify', 'decloak', 'delete']
+            # creator has full perms
+            perms = ['view', 'decloak']
+            if not isinstance(obj, orb.classes['Acu']):
+                perms.append('modify')
+            if state.get('connected'):
+                # deletions are only allowed if connected
+                perms.append('delete')
+                if isinstance(obj, orb.classes['Acu']):
+                    # Acus can only be modified if connected
+                    perms.append('modify')
             # orb.log.debug('  perms: {}'.format(perms))
             return perms
         # From here on, access depends on roles and product_types
@@ -133,7 +152,10 @@ def get_perms(obj, user=None, permissive=False):
                     # orb.log.debug(
                         # '  user is authorized for ProductType "{}".'.format(
                         # pt_id))
-                    perms = ['view', 'modify', 'decloak', 'delete']
+                    perms = ['view', 'modify', 'decloak']
+                    if state.get('connected'):
+                        # deletions are only allowed if connected
+                        perms.append('delete')
                     # orb.log.debug('  perms: {}'.format(perms))
                     return perms
                 else:
@@ -148,7 +170,10 @@ def get_perms(obj, user=None, permissive=False):
                 req_mgrs = set(['Administrator', 'systems_engineer',
                                 'lead_engineer'])
                 if req_mgrs & role_ids:
-                    perms = ['view', 'modify', 'decloak', 'delete']
+                    perms = ['view', 'modify', 'decloak']
+                    if state.get('connected'):
+                        # deletions are only allowed if connected
+                        perms.append('delete')
                     # orb.log.debug('  perms: {}'.format(perms))
                     return perms
                 else:
@@ -190,14 +215,20 @@ def get_perms(obj, user=None, permissive=False):
             # [2a] assembly with a relevant product type
             if assembly_type in subsystem_types:
                 # orb.log.debug('  - assembly product_type is relevant.')
-                perms = ['view', 'modify', 'decloak', 'delete']
+                perms = ['view', 'decloak']
+                if state.get('connected'):
+                    # mods and deletions are only allowed if connected
+                    perms.append('modify', 'delete')
                 # orb.log.debug('    perms: {}'.format(perms))
                 return perms
             # [2b] real component with a relevant product type
             elif (getattr(obj.component.product_type, 'id', None)
                   in subsystem_types):
                 # orb.log.debug('  - component product_type is relevant.')
-                perms = ['view', 'modify', 'decloak', 'delete']
+                perms = ['view', 'decloak']
+                if state.get('connected'):
+                    # mods and deletions are only allowed if connected
+                    perms.append('modify', 'delete')
                 # orb.log.debug('    perms: {}'.format(perms))
                 return perms
             # [2c] TBD component with a relevant product type hint
@@ -205,7 +236,10 @@ def get_perms(obj, user=None, permissive=False):
                 pt = getattr(obj.product_type_hint, 'id', '')
                 if pt in subsystem_types:
                     # orb.log.debug('  - TBD product_type_hint is relevant.')
-                    perms = ['view', 'modify', 'decloak', 'delete']
+                    perms = ['view', 'decloak']
+                    if state.get('connected'):
+                        # mods and deletions are only allowed if connected
+                        perms.append('modify', 'delete')
                     # orb.log.debug('    perms: {}'.format(perms))
                     return perms
                 else:
@@ -226,7 +260,10 @@ def get_perms(obj, user=None, permissive=False):
             if roles & auth_roles:
                 # orb.log.debug('  - user is authorized by role(s) ...')
                 # orb.log.debug('    {}'.format(list(roles & auth_roles)))
-                perms = ['view', 'modify', 'decloak', 'delete']
+                perms = ['view', 'modify', 'decloak']
+                if state.get('connected'):
+                    # deletions are only allowed if connected
+                    perms.append('delete')
                 # orb.log.debug('    perms: {}'.format(perms))
                 return perms
         # [4] is it a Port?
