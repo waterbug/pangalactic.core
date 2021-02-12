@@ -218,7 +218,7 @@ def get_perms(obj, user=None, permissive=False):
                 perms = ['view', 'decloak']
                 if state.get('connected'):
                     # mods and deletions are only allowed if connected
-                    perms.append('modify', 'delete')
+                    perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 return perms
             # [2b] real component with a relevant product type
@@ -228,7 +228,7 @@ def get_perms(obj, user=None, permissive=False):
                 perms = ['view', 'decloak']
                 if state.get('connected'):
                     # mods and deletions are only allowed if connected
-                    perms.append('modify', 'delete')
+                    perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 return perms
             # [2c] TBD component with a relevant product type hint
@@ -239,7 +239,7 @@ def get_perms(obj, user=None, permissive=False):
                     perms = ['view', 'decloak']
                     if state.get('connected'):
                         # mods and deletions are only allowed if connected
-                        perms.append('modify', 'delete')
+                        perms += ['modify', 'delete']
                     # orb.log.debug('    perms: {}'.format(perms))
                     return perms
                 else:
