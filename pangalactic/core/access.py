@@ -90,6 +90,20 @@ def get_perms(obj, user=None, permissive=False):
             # orb.log.debug('  *** SANDBOX PSUs are modifiable by any user')
             perms = ['view', 'modify', 'decloak', 'delete']
             return perms
+    # Instances of these classes are refdata and cannot be modified or deleted.
+    # NOTE that ParameterDefinition is a subclass of DataElementDefinition, so is
+    # implicitly included here.
+    unmodifiables = (
+        orb.classes['DataElementDefinition'],
+        orb.classes['ParameterContext'],
+        orb.classes['PortTemplate'],
+        orb.classes['PortType'],
+        orb.classes['ProductType'],
+        orb.classes['Role'])
+    if isinstance(obj, unmodifiables):
+        # orb.log.debug('  *** reference data cannot be modified or deleted.')
+        perms = ['view']
+        return perms
     # if we get this far, we have a user_oid and a user object
     if is_global_admin(user):
         # global admin is omnipotent, except for deleting projects ...
