@@ -48,7 +48,6 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           parmz_by_dimz,
                                           refresh_componentz,
                                           refresh_req_allocz, req_allocz,
-                                          update_de_defz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
 from pangalactic.core.serializers import serialize, deserialize
@@ -1159,7 +1158,7 @@ class UberORB(object):
             elif cname == 'DataElementDefinition':
                 # NOTE:  all DataElementDefinitions are public
                 obj.public = True
-                update_de_defz(obj)
+                self.rebuild_de_defz()
             elif cname == 'ParameterDefinition':
                 # NOTE:  all ParameterDefinitions are public
                 obj.public = True
@@ -1171,6 +1170,22 @@ class UberORB(object):
         if recompute_required and recompute:
             self.recompute_parmz()
         return True
+
+    def rebuild_de_defz(self):
+        """
+        Update the `de_defz` cache when a new DataElementDefinition is created,
+        modified, or deleted.
+        """
+        self.log.debug('* rebuilding de_defz ...')
+        de_defz = {}
+        for de_def_obj in orb.get_by_type('DataElementDefinition'):
+            de_defz[de_def_obj.id] = {
+                'name': de_def_obj.name,
+                'description': de_def_obj.description,
+                'range_datatype': de_def_obj.range_datatype,
+                'label': de_def_obj.label or '',
+                'mod_datetime': str(dtstamp())}
+        self.log.debug('  done.')
 
     def get(self, *oid, **kw):
         """

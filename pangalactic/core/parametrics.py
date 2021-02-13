@@ -1548,7 +1548,6 @@ def update_de_defz(de_def_obj):
     Args:
         de_def_obj (DataElementDefinition):  DataElementDefinition object
     """
-    # log.debug('* update_de_defz')
     de_defz[de_def_obj.id] = {
         'name': de_def_obj.name,
         'description': de_def_obj.description,
