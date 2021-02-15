@@ -662,24 +662,24 @@ class OrbTest(unittest.TestCase):
         req = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         state["connected"] = False
         value = [
-            set(get_perms(sc, user=steve)),           #  1 Adm/sc:  full perms
-            set(get_perms(sc, user=carefulwalker)),   #  2 SE/sc:   full perms
-            set(get_perms(sc, user=zaphod)),          #  3 LE/sc:   full perms
+            set(get_perms(sc, user=steve)),           #  1 Adm/sc:  view/mod
+            set(get_perms(sc, user=carefulwalker)),   #  2 SE/sc:   view/mod
+            set(get_perms(sc, user=zaphod)),          #  3 LE/sc:   view/mod
             set(get_perms(sc, user=buckaroo)),        #  4 PE/sc:   view only
-            set(get_perms(acu1, user=steve)),         #  5 Adm/acu: full perms
-            set(get_perms(acu1, user=carefulwalker)), #  5a SE/acu: full perms
-            set(get_perms(acu1, user=buckaroo)),      #  6 PE/acu:  full perms
-            set(get_perms(acu2, user=buckaroo)),      #  7 PE/acu:  full perms
+            set(get_perms(acu1, user=steve)),         #  5 Adm/acu: view only
+            set(get_perms(acu1, user=carefulwalker)), #  5a SE/acu: view only
+            set(get_perms(acu1, user=buckaroo)),      #  6 PE/acu:  view only
+            set(get_perms(acu2, user=buckaroo)),      #  7 PE/acu:  view only
             set(get_perms(acu4, user=buckaroo)),      #  8 PE/acu:  view only
-            set(get_perms(acu6, user=carefulwalker)), #  8a SE/acu: full perms
+            set(get_perms(acu6, user=carefulwalker)), #  8a SE/acu: view only
             set(get_perms(acu7, user=carefulwalker)), #  8b acu: view only **
-            set(get_perms(psu, user=steve)),          #  9 Adm/psu: full perms
-            set(get_perms(psu, user=carefulwalker)),  # 10 SE/psu:  full perms
-            set(get_perms(psu, user=zaphod)),         # 11 LE/psu:  full perms
+            set(get_perms(psu, user=steve)),          #  9 Adm/psu: view/mod
+            set(get_perms(psu, user=carefulwalker)),  # 10 SE/psu:  view/mod
+            set(get_perms(psu, user=zaphod)),         # 11 LE/psu:  view/mod
             set(get_perms(psu, user=buckaroo)),       # 12 PE/psu:  view only
-            set(get_perms(req, user=steve)),          # 13 Adm/req: full perms
-            set(get_perms(req, user=carefulwalker)),  # 14 SE/req:  full perms
-            set(get_perms(req, user=zaphod)),         # 15 LE/req:  full perms
+            set(get_perms(req, user=steve)),          # 13 Adm/req: view/mod
+            set(get_perms(req, user=carefulwalker)),  # 14 SE/req:  view/mod
+            set(get_perms(req, user=zaphod)),         # 15 LE/req:  view/mod
             set(get_perms(req, user=buckaroo))        # 16 PE/req:  view only
             ]
         state["connected"] = True
@@ -688,7 +688,7 @@ class OrbTest(unittest.TestCase):
             set(get_perms(sc, user=carefulwalker)),   #  2 SE/sc:   full perms
             set(get_perms(sc, user=zaphod)),          #  3 LE/sc:   full perms
             set(get_perms(sc, user=buckaroo)),        #  4 PE/sc:   view only
-            set(get_perms(acu1, user=steve)),         #  5 Adm/acu: full perms
+            set(get_perms(acu1, user=steve)),         #  5 Adm/acu: view only
             set(get_perms(acu1, user=carefulwalker)), #  5a SE/acu: full perms
             set(get_perms(acu1, user=buckaroo)),      #  6 PE/acu:  full perms
             set(get_perms(acu2, user=buckaroo)),      #  7 PE/acu:  full perms
@@ -706,45 +706,45 @@ class OrbTest(unittest.TestCase):
             ]
         expected = [
             # non-connected state
-            set(['view', 'modify', 'decloak', 'delete']), #  1
-            set(['view', 'modify', 'decloak']),           #  2
-            set(['view', 'modify', 'decloak']),           #  3
-            set(['view']),                                #  4
-            set(['view', 'modify', 'decloak', 'delete']), #  5
-            set(['view', 'decloak']),                     #  5a
-            set(['view', 'decloak']),                     #  6
-            set(['view', 'decloak']),                     #  7
-            set(['view']),                                #  8
-            set(['view', 'decloak']),                     #  8a
-            set(['view']),                                #  8b
-            set(['view', 'modify', 'decloak', 'delete']), #  9
-            set(['view', 'modify', 'decloak']),           # 10
-            set(['view', 'modify', 'decloak']),           # 11
-            set(['view']),                                # 12
-            set(['view', 'modify', 'decloak', 'delete']), # 13
-            set(['view', 'modify', 'decloak']),           # 14
-            set(['view', 'modify', 'decloak']),           # 15
-            set(['view']),                                # 16
+            set(['view', 'modify']),           #  1
+            set(['view', 'modify']),           #  2
+            set(['view', 'modify']),           #  3
+            set(['view']),                     #  4
+            set(['view']),                     #  5
+            set(['view']),                     #  5a
+            set(['view']),                     #  6
+            set(['view']),                     #  7
+            set(['view']),                     #  8
+            set(['view']),                     #  8a
+            set(['view']),                     #  8b
+            set(['view']),                     #  9
+            set(['view']),                     # 10
+            set(['view']),                     # 11
+            set(['view']),                     # 12
+            set(['view', 'modify']),           # 13
+            set(['view', 'modify']),           # 14
+            set(['view', 'modify']),           # 15
+            set(['view']),                     # 16
             # connected state
-            set(['view', 'modify', 'decloak', 'delete']), #  1
-            set(['view', 'modify', 'decloak', 'delete']), #  2
-            set(['view', 'modify', 'decloak', 'delete']), #  3
-            set(['view']),                                #  4
-            set(['view', 'modify', 'decloak', 'delete']), #  5
-            set(['view', 'modify', 'decloak', 'delete']), #  5a
-            set(['view', 'modify', 'decloak', 'delete']), #  6
-            set(['view', 'modify', 'decloak', 'delete']), #  7
-            set(['view']),                                #  8
-            set(['view', 'modify', 'decloak', 'delete']), #  8a
-            set(['view']),                                #  8b
-            set(['view', 'modify', 'decloak', 'delete']), #  9
-            set(['view', 'modify', 'decloak', 'delete']), # 10
-            set(['view', 'modify', 'decloak', 'delete']), # 11
-            set(['view']),                                # 12
-            set(['view', 'modify', 'decloak', 'delete']), # 13
-            set(['view', 'modify', 'decloak', 'delete']), # 14
-            set(['view', 'modify', 'decloak', 'delete']), # 15
-            set(['view'])                                 # 16
+            set(['view', 'modify', 'delete']), #  1
+            set(['view', 'modify', 'delete']), #  2
+            set(['view', 'modify', 'delete']), #  3
+            set(['view']),                     #  4
+            set(['view', 'modify', 'delete']), #  5
+            set(['view', 'modify', 'delete']), #  5a
+            set(['view', 'modify', 'delete']), #  6
+            set(['view', 'modify', 'delete']), #  7
+            set(['view']),                     #  8
+            set(['view', 'modify', 'delete']), #  8a
+            set(['view']),                     #  8b
+            set(['view', 'modify', 'delete']), #  9
+            set(['view', 'modify', 'delete']), # 10
+            set(['view', 'modify', 'delete']), # 11
+            set(['view']),                     # 12
+            set(['view', 'modify', 'delete']), # 13
+            set(['view', 'modify', 'delete']), # 14
+            set(['view', 'modify', 'delete']), # 15
+            set(['view'])                      # 16
             ]
         self.assertEqual(expected, value)
 
