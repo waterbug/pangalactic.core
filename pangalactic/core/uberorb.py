@@ -1575,6 +1575,26 @@ class UberORB(object):
             self.log.debug('  - no associated flows found.')
         return flows
 
+    def gazoutas(self, port):
+        """
+        Get start_ports of all flows connecting to a port.
+
+        Args:
+            port (Port):  the specified Port
+        """
+        flowzintas = orb.search_exact(cname='Flow', end_port=port)
+        return [flow.start_port for flow in flowzintas]
+
+    def gazintas(self, port):
+        """
+        Get end_ports of all flows connecting to a port.
+
+        Args:
+            port (Port):  the specified Port
+        """
+        flowzoutas = orb.search_exact(cname='Flow', start_port=port)
+        return [flow.end_port for flow in flowzoutas]
+
     def get_all_port_flows(self, port):
         """
         For a Port instance, get all flows defined to or from it (gazintas and
@@ -1584,9 +1604,9 @@ class UberORB(object):
             port (Port):  the specified Port
         """
         self.log.debug('* get_all_port_flows()')
-        gazoutas = orb.search_exact(cname='Flow', start_port=port)
-        gazintas = orb.search_exact(cname='Flow', end_port=port)
-        return gazoutas + gazintas
+        flowzoutas = orb.search_exact(cname='Flow', start_port=port)
+        flowzintas = orb.search_exact(cname='Flow', end_port=port)
+        return flowzoutas + flowzintas
 
     def get_objects_for_project(self, project):
         """
