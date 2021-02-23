@@ -278,10 +278,17 @@ class OrbTest(unittest.TestCase):
                 value['twanger_id'] = so['id']
                 value['twanger_parameters'] = so['parameters']
                 value['twanger_product_type'] = so['product_type']
-            if so['_cname'] == 'Port':
+            if so['_cname'] == 'Port' and so['oid'] == 'test:port.twanger.0':
                 value['port_oid'] = 'test:port.twanger.0'
                 value['port_of_product'] = 'test:twanger'
                 value['type_of_port'] = 'pgefobjects:PortType.electrical_power'
+                # derived values to test parameters & data elements
+                directionality = so['data_elements']['directionality']['value']
+                value['directionality'] = directionality
+                voltage = so['parameters']['V']['value']
+                value['voltage'] = voltage
+                voltage_units = so['parameters']['V']['units']
+                value['voltage_units'] = voltage_units
         # serialized form includes 2 objects:
         # the twanger + 1 port
         expected = dict(
@@ -291,7 +298,10 @@ class OrbTest(unittest.TestCase):
             twanger_product_type=obj.product_type.oid,
             port_oid=obj.ports[0].oid,
             port_of_product=obj.ports[0].of_product.oid,
-            type_of_port=obj.ports[0].type_of_port.oid
+            type_of_port=obj.ports[0].type_of_port.oid,
+            directionality='input',
+            voltage=28.0,
+            voltage_units='V'
             )
         self.assertEqual(expected, value)
 

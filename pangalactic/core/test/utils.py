@@ -550,9 +550,17 @@ def create_test_project():
             id=get_port_id('electrical_power', 0),
             id_ns='test',
             abbreviation=get_port_name('Electrical Power', 0),
+            data_elements={'directionality': {'mod_datetime': NOW,
+                                              'units': None,
+                                              'value': 'input'}
+                                              },
             owner='test:yoyodyne',
             name=get_port_name('Electrical Power', 0),
             of_product='test:twanger',
+            parameters={'V': {'mod_datetime': NOW,
+                              'units': 'V',
+                              'value': 28.0}
+                              },
             type_of_port='pgefobjects:PortType.electrical_power',
             creator='test:steve',
             create_datetime=NOW,

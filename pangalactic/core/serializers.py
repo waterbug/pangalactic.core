@@ -395,13 +395,13 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 db_obj = orb.get(oid)
                 # check against db object's mod_datetime
                 so_datetime = uncook_datetime(d.get('mod_datetime'))
-                if force_update:
+                if force_update and db_obj:
                     # orb.log.debug('    forcing update ... ')
                     updates[oid] = db_obj
                     orb.db.add(db_obj)
                     if dictify:
                         output['modified'].append(db_obj)
-                elif not (so_datetime and
+                elif not (so_datetime and db_obj and
                           earlier(db_obj.mod_datetime, so_datetime)):
                     # txt = '    object "{}" has same or older'.format(oid)
                     # orb.log.debug('{} mod_datetime, ignoring.'.format(txt))
@@ -416,10 +416,13 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     # orb.log.debug('    object has later '
                                   # 'mod_datetime, saving it.')
                     # if it is newer, update the object
-                    updates[oid] = db_obj
-                    orb.db.add(db_obj)
-                    if dictify:
-                        output['modified'].append(db_obj)
+                    if db_obj:
+                        updates[oid] = db_obj
+                        orb.db.add(db_obj)
+                        if dictify:
+                            output['modified'].append(db_obj)
+                    else:
+                        continue
             # first do datatype properties (non-object properties)
             kw = dict([(name, d.get(name))
                            for name in field_names
