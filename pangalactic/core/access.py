@@ -37,8 +37,8 @@ def get_perms(obj, user=None, permissive=False):
     # empty or None objects have no permissions
     if not obj:
         return []
-    # if obj:
-        # cname = obj.__class__.__name__
+    if obj:
+        cname = obj.__class__.__name__
         # orb.log.debug('  for {} object, id: {}, oid: {}'.format(cname,
                                                         # obj.id, obj.oid))
     if obj.oid == 'pgefobjects:SANDBOX':
@@ -282,7 +282,7 @@ def get_perms(obj, user=None, permissive=False):
                 # orb.log.debug('    perms: {}'.format(perms))
                 return perms
         # [4] is it a Port?
-        elif isinstance(obj, orb.classes['Port']):
+        elif cname == 'Port':
             # access will depend on the user's permissions on 'of_product'
             return get_perms(obj.of_product)
         # [5] is it a Flow?
