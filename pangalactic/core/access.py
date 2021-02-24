@@ -66,7 +66,8 @@ def get_perms(obj, user=None, permissive=False):
         # not a Product -> everyone has 'view' access
         perms.add('view')
     if user:
-        # user specified -> server-side
+        # user specified -> server-side -> always "connected"
+        state['connected'] = True
         user_oid = getattr(user, 'oid', None)
         if not user_oid:
             # orb.log.debug('  specified user has no "oid".')
