@@ -147,10 +147,11 @@ class UberORB(object):
         # config.update() from the "config" file contents.
         read_config(os.path.join(pgx_home, 'config'))
         # --------------------------------------------------------------------
-        # ### NOTE:  saved "state" file represents most recent state of app
+        # ### NOTE:  saved "state" file represents most recent state of app,
+        # ###        including app-specified defaults
         read_state(os.path.join(pgx_home, 'state'))
         # --------------------------------------------------------------------
-        # Saved prefs and trash are read here; will be overwritten by
+        # Saved prefs and trash are read here; will be overridden by
         # any new prefs and trash set at runtime.
         read_prefs(os.path.join(pgx_home, 'prefs'))
         read_trash(os.path.join(pgx_home, 'trash'))
