@@ -32,7 +32,7 @@ log = logger()
 
 DATATYPES = SELECTABLE_VALUES['range_datatype']
 # NULL values by dtype:
-NULL = {'float': 0.0, 'int': 0, 'str': '', 'bool': False, 'text': ''}
+NULL = dict(float=0.0, int=0, str='', bool=False, text='', list=[])
 TWOPLACES = Decimal('0.01')
 
 # NOTE! #####################################################################
@@ -604,21 +604,15 @@ def add_parameter(oid, pid):
             parm_defz.update(pdz)
         # NOTE:  setting the parameter's value is a separate operation -- when a
         # parameter is created, its value is initialized to the appropriate "null"
-        radt = pdz.get('range_datatype', 'float')
+        range_datatype = pdz.get('range_datatype', 'float')
         dims = pdz.get('dimensions')
         p_defaults = config.get('p_defaults') or {}
         if p_defaults.get(variable):
             # if a default value is configured for this variable, override null
-            dtype = DATATYPES[radt]
+            dtype = DATATYPES[range_datatype]
             value = dtype(p_defaults[variable])
-        elif radt == 'float':
-            value = 0.0
-        elif radt == 'int':
-            value = 0
-        elif radt == 'boolean':
-            value = False
-        else:  # 'text'
-            value = ''
+        else:    # use a "NULL" value
+            value = NULL.get(range_datatype, 0.0)
         parameterz[oid][variable] = dict(
             value=value,   # consistent with dtype defined in `range_datatype`
             units=in_si.get(dims),   # SI units consistent with `dimensions`
@@ -628,21 +622,15 @@ def add_parameter(oid, pid):
         # the above clause if it was not already present, so it is safe to add
         # the context parameter now
         pdz = parm_defz.get(pid)
-        radt = pdz.get('range_datatype', 'float')
+        range_datatype = pdz.get('range_datatype', 'float')
         dims = pdz.get('dimensions')
         p_defaults = config.get('p_defaults') or {}
         if p_defaults.get(pid):
             # if a default value is configured for this pid, override null
-            dtype = DATATYPES[radt]
+            dtype = DATATYPES[range_datatype]
             value = dtype(p_defaults[pid])
-        elif radt == 'float':
-            value = 0.0
-        elif radt == 'int':
-            value = 0
-        elif radt == 'boolean':
-            value = False
-        else:  # 'text'
-            value = ''
+        else:    # use a "NULL" value
+            value = NULL.get(range_datatype, 0.0)
         parameterz[oid][pid] = dict(
             value=value,
             units=in_si.get(dims),   # SI units consistent with `dimensions`
@@ -823,9 +811,9 @@ def get_pval_as_str(oid, pid, units='', allow_nan=False):
                 val = quan_converted.magnitude
             else:
                 val = base_val
-        radt = pdz.get('range_datatype')
-        if radt in ['int', 'float']:
-            dtype = DATATYPES.get(radt)
+        range_datatype = pdz.get('range_datatype')
+        if range_datatype in ['int', 'float']:
+            dtype = DATATYPES.get(range_datatype)
             numfmt = prefs.get('numeric_format')
             if numfmt:
                 if numfmt == 'Thousands Commas':
@@ -1052,11 +1040,11 @@ def get_pval_from_str(oid, pid, str_val, units='', local=True):
     # log.debug('* get_pval_from_str({}, {}, {})'.format(oid, pid,
                                                            # str(str_val)))
     try:
-        radt = parm_defz[pid].get('range_datatype')
-        if radt in ['int', 'float']:
+        range_datatype = parm_defz[pid].get('range_datatype')
+        if range_datatype in ['int', 'float']:
             # if null string or None, replace with zero
             str_val = str_val or '0'
-            dtype = DATATYPES.get(radt)
+            dtype = DATATYPES.get(range_datatype)
             num_fmt = prefs.get('numeric_format')
             if num_fmt == 'Thousands Commas' or not num_fmt:
                 val = dtype(str_val.replace(',', ''))
@@ -1104,9 +1092,9 @@ def set_pval_from_str(oid, pid, str_val, units='', mod_datetime=None,
                                                            # str(str_val)))
     try:
         pd = parm_defz.get(pid, {})
-        radt = pd.get('range_datatype')
-        if radt in ['int', 'float']:
-            dtype = DATATYPES.get(radt)
+        range_datatype = pd.get('range_datatype')
+        if range_datatype in ['int', 'float']:
+            dtype = DATATYPES.get(range_datatype)
             num_fmt = prefs.get('numeric_format')
             if num_fmt == 'Thousands Commas' or not num_fmt:
                 val = dtype(str_val.replace(',', ''))
@@ -1146,8 +1134,8 @@ def compute_assembly_parameter(product_oid, variable):
     # This logging is VERY verbose, even for debugging!
     # log.debug('* compute_assembly_parameter()')
     if (product_oid in parameterz and variable in parameterz[product_oid]):
-        radt = parm_defz[variable]['range_datatype']
-        dtype = DATATYPES[radt]
+        range_datatype = parm_defz[variable]['range_datatype']
+        dtype = DATATYPES[range_datatype]
         # cz, if it exists, will be a list of namedtuples ...
         cz = componentz.get(product_oid)
         if cz:
@@ -1184,8 +1172,8 @@ def compute_mev(oid, variable):
     # log.debug('* compute_mev "{}": "{}"'.format(oid, variable))
     if oid not in parameterz or variable not in parameterz[oid]:
         return 0.0
-    radt = parm_defz[variable]['range_datatype']
-    dtype = DATATYPES[radt]
+    range_datatype = parm_defz[variable]['range_datatype']
+    dtype = DATATYPES[range_datatype]
     # cz, if it exists, will be a list of namedtuples ...
     cz = componentz.get(oid)
     # if components, use recursive sum of MEVs; else compute locally
@@ -1588,20 +1576,14 @@ def add_data_element(oid, deid):
         # log.debug('  - adding data element "{}" ...'.format(deid))
         # NOTE:  setting the data element's value is a separate operation -- when a
         # data element is created, its value is initialized to the appropriate "null"
-        radt = de_def.get('range_datatype', 'str')
+        range_datatype = de_def.get('range_datatype', 'str')
         de_defaults = config.get('de_defaults') or {}
         if de_defaults.get(deid):
             # if a default value is configured for this deid, override null
-            dtype = DATATYPES[radt]
+            dtype = DATATYPES[range_datatype]
             value = dtype(de_defaults[deid])
-        elif radt == 'float':
-            value = 0.0
-        elif radt == 'int':
-            value = 0
-        elif radt == 'boolean':
-            value = False
-        else:  # 'str' or 'text'
-            value = ''
+        else:
+            value = NULL.get(range_datatype, 0.0)
         data_elementz[oid][deid] = dict(
             value=value,   # consistent with dtype defined in `range_datatype`
             mod_datetime=str(dtstamp()))
@@ -1649,6 +1631,7 @@ def get_dval(oid, deid, units=''):
         # log.debug('  value of {} is "{}" ({})'.format(deid, val, type(val)))
         return val
     except:
+        # if no value is found, return a "NULL" value
         val = NULL.get(dedef.get('range_datatype', 'str'))
         # log.debug('  [exception] value of {} is {} ({})'.format(deid,
                                                           # val, type(val)))
@@ -1768,9 +1751,9 @@ def set_dval_from_str(oid, deid, str_val, units='', mod_datetime=None,
                                                            # str(str_val)))
     try:
         de_def = de_defz.get(deid, {})
-        radt = de_def.get('range_datatype', 'str')
-        if radt in ['int', 'float']:
-            dtype = DATATYPES.get(radt)
+        range_datatype = de_def.get('range_datatype', 'str')
+        if range_datatype in ['int', 'float']:
+            dtype = DATATYPES.get(range_datatype)
             num_fmt = prefs.get('numeric_format')
             if num_fmt == 'Thousands Commas' or not num_fmt:
                 val = dtype(str_val.replace(',', ''))

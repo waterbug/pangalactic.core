@@ -5,7 +5,7 @@ from pangalactic.core         import state, config
 from pangalactic.core.uberorb import orb
 
 
-def get_perms(obj, user=None, permissive=False):
+def get_perms(obj, user=None, permissive=False, debugging=False):
     """
     Get the permissions of the specified user relative to the specified object.
     If used as a client-side function, no user is supplied and the local user
@@ -19,6 +19,7 @@ def get_perms(obj, user=None, permissive=False):
     Keyword Args:
         user (Person):  the user object (None -> local user)
         permissive (bool):  sets "permissive" mode
+        debugging (bool):  add explanation string if debugging
 
     Returns:
         permissions (list of str):  a list that is either empty or
@@ -71,7 +72,8 @@ def get_perms(obj, user=None, permissive=False):
             # orb.log.debug('  specified user has no "oid".')
             # orb.log.debug('  perms: {}'.format(perms))
             perms = list(perms)
-            perms.append('no user oid')
+            if debugging:
+                perms.append('no user oid')
             return perms
     else:
         # user not provided -> find local user (client-side)
@@ -80,14 +82,16 @@ def get_perms(obj, user=None, permissive=False):
             # orb.log.debug('  no local user configured.')
             # orb.log.debug('  perms: {}'.format(perms))
             perms = list(perms)
-            perms.append('no local user oid')
+            if debugging:
+                perms.append('no local user oid')
             return perms
         user = orb.get(user_oid)
         if not user:
             # orb.log.debug('  no user object found.')
             # orb.log.debug('  perms: {}'.format(perms))
             perms = list(perms)
-            perms.append('no local user object found')
+            if debugging:
+                perms.append('no local user object found')
             return perms
     if isinstance(obj, orb.classes['ProjectSystemUsage']):
         # access is determined by project/system access for PSU
@@ -121,7 +125,8 @@ def get_perms(obj, user=None, permissive=False):
             # deletions (and mods of Acu/PSU) are only allowed if connected
             perms += ['modify', 'delete']
         # orb.log.debug('  perms: {}'.format(perms))
-        perms.append('global admin perms')
+        if debugging:
+            perms.append('global admin perms')
         return perms
     # user has write permissions if Admin for owner org or if user has a
     # discipline role in the owner org that corresponds to the object's
@@ -143,7 +148,8 @@ def get_perms(obj, user=None, permissive=False):
                     # Acus can only be modified if connected
                     perms.append('modify')
             # orb.log.debug('  perms: {}'.format(perms))
-            perms.append('object creator perms')
+            if debugging:
+                perms.append('object creator perms')
             return perms
         # From here on, access depends on roles and product_types
         TBD = orb.get('pgefobjects:TBD')
@@ -179,15 +185,16 @@ def get_perms(obj, user=None, permissive=False):
                         # deletions are only allowed if connected
                         perms.append('delete')
                     # orb.log.debug('  perms: {}'.format(perms))
-                    perms.append('role-based product type perms (Hardware)')
+                    if debugging:
+                        perms.append('role-based product type perms (HW)')
                     return perms
                 else:
-                    # txt = '  user NOT authorized for ProductType "{}".'.format(
-                                                                         # pt_id)
+                    # txt = f'  user NOT authorized for ProductType "{pt_id}")
                     # orb.log.debug(txt)
                     perms = ['view']
                     # orb.log.debug('  perms: {}'.format(perms))
-                    perms.append('role-based product type perms (Hardware)')
+                    if debugging:
+                        perms.append('role-based product type perms (HW)')
                     return perms
             elif isinstance(obj, orb.classes['Requirement']):
                 # Requirements (subclass of DigitalProduct) are a special case
@@ -199,12 +206,14 @@ def get_perms(obj, user=None, permissive=False):
                         # deletions are only allowed if connected
                         perms.append('delete')
                     # orb.log.debug('  perms: {}'.format(perms))
-                    perms.append('role-based perms (Requirement)')
+                    if debugging:
+                        perms.append('role-based perms (Requirement)')
                     return perms
                 else:
                     perms = ['view']
                     # orb.log.debug('  perms: {}'.format(perms))
-                    perms.append('role-based perms (Requirement)')
+                    if debugging:
+                        perms.append('role-based perms (Requirement)')
                     return perms
         # [2] is it an Acu?
         # if so, the user can modify it if any of the following is true:
@@ -246,7 +255,8 @@ def get_perms(obj, user=None, permissive=False):
                     # mods and deletions are only allowed if connected
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
-                perms.append('[2a] role-based perms (Acu)')
+                if debugging:
+                    perms.append('[2a] role-based perms (Acu)')
                 return perms
             # [2b] real component with a relevant product type
             elif (getattr(obj.component.product_type, 'id', None)
@@ -257,7 +267,8 @@ def get_perms(obj, user=None, permissive=False):
                     # mods and deletions are only allowed if connected
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
-                perms.append('[2b] role-based perms (Acu)')
+                if debugging:
+                    perms.append('[2b] role-based perms (Acu)')
                 return perms
             # [2c] TBD component with a relevant product type hint
             elif getattr(obj, 'component', None) is TBD:
@@ -269,13 +280,15 @@ def get_perms(obj, user=None, permissive=False):
                         # mods and deletions are only allowed if connected
                         perms += ['modify', 'delete']
                     # orb.log.debug('    perms: {}'.format(perms))
-                    perms.append('[2c] role-based perms (Acu)')
+                    if debugging:
+                        perms.append('[2c] role-based perms (Acu)')
                     return perms
                 else:
-                    # orb.log.debug('  - TBD product_type_hint is not relevant.')
+                    # orb.log.debug('  - TBD product_type_hint not relevant.')
                     perms = ['view']
                     # orb.log.debug('    perms: {}'.format(perms))
-                    perms.append('[2c] role-based perms (Acu)')
+                    if debugging:
+                        perms.append('[2c] role-based perms (Acu)')
                     return perms
         # [3] is it a ProjectSystemUsage?
         elif isinstance(obj, orb.classes['ProjectSystemUsage']):
@@ -295,19 +308,22 @@ def get_perms(obj, user=None, permissive=False):
                     # deletions are only allowed if connected
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
-                perms.append('[3] role-based perms (PSU)')
+                if debugging:
+                    perms.append('[3] role-based perms (PSU)')
                 return perms
         # [4] is it a Port?
         elif cname == 'Port':
             # access will depend on the user's permissions on 'of_product'
             perms = get_perms(obj.of_product, user=user)
-            perms.append('[4] role-based perms (Port)')
+            if debugging:
+                perms.append('[4] role-based perms (Port)')
             return perms
         # [5] is it a Flow?
         elif isinstance(obj, orb.classes['Flow']):
             # access depends on the user's permissions on 'flow_context'
             perms = get_perms(obj.flow_context, user=user)
-            perms.append('[5] role-based perms (Flow)')
+            if debugging:
+                perms.append('[5] role-based perms (Flow)')
             return perms
         # [6] if none of the above, log the relevant info for debugging ...
         else:

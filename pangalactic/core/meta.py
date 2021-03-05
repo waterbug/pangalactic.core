@@ -9,7 +9,6 @@ Pan Galactic meta characteristics
 # Ultimately both aspects will be loosely coupled via a "master model", but
 # that architecture is still being worked out.
 
-from collections import OrderedDict
 from pangalactic.core.units import in_si
 
 # PGXN_REQD:  Properties that are validated by PgxnObject to be non-empty
@@ -350,15 +349,16 @@ def intconv(val):
 # a finite range of selectable values -- the form is:
 # ([combo-box string value] : value)
 SELECTABLE_VALUES = dict(
-    range_datatype=OrderedDict([
+    range_datatype=dict([
         ('float', float),
         ('int', intconv),
         ('text', str),
         ('str', str),
-        ('boolean', bool)]),
-    dimensions=OrderedDict(
+        ('boolean', bool),
+        ('list', list)]),
+    dimensions=dict(
         [(dim, dim) for dim in in_si]),
-    directionality=OrderedDict([
+    directionality=dict([
         # null -> bidirectional
         ('', ''),
         ('input', 'input'),

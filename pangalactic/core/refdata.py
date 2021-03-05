@@ -2399,6 +2399,76 @@ dict(
     'mod_datetime': epoch
     },
 
+{   '_cname': 'ModelFamily',
+    'oid': 'pgefobjects:ModelFamily.42',
+    'description': '42 standard family of model types.',
+    'id': '42',
+    'name': '42',
+    'abbreviation': '42',
+    'create_datetime': '2021-01-01 00:00:00',
+    'mod_datetime': '2021-01-01 00:00:00'
+    },
+
+{   '_cname': 'ModelType',
+    'oid': 'pgefobjects:ModelType.42.SC',
+    'id': 'SC',
+    'id_ns': '42',
+    'name': '42 Spacecraft Model',
+    'abbreviation': 'SC',
+    'description': '42 Spacecraft Model',
+    'model_type_family': 'pgefobjects:ModelFamily.42',
+    'create_datetime': '2021-01-01 00:00:00',
+    'mod_datetime': '2021-01-01 00:00:00'
+    },
+
+{   '_cname': 'ModelType',
+    'oid': 'pgefobjects:ModelType.42.Orb',
+    'id': 'Orb',
+    'id_ns': '42',
+    'name': '42 Reference Orbit Model',
+    'abbreviation': 'Orb',
+    'description': '42 Reference Orbit Model',
+    'model_type_family': 'pgefobjects:ModelFamily.42',
+    'create_datetime': '2021-01-01 00:00:00',
+    'mod_datetime': '2021-01-01 00:00:00'
+    },
+
+{   '_cname': 'ModelType',
+    'oid': 'pgefobjects:ModelType.42.Geom',
+    'id': 'Geom',
+    'id_ns': '42',
+    'name': '42 Geometry Model',
+    'abbreviation': 'Geom',
+    'description': '42 Geometry Model',
+    'model_type_family': 'pgefobjects:ModelFamily.42',
+    'create_datetime': '2021-01-01 00:00:00',
+    'mod_datetime': '2021-01-01 00:00:00'
+    },
+
+{   '_cname': 'ModelType',
+    'oid': 'pgefobjects:ModelType.42.Material',
+    'id': 'Material',
+    'id_ns': '42',
+    'name': '42 Material Model',
+    'abbreviation': 'Material',
+    'description': '42 Material Model',
+    'model_type_family': 'pgefobjects:ModelFamily.42',
+    'create_datetime': '2021-01-01 00:00:00',
+    'mod_datetime': '2021-01-01 00:00:00'
+    },
+
+{   '_cname': 'ModelType',
+    'oid': 'pgefobjects:ModelType.42.Sim',
+    'id': 'Sim',
+    'id_ns': '42',
+    'name': '42 Simulation Model',
+    'abbreviation': 'Sim',
+    'description': '42 Simulation Model',
+    'model_type_family': 'pgefobjects:ModelFamily.42',
+    'create_datetime': '2021-01-01 00:00:00',
+    'mod_datetime': '2021-01-01 00:00:00'
+    },
+
 {   '_cname': 'ModelType',
     'oid': 'pgefobjects:Spec',
     'id': 'pgef.Spec',
