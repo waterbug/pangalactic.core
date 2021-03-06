@@ -355,7 +355,7 @@ SELECTABLE_VALUES = dict(
         ('text', str),
         ('str', str),
         ('boolean', bool),
-        ('list', list)]),
+        ('array', dict)]),
     dimensions=dict(
         [(dim, dim) for dim in in_si]),
     directionality=dict([

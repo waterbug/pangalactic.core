@@ -32,7 +32,7 @@ log = logger()
 
 DATATYPES = SELECTABLE_VALUES['range_datatype']
 # NULL values by dtype:
-NULL = dict(float=0.0, int=0, str='', bool=False, text='', list=[])
+NULL = dict(float=0.0, int=0, str='', bool=False, text='', array=[])
 TWOPLACES = Decimal('0.01')
 
 # NOTE! #####################################################################
