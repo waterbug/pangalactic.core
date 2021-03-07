@@ -583,15 +583,18 @@ class UberORB(object):
         #     Margins) in case any requirements have been deleted or
         #     re-allocated
         pid_deletions = []
-        oid_deletions = []
+        oid_deletions = set()
         for oid in parameterz:
-            for pid in parameterz[oid]:
-                if 'Margin' in pid or 'NTE' in pid:
-                    pid_deletions.append((oid, pid))
+            if parameterz[oid] is not None:
+                for pid in parameterz[oid]:
+                    if 'Margin' in pid or 'NTE' in pid:
+                        pid_deletions.append((oid, pid))
+            else:
+                oid_deletions.add(oid)
         for oid, pid in pid_deletions:
             del parameterz[oid][pid]
             if not parameterz[oid]:
-                oid_deletions.append(oid)
+                oid_deletions.add(oid)
         for oid in oid_deletions:
             del parameterz[oid]
         # [1] iterate over current set of performance requirements, which

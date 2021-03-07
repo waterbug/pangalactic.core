@@ -351,8 +351,8 @@ def get_user_orgs(user):
     Returns:
         list of orgs
     """
-    # TODO ...
-    return []
+    ras = orb.search_exact(cname='RoleAssignment', assigned_to=user)
+    return set([ra.role_assignment_context for ra in ras])
 
 
 def is_global_admin(user):
