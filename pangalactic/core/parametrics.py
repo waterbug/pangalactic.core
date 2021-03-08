@@ -999,11 +999,6 @@ def set_pval(oid, pid, value, units='', mod_datetime=None, local=True):
             # None or "$" for units -> value is already in base units
             converted_value = value
         parameterz[oid][pid]['value'] = converted_value
-        ### NOTE: mod_datetime is deprecated and will be removed
-        # if local or mod_datetime is None:
-            # mod_datetime = str(dtstamp())
-        # parameterz[oid][pid]['mod_datetime'] = mod_datetime
-        # dts = str(mod_datetime)
         # log.debug('  setting value: {}'.format(value))
         if local:
             dispatcher.send('pval set', oid=oid, pid=pid, value=value,
@@ -1716,16 +1711,8 @@ def set_dval(oid, deid, value, units='', mod_datetime=None, local=True):
         else:
             value = NULL.get(dt_name, 0.0)
         data_elementz[oid][deid]['value'] = value
-        ### NOTE: mod_datetime is deprecated and will be removed
-        # if local or mod_datetime is None:
-            # mod_datetime = str(dtstamp())
-        # data_elementz[oid][deid]['mod_datetime'] = mod_datetime
-        # dts = str(mod_datetime)
         # log.debug('  setting value: {}'.format(value))
-        # log.debug('  setting mod_datetime: "{}"'.format(dts))
-        ### NOTE: mod_datetime is deprecated and will be removed
         dispatcher.send('dval set', oid, deid, value, local=local)
-                        # mod_datetime=mod_datetime, local=local)
         return True
     except:
         # log.debug('  *** set_dval() failed:')
