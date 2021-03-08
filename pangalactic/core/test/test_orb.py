@@ -454,57 +454,58 @@ class OrbTest(unittest.TestCase):
         expected = True
         self.assertEqual(expected, actual)
 
-    def test_19_deserialize_new_parameter_values(self):
-        """
-        CASE:  test pangalactic.core.serializers.deserialize_parms function.
+    ### NOTE:  mod_datetime is deprecated for parameters and will be removed
+    # def test_19_deserialize_new_parameter_values(self):
+        # """
+        # CASE:  test pangalactic.core.serializers.deserialize_parms function.
 
-        Tests parameter deserialization, including the comparison of
-        'mod_datetime' strings to determine the precedence of values.
+        # Tests parameter deserialization, including the comparison of
+        # 'mod_datetime' strings to determine the precedence of values.
 
-        In this test, the 'P' and 'R_D' values in the deserialized data have
-        later datetime stamps, but the 'm' value has the same datetime stamp as
-        the current value, so it is ignored.
-        """
-        test_oid = 'test:iidrive'
-        current_dt = parameterz[test_oid]['m']['mod_datetime']
-        current_mass = get_pval(test_oid, 'm')
-        NOW = str(dtstamp())
-        serialized_parms= {
-            'P':
-              {'mod_datetime': NOW,
-               'units': 'W',
-               'value': 100.0},
-            'R_D':
-              {'mod_datetime': NOW,
-               'units': 'bit/s',
-               'value': 1000000.0},
-            'm':
-              {'mod_datetime': current_dt,
-               'units': 'kg',
-               'value': 1000.0}
-            }
-        deserialize_parms(test_oid, serialized_parms)
-        orb.recompute_parmz()
-        # deserialized mass should be ignored since its dt string is the
-        # same as that of the current mass parameter ...
-        expected = [True, True, True, True, True, True, True,
-                    100.0, 1000000.0, current_mass, 100.0, 1000000.0,
-                    current_mass]
-        test_parms = parameterz.get(test_oid, {})
-        actual = [('P[CBE]' in test_parms),
-                  ('R_D[CBE]' in test_parms),
-                  ('m[CBE]' in test_parms),
-                  ('P' in test_parms),
-                  ('R_D' in test_parms),
-                  ('m' in test_parms),
-                  NOW > current_dt,
-                  get_pval(test_oid, 'P[CBE]'),
-                  get_pval(test_oid, 'R_D[CBE]'),
-                  get_pval(test_oid, 'm[CBE]'),
-                  get_pval(test_oid, 'P'),
-                  get_pval(test_oid, 'R_D'),
-                  get_pval(test_oid, 'm')]
-        self.assertEqual(expected, actual)
+        # In this test, the 'P' and 'R_D' values in the deserialized data have
+        # later datetime stamps, but the 'm' value has the same datetime stamp as
+        # the current value, so it is ignored.
+        # """
+        # test_oid = 'test:iidrive'
+        # current_dt = parameterz[test_oid]['m']['mod_datetime']
+        # current_mass = get_pval(test_oid, 'm')
+        # NOW = str(dtstamp())
+        # serialized_parms= {
+            # 'P':
+              # {'mod_datetime': NOW,
+               # 'units': 'W',
+               # 'value': 100.0},
+            # 'R_D':
+              # {'mod_datetime': NOW,
+               # 'units': 'bit/s',
+               # 'value': 1000000.0},
+            # 'm':
+              # {'mod_datetime': current_dt,
+               # 'units': 'kg',
+               # 'value': 1000.0}
+            # }
+        # deserialize_parms(test_oid, serialized_parms)
+        # orb.recompute_parmz()
+        # # deserialized mass should be ignored since its dt string is the
+        # # same as that of the current mass parameter ...
+        # expected = [True, True, True, True, True, True, True,
+                    # 100.0, 1000000.0, current_mass, 100.0, 1000000.0,
+                    # current_mass]
+        # test_parms = parameterz.get(test_oid, {})
+        # actual = [('P[CBE]' in test_parms),
+                  # ('R_D[CBE]' in test_parms),
+                  # ('m[CBE]' in test_parms),
+                  # ('P' in test_parms),
+                  # ('R_D' in test_parms),
+                  # ('m' in test_parms),
+                  # NOW > current_dt,
+                  # get_pval(test_oid, 'P[CBE]'),
+                  # get_pval(test_oid, 'R_D[CBE]'),
+                  # get_pval(test_oid, 'm[CBE]'),
+                  # get_pval(test_oid, 'P'),
+                  # get_pval(test_oid, 'R_D'),
+                  # get_pval(test_oid, 'm')]
+        # self.assertEqual(expected, actual)
 
     def test_20_deserialize_object_with_simple_parameters(self):
         """
