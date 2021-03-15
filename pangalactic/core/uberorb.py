@@ -171,15 +171,16 @@ class UberORB(object):
         self.log.debug('* state read ...')
         self.log.debug('  checking for app updates to state ...')
         new_dashes = []
-        for dash_name in app_state['app_dashboards']:
+        app_dashes = {}
+        if app_state and app_state.get('app_dashboards'):
+            app_dashes = app_state['app_dashboards']
+        for dash_name in app_dashes:
             if dash_name not in state['app_dashboards']:
-                state['app_dashboards'][dash_name] = app_state[
-                                                            'app_dashboards'][
-                                                            dash_name]
+                state['app_dashboards'][dash_name] = app_dashes[dash_name]
                 new_dashes.append(dash_name)
         if new_dashes:
-            nd = str(new_dashes)
-            self.log.debug(f'  new dashboards found, added: {nd}')
+            dashes = str(new_dashes)
+            self.log.debug(f'  new dashboards found, added: {dashes}')
         # self.log.debug('  state: {}'.format(str(state)))
         # self.log.debug('* prefs read ...')
         # self.log.debug('  prefs: {}'.format(str(prefs)))
