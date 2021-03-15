@@ -6,6 +6,7 @@ NOTE:  Only the `orb` instance created in this module should be imported (it is
 intended to be a singleton).
 """
 import json, os, shutil, sys, traceback
+from copy import deepcopy
 from pathlib import Path
 
 # Louie: dispatcher
@@ -147,8 +148,14 @@ class UberORB(object):
         # config.update() from the "config" file contents.
         read_config(os.path.join(pgx_home, 'config'))
         # --------------------------------------------------------------------
-        # ### NOTE:  saved "state" file represents most recent state of app,
-        # ###        including app-specified defaults
+        # ### NOTE:  saved "state" file represents most recently saved state
+        # ###        of the app -- so in case any new items have been added to
+        # ###        state at the app level (which would be in the current,
+        # ###        in-memory state dict, copy that to "app_state" and update
+        # ###        the saved state with it as necessary ... in particular,
+        # ###        check for any new dashboards.
+        if state:
+            app_state = deepcopy(state)
         read_state(os.path.join(pgx_home, 'state'))
         # --------------------------------------------------------------------
         # Saved prefs and trash are read here; will be overridden by
@@ -162,7 +169,18 @@ class UberORB(object):
         self.logging_initialized = False
         self.start_logging(home=pgx_home, console=console, debug=debug)
         # self.log.debug('* config read ...')
-        # self.log.debug('* state read ...')
+        self.log.debug('* state read ...')
+        self.log.debug('  checking for app updates to state ...')
+        new_dashes = []
+        for dash_name in app_state['app_dashboards']:
+            if dash_name not in state['app_dashboards']:
+                state['app_dashboards'][dash_name] = app_state[
+                                                            'app_dashboards'][
+                                                            dash_name]
+                new_dashes.append(dash_name)
+        if new_dashes:
+            nd = str(new_dashes)
+            self.log.debug(f'  new dashboards found, added: {nd}')
         # self.log.debug('  state: {}'.format(str(state)))
         # self.log.debug('* prefs read ...')
         # self.log.debug('  prefs: {}'.format(str(prefs)))
