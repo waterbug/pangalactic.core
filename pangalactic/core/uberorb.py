@@ -151,11 +151,10 @@ class UberORB(object):
         # ### NOTE:  saved "state" file represents most recently saved state
         # ###        of the app -- so in case any new items have been added to
         # ###        state at the app level (which would be in the current,
-        # ###        in-memory state dict, copy that to "app_state" and update
+        # ###        in-memory state dict), copy that to "app_state" and update
         # ###        the saved state with it as necessary ... in particular,
         # ###        check for any new dashboards.
-        if state:
-            app_state = deepcopy(state)
+        app_state = deepcopy(state)
         read_state(os.path.join(pgx_home, 'state'))
         # --------------------------------------------------------------------
         # Saved prefs and trash are read here; will be overridden by
