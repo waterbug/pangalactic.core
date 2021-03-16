@@ -478,7 +478,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
     for i, col_id in enumerate(mel_columns):
         val = get_dval(component.oid, col_id)
         if val and i not in predefined_cols:
-            dtype = de_defz.get(col_id, {}).get('range_datatype')
+            dtype = (de_defz.get(col_id) or {}).get('range_datatype')
             sheet.write(row, i, val, dt_map.get(dtype, txt_fmt))
     real_comps = []
     if component.components:

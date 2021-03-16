@@ -113,7 +113,8 @@ def get_external_name_plural(cname):
                                 to_external_name(cname)+'s')
 
 def get_attr_ext_name(cname, aname):
-    return ATTR_EXT_NAMES.get(cname, {}).get(aname, ' '.join(aname.split('_')))
+    return (ATTR_EXT_NAMES.get(cname) or {}).get(
+                                            aname, ' '.join(aname.split('_')))
 
 def to_external_name(cname):
     """

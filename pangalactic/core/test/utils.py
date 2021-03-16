@@ -25,7 +25,7 @@ def gen_test_dvals(data_elements):
     """
     for deid, de in data_elements.items():
         # get the cached data element definition
-        de_def = de_defz.get(deid, {})
+        de_def = de_defz.get(deid) or {}
         if de_def.get('range_datatype') in ['text', 'str']:
             # make sure no non-null default has been set
             if not de.get('value'):
@@ -56,7 +56,7 @@ def gen_test_pvals(parms):
             parameters.
     """
     for pid, parm in parms.items():
-        pdz = parm_defz.get(pid, {})
+        pdz = parm_defz.get(pid) or {}
         if pdz.get('computed'):
             # ignore computed parameters
             continue

@@ -185,9 +185,9 @@ def deserialize_parms(oid, ser_parms, cname=None, force_update=False):
             # log.debug('  - {}'.format(log_msg))
             # pid has no definition, so it should not be in parameterz or
             # data_elementz
-            if pid in parameterz.get(oid, {}):
+            if pid in (parameterz.get(oid) or {}):
                 pids_to_delete.append(pid)
-            if pid in data_elementz.get(oid, {}):
+            if pid in (data_elementz.get(oid) or {}):
                 deids_to_delete.append(pid)
     # delete any undefined parameters or data elements
     de_oids = list(data_elementz)
@@ -714,7 +714,7 @@ def delete_parameter(oid, pid):
         pid (str):  `id` attribute of the parameter
     """
     # dispatcher 'modified object' msg is sent by pgxnobject
-    if parameterz.get(oid, {}).get(pid):
+    if (parameterz.get(oid) or {}).get(pid):
         del parameterz[oid][pid]
 
 def get_pval(oid, pid, units='', allow_nan=False):
@@ -876,7 +876,7 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
     # if oid not in parameterz or not parameterz[oid].get(variable):
         # return val
     pid = get_parameter_id(variable, context_id)
-    pdz = parm_defz.get(pid, {})
+    pdz = parm_defz.get(pid) or {}
     if not pdz:
         # log.debug('  "{}" not found in parm_defz'.format(pid))
         # log.debug('  in _compute_pval for oid "{}"'.format(oid))
@@ -885,7 +885,7 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
         # log.debug('  "{}" is computed ...'.format(pid))
         # look up compute function -- in the future, there may be a Relation
         # expression, found using the ParameterRelation relationship
-        if not parameterz.get(oid, {}).get(variable):
+        if not (parameterz.get(oid) or {}).get(variable):
             # if object does not have the base parameter (variable), the
             # computed parameter has no meaning for it
             obj_parms = parameterz.get(oid)
@@ -954,7 +954,7 @@ def set_pval(oid, pid, value, units='', mod_datetime=None, local=True):
     # NOTE: henceforth, if the parameter whose value is being set is not
     # present it will be added (SCW 2019-09-26)
     ######################################################################
-    parm = parameterz.get(oid, {}).get(pid, {})
+    parm = (parameterz.get(oid) or {}).get(pid) or {}
     if not parm:
         # NOTE:  add_parameter() now checks if base parameter has been assigned
         # and if not, assigns it and returns True
@@ -1090,7 +1090,7 @@ def set_pval_from_str(oid, pid, str_val, units='', mod_datetime=None,
     # log.debug('* set_pval_from_str({}, {}, {})'.format(oid, pid,
                                                            # str(str_val)))
     try:
-        pd = parm_defz.get(pid, {})
+        pd = parm_defz.get(pid) or {}
         range_datatype = pd.get('range_datatype')
         if range_datatype in ['int', 'float']:
             dtype = DATATYPES.get(range_datatype)
@@ -1479,7 +1479,7 @@ def deserialize_des(oid, ser_des, cname=None, force_update=False):
             # log_msg = 'unknown id found in data elements: "{}"'.format(deid)
             # log.debug('  - {}'.format(log_msg))
             # deid has no definition, so it should not be in data_elementz
-            if deid in data_elementz.get(oid, {}):
+            if deid in (data_elementz.get(oid) or {}):
                 deids_to_delete.append(deid)
     # delete any undefined data elements
     de_oids = list(data_elementz)
@@ -1694,7 +1694,7 @@ def set_dval(oid, deid, value, units='', mod_datetime=None, local=True):
     # NOTE: if the data element whose value is being set is not
     # present it will be added
     ######################################################################
-    data_element = data_elementz.get(oid, {}).get(deid, {})
+    data_element = (data_elementz.get(oid) or {}).get(deid)
     if not data_element:
         if add_data_element(oid, deid):
             # log.debug('  data element either exists or was added.')
@@ -1751,7 +1751,7 @@ def set_dval_from_str(oid, deid, str_val, units='', mod_datetime=None,
     # log.debug('* set_dval_from_str({}, {}, {})'.format(oid, deid,
                                                            # str(str_val)))
     try:
-        de_def = de_defz.get(deid, {})
+        de_def = de_defz.get(deid) or {}
         range_datatype = de_def.get('range_datatype', 'str')
         if range_datatype in ['int', 'float']:
             dtype = DATATYPES.get(range_datatype)
