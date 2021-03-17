@@ -170,6 +170,7 @@ class UberORB(object):
         # self.log.debug('* config read ...')
         self.log.debug('* state read ...')
         self.log.debug('  checking for app updates to state ...')
+        # check for new app dashboards in state
         new_dashes = []
         app_dashes = {}
         if app_state and app_state.get('app_dashboards'):
@@ -181,6 +182,35 @@ class UberORB(object):
         if new_dashes:
             dashes = str(new_dashes)
             self.log.debug(f'  new dashboards found, added: {dashes}')
+        # check for new default parameters, data elements in state
+        app_parms = []
+        if app_state and app_state.get('default_parms'):
+            app_parms = app_state['default_parms']
+        if not state.get('default_parms'):
+            state['default_parms'] = []
+        for pid in app_parms:
+            if pid not in state['default_parms']:
+                state['default_parms'].append(pid)
+        app_data_elements = []
+        if app_state and app_state.get('default_data_elements'):
+            app_data_elements = app_state['default_data_elements']
+        if not state.get('default_data_elements'):
+            state['default_data_elements'] = []
+        for deid in app_data_elements:
+            if deid not in state['default_data_elements']:
+                state['default_data_elements'].append(deid)
+        # check for default_schema_name
+        app_schema_name = 'MEL'
+        if app_state and app_state.get('default_schema_name'):
+            app_schema_name = app_state['default_schema_name']
+        if not state.get('default_schema_name'):
+            state['default_schema_name'] = app_schema_name
+        # check for p_defaults (default parameter values)
+        app_p_defaults = {}
+        if app_state and app_state.get('p_defaults'):
+            app_p_defaults = app_state['p_defaults']
+        if not state.get('p_defaults'):
+            state['p_defaults'] = app_p_defaults
         # self.log.debug('  state: {}'.format(str(state)))
         # self.log.debug('* prefs read ...')
         # self.log.debug('  prefs: {}'.format(str(prefs)))

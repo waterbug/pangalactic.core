@@ -8,7 +8,7 @@ from decimal     import Decimal
 from math        import floor, fsum, log10
 
 # pangalactic
-from pangalactic.core                 import config, prefs
+from pangalactic.core                 import state, prefs
 from pangalactic.core.datastructures  import OrderedSet
 from pangalactic.core.meta            import (SELECTABLE_VALUES,
                                               DEFAULT_CLASS_DATA_ELEMENTS,
@@ -133,7 +133,7 @@ def deserialize_parms(oid, ser_parms, cname=None, force_update=False):
     if not ser_parms:
         # log.debug('  object with oid "{}" has no parameters'.format(oid))
         return
-    if oid not in parameterz:
+    if oid not in parameterz or parameterz[oid] is None:
         parameterz[oid] = {}
     pids_to_delete = []
     deids_to_delete = []
@@ -185,7 +185,7 @@ def deserialize_parms(oid, ser_parms, cname=None, force_update=False):
             # log.debug('  - {}'.format(log_msg))
             # pid has no definition, so it should not be in parameterz or
             # data_elementz
-            if pid in (parameterz.get(oid) or {}):
+            if pid in parameterz[oid]:
                 pids_to_delete.append(pid)
             if pid in (data_elementz.get(oid) or {}):
                 deids_to_delete.append(pid)
@@ -562,87 +562,35 @@ def add_parameter(oid, pid):
         oid (str):  oid of the object that owns the parameter
         pid (str):  the id of the parameter
     """
-    if oid not in parameterz:
+    if oid not in parameterz or parameterz[oid] is None:
         parameterz[oid] = {}
-    is_context_parm = False
-    if '[' in pid:
-        # this is a context parameter id -- find the base pid (variable)
-        variable = pid.split('[')[0]
-        is_context_parm = True
-    else:
-        variable = pid
-    # log.debug('* add_parameter "{!s}"'.format(pid))
-    # [1] check if object already has that parameter
+    # NOTE [SCW 2021-03-17] added when refactoring so that the "base variable"
+    # is not added when a context parameter is added: it doesn't matter whether
+    # the parameter being added is a context parameter or a "variable"
+    # parameter -- the function should be the same for both and should not add
+    # the "variable" parameter when a context parameter is added: in many cases
+    # the "variable" does not make sense as a "spec" parameter (e.g.,
+    # Temperature).
     if pid in parameterz[oid]:
         # if the object already has that parameter, do nothing
         return True
-    # [2] check for ParameterDefinition of base variable
-    pd = parm_defz.get(variable)
-    if not pd:
-        # for now, if no ParameterDefinition exists for pid, pass
-        # (maybe eventually raise TypeError)
-        # log.debug(
-            # '* add_parameter(): variable "{}" is not defined.'.format(
-                                                              # variable))
+    pdz = parm_defz.get(pid)
+    if not pdz:
+        print(f'* no definition for "{pid}" found in parm_defz.')
         return False
-    # [3] check if the variable (base parameter) has been assigned ...
-    if not parameterz[oid].get(variable):
-        # the variable (base parameter) has not been assigned ... this is
-        # rare, so debug logging is ok
-        # if is_context_parm:
-            # log.debug('* adding base parameter "{}".'.format(variable))
-        # else:
-            # log.debug('* adding parameter "{}".'.format(variable))
-        pdz = parm_defz.get(variable)
-        if not pdz:
-            # if not in parm_defz, add it:
-            pdz = {pd['id'] :
-                   {'name': pd['name'],
-                    'variable': pd['id'],
-                    'context': None,
-                    'context_type': None,
-                    'description': pd['description'],
-                    'dimensions': pd['dimensions'],
-                    'range_datatype': pd['range_datatype'],
-                    'computed': False,
-                    'mod_datetime':
-                        str(pd.get('mod_datetime', '') or dtstamp())
-                    }}
-            parm_defz.update(pdz)
-        # NOTE:  setting the parameter's value is a separate operation -- when a
-        # parameter is created, its value is initialized to the appropriate "null"
-        range_datatype = pdz.get('range_datatype', 'float')
-        dims = pdz.get('dimensions')
-        p_defaults = config.get('p_defaults') or {}
-        if p_defaults.get(variable):
-            # if a default value is configured for this variable, override null
-            dtype = DATATYPES[range_datatype]
-            value = dtype(p_defaults[variable])
-        else:    # use a "NULL" value
-            value = NULL.get(range_datatype, 0.0)
-        parameterz[oid][variable] = dict(
-            value=value,   # consistent with dtype defined in `range_datatype`
-            units=in_si.get(dims))   # SI units consistent with `dimensions`
-    if is_context_parm:
-        # if this is a context parameter, its base variable has been added by
-        # the above clause if it was not already present, so it is safe to add
-        # the context parameter now
-        pdz = parm_defz.get(pid)
-        range_datatype = pdz.get('range_datatype', 'float')
-        dims = pdz.get('dimensions')
-        p_defaults = config.get('p_defaults') or {}
-        if p_defaults.get(pid):
-            # if a default value is configured for this pid, override null
-            dtype = DATATYPES[range_datatype]
-            value = dtype(p_defaults[pid])
-        else:    # use a "NULL" value
-            value = NULL.get(range_datatype, 0.0)
-        parameterz[oid][pid] = dict(
-            value=value,
-            units=in_si.get(dims))   # SI units consistent with `dimensions`
-        return True
-    else:
-        return True
+    range_datatype = pdz.get('range_datatype', 'float')
+    dims = pdz.get('dimensions')
+    p_defaults = state.get('p_defaults') or {}
+    if p_defaults.get(pid):
+        # if a default value is configured for this pid, override null
+        dtype = DATATYPES[range_datatype]
+        value = dtype(p_defaults[pid])
+    else:    # use a "NULL" value
+        value = NULL.get(range_datatype, 0.0)
+    parameterz[oid][pid] = dict(
+        value=value,
+        units=in_si.get(dims))   # SI units consistent with `dimensions`
+    return True
 
 def add_default_parameters(obj, parms=None):
     """
@@ -666,12 +614,12 @@ def add_default_parameters(obj, parms=None):
     pids |= OrderedSet(DEFAULT_CLASS_PARAMETERS.get(cname, []))
     # TODO: let user set default parameters in their prefs
     if cname == 'HardwareProduct':
-        # default for "default_parms" in config:  mass, power, data rate
-        # (config is read in p.node.gui.startup, and will be overridden by
+        # default for "default_parms":  mass, power, data rate
+        # (state is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
         pids |= OrderedSet(parms
                            or prefs.get('default_parms')
-                           or config.get('default_parms')
+                           or state.get('default_parms')
                            or ['m', 'P', 'R_D',
                                'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
                                'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
@@ -873,8 +821,8 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
     # log.debug('                  in context "{}"'.format(context_id))
     val = 0.0
     # NOTE:  THE OBJECT DOES NOT ALWAYS HAVE TO HAVE THE VARIABLE
-    # if oid not in parameterz or not parameterz[oid].get(variable):
-        # return val
+    if oid not in parameterz or parameterz[oid] is None:
+        return val
     pid = get_parameter_id(variable, context_id)
     pdz = parm_defz.get(pid) or {}
     if not pdz:
@@ -1133,7 +1081,8 @@ def compute_assembly_parameter(product_oid, variable):
     """
     # This logging is VERY verbose, even for debugging!
     # log.debug('* compute_assembly_parameter()')
-    if (product_oid in parameterz and variable in parameterz[product_oid]):
+    if (product_oid in parameterz and
+        variable in (parameterz.get(product_oid) or {})):
         range_datatype = parm_defz[variable]['range_datatype']
         dtype = DATATYPES[range_datatype]
         # cz, if it exists, will be a list of namedtuples ...
@@ -1169,8 +1118,10 @@ def compute_mev(oid, variable):
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
+    if oid not in parameterz or parameterz[oid] is None:
+        parameterz[oid] = {}
     # log.debug('* compute_mev "{}": "{}"'.format(oid, variable))
-    if oid not in parameterz or variable not in parameterz[oid]:
+    if variable not in parameterz[oid]:
         return 0.0
     range_datatype = parm_defz[variable]['range_datatype']
     dtype = DATATYPES[range_datatype]
@@ -1580,7 +1531,7 @@ def add_data_element(oid, deid, units=None):
         # NOTE:  setting the data element's value is a separate operation -- when a
         # data element is created, its value is initialized to the appropriate "null"
         range_datatype = de_def.get('range_datatype', 'str')
-        de_defaults = config.get('de_defaults') or {}
+        de_defaults = state.get('de_defaults') or {}
         if de_defaults.get(deid):
             # if a default value is configured for this deid, override null
             dtype = DATATYPES[range_datatype]
@@ -1775,7 +1726,7 @@ def set_dval_from_str(oid, deid, str_val, units='', mod_datetime=None,
 
 def add_default_data_elements(obj, des=None):
     """
-    Assign the configured or preferred default data elements to an object.
+    Assign the app configured or preferred default data elements to an object.
 
     Args:
         obj (Identifiable):  the object to receive data elements
@@ -1794,13 +1745,13 @@ def add_default_data_elements(obj, des=None):
     deids |= OrderedSet(DEFAULT_CLASS_DATA_ELEMENTS.get(cname, []))
     # TODO: let user set default data elements in their prefs
     if cname == 'HardwareProduct':
-        # default for "default_parms" in config:  mass, power, data rate
-        # (config is read in p.node.gui.startup, and will be overridden by
-        # prefs['default_parms'] if it is set
+        # default for "default_data_elements":  Vendor
+        # (state is read in p.node.gui.startup, and will be overridden by
+        # prefs['default_data_elements'] if it is set
         deids |= OrderedSet(des
                             or prefs.get('default_data_elements')
-                            or config.get('default_data_elements')
-                            or ['TRL', 'Vendor'])
+                            or state.get('default_data_elements')
+                            or ['Vendor'])
         if obj.product_type:
             deids |= OrderedSet(DEFAULT_PRODUCT_TYPE_DATA_ELMTS.get(
                                 obj.product_type.id, []))
