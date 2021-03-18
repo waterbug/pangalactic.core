@@ -21,6 +21,7 @@ from pangalactic.core.utils.datetimes import dtstamp
 # dispatcher (Louie)
 from louie import dispatcher
 
+Q_ = ureg.Quantity
 
 class logger:
     def info(self, s):
@@ -710,7 +711,7 @@ def get_pval(oid, pid, units='', allow_nan=False):
                     return 0.00
             else:
                 base_val = parameterz[oid][pid]['value']
-                quan = base_val * ureg.parse_expression(in_si[dims])
+                quan = Q_(base_val, ureg.parse_expression(in_si[dims]))
                 quan_converted = quan.to(units)
                 return quan_converted.magnitude
         except:
@@ -736,8 +737,8 @@ def get_pval_as_str(oid, pid, units='', allow_nan=False):
     # log.debug('* get_pval_as_str({}, {})'.format(oid, pid))
     pdz = parm_defz.get(pid)
     if not pdz:
-        # log.debug('  - "{}" does not have a definition.'.format(pid))
-        return '-'
+        log.debug('  - "{}" does not have a definition.'.format(pid))
+        return '0'
     try:
         # convert based on dimensions/units ...
         dims = pdz.get('dimensions')
@@ -750,7 +751,7 @@ def get_pval_as_str(oid, pid, units='', allow_nan=False):
             # format with 2 decimal places
             val = get_pval(oid, pid)
             if val is None:
-                return ''
+                return '-'
             elif val:
                 return "{:,}".format(Decimal(val).quantize(TWOPLACES))
             else:
@@ -759,7 +760,7 @@ def get_pval_as_str(oid, pid, units='', allow_nan=False):
             base_val = get_pval(oid, pid)
             if units:
                 # TODO: ignore units if not compatible
-                quan = base_val * ureg.parse_expression(in_si[dims])
+                quan = Q_(base_val, ureg.parse_expression(in_si[dims]))
                 quan_converted = quan.to(units)
                 val = quan_converted.magnitude
             else:
@@ -787,8 +788,7 @@ def get_pval_as_str(oid, pid, units='', allow_nan=False):
         # msg = '* get_pval_as_str({}, {})'.format(oid, pid)
         # msg += '  encountered an error.'
         # log.debug(msg)
-
-        # for production use, return '-' if the value causes error
+        # for production use, return '' if the value causes error
         return '-'
 
 def _compute_pval(oid, variable, context_id, allow_nan=False):
@@ -928,15 +928,15 @@ def set_pval(oid, pid, value, units='', mod_datetime=None, local=True):
             value = NULL.get(dt_name, 0.0)
         if units is not None and units not in ["$", "%"]:
             # TODO:  validate units (ensure they are consistent with dims)
+            dims = pdz.get('dimensions')
             try:
-                quan = value * ureg.parse_expression(units)
+                quan = Q_(value, ureg.parse_expression(units))
                 quan_base = quan.to_base_units()
                 converted_value = quan_base.magnitude
             except:
                 # TODO: notify end user if units could not be parsed!
                 # ... for now, use base units
                 # log.debug('  could not parse units "{}" ...'.format(units))
-                dims = pdz.get('dimensions')
                 units = in_si.get(dims)
                 # log.debug('  setting to base units: {}'.format(units))
                 # if units parse failed, assume base units

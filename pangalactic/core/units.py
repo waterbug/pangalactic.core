@@ -47,7 +47,7 @@ in_si = OrderedDict([
     ('pressure', 'Pa'),                     # pascal
     ('radiation', 'rads'),                  # rads -- not 'rad' (== 'radian')
     ('substance', 'mol'),                   # moles
-    ('temperature', 'degC'),                # celsius; K; degF (fahrenheit)
+    ('temperature', 'K'),                   # Kelvin
     ('time', 's'),                          # second
     ('torque', 'N*m'),                      # newton-meter
     ('volume', 'm^3'),                      # cubic meter
@@ -82,7 +82,7 @@ alt_units = OrderedDict([
     ('power', ['W', 'kW', 'MW', 'GW', 'TW', 'mW', 'uW', 'nW', 'pW']),
     ('pressure', ['Pa', 'kPa', 'mPa', 'uPa', 'atm', 'psi']),
     ('radiation', ['rads', 'krads', 'Mrads', 'mrads', 'gray']),
-    ('temperature', ['degC', 'K', 'degF']),
+    ('temperature', ['K', 'degC', 'degF']),
     ('time', ['s', 'ms', 'us', 'ns', 'hr', 'day', 'week', 'fortnight', 'month',
               'year']),
     ('volume', ['m^3', 'liter', 'cc']),
