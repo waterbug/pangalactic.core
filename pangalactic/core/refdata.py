@@ -2930,12 +2930,7 @@ dict(
     'name': 'RS422 Digital Data Port',
     'abbreviation': 'RS422',
     'type_of_port': 'pgefobjects:PortType.digital_data',
-    'parameters': {
-       'R_D':
-         {'value': 10000000,  # per Wikipedia: up to 10 Mbit/s
-          'mod_datetime': '2020-01-01 00:00:00',
-          'units': 'Mbit/s'}
-          },
+    'parameters': {'R_D': 10000000},
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
@@ -2949,12 +2944,7 @@ dict(
     'name': 'LVDS Digital Data Port',
     'abbreviation': 'LVDS',
     'type_of_port': 'pgefobjects:PortType.digital_data',
-    'parameters': {
-       'R_D':
-         {'value': 655000000,  # per Wikipedia: 655 Mbit/s
-          'mod_datetime': '2020-01-01 00:00:00',
-          'units': 'Mbit/s'}
-          },
+    'parameters': {'R_D': 655000000},
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
@@ -2968,12 +2958,7 @@ dict(
     'name': 'MIL-STD-1553 Digital Data Port',
     'abbreviation': '1553',
     'type_of_port': 'pgefobjects:PortType.digital_data',
-    'parameters': {
-       'R_D':
-         {'value': 1000000,
-          'mod_datetime': '2021-03-01 00:00:00',
-          'units': 'Mbit/s'}
-          },
+    'parameters': {'R_D': 1000000},
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2021-03-01 00:00:00',
@@ -2987,12 +2972,7 @@ dict(
     'name': 'MIL-STD-1773 Digital Data Port',
     'abbreviation': '1773',
     'type_of_port': 'pgefobjects:PortType.digital_data',
-    'parameters': {
-       'R_D':
-         {'value': 1000000,
-          'mod_datetime': '2021-03-01 00:00:00',
-          'units': 'Mbit/s'}
-          },
+    'parameters': {'R_D': 1000000},
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2021-03-01 00:00:00',
@@ -3006,12 +2986,7 @@ dict(
     'name': 'Ethernet Digital Data Port',
     'abbreviation': 'Ethernet',
     'type_of_port': 'pgefobjects:PortType.digital_data',
-    'parameters': {
-       'R_D':
-         {'value': 2940000,  # up to 400 Gbit/s, currently
-          'mod_datetime': '2021-03-01 00:00:00',
-          'units': 'Mbit/s'}
-          },
+    'parameters': {'R_D': 2940000},  # up to 400 Gbit/s, currently
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2021-03-01 00:00:00',
@@ -3025,12 +3000,7 @@ dict(
     'name': 'SpaceWire Digital Data Port',
     'abbreviation': 'SpaceWire',
     'type_of_port': 'pgefobjects:PortType.digital_data',
-    'parameters': {
-       'R_D':
-         {'value': 400000000,  # per Wikipedia: 400 Mbit/s
-          'mod_datetime': '2020-01-01 00:00:00',
-          'units': 'Mbit/s'}
-          },
+    'parameters': {'R_D': 400000000},  # per Wikipedia: 400 Mbit/s
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
@@ -3043,12 +3013,7 @@ dict(
     'id': 'digital_data.GPIO',
     'name': 'GPIO Digital Data Port',
     'abbreviation': 'GPIO',
-    'parameters': {
-       'R_D':
-         {'value': 0,  # per Wikipedia: no data rate specified
-          'mod_datetime': epoch,
-          'units': 'Mbit/s'}
-          },
+    'parameters': {'R_D': 0},  # per Wikipedia: no data rate specified
     'type_of_port': 'pgefobjects:PortType.digital_data',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
@@ -3058,23 +3023,13 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.28V',
-    'data_elements': {
-       'directionality':
-         {'value': '',
-          'mod_datetime': epoch,
-          'units': None}
-          },
+    'data_elements': {'directionality': ''},
     'description': '28V electrical power port',
     'id': 'electrical_power.28V',
     'name': '28V Electrical Power Port',
     'abbreviation': '28V',
     'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 28,
-          'mod_datetime': epoch,
-          'units': 'V'}
-          },
+    'parameters': {'V': 28},
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
@@ -3083,23 +3038,13 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.12V',
-    'data_elements': {
-       'directionality':
-         {'value': '',
-          'mod_datetime': epoch,
-          'units': None}
-          },
+    'data_elements': {'directionality': ''},
     'description': '12V electrical power port',
     'id': 'electrical_power.12V',
     'name': '12V Electrical Power Port',
     'abbreviation': '12V',
     'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 12,
-          'mod_datetime': epoch,
-          'units': 'V'}
-          },
+    'parameters': {'V': 12},
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
@@ -3108,23 +3053,13 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.5V',
-    'data_elements': {
-       'directionality':
-         {'value': '',
-          'mod_datetime': epoch,
-          'units': None}
-          },
+    'data_elements': {'directionality': ''},
     'description': '5V electrical power port',
     'id': 'electrical_power.5V',
     'name': '5V Electrical Power Port',
     'abbreviation': '5V',
     'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 5,
-          'mod_datetime': epoch,
-          'units': 'V'}
-          },
+    'parameters': {'V': 5},
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
@@ -3133,23 +3068,13 @@ dict(
 
 {   '_cname': 'PortTemplate',
     'oid': 'pgefobjects:PortTemplate.electrical_power.3.3V',
-    'data_elements': {
-       'directionality':
-         {'value': '',
-          'mod_datetime': epoch,
-          'units': None}
-          },
+    'data_elements': {'directionality': ''},
     'description': '3.3V electrical power port',
     'id': 'electrical_power.3.3V',
     'name': '3.3V Electrical Power Port',
     'abbreviation': '3.3V',
     'type_of_port': 'pgefobjects:PortType.electrical_power',
-    'parameters': {
-       'V':
-         {'value': 3.3,
-          'mod_datetime': epoch,
-          'units': 'V'}
-          },
+    'parameters': {'V': 3.3},
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,

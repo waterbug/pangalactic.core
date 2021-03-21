@@ -17,26 +17,26 @@
   oid: magtorq
   owner: 'PGANA'
   parameters:
-    Cost: {mod_datetime: '2019-10-04 14:38:38.837691', units: $, value: 1000000.0}
-    Cost[Ctgcy]: {mod_datetime: '2019-10-04 14:38:39.221997', units: '%', value: 0.0}
-    P: {mod_datetime: '2019-10-04 14:38:37.346689', units: W, value: 9.0}
-    P[CBE]: {mod_datetime: '2020-01-09 15:45:49.130579', units: W, value: 9.0}
-    P[Ctgcy]: {mod_datetime: '2019-10-04 14:38:37.687199', units: '%', value: 0.1}
-    P[MEV]: {mod_datetime: '2020-01-09 15:45:49.130579', units: W, value: 9.9}
-    R_D: {mod_datetime: '2019-10-04 14:38:37.973207', units: bit/s, value: 0.0}
-    R_D[CBE]: {mod_datetime: '2020-01-09 15:45:49.135541', units: bit/s, value: 0.0}
-    R_D[Ctgcy]: {mod_datetime: '2019-10-04 14:38:38.259975', units: '%', value: 0.1}
-    R_D[MEV]: {mod_datetime: '2020-01-09 15:45:49.135541', units: bit/s, value: 0.0}
-    TRL: {mod_datetime: '2019-10-04 14:38:39.512428', units: '', value: 9}
-    Vendor: {mod_datetime: '2019-10-04 14:38:38.549642', units: '', value: Adcole}
-    depth: {mod_datetime: '2019-10-04 14:38:41.078035', units: m, value: 0.0}
-    depth[Ctgcy]: {mod_datetime: '2019-10-04 14:38:41.446282', units: '%', value: 0.0}
-    height: {mod_datetime: '2019-10-04 14:38:39.808221', units: m, value: 0.0}
-    height[Ctgcy]: {mod_datetime: '2019-10-04 14:38:40.190275', units: '%', value: 0.0}
-    m: {mod_datetime: '2019-10-04 14:38:36.770529', units: kg, value: 11.0}
-    m[Ctgcy]: {mod_datetime: '2019-10-04 14:38:37.065361', units: '%', value: 0.1}
-    width: {mod_datetime: '2019-10-04 14:38:40.479669', units: m, value: 0.0}
-    width[Ctgcy]: {mod_datetime: '2019-10-04 14:38:40.789263', units: '%', value: 0.0}
+    Cost: 1000000.0
+    Cost[Ctgcy]: 0.0
+    P: 9.0
+    P[CBE]: 9.0
+    P[Ctgcy]: 0.1
+    P[MEV]: 9.9
+    R_D: 0.0
+    R_D[CBE]: 0.0
+    R_D[Ctgcy]: 0.1
+    R_D[MEV]: 0.0
+    TRL: 9
+    Vendor: Adcole
+    depth: 0.0
+    depth[Ctgcy]: 0.0
+    height: 0.0
+    height[Ctgcy]: 0.0
+    m: 11.0
+    m[Ctgcy]: 0.1
+    width: 0.0
+    width[Ctgcy]: 0.0
   product_type: pgefobjects:ProductType.magnetic_torquer
   public: true
   purpose: ''

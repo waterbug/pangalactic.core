@@ -8,7 +8,7 @@ from decimal     import Decimal
 from math        import floor, fsum, log10
 
 # pangalactic
-from pangalactic.core                 import state, prefs
+from pangalactic.core                 import config, state, prefs
 from pangalactic.core.datastructures  import OrderedSet
 from pangalactic.core.meta            import (SELECTABLE_VALUES,
                                               DEFAULT_CLASS_DATA_ELEMENTS,
@@ -57,7 +57,7 @@ Comp = namedtuple('Comp', 'oid usage_oid quantity reference_designator')
 # parm_defz:  runtime cache of parameter definitions (both base and context
 #             parameter definitions are included)
 # purpose:  enable fast lookup of parameter metadata & compact representation
-#           of 'parameterz' cache as (value, units, mod_datetime)
+#           of the content of ParameterDefinition objects
 # format:  {'parameter id': {parameter properties}
 #                            ...}}
 # ... where parameter definition properties are:
@@ -71,14 +71,9 @@ parm_defz = {}
 #              ** persisted in the file 'parameters.json' in the
 #              application home directory -- see the orb functions
 #              `_save_parmz` and `_load_parmz`
-# format:  {object.oid : {'parameter id': {parameter properties}
+# format:  {object.oid : {'parameter id': value
 #                         ...}}
-# ... where parameter properties are:
-# ------------
-# value, units
-# ------------
-# NOTE:  "value" is ALWAYS stored in base mks units; "units" refers to the
-# units in which the parameter prefers to be displayed
+# NOTE:  "value" is ALWAYS stored in base mks units
 parameterz = {}
 
 def serialize_parms(oid):
@@ -95,15 +90,13 @@ def serialize_parms(oid):
 
     Serialize the dictionary of parameters associated with an object.
     """
-    ### NOTE:  mod_datetime is deprecated for parameters
     if oid in parameterz and parameterz[oid] is not None:
-        return {pid: dict(value=parameterz[oid][pid].get('value'),
-                          units=parameterz[oid][pid].get('units', ''))
+        return {pid: parameterz[oid][pid]
                 for pid in parameterz[oid]}
     else:
         return {}
 
-def deserialize_parms(oid, ser_parms, cname=None, force_update=False):
+def deserialize_parms(oid, ser_parms, cname=None):
     """
     Output the serialized format for parameters. Note that the values are
     *always* expressed in base units and the 'units' field contains the
@@ -123,9 +116,6 @@ def deserialize_parms(oid, ser_parms, cname=None, force_update=False):
     Keyword Args:
         cname (str):  class name of the object to which the parameters are
             assigned (only used for logging)
-        force_update (bool):  force parameters to update regardless of
-            mod_datetimes (used in conjunction with a
-            force_load_serialized_objects() call)
     """
     # if cname:
         # log.debug('* deserializing parms for {} ({})...'.format(oid,
@@ -138,47 +128,17 @@ def deserialize_parms(oid, ser_parms, cname=None, force_update=False):
         parameterz[oid] = {}
     pids_to_delete = []
     deids_to_delete = []
-    for pid, parm in ser_parms.items():
-        ### NOTE: "mod_datetime" is deprecated and will be removed
-        # mod_dt = parm['mod_datetime']
+    for pid, value in ser_parms.items():
         if pid in parm_defz:
             # yes, this is a valid parameter (has a ParameterDefinition)
-            ### NOTE: "force_update" is deprecated and will be removed
-            # if force_update:
-            parameterz[oid][pid] = dict(value=parm['value'],
-                                        units=parm['units'])
-            ### NOTE: "mod_datetime" is deprecated and will be removed
-            # elif ((parameterz[oid].get(pid) and
-                 # mod_dt > parameterz[oid][pid]['mod_datetime'])
-                # or not parameterz[oid].get(pid)):
-                # # deserialized parameter value is more recent or that
-                # # parameter was not previously assigned
-                # parameterz[oid][pid] = parm
+            parameterz[oid][pid] = value
         elif pid in de_defz:
             # this is a data element (has a DataElementDefinition)
             # log_msg = 'data element found in parameters: "{}"'.format(pid)
             # log.debug('  - {}'.format(log_msg))
             if oid not in data_elementz:
                 data_elementz[oid] = {}
-            ### NOTE: "force_update" is deprecated and will be removed
-            # if force_update:
-            de = dict(value=parm['value'],
-                      units=parm['units'])
-                      # mod_datetime=parm['mod_datetime'])
-            data_elementz[oid][pid] = de
-            ### NOTE: "mod_datetime" is deprecated and will be removed
-            # if (de and mod_dt > de['mod_datetime']):
-                # # deserialized value is more recent
-                # de['mod_datetime'] = parm['mod_datetime']
-                # de['value'] = parm['value']
-                # de['units'] = parm['units']
-            # elif not data_elementz[oid].get(pid):
-                # that data element was not previously assigned
-                # de = dict(value=parm['value'],
-                          # units=parm['units'])
-                          # # mod_datetime=parm['mod_datetime'])
-                # data_elementz[oid][pid] = de
-            # pid refers to a data element, so it should not be in parameterz
+            data_elementz[oid][pid] = value
             if pid in parameterz[oid]:
                 pids_to_delete.append(pid)
         else:
@@ -208,15 +168,7 @@ def deserialize_parms(oid, ser_parms, cname=None, force_update=False):
     # for pid in pids:
         # if pid not in new_parms:
             # del parameterz[oid][pid]
-    # add base parameters for any context parameters for which the base
-    # parameter is absent
-    base_pids = set([pid.split('[')[0] for pid in parameterz[oid]])
-    for base_pid in base_pids:
-        if not base_pid in parameterz[oid]:
-            # log_msg = 'base variable not in parameters, adding: "{}"'.format(
-                                                                    # base_pid)
-            # log.debug('  - {}'.format(log_msg))
-            set_pval(oid, base_pid, 0.0)
+
 
 def load_parmz(dir_path):
     """
@@ -232,6 +184,7 @@ def load_parmz(dir_path):
         log.debug('  - parameterz cache loaded.')
     else:
         log.debug('  - "parameters.json" was not found.')
+
 
 def save_parmz(dir_path):
     """
@@ -548,16 +501,9 @@ def update_parmz_by_dimz(pd):
 
 def add_parameter(oid, pid):
     """
-    Add a new parameter to an object, which means adding a parameter's data
-    structure to the `p.node.parametrics.parameterz` dictionary under that
-    objects's oid, if it does not already exist for the specified paramter.
-    The parameter data structure format is a dict with the following keys:
-
-        value, units
-
-    NOTE:  'units' here refers to the preferred units in which to *display* the
-    parameter's value, not the units of the 'value', which are *always* mks
-    base units.
+    Add a new parameter to an object, which means adding a parameter's value to
+    the `p.node.parametrics.parameterz` dictionary under that objects's oid, if
+    it does not already exist for the specified paramter.
 
     Args:
         oid (str):  oid of the object that owns the parameter
@@ -580,7 +526,6 @@ def add_parameter(oid, pid):
         print(f'* no definition for "{pid}" found in parm_defz.')
         return False
     range_datatype = pdz.get('range_datatype', 'float')
-    dims = pdz.get('dimensions')
     p_defaults = state.get('p_defaults') or {}
     if p_defaults.get(pid):
         # if a default value is configured for this pid, override null
@@ -588,9 +533,7 @@ def add_parameter(oid, pid):
         value = dtype(p_defaults[pid])
     else:    # use a "NULL" value
         value = NULL.get(range_datatype, 0.0)
-    parameterz[oid][pid] = dict(
-        value=value,
-        units=in_si.get(dims))   # SI units consistent with `dimensions`
+    parameterz[oid][pid] = value
     return True
 
 def add_default_parameters(obj, parms=None):
@@ -621,6 +564,7 @@ def add_default_parameters(obj, parms=None):
         pids |= OrderedSet(parms
                            or prefs.get('default_parms')
                            or state.get('default_parms')
+                           or config.get('default_parms')
                            or ['m', 'P', 'R_D',
                                'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
                                'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
@@ -651,7 +595,7 @@ def add_product_type_parameters(obj, pt):
         if pt_parmz:
             # if so, replicate them directly (with values)
             for pid in pt_parmz:
-                parameterz[obj.oid][pid] = pt_parmz[pid].copy()
+                parameterz[obj.oid][pid] = pt_parmz[pid]
 
 def delete_parameter(oid, pid):
     """
@@ -686,11 +630,8 @@ def get_pval(oid, pid, units='', allow_nan=False):
         return
     if not units:
         # if no units are specified, return the value in base units
-        try:
-            return parameterz[oid][pid]['value']
-        except:
-            # log.debug('  "{}" is not assigned'.format(pid))
-            return NULL.get(pdz.get('range_datatype', 'float'))
+        return (parameterz[oid].get(pid) or 
+                NULL.get(pdz.get('range_datatype', 'float')))
     else:
         try:
             # convert based on dimensions/units ...
@@ -699,18 +640,18 @@ def get_pval(oid, pid, units='', allow_nan=False):
             if dims == 'percent':
                 # show percentage values in interface -- they will
                 # later be saved (by set_pval) as .01 * value
-                return 100.0 * parameterz[oid][pid]['value']
+                return 100.0 * (parameterz[oid].get(pid) or 0.0)
             elif dims == 'money':
                 # round to 2 decimal places
                 val = get_pval(oid, pid)
                 if val is None:
-                    return 0.00
+                    return 0.0
                 elif val:
                     return float(Decimal(val).quantize(TWOPLACES))
                 else:
-                    return 0.00
+                    return 0.0
             else:
-                base_val = parameterz[oid][pid]['value']
+                base_val = parameterz[oid][pid]
                 quan = Q_(base_val, ureg.parse_expression(in_si[dims]))
                 quan_converted = quan.to(units)
                 return quan_converted.magnitude
@@ -821,8 +762,6 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
     # log.debug('                  in context "{}"'.format(context_id))
     val = 0.0
     # NOTE:  THE OBJECT DOES NOT ALWAYS HAVE TO HAVE THE VARIABLE
-    if oid not in parameterz or parameterz[oid] is None:
-        return val
     pid = get_parameter_id(variable, context_id)
     pdz = parm_defz.get(pid) or {}
     if not pdz:
@@ -833,15 +772,8 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
         # log.debug('  "{}" is computed ...'.format(pid))
         # look up compute function -- in the future, there may be a Relation
         # expression, found using the ParameterRelation relationship
-        if not (parameterz.get(oid) or {}).get(variable):
-            # if object does not have the base parameter (variable), the
-            # computed parameter has no meaning for it
-            obj_parms = parameterz.get(oid)
-            if obj_parms and obj_parms.get(pid):
-                # if the object has the computed parameter, it is invalid;
-                # delete it ...
-                del obj_parms[pid]
-            return val
+        if not parameterz.get(oid):
+            parameterz[oid] = {}
         compute = COMPUTES.get((variable, context_id))
         if compute:
             # log.debug('  compute function is {!s}'.format(getattr(
@@ -852,18 +784,15 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
             return val
             # log.debug('  compute function not found.')
             # val = 'undefined'
-        dims = pdz.get('dimensions')
-        units = in_si.get(dims)
         if val != 'undefined':
-            parameterz[oid][pid] = dict(value=val, units=units)
+            parameterz[oid][pid] = val
     elif oid in parameterz:
         # msg = '  "{}" is not computed; getting value ...'.format(pid)
         # log.debug(msg)
-        parm = parameterz[oid].get(pid) or {}
-        val = parm.get('value') or 0.0
+        val = parameterz[oid].get(pid) or 0.0
     return val
 
-def set_pval(oid, pid, value, units='', mod_datetime=None, local=True):
+def set_pval(oid, pid, value, units='', local=True):
     """
     Set the value of a parameter instance for the specified object to the
     specified value, as expressed in the specified units (or in base units if
@@ -878,11 +807,8 @@ def set_pval(oid, pid, value, units='', mod_datetime=None, local=True):
             the parameter object's definition.range_datatype
 
     Keyword Args:
-        units (str): the units in which the parameter value is expressed;
+        units (str): the units in which the value is expressed;
             None -> SI (mks) base units
-        mod_datetime (str): mod_datetime string of the parameter (if the action
-            originates locally, this will be None and a datetime stamp will be
-            generated)
         local (bool):  if False, we were called as a result of a remote event
             -- i.e., someone else set the value [default: True]
     """
@@ -902,18 +828,13 @@ def set_pval(oid, pid, value, units='', mod_datetime=None, local=True):
     # NOTE: henceforth, if the parameter whose value is being set is not
     # present it will be added (SCW 2019-09-26)
     ######################################################################
-    parm = (parameterz.get(oid) or {}).get(pid) or {}
-    if not parm:
-        # NOTE:  add_parameter() now checks if base parameter has been assigned
-        # and if not, assigns it and returns True
+    if oid not in parameterz:
+        parameterz[oid] = {}
+    if pid not in parameterz.get(oid):
         added = add_parameter(oid, pid)
         if not added:
-            # if the parameter cannot be added, it normally implies that its
-            # base parameter has not been defined ...
             # log.debug('  parameter could not be added (see log).')
             return False
-        # else:
-            # log.debug('  parameter either exists or was added.')
     try:
         # cast value to range_datatype before setting
         pdz = parm_defz.get(pid)
@@ -941,16 +862,14 @@ def set_pval(oid, pid, value, units='', mod_datetime=None, local=True):
                 # log.debug('  setting to base units: {}'.format(units))
                 # if units parse failed, assume base units
                 converted_value = value
-            finally:
-                parameterz[oid][pid]['units'] = units
         else:
             # None or "$" for units -> value is already in base units
             converted_value = value
-        parameterz[oid][pid]['value'] = converted_value
+        parameterz[oid][pid] = converted_value
         # log.debug('  setting value: {}'.format(value))
         if local:
-            dispatcher.send('pval set', oid=oid, pid=pid, value=value,
-                            units=units, local=local)
+            dispatcher.send('pval set', oid=oid, pid=pid,
+                            value=converted_value, local=local)
         return True
     except:
         # log.debug('  *** set_pval() failed:')
@@ -1010,9 +929,7 @@ def get_pval_from_str(oid, pid, str_val, units='', local=True):
         # log.debug('* {}'.format(msg.format(str_val)))
         pass
 
-### NOTE: mod_datetime for parameters is deprecated and will be removed
-def set_pval_from_str(oid, pid, str_val, units='', mod_datetime=None,
-                      local=True):
+def set_pval_from_str(oid, pid, str_val, units='', local=True):
     """
     Set the value of a parameter instance for the specified object from a
     string value, as expressed in the specified units (or in base units if
@@ -1027,9 +944,6 @@ def set_pval_from_str(oid, pid, str_val, units='', mod_datetime=None,
     Keyword Args:
         units (str): the units in which the parameter value is expressed;
             None -> SI (mks) base units
-        mod_datetime (str): mod_datetime string of the parameter (if the action
-            originates locally, this will be None and a datetime stamp will be
-            generated)
         local (bool):  if False, we were called as a result of a remote event
             -- i.e., someone else set the value [default: True]
     """
@@ -1053,9 +967,7 @@ def set_pval_from_str(oid, pid, str_val, units='', mod_datetime=None,
             val = str_val
         if pd.get('dimensions') == 'percent':
             val = 0.01 * float(val)
-        ### NOTE: mod_datetime for parameters is deprecated and will be removed
-        set_pval(oid, pid, val, units=units, mod_datetime=str(mod_datetime),
-                 local=local)
+        set_pval(oid, pid, val, units=units, local=local)
     except:
         # if unable to cast a value, do nothing (and log it)
         # TODO:  more form validation!
@@ -1070,6 +982,9 @@ def compute_assembly_parameter(product_oid, variable):
     summed values of the parameter over all of the product's known components.
     If no components are defined for the product, simply return the value of
     the parameter as specified for the product, or the default (usually 0).
+    Note that if the product specified by the oid has components, a value will
+    be returned that represents the rolled up assembly parameter even if the
+    product specified does not have any parameters assigned to it.
 
     CAUTION: this will obviously return a wildly inaccurate value if the
     list of components in a specified assembly is incomplete.
@@ -1081,8 +996,7 @@ def compute_assembly_parameter(product_oid, variable):
     """
     # This logging is VERY verbose, even for debugging!
     # log.debug('* compute_assembly_parameter()')
-    if (product_oid in parameterz and
-        variable in (parameterz.get(product_oid) or {})):
+    if (product_oid in parameterz):
         range_datatype = parm_defz[variable]['range_datatype']
         dtype = DATATYPES[range_datatype]
         # cz, if it exists, will be a list of namedtuples ...
@@ -1121,8 +1035,11 @@ def compute_mev(oid, variable):
     if oid not in parameterz or parameterz[oid] is None:
         parameterz[oid] = {}
     # log.debug('* compute_mev "{}": "{}"'.format(oid, variable))
-    if variable not in parameterz[oid]:
-        return 0.0
+
+    # NOTE: variable is not required to be present
+    # if variable not in parameterz[oid]:
+        # return 0.0
+
     range_datatype = parm_defz[variable]['range_datatype']
     dtype = DATATYPES[range_datatype]
     # cz, if it exists, will be a list of namedtuples ...
@@ -1150,9 +1067,7 @@ def compute_mev(oid, variable):
             # if Contingency value is 0 or not set, set to default value of 30%
             ctgcy_val = 0.3
             pid = variable + '[Ctgcy]'
-            ### NOTE: mod_datetime is deprecated and will be removed
-            parameterz[oid][pid] = {'value': ctgcy_val, 'units': '%'}
-                                    # 'mod_datetime': str(dtstamp())}
+            parameterz[oid][pid] = ctgcy_val
         factor = ctgcy_val + 1.0
         base_val = _compute_pval(oid, variable, 'CBE')
         # extremely verbose logging -- uncomment only for intense debugging
@@ -1341,7 +1256,7 @@ COMPUTES = {
 # purpose:  to enable fast lookup of data element metadata
 # format:  {data element id: {data element properties}
 #                             ...}}
-# ... where data element properties are:
+# ... where data element definition properties are:
 # -----------------------------------------------------------------------------
 # name, label, variable, context, description, dimensions, range_datatype,
 # computed, mod_datetime
@@ -1357,13 +1272,8 @@ de_defz = {}
 #              ** persisted in the file 'data_elements.json' in the
 #              application home directory -- see the orb functions
 #              `save_data_elementz` and `load_data_elementz`
-# format:  {oid : {'data element id': {data element properties}
+# format:  {oid : {'data element id': value,
 #                   ...}}
-# ... where data element properties are:
-# ------------
-# value, units
-# ------------
-### NOTE: mod_datetime is deprecated and will be removed
 data_elementz = {}
 
 def serialize_des(oid):
@@ -1372,9 +1282,7 @@ def serialize_des(oid):
         oid (str):  the oid of the object whose data elements are to be
             serialized.
 
-    Serialize the data elements associated with an object.  Basically, this
-    function is only required to serialize the `mod_datetime` value of each
-    data element.
+    Serialize the data elements associated with an object.
 
     IMPLEMENTATION NOTE:  uses deepcopy() to avoid side-effects to the
     `data_elementz` dict.
@@ -1384,7 +1292,7 @@ def serialize_des(oid):
     else:
         return {}
 
-def deserialize_des(oid, ser_des, cname=None, force_update=False):
+def deserialize_des(oid, ser_des, cname=None):
     """
     Deserialize a serialized object's `data_elements` dictionary.
 
@@ -1396,9 +1304,6 @@ def deserialize_des(oid, ser_des, cname=None, force_update=False):
     Keyword Args:
         cname (str):  class name of the object to which the parameters are
             assigned (only used for logging)
-        force_update (bool):  force data elements to update regardless of
-            mod_datetimes (used in conjunction with a
-            force_load_serialized_objects() call)
     """
     # if cname and ser_des:
         # log.debug('* deserializing data elements for "{}" ({})...'.format(
@@ -1415,22 +1320,14 @@ def deserialize_des(oid, ser_des, cname=None, force_update=False):
     if oid not in data_elementz:
         data_elementz[oid] = {}
     deids_to_delete = []
-    for deid, de in ser_des.items():
-        ### NOTE: mod_datetime is deprecated and will be removed
-        # mod_dt = de['mod_datetime']
+    for deid in ser_des:
         if deid in de_defz:
-            # if (data_elementz[oid].get(deid) and
-                 # mod_dt > data_elementz[oid][deid]['mod_datetime'])
-                # or not data_elementz[oid].get(deid)
-                # or force_update):
-                # deserialized data element value is more recent or that
-                # data element was not previously assigned
-            data_elementz[oid] = ser_des
+            data_elementz[oid][deid] = ser_des[deid]
         else:
             # log_msg = 'unknown id found in data elements: "{}"'.format(deid)
             # log.debug('  - {}'.format(log_msg))
             # deid has no definition, so it should not be in data_elementz
-            if deid in (data_elementz.get(oid) or {}):
+            if deid in data_elementz[oid]:
                 deids_to_delete.append(deid)
     # delete any undefined data elements
     de_oids = list(data_elementz)
@@ -1502,9 +1399,6 @@ def add_data_element(oid, deid, units=None):
     Add a new data element to an object, which means adding a data element's data
     structure to the `p.node.parametrics.data_elementz` dictionary under that
     objects's oid, if it does not already exist for the specified paramter.
-    The data element data structure format is a dict with the following keys:
-
-        value, units
 
     Args:
         oid (str):  oid of the object that owns the data element
@@ -1540,11 +1434,7 @@ def add_data_element(oid, deid, units=None):
             value = NULL.get(range_datatype, 0.0)
         # TODO:  add "dimensions" to data element definitions, so units can be
         # defined where applicable
-        ### NOTE: mod_datetime is deprecated and will be removed
-        data_elementz[oid][deid] = dict(
-            value=value,   # consistent with dtype defined in `range_datatype`
-            units='')
-            # mod_datetime=str(dtstamp()))
+        data_elementz[oid][deid] = value
         # log.debug('    data element "{}" added.'.format(deid))
         return True
     else:
@@ -1611,7 +1501,7 @@ def get_dval_as_str(oid, deid, units=''):
     """
     return str(get_dval(oid, deid))
 
-def set_dval(oid, deid, value, units='', mod_datetime=None, local=True):
+def set_dval(oid, deid, value, units='', local=True):
     """
     Set the value of a data element instance for the specified object to the
     specified value.
@@ -1625,9 +1515,6 @@ def set_dval(oid, deid, value, units='', mod_datetime=None, local=True):
     Keyword Args:
         units (str): the units in which `value` is expressed; empty implies
             SI (mks) base units
-        mod_datetime (str): string mod_datetime of the data element (if the
-            action originates locally, this will be None and a datetime stamp
-            will be generated)
         local (bool):  if False, we were called as a result of a remote event
             -- i.e., someone else set the value [default: True]
     """
@@ -1645,14 +1532,8 @@ def set_dval(oid, deid, value, units='', mod_datetime=None, local=True):
     # NOTE: if the data element whose value is being set is not
     # present it will be added
     ######################################################################
-    data_element = (data_elementz.get(oid) or {}).get(deid)
-    if not data_element:
-        if add_data_element(oid, deid):
-            # log.debug('  data element either exists or was added.')
-            pass
-        else:
-            # log.debug('  data element could not be added (see log).')
-            return False
+    if oid not in data_elementz:
+        data_elementz[oid] = {}
     try:
         # cast value to range_datatype before setting
         dt_name = dedef['range_datatype']
@@ -1661,7 +1542,7 @@ def set_dval(oid, deid, value, units='', mod_datetime=None, local=True):
             value = dtype(value)
         else:
             value = NULL.get(dt_name, 0.0)
-        data_elementz[oid][deid]['value'] = value
+        data_elementz[oid][deid] = value
         # log.debug('  setting value: {}'.format(value))
         dispatcher.send('dval set', oid, deid, value, local=local)
         return True
@@ -1676,8 +1557,7 @@ def set_dval(oid, deid, value, units='', mod_datetime=None, local=True):
         # log.debug(msg)
         return False
 
-def set_dval_from_str(oid, deid, str_val, units='', mod_datetime=None,
-                      local=True):
+def set_dval_from_str(oid, deid, str_val, units='', local=True):
     """
     Set the value of a data element instance for the specified object from a
     string value.  (Mainly for use in saving input from the object editor,
@@ -1691,9 +1571,6 @@ def set_dval_from_str(oid, deid, str_val, units='', mod_datetime=None,
     Keyword Args:
         units (str): the units in which `value` is expressed; empty implies
             SI (mks) base units
-        mod_datetime (str): mod_datetime string of the parameter (if the action
-            originates locally, this will be None and a datetime stamp will be
-            generated)
         local (bool):  if False, we were called as a result of a remote event
             -- i.e., someone else set the value [default: True]
     """
@@ -1715,8 +1592,6 @@ def set_dval_from_str(oid, deid, str_val, units='', mod_datetime=None,
                 val = dtype(str_val)
         else:
             val = str_val
-        ### NOTE: mod_datetime is deprecated and will be removed
-        # set_dval(oid, deid, val, mod_datetime=str(mod_datetime), local=local)
         set_dval(oid, deid, val, local=local)
     except:
         # if unable to cast a value, do nothing (and log it)

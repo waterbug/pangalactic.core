@@ -605,7 +605,8 @@ class UberORB(object):
         # self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
         # default descriptive contexts:  CBE, MEV
-        d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or []
+        d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or [
+                                                                'CBE', 'MEV']
         variables = config.get('variables', ['m', 'P', 'R_D']) or []
         # NOTE: this iterates only over assembly oids (i.e., keys in the
         # 'componentz' cache), because _compute_pval() is recursive and will
@@ -667,11 +668,8 @@ class UberORB(object):
                     # if result is int or float, set it as margin; otherwise,
                     # it is a message indicating that margin could not be
                     # computed
-                    parameterz[oid][margin_pid] = dict(value=result, units='%',
-                                                   mod_datetime=str(dtstamp()))
-                parameterz[oid][nte_pid] = dict(value=nte,
-                                                units=nte_units,
-                                                mod_datetime=str(dtstamp()))
+                    parameterz[oid][margin_pid] = result
+                parameterz[oid][nte_pid] = nte
             else:
                 # if oid is empty, reason for failure will be in "result"
                 # self.log.debug(' - margin comp. failed for req with oid:')

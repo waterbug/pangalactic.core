@@ -442,8 +442,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             if de_dict:
                 # orb.log.debug('  + data elements found: {}'.format(de_dict))
                 # orb.log.debug('    deserializing data elements ...')
-                deserialize_des(oid, de_dict, cname=cname,
-                                force_update=force_update)
+                deserialize_des(oid, de_dict, cname=cname)
             else:
                 pass
                 # orb.log.debug('  + no data elements found for this object.')
@@ -453,8 +452,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 recompute_parmz_required = True
                 # orb.log.debug('  + parameters found: {}'.format(parm_dict))
                 # orb.log.debug('    deserializing parameters ...')
-                deserialize_parms(oid, parm_dict, cname=cname,
-                                  force_update=force_update)
+                deserialize_parms(oid, parm_dict, cname=cname)
             else:
                 pass
                 # orb.log.debug('  + no parameters found for this object.')

@@ -283,12 +283,10 @@ class OrbTest(unittest.TestCase):
                 value['port_of_product'] = 'test:twanger'
                 value['type_of_port'] = 'pgefobjects:PortType.electrical_power'
                 # derived values to test parameters & data elements
-                directionality = so['data_elements']['directionality']['value']
+                directionality = so['data_elements']['directionality']
                 value['directionality'] = directionality
-                voltage = so['parameters']['V']['value']
+                voltage = so['parameters']['V']
                 value['voltage'] = voltage
-                voltage_units = so['parameters']['V']['units']
-                value['voltage_units'] = voltage_units
         # serialized form includes 2 objects:
         # the twanger + 1 port
         expected = dict(
@@ -300,8 +298,7 @@ class OrbTest(unittest.TestCase):
             port_of_product=obj.ports[0].of_product.oid,
             type_of_port=obj.ports[0].type_of_port.oid,
             directionality='input',
-            voltage=28.0,
-            voltage_units='V'
+            voltage=28.0
             )
         self.assertEqual(expected, value)
 
@@ -524,9 +521,9 @@ class OrbTest(unittest.TestCase):
         P = get_pval(obj.oid, 'P')
         R_D = get_pval(obj.oid, 'R_D')
         value = [m, P, R_D]
-        expected = [parameters['m']['value'],
-                    parameters['P']['value'],
-                    parameters['R_D']['value']]
+        expected = [parameters['m'],
+                    parameters['P'],
+                    parameters['R_D']]
         self.assertEqual(expected, value)
 
     def test_21_deserialize_related_objects(self):

@@ -17,29 +17,29 @@ def gen_test_dvals(data_elements):
     Args:
         data_elements (dict):  data elements dict of the form
 
-            {data element id: {standard data element dict}, ...}
+            {data element id: value, ...}
 
             where the standard data element dict is defined in
             p.core.parametrics and is the value of data_elementz[obj.oid] for
             any object that has data elements.
     """
-    for deid, de in data_elements.items():
+    for deid in data_elements:
         # get the cached data element definition
         de_def = de_defz.get(deid) or {}
         if de_def.get('range_datatype') in ['text', 'str']:
             # make sure no non-null default has been set
-            if not de.get('value'):
+            if not data_elements[deid]:
                 i = random.randint(0, 1)
                 j = random.randint(0, 1)
                 k = random.randint(0, 1)
-                de['value'] = i * 'Spam' + j * 'Eggs' + k * 'Spam'
+                data_elements[deid] = i * 'Spam' + j * 'Eggs' + k * 'Spam'
         elif de_def.get('range_datatype') == 'int':
             # make sure no non-zero default has been set
-            if not de['value']:
-                de['value'] = random.randint(1, 10)
+            if not data_elements[deid]:
+                data_elements[deid] = random.randint(1, 10)
         elif de_def.get('range_datatype') == 'float':
-            if not de['value']:
-                de['value'] = float(random.randint(1, 1000))
+            if not data_elements[deid]:
+                data_elements[deid] = float(random.randint(1, 1000))
 
 def gen_test_pvals(parms):
     """
@@ -49,13 +49,13 @@ def gen_test_pvals(parms):
     Args:
         parms (dict):  parameters dict of the form
 
-            {parameter id: {standard parameter dict}, ...}
+            {parameter id: value, ...}
 
             where the standard parameter dict is defined in p.core.parametrics
             and is the value of parameterz[obj.oid] for any object that has
             parameters.
     """
-    for pid, parm in parms.items():
+    for pid in parms:
         pdz = parm_defz.get(pid) or {}
         if pdz.get('computed'):
             # ignore computed parameters
@@ -63,17 +63,17 @@ def gen_test_pvals(parms):
         if '[Ctgcy]' in pid:
             # assign a random contingency of 10%, 20%, or 30%
             x = random.randint(1, 3)
-            parm['value'] = round_to(x * 0.10, n=3)
+            parms[pid] = round_to(x * 0.10, n=3)
         elif pdz.get('range_datatype') == 'float':
-            if not parm['value']:
-                parm['value'] = float(random.randint(1, 1000))
+            if not parms[pid]:
+                parms[pid] = float(random.randint(1, 1000))
         # special cases for Data Rate parameters (bigger)
         elif pdz.get('variable') == 'R_D':
-            parm['value'] = float(random.randint(10000, 100000))
+            parms[pid] = float(random.randint(10000, 100000))
         elif pdz.get('range_datatype') == 'int':
             # make sure no non-zero default has been set
-            if not parm['value']:
-                parm['value'] = random.randint(1, 10)
+            if not parms[pid]:
+                parms[pid] = random.randint(1, 10)
 
 def create_test_users():
     """
@@ -550,17 +550,11 @@ def create_test_project():
             id=get_port_id('electrical_power', 0),
             id_ns='test',
             abbreviation=get_port_name('Electrical Power', 0),
-            data_elements={'directionality': {'mod_datetime': NOW,
-                                              'units': None,
-                                              'value': 'input'}
-                                              },
+            data_elements={'directionality': 'input'},
             owner='test:yoyodyne',
             name=get_port_name('Electrical Power', 0),
             of_product='test:twanger',
-            parameters={'V': {'mod_datetime': NOW,
-                              'units': 'V',
-                              'value': 28.0}
-                              },
+            parameters={'V': 28.0},
             type_of_port='pgefobjects:PortType.electrical_power',
             creator='test:steve',
             create_datetime=NOW,
@@ -858,16 +852,8 @@ owned_test_objects = [
        create_datetime=NOW,
        modifier='test:steve',
        mod_datetime=NOW,
-       parameters={
-       'P':
-         {'mod_datetime': NOW,
-          'units': 'W',
-          'value': 50.0},
-       'm':
-         {'mod_datetime': NOW,
-          'units': 'kg',
-          'value': 500.0}
-       },
+       parameters={'P': 50.0,
+                   'm': 500.0},
        iteration=1,
        version='2',
        version_sequence=2),
@@ -892,16 +878,8 @@ locally_owned_test_objects = [
        create_datetime=NOW,
        modifier='test:steve',
        mod_datetime=NOW,
-       parameters={
-       'P':
-         {'mod_datetime': NOW,
-          'units': 'W',
-          'value': 50000.0},
-       'm':
-         {'mod_datetime': NOW,
-          'units': 'kg',
-          'value': 1000.0}
-       },
+       parameters={'P': 50000.0,
+                   'm': 1000.0},
        iteration=1,
        version='0',
        version_sequence=0),
@@ -921,20 +899,9 @@ parametrized_test_object = [
        create_datetime=NOW,
        modifier='test:steve',
        mod_datetime=NOW,
-       parameters={
-       'P':
-         {'mod_datetime': NOW,
-          'units': 'W',
-          'value': 100.0},
-       'R_D':
-         {'mod_datetime': NOW,
-          'units': 'bit/s',
-          'value': 1000000.0},
-       'm':
-         {'mod_datetime': NOW,
-          'units': 'kg',
-          'value': 1000.0}
-       },
+       parameters={'P': 100.0,
+                   'R_D': 1000000.0,
+                   'm': 1000.0},
        iteration=1,
        version='3',
        version_sequence=3),
@@ -955,106 +922,36 @@ parametrized_summary_test_object = [
        create_datetime=NOW,
        modifier='test:steve',
        mod_datetime=NOW,
-       parameters={'m' : (50.0, 'kg'),
-                   'P' : (10.0, 'W')},
+       parameters={'m' : 50.0,
+                   'P' : 10.0},
        iteration=1,
        version='4',
        version_sequence=4),
      ]
 
-test_data_elements = {
-    "TRL":{
-        "mod_datetime":NOW,
-        "value":4
-    },
-    "Vendor":{
-        "mod_datetime":NOW,
-        "value":"Yoyodyne"
-    }
-}
+test_data_elements = dict(
+    TRL=4,
+    Vendor="Yoyodyne"
+    )
 
 test_parms = {
-    "Cost":{
-        "mod_datetime":NOW,
-        "units":"$",
-        "value":0.0
-    },
-    "P":{
-        "mod_datetime":NOW,
-        "units":"W",
-        "value":0.0
-    },
-    "P[CBE]":{
-        "mod_datetime":NOW,
-        "units":"W",
-        "value":0.0
-    },
-    "P[MEV]":{
-        "mod_datetime":NOW,
-        "units":"W",
-        "value":0.0
-    },
-    "R_D":{
-        "mod_datetime":NOW,
-        "units":"bit/s",
-        "value":0
-    },
-    "R_D[CBE]":{
-        "mod_datetime":NOW,
-        "units":"bit/s",
-        "value":0
-    },
-    "R_D[MEV]":{
-        "mod_datetime":NOW,
-        "units":"bit/s",
-        "value":0
-    },
-    "depth":{
-        "mod_datetime":NOW,
-        "units":"m",
-        "value":0.0
-    },
-    "height":{
-        "mod_datetime":NOW,
-        "units":"m",
-        "value":0.0
-    },
-    "m":{
-        "mod_datetime":NOW,
-        "units":"kg",
-        "value":0.0
-    },
-    "m[CBE]":{
-        "mod_datetime":NOW,
-        "units":"kg",
-        "value":0.0
-    },
-    "m[MEV]":{
-        "mod_datetime":NOW,
-        "units":"kg",
-        "value":0.0
-    },
-    "P[Ctgcy]":{
-        "mod_datetime":NOW,
-        "units":"%",
-        "value":0.3
-    },
-    "m[Ctgcy]":{
-        "mod_datetime":NOW,
-        "units":"%",
-        "value":0.3
-    },
-    "R_D[Ctgcy]":{
-        "mod_datetime":NOW,
-        "units":"%",
-        "value":0.3
-    },
-    "width":{
-        "mod_datetime":NOW,
-        "units":"m",
-        "value":0.0
+    "Cost" : 0.0,
+    "P" : 0.0,
+    "P[CBE]" : 0.0,
+    "P[MEV]" : 0.0,
+    "R_D" : 0.0,
+    "R_D[CBE]" : 0.0,
+    "R_D[MEV]" : 0.0,
+    "depth" : 0.0,
+    "height" : 0.0,
+    "width" : 0.0,
+    "m" : 0.0,
+    "m[CBE]" : 0.0,
+    "m[MEV]" : 0.0,
+    "P[Ctgcy]" : 0.3,
+    "m[Ctgcy]" : 0.3,
+    "R_D[Ctgcy]" : 0.3
     }
-}
 
 # A collection of related serialized test objects to be used for unit testing.
 # The main purposes in having a separate set of serialized objects are:
