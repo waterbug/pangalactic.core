@@ -667,6 +667,8 @@ def get_pval(oid, pid, units='', allow_nan=False):
         # log.debug('* get_pval: "{}" does not have a definition.'.format(
                                                                         # pid))
         return
+    if not parameterz.get(oid):
+        parameterz[oid] = {}
     if not units:
         # if no units are specified, return the value in base units
         return (parameterz[oid].get(pid) or 
@@ -1551,6 +1553,8 @@ def get_dval(oid, deid, units=''):
     if not dedef:
         # log.debug('* get_dval: "{}" does not have a definition.'.format(deid))
         return '-'
+    if not data_elementz.get(oid):
+        data_elementz[oid] = {}
     return (data_elementz[oid].get(deid) or
             NULL.get(dedef.get('range_datatype', 'str') or 'str'))
 
