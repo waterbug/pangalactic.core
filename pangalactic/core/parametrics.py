@@ -179,6 +179,45 @@ def load_parmz(dir_path):
     if os.path.exists(fpath):
         with open(fpath) as f:
             stored_parameterz = json.loads(f.read())
+            # first check for old format and convert if necessary
+            old_format = False
+            oids = list(stored_parameterz)
+            if oids:
+                # find first non-empty data element dict
+                n = 0
+                while 1:
+                    test_oid = oids[n]
+                    test_dict = stored_parameterz[test_oid]
+                    if test_dict:
+                        # test_dict is non-empty
+                        pids = list(test_dict)
+                        if pids:
+                            for parm_val in test_dict.values():
+                                if parm_val and isinstance(parm_val, dict):
+                                    # if the value is a dict, format is old
+                                    old_format = True
+                    if old_format:
+                        break
+                    else:
+                        n += 1
+                        if n == len(oids):
+                            break
+            if old_format:
+                # convert to new format
+                ser_parms_old = deepcopy(stored_parameterz)
+                stored_parameterz = {}
+                for oid, old_parms_dict in ser_parms_old.items():
+                    new_parms_dict = {}
+                    for pid in old_parms_dict:
+                        if old_parms_dict:
+                            new_parms_dict[pid] = old_parms_dict[pid]['value']
+                        else:
+                            dtype = (parm_defz.get(
+                                     pid, 'range_datatype', 'float')
+                                     or 'float')
+                            new_parms_dict[pid] = NULL.get(dtype, '') or ''
+                    stored_parameterz[oid] = new_parms_dict
+                log.debug('  - parameterz cache converted from old format.')
         for oid, parms in stored_parameterz.items():
             deserialize_parms(oid, parms)
         log.debug('  - parameterz cache loaded.')
@@ -631,7 +670,7 @@ def get_pval(oid, pid, units='', allow_nan=False):
     if not units:
         # if no units are specified, return the value in base units
         return (parameterz[oid].get(pid) or 
-                NULL.get(pdz.get('range_datatype', 'float')))
+                NULL.get(pdz.get('range_datatype', 'float') or 'float'))
     else:
         try:
             # convert based on dimensions/units ...
@@ -1288,7 +1327,8 @@ def serialize_des(oid):
     `data_elementz` dict.
     """
     if oid in data_elementz:
-        return deepcopy(data_elementz[oid])
+        return {deid: data_elementz[oid][deid]
+                for deid in data_elementz[oid]}
     else:
         return {}
 
@@ -1320,9 +1360,9 @@ def deserialize_des(oid, ser_des, cname=None):
     if oid not in data_elementz:
         data_elementz[oid] = {}
     deids_to_delete = []
-    for deid in ser_des:
+    for deid, value in ser_des.items():
         if deid in de_defz:
-            data_elementz[oid][deid] = ser_des[deid]
+            data_elementz[oid][deid] = value
         else:
             # log_msg = 'unknown id found in data elements: "{}"'.format(deid)
             # log.debug('  - {}'.format(log_msg))
@@ -1354,6 +1394,44 @@ def load_data_elementz(dir_path):
     if os.path.exists(fpath):
         with open(fpath) as f:
             serialized_des = json.loads(f.read())
+            # first check for old format and convert if necessary
+            old_format = False
+            oids = list(serialized_des)
+            if oids:
+                # find first non-empty data element dict
+                n = 0
+                while 1:
+                    test_oid = oids[n]
+                    test_dict = serialized_des[test_oid]
+                    if test_dict:
+                        # test_dict is non-empty
+                        deids = list(test_dict)
+                        if deids:
+                            for deid, de_val in test_dict.items():
+                                if de_val and isinstance(de_val, dict):
+                                    # if the value is a dict, format is old
+                                    old_format = True
+                    if old_format:
+                        break
+                    else:
+                        n += 1
+                        if n == len(oids):
+                            break
+            if old_format:
+                # convert to new format
+                ser_des_old = deepcopy(serialized_des)
+                serialized_des = {}
+                for oid, old_de_dict in ser_des_old.items():
+                    new_de_dict = {}
+                    for deid in old_de_dict:
+                        if old_de_dict[deid]:
+                            new_de_dict[deid] = old_de_dict[deid]['value']
+                        else:
+                            dtype = (de_defz.get(deid, 'range_datatype', 'str')
+                                     or 'str')
+                            new_de_dict[deid] = NULL.get(dtype, '') or ''
+                    serialized_des[oid] = new_de_dict
+                log.debug('  - data_elementz cache converted from old format.')
         for oid, ser_des in serialized_des.items():
             deserialize_des(oid, ser_des)
         log.debug('  - data_elementz cache loaded.')
@@ -1472,18 +1550,9 @@ def get_dval(oid, deid, units=''):
     dedef = de_defz.get(deid)
     if not dedef:
         # log.debug('* get_dval: "{}" does not have a definition.'.format(deid))
-        return None
-    try:
-        # for extreme debugging only ...
-        val = data_elementz[oid][deid]['value']
-        # log.debug('  value of {} is "{}" ({})'.format(deid, val, type(val)))
-        return val
-    except:
-        # if no value is found, return a "NULL" value
-        val = NULL.get(dedef.get('range_datatype', 'str'))
-        # log.debug('  [exception] value of {} is {} ({})'.format(deid,
-                                                          # val, type(val)))
-        return val
+        return '-'
+    return (data_elementz[oid].get(deid) or
+            NULL.get(dedef.get('range_datatype', 'str') or 'str'))
 
 def get_dval_as_str(oid, deid, units=''):
     """

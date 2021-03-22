@@ -1,0 +1,25 @@
+{
+    "oid1":{
+        "directionality":{
+            "mod_datetime":"2021-02-13 07:24:29.766928",
+            "units":null,
+            "value":"input"
+        }
+    },
+    "oid2":{
+        "TRL":{
+            "mod_datetime":"2021-01-14 15:42:28.800870",
+            "value":7
+        }
+    },
+    "oid3":{
+        "TRL":{
+            "mod_datetime":"2021-01-20 14:39:58.039776",
+            "value":9
+        },
+        "Vendor":{
+            "mod_datetime":"2021-01-20 14:39:58.041772",
+            "value":"Sheldahl"
+        }
+    }
+}

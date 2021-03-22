@@ -3,7 +3,7 @@
 Unit tests for pangalactic.core.uberorb.orb
 """
 from math import fsum
-import os
+import os, shutil
 import unittest
 
 # yaml
@@ -17,7 +17,9 @@ from pangalactic.core             import config, refdata, state, write_config
 from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
+                                          get_dval, data_elementz,
                                           get_pval, parameterz,
+                                          load_parmz, load_data_elementz,
                                           req_allocz, round_to,
                                           save_parmz, save_data_elementz)
 from pangalactic.core.serializers import (deserialize,
@@ -33,7 +35,6 @@ from pangalactic.core.test.utils  import (create_test_users,
                                           owned_test_objects,
                                           related_test_objects)
 from pangalactic.core.uberorb     import orb
-from pangalactic.core.utils.datetimes import dtstamp
 from pangalactic.core.utils.reports   import write_mel_xlsx_from_model
 
 orb.start(home='pangalaxian_test', debug=True)
@@ -254,8 +255,8 @@ class OrbTest(unittest.TestCase):
         Person = orb.classes['Person']
         obj = Person(oid='0123456789', name='John Icecicleboy')
         res = serialize(orb, [obj])
-        data = yaml.safe_dump(res)
-        out_data = yaml.safe_load(data)
+        # data = yaml.safe_dump(res)
+        # out_data = yaml.safe_load(data)
         out_objs = deserialize(orb, res)
         # serialized form includes only the original object
         out_obj = out_objs[0]
@@ -451,58 +452,86 @@ class OrbTest(unittest.TestCase):
         expected = True
         self.assertEqual(expected, actual)
 
-    ### NOTE:  mod_datetime is deprecated for parameters and will be removed
-    # def test_19_deserialize_new_parameter_values(self):
-        # """
-        # CASE:  test pangalactic.core.serializers.deserialize_parms function.
+    def test_19_deserialize_new_parameter_values(self):
+        """
+        CASE:  test pangalactic.core.parametrics.deserialize_parms function.
 
-        # Tests parameter deserialization, including the comparison of
-        # 'mod_datetime' strings to determine the precedence of values.
+        Tests parameter deserialization.
+        """
+        test_oid = 'test:iidrive'
+        serialized_parms= {
+            'P': 100.0,
+            'R_D': 1000000.0,
+            'm': 1000.0
+            }
+        deserialize_parms(test_oid, serialized_parms)
+        orb.recompute_parmz()
+        expected = [True, True, True, True, True, True,
+                    100.0, 1000000.0, 1000.0, 100.0, 1000000.0, 1000.0]
+        test_parms = parameterz.get(test_oid, {})
+        actual = [('P[CBE]' in test_parms),
+                  ('R_D[CBE]' in test_parms),
+                  ('m[CBE]' in test_parms),
+                  ('P' in test_parms),
+                  ('R_D' in test_parms),
+                  ('m' in test_parms),
+                  get_pval(test_oid, 'P[CBE]'),
+                  get_pval(test_oid, 'R_D[CBE]'),
+                  get_pval(test_oid, 'm[CBE]'),
+                  get_pval(test_oid, 'P'),
+                  get_pval(test_oid, 'R_D'),
+                  get_pval(test_oid, 'm')]
+        self.assertEqual(expected, actual)
 
-        # In this test, the 'P' and 'R_D' values in the deserialized data have
-        # later datetime stamps, but the 'm' value has the same datetime stamp as
-        # the current value, so it is ignored.
-        # """
-        # test_oid = 'test:iidrive'
-        # current_dt = parameterz[test_oid]['m']['mod_datetime']
-        # current_mass = get_pval(test_oid, 'm')
-        # NOW = str(dtstamp())
-        # serialized_parms= {
-            # 'P':
-              # {'mod_datetime': NOW,
-               # 'units': 'W',
-               # 'value': 100.0},
-            # 'R_D':
-              # {'mod_datetime': NOW,
-               # 'units': 'bit/s',
-               # 'value': 1000000.0},
-            # 'm':
-              # {'mod_datetime': current_dt,
-               # 'units': 'kg',
-               # 'value': 1000.0}
-            # }
-        # deserialize_parms(test_oid, serialized_parms)
-        # orb.recompute_parmz()
-        # # deserialized mass should be ignored since its dt string is the
-        # # same as that of the current mass parameter ...
-        # expected = [True, True, True, True, True, True, True,
-                    # 100.0, 1000000.0, current_mass, 100.0, 1000000.0,
-                    # current_mass]
-        # test_parms = parameterz.get(test_oid, {})
-        # actual = [('P[CBE]' in test_parms),
-                  # ('R_D[CBE]' in test_parms),
-                  # ('m[CBE]' in test_parms),
-                  # ('P' in test_parms),
-                  # ('R_D' in test_parms),
-                  # ('m' in test_parms),
-                  # NOW > current_dt,
-                  # get_pval(test_oid, 'P[CBE]'),
-                  # get_pval(test_oid, 'R_D[CBE]'),
-                  # get_pval(test_oid, 'm[CBE]'),
-                  # get_pval(test_oid, 'P'),
-                  # get_pval(test_oid, 'R_D'),
-                  # get_pval(test_oid, 'm')]
-        # self.assertEqual(expected, actual)
+    def test_19_1_load_parameters_from_old_format(self):
+        """
+        CASE:  test pangalactic.core.parametrics.load_parmz function.
+
+        Tests ability of load_parms() to load parameters from a parameters.json
+        file in the old format and convert them to the new format.
+        """
+        parms_path = os.path.join('pangalaxian_test', 'parameters.json')
+        parms_bkup_path = os.path.join('pangalaxian_test',
+                                       'parameters_backup.json')
+        shutil.move(parms_path, parms_bkup_path)  
+        shutil.copyfile('parameters_old_test.json', parms_path)  
+        load_parmz(orb.home)
+        oid1_parmz = parameterz.get('oid1')
+        # oid2_parmz = parameterz.get('oid2')
+        # oid3_parmz = parameterz.get('oid3')
+        expected = [True, True, 0.0, 300.0]
+        actual = [("P" in oid1_parmz),
+                  ("P[NTE]" in oid1_parmz),
+                  (get_pval('oid1', 'P')),
+                  (get_pval('oid1', 'P[NTE]'))]
+        shutil.move(parms_bkup_path, parms_path)  
+        self.assertEqual(expected, actual)
+
+    def test_19_2_load_data_elements_from_old_format(self):
+        """
+        CASE:  test pangalactic.core.parametrics.load_data_elementz function.
+
+        Tests ability of load_parms() to load parameters from a parameters.json
+        file in the old format and convert them to the new format.
+        """
+        des_path = os.path.join('pangalaxian_test', 'data_elements.json')
+        des_bkup_path = os.path.join('pangalaxian_test',
+                                     'data_elements_backup.json')
+        shutil.move(des_path, des_bkup_path)  
+        shutil.copyfile('data_elements_old_test.json', des_path)  
+        load_data_elementz(orb.home)
+        oid1_dez = data_elementz.get('oid1')
+        oid2_dez = data_elementz.get('oid2')
+        oid3_dez = data_elementz.get('oid3')
+        expected = [True, True, True, 'input', 7, 'Sheldahl']
+        actual = [("directionality" in oid1_dez),
+                  ("TRL" in oid2_dez),
+                  ("Vendor" in oid3_dez),
+                  (get_dval('oid1', 'directionality')),
+                  (get_dval('oid2', 'TRL')),
+                  (get_dval('oid3', 'Vendor'))]
+        # shutil.move(des_bkup_path, des_path)  
+        self.assertEqual(expected, actual)
 
     def test_20_deserialize_object_with_simple_parameters(self):
         """
