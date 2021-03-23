@@ -118,16 +118,24 @@ def deserialize_parms(oid, ser_parms, cname=None):
             assigned (only used for logging)
     """
     # if cname:
-        # log.debug('* deserializing parms for {} ({})...'.format(oid,
-                                                                    # cname))
+        # log.debug('* deserializing parms for {} ({})...'.format(oid, cname))
         # log.debug('  parms: {}'.format(ser_parms))
     if not ser_parms:
         # log.debug('  object with oid "{}" has no parameters'.format(oid))
         return
-    if oid not in parameterz or parameterz[oid] is None:
-        parameterz[oid] = {}
+    # ser_parms is non-empty
+    pids = list(ser_parms)
+    if ser_parms[pids[0]] and isinstance(ser_parms[pids[0]], dict):
+        # if the value is a dict, format is old
+        old_ser_parms = deepcopy(ser_parms)
+        ser_parms = {}
+        for pid, pdict in old_ser_parms.items():
+            ser_parms[pid] = pdict['value']
+        log.debug('  - parameters converted from old format.')
     pids_to_delete = []
     deids_to_delete = []
+    if not parameterz.get(oid):
+        parameterz[oid] = {}
     for pid, value in ser_parms.items():
         if pid in parm_defz:
             # yes, this is a valid parameter (has a ParameterDefinition)
@@ -1349,16 +1357,24 @@ def deserialize_des(oid, ser_des, cname=None):
     """
     # if cname and ser_des:
         # log.debug('* deserializing data elements for "{}" ({})...'.format(
-                                                                  # oid, cname))
+                                                                # oid, cname))
         # log.debug('  - data elements: {}'.format(ser_des))
     # elif ser_des:
         # log.debug('* deserializing data elements for oid "{}")...'.format(
-                                                                         # oid))
+                                                                       # oid))
         # log.debug('  - data elements: {}'.format(ser_des))
     if not ser_des:
-        # log.debug('  object with oid "{}" has no data elements'.format(
-                                                                      # oid))
+        # log.debug('  object with oid "{}" has no data elements'.format(oid))
         return
+    # ser_des is non-empty
+    deids = list(ser_des)
+    if ser_des[deids[0]] and isinstance(ser_des[deids[0]], dict):
+        # if the value is a dict, format is old
+        old_ser_des = deepcopy(ser_des)
+        ser_des = {}
+        for deid, dedict in old_ser_des.items():
+            ser_des[deid] = dedict['value']
+        log.debug('  - data elements converted from old format.')
     if oid not in data_elementz:
         data_elementz[oid] = {}
     deids_to_delete = []
