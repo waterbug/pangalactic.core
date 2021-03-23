@@ -1332,11 +1332,8 @@ def serialize_des(oid):
             serialized.
 
     Serialize the data elements associated with an object.
-
-    IMPLEMENTATION NOTE:  uses deepcopy() to avoid side-effects to the
-    `data_elementz` dict.
     """
-    if oid in data_elementz:
+    if oid in data_elementz and data_elementz[oid] is not None:
         return {deid: data_elementz[oid][deid]
                 for deid in data_elementz[oid]}
     else:
