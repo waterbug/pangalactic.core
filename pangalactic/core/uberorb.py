@@ -1664,7 +1664,7 @@ class UberORB(object):
         [1] the project object, [2] objects for which the project is the
         `owner` or `user` (i.e., to which the project has a
         `ProjectSystemUsage` relationship), and [3] all related objects
-        (assemblies and related components, etc.).
+        (assemblies and related components, ports, flows, etc.).
 
         Args:
             project (Project):  the specified project
@@ -1738,6 +1738,11 @@ class UberORB(object):
         if mission:
             objs.append(mission)
             objs += mission.components  # Acus
+        # include all ports and flows relevant to products
+        for obj in objs:
+            if isinstance(obj, self.classes['Product']):
+                objs += obj.ports
+                objs += self.get_internal_flows_of(obj)
         # TODO:  get the files too (fpath = rep_file.url)
         # use set() to eliminate dups
         res = [o for o in set(objs) if o]
