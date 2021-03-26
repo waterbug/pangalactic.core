@@ -23,7 +23,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm             import relationship
 
 # PanGalactic
-from pangalactic.core                import config
 from pangalactic.core.datastructures import OrderedSet
 from pangalactic.core.meta           import PGEF_PROPS_ORDER
 from pangalactic.core.kb             import PanGalacticKnowledgeBase as KB

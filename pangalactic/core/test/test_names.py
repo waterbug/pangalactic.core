@@ -91,12 +91,12 @@ class NamesTests(unittest.TestCase):
         d = names.q2u("owl:Class")
         q2u_d = URIRef(u"http://www.w3.org/2002/07/owl#Class")
         try:
-            error = names.q2u("#foo")
+            names.q2u("#foo")
         except ValueError as err:
             e = str(err)
         q2u_e = "invalid qname"
         try:
-            error = names.q2u("ni:knightswhosay")
+            names.q2u("ni:knightswhosay")
         except ValueError as err:
             f = str(err)
         q2u_f = "unknown prefix: ni"
@@ -119,7 +119,7 @@ class NamesTests(unittest.TestCase):
         f = names.get_uri("http://www.w3.org/2002/07/owl#Class")
         ga_f = URIRef("http://www.w3.org/2002/07/owl#Class")
         try:
-            error = names.get_uri("ni:knightswhosay")
+            names.get_uri("ni:knightswhosay")
         except ValueError as err:
             g = str(err)
         ga_g = "unknown prefix: ni"
