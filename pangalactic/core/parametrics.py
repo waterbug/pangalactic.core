@@ -1438,7 +1438,7 @@ def load_data_elementz(dir_path):
                 serialized_des = {}
                 for oid, old_de_dict in ser_des_old.items():
                     new_de_dict = {}
-                    for deid in old_de_dict:
+                    for deid in (old_de_dict or {}):
                         if old_de_dict[deid]:
                             new_de_dict[deid] = old_de_dict[deid]['value']
                         else:
