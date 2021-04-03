@@ -527,8 +527,8 @@ class UberORB(object):
             self.log.info('  local.db backed up along with caches.')
 
     def dump_all(self, dir_path=None):
-        self.dump_db(dir_path=dir_path)
         self.save_caches(dir_path=dir_path)
+        self.dump_db(dir_path=dir_path)
 
     def drop_and_create_db(self, home):
         """
