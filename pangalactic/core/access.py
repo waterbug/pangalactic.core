@@ -93,12 +93,11 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if debugging:
                 perms.append('no local user object found')
             return perms
-    if isinstance(obj, orb.classes['ProjectSystemUsage']):
-        # access is determined by project/system access for PSU
-        if obj.project.oid == 'pgefobjects:SANDBOX':
-            # orb.log.debug('  *** SANDBOX PSUs are modifiable by any user')
-            perms = ['view', 'modify', 'delete', 'SANDBOX PSU']
-            return perms
+    if (isinstance(obj, orb.classes['ProjectSystemUsage'])
+        and obj.project.oid == 'pgefobjects:SANDBOX'):
+        # orb.log.debug('  *** SANDBOX PSUs are modifiable by any user')
+        perms = ['view', 'modify', 'delete', 'SANDBOX PSU']
+        return perms
     # Instances of these classes are refdata and cannot be modified or deleted.
     # NOTE that ParameterDefinition is a subclass of DataElementDefinition, so is
     # implicitly included here.
@@ -118,11 +117,8 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         # global admin is omnipotent, except for deleting projects ...
         # orb.log.debug('  ******* user is a global admin.')
         perms = ['view']
-        if not isinstance(obj, (orb.classes['Acu'],
-                                orb.classes['ProjectSystemUsage'])):
-            perms += ['modify']
         if state.get('connected'):
-            # deletions (and mods of Acu/PSU) are only allowed if connected
+            # deletions and are only allowed if connected
             perms += ['modify', 'delete']
         # orb.log.debug('  perms: {}'.format(perms))
         if debugging:
@@ -139,14 +135,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             # orb.log.debug('  user is object creator.')
             # creator has full perms
             perms = ['view']
-            if not isinstance(obj, orb.classes['Acu']):
-                perms.append('modify')
             if state.get('connected'):
-                # deletions are only allowed if connected
-                perms.append('delete')
-                if isinstance(obj, orb.classes['Acu']):
-                    # Acus can only be modified if connected
-                    perms.append('modify')
+                # deletions and mods are only allowed if connected
+                perms += ['delete', 'modify']
             # orb.log.debug('  perms: {}'.format(perms))
             if debugging:
                 perms.append('object creator perms')
@@ -180,10 +171,10 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                     # orb.log.debug(
                         # '  user is authorized for ProductType "{}".'.format(
                         # pt_id))
-                    perms = ['view', 'modify']
+                    perms = ['view']
                     if state.get('connected'):
-                        # deletions are only allowed if connected
-                        perms.append('delete')
+                        # mods and deletions are only allowed if connected
+                        perms += ['modify', 'delete']
                     # orb.log.debug('  perms: {}'.format(perms))
                     if debugging:
                         perms.append('role-based product type perms (HW)')
@@ -201,10 +192,10 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 req_mgrs = set(['Administrator', 'systems_engineer',
                                 'lead_engineer'])
                 if req_mgrs & role_ids:
-                    perms = ['view', 'modify']
+                    perms = ['view']
                     if state.get('connected'):
-                        # deletions are only allowed if connected
-                        perms.append('delete')
+                        # mods and deletions are only allowed if connected
+                        perms += ['modify', 'delete']
                     # orb.log.debug('  perms: {}'.format(perms))
                     if debugging:
                         perms.append('role-based perms (Requirement)')
@@ -305,7 +296,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 # orb.log.debug('    {}'.format(list(roles & auth_roles)))
                 perms = ['view']
                 if state.get('connected'):
-                    # deletions are only allowed if connected
+                    # mods and deletions are only allowed if connected
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 if debugging:
