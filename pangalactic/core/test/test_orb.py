@@ -13,7 +13,8 @@ import ruamel_yaml as yaml
 import dateutil.parser as dtparser
 
 # pangalactic
-from pangalactic.core             import config, refdata, state, write_config
+from pangalactic.core             import (config, refdata, state, prefs,
+                                          write_config, write_prefs)
 from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
@@ -40,8 +41,8 @@ from pangalactic.core.utils.reports   import write_mel_xlsx_from_model
 orb.start(home='pangalaxian_test', debug=True)
 serialized_test_objects = create_test_users()
 serialized_test_objects += create_test_project()
-config['default_data_elements'] = ['TRL']
-config['default_parms'] = [
+prefs['default_data_elements'] = ['TRL', 'Vendor']
+prefs['default_parms'] = [
     'm[CBE]',
     'm[Ctgcy]',
     'm[MEV]',
@@ -169,8 +170,9 @@ class OrbTest(unittest.TestCase):
         functions of the p.core.parametrics module since
         'assign_test_parameters' uses them.
         """
-        # for debugging, write config file to home dir ...
+        # for debugging, write config and prefs files to home dir ...
         write_config(os.path.join(orb.home, 'config'))
+        write_prefs(os.path.join(orb.home, 'prefs'))
         orb.recompute_parmz()
         self.test_hw = []
         hw = orb.get_by_type('HardwareProduct')
@@ -180,13 +182,18 @@ class OrbTest(unittest.TestCase):
         # test that the configured default parameters and their related base
         # parameters have been added to the test HardwareProducts and assigned
         # values of the correct type
-        all_pids = config['default_parms'] + ['m', 'P', 'R_D']
+        all_pids = prefs['default_parms'] + ['m', 'P', 'R_D']
+        all_deids = prefs['default_data_elements']
         expected = []
         value = []
         for h in self.test_hw:
             for pid in all_pids:
                 pval = get_pval(h.oid, pid)
                 value.append(type(pval) in [int, float])
+                expected.append(True)
+            for deid in all_deids:
+                dval = get_dval(h.oid, deid)
+                value.append(type(dval) in [str, int, float])
                 expected.append(True)
         self.assertEqual(expected, value)
 
@@ -670,7 +677,7 @@ class OrbTest(unittest.TestCase):
         expected = ('test:OTHER:system-1', 'm', nte, perf_reqt.req_units, margin)
         self.assertEqual(expected, value)
 
-    def test_26_systems_engineer_perms(self):
+    def test_26_role_based_perms(self):
         """
         CASE:  test role-based permissions on project objects
         """
@@ -699,9 +706,9 @@ class OrbTest(unittest.TestCase):
         req = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         state["connected"] = False
         value = [
-            set(get_perms(sc, user=steve)),           #  1 Adm/sc:  view/mod
-            set(get_perms(sc, user=carefulwalker)),   #  2 SE/sc:   view/mod
-            set(get_perms(sc, user=zaphod)),          #  3 LE/sc:   view/mod
+            set(get_perms(sc, user=steve)),           #  1 Adm/sc:  view only
+            set(get_perms(sc, user=carefulwalker)),   #  2 SE/sc:   view only
+            set(get_perms(sc, user=zaphod)),          #  3 LE/sc:   view only
             set(get_perms(sc, user=buckaroo)),        #  4 PE/sc:   view only
             set(get_perms(acu1, user=steve)),         #  5 Adm/acu: view only
             set(get_perms(acu1, user=carefulwalker)), #  5a SE/acu: view only
@@ -709,14 +716,14 @@ class OrbTest(unittest.TestCase):
             set(get_perms(acu2, user=buckaroo)),      #  7 PE/acu:  view only
             set(get_perms(acu4, user=buckaroo)),      #  8 PE/acu:  view only
             set(get_perms(acu6, user=carefulwalker)), #  8a SE/acu: view only
-            set(get_perms(acu7, user=carefulwalker)), #  8b acu: view only **
-            set(get_perms(psu, user=steve)),          #  9 Adm/psu: view/mod
-            set(get_perms(psu, user=carefulwalker)),  # 10 SE/psu:  view/mod
-            set(get_perms(psu, user=zaphod)),         # 11 LE/psu:  view/mod
+            set(get_perms(acu7, user=carefulwalker)), #  8b acu:    view only
+            set(get_perms(psu, user=steve)),          #  9 Adm/psu: view only
+            set(get_perms(psu, user=carefulwalker)),  # 10 SE/psu:  view only
+            set(get_perms(psu, user=zaphod)),         # 11 LE/psu:  view only
             set(get_perms(psu, user=buckaroo)),       # 12 PE/psu:  view only
-            set(get_perms(req, user=steve)),          # 13 Adm/req: view/mod
-            set(get_perms(req, user=carefulwalker)),  # 14 SE/req:  view/mod
-            set(get_perms(req, user=zaphod)),         # 15 LE/req:  view/mod
+            set(get_perms(req, user=steve)),          # 13 Adm/req: view only
+            set(get_perms(req, user=carefulwalker)),  # 14 SE/req:  view only
+            set(get_perms(req, user=zaphod)),         # 15 LE/req:  view only
             set(get_perms(req, user=buckaroo))        # 16 PE/req:  view only
             ]
         state["connected"] = True
@@ -743,9 +750,9 @@ class OrbTest(unittest.TestCase):
             ]
         expected = [
             # non-connected state
-            set(['view', 'modify']),           #  1
-            set(['view', 'modify']),           #  2
-            set(['view', 'modify']),           #  3
+            set(['view']),                     #  1
+            set(['view']),                     #  2
+            set(['view']),                     #  3
             set(['view']),                     #  4
             set(['view']),                     #  5
             set(['view']),                     #  5a
@@ -758,9 +765,9 @@ class OrbTest(unittest.TestCase):
             set(['view']),                     # 10
             set(['view']),                     # 11
             set(['view']),                     # 12
-            set(['view', 'modify']),           # 13
-            set(['view', 'modify']),           # 14
-            set(['view', 'modify']),           # 15
+            set(['view']),                     # 13
+            set(['view']),                     # 14
+            set(['view']),                     # 15
             set(['view']),                     # 16
             # connected state
             set(['view', 'modify', 'delete']), #  1

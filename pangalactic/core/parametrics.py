@@ -159,16 +159,14 @@ def deserialize_parms(oid, ser_parms, cname=None):
             if pid in (data_elementz.get(oid) or {}):
                 deids_to_delete.append(pid)
     # delete any undefined parameters or data elements
-    de_oids = list(data_elementz)
-    parm_oids = list(parameterz)
+    # de_oids = list(data_elementz)
+    # parm_oids = list(parameterz)
     for pid in pids_to_delete:
-        for oid in parm_oids:
-            if pid in parameterz[oid]:
-                del parameterz[oid][pid]
+        if pid in parameterz[oid]:
+            del parameterz[oid][pid]
     for deid in deids_to_delete:
-        for oid in de_oids:
-            if deid in data_elementz[oid]:
-                del data_elementz[oid][deid]
+        if deid in data_elementz[oid]:
+            del data_elementz[oid][deid]
     ### FIXME (?): it's dangerous to remove pids not in new_parms, but we
     ### may need at some point to deal with deleted parameters ... (i.e.
     ### remove them from the cache).
@@ -1385,11 +1383,9 @@ def deserialize_des(oid, ser_des, cname=None):
             if deid in data_elementz[oid]:
                 deids_to_delete.append(deid)
     # delete any undefined data elements
-    de_oids = list(data_elementz)
     for deid in deids_to_delete:
-        for oid in de_oids:
-            if deid in data_elementz[oid]:
-                del data_elementz[oid][deid]
+        if deid in data_elementz[oid]:
+            del data_elementz[oid][deid]
     ### FIXME:  it's dangerous to remove deids not in new_des, but we
     ### must deal with deleted parameters ...
     # deids = list(data_elementz[oid])
@@ -1712,7 +1708,7 @@ def add_default_data_elements(obj, des=None):
         deids |= OrderedSet(des
                             or prefs.get('default_data_elements')
                             or state.get('default_data_elements')
-                            or ['Vendor'])
+                            or ['TRL', 'Vendor'])
         if obj.product_type:
             deids |= OrderedSet(DEFAULT_PRODUCT_TYPE_DATA_ELMTS.get(
                                 obj.product_type.id, []))

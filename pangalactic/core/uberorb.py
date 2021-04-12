@@ -690,7 +690,7 @@ class UberORB(object):
         self.log.debug('* assign_test_parameters()')
         for o in objs:
             add_default_data_elements(o, des=des)
-            gen_test_dvals(data_elementz.get(o.oid))
+            gen_test_dvals(data_elementz[o.oid])
             add_default_parameters(o, parms=parms)
             gen_test_pvals(parameterz[o.oid])
         self.recompute_parmz()
