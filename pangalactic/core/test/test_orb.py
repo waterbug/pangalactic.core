@@ -13,7 +13,7 @@ import ruamel_yaml as yaml
 import dateutil.parser as dtparser
 
 # pangalactic
-from pangalactic.core             import (config, refdata, state, prefs,
+from pangalactic.core             import (refdata, state, prefs,
                                           write_config, write_prefs)
 from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
@@ -25,6 +25,7 @@ from pangalactic.core.parametrics import (compute_margin,
                                           save_parmz, save_data_elementz)
 from pangalactic.core.serializers import (deserialize,
                                           deserialize_parms,
+                                          deserialize_des,
                                           serialize,
                                           serialize_des,
                                           serialize_parms)
@@ -488,6 +489,26 @@ class OrbTest(unittest.TestCase):
                   get_pval(test_oid, 'P'),
                   get_pval(test_oid, 'R_D'),
                   get_pval(test_oid, 'm')]
+        self.assertEqual(expected, actual)
+
+    def test_19_0_deserialize_new_data_element_values(self):
+        """
+        CASE:  test pangalactic.core.parametrics.deserialize_des function.
+
+        Tests data element deserialization.
+        """
+        test_oid = 'test:iidrive'
+        serialized_des= {
+            'TRL': 3,
+            'Vendor': 'Yoyodyne'
+            }
+        deserialize_des(test_oid, serialized_des)
+        expected = [True, True, 3, 'Yoyodyne']
+        test_des = data_elementz.get(test_oid, {})
+        actual = [('TRL' in test_des),
+                  ('Vendor' in test_des),
+                  get_dval(test_oid, 'TRL'),
+                  get_dval(test_oid, 'Vendor')]
         self.assertEqual(expected, actual)
 
     def test_19_1_load_parameters_from_old_format(self):
