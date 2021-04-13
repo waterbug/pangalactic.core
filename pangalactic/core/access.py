@@ -93,8 +93,10 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if debugging:
                 perms.append('no local user object found')
             return perms
+    # allow for PSU instances with 'project' attr of None -- this has been
+    # observed, although the PSU is obviously corrupted in this case
     if (isinstance(obj, orb.classes['ProjectSystemUsage'])
-        and obj.project.oid == 'pgefobjects:SANDBOX'):
+        and getattr(obj.project, 'oid', None) == 'pgefobjects:SANDBOX'):
         # orb.log.debug('  *** SANDBOX PSUs are modifiable by any user')
         perms = ['view', 'modify', 'delete', 'SANDBOX PSU']
         return perms
