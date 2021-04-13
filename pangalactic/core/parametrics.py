@@ -134,6 +134,8 @@ def deserialize_parms(oid, ser_parms, cname=None):
         log.debug('  - parameters converted from old format.')
     pids_to_delete = []
     deids_to_delete = []
+    # this covers (1) oid not in parameterz and (2) oid in parameterz but value
+    # is None
     if not parameterz.get(oid):
         parameterz[oid] = {}
     for pid, value in ser_parms.items():
@@ -1370,7 +1372,9 @@ def deserialize_des(oid, ser_des, cname=None):
         for deid, dedict in old_ser_des.items():
             ser_des[deid] = dedict['value']
         log.debug('  - data elements converted from old format.')
-    if oid not in data_elementz:
+    # this covers (1) oid not in data_elementz and (2) oid in data_elementz but
+    # value is None
+    if not data_elementz.get(oid):
         data_elementz[oid] = {}
     deids_to_delete = []
     for deid, value in ser_des.items():
