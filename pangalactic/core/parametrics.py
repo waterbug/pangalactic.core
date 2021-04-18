@@ -646,17 +646,21 @@ def add_product_type_parameters(obj, pt):
             for pid in pt_parmz:
                 parameterz[obj.oid][pid] = pt_parmz[pid]
 
-def delete_parameter(oid, pid):
+def delete_parameter(oid, pid, local=True):
     """
-    Delete a parameter from an object.  This should be rare and would only be
-    necessary if the parameter is irrelevant to the object.
+    Delete a parameter from an object.
 
     Args:
         oid (str):  oid of the object that owns the parameter
         pid (str):  `id` attribute of the parameter
+
+    Keyword Args:
+        local (bool):  if True, originated locally
     """
     if pid in (parameterz.get(oid) or {}):
         del parameterz[oid][pid]
+        if local:
+            dispatcher.send(signal='parm del', oid=oid, pid=pid)
 
 def get_pval(oid, pid, units='', allow_nan=False):
     """
@@ -1533,19 +1537,22 @@ def add_data_element(oid, deid, units=None):
         # log.debug('    data element "{}" was already there.'.format(deid))
         return True
 
-def delete_data_element(oid, deid):
+def delete_data_element(oid, deid, local=True):
     """
-    Delete a parameter from an object.  This should be rare and would only be
-    necessary if the parameter is irrelevant to the object; therefore, the base
-    variable and all related context parameters would be deleted.
+    Delete a data element from an object.
 
     Args:
-        oid (str):  oid of the object that owns the parameter
-        deid (str):  `id` attribute of the parameter
+        oid (str):  oid of the object that owns the data element
+        deid (str):  `id` attribute of the data element
+
+    Keyword Args:
+        local (bool):  if True, originated locally
     """
     # TODO: need to dispatch louie & pubsub messages!
     if deid in (data_elementz.get(oid) or {}):
         del data_elementz[oid][deid]
+        if local:
+            dispatcher.send(signal='de del', oid=oid, deid=deid)
 
 def get_dval(oid, deid, units=''):
     """
