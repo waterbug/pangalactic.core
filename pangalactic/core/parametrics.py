@@ -556,7 +556,9 @@ def add_parameter(oid, pid):
         oid (str):  oid of the object that owns the parameter
         pid (str):  the id of the parameter
     """
-    if oid not in parameterz or parameterz[oid] is None:
+    # oid could be a key in parameterz but have a value of None -- if so, it
+    # needs to be set as an empty dict ...
+    if parameterz.get(oid) is None:
         parameterz[oid] = {}
     # NOTE [SCW 2021-03-17] added when refactoring so that the "base variable"
     # is not added when a context parameter is added: it doesn't matter whether
@@ -653,8 +655,7 @@ def delete_parameter(oid, pid):
         oid (str):  oid of the object that owns the parameter
         pid (str):  `id` attribute of the parameter
     """
-    # dispatcher 'modified object' msg is sent by pgxnobject
-    if (parameterz.get(oid) or {}).get(pid):
+    if pid in (parameterz.get(oid) or {}):
         del parameterz[oid][pid]
 
 def get_pval(oid, pid, units='', allow_nan=False):
@@ -915,10 +916,6 @@ def set_pval(oid, pid, value, units='', local=True):
             # None or "$" for units -> value is already in base units
             converted_value = value
         parameterz[oid][pid] = converted_value
-        # log.debug('  setting value: {}'.format(value))
-        if local:
-            dispatcher.send('pval set', oid=oid, pid=pid,
-                            value=converted_value, local=local)
         return True
     except:
         # log.debug('  *** set_pval() failed:')
@@ -1497,7 +1494,9 @@ def add_data_element(oid, deid, units=None):
         oid (str):  oid of the object that owns the data element
         deid (str):  the id of the data element
     """
-    if oid not in data_elementz:
+    # oid could be a key in data_elementz but have a value of None -- if so, it
+    # needs to be set as an empty dict ...
+    if data_elementz.get(oid) is None:
         data_elementz[oid] = {}
     # log.debug('* add_data_element("{}")'.format(deid))
     # [1] check if object already has that data element
@@ -1545,7 +1544,7 @@ def delete_data_element(oid, deid):
         deid (str):  `id` attribute of the parameter
     """
     # TODO: need to dispatch louie & pubsub messages!
-    if oid in data_elementz and data_elementz[oid].get(deid):
+    if deid in (data_elementz.get(oid) or {}):
         del data_elementz[oid][deid]
 
 def get_dval(oid, deid, units=''):
@@ -1629,8 +1628,6 @@ def set_dval(oid, deid, value, units='', local=True):
         else:
             value = NULL.get(dt_name, 0.0)
         data_elementz[oid][deid] = value
-        # log.debug('  setting value: {}'.format(value))
-        dispatcher.send('dval set', oid, deid, value, local=local)
         return True
     except:
         # log.debug('  *** set_dval() failed:')
