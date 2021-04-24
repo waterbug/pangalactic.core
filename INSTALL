@@ -193,6 +193,11 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration: 'conda install pythonocc-core'
 
+    - websocket-client
+      (Checks status of server when logging in to repository)
+
+          Configuration: 'conda install websocket-client'
+
 
 (3) Required for pangalactic.vger (repository service):
 
