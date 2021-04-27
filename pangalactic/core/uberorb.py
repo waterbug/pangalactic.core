@@ -1995,7 +1995,7 @@ class UberORB(object):
                 info.append(f'   cannot delete "{obj_id}".')
                 continue
             else:
-                info.append('   attempting to delete "{obj_id}" ...')
+                info.append(f'   attempting to delete "{obj_id}" ...')
                 self.db.delete(obj)
                 try:
                     self.db.commit()
