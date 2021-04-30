@@ -5,7 +5,8 @@ Pan Galactic Report Writer
 import xlsxwriter
 
 from pangalactic.core.entity       import dmz
-from pangalactic.core.parametrics  import get_pval, get_dval, de_defz
+from pangalactic.core.parametrics  import (get_pval, get_dval, de_defz,
+                                           parm_defz)
 from pangalactic.core.uberorb      import orb
 from pangalactic.core.utils.styles import xlsx_styles
 
@@ -503,150 +504,103 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
     return row
 
 
-def write_mel_tsv(context, is_project=True, file_path='mel_data.tsv'):
+def write_mel_to_tsv(context, schema=None, file_path='dash_data.tsv'):
     """
-    Output Master Equipment List (MEL) data to a .tsv file (suitable for
-    loading into a DataMatrix).
+    Output a customized Master Equipment List (MEL) report including system /
+    subsystem / component names and assembly levels, with the specified schema
+    (set of parameters, and data elements), to a .tsv file.
 
     Args:
         context (Project or Product):  the project or system of which this is
             the MEL
-        is_project (bool):  flag indicating whether context is a Product or
-            Project
+
+    Keyword Args:
+        schema (list of str):  ids of the parameters and data elements to be
+            included
         file_path (str):  path to data file
     """
-    # STANDARD MEL SCHEMA
-    # ===================
-    # Level
-    # System/Subsystem Name
-    # UNIT MASS
-    # Cold Units       [# of Units]
-    # Hot Units        [# of Units]
-    # Flight Units     [# of Units]
-    # Flight Spares    [# of Units]
-    # ETU/Qual Units   [# of Units]
-    # EM/EDU Prototype [# of Units]
-    # Total Mass [kg] (CBE)
-    # Mass Contingency [%]
-    # Total Mass w/ Contingency (MEV)
-    # Nominal Unit Power (W)
-    # Nominal Total Power (W)
-    # Nominal Power Contingency [%]
-    # Nominal Total Power w/ Contingency (MEV)
-    # Peak Unit Power (W)
-    # Peak Total Power (W)
-    # Peak Power Contingency [%]
-    # Peak Total Power w/ Contingency (MEV)
-    # QUIESCENT Total Power [W] (CBE)
-    # Quoted Unit Price ($K)
-    # Composition
-    # ADDITIONAL INFORMATION
-    # TRL
-    # Similarity to Existing
-    # Design        [Heritage Summary]
-    # Manufacture   [Heritage Summary]
-    # Software      [Heritage Summary]
-    # Provider      [Heritage Summary]
-    # Use           [Heritage Summary]
-    # Operating Env [Heritage Summary]
-    # Ref Prior Use [Heritage Summary]
-    # Reference Mission(s)
-    # Heritage Justification and Additional Information
-    # Structure Mass (kg)               [COST MODELING DATA]
-    # Electronic Complexity Factor      [COST MODELING DATA]
-    # Structure Complexity Factor       [COST MODELING DATA]
-    # Electronic Remaining Design       [COST MODELING DATA]
-    # Structure Remaining Design        [COST MODELING DATA]
-    # Engineering Complexity Mod. Level [COST MODELING DATA]
-
-    ### NOTE: WORKING HERE!!! ...
-    # with open(file_path) as f:
-    # system level
-    # (note that system.name overwrites the template "NAME..." placeholder)
-    # if is_project:
+    data = ''
+    std_headers = ['system_name', 'level', 'qty']
+    if schema and isinstance(schema, list):
+        data = '\t'.join(std_headers + schema) + '\n'
+    else:
+        data = '\t'.join(std_headers) + '\n'
+        schema = []
+    if isinstance(context, orb.classes['Project']):
         # context is Project, so may include several systems
-        # project = context
-        # mel_label = 'MISSION: {}'.format(project.id)
-        # worksheet.write(hrow1, 1, mel_label, fmts['left_pale_blue_bold_12'])
-        # start_row = 1
-        # system_names = [psu.system.name.lower() for psu in project.systems]
-        # system_names.sort()
-        # systems_by_name = {psu.system.name.lower() : psu.system
-                           # for psu in project.systems}
-        # for system_name in system_names:
-            # last_row = write_component_rows_tsv(1, start_row,
-                                                # systems_by_name[system_name])
-            # start_row = last_row + 1
-    # else:
-        # # if context is Product -> a single system MEL
-        # system = context
-        # worksheet.write(hrow1, 1, system.name, fmts['left_pale_blue_bold_12'])
-        # write_component_rows_tsv(1, 1, system)
-    # book.close()
+        project = context
+        system_names = [psu.system.name.lower() for psu in project.systems]
+        system_names.sort()
+        systems_by_name = {psu.system.name.lower() : psu.system
+                           for psu in project.systems}
+        for system_name in system_names:
+            data += get_component_data_tsv(systems_by_name[system_name],
+                                           schema, 1)
+    elif isinstance(context, orb.classes['HardwareProduct']):
+        # context is Product -> single system MEL
+        system = context
+        data += get_component_data_tsv(system, schema, 1)
+    else:
+        orb.info('  - context is neither a Project nor Product ...')
+        orb.info('    could not write MEL, quitting.')
+        return
+    with open(file_path, 'w') as f:
+        f.write(data)
 
 
-def write_component_rows_tsv(level, row, component, qty=1):
+def get_component_data_tsv(component, schema, level, qty=1):
     """
-    Write a set of component rows.
+    Return a tsv string for an assembly of components with parameters / data
+    elements.
 
     Args:
-        level (int): assembly level of component
-        row (int): row number of component in the file
         component (HardwareProduct): component object
+        schema (list of str):  ids of the parameters and data elements to be
+            included
+        level (int): assembly level of component
 
     Keyword Args:
         qty (int): quantity of component in its next higher assembly
     """
-    # NB:  levels are 1-based; rows are 0-based
-    # mcbe = get_pval(component.oid, 'm[CBE]')
-    # Excel doesn't like space between the number and "%"
-    # ctgcy_m = fix_ctgcy(str(100 * get_pval(component.oid, 'm[Ctgcy]')))
-    # mmev = get_pval(component.oid, 'm[MEV]')
-    # pcbe = get_pval(component.oid, 'P[CBE]')
-    # Excel doesn't like space between the number and "%"
-    # ctgcy_P = fix_ctgcy(str(100 * get_pval(component.oid, 'P[Ctgcy]')))
-    # pmev = get_pval(component.oid, 'P[MEV]')
-    # columns:
-    #   0: Level
-    #   1: Name
-    #   2: UNIT MASS CBE
-    #   8: Mass CBE
-    #   9: Mass Contingency (Margin)
-    #  10: Mass MEV
-    #  12: Power CBE
-    #  13: Power Contingency (Margin)
-    #  14: Power MEV
-    # row += 1
-    # print('writing {} in row {}'.format(component.name, row))
-    # first write the formatting to the whole row to set the bg color
-    # sheet.write_row(row, 0, [' ']*48, level_fmts.get(level, level_fmts[3]))
-    # # then write the "LEVEL" cell
-    # sheet.write(row, 0, level, level_fmts.get(level, level_fmts[3]))
-    # sheet.write(row, 1, component.name, name_fmts.get(level, name_fmts[3]))
-    # data_fmt = data_fmts.get(level, data_fmts[3])
-    # sheet.write(row, 2, mcbe, data_fmt)        # Unit Mass
-    # sheet.write(row, 5, qty, int_fmt)          # Flight Units
-    # sheet.write(row, 9, mcbe * qty, data_fmt)  # Total Mass
-    # sheet.write(row, 10, ctgcy_m, data_fmt)
-    # sheet.write(row, 11, mmev * qty, data_fmt) # Mass MEV
-    # sheet.write(row, 12, pcbe, data_fmt)       # Unit Power
-    # sheet.write(row, 13, pcbe * qty, data_fmt) # Total Power
-    # sheet.write(row, 14, ctgcy_P, data_fmt)
-    # sheet.write(row, 15, pmev * qty, data_fmt) # Power MEV
-    # if component.components:
-        # next_level = level + 1
-        # comp_names = [acu.component.name.lower()
-                      # for acu in component.components]
-        # comp_names.sort()
-        # comps_by_name = {acu.component.name.lower() : acu.component
-                         # for acu in component.components}
-        # qty_by_name = {acu.component.name.lower() : acu.quantity or 1
-                       # for acu in component.components}
-        # for comp_name in comp_names:
-            # row = write_component_rows_tsv(next_level, row,
-                                           # comps_by_name[comp_name],
-                                           # qty=qty_by_name[comp_name])
-    # return row
+    # NB:  levels are 1-based
+    data = ''
+    vals = []
+    for col_id in schema:
+        # TODO: predetermine whether each schema item is a pid or deid
+        # Excel doesn't like space between the number and "%" --
+        # hence, fix_ctgcy() ...
+        if col_id in parm_defz:
+            # it's a parameter ...
+            if 'Ctgcy' in col_id:
+                pval = fix_ctgcy(str(100 * get_pval(component.oid, col_id)))
+            else:
+                pval = str(get_pval(component.oid, col_id))
+            vals.append(pval)
+        elif col_id in de_defz:
+            # it's a data_element ...
+            dval = str(get_dval(component.oid, col_id))
+            vals.append(dval)
+        else:
+            # neither a parameter nor data element
+            vals.append('unknown')
+    # strip out any newlines in name (wha?) and indent 2 spaces per level
+    comp_name = (level - 1) * '  ' + component.name.replace('\n', ' ').strip()
+    data += '\t'.join([comp_name, str(level), str(qty)] + vals) + '\n'
+    orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
+    if component.components:
+        next_level = level + 1
+        comp_names = [acu.component.name.lower()
+                      for acu in component.components]
+        comp_names.sort()
+        comps_by_name = {acu.component.name.lower() : acu.component
+                         for acu in component.components}
+        qty_by_name = {acu.component.name.lower() : acu.quantity or 1
+                       for acu in component.components}
+        for comp_name in comp_names:
+            data += get_component_data_tsv(comps_by_name[comp_name],
+                                           schema, next_level,
+                                           qty=qty_by_name[comp_name])
+    return data
 
 
 def write_mel_xlsx_from_datagrid(context, is_project=True,
