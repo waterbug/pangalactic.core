@@ -504,6 +504,103 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
     return row
 
 
+def get_mel_data(context, schema=None):
+    """
+    Generate a customized Master Equipment List (MEL) as a list of dicts.
+
+    Args:
+        context (Project or Product):  the project or system of which this is
+            the MEL
+
+    Keyword Args:
+        schema (list of str):  ids of the parameters and data elements to be
+            included
+    """
+    data = []
+    cols = []
+    std_headers = ['system_name', 'level', 'qty']
+    if schema and isinstance(schema, list):
+        cols = std_headers + schema
+    else:
+        cols = std_headers
+        schema = []
+    if isinstance(context, orb.classes['Project']):
+        # context is Project, so may include several systems
+        project = context
+        system_names = [psu.system.name.lower() for psu in project.systems]
+        system_names.sort()
+        systems_by_name = {psu.system.name.lower() : psu.system
+                           for psu in project.systems}
+        for system_name in system_names:
+            data += get_component_data(systems_by_name[system_name], cols,
+                                       schema, 1)
+    elif isinstance(context, orb.classes['HardwareProduct']):
+        # context is Product -> single system MEL
+        system = context
+        data += get_component_data(system, cols, schema, 1)
+    else:
+        orb.info('  - context is neither a Project nor Product ...')
+        orb.info('    could not write MEL, quitting.')
+        return []
+    return data
+
+
+def get_component_data(component, cols, schema, level, qty=1):
+    """
+    Return a list of dicts containing the parameter and data element data for
+    an assembly of components.
+
+    Args:
+        component (HardwareProduct): component object
+        cols (list of str):  columns in the MEL (of which schema is a subset)
+        schema (list of str):  ids of the parameters and data elements to be
+            included
+        level (int): assembly level of component
+
+    Keyword Args:
+        qty (int): quantity of component in its next higher assembly
+    """
+    # NB:  levels are 1-based
+    data = []
+    vals = []
+    for col_id in schema:
+        # TODO: predetermine whether each schema item is a pid or deid
+        # Excel doesn't like space between the number and "%" --
+        # hence, fix_ctgcy() ...
+        if col_id in parm_defz:
+            # it's a parameter ...
+            if 'Ctgcy' in col_id:
+                pval = fix_ctgcy(str(100 * get_pval(component.oid, col_id)))
+            else:
+                pval = str(get_pval(component.oid, col_id))
+            vals.append(pval)
+        elif col_id in de_defz:
+            # it's a data_element ...
+            dval = str(get_dval(component.oid, col_id))
+            vals.append(dval)
+        else:
+            # neither a parameter nor data element
+            vals.append('-')
+    # strip out any newlines in name (wha?) and indent 2 spaces per level
+    comp_name = (level - 1) * '  ' + component.name.replace('\n', ' ').strip()
+    data.append(dict(zip(cols, [comp_name, str(level), str(qty)] + vals)))
+    orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
+    if component.components:
+        next_level = level + 1
+        comp_names = [acu.component.name.lower()
+                      for acu in component.components]
+        comp_names.sort()
+        comps_by_name = {acu.component.name.lower() : acu.component
+                         for acu in component.components}
+        qty_by_name = {acu.component.name.lower() : acu.quantity or 1
+                       for acu in component.components}
+        for comp_name in comp_names:
+            data += get_component_data(comps_by_name[comp_name],
+                                       cols, schema, next_level,
+                                       qty=qty_by_name[comp_name])
+    return data
+
+
 def write_mel_to_tsv(context, schema=None, file_path='dash_data.tsv'):
     """
     Output a customized Master Equipment List (MEL) report including system /
