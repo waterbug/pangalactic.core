@@ -6,7 +6,7 @@ import xlsxwriter
 
 from pangalactic.core.entity       import dmz
 from pangalactic.core.parametrics  import (get_pval, get_dval, de_defz,
-                                           parm_defz)
+                                           parm_defz, round_to)
 from pangalactic.core.uberorb      import orb
 from pangalactic.core.utils.styles import xlsx_styles
 
@@ -572,7 +572,7 @@ def get_component_data(component, cols, schema, level, qty=1):
             if 'Ctgcy' in col_id:
                 pval = fix_ctgcy(str(100 * get_pval(component.oid, col_id)))
             else:
-                pval = str(get_pval(component.oid, col_id))
+                pval = str(round_to(get_pval(component.oid, col_id)))
             vals.append(pval)
         elif col_id in de_defz:
             # it's a data_element ...
@@ -671,7 +671,7 @@ def get_component_data_tsv(component, schema, level, qty=1):
             if 'Ctgcy' in col_id:
                 pval = fix_ctgcy(str(100 * get_pval(component.oid, col_id)))
             else:
-                pval = str(get_pval(component.oid, col_id))
+                pval = str(round_to(get_pval(component.oid, col_id)))
             vals.append(pval)
         elif col_id in de_defz:
             # it's a data_element ...
