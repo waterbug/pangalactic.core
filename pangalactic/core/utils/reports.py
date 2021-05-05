@@ -4,10 +4,12 @@ Pan Galactic Report Writer
 """
 import xlsxwriter
 
+from pangalactic.core              import prefs
 from pangalactic.core.entity       import dmz
 from pangalactic.core.parametrics  import (get_pval, get_dval, de_defz,
                                            parm_defz, round_to)
 from pangalactic.core.uberorb      import orb
+from pangalactic.core.units        import in_si
 from pangalactic.core.utils.styles import xlsx_styles
 
 
@@ -572,7 +574,12 @@ def get_component_data(component, cols, schema, level, qty=1):
             if 'Ctgcy' in col_id:
                 pval = fix_ctgcy(str(100 * get_pval(component.oid, col_id)))
             else:
-                pval = str(round_to(get_pval(component.oid, col_id)))
+                # get all values in user's preferred units
+                pd = parm_defz.get(col_id)
+                units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                        pd['dimensions'], '')
+                pval = str(round_to(get_pval(
+                                        component.oid, col_id, units=units)))
             vals.append(pval)
         elif col_id in de_defz:
             # it's a data_element ...
@@ -671,7 +678,12 @@ def get_component_data_tsv(component, schema, level, qty=1):
             if 'Ctgcy' in col_id:
                 pval = fix_ctgcy(str(100 * get_pval(component.oid, col_id)))
             else:
-                pval = str(round_to(get_pval(component.oid, col_id)))
+                # get all values in user's preferred units
+                pd = parm_defz.get(col_id)
+                units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                        pd['dimensions'], '')
+                pval = str(round_to(get_pval(
+                                        component.oid, col_id, units=units)))
             vals.append(pval)
         elif col_id in de_defz:
             # it's a data_element ...
