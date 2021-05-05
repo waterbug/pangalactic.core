@@ -520,7 +520,7 @@ def get_mel_data(context, schema=None):
     """
     data = []
     cols = []
-    std_headers = ['system_name', 'level', 'qty']
+    std_headers = ['system_name', 'ID', 'level', 'qty']
     if schema and isinstance(schema, list):
         cols = std_headers + schema
     else:
@@ -590,7 +590,9 @@ def get_component_data(component, cols, schema, level, qty=1):
             vals.append('-')
     # strip out any newlines in name (wha?) and indent 2 spaces per level
     comp_name = (level - 1) * '  ' + component.name.replace('\n', ' ').strip()
-    data.append(dict(zip(cols, [comp_name, str(level), str(qty)] + vals)))
+    comp_id = component.id
+    data.append(dict(zip(cols, [comp_name, comp_id, str(level), str(qty)]
+                                + vals)))
     orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
     if component.components:
         next_level = level + 1
@@ -628,7 +630,7 @@ def write_mel_to_tsv(context, schema=None, pref_units=False,
         file_path (str):  path to data file
     """
     data = ''
-    std_headers = ['system_name', 'level', 'qty']
+    std_headers = ['system_name', 'ID', 'level', 'qty']
     if schema and isinstance(schema, list):
         schema_with_units = []
         for col_id in schema:
@@ -719,7 +721,8 @@ def get_component_data_tsv(component, schema, level, qty=1, pref_units=False):
             vals.append('unknown')
     # strip out any newlines in name (wha?) and indent 2 spaces per level
     comp_name = (level - 1) * '  ' + component.name.replace('\n', ' ').strip()
-    data += '\t'.join([comp_name, str(level), str(qty)] + vals) + '\n'
+    comp_id = component.id
+    data += '\t'.join([comp_name, comp_id, str(level), str(qty)] + vals) + '\n'
     orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
     if component.components:
         next_level = level + 1
