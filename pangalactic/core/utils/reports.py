@@ -608,7 +608,8 @@ def get_component_data(component, cols, schema, level, qty=1):
     return data
 
 
-def write_mel_to_tsv(context, schema=None, file_path='dash_data.tsv'):
+def write_mel_to_tsv(context, schema=None, pref_units=False,
+                     file_path='dash_data.tsv'):
     """
     Output a customized Master Equipment List (MEL) report including system /
     subsystem / component names and assembly levels, with the specified schema
@@ -621,12 +622,31 @@ def write_mel_to_tsv(context, schema=None, file_path='dash_data.tsv'):
     Keyword Args:
         schema (list of str):  ids of the parameters and data elements to be
             included
+        pref_units (bool):  express values in the user's preferred units;
+            default is False (use mks units); if True, units will be specified
+            in headers
         file_path (str):  path to data file
     """
     data = ''
     std_headers = ['system_name', 'level', 'qty']
     if schema and isinstance(schema, list):
-        data = '\t'.join(std_headers + schema) + '\n'
+        schema_with_units = []
+        for col_id in schema:
+            if col_id in parm_defz:
+                # it's a parameter ...
+                if 'Ctgcy' in col_id:
+                    schema_with_units.append(col_id + ' (%)')
+                else:
+                    pd = parm_defz.get(col_id)
+                    if pref_units:
+                        units = prefs['units'].get(pd['dimensions'], '')
+                        units = units or in_si.get(pd['dimensions'], '')
+                    else:
+                        units = in_si.get(pd['dimensions'], '')
+                    schema_with_units.append(col_id + f' ({units})')
+            else:
+                schema_with_units.append(col_id)
+        data = '\t'.join(std_headers + schema_with_units) + '\n'
     else:
         data = '\t'.join(std_headers) + '\n'
         schema = []
@@ -639,11 +659,12 @@ def write_mel_to_tsv(context, schema=None, file_path='dash_data.tsv'):
                            for psu in project.systems}
         for system_name in system_names:
             data += get_component_data_tsv(systems_by_name[system_name],
-                                           schema, 1)
+                                           schema, 1, pref_units=pref_units)
     elif isinstance(context, orb.classes['HardwareProduct']):
         # context is Product -> single system MEL
         system = context
-        data += get_component_data_tsv(system, schema, 1)
+        data += get_component_data_tsv(system, schema, 1,
+                                       pref_units=pref_units)
     else:
         orb.info('  - context is neither a Project nor Product ...')
         orb.info('    could not write MEL, quitting.')
@@ -652,7 +673,7 @@ def write_mel_to_tsv(context, schema=None, file_path='dash_data.tsv'):
         f.write(data)
 
 
-def get_component_data_tsv(component, schema, level, qty=1):
+def get_component_data_tsv(component, schema, level, qty=1, pref_units=False):
     """
     Return a tsv string for an assembly of components with parameters / data
     elements.
@@ -678,12 +699,16 @@ def get_component_data_tsv(component, schema, level, qty=1):
             if 'Ctgcy' in col_id:
                 pval = fix_ctgcy(str(100 * get_pval(component.oid, col_id)))
             else:
-                # get all values in user's preferred units
-                pd = parm_defz.get(col_id)
-                units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
-                                                        pd['dimensions'], '')
-                pval = str(round_to(get_pval(
-                                        component.oid, col_id, units=units)))
+                if pref_units:
+                    # get all values in user's preferred units
+                    pd = parm_defz.get(col_id)
+                    units = prefs['units'].get(pd['dimensions'], '')
+                    units = units or in_si.get(pd['dimensions'], '')
+                    pval = str(round_to(get_pval(
+                                            component.oid, col_id, units=units)))
+                else:
+                    # get all values in SI units
+                    pval = str(round_to(get_pval(component.oid, col_id)))
             vals.append(pval)
         elif col_id in de_defz:
             # it's a data_element ...
@@ -708,7 +733,8 @@ def get_component_data_tsv(component, schema, level, qty=1):
         for comp_name in comp_names:
             data += get_component_data_tsv(comps_by_name[comp_name],
                                            schema, next_level,
-                                           qty=qty_by_name[comp_name])
+                                           qty=qty_by_name[comp_name],
+                                           pref_units=pref_units)
     return data
 
 
