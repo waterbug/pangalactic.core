@@ -1979,6 +1979,8 @@ class UberORB(object):
                     refresh_assemblies.append(obj.assembly)
                 recompute_required = True
             creator = getattr(obj, 'creator', None)
+            obj_id = getattr(obj, 'id', 'no id')
+            obj_name = getattr(obj, 'name', 'no name')
             if isinstance(obj, orb.classes['Product']):
                 # if local_user created Product, add it to trash
                 # TODO:  use trash to enable undo of delete ...
@@ -1988,8 +1990,6 @@ class UberORB(object):
                     trash[obj.oid] = serialize(self, [obj])
                     txt = 'local user was creator -- obj recorded in trash.'
                     info.append(f'   {txt}')
-                obj_id = getattr(obj, 'id', 'no id')
-                obj_name = getattr(obj, 'name', 'no name')
                 info.append('   obj id: {}, name: {} (oid "{}")'.format(
                                             obj_id, obj_name, obj.oid))
             if delete_not_allowed:
