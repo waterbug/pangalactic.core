@@ -1979,27 +1979,37 @@ class UberORB(object):
                     refresh_assemblies.append(obj.assembly)
                 recompute_required = True
             creator = getattr(obj, 'creator', None)
-            # if local_user created Product, add it to trash
-            # TODO:  use trash to enable undo of delete ...
-            # [NOTE: this adds the object to trash for the client;
-            # server-side trash management is handled by "vger".]
-            if creator is local_user_obj:
-                trash[obj.oid] = serialize(self, [obj])
-                txt = 'local user was creator -- obj recorded in trash.'
-                info.append(f'   {txt}')
-            obj_id = getattr(obj, 'id', 'no id')
-            obj_name = getattr(obj, 'name', 'no name')
-            info.append('   obj id: {}, name: {} (oid "{}")'.format(
-                                        obj_id, obj_name, obj.oid))
+            if isinstance(obj, orb.classes['Product']):
+                # if local_user created Product, add it to trash
+                # TODO:  use trash to enable undo of delete ...
+                # [NOTE: this adds the object to trash for the client;
+                # server-side trash management is handled by "vger".]
+                if creator is local_user_obj:
+                    trash[obj.oid] = serialize(self, [obj])
+                    txt = 'local user was creator -- obj recorded in trash.'
+                    info.append(f'   {txt}')
+                obj_id = getattr(obj, 'id', 'no id')
+                obj_name = getattr(obj, 'name', 'no name')
+                info.append('   obj id: {}, name: {} (oid "{}")'.format(
+                                            obj_id, obj_name, obj.oid))
             if delete_not_allowed:
                 info.append(f'   cannot delete "{obj_id}".')
                 continue
             else:
                 info.append(f'   attempting to delete "{obj_id}" ...')
+                product_oid = ''
+                if isinstance(obj, orb.classes['Product']):
+                    # if a Product instance, add its oid to deleted_oids ...
+                    product_oid = obj.oid
                 self.db.delete(obj)
                 try:
                     self.db.commit()
                     info.append('     ... deleted.')
+                    if product_oid:
+                        if state.get('deleted_oids'):
+                            state['deleted_oids'].append(product_oid)
+                        else:
+                            state['deleted_oids'] = [product_oid]
                 except:
                     self.db.rollback()
                     info.append('     ... delete failed, rolled back.')

@@ -45,6 +45,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     if obj.oid == 'pgefobjects:SANDBOX':
         # anyone can "modify" the SANDBOX (i.e. add systems to it)
         return ['view', 'modify', 'object is SANDBOX']
+    if obj.oid == 'pgefobjects:TBD':
+        # no one can "modify" the TBD object
+        return ['view', 'object is TBD']
     if config.get('local_admin') or permissive:
         # *********************************************************************
         # NOTE: USE WITH EXTREME CAUTION! These settings can lead to database
