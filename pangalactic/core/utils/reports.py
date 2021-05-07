@@ -518,6 +518,8 @@ def get_mel_data(context, schema=None):
         schema (list of str):  ids of the parameters and data elements to be
             included
     """
+    context_id = getattr(context, 'id', None) or '[unknown id]'
+    orb.log.debug(f'* getting Mini MEL data for {context_id} ...')
     data = []
     cols = []
     std_headers = ['system_name', 'ID', 'level', 'qty']
@@ -541,8 +543,8 @@ def get_mel_data(context, schema=None):
         system = context
         data += get_component_data(system, cols, schema, 1)
     else:
-        orb.info('  - context is neither a Project nor Product ...')
-        orb.info('    could not write MEL, quitting.')
+        orb.log.info('  - context is neither a Project nor Product ...')
+        orb.log.info('    could not write MEL, quitting.')
         return []
     return data
 
@@ -593,7 +595,7 @@ def get_component_data(component, cols, schema, level, qty=1):
     comp_id = component.id
     data.append(dict(zip(cols, [comp_name, comp_id, str(level), str(qty)]
                                 + vals)))
-    orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
+    # orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
     if component.components:
         next_level = level + 1
         comp_names = [acu.component.name.lower()
@@ -629,6 +631,8 @@ def write_mel_to_tsv(context, schema=None, pref_units=False,
             in headers
         file_path (str):  path to data file
     """
+    context_id = getattr(context, 'id', None) or '[unknown id]'
+    orb.log.debug(f'* writing Mini MEL data for {context_id} to tsv ...')
     data = ''
     std_headers = ['system_name', 'ID', 'level', 'qty']
     if schema and isinstance(schema, list):
@@ -723,7 +727,7 @@ def get_component_data_tsv(component, schema, level, qty=1, pref_units=False):
     comp_name = (level - 1) * '  ' + component.name.replace('\n', ' ').strip()
     comp_id = component.id
     data += '\t'.join([comp_name, comp_id, str(level), str(qty)] + vals) + '\n'
-    orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
+    # orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
     if component.components:
         next_level = level + 1
         comp_names = [acu.component.name.lower()
