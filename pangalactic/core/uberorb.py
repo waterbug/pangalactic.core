@@ -97,6 +97,11 @@ class UberORB(object):
     started = False
     startup_msg = '* orb starting up ...'
     new_oids = []
+    # parmz_status and data_elementz_status are used to determine whether saved
+    # parameter and data_element data have been loaded successfully from the
+    # "parameters.json" and "data_elements.json" files
+    data_elementz_status = 'unknown'
+    parmz_status = 'unknown'
 
     def start(self, home=None, db_url=None, console=False, debug=False,
               log_msgs=None, **kw):
@@ -360,7 +365,9 @@ class UberORB(object):
         self.versionables = [cname for cname in self.classes if 'version' in
                              self.schemas[cname]['field_names']]
         # load (and update) ref data ... note that this must be done AFTER
-        # config and state have been created and updated
+        # config and state have been created and updated (except in the case
+        # that the schema version doesn't match and we have to load data from a
+        # dump)
         self.load_reference_data()
         # ---------------------------------------------------------------------
         # ### NOTE:  user or app configured schemas can override reference data
@@ -829,8 +836,8 @@ class UberORB(object):
         # (parameters.json) -- e.g., some ref data objects might have updated
         # parameters
         # ********************************************************************
-        load_data_elementz(self.home)
-        load_parmz(self.home)
+        self.data_elementz_status = load_data_elementz(self.home)
+        self.parmz_status = load_parmz(self.home)
         # self.log.debug('* loading ent_histz ...')
         load_ent_histz(self.home)
         # self.log.debug('* loading schemaz ...')

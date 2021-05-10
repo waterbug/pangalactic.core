@@ -186,7 +186,11 @@ def load_parmz(dir_path):
     fpath = os.path.join(dir_path, 'parameters.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
-            stored_parameterz = json.loads(f.read())
+            try:
+                stored_parameterz = json.loads(f.read())
+            except:
+                log.debug('  - json decoding of "parameters.json" failed.')
+                return 'fail'
             # first check for old format and convert if necessary
             old_format = False
             oids = list(stored_parameterz)
@@ -229,8 +233,10 @@ def load_parmz(dir_path):
         for oid, parms in stored_parameterz.items():
             deserialize_parms(oid, parms)
         log.debug('  - parameterz cache loaded.')
+        return 'success'
     else:
         log.debug('  - "parameters.json" was not found.')
+        return 'not found'
 
 
 def save_parmz(dir_path):
@@ -1409,7 +1415,11 @@ def load_data_elementz(dir_path):
     fpath = os.path.join(dir_path, 'data_elements.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
-            serialized_des = json.loads(f.read())
+            try:
+                serialized_des = json.loads(f.read())
+            except:
+                log.debug('  - json decoding of "data_elements.json" failed.')
+                return 'fail'
             # first check for old format and convert if necessary
             old_format = False
             oids = list(serialized_des)
@@ -1451,8 +1461,10 @@ def load_data_elementz(dir_path):
         for oid, ser_des in serialized_des.items():
             deserialize_des(oid, ser_des)
         log.debug('  - data_elementz cache loaded.')
+        return 'success'
     else:
         log.debug('  - "data_elements.json" was not found.')
+        return 'not found'
 
 def save_data_elementz(dir_path):
     """
