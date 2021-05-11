@@ -291,9 +291,14 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                               orb.classes['Project'])):
             # orb.log.debug('  - object is a Project or ProjectSystemUsage')
             # access will depend on the user's role in the project
-            ras = orb.search_exact(cname='RoleAssignment',
-                                   assigned_to=user,
-                                   role_assignment_context=obj.project)
+            if isinstance(obj, orb.classes['ProjectSystemUsage']):
+                ras = orb.search_exact(cname='RoleAssignment',
+                                       assigned_to=user,
+                                       role_assignment_context=obj.project)
+            elif isinstance(obj, orb.classes['Project']):
+                ras = orb.search_exact(cname='RoleAssignment',
+                                       assigned_to=user,
+                                       role_assignment_context=obj)
             roles = set([ra.assigned_role.id for ra in ras])
             auth_roles = set(['administrator', 'lead_engineer',
                               'systems_engineer'])
