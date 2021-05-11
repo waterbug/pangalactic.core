@@ -96,7 +96,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if debugging:
                 perms.append('no local user object found')
             return perms
-    # allow for PSU instances with 'project' attr of None -- this has been
+    # avoid crash if PSU instances have 'project' attr of None -- this has been
     # observed, although the PSU is obviously corrupted in this case
     if (isinstance(obj, orb.classes['ProjectSystemUsage'])
         and getattr(obj.project, 'oid', None) == 'pgefobjects:SANDBOX'):
@@ -286,9 +286,10 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                     if debugging:
                         perms.append('[2c] role-based perms (Acu)')
                     return perms
-        # [3] is it a ProjectSystemUsage?
-        elif isinstance(obj, orb.classes['ProjectSystemUsage']):
-            # orb.log.debug('  - object is a ProjectSystemUsage')
+        # [3] is it a ProjectSystemUsage or a Project?
+        elif isinstance(obj, (orb.classes['ProjectSystemUsage'],
+                              orb.classes['Project'])):
+            # orb.log.debug('  - object is a Project or ProjectSystemUsage')
             # access will depend on the user's role in the project
             ras = orb.search_exact(cname='RoleAssignment',
                                    assigned_to=user,
