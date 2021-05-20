@@ -131,7 +131,7 @@ class UberORB(object):
         # [C] create a 'pangalaxian' directory in the user's home dir
         else:
             if sys.platform == 'win32':
-                default_home = os.path.join(os.environ.get('HOMEPATH'))
+                default_home = os.path.join(os.environ.get('USERPROFILE'))
                 if os.path.exists(default_home):
                     pgx_home = os.path.join(default_home, 'pangalaxian')
             else:
