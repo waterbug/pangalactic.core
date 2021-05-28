@@ -479,7 +479,7 @@ def create_test_project():
             id_ns='test',
             product_type='pgefobjects:ProductType.power_system',
             owner='test:yoyodyne',
-            name='Mr. Fusion Series A',
+            name='Mr. Fusion',
             description='Power Generator, Fusion, Blender-Style',
             data_elements=deepcopy(test_data_elements),
             parameters=deepcopy(test_parms),
