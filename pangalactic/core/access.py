@@ -60,6 +60,15 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         # orb.log.debug('  perms: {}'.format(perms))
         return perms
     perms = set()
+    # Products can be "frozen", in which case if they would otherwise be
+    # viewable (i.e. either "public" or the user has a role in the project that
+    # owns them) then they are view-only
+    frozen = getattr(obj, 'frozen', False)
+    # an Acu in a frozen assembly
+    if (hasattr(obj, 'assembly') and
+        getattr(obj.assembly, 'frozen', False)):
+        orb.log.debug('  Any Acu in a frozen assembly is frozen')
+        frozen = True
     if isinstance(obj, orb.classes['Product']):
         # Products can be "cloaked" ("non-public")
         if getattr(obj, 'public', False):
@@ -124,6 +133,11 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         perms = ['view']
         if state.get('connected'):
             # deletions and are only allowed if connected
+            # first check whether frozen
+            if frozen:
+                # if frozen, view-only even for global admin (although global
+                # admin has access to "thaw")
+                return perms   # i.e. ["view"]
             perms += ['modify', 'delete']
         # orb.log.debug('  perms: {}'.format(perms))
         if debugging:
@@ -133,9 +147,10 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     # discipline role in the owner org that corresponds to the object's
     # 'product_type'
     else:
-        # did the user create the object?  if so, and the object is not an
-        # instance of Person, then full perms ...
-        if (hasattr(obj, 'creator') and obj.creator is user and
+        # did the user create the object?
+        # if the object is not an instance of Person and is not frozen, full
+        # perms ...
+        if (not frozen and hasattr(obj, 'creator') and obj.creator is user and
             not isinstance(obj, orb.classes['Person'])):
             # orb.log.debug('  user is object creator.')
             # creator has full perms
@@ -177,8 +192,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                         # '  user is authorized for ProductType "{}".'.format(
                         # pt_id))
                     perms = ['view']
-                    if state.get('connected'):
-                        # mods and deletions are only allowed if connected
+                    if state.get('connected') and not frozen:
+                        # mods and deletions are only allowed if connected and
+                        # the object is not frozen
                         perms += ['modify', 'delete']
                     # orb.log.debug('  perms: {}'.format(perms))
                     if debugging:
@@ -198,7 +214,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                                 'lead_engineer'])
                 if req_mgrs & role_ids:
                     perms = ['view']
-                    if state.get('connected'):
+                    if state.get('connected') and not frozen:
                         # mods and deletions are only allowed if connected
                         perms += ['modify', 'delete']
                     # orb.log.debug('  perms: {}'.format(perms))
@@ -213,6 +229,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                     return perms
         # [2] is it an Acu?
         # if so, the user can modify it if any of the following is true:
+        # [2z] ITS ASSEMBLY IS NOT FROZEN **AND** ONE OF a, b, c:
         # [2a] the user has a role in the context of the assembly's "owner"
         #      that relates to the assembly's product_type
         # [2b] its component is real and the user has a role in the context of
@@ -225,7 +242,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             # orb.log.debug('  - object is an Acu')
             # access will depend on ownership of its assembly
             if not obj.assembly.owner:
-                # orb.log.debug('    assembly owner not specified -- view only!')
+                # orb.log.debug('    assmb. owner not specified -- view only!')
                 return ['view']
             ras = orb.search_exact(cname='RoleAssignment',
                                    assigned_to=user,
@@ -247,7 +264,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if assembly_type in subsystem_types:
                 # orb.log.debug('  - assembly product_type is relevant.')
                 perms = ['view']
-                if state.get('connected'):
+                if state.get('connected') and not frozen:
                     # mods and deletions are only allowed if connected
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
@@ -259,7 +276,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                   in subsystem_types):
                 # orb.log.debug('  - component product_type is relevant.')
                 perms = ['view']
-                if state.get('connected'):
+                if state.get('connected') and not frozen:
                     # mods and deletions are only allowed if connected
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
@@ -272,7 +289,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 if pt in subsystem_types:
                     # orb.log.debug('  - TBD product_type_hint is relevant.')
                     perms = ['view']
-                    if state.get('connected'):
+                    if state.get('connected') and not frozen:
                         # mods and deletions are only allowed if connected
                         perms += ['modify', 'delete']
                     # orb.log.debug('    perms: {}'.format(perms))
