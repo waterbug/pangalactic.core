@@ -7,8 +7,8 @@ test_uncook.py \
 test_names.py \
 test_kb.py \
 test_registry.py \
-test_orb.py \
-test_entity.py
+test_orb.py
+# test_entity.py \
 # test_objectcache.py \
 # test_remember.py \
 # test_vger_changePassword.py \
