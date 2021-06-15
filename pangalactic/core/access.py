@@ -64,6 +64,8 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     # viewable (i.e. either "public" or the user has a role in the project that
     # owns them) then they are view-only
     frozen = getattr(obj, 'frozen', False)
+    # if frozen:
+        # orb.log.debug(f'* object {obj.oid} is frozen.')
     # an Acu in a frozen assembly
     if (hasattr(obj, 'assembly') and
         getattr(obj.assembly, 'frozen', False)):
