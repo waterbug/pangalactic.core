@@ -121,6 +121,11 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install xlwt'
 
+    - openpyxl (latest released version)
+      Reads .xlsx files
+
+          Configuration:  'conda install openpyxl'
+
 
 (2) pangalactic.node (the pangalactic GUI client package):
 
