@@ -32,7 +32,7 @@ PGXN_REQD = dict(
 # app-specific settings defined in the 'pangalactic.config' module-level
 # dictionary.
 # TODO:  support for field "aliases" (a.k.a. "display names")
-SYSTEM = ['version_sequence', 'iteration', 'frozen', 'derived_from']
+SYSTEM = ['version_sequence', 'iteration', 'derived_from']
 MAIN_VIEWS = dict(
     Activity=(IDENTITY + ['activity_type', 'activity_of']),
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
@@ -66,8 +66,8 @@ MAIN_VIEWS = dict(
     RepresentationFile=(IDENTITY + ['of_representation']),
     Requirement=(IDENTITY + ['owner', 'req_type', 'allocated_to_function',
                  'allocated_to_system', 'req_level', 'version',
-                 'version_sequence', 'iteration', 'validated', 'public',
-                 'frozen']),
+                 'version_sequence', 'iteration', 'validated', 'public'
+                 ]),
     RoleAssignment=['assigned_role', 'assigned_to', 'role_assignment_context'],
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
     )
@@ -281,6 +281,7 @@ PGXN_HIDE = list(ONE2M.keys()) + list(M2M.keys())
 # the object editor
 PGXN_MASK = dict(
     DataElementDefinition=(PGXN_HIDE + ['owner']),
+    HardwareProduct=(PGXN_HIDE + ['frozen']),
     ParameterDefinition=(PGXN_HIDE + ['base_parameters', 'computed_by_default',
                          'generating_function', 'used_in_disciplines']),
     Requirement=(PGXN_HIDE + ['components', 'derived_from', 'fsc_code',

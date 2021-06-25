@@ -1,28 +1,18 @@
 # PANGALACTIC DEVELOPER NOTES
 
-## Concept of Master Model
-
-* The concept of the **Master Model** is to unify the management of all
-  ontology/db objects that combine to represent the full set of information
-  that is shared (and therefore needs to be synchronized) among the
-  discipline/domain-specific models and views of a product.  These include
-  **Product** (and its subclasses), **Acu**, **Port**, **Flow**,
-  **ProductType**, **ParameterDefinition**, **ParameterContext** and the
-  parameter data structures.
-
-  Specifically, this is needed to deal with computed product parameters (and
-  related Requirements) that may be assigned to Ports, Flows, etc. -- this will
-  require some kind of "Product Definition" or "Master Model" semantic, to
-  manage the total configuration of a product and keep it in sync.
-
 ## Structure of the `pangalactic` Namespace Packages
 
 ### `core`: base pangalactic package: ontology, registry, orb, reference data
-  - `ontology ... pgef.owl [file in OWL format]`
-  - `test ....... unit tests`
-    + `data ..... test data files`
-    + `vault .... test data files [copied to app_home/vault]`
-  - `utils ...... general utility modules`
+  - `access.py ............ computes user permissions for objects`
+  - `datastructures.py .... some custom data structures`
+  - `entity.py ............ a data object for a collaborative spreadsheet`
+  - `kb.py ................ "knowledgebase" api: OWL ontology import/export`
+  - `log.py ............... loggers, used by the "orb"`
+  - `ontology ............. pgef.owl [file in OWL format]`
+  - `test ................. unit tests`
+    + `data ............... test data files`
+    + `vault .............. test data files [copied to app_home/vault]`
+  - `utils ................ general utility modules`
 
 ### `node`: GUI client package
   - `cad ........ CAD modules`
