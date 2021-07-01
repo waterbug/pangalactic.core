@@ -315,17 +315,6 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/derived_from -->
-
-    <owl:ObjectProperty rdf:about="&pgef;derived_from">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The Product from which another Product is derived. This will usually mean the derived Product was created by copying and modifying the original Product.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Product"/>
-        <rdfs:range rdf:resource="&pgef;Product"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/port_type-->
 
     <owl:ObjectProperty rdf:about="&pgef;port_type">
@@ -2243,7 +2232,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/Activity -->
 
     <owl:Class rdf:about="&pgef;Activity">
-        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A named, structured procedural concept which is realized and applied systematically to achieve an objective.</rdfs:comment>
     </owl:Class>
 
