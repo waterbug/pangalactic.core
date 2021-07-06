@@ -361,6 +361,26 @@ def get_ra_name(ra_context_id, role_id, fname, mi, lname):
     else:
         return ': '.join([role_id, ' '.join([lname, fname, mi])])
 
+def get_acr_id(comp_act_id, sub_act_role):
+    """
+    Create an 'id' for a new ActCompRel.
+
+    Args:
+        comp_act_id:  the 'id' of the composite activity (Activity)
+        sub_act_role:  the sub_activity_role
+    """
+    return comp_act_id + '-' + '-'.join(sub_act_role.split(' '))
+
+def get_acr_name(comp_act_name, sub_act_role):
+    """
+    Create a 'name' for a new ActCompRel.
+
+    Args:
+        comp_act_name:  the 'name' of the composite activity (Activity)
+        sub_act_role:  the sub_activity_role
+    """
+    return comp_act_name + '-' + '-'.join(sub_act_role.split(' '))
+
 def get_acu_id(assembly_id, ref_des):
     """
     Create an 'id' for a new Acu.

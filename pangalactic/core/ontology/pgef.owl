@@ -98,9 +98,9 @@
 
     <owl:ObjectProperty rdf:about="&pgef;q_assembly">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The assembly to which a quantified assembly component usage (Qacu) points.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The assembled product to which a quantified assembly component usage (Qacu) points.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Qacu"/>
-        <rdfs:range rdf:resource="&pgef;ContinuousProduct"/>
+        <rdfs:range rdf:resource="&pgef;Product"/>
     </owl:ObjectProperty>
 
 
@@ -109,8 +109,8 @@
 
     <owl:ObjectProperty rdf:about="&pgef;q_components">
         <owl:inverseOf rdf:resource="&pgef;q_assembly"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The slots or roles (quantified assembly component usages [Qacu]) of the products used to assemble this product.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ContinuousProduct"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The slots or roles (quantified assembly component usages [Qacu]) of the continuous products used to assemble this product.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
         <rdfs:range rdf:resource="&pgef;Qacu"/>
     </owl:ObjectProperty>
 
@@ -652,6 +652,61 @@
         <rdfs:comment rdf:datatype="&xsd;string">The Product or system of which this is an Activity.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Activity"/>
         <rdfs:range rdf:resource="&pgef;Product"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/activities -->
+
+    <owl:ObjectProperty rdf:about="&pgef;activities">
+        <owl:inverseOf rdf:resource="&pgef;activity_of"/>
+        <rdfs:comment rdf:datatype="&xsd;string">All Activities of a Product.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&pgef;Activity"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/composite_activity -->
+
+    <owl:ObjectProperty rdf:about="&pgef;composite_activity">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The composite activity in an Activity Composition Relationship (ActCompRel).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ActCompRel"/>
+        <rdfs:range rdf:resource="&pgef;Activity"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/sub_activities -->
+
+    <owl:ObjectProperty rdf:about="&pgef;sub_activities">
+        <owl:inverseOf rdf:resource="&pgef;composite_activity"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The activities into which a composite activity can be decomposed.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Activity"/>
+        <rdfs:range rdf:resource="&pgef;ActCompRel"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/sub_activity -->
+
+    <owl:ObjectProperty rdf:about="&pgef;sub_activity">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The constituent activity in an Activity Composition Relationship (ActCompRel).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ActCompRel"/>
+        <rdfs:range rdf:resource="&pgef;Activity"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/where_occurs -->
+
+    <owl:ObjectProperty rdf:about="&pgef;where_occurs">
+        <owl:inverseOf rdf:resource="&pgef;sub_activity"/>
+        <rdfs:comment rdf:datatype="&xsd;string">All composite activities in which this activity occurs.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Activity"/>
+        <rdfs:range rdf:resource="&pgef;ActCompRel"/>
     </owl:ObjectProperty>
 
 
@@ -1750,6 +1805,17 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
+    <!-- http://pangalactic.us/pgef/sub_activity_role -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;sub_activity_role">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The sub-activity role is the role of an activity within the context of a composite Activity in which it occurs.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ActCompRel"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/representation_purpose -->
 
     <owl:DatatypeProperty rdf:about="&pgef;representation_purpose">
@@ -1983,6 +2049,15 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <owl:Class rdf:about="&pgef;Qacu">
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">The Qacu (quantified assembly constituent usage) is the relationship between a continuous product (the constituent) and an assembled product (the assembly) of which it is a constituent; a Qacu is a many-to-many relationship in that an assembly may contain multiple continuous products, and any given product may be a constituent in many assemblies.</rdfs:comment>
+    </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/ActCompRel -->
+
+    <owl:Class rdf:about="&pgef;ActCompRel">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The ActCompRel (Activity Composition Relationship) is the relationship between a composite Activity and one of the constituent activities into which it can be decomposed; a ActCompRel is a many-to-many relationship in that a composite Activity may be composed of multiple sub-activities, and any given Activity may occur in multiple composite Activities.</rdfs:comment>
     </owl:Class>
 
 
@@ -2247,15 +2322,6 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
 
 
-    <!-- http://pangalactic.us/pgef/Mission -->
-
-    <owl:Class rdf:about="&pgef;Mission">
-        <rdfs:subClassOf rdf:resource="&pgef;Activity"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A Mission is an activity which is defined by a project, takes place in an environment, and is accomplished by means of a collection of systems.</rdfs:comment>
-    </owl:Class>
-
-
-
     <!-- http://pangalactic.us/pgef/Flow -->
 
     <owl:Class rdf:about="&pgef;Flow">
@@ -2394,7 +2460,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
     <owl:Class rdf:about="&pgef;Mission">
         <rdfs:subClassOf rdf:resource="&pgef;Activity"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A Mission is a type of activity undertaken to accomplish a specified goal.  It will typically be decomposed into a set of phases for which the Mission concept of operations specification will associate sets of parameter values with the states of the physical systems and components used to accomplish the Mission goal.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">A Mission is an activity which is defined by a project and is accomplished by means of a collection of systems.  It will typically be decomposed into a set of phases for which the Mission concept of operations specification will associate sets of parameter values with the states of the physical systems and components used to accomplish the Mission goal.</rdfs:comment>
     </owl:Class>
 
 

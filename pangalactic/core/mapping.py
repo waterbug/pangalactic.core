@@ -22,6 +22,13 @@ Examples of schema mods that require a conversion function include:
                functions they require
 """
 # NOTES:
+# version 2.0.0:
+#   * mods:
+#     - Activity was subclass of DigitalProduct; now subclass of Modelable
+#     - Activity previously used Acu to create "composite activities"; it now
+#       uses a new class, ActCompRel (Activity Composition Relationship)
+#   * reason:
+#     These changes fix a sqlalchemy warning related to Activity
 # version 1.5.0:
 #   * mods:
 #     - Actor was subclass of ManagedObject; now subclass of Identifiable
@@ -32,9 +39,9 @@ Examples of schema mods that require a conversion function include:
 #     eliminated.  As a result of these mods, Actor and Person objects do not
 #     have a 'creator' or 'modifier' attribute, but that is not a problem
 #     because they will always be created by a global admin.
-schema_mods = ['1.0.4', '1.5.0']
+schema_mods = ['1.0.4', '1.5.0', '2.0.0']
 
-schema_version = '1.5.0'
+schema_version = '2.0.0'
 
 
 def to_x_x_x(sos):
@@ -47,6 +54,28 @@ def to_x_x_x(sos):
     for so in sos:
         pass
 
+
+def to_2_0_0(sos):
+    """
+    Convert any serialized Acu objects that reference Activity instances to
+    serialized ActCompRel objects.
+
+    Args:
+        sos (list):  serialized objects to be transformed
+    """
+    by_oids = {so.get('oid') : so for so in sos}
+    for so in sos:
+        if (so.get('_cname') == 'Acu' and
+            so.get('assembly') in by_oids and
+            by_oids[so.get('assembly')].get('_cname') in ['Activity',
+            'Mission']):
+            so['_cname'] = 'ActCompRel'
+            so['composite_activity'] = so['assembly']
+            so['sub_activity'] = so['component']
+            so['sub_activity_role'] = so['reference_designator']
+            del so['assembly']
+            del so['component']
+
 # `schema_maps` dictionary maps versions to conversion functions
-schema_maps = {}
+schema_maps = {'2.0.0': to_2_0_0}
 

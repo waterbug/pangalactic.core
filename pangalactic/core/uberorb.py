@@ -1681,9 +1681,11 @@ class UberORB(object):
         if not project:
             self.log.debug('  - no project provided -- returning empty list.')
             return []
+        if not isinstance(project, orb.classes['Project']):
+            self.log.debug('  - object provided is not a Project.')
+            return []
         objs = self.search_exact(owner=project)
-        psus = self.search_exact(cname='ProjectSystemUsage',
-                                 project=project)
+        psus = project.systems
         if psus:
             objs += psus
             systems = [psu.system for psu in psus]
@@ -1703,6 +1705,12 @@ class UberORB(object):
                 self.log.debug('  - {} assemblies found'.format(
                                len(assemblies)))
             objs += assemblies
+            # get Missions and Activities related to project systems
+            activities = [system.activities for system in systems]
+            if activities:
+                self.log.debug('  - {} Mission(s)/Activities found'.format(
+                               len(activities)))
+            objs += activities
         else:
             self.log.debug('  - no project-level systems found')
         objs.append(project)
@@ -1738,13 +1746,6 @@ class UberORB(object):
                     prs = reqt.computable_form.correlates_parameters
                     if prs:
                         objs += prs
-        # also get Mission, if any, and its components (Acus) -- Activities
-        # within the project are already included, since their "owner" is the
-        # project ...
-        mission = self.select('Mission', owner=project)
-        if mission:
-            objs.append(mission)
-            objs += mission.components  # Acus
         # include all ports and flows relevant to products
         for obj in objs:
             if isinstance(obj, self.classes['Product']):

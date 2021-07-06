@@ -146,8 +146,17 @@ PGXN_ADMIN_MENU = [
 #                       'range'  : m2m relationship join class name},
 #            ...}
 M2M = {
+       # *** M2M:  ActCompRel (Activity Composition Relationship)
+       # inverse of 'composite_activity'
+       'sub_activities' :       {'domain' : 'Activity',
+                                 'range'  : 'ActCompRel'},
+       # inverse of 'sub_activity'
+       # complementary to 'sub_activities'
+       'where_occurs' :         {'domain' : 'Activity',
+                                 'range'  : 'ActCompRel'},
+
        # *** M2M:  Acu (Assembly Component Usage)
-       # inverse of 'assembly'
+       # inverse of ''
        'components' :           {'domain' : 'Product',
                                  'range'  : 'Acu'},
        # inverse of 'component'

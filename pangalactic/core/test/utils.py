@@ -190,10 +190,11 @@ def create_test_project():
             name_code='H2G2'),
         dict(
             _cname='Mission', oid='test:Mission.H2G2',
-            id='h2g2_mission', id_ns='test', owner='H2G2',
+            id='h2g2_mission', id_ns='test',
+            activity_of='test:spacecraft0',
             creator='test:steve', modifier='test:steve',
             create_datetime=NOW, mod_datetime=NOW,
-            public=True, name='Hitchhike the Galaxy'),
+            name='Hitchhike the Galaxy'),
         dict(
             _cname='RoleAssignment',
             creator='pgefobjects:admin', modifier='pgefobjects:admin',
