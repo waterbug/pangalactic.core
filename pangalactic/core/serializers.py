@@ -21,7 +21,8 @@ from pangalactic.core.parametrics import (add_parameter,
 
 
 def serialize(orb, objs, view=None, include_components=False,
-              include_refdata=False, include_inverse_attrs=False):
+              include_sub_activities=False, include_refdata=False,
+              include_inverse_attrs=False):
     """
     Args:
         orb (UberORB): the (singleton) `orb` instance
@@ -181,6 +182,14 @@ def serialize(orb, objs, view=None, include_components=False,
             scomps = serialize(orb, [acu.component
                                      for acu in obj.components])
             serialized += scomps
+        # 'include_sub_activities' only applies to Activities ... and only
+        # "direct sub_activities" will be included (not recursive)
+        if include_sub_activities and getattr(obj, 'sub_activities', None):
+            ser_acrs = serialize(orb, obj.sub_activities)
+            serialized += ser_acrs
+            ser_acts = serialize(orb, [acr.sub_activity
+                                       for acr in obj.sub_activities])
+            serialized += ser_acts
         ###################################################################
         # NOTE:  Ports and Flows need to be part of a "product definition"
         # abstraction -- i.e., the "white box" model of the product
