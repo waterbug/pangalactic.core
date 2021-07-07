@@ -522,13 +522,13 @@ class PanGalacticRegistry(object):
                         if related_cname == cname:
                             # self-referential -> need a 'remote_side' arg
                             rel = relationship(related_cname,
-                                               foreign_keys=[fk_col],
+                                               foreign_keys=fk_col,
                                                remote_side=[class_dict['oid']],
                                                back_populates=has_inverse[0],
                                                post_update=True)
                         else:
                             rel = relationship(related_cname,
-                                               foreign_keys=[fk_col],
+                                               foreign_keys=fk_col,
                                                back_populates=has_inverse[0],
                                                post_update=True)
                     else:
@@ -537,11 +537,11 @@ class PanGalacticRegistry(object):
                             # self-referential -> need a 'remote_side' arg
                             rel = relationship(related_cname,
                                                remote_side=[class_dict['oid']],
-                                               foreign_keys=[fk_col],
+                                               foreign_keys=fk_col,
                                                post_update=True)
                         else:
                             rel = relationship(related_cname,
-                                               foreign_keys=[fk_col],
+                                               foreign_keys=fk_col,
                                                post_update=True)
                     class_dict[field_name] = rel
                 # TODO:  deal with non-functional properties (collections) --
