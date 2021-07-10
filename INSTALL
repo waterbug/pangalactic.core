@@ -8,8 +8,13 @@ Platform Notes
   OS for which its dependencies can be installed; it has been tested on Windows
   10, Linux (mainly Ubuntu), and OSX.
 
-* The Virtual Galactic Engineering Repository (``vger``) server is only
-  supported on Linux.
+* The Virtual Galactic Engineering Repository (``vger.py``) server is only
+  supported on Linux.  For details on installing and running the server, either
+  using Docker or standalone, see the ``pangalactic.vger`` package --
+  specifically, the README files:
+
+    - ``pangalactic.vger/README``
+    - ``pangalactic.vger/docker/README``
 
 -------------------------------------------------------------------------------
 

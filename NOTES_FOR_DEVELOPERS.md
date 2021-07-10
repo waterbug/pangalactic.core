@@ -22,8 +22,9 @@
   - `test ....... GUI test client`
 
 ### `vger`: network repository service
-  - `vger ........ repository service interface`
-  - `userdir ..... LDAP directory search interface`
+  - `vger.py ........ repository service module`
+  - `userdir.py ..... LDAP directory search interface`
+  - `transform.py ... data migration script (for schema changes)`
 
 ## Contents of App Home Directory (`[app]_home`) created at start-up
 

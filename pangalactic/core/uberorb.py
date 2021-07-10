@@ -1879,13 +1879,32 @@ class UberORB(object):
                     new_owner = obj.parent_organization or pgana
                     for owned_obj in obj.owned_objects:
                         owned_obj.owner = new_owner
+            elif isinstance(obj, self.classes['Activity']):
+                self.log.debug('   - checking for sub-activity rels ...')
+                if obj.where_occurs:
+                    # delete all ActCompRel with obj as sub_activity
+                    for acr in obj.where_occurs:
+                        self.db.delete(acr)
+                    self.db.commit()
+                    self.log.debug('    ... sub-activity rels deleted.')
+                else:
+                    self.log.debug('     no sub-activity rels found.')
+                self.log.debug('   - checking for composite-activity rels...')
+                if obj.sub_activities:
+                    # delete all ActCompRel with obj as composite_activity
+                    for acr in obj.sub_activities:
+                        self.db.delete(acr)
+                    self.db.commit()
+                    self.log.debug('    ... composite activity rels deleted.')
+                else:
+                    self.log.debug('     no composite activity rels found.')
             elif isinstance(obj, (self.classes['Acu'],
                                   self.classes['ProjectSystemUsage'])):
                 # check for and delete any Flows to/from its component/system
                 # in the context of its assembly/project
                 self.log.debug('   - orb checking for flows ...')
                 flows = self.get_all_usage_flows(obj)
-                # *** NOTE: CAUTION! Acu should not be deleted if flows exist!
+                # *** NOTE: CAUTION! Flows must be deleted before the Acu!
                 if flows:
                     n = len(flows)
                     self.log.debug(f'     deleting {n} flows ...')
