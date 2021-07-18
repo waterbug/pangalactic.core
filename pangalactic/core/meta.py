@@ -80,8 +80,8 @@ PGXN_VIEWS = dict(
           'req_tolerance_type', 'req_tolerance_lower', 'req_tolerance_upper',
           'req_maximum_value', 'req_minimum_value', 'validated',
           'verification_method'],
-    narrative=['comment', 'rationale', 'purpose', 'req_epilog',
-               'req_min_max_phrase', 'req_shall_phrase', 'req_subject'],
+    narrative=['comment', 'rationale', 'purpose', 'req_subject',
+               'req_predicate', 'req_object'],
     admin=['oid', 'url', 'creator', 'create_datetime', 'modifier',
            'mod_datetime'])
 

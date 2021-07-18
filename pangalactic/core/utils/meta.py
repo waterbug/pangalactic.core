@@ -403,6 +403,46 @@ def get_acu_name(assembly_name, ref_des):
     """
     return assembly_name + ' : ' + ref_des
 
+def get_rel_id(context_id, role_id):
+    """
+    Create an 'id' for a new Relation.
+
+    Args:
+        context_id (str):  the 'id' of related context (a Requirement, e.g.)
+        role_id (str):  the role of the Relation in the specified context
+    """
+    return context_id + '-' + role_id + '-relation'
+
+def get_rel_name(context_name, role_name):
+    """
+    Create a name for a new Relation.
+
+    Args:
+        context_name (str):  the name of related context (a Requirement, e.g.)
+        role_name (str):  its role name in the specified context
+    """
+    return context_name + ' ' + role_name + ' Relation'
+
+def get_parm_rel_id(rel_id, pid):
+    """
+    Create an 'id' for a new ParameterRelation.
+
+    Args:
+        rel_id (str):  the 'id' of related Relation
+        pid (str):  the parameter id of the related ParameterDefinition
+    """
+    return rel_id + '-' + pid + '-parm-rel'
+
+def get_parm_rel_name(rel_name, pname):
+    """
+    Create a name for a new ParameterRelation.
+
+    Args:
+        rel_name (str):  the name of related Relation
+        pname (str):  the parameter name of the related ParameterDefinition
+    """
+    return rel_name + ' ' + pname + ' Parameter Relation'
+
 def get_next_port_seq(obj, port_type):
     """
     Get the next sequence number for an object and a type of port.
