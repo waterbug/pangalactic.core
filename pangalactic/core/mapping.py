@@ -55,7 +55,7 @@ Examples of schema mods that require a conversion function include:
 #     have a 'creator' or 'modifier' attribute, but that is not a problem
 #     because they will always be created by a global admin.
 
-from copy import deep_copy
+from copy import deepcopy
 
 schema_mods = ['1.0.4', '1.5.0', '2.0.0']
 
@@ -91,7 +91,7 @@ def to_2_0_0(sos):
             so.get('assembly') in by_oids and
             by_oids[so.get('assembly')].get('_cname') in ['Activity',
             'Mission']):
-            new_so = deep_copy(so)
+            new_so = deepcopy(so)
             new_so['_cname'] = 'ActCompRel'
             new_so['composite_activity'] = new_so['assembly']
             new_so['sub_activity'] = new_so['component']
