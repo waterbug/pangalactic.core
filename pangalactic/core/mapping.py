@@ -78,8 +78,9 @@ def to_x_x_x(sos):
 def to_2_0_0(sos):
     """
     Convert any serialized Acu objects that reference Activity instances to
-    serialized ActCompRel objects.  Remove any Requirement, Relation, and
-    ParameterRelation objects.
+    serialized ActCompRel objects.  Requirement, Relation, and
+    ParameterRelation objects can be retained as is, since deserialization will
+    ignore the deprecated attributes.
 
     Args:
         sos (list):  serialized objects to be transformed
@@ -99,11 +100,6 @@ def to_2_0_0(sos):
             del new_so['assembly']
             del new_so['component']
             new_sos.append(new_so)
-        elif so.get('_cname') in ['Requirement', 'Relation',
-                                  'ParameterRelation']:
-            # do not include Requirement, Relation, and ParameterRelation
-            # objects in output
-            continue
         else:
             new_sos.append(so)
     return new_sos
