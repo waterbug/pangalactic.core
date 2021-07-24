@@ -2295,7 +2295,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
     <owl:Class rdf:about="&pgef;ActivityType">
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The type of an Activity.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of an Activity.  Reference examples are "Operation", "Event", "Cycle", "Mode".  Note that "Mode" is considered to be synonymous with "State".</rdfs:comment>
     </owl:Class>
 
 
@@ -2441,14 +2441,6 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
         <rdfs:comment rdf:datatype="&xsd;string">A Mission is an activity which is defined by a project and is accomplished by means of a collection of systems.  It will typically be decomposed into a set of phases for which the Mission concept of operations specification will associate sets of parameter values with the states of the physical systems and components used to accomplish the Mission goal.</rdfs:comment>
     </owl:Class>
 
-
-
-    <!-- http://pangalactic.us/pgef/State -->
-
-    <owl:Class rdf:about="&pgef;State">
-        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A significant condition or phase in the life of a system (SysML: State, in the context of SysML State Machine).</rdfs:comment>
-    </owl:Class>
 
 
     <!-- http://pangalactic.us/pgef/Test -->

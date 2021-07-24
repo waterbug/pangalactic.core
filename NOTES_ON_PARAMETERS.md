@@ -11,6 +11,7 @@
   parameters that are created from that ParameterDefinition.  (The `id` of the
   created parameter is only unique within its parent object's namespace.)
   -----------------------------------------------------------------------------
+
   - In Pangalactic, parameters can only be assigned to instances of "Modelable"
     and its subclasses
     + this cannot be enforced by normal python class management, since
@@ -39,6 +40,7 @@
       (equation) [a la Modelica)
 
 ## Parameter "Families" and Identifier Structure
+
   - When creating a new 'Parameter Instance', the ParameterDefinition is used
     as a template from which metadata is copied into the Parameter Instance's
     data structure in the `parameterz` dictionary (see below), in the format:
@@ -74,8 +76,6 @@
 
   - so they can be used in perf. requirements and in ConOps
     + Use parametric diagram to specify formula (Relation) for reqt.
-
-
 
 ## Internal Storage Format
 
@@ -114,7 +114,6 @@
     + `parameterz` is recomputed whenever a parameter value is saved;
     + `parameterz` is written to parameters.json at shutdown.
 
-
 ## Future Parameter Performance and Scalability Considerations
 
 The average size of the representation of parameters (a python dictionary with
@@ -145,7 +144,6 @@ Both size and performance can be optimized further by ...
 * writing a parameter-handling module using Cython (which generates a C extension
 module from python code).
 
-
 ## ParameterDefinition Objects
 
   - oid, id, etc. (Identifiable)
@@ -165,8 +163,6 @@ module from python code).
     -> m2m relationship between Discipline and ParameterDefinition
     i.e., "Parameter (Definitions) used in this Discipline" --
     this relationship is basically a convenience thing.
-
-----------------------------------------------------------------------------------
 
 ## Parameter Definition Editor / Wizard
 
@@ -200,9 +196,7 @@ Simple models (e.g. Electrical Resistor might just have:
   - General
   - Modifiers ("Add new modifiers" [free form])
 
-----------------------------------------------------------------------------------
-
-## Computer Science-y Stuff
+## Information Modeling and Implementation Considerations
 
 * Ontological Properties vs. Parameters
 
@@ -223,6 +217,7 @@ Simple models (e.g. Electrical Resistor might just have:
     + measured values (test or evaluation context)
 
 * Problems addressed/avoided by Parameter architecture:
+
   - Need ontology/db structures to be standardized asap,
     but engineers need freedom and flexibility to create
     + Product types (ProductType)

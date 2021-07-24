@@ -1170,6 +1170,16 @@ core = [
     'mod_datetime': epoch
     },
 
+{   '_cname': 'ActivityType',
+    'oid': 'pgefobjects:ActivityType.Mode',
+    'id': 'mode',
+    'id_ns': 'pgef',
+    'name': 'Mode',
+    'abbreviation': 'Mode',
+    'create_datetime': '2021-07-23 00:00:00',
+    'mod_datetime': '2021-07-23 00:00:00',
+    },
+
 {   '_cname': 'Product',
     'oid': 'pgefobjects:TBD',
     'id': 'TBD',

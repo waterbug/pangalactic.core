@@ -8,32 +8,29 @@ DONE = [+]
 [+]     + NTE: Not To Exceed (max. allowed value)
 [+]     + Margin: (NTE - MEV) / NTE
 [+]   - "descriptive" contexts:
+[+]     + Average
 [+]     + CBE (Current Best Estimate
 [+]     + Contingency:  % tolerance for CBE (represents uncertainty)
 [+]     + MEV (Maximum Estimated Value) = CBE * (1 + Contingency)
-[+] 2.  Add State objects to reference data for:
-[+]   - Peak
-[+]   - Quiescent
-[+]   - Nominal
-[+]   - Launch
+[+]     + Nominal
+[+]     + Peak
+[+]     + Quiescent
+[+]     + RMS
 [+] 3.  Fix PgxnObject to display only base ("variable") parameters
 [+] 3.  New functions:  `get_parameter_context_oid(pcid)`,
         `get_state_oid(sid)`
 [+] 4.  Fix Contexts:  need to specify variables a generating fn supports
         (e.g., "get_assembly_parameter" works for m, P, R_D)
-[ ] 5.  Fix Dashboards:
-[ ]   - config will now have "variables" + "contexts" -- for example:
-        variables:  mass, Power, Data Rate
-        contexts:   CBE, MEV, Contingency, Margin
+[+] 5.  Fix Dashboards:
 [ ] 6.  Fix Reqts Wizard to use parameters / prescriptive contexts
 [ ] 7.  ADD MORE TESTS!!!!
 
 
 ## General notes on the new paradigm
 
-* New parameters are named as:  variable (state) [context]
-  ... where the "state" and "context" are used to define a "family" of
-  parameters related to the base "variable"
+* New parameters are named as:  variable [context]
+  ... where the "context" is used to define a "family" of parameters related to
+  the base "variable"
 
 * the new ParameterDefinition class:
   - only defines "base" parameters (a.k.a. "variables")
@@ -48,13 +45,12 @@ DONE = [+]
   a parameter's value in that context is derived (computed from other
   parameters and/or standard quantities)
 
-* State object (state.id is parameter 'state' attribute)
-  - is fully general (state machines etc.)
-  - a parameter 'state' can be a standard state or custom state
-  - standard states include 'Peak', 'Quiescent', 'Nominal', etc.
-  - custom states can be defined by ConOps (Activity Diagram) or state machine
-    states.
-  - State 'oid' is canonical:  pgef:State.[state.id]
+* "Mode"
+  - "Mode" is considered a synonym of "State"
+  - "Mode" is an ActivityType
+  - used in the MDL "Modes Table", which specifies the values of a parameter,
+    such as Power, for various operational states of a system, such as a
+    Spacecraft.
 
 * ParameterContext object (parameter 'context' attribute)
   - properties local to ParameterContext are:
