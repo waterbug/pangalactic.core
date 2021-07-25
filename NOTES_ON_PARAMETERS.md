@@ -14,24 +14,27 @@
 
   - In Pangalactic, parameters can only be assigned to instances of "Modelable"
     and its subclasses
+
     + this cannot be enforced by normal python class management, since
       parameters are not python attributes
     + it is enforced at the application level, e.g. by PgxnObject
+
   - The 'id' and 'oid' attributes of ParameterDefinition have a special
-    relationship (also true for State and Context objects):
+    relationship (also true for ParameterContext objects):
+
     + a ParameterDefinition's oid is **always**:
         'pgef:ParameterDefinition.[id]'
     + using the 'pgef:' namespace prefix here allows for other
       namespaces of parameters, but that is not supported (yet)
+
   - a parameter can be thought of as an "instantiation" of a
     ParameterDefinition (in other words, the ParameterDefinition can be
     regarded as a kind of template for parameters)
-  - NOTE:  all parameter metadata are READ-ONLY except `computed` **
-    + ** there are not yet any application functions that can define the
-      `generating_function` for a parameter whose `computed` value is set to
-      True at runtime
-    + the parameter's `value` is only writable if `computed` is False)
+
+  - a parameter's value is only editable if `computed` is False
+
   - FUTURE PLAN:  a parameter can be "specified", "computed", "correlated"
+
     + specified:  "fixed" (within the context)
     + computed:  generated from an opaque function (`generating_function`) or
       derived from other properties within the context (e.g. volume = l*w*h,
@@ -39,50 +42,43 @@
     + correlated:  related to other properties by some mathematical model
       (equation) [a la Modelica)
 
-## Parameter "Families" and Identifier Structure
+## Parameter Identifier Structure
 
-  - When creating a new 'Parameter Instance', the ParameterDefinition is used
-    as a template from which metadata is copied into the Parameter Instance's
-    data structure in the `parameterz` dictionary (see below), in the format:
+  - When creating a new parameter instance, its 'id' is taken from its
+    ParameterDefinition.
 
-    [id] : {
-            "base_parameters":,
-            "computed":,
-            "description":"",
-            "dimensions":"",
-            "generating_function":,
-            "mod_datetime":,
-            "name":[name],
-            "range_datatype":,
-            "units":[units],
-            "value":[value]
-            }
+  - Parameter 'id' (pid) structure: 'id[context id]'
 
-  - Identifier structure
-    + first segment is `variable_name` (e.g. 'P' for electrical power)
-    + second segment (subscript) is "state" (id of related State object)
-      * generic states:  'Average', 'Peak', 'Quiescent', etc.
-      * custom states:  'Safe Hold', 'Slew', 'Data Transmit', etc.
-    + third segment (parens) is "context" (id of ParameterContext object)
-      * descriptive:  'CBE', 'MEV', 'Contingency'
-      * prescriptive: 'NTE', 'target', 'upper_tol', 'lower_tol', etc.
-    + there is no 4th segment!
+  - Parameters are stored in the `parameterz` dictionary (see below)
+    in the format:
+
+        {pid : value,
+         ...}
 
   - Filtering parameters via context:
-    + "specification" contexts: no suffix, "CBE", "total", ...
-      used in component or subsystem specifications
-    + "systems" contexts: "ctgcy", "NTE", "MEV", ...
+    + "descriptive" contexts: "CBE", "Ctgcy", "MEV", ...
+      used in component / subsystem specifications
+    + "prescriptive" contexts: "NTE", "Margin" ...
       used in managing requirements and evolving system designs
 
-  - so they can be used in perf. requirements and in ConOps
-    + Use parametric diagram to specify formula (Relation) for reqt.
+## Parameter Functions
 
-## Internal Storage Format
+  - Parameter functions can be either discrete or continuous
+
+  - Continuous functions can be specified using a Relation object -- the
+    mechanism for this has not yet been implemented, but Relation objects are
+    used in the definition of performance requirements in PGEF.
+
+  - Discrete functions are represented in tabular data format.  The initial use
+    case for discrete functions is "Mode Tables", which specify the values of a
+    variable (such as Electrical Power consumption) in a set of specified
+    "Modes" (aka states) of a system and its subsystems.
+
+## Parameter Cache: the `parameterz` dictionary
 
   - parameter values are stored as pure floating point numbers that are
-    interpreted as quantities in mks base units
-
-## Parameter Cache: `parameterz`
+    interpreted as quantities in mks base units or other base units, as
+    specified in the p.core.units.in_si module
 
   - getting and setting cached parameter values
 
@@ -91,12 +87,7 @@
     + `get_pval(orb, obj, parameter_id, allow_nan=False)`
     + `set_pval(orb, obj, parameter_id, val, local=True)`
       (when setting a value received from a remote source, use `local=False`)
-    + `value` must be of the correct datatype, as specified by
-      `range_datatype`
-    + sets the parameter's `mod_datetime`
-    + ... dispatches `modified parameter` signal
-    + which, if online, publishes `set_parameter` message to instantly update
-      remote instances of the object/parameter
+    + `value` must be of the correct datatype, as specified by `range_datatype`
 
   - refreshing the cache (recomputing computed parameters)
     + `orb.recompute_parms()`
@@ -164,11 +155,10 @@ module from python code).
     i.e., "Parameter (Definitions) used in this Discipline" --
     this relationship is basically a convenience thing.
 
-## Parameter Definition Editor / Wizard
+## Data Element Definition Editor / Wizard
 
   - identifier
     + compare to existing identifiers to ensure uniqueness
-    + compare to existing PDs by dimensions to ensure it is not a synomym
 
   - selection lists (configurable)
     + datatypes  (float, integer, string, boolean, etc.)
@@ -216,7 +206,7 @@ Simple models (e.g. Electrical Resistor might just have:
     + specified values (specification context)
     + measured values (test or evaluation context)
 
-* Problems addressed/avoided by Parameter architecture:
+* Problems addressed/avoided by the PGEF parameter architecture:
 
   - Need ontology/db structures to be standardized asap,
     but engineers need freedom and flexibility to create
