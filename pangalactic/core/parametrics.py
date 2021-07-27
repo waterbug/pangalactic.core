@@ -1119,9 +1119,11 @@ def compute_mev(oid, variable):
             ctgcy_val = round_to(ctgcy_val, n=3)
         else:
             # log.debug('  contingency not set --')
-            # log.debug('  setting default value (30%) ...')
-            # if Contingency value is 0 or not set, set to default value of 30%
-            ctgcy_val = 0.3
+            # log.debug('  setting to default value (25%) ...')
+            # if Contingency value is 0 or not set, set to default value of 25%
+            # [SCW 2021-07-27] Default value changed to 25% (previously 30%)
+            # per NASA Gold Rules, etc.
+            ctgcy_val = 0.25
             pid = variable + '[Ctgcy]'
             parameterz[oid][pid] = ctgcy_val
         factor = ctgcy_val + 1.0

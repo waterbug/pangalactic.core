@@ -44,6 +44,7 @@ in_si = OrderedDict([
     ('money', '$'),                         # dollar
     ('percent', '%'),                       # .01 * value
     ('power', 'W'),                         # watt
+    ('power gain (antenna)', 'dBi'),        # dBi (decibels-isotropic)
     ('pressure', 'Pa'),                     # pascal
     ('radiation', 'rads'),                  # rads -- not 'rad' (== 'radian')
     ('substance', 'mol'),                   # moles
@@ -82,6 +83,7 @@ alt_units = OrderedDict([
     ('money', ['$']),                         # dollar
     ('substance', ['mol', 'nmol', 'mmol']),
     ('power', ['W', 'kW', 'MW', 'GW', 'TW', 'mW', 'uW', 'nW', 'pW']),
+    ('power gain (antenna)', ['dBi']),
     ('pressure', ['Pa', 'kPa', 'mPa', 'uPa', 'atm', 'psi']),
     ('radiation', ['rads', 'krads', 'Mrads', 'mrads', 'gray']),
     ('temperature', ['K', 'degC', 'degF']),

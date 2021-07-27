@@ -1079,13 +1079,13 @@ def write_entity_xlsx(entity, sheet, level_fmts, name_fmts, data_fmts,
     mcbe = entity.get('m_cbe', '')
     # fix_ctgcy(): because Excel doesn't like space between the number and "%"
     # NOTE: this make ctgcy a str, unlike the other columns!
-    ctgcy_m = fix_ctgcy(str(entity.get('m_ctgcy', 30.0)))
+    ctgcy_m = fix_ctgcy(str(entity.get('m_ctgcy', 25.0)))
     # print(f' * ctgcy_m: {ctgcy_m}')
     mmev = entity.get('m_mev', '')
     pcbe = entity.get('nom_p_cbe', '')
     # fix_ctgcy(): because Excel doesn't like space between the number and "%"
     # NOTE: this make ctgcy a str, unlike the other columns!
-    ctgcy_P = fix_ctgcy(str(entity.get('nom_p_ctgcy', 30.0)))
+    ctgcy_P = fix_ctgcy(str(entity.get('nom_p_ctgcy', 25.0)))
     pmev = entity.get('nom_p_mev', '')
     cost = entity.get('Cost', '')
 
