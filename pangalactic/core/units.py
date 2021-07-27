@@ -29,6 +29,8 @@ in_si = OrderedDict([
     ('capacitance', 'F'),                   # farad
     ('charge', 'C'),                        # coulomb
     ('data', 'bit'),                        # bit
+    ('decibels-isotropic', 'dBi'),          # dBi (decibels-isotropic)
+    ('decibels', 'dB'),                     # dB (decibels)
     ('electrical current', 'A'),            # ampere
     ('electrical potential', 'V'),          # volt
     ('electrical resistance', 'Ohm'),       # ohm
@@ -44,7 +46,6 @@ in_si = OrderedDict([
     ('money', '$'),                         # dollar
     ('percent', '%'),                       # .01 * value
     ('power', 'W'),                         # watt
-    ('power gain (antenna)', 'dBi'),        # dBi (decibels-isotropic)
     ('pressure', 'Pa'),                     # pascal
     ('radiation', 'rads'),                  # rads -- not 'rad' (== 'radian')
     ('substance', 'mol'),                   # moles
@@ -66,6 +67,8 @@ alt_units = OrderedDict([
     ('charge', ['C', 'mC', 'uC', 'nC', 'pC']),
     ('data', ['bit', 'kbit', 'Mbit', 'Gbit', 'Tbit', 'kB', 'MB', 'GB', 'TB',
               'PB', 'EB']),
+    ('decibels-isotropic', ['dBi']),   # antenna gain
+    ('decibels', ['dB']),              # amplifier gain
     ('electrical current', ['A', 'mA', 'uA', 'kA']),
     ('electrical potential', ['V', 'kV', 'mV', 'uV']),
     ('electrical resistance', ['Ohm', 'kOhm', 'MOhm', 'GOhm', 'mOhm', 'uOhm']),
@@ -83,7 +86,6 @@ alt_units = OrderedDict([
     ('money', ['$']),                         # dollar
     ('substance', ['mol', 'nmol', 'mmol']),
     ('power', ['W', 'kW', 'MW', 'GW', 'TW', 'mW', 'uW', 'nW', 'pW']),
-    ('power gain (antenna)', ['dBi']),
     ('pressure', ['Pa', 'kPa', 'mPa', 'uPa', 'atm', 'psi']),
     ('radiation', ['rads', 'krads', 'Mrads', 'mrads', 'gray']),
     ('temperature', ['K', 'degC', 'degF']),
