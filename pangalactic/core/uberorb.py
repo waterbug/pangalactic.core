@@ -41,7 +41,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           _compute_pval,
                                           compute_requirement_margin,
                                           data_elementz, de_defz,
-                                          get_dval, get_parameter_id,
+                                          get_parameter_id,
                                           load_data_elementz,
                                           save_data_elementz,
                                           load_parmz, save_parmz,
@@ -1233,7 +1233,7 @@ class UberORB(object):
         Update the `de_defz` cache when a new DataElementDefinition is created,
         modified, or deleted.
         """
-        self.log.debug('* rebuilding de_defz ...')
+        # self.log.debug('* rebuilding de_defz ...')
         de_defz = {}
         for de_def_obj in orb.get_by_type('DataElementDefinition'):
             de_defz[de_def_obj.id] = {
@@ -1242,7 +1242,7 @@ class UberORB(object):
                 'range_datatype': de_def_obj.range_datatype,
                 'label': de_def_obj.label or '',
                 'mod_datetime': str(dtstamp())}
-        self.log.debug('  done.')
+        # self.log.debug('  done.')
 
     def get(self, *oid, **kw):
         """
@@ -1364,7 +1364,7 @@ class UberORB(object):
             obj (HardwareProduct or Template):  obj for which to generate an
                 'id'
         """
-        self.log.debug('* gen_product_id')
+        # self.log.debug('* gen_product_id')
         if not isinstance(obj, (self.classes['HardwareProduct'],
                                 self.classes['Template'])):
             return ''
@@ -1379,12 +1379,7 @@ class UberORB(object):
         # self.log.debug('  current_id_parts: {}'.format(str(current_id_parts)))
         if current_id_parts[-1] in id_suffixes:
             id_suffixes.remove(current_id_parts[-1])
-        # if the 'Vendor' data element has a non-blank value, the owner id is
-        # set to 'Vendor'
-        if get_dval(obj.oid, 'Vendor'):
-            owner_id = 'Vendor'
-        else:
-            owner_id = getattr(obj.owner, 'id', 'Owner-Unknown')
+        owner_id = getattr(obj.owner, 'id', 'Owner-unspecified')
         # self.log.debug('  owner_id: {}'.format(owner_id))
         pt_abbr = getattr(obj.product_type, 'abbreviation', 'TBD') or 'TBD'
         # self.log.debug('  pt_abbr: {}'.format(pt_abbr))

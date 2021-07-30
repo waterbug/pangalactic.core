@@ -578,7 +578,6 @@ def add_parameter(oid, pid):
         return True
     pdz = parm_defz.get(pid)
     if not pdz:
-        print(f'* no definition for "{pid}" found in parm_defz.')
         return False
     range_datatype = pdz.get('range_datatype', 'float')
     p_defaults = state.get('p_defaults') or {}
@@ -593,45 +592,45 @@ def add_parameter(oid, pid):
 
 def add_default_parameters(obj, parms=None):
     """
-    Assign the specified, configured, or preferred default parameters to an
-    object.
+    Assign any specified, configured, or preferred default parameters that are
+    missing from an object.
 
     Args:
         obj (Identifiable):  the object to receive parameters
 
     Keyword Args:
-        parms (list):  list of parameter id's to add
+        parms (list):  (optional) list of parameter id's to add
     """
-    # log.debug('* adding default parameters to object "{}"'.format(
-                                                                # obj.id))
-    # Configured Parameters are currently defined by the 'dashboard'
-    # configuration (in future that may be augmented by Parameters
-    # referenced by, e.g., a ProductType and/or a ModelTemplate, both of
-    # which are essentially collections of ParameterDefinitions.
     pids = OrderedSet()
     cname = obj.__class__.__name__
     pids |= OrderedSet(DEFAULT_CLASS_PARAMETERS.get(cname, []))
-    # TODO: let user set default parameters in their prefs
+    # if config does not have 'default_parms' set, set it ... it will still be
+    # user-editable
+    if not config.get('default_parms'):
+        config['default_parms'] = [
+                            'm', 'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
+                            'P', 'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
+                            'P[Peak]', 'P[max]', 'P[min]',
+                            'P_operational[max]', 'P_operational[min]',
+                            'P_survival[max]', 'P_survival[min]',
+                            'T[max]', 'T[min]',
+                            'T_operational[max]', 'T_operational[min]',
+                            'T_survival[max]', 'T_survival[min]',
+                            'R_D', 'R_D[CBE]', 'R_D[Ctgcy]', 'R_D[MEV]',
+                            'height', 'width', 'depth', 'Cost']
     if cname == 'HardwareProduct':
         # default for "default_parms":  mass, power, data rate
         # (state is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
-        pids |= OrderedSet(parms
-                           or prefs.get('default_parms')
-                           or state.get('default_parms')
-                           or config.get('default_parms')
-                           or ['m', 'P', 'R_D',
-                               'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
-                               'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
-                               'R_D[CBE]', 'R_D[Ctgcy]', 'R_D[MEV]',
-                               'Cost'])
+        pids |= OrderedSet(parms or config['default_parms'])
         if obj.product_type:
             pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
                                getattr(obj.product_type, 'id', '') or []))
-    # add default parameters first ...
-    # log.debug('  - adding parameters {!s} ...'.format(str(pids)))
-    for pid in pids:
-        add_parameter(obj.oid, pid)
+    pids_to_add =  pids - set(parameterz.get(obj.oid, {}))
+    if pids_to_add:
+        log.debug(f'  - adding default parameters {pids_to_add} ...')
+        for pid in pids_to_add:
+            add_parameter(obj.oid, pid)
 
 def add_product_type_parameters(obj, pt):
     """
@@ -1705,7 +1704,8 @@ def set_dval_from_str(oid, deid, str_val, units='', local=True):
 
 def add_default_data_elements(obj, des=None):
     """
-    Assign the app configured or preferred default data elements to an object.
+    Assign any configured or preferred default data elements that are missing
+    from an object.
 
     Args:
         obj (Identifiable):  the object to receive data elements
@@ -1715,27 +1715,27 @@ def add_default_data_elements(obj, des=None):
     """
     # log.debug('* adding default data elements to object "{}"'.format(
                                                                  # obj.id))
-    # Configured Parameters are currently defined by the 'dashboard'
-    # configuration (in future that may be augmented by Parameters
-    # referenced by, e.g., a ProductType and/or a ModelTemplate, both of
-    # which are essentially collections of ParameterDefinitions.
     deids = OrderedSet()
     cname = obj.__class__.__name__
     deids |= OrderedSet(DEFAULT_CLASS_DATA_ELEMENTS.get(cname, []))
     # TODO: let user set default data elements in their prefs
+    if not config.get('default_data_elements'):
+        config['default_data_elements'] = ['TRL', 'Vendor',
+                                           'heritage_justification',
+                                           'heritage_use']
     if cname == 'HardwareProduct':
         # default for "default_data_elements":  Vendor
         # (state is read in p.node.gui.startup, and will be overridden by
         # prefs['default_data_elements'] if it is set
-        deids |= OrderedSet(des
-                            or prefs.get('default_data_elements')
-                            or state.get('default_data_elements')
-                            or ['TRL', 'Vendor'])
+        deids |= OrderedSet(des or config['default_data_elements'])
         if obj.product_type:
             deids |= OrderedSet(DEFAULT_PRODUCT_TYPE_DATA_ELMTS.get(
                                 obj.product_type.id, []))
     # add default parameters first ...
     # log.debug('  - adding data elements {} ...'.format(str(deids)))
-    for deid in deids:
-        add_data_element(obj.oid, deid)
+    deids_to_add = deids - set(data_elementz.get(obj.oid, {}))
+    if deids_to_add:
+        log.debug(f'  - adding default data elements {deids_to_add} ...')
+        for deid in deids_to_add:
+            add_data_element(obj.oid, deid)
 

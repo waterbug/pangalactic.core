@@ -102,7 +102,16 @@ DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start'],
                             'HardwareProduct': ['m', 'P', 'R_D']}
 
 # DEFAULT_PRODUCT_TYPE_PARAMETERS:  default parameters by ProductType id
-DEFAULT_PRODUCT_TYPE_PARAMETERS = {'': []}
+DEFAULT_PRODUCT_TYPE_PARAMETERS = {
+    'antenna': ['Gain_antenna'],
+    'omni_antenna': ['Gain_antenna'],
+    'medium_gain_antenna': ['Gain_antenna'],
+    'high_gain_antenna': ['Gain_antenna'],
+    'power_amplifier': ['Gain'],
+    'transponder': ['f_downlink', 'f_uplink'],
+    'transmitter': ['f_downlink', 'f_uplink'],
+    'receiver': ['f_downlink', 'f_uplink']
+    }
 
 # PGXN_PLACEHOLDERS:  Placeholder text for fields in PgxnObject forms
 PGXN_PLACEHOLDERS = {'id': 'unique identifier; no spaces',

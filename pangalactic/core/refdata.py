@@ -3486,6 +3486,7 @@ for pt_oid in [
     'pgefobjects:ProductType.communications_system',
     'pgefobjects:ProductType.eee_part',
     'pgefobjects:ProductType.electro_mechanical',
+    'pgefobjects:ProductType.antenna',
     'pgefobjects:ProductType.omni_antenna',
     'pgefobjects:ProductType.medium_gain_antenna',
     'pgefobjects:ProductType.high_gain_antenna',

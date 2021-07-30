@@ -9,10 +9,10 @@ from sqlalchemy import ForeignKey
 from pangalactic.core.refdata     import ref_oids
 from pangalactic.core.utils.meta  import cookers, uncookers, uncook_datetime
 from pangalactic.core.utils.datetimes  import earlier
-from pangalactic.core.parametrics import (add_parameter,
+from pangalactic.core.parametrics import (add_default_parameters,
+                                          add_default_data_elements,
                                           deserialize_des,
                                           deserialize_parms,
-                                          parameterz,
                                           refresh_componentz,
                                           refresh_req_allocz,
                                           serialize_des, serialize_parms,
@@ -521,6 +521,11 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     update_parmz_by_dimz(obj)
                 elif cname == 'DataElementDefinition':
                     update_de_defz(obj)
+                elif cname == 'HardwareProduct':
+                    # make sure HW Products have the full set of
+                    # default parameters and data elements ...
+                    add_default_parameters(obj)
+                    add_default_data_elements(obj)
                 orb.log.debug('* updated object: [{}] {}'.format(cname,
                                                           obj.id or '(no id)'))
             elif d['oid'] not in ignores:
@@ -543,12 +548,12 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     elif isinstance(obj, orb.classes['Product']):
                         products.append(obj)
                         if cname == 'HardwareProduct':
-                            # make sure HW Products have mass, power, data rate
-                            if obj.oid not in parameterz:
-                                parameterz[obj.oid] = {}
-                            for pid in ['m', 'P', 'R_D']:
-                                if not parameterz[obj.oid].get(pid):
-                                     add_parameter(obj.oid, pid)
+                            # make sure HW Products have the full set of
+                            # default parameters and data elements ...
+                            add_default_parameters(obj)
+                            add_default_data_elements(obj)
+                            # make sure 'id' is correctly generated
+                            obj.id = orb.gen_product_id(obj)
                     if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                         recompute_parmz_required = True
                 else:
