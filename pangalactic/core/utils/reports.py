@@ -462,6 +462,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
     data_fmt = data_fmts.get(level, data_fmts[3])
     int_fmt = int_fmts.get(level, int_fmts[3])
     txt_fmt = txt_fmts.get(level, txt_fmts[3])
+    txt_fmt.set_text_wrap()
     sheet.write(row, 2, mcbe, data_fmt)        # Unit Mass
     sheet.write(row, 5, qty, int_fmt)          # Flight Units
     sheet.write(row, 9, mcbe * qty, data_fmt)  # Total Mass
@@ -828,7 +829,6 @@ def write_mel_xlsx_from_datagrid(context, is_project=True,
                           fmts['black_bg_18'])
 
     # First row of headers (hrow1)
-    # worksheet.row(hrow1).height_mismatch = True
     worksheet.set_row(hrow1, 12*3)
     worksheet.write(hrow1, 0, 'LEVEL', fmts['ctr_pale_blue_bold_12'])
     worksheet.write(hrow1, 1, 'NAME (Mission or Payload Name)',
@@ -874,7 +874,7 @@ def write_mel_xlsx_from_datagrid(context, is_project=True,
     worksheet.write(hrow2, 10, 'Contingency\n[%]', fmts['ctr_pale_blue_12'])
     worksheet.write(hrow2, 11, 'Total Mass\n[kg] with\nContingency\n(MEV)',
                     fmts['ctr_pale_blue_12'])
-    worksheet.write(hrow2, 12, 'Unit\nPower [W]\n(CBE)',
+    worksheet.write(hrow2, 12, 'Unit Power\n[W]\n(CBE)',
                     fmts['ctr_pale_blue_12'])
     worksheet.write(hrow2, 13, 'Total\nPower [W]\n(CBE)',
                     fmts['ctr_pale_blue_12'])

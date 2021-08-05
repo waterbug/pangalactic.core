@@ -765,7 +765,7 @@ class UberORB(object):
                 self.error_log.info('* error in load_and_transform_data():')
                 self.error_log.info(traceback.format_exc())
         else:
-            self.log.debug('  - file "db.yaml" not found.')
+            self.log.debug(f'  - file "{data_path}" not found.')
         return sdata
 
     def load_reference_data(self):
