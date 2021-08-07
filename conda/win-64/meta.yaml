@@ -1,6 +1,6 @@
 package:
   name: pangalactic.core
-  version: "2.0.dev2"
+  version: "2.0.dev3"
 
 source:
         path: C:\Users\swaterbu\clones\pangalactic.core
