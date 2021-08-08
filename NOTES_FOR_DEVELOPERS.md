@@ -191,9 +191,11 @@
 
     `width:            (int)  current pixel width of pangalaxian gui`
 
-    `[1]: "load_extra_data" is intended for use primarily on the server (vger)`
+    `[1]: "load_extra_data" is intended for use on the server (vger)`
     `     for special data not included in "refdata", such as data specific to`
-    `     local organizations, etc.`
+    `     local organizations, etc.  Specifically, it is intended to be used`
+    `     to reload data from a database backup when a new docker`
+    `     image/container is started.`
 
     `[2]: "assigned_roles" data structure:`
 
