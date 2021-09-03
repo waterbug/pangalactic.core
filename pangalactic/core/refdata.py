@@ -4004,7 +4004,6 @@ for pt_oid in [
     'pgefobjects:ProductType.payload_attach_fitting',
     'pgefobjects:ProductType.solar_array_actuator',
     'pgefobjects:ProductType.actuator',
-    'pgefobjects:ProductType.antenna_gimbal',
     'pgefobjects:ProductType.boom',
     'pgefobjects:ProductType.deployment_system'
     ]:
@@ -4068,6 +4067,7 @@ for pt_oid in [
 # Comm ProductTypes
 comm_discipline_obj = core_objs['pgefobjects:Discipline.rf_comm']
 for pt_oid in [
+    'pgefobjects:ProductType.antenna_gimbal',
     'pgefobjects:ProductType.communications_system',
     'pgefobjects:ProductType.eee_part',
     'pgefobjects:ProductType.electro_mechanical',
