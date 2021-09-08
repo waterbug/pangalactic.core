@@ -591,14 +591,9 @@ class OrbTest(unittest.TestCase):
         requirement and its allocation, which will be further exercised in
         'test_22_compute_margin' and 'test_23_compute_requirement_margin'.
         """
-        # TODO:  rather than using existing components from the other test
-        # data, create a new set of [serialized] HardwareProduct objects for
-        # the components, which would make the data set completely
-        # self-contained and would demonstrate the "serializability" of an
-        # entire project.  :)
         objs = deserialize(orb, related_test_objects)
         by_oid = {o.oid : o for o in objs}
-        acu_oids = ['test:spacecraft3-acu-{}'.format(n) for n in range(1, 6)]
+        sc_acu_oids = [f'test:spacecraft3-acu-{n}' for n in range(1, 7)]
         value = [
             bool('test:OTHER:Spacecraft-Mass' in req_allocz),
             by_oid['test:OTHER:system-1'].project,
@@ -618,7 +613,7 @@ class OrbTest(unittest.TestCase):
             True,
             by_oid['test:OTHER'],
             by_oid['test:spacecraft3'],
-            [by_oid[acu_oid] for acu_oid in acu_oids],
+            [by_oid[acu_oid] for acu_oid in sc_acu_oids],
             [by_oid['test:spacecraft3.mcad.model.0']],
             by_oid['test:OTHER'],
             by_oid['test:spacecraft3'],
@@ -630,7 +625,7 @@ class OrbTest(unittest.TestCase):
             ]
         self.assertEqual(expected, value)
 
-    def test_22_compute_cbe_with_components(self):
+    def test_22_0_compute_cbe_with_component_vars(self):
         """
         CASE:  compute the mass CBE (Current Best Estimate)
         """
@@ -639,14 +634,29 @@ class OrbTest(unittest.TestCase):
         sc = orb.get('test:spacecraft3')
         expected  = fsum([get_pval(acu.component.oid, 'm')
                           for acu in sc.components])
-        # but the Magic Twanger has components Flux Capacitor and Mr. Fusion,
-        # so ...
+        # the Magic Twanger has components Flux Capacitor and Mr. Fusion
         expected -= get_pval('test:twanger', 'm')
         expected += get_pval('test:flux_capacitor', 'm')
         expected += get_pval('test:mr_fusion', 'm')
+        # the Thermal System has Thermistors
+        expected -= get_pval('test:sc3-thermal-system', 'm')
+        expected += get_pval('test:thermistor-0001', 'm') * 1600
+        expected += get_pval('test:thermistor-0001', 'm') * 3200
+        expected = round_to(expected)
         self.assertEqual(expected, value)
 
-    def test_22_1_compute_cbe_without_components(self):
+    def test_22_1_compute_cbe_with_component_cbes(self):
+        """
+        CASE:  compute the mass CBE (Current Best Estimate)
+        """
+        orb.recompute_parmz()
+        value = get_pval('test:spacecraft3', 'm[CBE]')
+        sc = orb.get('test:spacecraft3')
+        expected  = round_to(fsum([get_pval(acu.component.oid, 'm[CBE]')
+                                  for acu in sc.components]))
+        self.assertEqual(expected, value)
+
+    def test_22_2_compute_cbe_without_components(self):
         """
         CASE:  compute the mass CBE (Current Best Estimate) of a product whose
         components are not specified (i.e. it has no Acu's of components).  Its

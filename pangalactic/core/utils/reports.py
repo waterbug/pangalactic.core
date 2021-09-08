@@ -599,6 +599,14 @@ def get_component_data(component, cols, schema, level, qty=1):
     # orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
     if component.components:
         next_level = level + 1
+        # THE "comps_by_name" DICT IS A BAD MISTAKE!!!!
+        # If a component is used more than once in an assembly, its "name"
+        # needs to be the combination of [1] the product name (component.name)
+        # and [2] the FUNCTION (which can be represented by the reference
+        # designator -- i.e. the "usage" name) -- the very practical reason for
+        # this is that each usage can have a different quantity associated with
+        # it, so they MUST be distinguishable -- i.e., do NOT create a dict
+        # with the component.name as the KEY, that is WRONG!!!)
         comp_names = [acu.component.name.lower()
                       for acu in component.components]
         comp_names.sort()
