@@ -340,7 +340,14 @@ def get_next_ref_des(assembly, component, prefix=None, product_type=None):
         all_prefixes = [(''.join(rd.split('-')[:-1])) for rd in rds if rd]
         these_prefixes = [p for p in all_prefixes if p == prefix]
         new_nbr = len(these_prefixes) + 1
-        return prefix + '-' + str(new_nbr)
+        refdes = prefix + '-' + str(new_nbr)
+        while 1:
+            if refdes not in rds:
+                break
+            else:
+                new_nbr += 1
+                refdes = prefix + '-' + str(new_nbr)
+        return refdes
     else:
         return prefix + '-1'
 
