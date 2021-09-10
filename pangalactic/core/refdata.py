@@ -2098,13 +2098,13 @@ dict(
     'oid': 'pgefobjects:ProductType.instrument',
     'id': 'instrument',
     'name': 'Instrument',
-    'abbreviation': 'Instrument',
+    'abbreviation': 'Inst',
     'description': 'Instrument',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2117,7 +2117,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2137,12 +2137,12 @@ dict(
     'oid': 'pgefobjects:ProductType.launch_vehicle',
     'id': 'launch_vehicle',
     'name': 'Launch Vehicle',
-    'abbreviation': 'LaunchVeh',
+    'abbreviation': 'LV',
     'description': 'Launch Vehicle',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2168,7 +2168,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-01-25 00:00:00'
+    'mod_datetime': '2021-02-25 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2188,13 +2188,13 @@ dict(
     'oid': 'pgefobjects:ProductType.cryogenic_system',
     'id': 'cryogenic_system',
     'name': 'Cryogenic System',
-    'abbreviation': 'CryoSys',
+    'abbreviation': 'Cryo',
     'description': 'Cryogenic System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-03-24 00:00:00'
+    'mod_datetime': '2020-04-24 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2207,7 +2207,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-03-24 01:00:00'
+    'mod_datetime': '2020-04-24 01:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2227,26 +2227,26 @@ dict(
     'oid': 'pgefobjects:ProductType.electro_mechanical',
     'id': 'electro_mechanical',
     'name': 'Electro Mechanical Device',
-    'abbreviation': 'ElecMech',
+    'abbreviation': 'EMech',
     'description': 'Electro Mechanical Devices',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.optical_component',
     'id': 'optical_component',
     'name': 'Optical Component',
-    'abbreviation': 'OpticCmp',
+    'abbreviation': 'OpticComp',
     'description': 'Optical Components',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2259,7 +2259,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2305,20 +2305,20 @@ dict(
     'oid': 'pgefobjects:ProductType.eee_part',
     'id': 'eee_part',
     'name': 'EEE Part',
-    'abbreviation': 'EEEPart',
+    'abbreviation': 'EEE',
     'description': 'Electrical, Electronic, or Electromechanical Component',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-01-02 00:00:00'
+    'mod_datetime': '2020-02-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.communications_system',
     'id': 'communications_system',
     'name': 'Communications System',
-    'abbreviation': 'CommSys',
+    'abbreviation': 'Comm',
     'description': 'Communications System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
@@ -2331,7 +2331,7 @@ dict(
     'oid': 'pgefobjects:ProductType.communications_component',
     'id': 'communications_component',
     'name': 'Communications Component',
-    'abbreviation': 'CommCmp',
+    'abbreviation': 'CommComp',
     'description': 'Communications Component',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
@@ -2344,20 +2344,20 @@ dict(
     'oid': 'pgefobjects:ProductType.metrology_equipment',
     'id': 'metrology_equipment',
     'name': 'Metrology Equipment',
-    'abbreviation': 'MetEqpt',
+    'abbreviation': 'MetrEqpt',
     'description': 'Metrology Equipment',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.power_system',
     'id': 'power_system',
     'name': 'Power System',
-    'abbreviation': 'PowerSys',
+    'abbreviation': 'Power',
     'description': 'Power System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
@@ -2383,65 +2383,65 @@ dict(
     'oid': 'pgefobjects:ProductType.mechanical_system',
     'id': 'mechanical_system',
     'name': 'Mechanical System',
-    'abbreviation': 'MechSys',
+    'abbreviation': 'Mech',
     'description': 'Mechanical System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.propulsion_system',
     'id': 'propulsion_system',
     'name': 'Propulsion System',
-    'abbreviation': 'PropSys',
+    'abbreviation': 'Prop',
     'description': 'Propulsion System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_control_system',
     'id': 'thermal_control_system',
     'name': 'Thermal Control System',
-    'abbreviation': 'ThermSys',
+    'abbreviation': 'Thermal',
     'description': 'Thermal Control System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.computer',
     'id': 'computer',
     'name': 'Computer System',
-    'abbreviation': 'CompSys',
+    'abbreviation': 'Computer',
     'description': 'Computer System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.star_tracker',
     'id': 'star_tracker',
     'name': 'Star Tracker',
-    'abbreviation': 'StarTrack',
+    'abbreviation': 'ST',
     'description': 'Star Tracker',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-06-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2487,7 +2487,7 @@ dict(
     'oid': 'pgefobjects:ProductType.control_moment_gyro',
     'id': 'control_moment_gyro',
     'name': 'Control Moment Gyro',
-    'abbreviation': 'CMG',
+    'abbreviation': 'Gyro',
     'description': 'Control Moment Gyro',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
@@ -2630,13 +2630,13 @@ dict(
     'oid': 'pgefobjects:ProductType.propellant_filter',
     'id': 'propellant_filter',
     'name': 'Propellant Filter',
-    'abbreviation': 'PrplntFltr',
+    'abbreviation': 'PropFltr',
     'description': 'Propellant Filter',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2760,13 +2760,13 @@ dict(
     'oid': 'pgefobjects:ProductType.temperature_sensor',
     'id': 'temperature_sensor',
     'name': 'Temperature Sensor',
-    'abbreviation': 'TempSensor',
+    'abbreviation': 'TempSens',
     'description': 'Temperature Sensor',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2786,13 +2786,13 @@ dict(
     'oid': 'pgefobjects:ProductType.multi_layer_insulation',
     'id': 'multi_layer_insulation',
     'name': 'Multi Layer Insulation',
-    'abbreviation': 'MltLyrInsl',
+    'abbreviation': 'MLI',
     'description': 'Multi Layer Insulation',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2805,33 +2805,33 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_if_matl',
     'id': 'thermal_if_matl',
     'name': 'Thermal Interface Material',
-    'abbreviation': 'ThermIFMatl',
+    'abbreviation': 'TIM',
     'description': 'Thermal Interface Material',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-12-01 00:00:00'
+    'mod_datetime': '2021-01-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.radiator_panel',
     'id': 'radiator_panel',
     'name': 'Radiator Panel',
-    'abbreviation': 'RadtrPnl',
+    'abbreviation': 'RadPanel',
     'description': 'Radiator Panel',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2864,13 +2864,13 @@ dict(
     'oid': 'pgefobjects:ProductType.thermal_louver',
     'id': 'thermal_louver',
     'name': 'Thermal Louver',
-    'abbreviation': 'ThermLver',
+    'abbreviation': 'ThermLvr',
     'description': 'Thermal Louver',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2903,7 +2903,7 @@ dict(
     'oid': 'pgefobjects:ProductType.payload_attach_fitting',
     'id': 'payload_attach_fitting',
     'name': 'Payload Attach Fitting',
-    'abbreviation': 'PldAchFtng',
+    'abbreviation': 'PldAtchFtng',
     'description': 'Payload Attach Fitting',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
@@ -2994,13 +2994,13 @@ dict(
     'oid': 'pgefobjects:ProductType.battery',
     'id': 'battery',
     'name': 'Battery',
-    'abbreviation': 'Battery',
+    'abbreviation': 'Batt',
     'description': 'Battery',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2020-05-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3224,8 +3224,8 @@ dict(
     'mod_datetime': '2021-01-01 00:00:00'
     },
 
-{   '_cname': 'ContinuousProductType',
-    'oid': 'pgefobjects:ContinuousProductType.cable',
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.cable',
     'id': 'cable',
     'name': 'Cable',
     'abbreviation': 'Cable',
@@ -3234,11 +3234,11 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2021-02-01 00:00:00'
     },
 
-{   '_cname': 'ContinuousProductType',
-    'oid': 'pgefobjects:ContinuousProductType.wire',
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.wire',
     'id': 'wire',
     'name': 'Wire',
     'abbreviation': 'Wire',
@@ -3247,11 +3247,11 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2021-02-01 00:00:00'
     },
 
-{   '_cname': 'ContinuousProductType',
-    'oid': 'pgefobjects:ContinuousProductType.tubing',
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.tubing',
     'id': 'tubing',
     'name': 'Tubing',
     'abbreviation': 'Tubing',
@@ -3260,7 +3260,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2021-02-01 00:00:00'
     },
 
 {   '_cname': 'ModelFamily',
