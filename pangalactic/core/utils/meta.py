@@ -410,6 +410,34 @@ def get_acu_name(assembly_name, ref_des):
     """
     return assembly_name + ' : ' + ref_des
 
+def get_mel_item_name(usage):
+    """
+    Create a unique name for a line item in a MEL (Master Equipment List).
+
+    Args:
+        usage (Acu or ProjectSystemUsage):  the item usage
+    """
+    # newlines *should* not occur in a product name but have been known to --
+    # hence the '\n' replacements ...
+    if hasattr(usage, 'component'):
+        # usage is an Acu instance
+        name = (getattr(usage.component, 'name', '') or 'unknown').replace(
+                '\n', ' ').strip()
+        if usage.reference_designator:
+            return '[' + usage.reference_designator + '] ' + name
+        else:
+            return name
+    elif hasattr(usage, 'system'):
+        # usage is an ProjectSystemUsage instance
+        name = (getattr(usage.system, 'name', '') or 'unknown').replace(
+                '\n', ' ').strip()
+        if usage.system_role:
+            return '[' + usage.system_role + '] ' + name
+        else:
+            return name
+    else:
+        return 'NO ITEM'
+
 def get_rel_id(context_id, role_id):
     """
     Create an 'id' for a new Relation.

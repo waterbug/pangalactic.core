@@ -10,6 +10,7 @@ from pangalactic.core.parametrics  import (get_pval, get_dval, de_defz,
                                            parm_defz, round_to)
 from pangalactic.core.uberorb      import orb
 from pangalactic.core.units        import in_si
+from pangalactic.core.utils.meta   import get_mel_item_name
 from pangalactic.core.utils.styles import xlsx_styles
 
 
@@ -532,17 +533,17 @@ def get_mel_data(context, schema=None):
     if isinstance(context, orb.classes['Project']):
         # context is Project, so may include several systems
         project = context
-        system_names = [psu.system.name.lower() for psu in project.systems]
-        system_names.sort()
-        systems_by_name = {psu.system.name.lower() : psu.system
-                           for psu in project.systems}
-        for system_name in system_names:
-            data += get_component_data(systems_by_name[system_name], cols,
-                                       schema, 1)
+        item_names = [get_mel_item_name(psu) for psu in project.systems]
+        item_names.sort()
+        iname_to_psu = {get_mel_item_name(psu) : psu for psu in project.systems}
+        # TODO: get rid of this, it appears unnecessary ...
+        # systems_by_name = {iname : iname_to_psu[iname]  for iname in item_names}
+        for item_name in item_names:
+            data += get_item_data(iname_to_psu[item_name], cols, schema, 1)
     elif isinstance(context, orb.classes['HardwareProduct']):
         # context is Product -> single system MEL
         system = context
-        data += get_component_data(system, cols, schema, 1)
+        data += get_item_data(system, cols, schema, 1)
     else:
         orb.log.info('  - context is neither a Project nor Product ...')
         orb.log.info('    could not write MEL, quitting.')
@@ -550,26 +551,41 @@ def get_mel_data(context, schema=None):
     return data
 
 
-def get_component_data(component, cols, schema, level, qty=1):
+def get_item_data(item, cols, schema, level):
     """
-    Return a list of dicts containing the parameter and data element data for
-    an assembly of components.
+    Recursively return a lists of dicts containing the parameter and data
+    element data for MEL items of an assembly.
 
     Args:
-        component (HardwareProduct): component object
+        item (Acu or HardwareProduct): item is an Acu unless it is the "root"
+            of the MEL, in which case it is a HardwareProduct
         cols (list of str):  columns in the MEL (of which schema is a subset)
         schema (list of str):  ids of the parameters and data elements to be
             included
-        level (int): assembly level of component
-
-    Keyword Args:
-        qty (int): quantity of component in its next higher assembly
+        level (int): assembly level of item
     """
     # NB:  levels are 1-based
+    if isinstance(item, orb.classes['HardwareProduct']):
+        # this implies "root" item, so level and qty are 1
+        component = item
+        comp_name = (getattr(item, 'name', '') or 'Unknown').replace(
+                                                            '\n', ' ').strip()
+        qty = 1
+    else:
+        # Acu or ProjectSystemUsage
+        if hasattr(item, 'component'):
+            # Acu
+            component = item.component
+            qty = item.quantity
+        else:
+            # ProjectSystemUsage
+            component = item.system
+            qty = 1
+        comp_name = (level - 1) * '  ' + get_mel_item_name(item)
     data = []
     vals = []
     for col_id in schema:
-        # TODO: predetermine whether each schema item is a pid or deid
+        # TODO: predetermine whether each schema element is a pid or deid
         # Excel doesn't like space between the number and "%" --
         # hence, fix_ctgcy() ...
         if col_id in parm_defz:
@@ -591,33 +607,19 @@ def get_component_data(component, cols, schema, level, qty=1):
         else:
             # neither a parameter nor data element
             vals.append('-')
-    # strip out any newlines in name (wha?) and indent 2 spaces per level
-    comp_name = (level - 1) * '  ' + component.name.replace('\n', ' ').strip()
     comp_id = component.id
     data.append(dict(zip(cols, [comp_name, comp_id, str(level), str(qty)]
                                 + vals)))
     # orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
     if component.components:
         next_level = level + 1
-        # THE "comps_by_name" DICT IS A BAD MISTAKE!!!!
-        # If a component is used more than once in an assembly, its "name"
-        # needs to be the combination of [1] the product name (component.name)
-        # and [2] the FUNCTION (which can be represented by the reference
-        # designator -- i.e. the "usage" name) -- the very practical reason for
-        # this is that each usage can have a different quantity associated with
-        # it, so they MUST be distinguishable -- i.e., do NOT create a dict
-        # with the component.name as the KEY, that is WRONG!!!)
-        comp_names = [acu.component.name.lower()
-                      for acu in component.components]
-        comp_names.sort()
-        comps_by_name = {acu.component.name.lower() : acu.component
-                         for acu in component.components}
-        qty_by_name = {acu.component.name.lower() : acu.quantity or 1
-                       for acu in component.components}
-        for comp_name in comp_names:
-            data += get_component_data(comps_by_name[comp_name],
-                                       cols, schema, next_level,
-                                       qty=qty_by_name[comp_name])
+        item_names = [get_mel_item_name(acu) for acu in component.components]
+        item_names.sort()
+        acus_by_item_name = {get_mel_item_name(acu) : acu
+                             for acu in component.components}
+        for item_name in item_names:
+            data += get_item_data(acus_by_item_name[item_name], cols,
+                                  schema, next_level)
     return data
 
 
@@ -668,18 +670,17 @@ def write_mel_to_tsv(context, schema=None, pref_units=False,
     if isinstance(context, orb.classes['Project']):
         # context is Project, so may include several systems
         project = context
-        system_names = [psu.system.name.lower() for psu in project.systems]
-        system_names.sort()
-        systems_by_name = {psu.system.name.lower() : psu.system
-                           for psu in project.systems}
-        for system_name in system_names:
-            data += get_component_data_tsv(systems_by_name[system_name],
-                                           schema, 1, pref_units=pref_units)
+        item_names = [get_mel_item_name(psu) for psu in project.systems]
+        item_names.sort()
+        iname_to_psu = {get_mel_item_name(psu) : psu for psu in project.systems}
+        # TODO: get rid of this, it appears unnecessary ...
+        # systems_by_name = {iname : iname_to_psu[iname]  for iname in item_names}
+        for item_name in item_names:
+            data += get_item_data_tsv(iname_to_psu[item_name], schema, 1)
     elif isinstance(context, orb.classes['HardwareProduct']):
         # context is Product -> single system MEL
         system = context
-        data += get_component_data_tsv(system, schema, 1,
-                                       pref_units=pref_units)
+        data += get_item_data_tsv(system, schema, 1)
     else:
         orb.info('  - context is neither a Project nor Product ...')
         orb.info('    could not write MEL, quitting.')
@@ -688,7 +689,7 @@ def write_mel_to_tsv(context, schema=None, pref_units=False,
         f.write(data)
 
 
-def get_component_data_tsv(component, schema, level, qty=1, pref_units=False):
+def get_item_data_tsv(item, schema, level, pref_units=False):
     """
     Return a tsv string for an assembly of components with parameters / data
     elements.
@@ -698,11 +699,25 @@ def get_component_data_tsv(component, schema, level, qty=1, pref_units=False):
         schema (list of str):  ids of the parameters and data elements to be
             included
         level (int): assembly level of component
-
-    Keyword Args:
-        qty (int): quantity of component in its next higher assembly
     """
     # NB:  levels are 1-based
+    if isinstance(item, orb.classes['HardwareProduct']):
+        # this implies "root" item, so level and qty are 1
+        component = item
+        comp_name = (getattr(item, 'name', '') or 'Unknown').replace(
+                                                            '\n', ' ').strip()
+        qty = 1
+    else:
+        # Acu or ProjectSystemUsage
+        if hasattr(item, 'component'):
+            # Acu
+            component = item.component
+            qty = item.quantity
+        else:
+            # ProjectSystemUsage
+            component = item.system
+            qty = 1
+        comp_name = (level - 1) * '  ' + get_mel_item_name(item)
     data = ''
     vals = []
     for col_id in schema:
@@ -732,25 +747,18 @@ def get_component_data_tsv(component, schema, level, qty=1, pref_units=False):
         else:
             # neither a parameter nor data element
             vals.append('unknown')
-    # strip out any newlines in name (wha?) and indent 2 spaces per level
-    comp_name = (level - 1) * '  ' + component.name.replace('\n', ' ').strip()
     comp_id = component.id
     data += '\t'.join([comp_name, comp_id, str(level), str(qty)] + vals) + '\n'
     # orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
     if component.components:
         next_level = level + 1
-        comp_names = [acu.component.name.lower()
-                      for acu in component.components]
-        comp_names.sort()
-        comps_by_name = {acu.component.name.lower() : acu.component
-                         for acu in component.components}
-        qty_by_name = {acu.component.name.lower() : acu.quantity or 1
-                       for acu in component.components}
-        for comp_name in comp_names:
-            data += get_component_data_tsv(comps_by_name[comp_name],
-                                           schema, next_level,
-                                           qty=qty_by_name[comp_name],
-                                           pref_units=pref_units)
+        item_names = [get_mel_item_name(acu) for acu in component.components]
+        item_names.sort()
+        acus_by_item_name = {get_mel_item_name(acu) : acu
+                             for acu in component.components}
+        for item_name in item_names:
+            data += get_item_data_tsv(acus_by_item_name[item_name], schema,
+                                      next_level)
     return data
 
 
