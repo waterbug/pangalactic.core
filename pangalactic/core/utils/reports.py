@@ -576,7 +576,7 @@ def get_item_data(item, cols, schema, level):
         if hasattr(item, 'component'):
             # Acu
             component = item.component
-            qty = item.quantity
+            qty = item.quantity or 1
         else:
             # ProjectSystemUsage
             component = item.system
@@ -712,7 +712,7 @@ def get_item_data_tsv(item, schema, level, pref_units=False):
         if hasattr(item, 'component'):
             # Acu
             component = item.component
-            qty = item.quantity
+            qty = item.quantity or 1
         else:
             # ProjectSystemUsage
             component = item.system
