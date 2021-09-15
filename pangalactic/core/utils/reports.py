@@ -314,14 +314,14 @@ def write_mel_xlsx_from_model(context, is_project=True,
         start_row = hrow3
         system_names = [psu.system.name.lower() for psu in project.systems]
         system_names.sort()
-        systems_by_name = {psu.system.name.lower() : psu.system
-                           for psu in project.systems}
+        system_by_name = {psu.system.name.lower() : psu.system
+                          for psu in project.systems}
         for system_name in system_names:
             last_row = write_component_rows_xlsx(worksheet, level_fmts,
                                                  name_fmts, data_fmts,
                                                  int_fmts, txt_fmts, 1,
                                                  start_row,
-                                                 systems_by_name[system_name])
+                                                 system_by_name[system_name])
             start_row = last_row + 1
     else:
         # context is Product -> a single system MEL
@@ -350,7 +350,8 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
         component (Product):  the product mapped to the current row
 
     Keyword Args:
-        qty (int):  the number of instances of the component in the assembly
+        qty (int):  the number of instances of the component (Product instance)
+            in the assembly
     """
     mcbe = get_pval(component.oid, 'm[CBE]')
     ctgcy_m = fix_ctgcy(str(100 * get_pval(component.oid, 'm[Ctgcy]')))
@@ -492,13 +493,32 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
                       acu.component.oid != 'pgefobjects:TBD']
     if real_comps:
         next_level = level + 1
-        comp_names = [acu.component.name.lower()
-                      for acu in real_comps]
-        comp_names.sort()
-        comps_by_name = {acu.component.name.lower() : acu.component
-                         for acu in real_comps}
-        qty_by_name = {acu.component.name.lower() : acu.quantity or 1
-                       for acu in real_comps}
+        product_oids = set([acu.component.oid for acu in real_comps])
+        if len(product_oids) < len(real_comps):
+            # this means a product is a component in more than one acu, so we
+            # need to iterate over unique product instances, and quantities
+            # must be computed
+            products = orb.get(oids=product_oids)
+            comp_names = [product.name.lower() for product in products]
+            comp_names.sort()
+            comps_by_name = {product.name.lower() : product
+                             for product in products}
+            qty_by_name = {}
+            for acu in real_comps:
+                if qty_by_name.get(acu.component.name.lower()):
+                    qty_by_name[acu.component.name.lower()] += (
+                                                            acu.quantity or 1)
+                else:
+                    qty_by_name[acu.component.name.lower()] = (
+                                                            acu.quantity or 1)
+        else:
+            comp_names = [acu.component.name.lower()
+                          for acu in real_comps]
+            comp_names.sort()
+            comps_by_name = {acu.component.name.lower() : acu.component
+                             for acu in real_comps}
+            qty_by_name = {acu.component.name.lower() : acu.quantity or 1
+                           for acu in real_comps}
         for comp_name in comp_names:
             row = write_component_rows_xlsx(sheet, level_fmts, name_fmts,
                                             data_fmts, int_fmts, txt_fmts,
@@ -536,8 +556,6 @@ def get_mel_data(context, schema=None):
         item_names = [get_mel_item_name(psu) for psu in project.systems]
         item_names.sort()
         iname_to_psu = {get_mel_item_name(psu) : psu for psu in project.systems}
-        # TODO: get rid of this, it appears unnecessary ...
-        # systems_by_name = {iname : iname_to_psu[iname]  for iname in item_names}
         for item_name in item_names:
             data += get_item_data(iname_to_psu[item_name], cols, schema, 1)
     elif isinstance(context, orb.classes['HardwareProduct']):
@@ -673,8 +691,6 @@ def write_mel_to_tsv(context, schema=None, pref_units=False,
         item_names = [get_mel_item_name(psu) for psu in project.systems]
         item_names.sort()
         iname_to_psu = {get_mel_item_name(psu) : psu for psu in project.systems}
-        # TODO: get rid of this, it appears unnecessary ...
-        # systems_by_name = {iname : iname_to_psu[iname]  for iname in item_names}
         for item_name in item_names:
             data += get_item_data_tsv(iname_to_psu[item_name], schema, 1)
     elif isinstance(context, orb.classes['HardwareProduct']):
@@ -999,12 +1015,6 @@ def write_mel_xlsx_from_datagrid(context, is_project=True,
     orb.log.info(f'  - writing MISSION: {project.id} ...')
     worksheet.write(hrow1, 1, mel_label, fmts['left_pale_blue_bold_12'])
     start_row = hrow3 + 1
-    ### DEPRECATED:  used system model directly -- now use DataMatrix
-    # system_names = [psu.system.name.lower() for psu in project.systems]
-    # system_names.sort()
-    # systems_by_name = {psu.system.name.lower() : psu.system
-                       # for psu in project.systems}
-    # for system_name in system_names:
     # Look for an existing MEL DataMatrix for the project
     dm_oid = '-'.join([project.oid, 'MEL'])
     dm = dmz.get(dm_oid)
