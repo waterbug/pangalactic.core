@@ -410,33 +410,36 @@ def get_acu_name(assembly_name, ref_des):
     """
     return assembly_name + ' : ' + ref_des
 
-def get_mel_item_name(usage):
+def get_mel_item_name(item):
     """
     Create a unique name for a line item in a MEL (Master Equipment List).
 
     Args:
-        usage (Acu or ProjectSystemUsage):  the item usage
+        item (Product, Acu, or ProjectSystemUsage):  the MEL line item
     """
     # newlines *should* not occur in a product name but have been known to --
     # hence the '\n' replacements ...
-    if hasattr(usage, 'component'):
-        # usage is an Acu instance
-        name = (getattr(usage.component, 'name', '') or 'unknown').replace(
-                '\n', ' ').strip()
-        if usage.reference_designator:
-            return '[' + usage.reference_designator + '] ' + name
+    if hasattr(item, 'component'):
+        # item is an Acu
+        name = (getattr(item.component, 'name', '') or 'unknown').replace(
+                                                        '\n', ' ').strip()
+        if item.reference_designator:
+            return '[' + item.reference_designator + '] ' + name
         else:
             return name
-    elif hasattr(usage, 'system'):
-        # usage is an ProjectSystemUsage instance
-        name = (getattr(usage.system, 'name', '') or 'unknown').replace(
-                '\n', ' ').strip()
-        if usage.system_role:
-            return '[' + usage.system_role + '] ' + name
+    elif hasattr(item, 'system'):
+        # item is an ProjectSystemUsage
+        name = (getattr(item.system, 'name', '') or 'unknown').replace(
+                                                        '\n', ' ').strip()
+        if item.system_role:
+            return '[' + item.system_role + '] ' + name
         else:
             return name
     else:
-        return 'NO ITEM'
+        # item is a Product
+        name = (getattr(item, 'name', '') or 'unknown').replace(
+                                                        '\n', ' ').strip()
+        return name
 
 def get_rel_id(context_id, role_id):
     """

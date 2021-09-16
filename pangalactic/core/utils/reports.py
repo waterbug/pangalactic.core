@@ -528,7 +528,7 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
     return row
 
 
-def get_mel_data(context, schema=None):
+def get_mel_data(context, schema=None, summary=False):
     """
     Generate a customized Master Equipment List (MEL) as a list of dicts.
 
@@ -539,6 +539,9 @@ def get_mel_data(context, schema=None):
     Keyword Args:
         schema (list of str):  ids of the parameters and data elements to be
             included
+        summary (bool):  if True, combine all instances of a product in a given
+            asssembly into one line item with a computed quantity; otherwise,
+            tag each usage with its reference designator
     """
     context_id = getattr(context, 'id', None) or '[unknown id]'
     orb.log.debug(f'* getting Mini MEL data for {context_id} ...')
@@ -557,11 +560,12 @@ def get_mel_data(context, schema=None):
         item_names.sort()
         iname_to_psu = {get_mel_item_name(psu) : psu for psu in project.systems}
         for item_name in item_names:
-            data += get_item_data(iname_to_psu[item_name], cols, schema, 1)
+            data += get_item_data(iname_to_psu[item_name], cols, schema, 1,
+                                  summary=summary)
     elif isinstance(context, orb.classes['HardwareProduct']):
         # context is Product -> single system MEL
         system = context
-        data += get_item_data(system, cols, schema, 1)
+        data += get_item_data(system, cols, schema, 1, summary=summary)
     else:
         orb.log.info('  - context is neither a Project nor Product ...')
         orb.log.info('    could not write MEL, quitting.')
@@ -569,7 +573,7 @@ def get_mel_data(context, schema=None):
     return data
 
 
-def get_item_data(item, cols, schema, level):
+def get_item_data(item, cols, schema, level, summary=False, qty=1):
     """
     Recursively return a lists of dicts containing the parameter and data
     element data for MEL items of an assembly.
@@ -581,14 +585,24 @@ def get_item_data(item, cols, schema, level):
         schema (list of str):  ids of the parameters and data elements to be
             included
         level (int): assembly level of item
+
+    Keyword Args:
+        summary (bool):  if True, combine all instances of a product in a given
+            asssembly into one line item with a computed quantity; otherwise,
+            show a line item for each usage, tagged with its reference
+            designator
+        qty (int):  quantity of the item (used for summary)
     """
     # NB:  levels are 1-based
-    if isinstance(item, orb.classes['HardwareProduct']):
-        # this implies "root" item, so level and qty are 1
+    if isinstance(item, orb.classes['Product']):
         component = item
         comp_name = (getattr(item, 'name', '') or 'Unknown').replace(
-                                                            '\n', ' ').strip()
-        qty = 1
+                                                        '\n', ' ').strip()
+        if not summary:
+            # if not summary, the item being a Product instance implies that
+            # it's the "root" item, so level and qty are 1
+            level = 1
+            qty = 1
     else:
         # Acu or ProjectSystemUsage
         if hasattr(item, 'component'):
@@ -631,13 +645,30 @@ def get_item_data(item, cols, schema, level):
     # orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
     if component.components:
         next_level = level + 1
-        item_names = [get_mel_item_name(acu) for acu in component.components]
-        item_names.sort()
-        acus_by_item_name = {get_mel_item_name(acu) : acu
-                             for acu in component.components}
-        for item_name in item_names:
-            data += get_item_data(acus_by_item_name[item_name], cols,
-                                  schema, next_level)
+        if summary:
+            products_by_oid = {acu.component.oid : acu.component
+                               for acu in component.components
+                               if acu.component.oid != 'pgefobjects:TBD'}
+            qty_by_oid = {}
+            for acu in component.components:
+                oid = acu.component.oid
+                if qty_by_oid.get(oid):
+                    qty_by_oid[oid] += acu.quantity or 1
+                else:
+                    qty_by_oid[oid] = acu.quantity or 1
+            for oid in products_by_oid:
+                data += get_item_data(products_by_oid[oid], cols,
+                                      schema, next_level, qty=qty_by_oid[oid],
+                                      summary=True)
+        else:
+            item_names = [get_mel_item_name(acu)
+                          for acu in component.components]
+            item_names.sort()
+            acus_by_item_name = {get_mel_item_name(acu) : acu
+                                 for acu in component.components}
+            for item_name in item_names:
+                data += get_item_data(acus_by_item_name[item_name], cols,
+                                      schema, next_level)
     return data
 
 
