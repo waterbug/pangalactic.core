@@ -596,14 +596,15 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
     """
     # NB:  levels are 1-based
     if isinstance(item, orb.classes['Product']):
-        component = item
-        comp_name = (getattr(item, 'name', '') or 'Unknown').replace(
-                                                        '\n', ' ').strip()
         if not summary:
             # if not summary, the item being a Product instance implies that
             # it's the "root" item, so level and qty are 1
             level = 1
             qty = 1
+        component = item
+        comp_name = (getattr(item, 'name', '') or 'Unknown').replace(
+                                                        '\n', ' ').strip()
+        comp_name = (level - 1) * '  ' + comp_name
     else:
         # Acu or ProjectSystemUsage
         if hasattr(item, 'component'):
