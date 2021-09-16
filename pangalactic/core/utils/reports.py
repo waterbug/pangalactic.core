@@ -579,8 +579,9 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
     element data for MEL items of an assembly.
 
     Args:
-        item (Acu or HardwareProduct): item is an Acu unless it is the "root"
-            of the MEL, in which case it is a HardwareProduct
+        item (Acu, ProjectSystemUsage, or HardwareProduct): item is an Acu
+            or a ProjectSystemUsage unless it is the "root" of the MEL, in
+            which case it is a HardwareProduct
         cols (list of str):  columns in the MEL (of which schema is a subset)
         schema (list of str):  ids of the parameters and data elements to be
             included
@@ -672,7 +673,7 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
     return data
 
 
-def write_mel_to_tsv(context, schema=None, pref_units=False,
+def write_mel_to_tsv(context, schema=None, pref_units=False, summary=False,
                      file_path='dash_data.tsv'):
     """
     Output a customized Master Equipment List (MEL) report including system /
@@ -689,6 +690,9 @@ def write_mel_to_tsv(context, schema=None, pref_units=False,
         pref_units (bool):  express values in the user's preferred units;
             default is False (use mks units); if True, units will be specified
             in headers
+        summary (bool):  if True, combine all instances of a product in a given
+            asssembly into one line item with a computed quantity; otherwise,
+            tag each usage with its reference designator
         file_path (str):  path to data file
     """
     context_id = getattr(context, 'id', None) or '[unknown id]'
@@ -723,11 +727,12 @@ def write_mel_to_tsv(context, schema=None, pref_units=False,
         item_names.sort()
         iname_to_psu = {get_mel_item_name(psu) : psu for psu in project.systems}
         for item_name in item_names:
-            data += get_item_data_tsv(iname_to_psu[item_name], schema, 1)
+            data += get_item_data_tsv(iname_to_psu[item_name], schema, 1,
+                                      summary=summary)
     elif isinstance(context, orb.classes['HardwareProduct']):
         # context is Product -> single system MEL
         system = context
-        data += get_item_data_tsv(system, schema, 1)
+        data += get_item_data_tsv(system, schema, 1, summary=summary)
     else:
         orb.info('  - context is neither a Project nor Product ...')
         orb.info('    could not write MEL, quitting.')
@@ -736,7 +741,8 @@ def write_mel_to_tsv(context, schema=None, pref_units=False,
         f.write(data)
 
 
-def get_item_data_tsv(item, schema, level, pref_units=False):
+def get_item_data_tsv(item, schema, level, pref_units=False, summary=False,
+                      qty=1):
     """
     Return a tsv string for an assembly of components with parameters / data
     elements.
@@ -746,6 +752,13 @@ def get_item_data_tsv(item, schema, level, pref_units=False):
         schema (list of str):  ids of the parameters and data elements to be
             included
         level (int): assembly level of component
+
+    Keyword Args:
+        summary (bool):  if True, combine all instances of a product in a given
+            asssembly into one line item with a computed quantity; otherwise,
+            show a line item for each usage, tagged with its reference
+            designator
+        qty (int):  quantity of the item (used for summary)
     """
     # NB:  levels are 1-based
     if isinstance(item, orb.classes['HardwareProduct']):
@@ -753,7 +766,11 @@ def get_item_data_tsv(item, schema, level, pref_units=False):
         component = item
         comp_name = (getattr(item, 'name', '') or 'Unknown').replace(
                                                             '\n', ' ').strip()
-        qty = 1
+        if not summary:
+            # if not summary, the item being a Product instance implies that
+            # it's the "root" item, so level and qty are 1
+            level = 1
+            qty = 1
     else:
         # Acu or ProjectSystemUsage
         if hasattr(item, 'component'):
@@ -799,13 +816,31 @@ def get_item_data_tsv(item, schema, level, pref_units=False):
     # orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
     if component.components:
         next_level = level + 1
-        item_names = [get_mel_item_name(acu) for acu in component.components]
-        item_names.sort()
-        acus_by_item_name = {get_mel_item_name(acu) : acu
-                             for acu in component.components}
-        for item_name in item_names:
-            data += get_item_data_tsv(acus_by_item_name[item_name], schema,
-                                      next_level)
+        if summary:
+            products_by_oid = {acu.component.oid : acu.component
+                               for acu in component.components
+                               if acu.component.oid != 'pgefobjects:TBD'}
+            qty_by_oid = {}
+            for acu in component.components:
+                oid = acu.component.oid
+                if qty_by_oid.get(oid):
+                    qty_by_oid[oid] += acu.quantity or 1
+                else:
+                    qty_by_oid[oid] = acu.quantity or 1
+            for oid in products_by_oid:
+                data += get_item_data_tsv(products_by_oid[oid],
+                                          schema, next_level,
+                                          qty=qty_by_oid[oid],
+                                          summary=True)
+        else:
+            item_names = [get_mel_item_name(acu)
+                          for acu in component.components]
+            item_names.sort()
+            acus_by_item_name = {get_mel_item_name(acu) : acu
+                                 for acu in component.components}
+            for item_name in item_names:
+                data += get_item_data_tsv(acus_by_item_name[item_name], schema,
+                                          next_level)
     return data
 
 
