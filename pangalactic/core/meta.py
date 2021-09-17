@@ -173,6 +173,15 @@ M2M = {
        'where_used' :           {'domain' : 'Product',
                                  'range'  : 'Acu'},
 
+       # *** M2M:  Qacu (Quantified Assembly Component Usage)
+       # inverse of ''
+       'q_components' :         {'domain' : 'ContinuousProduct',
+                                 'range'  : 'Qacu'},
+       # inverse of 'q_component'
+       # complementary to 'q_components'
+       'q_where_used' :         {'domain' : 'ContinuousProduct',
+                                 'range'  : 'Qacu'},
+
        # *** M2M:  RoleAssignment
        # inverse of 'assigned_to'
        'roles' :                {'domain' : 'Person',
@@ -251,6 +260,9 @@ M2M = {
 # populating a one-to-many relationship with objects.
 # Format is {property name : one2m relationship range class name}
 ONE2M = {
+         # inverse of 'activity_of'
+         'activities' :           {'domain' : 'Product',
+                                   'range'  : 'Activity'},
          # inverse of 'creator'
          'created_objects' :      {'domain' : 'Actor',
                                    'range'  : 'Modelable'},
