@@ -102,8 +102,7 @@ class Entity(dict):
     'dmz' (DataMatrix) cache along with its containing DataMatrix.  Attributes
     other than its metadata are accessed via the `data_elementz` and
     `parameterz` caches; therefore, an Entity does not store any data locally
-    other than its metadata, and its 'oid' is used as a key when interfacing to
-    the caches.
+    and its 'oid' is used as a key when interfacing to the caches.
 
     Attributes:
         oid (str):  a unique identifier
@@ -196,8 +195,8 @@ class Entity(dict):
             # print('  - got parameter.')
             return get_pval(self.oid, k)
         else:
-            # k is a data element
-            # print('  - got data element.')
+            # k is a data element or undefined
+            # print('  - got data element or undefined.')
             return get_dval(self.oid, k)
 
     def get(self, k, *default):
@@ -237,20 +236,22 @@ class Entity(dict):
         # log.debug(f'* Entity.__setitem__({k}, {v})')
         # print(f'* Entity.__setitem__({k}, {v})')
         # NOTE: for 'oid', it is both an object attribute and a dict key
-        if k == 'oid':
-            object.__setattr__(self, 'oid', v)
+        success = False
+        previous_self = deepcopy(self)
+        if k in ['oid', 'system_name']:
+            object.__setattr__(self, k, v)
+            success = True
         else:
-            previous_self = deepcopy(self)
             if k in parm_defz:
                 success = set_pval(self.oid, k, v)
-            else:
+            elif k in de_defz:
                 success = set_dval(self.oid, k, v)
-            if success:
-                # add previous self to history ...
-                if not self.oid in ent_histz:
-                    ent_histz[self.oid] = [deepcopy(previous_self)]
-                else:
-                    ent_histz[self.oid].append(deepcopy(previous_self))
+        if success:
+            # add previous self to history ...
+            if not self.oid in ent_histz:
+                ent_histz[self.oid] = [deepcopy(previous_self)]
+            else:
+                ent_histz[self.oid].append(deepcopy(previous_self))
 
     def __delitem__(self, k):
         if k in parameterz.get(self.oid, {}):
@@ -279,7 +280,11 @@ class Entity(dict):
                              for k in data_elementz.get(self.oid, {})])
         else:
             des += 'None'
-        return '{<Entity "' + self.oid + '">: ' + ', '.join([parms, des]) + '}'
+        s = '<Entity "' + self.oid + '">: '
+        for a in self.metadata:
+            s += '\n' + ': '.join([a, getattr(self, a) or ''])
+        s += '\n{' + '\n'.join([parms, des]) + '}'
+        return s
 
     def undo(self):
         if self.oid in ent_histz and ent_histz[self.oid]:
@@ -634,11 +639,13 @@ class DataMatrix(list):
             context (Project or Product):  the project or system to which the
                 MEL parameters pertain
         """
-        log.debug(f'* recompute_mel({context.id})')
+        log.debug('* recompute_mel()')
         row = 0
         # re-mapping, so set all entities as not mapped
         for e in self:
             e.mapped = False
+        if not context:
+            return
         if context.__class__.__name__ == 'Project':
             log.debug(f'  recomputing MEL for Project "{context.id}" ...')
             # context is Project, so may include several systems

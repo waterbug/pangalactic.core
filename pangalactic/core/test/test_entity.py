@@ -3,7 +3,6 @@
 Unit tests for pangalactic.core.entity
 """
 import unittest
-from copy import deepcopy
 
 # pangalactic
 from pangalactic.core.entity import DataMatrix, dmz, load_dmz, save_dmz
@@ -82,7 +81,7 @@ class EntityTest(unittest.TestCase):
         """
         e['bogus'] = 5.0
         value = e['bogus']
-        expected = None
+        expected = '-'
         self.assertEqual(expected, value)
 
     def test_06_data_matrix_save_and_load(self):

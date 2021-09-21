@@ -371,7 +371,7 @@ class UberORB(object):
         self.load_reference_data()
         # ---------------------------------------------------------------------
         # ### NOTE:  user or app configured schemas can override reference data
-        # -- if there are any pre-configured schemas, they are updated here ...
+        # -- if schemas are specified in "config", they are updated here ...
         if config.get('schemaz'):
             schemaz.update(config['schemaz'])
         # ---------------------------------------------------------------------

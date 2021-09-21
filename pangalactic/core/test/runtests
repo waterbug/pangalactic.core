@@ -7,6 +7,7 @@ test_uncook.py \
 test_names.py \
 test_kb.py \
 test_registry.py \
+test_entity.py \
 test_orb.py
 do
     echo
@@ -26,6 +27,3 @@ if [ -d pangalaxian_test ]; then
     rm -r ./pangalaxian_test
 fi
 
-# INACTIVE TESTS:
-
-# test_entity.py \

@@ -79,7 +79,8 @@ def fix_ctgcy(ctgcy):
 def write_mel_xlsx_from_model(context, is_project=True,
                               file_path='mel_writer_output.xlsx'):
     """
-    Output a Master Equipment List (MEL) directly from a system model.
+    Output a Master Equipment List (MEL) in "summary" format directly from a
+    system model.
 
     Args:
         context (Project or Product):  the project or system of which this is
@@ -674,6 +675,24 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
     return data
 
 
+def write_data_to_tsv(data, file_path='data.tsv'):
+    """
+    Output data in "list of dicts" format to a .tsv file.
+
+    Args:
+        data (list of dicts):  the data to write to tsv
+
+    Keyword Args:
+        file_path (str):  path to data file
+    """
+    rows = ['\t'.join(data[0].keys())]
+    for row in data:
+        rows.append('\t'.join(row.values()))
+    output = '\n'.join(rows)
+    with open(file_path, 'w') as f:
+        f.write(output)
+
+
 def write_mel_to_tsv(context, schema=None, pref_units=False, summary=False,
                      file_path='dash_data.tsv'):
     """
@@ -699,7 +718,7 @@ def write_mel_to_tsv(context, schema=None, pref_units=False, summary=False,
     context_id = getattr(context, 'id', None) or '[unknown id]'
     orb.log.debug(f'* writing Mini MEL data for {context_id} to tsv ...')
     data = ''
-    std_headers = ['system_name', 'ID', 'level', 'qty']
+    std_headers = ['System Name', 'ID', 'Level', 'Qty']
     if schema and isinstance(schema, list):
         schema_with_units = []
         for col_id in schema:
@@ -767,6 +786,7 @@ def get_item_data_tsv(item, schema, level, pref_units=False, summary=False,
         component = item
         comp_name = (getattr(item, 'name', '') or 'Unknown').replace(
                                                             '\n', ' ').strip()
+        comp_name = (level - 1) * '  ' + comp_name
         if not summary:
             # if not summary, the item being a Product instance implies that
             # it's the "root" item, so level and qty are 1
@@ -814,7 +834,6 @@ def get_item_data_tsv(item, schema, level, pref_units=False, summary=False,
             vals.append('unknown')
     comp_id = component.id
     data += '\t'.join([comp_name, comp_id, str(level), str(qty)] + vals) + '\n'
-    # orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
     if component.components:
         next_level = level + 1
         if summary:

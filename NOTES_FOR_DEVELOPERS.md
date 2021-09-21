@@ -38,9 +38,11 @@
 
     `config ..........  config file (yaml) -- see *Settings* section below`
 
-    `data_elements.json ... data element storage`
+    `data_elements.json ... persistent form of "data_elementz" runtime cache`
 
     `diagrams.json .... diagram geometry storage`
+
+    `dms.json ......... persistent form of "dmz" cache of DataMatrix instances`
 
     `icons/ ........... "built-in" icons (icons generated at runtime are saved in vault/icons; all other data files are simply added to the "vault" directory)`
 
@@ -52,11 +54,11 @@
 
     `onto/ ............ contains pgef.owl (OWL ontology file)`
 
-    `parameters.json .. parameter storage`
+    `parameters.json .. persistent form of "parameterz" runtime cache`
 
     `prefs ............ saved preferences (yaml) -- see *Settings* section below`
 
-    `schemas.json ..... schemas for data matrix`
+    `schemas.json ..... persistent form of "schemaz" cache, used by DataMatrix`
 
     `server_cert.pem .. certificate for message bus host (enables TLS connection)`
 
@@ -108,7 +110,6 @@
 
     `port:                  (str)  port to use for message bus host connection`
 
-    `schemaz:               (list) pre-configured schemas`
 
     `tall_logo:             (str)  "tall" logo icon file name`
 
@@ -235,6 +236,18 @@
     `     state["test_project_loaded"] is false, the H2G2 test project and its`
     `     data will be loaded; if true, H2G2 has already been loaded -- see`
     `     pangalactic.vger.vger.RepositoryService.`
+
+## Runtime Caches
+
+Certain data structures are maintained in python dictionaries at runtime to
+optimize performance.
+
+* `componentz`
+* `data_elementz`
+* `de_defz`
+* `parameterz`
+* `parm_defz`
+* `schemaz`
 
 ## Modes and Views
 
