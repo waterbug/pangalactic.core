@@ -880,7 +880,7 @@ class UberORB(object):
             self.db.add(o)
         # [6] check for updates to reference data other than parameter defs
         # self.log.debug('  + checking for updates to reference data ...')
-        all_ref = refdata.initial + refdata.core
+        all_ref = refdata.initial + refdata.core + refdata.deds
         all_ref_oids = [so['oid'] for so in all_ref]
         # get mod_datetimes of all current ref data objects
         mod_dts = self.get_mod_dts(oids=all_ref_oids)
