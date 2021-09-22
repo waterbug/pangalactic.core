@@ -116,7 +116,7 @@ def write_mel_xlsx_from_model(context, is_project=True,
     col_widths[18] = 14   # Peak Power Contingency [%]
     col_widths[19] = 14   # Peak Total Power w/ Contingency (MEV)
     col_widths[20] = 16   # QUIESCENT Total Power [W] (CBE)
-    col_widths[21] = 12   # Quoted Unit Price ($K)
+    col_widths[21] = 12   # Quoted Unit Price ($)
     col_widths[22] = 24   # Composition
     col_widths[23] = 40   # ADDITIONAL INFORMATION
     col_widths[24] = 18   # TRL
@@ -219,7 +219,7 @@ def write_mel_xlsx_from_model(context, is_project=True,
     worksheet.write(hrow2, 19, 'Total\nPower [W]\nwith\nContingency\n(MEV)',
                     fmts['ctr_gray_12'])
     worksheet.write(hrow2, 20, 'Total Power\n[W] (CBE)', fmts['ctr_gray_12'])
-    worksheet.merge_range(hrow1, 21, hrow2, 21, 'Quoted\nUnit\nPrice\n($K)',
+    worksheet.merge_range(hrow1, 21, hrow2, 21, 'Quoted\nUnit\nPrice\n($)',
                           fmts['ctr_pale_blue_12'])
     worksheet.merge_range(hrow1, 22, hrow2, 22, 'Composition',
                           fmts['ctr_pale_blue_12'])
@@ -903,7 +903,7 @@ def write_mel_xlsx_from_datagrid(context, is_project=True,
     col_widths[18] = 14   # Peak Power Contingency [%]
     col_widths[19] = 14   # Peak Total Power w/ Contingency (MEV)
     col_widths[20] = 16   # QUIESCENT Total Power [W] (CBE)
-    col_widths[21] = 12   # Quoted Unit Price ($K)
+    col_widths[21] = 12   # Quoted Unit Price ($)
     col_widths[22] = 24   # Composition
     col_widths[23] = 40   # ADDITIONAL INFORMATION
     col_widths[24] = 18   # TRL
@@ -1005,7 +1005,7 @@ def write_mel_xlsx_from_datagrid(context, is_project=True,
     worksheet.write(hrow2, 19, 'Total\nPower [W]\nwith\nContingency\n(MEV)',
                     fmts['ctr_gray_12'])
     worksheet.write(hrow2, 20, 'Total Power\n[W] (CBE)', fmts['ctr_gray_12'])
-    worksheet.merge_range(hrow1, 21, hrow2, 21, 'Quoted\nUnit\nPrice\n($K)',
+    worksheet.merge_range(hrow1, 21, hrow2, 21, 'Quoted\nUnit\nPrice\n($)',
                           fmts['ctr_pale_blue_12'])
     worksheet.merge_range(hrow1, 22, hrow2, 22, 'Composition',
                           fmts['ctr_pale_blue_12'])
