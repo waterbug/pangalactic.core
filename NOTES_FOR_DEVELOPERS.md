@@ -242,12 +242,16 @@
 Certain data structures are maintained in python dictionaries at runtime to
 optimize performance.
 
-* `componentz`
-* `data_elementz`
-* `de_defz`
-* `parameterz`
-* `parm_defz`
-* `schemaz`
+* `componentz` (defined in "parameters" module)
+  - cache of assembly components:  
+* `data_elementz` (defined in "parameters" module)
+* `de_defz` (defined in "parameters" module)
+* `dmz` (defined in "entity" module)
+  - cache of DataMatrix instances:  {oid: DataMatrix}
+* `parameterz` (defined in "parameters" module)
+* `parm_defz` (defined in "parameters" module)
+* `schemaz` (defined in "entity" module)
+  - cache of schemas:  {schema name: [col1, col2, ...]}
 
 ## Modes and Views
 

@@ -8,7 +8,6 @@ from itertools       import chain
 from uuid            import uuid4
 
 # pangalactic
-from pangalactic.core                 import config
 from pangalactic.core.parametrics     import (data_elementz, de_defz,
                                               parameterz, parm_defz,
                                               get_dval, get_pval,
@@ -310,8 +309,8 @@ class Entity(dict):
 
     def delete(self):
         """
-        Delete the entity, removing all references to it from ent_histz,
-        parameterz, data_elementz, and dmz.
+        Remove all references to the Entity from ent_histz, parameterz,
+        data_elementz, and dmz.
         """
         if self.oid in ent_histz:
             del ent_histz[self.oid]
@@ -322,7 +321,6 @@ class Entity(dict):
         dm = dmz.get(self.dm_oid)
         if dm and self in dm:
             dm.remove(self)
-
 
 # -----------------------------------------------------------------------
 # DATAMATRIX-RELATED CACHES #############################################
@@ -446,21 +444,21 @@ class DataMatrix(list):
 
     All DataMatrix instances are cached in the `dmz` dict cache, in which the
     key is the DataMatrix instance `oid`, a property composed from its
-    `project_oid` (the `oid` of its owner Project) and its `name` (which is
-    also the key used to look up its `schema` in the `schemaz` cache).
+    `project_oid` (the `oid` of its owner Project) and its `entity_class`
+    (which is also the key used to look up its `schema` in the `schemaz`
+    cache).
 
     Attributes:
         data (iterable):  an iterable of entities
-        name (str): name (which may or may not exist in the 'schemaz' cache)
         project_oid (str): oid of a project (owner of the DataMatrix)
         schema (list): list of data element ids and parameter ids
         mapped_ents (list): used when recomputing a MEL DataMatrix to keep
             track of which entities have been mapped from the assembly
             structure(s)
     """
-    def __init__(self, *data, project_oid=None, name=None, schema=None,
-                 creator=None, modifier=None, create_datetime=None,
-                 mod_datetime=None):
+    def __init__(self, *data, project_oid=None, entity_class='HardwareProduct',
+                 schema_name=None, schema=None, creator=None, modifier=None,
+                 create_datetime=None, mod_datetime=None):
         """
         Initialize.
 
@@ -469,7 +467,10 @@ class DataMatrix(list):
 
         Keyword Args:
             project_oid (str): oid of a project (owner of the DataMatrix)
-            name (str): name (which may or may not exist in 'schemaz')
+            entity_class (str):  name of the class of the contained entities
+                (e.g. "HardwareProduct", "Activity", "Requirement")
+            schema_name (str): name of a schema to be looked up in the
+                'schemaz' cache
             schema (list): list of data element ids and parameter ids
             creator (str):  oid of the entity's creator
             modifier (str):  oid of the entity's last modifier
@@ -477,19 +478,18 @@ class DataMatrix(list):
             mod_datetime (str):  iso-format string of last mod datetime
         """
         super().__init__(*data)
-        sig = f'project_oid="{project_oid}", name="{name}"'
+        sig = f'project_oid="{project_oid}", entity_class="{entity_class}"'
         log.debug('* DataMatrix({})'.format(sig))
         dt = str(dtstamp())
+        self.entity_class = entity_class
         self.creator = creator or 'pgefobjects:admin'
         self.modifier = modifier or 'pgefobjects:admin'
         self.create_datetime = create_datetime or dt
         self.mod_datetime = mod_datetime or dt
-        # NOTE:  self.project_oid and self.name MUST be set before accessing
-        # self.oid, which is computed from them ...
+        # NOTE:  self.project_oid and self.entity_class MUST be set before
+        # accessing self.oid, which is computed from them ...
         self.project_oid = project_oid or 'pgefobjects:SANDBOX'
         log.debug(f'  - project_oid set to: {self.project_oid}')
-        self.name = name or 'custom'
-        log.debug('  - name set to: "{}"'.format(name))
         # check for a cached DataMatrix instance with our computed oid ...
         log.debug(f'  checking `dmz` cache for oid "{self.oid}" ...')
         log.debug('  dmz cache is: {}'.format(str(dmz)))
@@ -498,23 +498,23 @@ class DataMatrix(list):
             del dmz[self.oid]
             log.debug('    removed.')
         self.schema = schema
-        if schema:
-            log.debug('    registering new schema in schemaz cache ...')
-            # if a schema is passed in, use it and register it in schemaz ...
-            schemaz[self.oid] = self.schema
-        elif schemaz.get(name):
-            log.debug(f'    found "{name}" schema in schemaz cache ...')
-            self.schema = schemaz[name]
-        elif config.get('schemas', {}).get(name):
-            log.debug(f'    found "{name}" schema in config ...')
-            self.schema = config['schemas'][name]
-        else:
-            log.debug(f'    "{name}" schema not found, using generic ...')
-            self.name = config.get('default_schema_name') or 'generic'
-            self.schema = schemaz.get(self.name) or ['system_name']
+        if not schema:
+            if schemaz.get(schema_name):
+                log.debug(f'    found "{schema_name}" in schemaz cache ...')
+                self.schema = schemaz[schema_name]
+            else:
+                log.debug(f'    "{schema_name}" schema not found ...')
+                if entity_class == 'HardwareProduct':
+                    self.schema_name = 'MEL'
+                    self.schema = schemaz.get('MEL') or ['system_name']
+                    log.debug('    using "MEL".')
+                else:
+                    # TODO: set default schemas for Activity and Requirement
+                    self.schema_name = 'Default'
+                    self.schema = ['system_name']
         # look for pre-defined column labels, or use names/ids as defaults
         if self.schema:
-            log.debug(f'    setting column labels for "{name}" schema ...')
+            log.debug('    setting column labels ...')
             self.column_labels = [
                 (de_defz.get(col_id, {}).get('label', '')
                  or parm_defz.get(col_id, {}).get('label', '')
@@ -526,7 +526,7 @@ class DataMatrix(list):
 
     @property
     def oid(self):
-        return '-'.join([self.project_oid, self.name])
+        return '-'.join([self.project_oid, self.entity_class, 'DataMatrix'])
 
     def __str__(self):
         s = 'DataMatrix: '
@@ -629,6 +629,42 @@ class DataMatrix(list):
             return False
         self.pop(i)
         return True
+
+    def recompute(self, context):
+        """
+        Recompute parameters / data elements for the DataMatrix.
+
+        Args:
+            context (Project or Product):  the project or system to which the
+                MEL parameters pertain
+        """
+        if self.entity_class == 'HardwareProduct':
+            self.recompute_mel(context)
+        elif self.entity_class == 'Activity':
+            self.map_activities(context)
+        elif self.entity_class == 'Requirement':
+            self.map_requirements(context)
+
+    def map_activities(self, context):
+        """
+        Compute parameters / data elements for a project's Activity model
+        (ConOps).
+
+        Args:
+            context (Project or Product):  the project or system to which the
+                parameters pertain
+        """
+        pass
+
+    def map_requirements(self, context):
+        """
+        Compute parameters / data elements for a project's Requirements.
+
+        Args:
+            context (Project or Product):  the project or system to which the
+                parameters pertain
+        """
+        pass
 
     def recompute_mel(self, context):
         """
