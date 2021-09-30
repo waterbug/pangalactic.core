@@ -32,7 +32,7 @@ PGXN_REQD = dict(
 # app-specific settings defined in the 'pangalactic.config' module-level
 # dictionary.
 # TODO:  support for field "aliases" (a.k.a. "display names")
-SYSTEM = ['version', 'version_sequence', 'iteration', 'derived_from']
+SYSTEM = ['version', 'version_sequence', 'iteration']
 MAIN_VIEWS = dict(
     Activity=(IDENTITY + ['activity_type', 'activity_of']),
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
@@ -317,10 +317,9 @@ PGXN_MASK = dict(
     HardwareProduct=(PGXN_HIDE + ['frozen']),
     ParameterDefinition=(PGXN_HIDE + ['base_parameters', 'computed_by_default',
                          'generating_function', 'used_in_disciplines']),
-    Requirement=(PGXN_HIDE + ['components', 'derived_from', 'fsc_code',
-                 'has_models', 'ports', 'product_type',
-                 'specification_number']),
-    Test=(PGXN_HIDE + ['components', 'fsc_code', 'product_type'])
+    Requirement=(PGXN_HIDE + ['fsc_code', 'has_models', 'ports',
+                 'product_type', 'specification_number']),
+    Test=(PGXN_HIDE + ['fsc_code', 'product_type'])
     )
 
 # PGXN_DATA_VIEW:  minimal set of Data Elements to be displayed in the object
@@ -518,7 +517,6 @@ PGEF_COL_NAMES = {
 READONLY = [
             'allocated_to_functions', # m2m (Requirement:Acu)
             'allocated_to_systems', # m2m (Requirement:ProjectSystemUsage)
-            'components',       # m2m (Acu)
             'creator',          #  "   "    "   "
             'create_datetime',  # tds
             'has_models',       # inverse of 'of_thing' property of Model
