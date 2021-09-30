@@ -32,7 +32,7 @@ PGXN_REQD = dict(
 # app-specific settings defined in the 'pangalactic.config' module-level
 # dictionary.
 # TODO:  support for field "aliases" (a.k.a. "display names")
-SYSTEM = ['version_sequence', 'iteration', 'derived_from']
+SYSTEM = ['version', 'version_sequence', 'iteration', 'derived_from']
 MAIN_VIEWS = dict(
     Activity=(IDENTITY + ['activity_type', 'activity_of']),
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
@@ -41,7 +41,8 @@ MAIN_VIEWS = dict(
     DisciplineProductType=['used_in_discipline', 'relevant_product_type'],
     DisciplineRole=['related_to_discipline', 'related_role'],
     Flow=['flow_context', 'start_port', 'end_port'],
-    HardwareProduct=(PGXN_REQD['Product'] + ['product_type', 'public']
+    HardwareProduct=(PGXN_REQD['Product']
+                     + ['id_ns', 'abbreviation', 'product_type', 'public']
                      + SYSTEM),
     Model=(IDENTITY + ['type_of_model', 'of_thing']),
     ModelFamily=IDENTITY,
@@ -55,7 +56,9 @@ MAIN_VIEWS = dict(
     ParameterDefinition=(IDENTITY + ['range_datatype', 'dimensions']),
     ParameterRelation=['referenced_relation', 'correlates_parameter'],
     Port=['id', 'name', 'of_product', 'type_of_port'],
-    Product=(PGXN_REQD['Product'] + ['public'] + SYSTEM),
+    Product=(PGXN_REQD['Product']
+             + ['id_ns', 'abbreviation', 'public']
+             + SYSTEM),
     ProductType=IDENTITY,
     ProductTypeParameterDefinition=['used_in_product_type',
                                     'parameter_definition'],
