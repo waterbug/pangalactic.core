@@ -14,7 +14,7 @@ from pangalactic.core.units import in_si
 # PGXN_REQD:  Properties that are validated by PgxnObject to be non-empty
 # SEE ALSO:  PGXN_HIDE and PGXN_MASK (fields never shown for a class -- defined
 # below)
-IDENTITY = ['id', 'name', 'description']
+IDENTITY = ['id', 'id_ns', 'name', 'abbreviation', 'description']
 PRODUCT_ID = ['id', 'version', 'name', 'description']
 PGXN_REQD = dict(
     HardwareProduct=['name', 'description', 'owner', 'product_type'],
@@ -56,7 +56,7 @@ MAIN_VIEWS = dict(
     ParameterRelation=['referenced_relation', 'correlates_parameter'],
     Port=['id', 'name', 'of_product', 'type_of_port'],
     Product=(PGXN_REQD['Product'] + ['public'] + SYSTEM),
-    ProductType=['abbreviation'] + IDENTITY,
+    ProductType=IDENTITY,
     ProductTypeParameterDefinition=['used_in_product_type',
                                     'parameter_definition'],
     Project=(IDENTITY + ['parent_organization']),

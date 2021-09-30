@@ -395,7 +395,7 @@ def load_dmz(dir_path):
             deser_dms = {oid: DataMatrix([
                               Entity(**se) for se in sdm['ents']],
                               project_oid=sdm['project_oid'],
-                              name=sdm['name'],
+                              entity_class=sdm['entity_class'],
                               creator=sdm['creator'],
                               modifier=sdm['modifier'],
                               create_datetime=sdm['create_datetime'],
@@ -420,7 +420,7 @@ def save_dmz(dir_path):
     """
     log.debug('* save_dmz() ...')
     ser_dms = {oid: dict(project_oid=dm.project_oid,
-                         name=dm.name,
+                         entity_class=dm.entity_class,
                          ents=[e.serialize_meta() for e in dm],
                          creator=dm.creator,
                          modifier=dm.modifier,
