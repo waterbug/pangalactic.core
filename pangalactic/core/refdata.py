@@ -2098,26 +2098,26 @@ dict(
     'oid': 'pgefobjects:ProductType.instrument',
     'id': 'instrument',
     'name': 'Instrument',
-    'abbreviation': 'Inst',
+    'abbreviation': 'Instr',
     'description': 'Instrument',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2021-10-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.observatory',
     'id': 'observatory',
     'name': 'Observatory',
-    'abbreviation': 'Observ',
+    'abbreviation': 'Obsrv',
     'description': 'Observatory',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2021-10-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
