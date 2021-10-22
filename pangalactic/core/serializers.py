@@ -540,9 +540,6 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         psus.add(obj)
                     elif isinstance(obj, orb.classes['Product']):
                         products.append(obj)
-                        if cname == 'HardwareProduct':
-                            # make sure 'id' is correctly generated
-                            obj.id = orb.gen_product_id(obj)
                     if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                         recompute_parmz_required = True
                 else:
