@@ -2104,20 +2104,20 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-10-01 00:00:00'
+    'mod_datetime': '2021-10-03 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.observatory',
     'id': 'observatory',
     'name': 'Observatory',
-    'abbreviation': 'Obsrv',
+    'abbreviation': 'Observ',
     'description': 'Observatory',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-10-01 00:00:00'
+    'mod_datetime': '2021-10-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',

@@ -1376,7 +1376,8 @@ class UberORB(object):
         # self.log.debug('  id_suffixes:')
         # self.log.debug('  {}'.format(str(id_suffixes)))
         current_id_parts = (obj.id or '').split('-')
-        # self.log.debug('  current_id_parts: {}'.format(str(current_id_parts)))
+        # self.log.debug('  current_id_parts: {}'.format(
+                                                # str(current_id_parts)))
         if current_id_parts[-1] in id_suffixes:
             id_suffixes.remove(current_id_parts[-1])
         owner_id = getattr(obj.owner, 'id', 'Owner-unspecified')
