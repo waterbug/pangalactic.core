@@ -520,7 +520,6 @@ READONLY = [
             'creator',          #  "   "    "   "
             'create_datetime',  # tds
             'has_models',       # inverse of 'of_thing' property of Model
-            'id_ns',            # derive from 'owner'; might be YAGNI ...
             'iteration',
             'modifier',         # set from user id
             'mod_datetime',     # tds
