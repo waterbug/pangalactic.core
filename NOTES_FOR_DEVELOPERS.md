@@ -137,8 +137,6 @@
 
     `active_users:     (list) ids of users that have registered public keys`
 
-    `assigned_roles[2]: (dict) maps proj/org oids to assigned role names for user`
-
     `cloaked:          (list) oids of local cloaked objects`
 
     `connected:        (bool) true if logged in to message bus`
@@ -177,7 +175,7 @@
 
     `synced_projects[4]: (list) oids of projects that have been synced`
 
-    `sys_trees[5]:     (dict) maps project ids to system tree attributes`
+    `sys_tree_expansion[5]: (dict) maps project oids to tree expansion level`
 
     `system:           (str)  oid of currently selected system (Product or`
     `                         Project) -- may be selected by clicking on an item`
@@ -224,13 +222,10 @@
     `     "synced_projects".  The "synced_projects" list is cleared when the`
     `     session ends.`
 
-    `[5]: "sys_trees" data structure:`
+    `[5]: "sys_tree_expansion" data structure:`
 
-    `    {project id : {nodes : (int) # of nodes in sys tree (used in`
-    `                           calculating progress bar for tree rebuilds)`
-    `                   expanded : (list) indexes of expanded nodes in sys tree`
-    `                              (used in restoring state when tree is rebuilt)`
-    `                  }}`
+    `    {project oid : (int) index in the "levels" combo (2 to 5 levels)`
+                              for state of sys tree expansion in that project}`
 
     `[6]: (server only) for vger, if "test" arg is true and`
     `     state["test_project_loaded"] is false, the H2G2 test project and its`
