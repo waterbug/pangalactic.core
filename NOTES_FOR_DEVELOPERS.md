@@ -38,7 +38,7 @@
 
     `config ..........  config file (yaml) -- see *Settings* section below`
 
-    `data_elements.json ... persistent form of "data_elementz" runtime cache`
+    `data_elements.json ... persistent form of "data_elementz" runtime cache -- see p.core.parametrics module`
 
     `diagrams.json .... diagram geometry storage`
 
@@ -52,9 +52,13 @@
 
     `log/ ............. logs`
 
+    `modes.yaml ....... persistent form of "modez" runtime cache -- see p.core.parametrics module`
+
+    `mode_defs.yaml ... persistent form of "mode_defz" runtime cache -- see p.core.parametrics module`
+
     `onto/ ............ contains pgef.owl (OWL ontology file)`
 
-    `parameters.json .. persistent form of "parameterz" runtime cache`
+    `parameters.json .. persistent form of "parameterz" runtime cache -- see p.core.parametrics module`
 
     `prefs ............ saved preferences (yaml) -- see *Settings* section below`
 

@@ -7,6 +7,9 @@ from copy        import deepcopy
 from decimal     import Decimal
 from math        import floor, fsum, log10
 
+# ruamel_yaml
+import ruamel_yaml as yaml
+
 # pangalactic
 from pangalactic.core                 import config, state, prefs
 from pangalactic.core.datastructures  import OrderedSet
@@ -37,8 +40,13 @@ NULL = dict(float=0.0, int=0, str='', bool=False, text='', array=[])
 TWOPLACES = Decimal('0.01')
 
 # NOTE! #####################################################################
-# For Data Element handling, see DATA ELEMENT SECTION, at the end ...
+# For Data Element handling, see DATA ELEMENT SECTION
+# For Mode handling, see MODE SECTION
 # NOTE! #####################################################################
+
+################################################
+# PARAMETER SECTION
+################################################
 
 # PARAMETER CACHES ##########################################################
 
@@ -69,26 +77,24 @@ parm_defz = {}
 
 # parameterz:  persistent** cache of assigned parameter values
 #              ** persisted in the file 'parameters.json' in the
-#              application home directory -- see the orb functions
-#              `_save_parmz` and `_load_parmz`
+#              application home directory -- see the functions
+#              `save_parmz` and `load_parmz`
+#
 # format:  {object.oid : {'parameter id': value
 #                         ...}}
+#
 # NOTE:  "value" is ALWAYS stored in base mks units
 parameterz = {}
 
 def serialize_parms(oid):
     """
-    Output the serialized format for parameters. Note that the values are
-    *always* expressed in *base* units and the 'units' field contains the
-    preferred units to be used when displaying the value in the user interface
-    (i.e., the value must be converted to those units for display).
+    Output the parameters for an object. Note that the values are *always*
+    expressed in *base* units and the 'units' field contains the preferred
+    units to be used when displaying the value in the user interface (i.e., the
+    value must be converted to those units for display).
 
     Args:
-        obj_parms (dict):  a dictionary containing the parameters
-            associated with an object (for a given object `obj`, its
-            parameters dictionary will be `parameterz[obj.oid]`).
-
-    Serialize the dictionary of parameters associated with an object.
+        oid (str):  oid of the object to which the parameters apply.
     """
     if oid in parameterz and parameterz[oid] is not None:
         return {pid: parameterz[oid][pid]
@@ -463,18 +469,43 @@ def node_count(product_oid):
     return count
 
 def get_parameter_id(variable, context_id):
+    """
+    Given a variable and a context id, return a parameter id.
+    """
     pid = variable
     if context_id:
         pid += '[' + context_id + ']'
     return pid
 
+def get_variable_and_context(parameter_id):
+    """
+    Given a parameter id, return its variable and context id (substituting
+    "Nominal" for "CBE").
+    """
+    if '[' in parameter_id:
+        try:
+            var, ctx = parameter_id.split('[')[0], parameter_id.split('[')[1][:-1]
+            if ctx == 'CBE':
+                return (var, 'Nominal')
+            return (var, ctx)
+        except:
+            return ('', '')
+    return ('', '')
+
 def get_parameter_name(variable_name, context_abbr):
+    """
+    Given a variable name and a context abbreviation, return a parameter name.
+    """
     name = variable_name
     if context_abbr:
         name += ' [' + context_abbr + ']'
     return name
 
 def get_parameter_description(variable_desc, context_desc):
+    """
+    Given a variable description and a context description, return a parameter
+    description.
+    """
     desc = variable_desc
     if context_desc:
         desc += ' [' + context_desc + ']'
@@ -1327,8 +1358,9 @@ de_defz = {}
 
 # data_elementz:  persistent** cache of assigned data element values
 #              ** persisted in the file 'data_elements.json' in the
-#              application home directory -- see the orb functions
+#              application home directory -- see the functions
 #              `save_data_elementz` and `load_data_elementz`
+#
 # format:  {oid : {'data element id': value,
 #                   ...}}
 data_elementz = {}
@@ -1738,4 +1770,160 @@ def add_default_data_elements(obj, des=None):
         log.debug(f'  - adding default data elements {deids_to_add} ...')
         for deid in deids_to_add:
             add_data_element(obj.oid, deid)
+
+################################################
+# MODE SECTION
+################################################
+
+# MODE CACHES ##########################################################
+
+# mode_defz:  persistent** cache of system power mode definitions, which
+#             consist of a set of systems / subsystems and the applicable power
+#             states of each during a specified mode
+#             ** persisted in the file 'mode_defs.json' in the
+#             application home directory -- see the functions
+#             `save_mode_defz` and `load_mode_defz`
+#
+# format:  {project A oid:
+#               'modes': {mode 1 name: default,
+#                         mode 2 name: default,
+#                         ...},
+#               'systems':
+#                  {psu 1 oid: {mode 1 name: context,
+#                               mode 2 name: context,
+#                                ...},
+#                   psu 2 oid: {mode 1 name: context,
+#                               mode 2 name: context,
+#                                ...},
+#                   acu 1 oid: {mode 1 name: context,
+#                               mode 2 name: context,
+#                                ...}
+#                   ...},
+#               'components':
+#                  {psu 1 oid:
+#                       {acu 3 oid: {mode 1 name: context,
+#                                    mode 2 name: context,
+#                                    ...},
+#                        acu 4 oid: {mode 1 name: context,
+#                                    mode 2 name: context,
+#                                    ...}
+#                        ...},
+#                   psu 2 oid:
+#                       {acu 5 oid ...},
+#                   acu 1 oid:
+#                       {acu 6 oid ...}
+#                   ...},
+#           project B oid:
+#               {...}
+#           }
+# ... where
+#   context:    None, "computed", or a ParameterContext id
+#   default:    context used if None is specified
+mode_defz = {}
+
+# modez:   persistent** cache of power values during specified modes
+#          ** persisted in the file 'modes.json' in the
+#          application home directory -- see the functions
+#          `save_modez` and `load_modez`
+#
+# format:  {project.oid: 'mode id' : {usage oid: value,
+#                                     usage oid: value,
+#                                      ...}}
+# NOTE:  "value" is ALWAYS stored in base mks units
+modez = {}
+
+
+def serialize_modes(oid):
+    """
+    Serialized the modes for an object. Note that the values are *always*
+    expressed in *base* units and the 'units' field contains the preferred
+    units to be used when displaying the value in the user interface (i.e., the
+    value must be converted to those units for display).
+
+    Args:
+        oid (str):  oid of the object to which the modes apply.
+    """
+    if oid in modez and modez[oid] is not None:
+        return {mode_id: modez[oid][mode_id]
+                for mode_id in modez[oid]}
+    else:
+        return {}
+
+def deserialize_modes(oid, ser_modes, cname=None):
+    """
+    Deserialize the modes for an object. Note that the values are *always*
+    expressed in base units and the 'units' field contains the preferred units
+    to be used when displaying the value in the user interface (i.e., the value
+    must be converted to those units for display).
+
+    Args:
+        oid (str):  oid attr of the object to which the modes are assigned
+        ser_modes (dict):  the serialized modes dictionary
+
+    Keyword Args:
+        cname (str):  class name of the object to which the modes are
+            assigned (only used for logging)
+    """
+    # if cname:
+        # log.debug('* deserializing modes for {} ({})...'.format(oid, cname))
+        # log.debug('  modes: {}'.format(ser_modes))
+    if not ser_modes:
+        # log.debug('  object with oid "{}" has no modes'.format(oid))
+        return
+    # ser_modes is non-empty
+    mode_ids_to_delete = []
+    # this covers (1) oid not in modez and (2) oid in modez but value
+    # is None
+    if not modez.get(oid):
+        modez[oid] = {}
+    for mode_id, value in ser_modes.items():
+        if mode_id in mode_defz:
+            # yes, this is a valid mode (has a mode definition)
+            modez[oid][mode_id] = value
+        else:
+            # log_msg = 'unknown id found in modes: "{}"'.format(mode_id)
+            # log.debug('  - {}'.format(log_msg))
+            # mode_id has no definition, so it should not be in modez or
+            # data_elementz
+            if mode_id in modez[oid]:
+                mode_ids_to_delete.append(mode_id)
+    # delete any undefined modes
+    for mode_id in mode_ids_to_delete:
+        if mode_id in modez[oid]:
+            del modez[oid][mode_id]
+
+
+def load_modez(dir_path):
+    """
+    Load the `modez` dict from yaml file in cache format.
+    """
+    log.debug('* load_modez() ...')
+    fpath = os.path.join(dir_path, 'modes.yaml')
+    if os.path.exists(fpath):
+        with open(fpath) as f:
+            try:
+                stored_modez = yaml.safe_load(f.read())
+            except:
+                log.debug('  - reading of "modes.yaml" failed.')
+                return 'fail'
+        modez.update(stored_modez)
+        log.debug('  - modez cache loaded.')
+        return 'success'
+    else:
+        log.debug('  - "modes.yaml" was not found.')
+        return 'not found'
+
+
+def save_modez(dir_path):
+    """
+    Save `modez` dict to a yaml file in cache format.
+    """
+    log.debug('* save_modez() ...')
+    stored_modez = {}
+    for oid, mode in modez.items():
+        stored_modez[oid] = serialize_modes(oid)
+    fpath = os.path.join(dir_path, 'modes.yaml')
+    with open(fpath, 'w') as f:
+        f.write(yaml.safe_dump(stored_modez, default_flow_style=False))
+    log.debug(f'  ... modes.yaml file written to {dir_path}.')
 

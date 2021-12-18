@@ -2295,7 +2295,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
     <owl:Class rdf:about="&pgef;ActivityType">
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The type of an Activity.  Reference examples are "Operation", "Event", "Cycle", "Mode".  Note that "Mode" is considered to be synonymous with "State".</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of an Activity.  Reference examples are "Operation", "Event", "Cycle".</rdfs:comment>
     </owl:Class>
 
 
