@@ -1821,109 +1821,179 @@ def add_default_data_elements(obj, des=None):
 #   default:    context used if None is specified
 mode_defz = {}
 
-# modez:   persistent** cache of power values during specified modes
-#          ** persisted in the file 'modes.json' in the
-#          application home directory -- see the functions
-#          `save_modez` and `load_modez`
-#
-# format:  {project.oid: 'mode id' : {usage oid: value,
-#                                     usage oid: value,
-#                                      ...}}
-# NOTE:  "value" is ALWAYS stored in base mks units
-modez = {}
 
-
-def serialize_modes(oid):
+def load_mode_defz(dir_path):
     """
-    Serialized the modes for an object. Note that the values are *always*
-    expressed in *base* units and the 'units' field contains the preferred
-    units to be used when displaying the value in the user interface (i.e., the
-    value must be converted to those units for display).
-
-    Args:
-        oid (str):  oid of the object to which the modes apply.
+    Load the `mode_defz` dict from file in cache format (yaml).
     """
-    if oid in modez and modez[oid] is not None:
-        return {mode_id: modez[oid][mode_id]
-                for mode_id in modez[oid]}
-    else:
-        return {}
-
-def deserialize_modes(oid, ser_modes, cname=None):
-    """
-    Deserialize the modes for an object. Note that the values are *always*
-    expressed in base units and the 'units' field contains the preferred units
-    to be used when displaying the value in the user interface (i.e., the value
-    must be converted to those units for display).
-
-    Args:
-        oid (str):  oid attr of the object to which the modes are assigned
-        ser_modes (dict):  the serialized modes dictionary
-
-    Keyword Args:
-        cname (str):  class name of the object to which the modes are
-            assigned (only used for logging)
-    """
-    # if cname:
-        # log.debug('* deserializing modes for {} ({})...'.format(oid, cname))
-        # log.debug('  modes: {}'.format(ser_modes))
-    if not ser_modes:
-        # log.debug('  object with oid "{}" has no modes'.format(oid))
-        return
-    # ser_modes is non-empty
-    mode_ids_to_delete = []
-    # this covers (1) oid not in modez and (2) oid in modez but value
-    # is None
-    if not modez.get(oid):
-        modez[oid] = {}
-    for mode_id, value in ser_modes.items():
-        if mode_id in mode_defz:
-            # yes, this is a valid mode (has a mode definition)
-            modez[oid][mode_id] = value
-        else:
-            # log_msg = 'unknown id found in modes: "{}"'.format(mode_id)
-            # log.debug('  - {}'.format(log_msg))
-            # mode_id has no definition, so it should not be in modez or
-            # data_elementz
-            if mode_id in modez[oid]:
-                mode_ids_to_delete.append(mode_id)
-    # delete any undefined modes
-    for mode_id in mode_ids_to_delete:
-        if mode_id in modez[oid]:
-            del modez[oid][mode_id]
-
-
-def load_modez(dir_path):
-    """
-    Load the `modez` dict from yaml file in cache format.
-    """
-    log.debug('* load_modez() ...')
-    fpath = os.path.join(dir_path, 'modes.yaml')
+    log.debug('* load_mode_defz() ...')
+    fpath = os.path.join(dir_path, 'mode_defs.yaml')
     if os.path.exists(fpath):
         with open(fpath) as f:
             try:
-                stored_modez = yaml.safe_load(f.read())
+                stored_mode_defz = yaml.safe_load(f.read())
             except:
-                log.debug('  - reading of "modes.yaml" failed.')
+                log.debug('  - reading of "mode_defs.yaml" failed.')
                 return 'fail'
-        modez.update(stored_modez)
-        log.debug('  - modez cache loaded.')
+        mode_defz.update(stored_mode_defz)
+        log.debug('  - mode_defz cache loaded.')
         return 'success'
     else:
-        log.debug('  - "modes.yaml" was not found.')
+        log.debug('  - "mode_defs.yaml" was not found.')
         return 'not found'
 
 
-def save_modez(dir_path):
+def save_mode_defz(dir_path):
     """
-    Save `modez` dict to a yaml file in cache format.
+    Save `mode_defz` dict to a file in cache format (yaml).
     """
-    log.debug('* save_modez() ...')
-    stored_modez = {}
-    for oid, mode in modez.items():
-        stored_modez[oid] = serialize_modes(oid)
-    fpath = os.path.join(dir_path, 'modes.yaml')
+    log.debug('* save_mode_defz() ...')
+    fpath = os.path.join(dir_path, 'mode_defs.yaml')
     with open(fpath, 'w') as f:
-        f.write(yaml.safe_dump(stored_modez, default_flow_style=False))
-    log.debug(f'  ... modes.yaml file written to {dir_path}.')
+        f.write(yaml.safe_dump(mode_defz, default_flow_style=False))
+    log.debug(f'  ... mode_defs.yaml file written to {dir_path}.')
+
+def get_mode_val(project_oid, oid, mode, units='', allow_nan=False):
+    """
+    Return a mode value in base units or in the units specified.
+
+    Args:
+        project_oid (str): the oid of the project within which the mode is
+            defined
+        oid (str): the oid of the usage that has the mode
+        mode (str): the name of the mode
+
+    Keyword Args:
+        units (str):  units in which the return value should be expressed
+    """
+    # Too verbose -- only for extreme debugging ...
+    # log.debug('* get_mode_val() ...')
+    modes = (mode_defz.get(project_oid) or {}).get('modes')
+    if mode not in modes:
+        # log.debug(f'* get_mode_val: "{}" is not defined')
+        # log.debug('  for the specified project.')
+        return
+    if oid in (mode_defz[project_oid].get('systems') or {}):
+        # TODO:  determine if computed -- if so, compute; if not, get
+        return 0
+    elif oid in (mode_defz[project_oid].get('components') or {}):
+        # TODO:  determine if computed -- if so, compute; if not, get
+        return 0
+    # if not units:
+        # # if no units are specified, return the value in base units
+        # return (parameterz[oid].get(pid) or 
+                # NULL.get(pdz.get('range_datatype', 'float') or 'float'))
+    # else:
+        # try:
+            # # convert based on dimensions/units ...
+            # dims = pdz.get('dimensions')
+            # # special cases for 'percent' and 'money'
+            # if dims == 'percent':
+                # # show percentage values in interface -- they will
+                # # later be saved (by set_pval) as .01 * value
+                # return 100.0 * (parameterz[oid].get(pid) or 0.0)
+            # elif dims == 'money':
+                # # round to 2 decimal places
+                # val = get_mode_val(oid, pid)
+                # if val is None:
+                    # return 0.0
+                # elif val:
+                    # return float(Decimal(val).quantize(TWOPLACES))
+                # else:
+                    # return 0.0
+            # else:
+                # base_val = parameterz[oid][pid]
+                # quan = Q_(base_val, ureg.parse_expression(in_si[dims]))
+                # quan_converted = quan.to(units)
+                # return quan_converted.magnitude
+        # except:
+            # # log.debug('  "{}": something bad happened with units.'.format(
+                                                                      # # pid))
+            # return NULL.get(pdz.get('range_datatype', 'float'))
+
+def get_mode_val_as_str(project_oid, oid, mode, units='', allow_nan=False):
+    """
+    Return a mode value in the specified units (or in base units if not
+    specified) as a formatted string, for display in UI.  (Used in the
+    dashboard.)
+
+    Args:
+        project_oid (str): the oid of the project within which the mode is
+            defined
+        oid (str): the oid of the usage that has the mode
+        mode (str): the name of the mode
+
+    Keyword Args:
+        units (str):  units in which the return value should be expressed
+        allow_nan (bool):  allow numpy NaN as a return value
+    """
+    # Too verbose -- only for extreme debugging ...
+    # log.debug('* get_mode_val_as_str({}, {})'.format(oid, pid))
+    modes = (mode_defz.get(project_oid) or {}).get('modes')
+    if not modes:
+        log.debug('  - modes not defined for this project.')
+        return 'no modes'
+    elif mode not in modes:
+        log.debug(f'  - mode "{mode}" not defined for this project.')
+        return 'undefined'
+    try:
+        sys_dict = mode_defz[project_oid]['systems']
+        comp_dict = mode_defz[project_oid]['components']
+        if oid in sys_dict:
+            return sys_dict[oid].get(mode) or '-'
+        elif comp_dict:
+            for sys_oid in comp_dict:
+                if oid in comp_dict[sys_oid]:
+                    return comp_dict[sys_oid][oid].get(mode) or '-'
+        return 'not found'
+        # # convert based on dimensions/units ...
+        # dims = pdz.get('dimensions')
+        # # special cases for 'percent' and 'money'
+        # if dims == 'percent':
+            # # show percentage values in interface -- they will
+            # # later be saved (by set_pval) as .01 * value
+            # val = 100.0 * get_mode_val(oid, pid)
+        # elif dims == 'money':
+            # # format with 2 decimal places
+            # val = get_mode_val(oid, pid)
+            # if val is None:
+                # return '-'
+            # elif val:
+                # return "{:,}".format(Decimal(val).quantize(TWOPLACES))
+            # else:
+                # return '0.00'
+        # else:
+            # base_val = get_mode_val(oid, pid)
+            # if units:
+                # # TODO: ignore units if not compatible
+                # quan = Q_(base_val, ureg.parse_expression(in_si[dims]))
+                # quan_converted = quan.to(units)
+                # val = quan_converted.magnitude
+            # else:
+                # val = base_val
+        # range_datatype = pdz.get('range_datatype')
+        # if range_datatype in ['int', 'float']:
+            # dtype = DATATYPES.get(range_datatype)
+            # numfmt = prefs.get('numeric_format')
+            # if numfmt:
+                # if numfmt == 'Thousands Commas':
+                    # return "{:,}".format(dtype(round_to(val)))
+                # elif numfmt == 'Scientific Notation':
+                    # return "{:.4e}".format(dtype(round_to(val)))
+                # else:   # 'No Commas'
+                    # return str(round_to(val))
+            # else:
+                # # default: Thousands Commas
+                # return "{:,}".format(dtype(round_to(val)))
+        # else:
+            # # if not an int or float, cast directly to string ...
+            # return str(val)
+    except:
+        # FOR EXTREME DEBUGGING ONLY:
+        # this logs an ERROR for every unpopulated parameter
+        # msg = '* get_mode_val_as_str({}, {})'.format(oid, pid)
+        # msg += '  encountered an error.'
+        # log.debug(msg)
+        # for production use, return '' if the value causes error
+        return 'exception'
 

@@ -36,18 +36,18 @@ from pangalactic.core.mapping     import schema_maps, schema_version
 from pangalactic.core.parametrics import (add_context_parm_def,
                                           add_default_parameters,
                                           add_default_data_elements,
-                                          add_parameter,
-                                          componentz,
+                                          add_parameter, componentz,
                                           _compute_pval,
                                           compute_requirement_margin,
                                           data_elementz, de_defz,
                                           get_parameter_id,
                                           load_data_elementz,
                                           save_data_elementz,
+                                          load_mode_defz, save_mode_defz,
+                                          mode_defz,
                                           load_parmz, save_parmz,
                                           parameterz, parm_defz,
-                                          parmz_by_dimz,
-                                          refresh_componentz,
+                                          parmz_by_dimz, refresh_componentz,
                                           refresh_req_allocz, req_allocz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
@@ -415,6 +415,7 @@ class UberORB(object):
         save_ent_histz(self.home)
         save_schemaz(self.home)
         save_dmz(self.home)
+        save_mode_defz(self.home)
         return self.home
 
     def init_registry(self, home, db_url, force_new_core=False, version='',
@@ -507,6 +508,7 @@ class UberORB(object):
         save_ent_histz(self.home)
         save_schemaz(self.home)
         save_dmz(self.home)
+        save_mode_defz(self.home)
         self.log.info('  cache saves completed ...')
         # [2] save all caches to backup dir
         if not dir_path:
@@ -522,6 +524,7 @@ class UberORB(object):
         save_ent_histz(dir_path)
         save_schemaz(dir_path)
         save_dmz(dir_path)
+        save_mode_defz(dir_path)
         self.cache_dump_complete = True
         if backup:
             self.log.info('  cache backup completed.')
@@ -770,8 +773,10 @@ class UberORB(object):
 
     def load_reference_data(self):
         """
-        Create reference data objects.  Performed at orb start up, since new
-        objects created at runtime refer to some of the reference objects.
+        Create reference data objects.  This includes loading parameters, data
+        elements, "modes" (power modes of systems), and their definitions.
+        Performed at orb start up, since new objects created at runtime refer
+        to some of the reference objects.
         """
         # self.log.info('* checking reference data ...')
         # first get the oids of everything in the db ...
@@ -864,7 +869,7 @@ class UberORB(object):
             # self.log.debug('    parameter definition updates completed.')
         # else:
             # self.log.debug('    no updates found.')
-        # [5] load balance of any reference data missiong from db
+        # [5] load balance of any reference data missing from db
         missing_c = [so for so in refdata.core if so['oid'] not in db_oids]
         objs = []
         if missing_c:
@@ -915,6 +920,10 @@ class UberORB(object):
         for req in self.get_by_type('Requirement'):
             refresh_req_allocz(req)
         self.recompute_parmz()
+        load_mode_defz(self.home)
+        if (mode_defz and
+            ('System Power Modes' not in prefs['dashboard_names'])):
+            prefs['dashboard_names'].append('System Power Modes')
         self.log.info('  + all reference data loaded.')
 
     #########################################################################
