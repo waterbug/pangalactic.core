@@ -1817,7 +1817,7 @@ def add_default_data_elements(obj, des=None):
 #               {...}
 #           }
 # ... where
-#   context:    None, "computed", or a ParameterContext id
+#   context:    None, "[computed]", or a ParameterContext id
 #   default:    context used if None is specified
 mode_defz = {}
 
@@ -1853,74 +1853,77 @@ def save_mode_defz(dir_path):
         f.write(yaml.safe_dump(mode_defz, default_flow_style=False))
     log.debug(f'  ... mode_defs.yaml file written to {dir_path}.')
 
-def get_mode_val(project_oid, oid, mode, units='', allow_nan=False):
+def get_modal_power(oid, context, units=None):
+    if context == 'Off':
+        return 0.0
+    elif context == 'Nominal':
+        return get_pval(oid, 'P[CBE]', units=units)
+    return get_pval(oid, get_parameter_id('P', context), units=units)
+
+def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
+                       allow_nan=False):
     """
-    Return a mode value in base units or in the units specified.
+    Return the power mode value for a usage in base units or in the units
+    specified.
 
     Args:
         project_oid (str): the oid of the project within which the mode is
             defined
-        oid (str): the oid of the usage that has the mode
+        usage_oid (str): the oid of the usage that has the mode
+        oid (str): the oid of the product in the usage (system or component)
         mode (str): the name of the mode
 
     Keyword Args:
         units (str):  units in which the return value should be expressed
     """
     # Too verbose -- only for extreme debugging ...
-    # log.debug('* get_mode_val() ...')
-    modes = (mode_defz.get(project_oid) or {}).get('modes')
-    if mode not in modes:
-        # log.debug(f'* get_mode_val: "{}" is not defined')
-        # log.debug('  for the specified project.')
+    # log.debug('* get_usage_mode_val() ...')
+    if project_oid not in mode_defz:
+        log.debug('* the specified project has no modes defined.')
         return
-    if oid in (mode_defz[project_oid].get('systems') or {}):
-        # TODO:  determine if computed -- if so, compute; if not, get
-        return 0
-    elif oid in (mode_defz[project_oid].get('components') or {}):
-        # TODO:  determine if computed -- if so, compute; if not, get
-        return 0
-    # if not units:
-        # # if no units are specified, return the value in base units
-        # return (parameterz[oid].get(pid) or 
-                # NULL.get(pdz.get('range_datatype', 'float') or 'float'))
-    # else:
-        # try:
-            # # convert based on dimensions/units ...
-            # dims = pdz.get('dimensions')
-            # # special cases for 'percent' and 'money'
-            # if dims == 'percent':
-                # # show percentage values in interface -- they will
-                # # later be saved (by set_pval) as .01 * value
-                # return 100.0 * (parameterz[oid].get(pid) or 0.0)
-            # elif dims == 'money':
-                # # round to 2 decimal places
-                # val = get_mode_val(oid, pid)
-                # if val is None:
-                    # return 0.0
-                # elif val:
-                    # return float(Decimal(val).quantize(TWOPLACES))
-                # else:
-                    # return 0.0
-            # else:
-                # base_val = parameterz[oid][pid]
-                # quan = Q_(base_val, ureg.parse_expression(in_si[dims]))
-                # quan_converted = quan.to(units)
-                # return quan_converted.magnitude
-        # except:
-            # # log.debug('  "{}": something bad happened with units.'.format(
-                                                                      # # pid))
-            # return NULL.get(pdz.get('range_datatype', 'float'))
+    modes = mode_defz[project_oid].get('modes') or {}
+    if mode not in modes:
+        # log.debug(f'* mode "{}" is not defined for the specified project.')
+        return
+    sys_dict = mode_defz[project_oid].get('systems') or {}
+    comp_dict = mode_defz[project_oid].get('components') or {}
+    if not sys_dict:
+        log.debug('* no systems have modes defined.')
+        return
+    if usage_oid in sys_dict:
+        if usage_oid in comp_dict:
+            # system usage with components -- compute ...
+            val = 0.0
+            # for comp_usage in comp_dict:
+                # val += 
+            return val
+        else:
+            # no components -- get Power value specified for that context
+            context = sys_dict[usage_oid][mode]
+            return get_modal_power(oid, context, units=units)
+    else:
+        # not a system usage -- check if included as a component ...
+        for sys_usage_oid in comp_dict:
+            if usage_oid in comp_dict[sys_usage_oid]:
+                # get Power value specified for that context
+                context = comp_dict[sys_usage_oid][usage_oid][mode]
+                return get_modal_power(oid, context, units=units)
+        # not defined
+        # log.debug('* no modes defined for this item.')
+        return
 
-def get_mode_val_as_str(project_oid, oid, mode, units='', allow_nan=False):
+def get_usage_mode_val_as_str(project_oid, usage_oid, oid, mode, units='',
+                              allow_nan=False):
     """
-    Return a mode value in the specified units (or in base units if not
-    specified) as a formatted string, for display in UI.  (Used in the
-    dashboard.)
+    Return the power mode value for a usage in the specified units (or in base
+    units if not specified) as a formatted string, for display in UI.  (Used in
+    the dashboard.)
 
     Args:
         project_oid (str): the oid of the project within which the mode is
             defined
-        oid (str): the oid of the usage that has the mode
+        usage_oid (str): the oid of the usage that has the mode
+        oid (str): the oid of the product in the usage (system or component)
         mode (str): the name of the mode
 
     Keyword Args:
@@ -1928,7 +1931,7 @@ def get_mode_val_as_str(project_oid, oid, mode, units='', allow_nan=False):
         allow_nan (bool):  allow numpy NaN as a return value
     """
     # Too verbose -- only for extreme debugging ...
-    # log.debug('* get_mode_val_as_str({}, {})'.format(oid, pid))
+    # log.debug('* get_usage_mode_val_as_str({}, {})'.format(oid, pid))
     modes = (mode_defz.get(project_oid) or {}).get('modes')
     if not modes:
         log.debug('  - modes not defined for this project.')
@@ -1937,61 +1940,15 @@ def get_mode_val_as_str(project_oid, oid, mode, units='', allow_nan=False):
         log.debug(f'  - mode "{mode}" not defined for this project.')
         return 'undefined'
     try:
-        sys_dict = mode_defz[project_oid]['systems']
-        comp_dict = mode_defz[project_oid]['components']
-        if oid in sys_dict:
-            return sys_dict[oid].get(mode) or '-'
-        elif comp_dict:
-            for sys_oid in comp_dict:
-                if oid in comp_dict[sys_oid]:
-                    return comp_dict[sys_oid][oid].get(mode) or '-'
-        return 'not found'
-        # # convert based on dimensions/units ...
-        # dims = pdz.get('dimensions')
-        # # special cases for 'percent' and 'money'
-        # if dims == 'percent':
-            # # show percentage values in interface -- they will
-            # # later be saved (by set_pval) as .01 * value
-            # val = 100.0 * get_mode_val(oid, pid)
-        # elif dims == 'money':
-            # # format with 2 decimal places
-            # val = get_mode_val(oid, pid)
-            # if val is None:
-                # return '-'
-            # elif val:
-                # return "{:,}".format(Decimal(val).quantize(TWOPLACES))
-            # else:
-                # return '0.00'
-        # else:
-            # base_val = get_mode_val(oid, pid)
-            # if units:
-                # # TODO: ignore units if not compatible
-                # quan = Q_(base_val, ureg.parse_expression(in_si[dims]))
-                # quan_converted = quan.to(units)
-                # val = quan_converted.magnitude
-            # else:
-                # val = base_val
-        # range_datatype = pdz.get('range_datatype')
-        # if range_datatype in ['int', 'float']:
-            # dtype = DATATYPES.get(range_datatype)
-            # numfmt = prefs.get('numeric_format')
-            # if numfmt:
-                # if numfmt == 'Thousands Commas':
-                    # return "{:,}".format(dtype(round_to(val)))
-                # elif numfmt == 'Scientific Notation':
-                    # return "{:.4e}".format(dtype(round_to(val)))
-                # else:   # 'No Commas'
-                    # return str(round_to(val))
-            # else:
-                # # default: Thousands Commas
-                # return "{:,}".format(dtype(round_to(val)))
-        # else:
-            # # if not an int or float, cast directly to string ...
-            # return str(val)
+        val = get_usage_mode_val(project_oid, usage_oid, oid, mode,
+                                 units=units)
+        if val is None:
+            return ''
+        return str(val) or '-'
     except:
         # FOR EXTREME DEBUGGING ONLY:
         # this logs an ERROR for every unpopulated parameter
-        # msg = '* get_mode_val_as_str({}, {})'.format(oid, pid)
+        # msg = '* get_usage_mode_val_as_str({}, {})'.format(oid, pid)
         # msg += '  encountered an error.'
         # log.debug(msg)
         # for production use, return '' if the value causes error
