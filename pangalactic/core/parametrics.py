@@ -183,7 +183,6 @@ def deserialize_parms(oid, ser_parms, cname=None):
         # if pid not in new_parms:
             # del parameterz[oid][pid]
 
-
 def load_parmz(dir_path):
     """
     Load the `parameterz` dict from json file in cache format.
@@ -243,7 +242,6 @@ def load_parmz(dir_path):
     else:
         log.debug('  - "parameters.json" was not found.')
         return 'not found'
-
 
 def save_parmz(dir_path):
     """
@@ -1821,7 +1819,6 @@ def add_default_data_elements(obj, des=None):
 #   default:    context used if None is specified
 mode_defz = {}
 
-
 def load_mode_defz(dir_path):
     """
     Load the `mode_defz` dict from file in cache format (yaml).
@@ -1842,7 +1839,6 @@ def load_mode_defz(dir_path):
         log.debug('  - "mode_defs.yaml" was not found.')
         return 'not found'
 
-
 def save_mode_defz(dir_path):
     """
     Save `mode_defz` dict to a file in cache format (yaml).
@@ -1853,12 +1849,49 @@ def save_mode_defz(dir_path):
         f.write(yaml.safe_dump(mode_defz, default_flow_style=False))
     log.debug(f'  ... mode_defs.yaml file written to {dir_path}.')
 
-def get_modal_power(oid, context, units=None):
-    if context == 'Off':
+def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
+                    units=None):
+    if modal_context == '[computed]':
+        sys_dict = mode_defz[project_oid].get('systems') or {}
+        comp_dict = mode_defz[project_oid].get('components') or {}
+        log.debug('* computing modal power value ...')
+        cz = componentz.get(oid)
+        if (sys_usage_oid in comp_dict) and cz:
+            log.debug(f'  - found {len(cz)} components ...')
+            # dtype cast is used here in case some component didn't have this
+            # parameter or didn't exist and we got a 0.0 value for it ...
+            summation = 0.0
+            for c in cz:
+                if c.usage_oid in comp_dict[sys_usage_oid]:
+                    context = comp_dict[sys_usage_oid][c.usage_oid][mode]
+                elif c.usage_oid in sys_dict:
+                    context = sys_dict[c.usage_oid][mode]
+                else:
+                    context = 'Off'
+                if context == 'Nominal':
+                    context = 'CBE'
+                if context == 'Off':
+                    val = 0.0
+                else:
+                    if context == '[computed]':
+                        val = get_modal_power(project_oid, c.usage_oid, c.oid,
+                                              mode, context, units=units)
+                    else:
+                        val = get_pval(c.oid, get_parameter_id('P', context),
+                                       units=units)
+                log.debug(f'    + {val} (context: {context})')
+                summation += (val or 0.0) * c.quantity
+            log.debug(f'  total: {summation}')
+            return round_to(summation)
+        else:
+            # if the product has no known components, return its specified
+            # value for the variable (note that the default here is 0.0)
+            return get_pval(oid, get_parameter_id('P', context), units=units)
+    elif modal_context == 'Off':
         return 0.0
-    elif context == 'Nominal':
+    elif modal_context == 'Nominal':
         return get_pval(oid, 'P[CBE]', units=units)
-    return get_pval(oid, get_parameter_id('P', context), units=units)
+    return get_pval(oid, get_parameter_id('P', modal_context), units=units)
 
 def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
                        allow_nan=False):
@@ -1891,23 +1924,17 @@ def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
         log.debug('* no systems have modes defined.')
         return
     if usage_oid in sys_dict:
-        if usage_oid in comp_dict:
-            # system usage with components -- compute ...
-            val = 0.0
-            # for comp_usage in comp_dict:
-                # val += 
-            return val
-        else:
-            # no components -- get Power value specified for that context
-            context = sys_dict[usage_oid][mode]
-            return get_modal_power(oid, context, units=units)
+        context = sys_dict[usage_oid][mode]
+        return get_modal_power(project_oid, usage_oid, oid, mode, context,
+                               units=units)
     else:
         # not a system usage -- check if included as a component ...
         for sys_usage_oid in comp_dict:
             if usage_oid in comp_dict[sys_usage_oid]:
                 # get Power value specified for that context
                 context = comp_dict[sys_usage_oid][usage_oid][mode]
-                return get_modal_power(oid, context, units=units)
+                return get_modal_power(project_oid, usage_oid, oid, mode,
+                                       context, units=units)
         # not defined
         # log.debug('* no modes defined for this item.')
         return
@@ -1939,18 +1966,18 @@ def get_usage_mode_val_as_str(project_oid, usage_oid, oid, mode, units='',
     elif mode not in modes:
         log.debug(f'  - mode "{mode}" not defined for this project.')
         return 'undefined'
-    try:
-        val = get_usage_mode_val(project_oid, usage_oid, oid, mode,
-                                 units=units)
-        if val is None:
-            return ''
-        return str(val) or '-'
-    except:
+    # try:
+    val = get_usage_mode_val(project_oid, usage_oid, oid, mode,
+                             units=units)
+    if val is None:
+        return ''
+    return str(val) or '-'
+    # except:
         # FOR EXTREME DEBUGGING ONLY:
         # this logs an ERROR for every unpopulated parameter
         # msg = '* get_usage_mode_val_as_str({}, {})'.format(oid, pid)
         # msg += '  encountered an error.'
         # log.debug(msg)
         # for production use, return '' if the value causes error
-        return 'exception'
+        # return 'exception'
 
