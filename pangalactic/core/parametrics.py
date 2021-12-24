@@ -1783,8 +1783,8 @@ def add_default_data_elements(obj, des=None):
 #             `save_mode_defz` and `load_mode_defz`
 #
 # format:  {project A oid:
-#               'modes': {mode 1 name: default,
-#                         mode 2 name: default,
+#               'modes': {mode 1 name: default context,
+#                         mode 2 name: default context,
 #                         ...},
 #               'systems':
 #                  {psu 1 oid: {mode 1 name: context,
