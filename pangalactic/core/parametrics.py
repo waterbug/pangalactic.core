@@ -1832,6 +1832,34 @@ def load_mode_defz(dir_path):
             except:
                 log.debug('  - reading of "mode_defs.yaml" failed.')
                 return 'fail'
+        # remove any blank modes
+        proj_oids = list(stored_mode_defz)
+        if proj_oids:
+            for proj_oid in proj_oids:
+                mode_dict = stored_mode_defz[proj_oid].get('modes') or {}
+                sys_dict = stored_mode_defz[proj_oid].get('systems') or {}
+                comp_dict = stored_mode_defz[proj_oid].get('components') or {}
+                modes = list(mode_dict)
+                sys_oids = list(sys_dict)
+                comp_sys_oids = list(comp_dict)
+                for mode in modes:
+                    if not mode:
+                        del mode_dict[mode]
+                for sys in sys_oids:
+                    if sys_dict[sys]:
+                        sys_modes = list(sys_dict[sys])
+                        for mode in sys_modes:
+                            if not mode:
+                                del sys_dict[sys][mode]
+                for sys in comp_sys_oids:
+                    if comp_dict[sys]:
+                        comp_oids = list(comp_dict[sys])
+                        for comp in comp_oids:
+                            if comp_dict[sys][comp]:
+                                comp_modes = list(comp_dict[sys][comp])
+                                for mode in comp_modes:
+                                    if not mode:
+                                        del comp_dict[sys][comp][mode]
         mode_defz.update(stored_mode_defz)
         log.debug('  - mode_defz cache loaded.')
         return 'success'
@@ -1844,6 +1872,34 @@ def save_mode_defz(dir_path):
     Save `mode_defz` dict to a file in cache format (yaml).
     """
     log.debug('* save_mode_defz() ...')
+    # remove any blank modes before saving
+    proj_oids = list(mode_defz)
+    if proj_oids:
+        for proj_oid in proj_oids:
+            mode_dict = mode_defz[proj_oid].get('modes') or {}
+            sys_dict = mode_defz[proj_oid].get('systems') or {}
+            comp_dict = mode_defz[proj_oid].get('components') or {}
+            modes = list(mode_dict)
+            sys_oids = list(sys_dict)
+            comp_sys_oids = list(comp_dict)
+            for mode in modes:
+                if not mode:
+                    del mode_dict[mode]
+            for sys in sys_oids:
+                if sys_dict[sys]:
+                    sys_modes = list(sys_dict[sys])
+                    for mode in sys_modes:
+                        if not mode:
+                            del sys_dict[sys][mode]
+            for sys in comp_sys_oids:
+                if comp_dict[sys]:
+                    comp_oids = list(comp_dict[sys])
+                    for comp in comp_oids:
+                        if comp_dict[sys][comp]:
+                            comp_modes = list(comp_dict[sys][comp])
+                            for mode in comp_modes:
+                                if not mode:
+                                    del comp_dict[sys][comp][mode]
     fpath = os.path.join(dir_path, 'mode_defs.yaml')
     with open(fpath, 'w') as f:
         f.write(yaml.safe_dump(mode_defz, default_flow_style=False))
