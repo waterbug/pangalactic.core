@@ -170,8 +170,10 @@
     `mode:             (str)  current Pangalaxian gui mode`
     `                         ('system', 'component', 'db', or 'data')`
 
-    `product:          (str)  oid of currently selected Product -- refers to the`
-    `                         product selected in 'product modeler'`
+    `mode_defz_dts:    (str)  last-synced-datetime str of the mode_defz cache`
+
+    `product:          (str)  oid of currently selected Product -- refers to`
+    `                         the product selected in 'product modeler'`
 
     `project:          (str)  oid of currently selected Project`
 

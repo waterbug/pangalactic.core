@@ -710,8 +710,6 @@ class DataMatrix(list):
                 unmapped += 1
         if unmapped:
             log.debug(f'  {unmapped} unmapped entities removed.')
-            ### NOTE:  this causes cycles -- find another way ...
-            # dispatcher.send('mel modified')
         else:
             log.debug('  no unmapped entities found.')
 
