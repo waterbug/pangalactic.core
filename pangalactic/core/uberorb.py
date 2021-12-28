@@ -44,7 +44,6 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           load_data_elementz,
                                           save_data_elementz,
                                           load_mode_defz, save_mode_defz,
-                                          mode_defz,
                                           load_parmz, save_parmz,
                                           parameterz, parm_defz,
                                           parmz_by_dimz, refresh_componentz,
@@ -921,9 +920,6 @@ class UberORB(object):
             refresh_req_allocz(req)
         self.recompute_parmz()
         load_mode_defz(self.home)
-        if (mode_defz and
-            ('System Power Modes' not in prefs['dashboard_names'])):
-            prefs['dashboard_names'].append('System Power Modes')
         self.log.info('  + all reference data loaded.')
 
     #########################################################################

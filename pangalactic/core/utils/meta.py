@@ -410,6 +410,34 @@ def get_acu_name(assembly_name, ref_des):
     """
     return assembly_name + ' : ' + ref_des
 
+def get_link_name(link):
+    """
+    Get a canonical name for a "link" (an Acu or ProjectSystemUsage).
+    Used in generating the Modes Table (system power modes).
+    """
+    if hasattr(link, 'system'):
+        # link is a psu
+        return '[' + link.system_role + '] ' + link.system.name
+    elif hasattr(link, 'component'):
+        # link is an acu
+        return '[' + link.reference_designator + '] ' + link.component.name
+    else:
+        return '[unknown]'
+
+def get_link_object(link):
+    """
+    Get the "child" object for a "link" (an Acu or ProjectSystemUsage).
+    Used in generating the Modes Table (system power modes).
+    """
+    if hasattr(link, 'system'):
+        # link is a psu
+        return link.system
+    elif hasattr(link, 'component'):
+        # link is an acu
+        return link.component
+    else:
+        return None
+
 def get_mel_item_name(item):
     """
     Create a unique name for a line item in a MEL (Master Equipment List).
