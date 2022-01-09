@@ -406,6 +406,8 @@ class UberORB(object):
                     else:
                         self.role_product_types[role_id] = set(
                             discipline_subsystems.get(discipline_id))
+        load_mode_defz(self.home)
+        self.log.info('  + mode defs loaded.')
         self.started = True
         # TODO:  clean up boilerplate ...
         save_data_elementz(self.home)
@@ -414,7 +416,6 @@ class UberORB(object):
         save_ent_histz(self.home)
         save_schemaz(self.home)
         save_dmz(self.home)
-        save_mode_defz(self.home)
         return self.home
 
     def init_registry(self, home, db_url, force_new_core=False, version='',
@@ -919,7 +920,6 @@ class UberORB(object):
         for req in self.get_by_type('Requirement'):
             refresh_req_allocz(req)
         self.recompute_parmz()
-        load_mode_defz(self.home)
         self.log.info('  + all reference data loaded.')
 
     #########################################################################
