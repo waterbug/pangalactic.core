@@ -1823,7 +1823,6 @@ def load_mode_defz(dir_path):
     """
     Load the `mode_defz` dict from file in cache format (yaml).
     """
-    global mode_defz
     log.debug('* load_mode_defz() ...')
     fpath = os.path.join(dir_path, 'mode_defs.yaml')
     if os.path.exists(fpath):
