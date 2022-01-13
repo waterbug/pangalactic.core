@@ -1900,7 +1900,7 @@ def save_mode_defz(dir_path):
     fpath = os.path.join(dir_path, 'mode_defs.json')
     with open(fpath, 'w') as f:
         f.write(json.dumps(mode_defz, separators=(',', ':'),
-                           indent=4, sort_keys=False))
+                           indent=4))
     log.debug(f'  ... mode_defs.json file written to {dir_path}.')
 
 def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
