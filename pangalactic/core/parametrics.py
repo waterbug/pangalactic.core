@@ -7,9 +7,6 @@ from copy        import deepcopy
 from decimal     import Decimal
 from math        import floor, fsum, log10
 
-# ruamel_yaml
-import ruamel_yaml as yaml
-
 # pangalactic
 from pangalactic.core                 import config, state, prefs
 from pangalactic.core.datastructures  import OrderedSet
@@ -1821,89 +1818,90 @@ mode_defz = {}
 
 def load_mode_defz(dir_path):
     """
-    Load the `mode_defz` dict from file in cache format (yaml).
+    Load the `mode_defz` dict from file in cache format.
     """
     log.debug('* load_mode_defz() ...')
-    fpath = os.path.join(dir_path, 'mode_defs.yaml')
+    fpath = os.path.join(dir_path, 'mode_defs.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
             try:
-                stored_mode_defz = yaml.safe_load(f.read())
+                stored_mode_defz = json.loads(f.read())
             except:
-                log.debug('  - reading of "mode_defs.yaml" failed.')
+                log.debug('  - reading of "mode_defs.json" failed.')
                 return 'fail'
         # remove any blank modes
-        proj_oids = list(stored_mode_defz)
-        if proj_oids:
-            for proj_oid in proj_oids:
-                mode_dict = stored_mode_defz[proj_oid].get('modes') or {}
-                sys_dict = stored_mode_defz[proj_oid].get('systems') or {}
-                comp_dict = stored_mode_defz[proj_oid].get('components') or {}
-                modes = list(mode_dict)
-                sys_oids = list(sys_dict)
-                comp_sys_oids = list(comp_dict)
-                for mode in modes:
-                    if not mode:
-                        del mode_dict[mode]
-                for sys in sys_oids:
-                    if sys_dict[sys]:
-                        sys_modes = list(sys_dict[sys])
-                        for mode in sys_modes:
-                            if not mode:
-                                del sys_dict[sys][mode]
-                for sys in comp_sys_oids:
-                    if comp_dict[sys]:
-                        comp_oids = list(comp_dict[sys])
-                        for comp in comp_oids:
-                            if comp_dict[sys][comp]:
-                                comp_modes = list(comp_dict[sys][comp])
-                                for mode in comp_modes:
-                                    if not mode:
-                                        del comp_dict[sys][comp][mode]
+        # proj_oids = list(stored_mode_defz)
+        # if proj_oids:
+            # for proj_oid in proj_oids:
+                # mode_dict = stored_mode_defz[proj_oid].get('modes') or {}
+                # sys_dict = stored_mode_defz[proj_oid].get('systems') or {}
+                # comp_dict = stored_mode_defz[proj_oid].get('components') or {}
+                # modes = list(mode_dict)
+                # sys_oids = list(sys_dict)
+                # comp_sys_oids = list(comp_dict)
+                # for mode in modes:
+                    # if not mode:
+                        # del mode_dict[mode]
+                # for sys in sys_oids:
+                    # if sys_dict[sys]:
+                        # sys_modes = list(sys_dict[sys])
+                        # for mode in sys_modes:
+                            # if not mode:
+                                # del sys_dict[sys][mode]
+                # for sys in comp_sys_oids:
+                    # if comp_dict[sys]:
+                        # comp_oids = list(comp_dict[sys])
+                        # for comp in comp_oids:
+                            # if comp_dict[sys][comp]:
+                                # comp_modes = list(comp_dict[sys][comp])
+                                # for mode in comp_modes:
+                                    # if not mode:
+                                        # del comp_dict[sys][comp][mode]
         mode_defz.update(stored_mode_defz)
         log.debug('  - mode_defz cache loaded.')
         return 'success'
     else:
-        log.debug('  - "mode_defs.yaml" was not found.')
+        log.debug('  - "mode_defs.json" was not found.')
         return 'not found'
 
 def save_mode_defz(dir_path):
     """
-    Save `mode_defz` dict to a file in cache format (yaml).
+    Save `mode_defz` dict to a file in cache format.
     """
     log.debug('* save_mode_defz() ...')
     # remove any blank modes before saving
-    proj_oids = list(mode_defz)
-    if proj_oids:
-        for proj_oid in proj_oids:
-            mode_dict = mode_defz[proj_oid].get('modes') or {}
-            sys_dict = mode_defz[proj_oid].get('systems') or {}
-            comp_dict = mode_defz[proj_oid].get('components') or {}
-            modes = list(mode_dict)
-            sys_oids = list(sys_dict)
-            comp_sys_oids = list(comp_dict)
-            for mode in modes:
-                if not mode:
-                    del mode_dict[mode]
-            for sys in sys_oids:
-                if sys_dict[sys]:
-                    sys_modes = list(sys_dict[sys])
-                    for mode in sys_modes:
-                        if not mode:
-                            del sys_dict[sys][mode]
-            for sys in comp_sys_oids:
-                if comp_dict[sys]:
-                    comp_oids = list(comp_dict[sys])
-                    for comp in comp_oids:
-                        if comp_dict[sys][comp]:
-                            comp_modes = list(comp_dict[sys][comp])
-                            for mode in comp_modes:
-                                if not mode:
-                                    del comp_dict[sys][comp][mode]
-    fpath = os.path.join(dir_path, 'mode_defs.yaml')
+    # proj_oids = list(mode_defz)
+    # if proj_oids:
+        # for proj_oid in proj_oids:
+            # mode_dict = mode_defz[proj_oid].get('modes') or {}
+            # sys_dict = mode_defz[proj_oid].get('systems') or {}
+            # comp_dict = mode_defz[proj_oid].get('components') or {}
+            # modes = list(mode_dict)
+            # sys_oids = list(sys_dict)
+            # comp_sys_oids = list(comp_dict)
+            # for mode in modes:
+                # if not mode:
+                    # del mode_dict[mode]
+            # for sys in sys_oids:
+                # if sys_dict[sys]:
+                    # sys_modes = list(sys_dict[sys])
+                    # for mode in sys_modes:
+                        # if not mode:
+                            # del sys_dict[sys][mode]
+            # for sys in comp_sys_oids:
+                # if comp_dict[sys]:
+                    # comp_oids = list(comp_dict[sys])
+                    # for comp in comp_oids:
+                        # if comp_dict[sys][comp]:
+                            # comp_modes = list(comp_dict[sys][comp])
+                            # for mode in comp_modes:
+                                # if not mode:
+                                    # del comp_dict[sys][comp][mode]
+    fpath = os.path.join(dir_path, 'mode_defs.json')
     with open(fpath, 'w') as f:
-        f.write(yaml.safe_dump(mode_defz, default_flow_style=False))
-    log.debug(f'  ... mode_defs.yaml file written to {dir_path}.')
+        f.write(json.dumps(mode_defz, separators=(',', ':'),
+                           indent=4, sort_keys=False))
+    log.debug(f'  ... mode_defs.json file written to {dir_path}.')
 
 def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
                     units=None):
