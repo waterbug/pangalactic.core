@@ -1975,7 +1975,7 @@ def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
     sys_dict = mode_defz[project_oid].get('systems') or {}
     comp_dict = mode_defz[project_oid].get('components') or {}
     if not sys_dict:
-        log.debug('* no systems have modes defined.')
+        # log.debug('* no systems have modes defined.')
         return
     if usage_oid in sys_dict:
         context = sys_dict[usage_oid][mode]
