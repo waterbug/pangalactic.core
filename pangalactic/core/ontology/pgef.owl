@@ -2043,7 +2043,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <!-- http://pangalactic.us/pgef/Relation -->
 
     <owl:Class rdf:about="&pgef;Relation">
-        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A mathematical Relation that holds among two or more parameters.</rdfs:comment>
     </owl:Class>
 
@@ -2196,7 +2196,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/ParameterRelation -->
 
     <owl:Class rdf:about="&pgef;ParameterRelation">
-        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A ParameterRelation links a Relation (that holds among one or more parameters) to the definitions of those parameters (ParameterDefinition). So a ParameterRelation is a many-to-many relationship between Relations and ParameterDefinitions. For a given Relation, its formulation (cf.) holds the mathematical expressions connecting the related parameters. Note that this model does not specify the context in which the Relation holds -- namely, the objects of which its parameters are attributes -- so this must be supplied as additional information in order to evaluate a Relation instance.</rdfs:comment>
     </owl:Class>
 
@@ -2258,7 +2258,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/RequirementAncestry -->
 
     <owl:Class rdf:about="&pgef;RequirementAncestry">
-        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A RequirementAncestry relationship is a parent / child relationship between two Requirements. A Requirement can, and often does, beget multiple child Requirements, and a Requirement that has parent Requirements can have more than one parent; hence, this is a many-to-many relationship.</rdfs:comment>
     </owl:Class>
 
@@ -2383,7 +2383,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/Representation -->
 
     <owl:Class rdf:about="&pgef;Representation">
-        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Representation is a collection of one or more digital artifacts that implement a digital product (e.g., a mechanical model, a data set, a document) and can be thought of as a reified relationship between an object and one or more digital files. Representations include both presentations, such as PDF or HTML for a document, and more general representations such as exchange data (e.g., for an engineering model, e.g. STEP, SysML, etc.).  A representation references one or more file-like objects (representation files) that are used in publishing, displaying, serializing, exporting, importing, or transmitting a digital product.  The concept is general and can apply to serialization, presentation, or data exchange use-cases, among others.</rdfs:comment>
     </owl:Class>
 
@@ -2401,7 +2401,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/Requirement -->
 
     <owl:Class rdf:about="&pgef;Requirement">
-        <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
+        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
         <rdfs:comment rdf:datatype="&xsd;string">A requirement is the specification of a goal or constraint to be satisfied by a product.</rdfs:comment>
     </owl:Class>
 
