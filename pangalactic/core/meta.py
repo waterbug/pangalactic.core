@@ -399,7 +399,8 @@ SELECTABLE_VALUES = dict(
         ]))
 
 # TEXT_PROPERTIES:  Properties that get a TextWidget interface
-TEXT_PROPERTIES = ['comment', 'description', 'rationale', 'purpose']
+TEXT_PROPERTIES = ['comment', 'description', 'justification', 'rationale',
+                   'purpose']
 
 # NUMERIC_FORMATS:  Formatting used to display numbers in UI
 NUMERIC_FORMATS = ['Thousands Commas', 'No Commas', 'Scientific Notation']
