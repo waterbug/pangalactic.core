@@ -172,13 +172,6 @@ def deserialize_parms(oid, ser_parms, cname=None):
     for deid in deids_to_delete:
         if deid in data_elementz[oid]:
             del data_elementz[oid][deid]
-    ### FIXME (?): it's dangerous to remove pids not in new_parms, but we
-    ### may need at some point to deal with deleted parameters ... (i.e.
-    ### remove them from the cache).
-    # pids = list(parameterz[oid])
-    # for pid in pids:
-        # if pid not in new_parms:
-            # del parameterz[oid][pid]
 
 def load_parmz(dir_path):
     """
@@ -636,14 +629,10 @@ def add_default_parameters(obj, parms=None):
         config['default_parms'] = [
                             'm', 'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
                             'P', 'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
-                            'P[Peak]', 'P[max]', 'P[min]',
-                            'P_operational[max]', 'P_operational[min]',
-                            'P_survival[max]', 'P_survival[min]',
-                            'T[max]', 'T[min]',
-                            'T_operational[max]', 'T_operational[min]',
-                            'T_survival[max]', 'T_survival[min]',
-                            'R_D', 'R_D[CBE]', 'R_D[Ctgcy]', 'R_D[MEV]',
-                            'height', 'width', 'depth', 'Cost']
+                            'P[Peak]', 'P[max]', 'P[min]', 'P[survival]',
+                            'T[max]', 'T[min]', 'T[operational]',
+                            'T[survival]', 'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
+                            'R_D[MEV]', 'height', 'width', 'depth', 'Cost']
     if cname == 'HardwareProduct':
         # default for "default_parms":  mass, power, data rate
         # (state is read in p.node.gui.startup, and will be overridden by

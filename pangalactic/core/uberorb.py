@@ -902,17 +902,13 @@ class UberORB(object):
         # else:
             # self.log.debug('    no updates found.')
         # [7] delete deprecated reference data
-        #     **********************************************************
-        #     NOTE:  DON'T DO THIS STEP UNTIL ALL DATA RELATED TO THE
-        #     DEPRECATED DATA HAS BEEN REMOVED FROM THE CURRENT DATABASE
-        #     **********************************************************
-        # db_oids = self.get_oids()
-        # deprecated = [oid for oid in refdata.deprecated if oid in db_oids]
-        # if deprecated:
-            # self.log.debug('  + deleting deprecated reference data:')
-            # self.log.debug('  {}'.format([oid for oid in deprecated]))
-            # for oid in deprecated:
-                # self.delete([self.get(oid) for oid in deprecated])
+        db_oids = self.get_oids()
+        deprecated = [oid for oid in refdata.deprecated if oid in db_oids]
+        if deprecated:
+            self.log.debug('  + deleting deprecated reference data:')
+            self.log.debug('  {}'.format([oid for oid in deprecated]))
+            for oid in deprecated:
+                self.delete([self.get(oid) for oid in deprecated])
         # build the 'componentz' runtime cache, which is used in recomputing
         # parameters ...
         self._build_componentz_cache()
@@ -938,6 +934,11 @@ class UberORB(object):
              data_element_id : {name, description, range_datatype, mod_datetime},
              ...}
         """
+        # --------------------------------------------------------------------
+        # NOTE: all parameters containing '_operational', '_survival',
+        # '_throughput' are deprecated -- these have now been implemented as
+        # ParameterContexts [2022-01-16 SCW]
+        # --------------------------------------------------------------------
         # self.log.debug('* create_parm_defz')
         pds = self.get_by_type('ParameterDefinition')
         # first, the "variable" parameters ...
@@ -952,7 +953,9 @@ class UberORB(object):
                     'computed': False,
                     'mod_datetime':
                         str(getattr(pd, 'mod_datetime', '') or dtstamp())
-                    } for pd in pds}
+                    } for pd in pds if ('_operational' not in pd.id and
+                                        '_survival' not in pd.id and
+                                        '_throughput' not in pd.id)}
         parm_defz.update(pd_dict)
         # var_ids = sorted(list(pd_dict), key=str.lower)
         # self.log.debug('      bases created: {}'.format(

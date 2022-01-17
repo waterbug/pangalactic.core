@@ -223,7 +223,15 @@ def read_state(statepath):
         f = open(statepath)
         data = f.read()
         if data:
-            state.update(yaml.safe_load(data))
+            saved_state = yaml.safe_load(data)
+            # do not use saved 'app_' items -- may be modified in a new release
+            app_items = []
+            for item in saved_state:
+                if 'app_' in item:
+                    app_items.append(item)
+            for item in app_items:
+                del saved_state[item]
+            state.update(saved_state)
         f.close()
 
 def write_state(statepath):
