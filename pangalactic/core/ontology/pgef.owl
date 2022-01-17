@@ -1336,9 +1336,9 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
     <owl:DatatypeProperty rdf:about="&pgef;req_compliance">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The extent to which the project, system, or component to which the Requirement is allocated meets the Requirement.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The extent to which the mission, system, or component to which the Requirement is allocated meets the Requirement.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
 
