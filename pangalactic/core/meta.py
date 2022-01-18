@@ -398,9 +398,9 @@ SELECTABLE_VALUES = dict(
         ('output', 'output')
         ]),
     req_compliance=dict([
-        ('Fully Compliant', 'Fully Compliant'),
-        ('Partially Compliant', 'Partially Compliant'),
-        ('Non-Compliant', 'Non-Compliant')])
+        ('Full', 'Full'),
+        ('Partial', 'Partial'),
+        ('None', 'None')])
         )
 
 # TEXT_PROPERTIES:  Properties that get a TextWidget interface
