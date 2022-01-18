@@ -902,13 +902,11 @@ class UberORB(object):
         # else:
             # self.log.debug('    no updates found.')
         # [7] delete deprecated reference data
-        db_oids = self.get_oids()
-        deprecated = [oid for oid in refdata.deprecated if oid in db_oids]
-        if deprecated:
-            self.log.debug('  + deleting deprecated reference data:')
-            self.log.debug('  {}'.format([oid for oid in deprecated]))
-            for oid in deprecated:
-                self.delete([self.get(oid) for oid in deprecated])
+        self.log.debug('  + checking for deprecated reference data ...')
+        deprecated_objs = [self.get(oid) for oid in refdata.deprecated]
+        to_delete = [obj for obj in deprecated_objs if obj is not None]
+        if to_delete:
+            self.delete(to_delete)
         # build the 'componentz' runtime cache, which is used in recomputing
         # parameters ...
         self._build_componentz_cache()

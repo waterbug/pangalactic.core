@@ -396,7 +396,12 @@ SELECTABLE_VALUES = dict(
         ('', ''),
         ('input', 'input'),
         ('output', 'output')
-        ]))
+        ]),
+    req_compliance=dict([
+        ('Fully Compliant', 'Fully Compliant'),
+        ('Partially Compliant', 'Partially Compliant'),
+        ('Non-Compliant', 'Non-Compliant')])
+        )
 
 # TEXT_PROPERTIES:  Properties that get a TextWidget interface
 TEXT_PROPERTIES = ['comment', 'description', 'justification', 'rationale',
@@ -435,6 +440,7 @@ ATTR_EXT_NAMES = {
          'description' : 'text',
          'req_type' : 'reqt type',
          'req_level' : 'level',
+         'req_compliance' : 'compliance',
          'req_constraint_type' : 'constraint type',
          'req_dimensions' : 'dimensions',
          'req_maximum_value' : 'maximum',
@@ -480,11 +486,12 @@ PGEF_COL_WIDTHS = {
             'creator': 100,
             'create_datetime': 100,
             'comment': 200,
-            'description': 300,
+            'description': 200,
             'frozen': 50,
             'id': 200,
             'id_ns': 100,
             'iteration': 50,
+            'justification': 200,
             'modifier': 100,
             'mod_datetime': 100,
             'name': 150,
@@ -494,8 +501,9 @@ PGEF_COL_WIDTHS = {
             'product_type': 150,
             'purpose': 250,
             'range_datatype': 50,
-            'rationale': 300,
+            'rationale': 200,
             'representations': 100,
+            'req_compliance': 100,
             'req_level': 50,
             'req_type': 100,
             'text': 300,
