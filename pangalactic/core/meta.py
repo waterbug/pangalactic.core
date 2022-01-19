@@ -344,7 +344,8 @@ PGXN_HIDE_PARMS = [
                    'ProductTypeParameterDefinition',
                    'Project',
                    'ProjectSystemUsage',
-                   'Representation'
+                   'Representation',
+                   'RoleAssignment'
                    ]
 
 # MODEL_TYPE_PREFS:  preferred model types
