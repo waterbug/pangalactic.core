@@ -472,6 +472,20 @@ PGEF_PROPS_ORDER = [
             'abbreviation'
             ]
 
+# Default ordering of dimensions (used in sorting parameters)
+PGEF_DIMENSION_ORDER = {
+            'mass': 'Mass',
+            'power': 'Power',
+            'bitrate': 'Data Rate',
+            'length': 'Length',
+            'temperature': 'Thermal',
+            'area': 'Area',
+            'moment of inertia': 'Moment of Inertia',
+            'frequency': 'Frequency',
+            'decibels': 'Gain',
+            'decibels-isotropic': 'Antenna Gain',
+            'money': 'Cost'}
+
 # max length of string fields (default: 80)
 MAX_LENGTH = {
             'abbreviation': 50,
