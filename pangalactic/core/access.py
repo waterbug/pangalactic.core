@@ -164,6 +164,11 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if debugging:
                 perms.append('object creator perms')
             return perms
+        if isinstance(obj, orb.classes['ManagedObject']):
+            ras = orb.search_exact(cname='RoleAssignment',
+                                   assigned_to=user,
+                                   role_assignment_context=obj.owner)
+            role_ids = set([ra.assigned_role.id for ra in ras])
         # From here on, access depends on roles and product_types
         TBD = orb.get('pgefobjects:TBD')
         # [1] is the object a Product?
@@ -172,10 +177,6 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if not obj.owner:
                 # orb.log.debug('    owner not specified -- view only.')
                 return ['view']
-            ras = orb.search_exact(cname='RoleAssignment',
-                                   assigned_to=user,
-                                   role_assignment_context=obj.owner)
-            role_ids = set([ra.assigned_role.id for ra in ras])
             # orb.log.debug('  user has roles: {}'.format(role_ids))
             if isinstance(obj, orb.classes['HardwareProduct']):
                 # permissions determined by product_type only apply to HW
@@ -210,25 +211,25 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                     if debugging:
                         perms.append('role-based product type perms (HW)')
                     return perms
-            elif isinstance(obj, orb.classes['Requirement']):
-                # Requirements (subclass of DigitalProduct) are a special case
-                req_mgrs = set(['Administrator', 'systems_engineer',
-                                'lead_engineer'])
-                if req_mgrs & role_ids:
-                    perms = ['view']
-                    if state.get('connected') and not frozen:
-                        # mods and deletions are only allowed if connected
-                        perms += ['modify', 'delete']
-                    # orb.log.debug('  perms: {}'.format(perms))
-                    if debugging:
-                        perms.append('role-based perms (Requirement)')
-                    return perms
-                else:
-                    perms = ['view']
-                    # orb.log.debug('  perms: {}'.format(perms))
-                    if debugging:
-                        perms.append('role-based perms (Requirement)')
-                    return perms
+        if isinstance(obj, orb.classes['Requirement']):
+            # Requirements (subclass of ManagedObject) are a special case
+            req_mgrs = set(['Administrator', 'systems_engineer',
+                            'lead_engineer'])
+            if req_mgrs & role_ids:
+                perms = ['view']
+                if state.get('connected') and not frozen:
+                    # mods and deletions are only allowed if connected
+                    perms += ['modify', 'delete']
+                # orb.log.debug('  perms: {}'.format(perms))
+                if debugging:
+                    perms.append('role-based perms (Requirement)')
+                return perms
+            else:
+                perms = ['view']
+                # orb.log.debug('  perms: {}'.format(perms))
+                if debugging:
+                    perms.append('role-based perms (Requirement)')
+                return perms
         # [2] is it an Acu?
         # if so, the user can modify it if any of the following is true:
         # [2z] ITS ASSEMBLY IS NOT FROZEN **AND** ONE OF a, b, c:
