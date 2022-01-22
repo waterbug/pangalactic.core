@@ -2028,7 +2028,7 @@ class UberORB(object):
                 info.append(f'   cannot delete "{obj_id}".')
                 continue
             else:
-                info.append(f'   attempting to delete "{obj_id}" ...')
+                # info.append(f'   attempting to delete "{obj_id}" ...')
                 product_oid = ''
                 if isinstance(obj, orb.classes['Product']):
                     # if a Product instance, add its oid to deleted_oids ...
@@ -2036,7 +2036,7 @@ class UberORB(object):
                 self.db.delete(obj)
                 try:
                     self.db.commit()
-                    info.append('     ... deleted.')
+                    # info.append('     ... deleted.')
                     if product_oid:
                         if state.get('deleted_oids'):
                             state['deleted_oids'].append(product_oid)
@@ -2044,7 +2044,7 @@ class UberORB(object):
                             state['deleted_oids'] = [product_oid]
                 except:
                     self.db.rollback()
-                    info.append('     ... delete failed, rolled back.')
+                    # info.append('     ... delete failed, rolled back.')
         for text in info:
             self.log.debug(text)
         if refresh_assemblies:
