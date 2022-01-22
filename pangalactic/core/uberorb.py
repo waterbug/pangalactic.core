@@ -1592,46 +1592,41 @@ class UberORB(object):
         Args:
             usage (Acu or ProjectSystemUsage):  the specified usage
         """
-        self.log.debug('* get_all_usage_flows()')
+        # self.log.debug('* get_all_usage_flows()')
         if usage:
             oid = getattr(usage, 'oid', None)
-            if oid:
-                self.log.debug(f'  for usage <{oid}>')
-            else:
-                self.log.debug('  object provided had no "oid" -> no flows.')
+            if not oid:
                 return []
         else:
-            self.log.debug('  no usage provided -> no flows.')
+            # self.log.debug('  no usage provided -> no flows.')
             return []
         if isinstance(usage, self.classes['ProjectSystemUsage']):
-            self.log.debug('  - no flows (Project context cannot have flows).')
+            # self.log.debug('  - no flows (Project context cannot have flows).')
             return []
         if isinstance(usage, self.classes['Acu']):
             assembly = usage.assembly
             component = usage.component
         else:
-            self.log.debug('  usage was not an Acu -> no flows.')
+            # self.log.debug('  usage was not an Acu -> no flows.')
             return []
         # in case we're dealing with a corrupted "usage" ...
         if not component or not component.ports:
-            self.log.debug('  usage had no components/ports -> no flows.')
+            # self.log.debug('  usage had no components/ports -> no flows.')
             return []
-        self.log.debug(f'  - assembly id: "{assembly.id}"')
-        self.log.debug(f'  - component id: "{component.id}"')
+        # self.log.debug(f'  - assembly id: "{assembly.id}"')
+        # self.log.debug(f'  - component id: "{component.id}"')
         context_flows = self.search_exact(cname='Flow', flow_context=assembly)
-        self.log.debug(f'  - # of context flows: {len(context_flows)}')
+        # self.log.debug(f'  - # of context flows: {len(context_flows)}')
         ports = component.ports
-        np = len(ports)
-        port_ids = [p.id for p in component.ports]
-        self.log.debug(f'  - {np} component ports: {port_ids}')
+        # np = len(ports)
+        # port_ids = [p.id for p in component.ports]
+        # self.log.debug(f'  - {np} component ports: {port_ids}')
         flows = [flow for flow in context_flows
                  if flow.start_port in ports or flow.end_port in ports]
-        if flows:
-            flow_ids = [flow.id for flow in flows]
-            nf = len(flow_ids)
-            self.log.debug(f'  - {nf} associated flows: {flow_ids}')
-        else:
-            self.log.debug('  - no associated flows found.')
+        # if flows:
+            # flow_ids = [flow.id for flow in flows]
+            # nf = len(flow_ids)
+            # self.log.debug(f'  - {nf} associated flows: {flow_ids}')
         return flows
 
     def gazoutas(self, port):
