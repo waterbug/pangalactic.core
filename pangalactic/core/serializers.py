@@ -519,14 +519,14 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     update_parmz_by_dimz(obj)
                 elif cname == 'DataElementDefinition':
                     update_de_defz(obj)
-                orb.log.debug('* updated object: [{}] {}'.format(cname,
-                                                          obj.id or '(no id)'))
+                # orb.log.debug('* updated object: [{}] {}'.format(cname,
+                                                      # obj.id or '(no id)'))
             elif d['oid'] not in ignores:
                 # orb.log.debug('* creating new object ...')
                 obj = cls(**kw)
                 if obj:
-                    orb.log.debug('* new object: [{}] {}'.format(cname,
-                                                          obj.id or '(no id)'))
+                    # orb.log.debug('* new object: [{}] {}'.format(cname,
+                                                      # obj.id or '(no id)'))
                     orb.db.add(obj)
                     objs.append(obj)
                     created.append(obj.id)
@@ -582,7 +582,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         recompute_parmz_required = True
         # orb.log.debug('    done.')
     if recompute_parmz_required and not force_no_recompute:
-        orb.log.debug('  - deserialize recomputing parameters ...')
+        # orb.log.debug('  - deserialize recomputing parameters ...')
         orb.recompute_parmz()
         # orb.log.debug('    done.')
     if dictify:
