@@ -411,7 +411,7 @@ def is_cloaked(obj):
         # orb.log.debug('  [no object or object has no oid]')
         return False
     if hasattr(obj, 'public') and obj.public:
-        orb.log.debug('  object is public.')
+        # orb.log.debug('  object is public.')
         return False
     elif isinstance(obj, (orb.classes['Organization'],
                           orb.classes['ParameterDefinition'])):
@@ -433,6 +433,6 @@ def is_cloaked(obj):
         return True
     else:
         # if object is not a ManagedObject, Acu, or PSU, it is public
-        orb.log.debug('  object is public.')
+        # orb.log.debug('  object is public.')
         return False
 
