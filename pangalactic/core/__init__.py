@@ -15,7 +15,7 @@ from sqlalchemy import (Boolean, Date, DateTime, Float, Integer, LargeBinary,
 import ruamel_yaml as yaml
 
 # pangalactic version
-__version__ = '2.2.dev10'
+__version__ = '2.2.dev11'
 
 # `diagramz` is a module-level variable for the diagram cache
 # (see pangalactic.node.gui.diagrams.view for more detail)
