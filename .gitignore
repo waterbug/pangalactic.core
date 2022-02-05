@@ -6,6 +6,7 @@ syntax: glob
 *.jpg
 *.pem
 *.pyc
+*.pyi
 *.pdf
 *.ps
 *.sgml
@@ -16,6 +17,7 @@ syntax: glob
 *.egg
 *.orig
 *.pprj
+*.build
 build
 bump_version.sh
 ipython.*
