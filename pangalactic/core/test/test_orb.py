@@ -27,8 +27,8 @@ from pangalactic.core.parametrics import (compute_margin,
                                           serialize_des,
                                           serialize_parms,
                                           save_parmz, save_data_elementz)
-from pangalactic.core.cmuster     import deserialize
-from pangalactic.core.serializers import serialize
+from pangalactic.core.cmuster     import deserialize, serialize
+# from pangalactic.core.serializers import serialize
 from pangalactic.core.test        import data as test_data_module
 from pangalactic.core.test        import vault as vault_module
 from pangalactic.core.test.utils  import (create_test_users,
