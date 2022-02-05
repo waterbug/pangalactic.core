@@ -27,6 +27,7 @@ from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
+from pangalactic.core.cmuster     import deserialize
 from pangalactic.core.entity      import (load_dmz, save_dmz,
                                           schemaz, load_schemaz, save_schemaz,
                                           load_ent_histz, save_ent_histz)
@@ -50,7 +51,8 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           refresh_req_allocz, req_allocz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
-from pangalactic.core.serializers import serialize, deserialize
+# from pangalactic.core.serializers import serialize, deserialize
+from pangalactic.core.serializers import serialize
 from pangalactic.core.test        import data as test_data_mod
 from pangalactic.core.test        import vault as test_vault_mod
 from pangalactic.core.test.utils  import gen_test_dvals, gen_test_pvals

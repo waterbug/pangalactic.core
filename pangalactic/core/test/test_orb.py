@@ -18,17 +18,17 @@ from pangalactic.core             import (refdata, state, prefs,
 from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
+                                          deserialize_des,
+                                          deserialize_parms,
                                           get_dval, data_elementz,
                                           get_pval, parameterz,
                                           load_parmz, load_data_elementz,
                                           req_allocz, round_to,
-                                          save_parmz, save_data_elementz)
-from pangalactic.core.serializers import (deserialize,
-                                          deserialize_parms,
-                                          deserialize_des,
-                                          serialize,
                                           serialize_des,
-                                          serialize_parms)
+                                          serialize_parms,
+                                          save_parmz, save_data_elementz)
+from pangalactic.core.cmuster     import deserialize
+from pangalactic.core.serializers import serialize
 from pangalactic.core.test        import data as test_data_module
 from pangalactic.core.test        import vault as vault_module
 from pangalactic.core.test.utils  import (create_test_users,
