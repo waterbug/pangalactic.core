@@ -27,7 +27,6 @@ from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
-# from pangalactic.core.cmuster     import deserialize, serialize
 from pangalactic.core.entity      import (load_dmz, save_dmz,
                                           schemaz, load_schemaz, save_schemaz,
                                           load_ent_histz, save_ent_histz)
