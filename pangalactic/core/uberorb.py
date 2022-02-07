@@ -1678,7 +1678,7 @@ class UberORB(object):
         if not project:
             self.log.debug('  - no project provided -- returning empty list.')
             return []
-        if not isinstance(project, orb.classes['Project']):
+        if not isinstance(project, self.classes['Project']):
             self.log.debug('  - object provided is not a Project.')
             return []
         objs = self.search_exact(owner=project)
@@ -2008,7 +2008,7 @@ class UberORB(object):
             creator = getattr(obj, 'creator', None)
             obj_id = getattr(obj, 'id', 'no id')
             obj_name = getattr(obj, 'name', 'no name')
-            if isinstance(obj, orb.classes['Product']):
+            if isinstance(obj, self.classes['Product']):
                 # if local_user created Product, add it to trash
                 # TODO:  use trash to enable undo of delete ...
                 # [NOTE: this adds the object to trash for the client;
@@ -2025,7 +2025,7 @@ class UberORB(object):
             else:
                 # info.append(f'   attempting to delete "{obj_id}" ...')
                 product_oid = ''
-                if isinstance(obj, orb.classes['Product']):
+                if isinstance(obj, self.classes['Product']):
                     # if a Product instance, add its oid to deleted_oids ...
                     product_oid = obj.oid
                 self.db.delete(obj)
