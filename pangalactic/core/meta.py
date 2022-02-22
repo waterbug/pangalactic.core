@@ -485,6 +485,7 @@ PGEF_DIMENSION_ORDER = {
             'frequency': 'Frequency',
             'decibels': 'Gain',
             'decibels-isotropic': 'Antenna Gain',
+            'electrical potential': 'Voltage',
             'money': 'Cost'}
 
 # max length of string fields (default: 80)
