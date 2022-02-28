@@ -473,7 +473,7 @@ PGEF_PROPS_ORDER = [
             'abbreviation'
             ]
 
-# Default ordering of dimensions (used in sorting parameters)
+# Default ordering and naming of dimensions (used in sorting parameters)
 PGEF_DIMENSION_ORDER = {
             'mass': 'Mass',
             'power': 'Power',
@@ -487,7 +487,13 @@ PGEF_DIMENSION_ORDER = {
             'decibels-isotropic': 'Antenna Gain',
             'electrical potential': 'Voltage',
             'time': 'Time',
-            'money': 'Cost'}
+            'substance': 'Moles',
+            'money': 'Cost'
+            }
+all_dims = {dim: dim.title() for dim in in_si
+            if (dim not in ('', None, 'None', 'dimensionless')
+                and dim not in PGEF_DIMENSION_ORDER)}
+PGEF_DIMENSION_ORDER.update(all_dims)
 
 # max length of string fields (default: 80)
 MAX_LENGTH = {
