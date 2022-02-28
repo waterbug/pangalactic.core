@@ -100,7 +100,7 @@ DEFAULT_CLASS_DATA_ELEMENTS = {'HardwareProduct': ['Vendor', 'TRL']}
 DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {'': []}
 
 # DEFAULT_CLASS_PARAMETERS:  default parameters of objects by class
-DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start'],
+DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start', 't_end'],
                             'Mission': ['duration'],
                             'HardwareProduct': ['m', 'P', 'R_D']}
 
@@ -486,6 +486,7 @@ PGEF_DIMENSION_ORDER = {
             'decibels': 'Gain',
             'decibels-isotropic': 'Antenna Gain',
             'electrical potential': 'Voltage',
+            'time': 'Time',
             'money': 'Cost'}
 
 # max length of string fields (default: 80)
