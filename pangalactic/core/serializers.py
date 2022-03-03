@@ -574,17 +574,6 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         # look for requirement allocations to psus ...
         if psu.system_requirements:
             req_oids.update([r.oid for r in psu.system_requirements])
-    # NOTE: orb.recompute_parmz() now calls refresh_req_allocz for all reqts 
-    # if req_oids:
-        # orb.log.debug('  - relevant req oids: {}'.format(str(req_oids)))
-        # orb.log.debug('    req_allocz is being refreshed ...')
-        # for req_oid in req_oids:
-            # req = orb.get(req_oid)
-            # refresh_req_allocz(req)
-        # orb.log.debug('    done.')
-        # # orb.log.debug('  - recomputing parameters ...')
-        # recompute_parmz_required = True
-        # # orb.log.debug('    done.')
     if recompute_parmz_required and not force_no_recompute:
         # orb.log.debug('  - deserialize recomputing parameters ...')
         orb.recompute_parmz()
