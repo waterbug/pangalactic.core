@@ -1215,9 +1215,11 @@ class UberORB(object):
                                 del alloc_reqs[req_oid]
                 # TODO: is recompute required here???
                 # recompute_required = True
-            elif cname == 'Requirement' and obj.req_type == 'performance':
+            elif cname == 'Requirement':
+                # in the future, functional reqts. can be allocated
                 refresh_req_allocz(obj)
-                recompute_required = True
+                if obj.req_type == 'performance':
+                    recompute_required = True
             elif cname == 'DataElementDefinition':
                 # NOTE:  all DataElementDefinitions are public
                 obj.public = True

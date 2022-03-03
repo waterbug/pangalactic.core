@@ -118,7 +118,13 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     # NOTE that ParameterDefinition is a subclass of DataElementDefinition, so is
     # implicitly included here.
     unmodifiables = (
+        orb.classes['ActivityType'],
         orb.classes['DataElementDefinition'],
+        orb.classes['Discipline'],
+        orb.classes['DisciplineProductType'],
+        orb.classes['DisciplineRole'],
+        orb.classes['ModelFamily'],
+        orb.classes['ModelType'],
         orb.classes['ParameterContext'],
         orb.classes['PortTemplate'],
         orb.classes['PortType'],
@@ -127,6 +133,19 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     if isinstance(obj, unmodifiables):
         # orb.log.debug('  *** reference data cannot be modified or deleted.')
         perms = ['view', 'ref data: view only']
+        return perms
+    # Instances of these classes are modifiable by any user -- they are
+    # typically only created in association with other objects and usually only
+    # accessible via their associated objects
+    modifiables = (
+        orb.classes['ActCompRel'],
+        orb.classes['ParameterRelation'],
+        orb.classes['Relation'],
+        orb.classes['Representation'],
+        orb.classes['RequirementAncestry'])
+    if isinstance(obj, modifiables):
+        # orb.log.debug('  *** reference data cannot be modified or deleted.')
+        perms = ['view', 'modify', 'delete', 'universally modifiable']
         return perms
     # if we get this far, we have a user_oid and a user object
     if is_global_admin(user):
