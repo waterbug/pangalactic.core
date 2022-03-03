@@ -375,13 +375,8 @@ def refresh_req_allocz(req):
     Args:
         req (Requirement):  a Requirement instance
     """
-    # log.debug('* refresh_req_allocz({})'.format(req.oid))
-    if not req and req.oid in req_allocz:
-        # the requirement is referenced in req_allocz but the requirement
-        # has now been deleted: remove it from req_allocz
-        # log.debug('  req was deleted, removing from req_allocz ...')
-        del req_allocz[req.oid]
-        return
+    # req_oid = getattr(req, 'oid', 'no oid') or 'no oid'
+    # log.debug(f'* refresh_req_allocz({req_oid})')
     usage_oid = None
     alloc_ref = None
     obj_oid = None

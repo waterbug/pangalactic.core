@@ -610,7 +610,7 @@ class UberORB(object):
         """
         Recompute any computed parameters for the configured variables and
         contexts.  This is required at startup or when a parameter is created,
-        modified, or deleted.
+        modified, or deleted, or in several other cases.
         """
         # self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
@@ -656,7 +656,10 @@ class UberORB(object):
                 oid_deletions.add(oid)
         for oid in oid_deletions:
             del parameterz[oid]
-        # [1] iterate over current set of performance requirements, which
+        # [1] refresh allocations for current requirements
+        for req in self.get_by_type('Requirement'):
+            refresh_req_allocz(req)
+        # [2] iterate over current set of performance requirements, which
         # should already have been identified by running refresh_req_allocz()
         for req_oid in req_allocz:
             # compute_requirement_margin() returns a tuple:
@@ -911,8 +914,6 @@ class UberORB(object):
         # parameters ...
         self._build_componentz_cache()
         # update the req_allocz runtime cache (used in computing margins)
-        for req in self.get_by_type('Requirement'):
-            refresh_req_allocz(req)
         self.recompute_parmz()
         self.log.info('  + all reference data loaded.')
 
@@ -1182,8 +1183,8 @@ class UberORB(object):
                                 req = self.get(req_oid)
                                 if req:
                                     self.log.debug('   alloc reqts found ...')
-                                    refresh_req_allocz(req)
-                                    self.log.debug('   refreshed.')
+                                    recompute_required = True
+                                    self.log.debug('   recompute will be done')
                                 else:
                                     # if requirement not there, remove alloc
                                     del alloc_reqs[req_oid]
@@ -1201,25 +1202,22 @@ class UberORB(object):
                          add_parameter(obj.oid, pid)
                 recompute_required = True
             elif cname == 'ProjectSystemUsage':
-                if not new:
-                    # find all allocations to this PSU and refresh them ...
-                    alloc_reqs = [req_oid for req_oid in req_allocz
-                                  if req_allocz[req_oid][0] == obj.oid]
-                    if alloc_reqs:
-                        for req_oid in alloc_reqs:
-                            req = self.get(req_oid)
-                            if req:
-                                refresh_req_allocz(req)
-                            else:
-                                # if requirement not there, remove alloc
-                                del alloc_reqs[req_oid]
-                # TODO: is recompute required here???
-                # recompute_required = True
+                # if not new:
+                    # # find all allocations to this PSU and refresh them ...
+                    # alloc_reqs = [req_oid for req_oid in req_allocz
+                                  # if req_allocz[req_oid][0] == obj.oid]
+                    # if alloc_reqs:
+                        # for req_oid in alloc_reqs:
+                            # req = self.get(req_oid)
+                            # if req:
+                                # recompute_required = True
+                            # else:
+                                # # if requirement not there, remove alloc
+                                # del alloc_reqs[req_oid]
+                recompute_required = True
             elif cname == 'Requirement':
                 # in the future, functional reqts. can be allocated
-                refresh_req_allocz(obj)
-                if obj.req_type == 'performance':
-                    recompute_required = True
+                recompute_required = True
             elif cname == 'DataElementDefinition':
                 # NOTE:  all DataElementDefinitions are public
                 obj.public = True
