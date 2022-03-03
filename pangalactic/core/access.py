@@ -5,6 +5,14 @@ from pangalactic.core         import state, config
 from pangalactic.core.uberorb import orb
 
 
+modifiables = [
+        'ActCompRel',
+        'ParameterRelation',
+        'Relation',
+        'Representation',
+        'RequirementAncestry']
+
+
 def get_perms(obj, user=None, permissive=False, debugging=False):
     """
     Get the permissions of the specified user relative to the specified object.
@@ -137,14 +145,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     # Instances of these classes are modifiable by any user -- they are
     # typically only created in association with other objects and usually only
     # accessible via their associated objects
-    modifiables = (
-        orb.classes['ActCompRel'],
-        orb.classes['ParameterRelation'],
-        orb.classes['Relation'],
-        orb.classes['Representation'],
-        orb.classes['RequirementAncestry'])
-    if isinstance(obj, modifiables):
-        # orb.log.debug('  *** reference data cannot be modified or deleted.')
+    if obj.__class__.__name__ in modifiables:
         perms = ['view', 'modify', 'delete', 'universally modifiable']
         return perms
     # if we get this far, we have a user_oid and a user object
