@@ -624,7 +624,7 @@ def add_default_parameters(obj, parms=None):
         config['default_parms'] = [
                             'm', 'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
                             'P', 'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
-                            'P[Peak]', 'P[max]', 'P[min]', 'P[survival]',
+                            'P[Peak]', 'P[survival]',
                             'T[max]', 'T[min]', 'T[operational]',
                             'T[survival]', 'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
                             'R_D[MEV]', 'height', 'width', 'depth', 'Cost']
