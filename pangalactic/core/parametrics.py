@@ -1732,8 +1732,7 @@ def add_default_data_elements(obj, des=None):
     # TODO: let user set default data elements in their prefs
     if not config.get('default_data_elements'):
         config['default_data_elements'] = ['TRL', 'Vendor',
-                                           'heritage_justification',
-                                           'heritage_use']
+                                           'reference_missions']
     if cname == 'HardwareProduct':
         # default for "default_data_elements":  Vendor
         # (state is read in p.node.gui.startup, and will be overridden by
