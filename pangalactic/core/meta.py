@@ -38,9 +38,9 @@ MAIN_VIEWS = dict(
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
          'assembly_level', 'product_type_hint'],
     Discipline=IDENTITY,
-    DisciplineProductType=['used_in_discipline', 'relevant_product_type'],
-    DisciplineRole=['related_to_discipline', 'related_role'],
-    Flow=['flow_context', 'start_port', 'end_port'],
+    DisciplineProductType=['id', 'used_in_discipline', 'relevant_product_type'],
+    DisciplineRole=['id', 'related_to_discipline', 'related_role'],
+    Flow=['id', 'flow_context', 'start_port', 'end_port'],
     HardwareProduct=(PGXN_REQD['Product']
                      + ['id_ns', 'abbreviation', 'product_type', 'public']
                      + SYSTEM),
@@ -49,18 +49,19 @@ MAIN_VIEWS = dict(
     ModelType=(IDENTITY + ['model_type_family']),
     Organization=(IDENTITY + ['name_code', 'cage_code', 'parent_organization',
                               'sub_organizations', 'street_address', 'city',
-                              'state_or_province', 'zip_or_postal_zone']),
+                              'state_or_province', 'country',
+                              'zip_or_postal_zone']),
     Person=(IDENTITY + ['last_name', 'mi_or_name', 'first_name',
                         'preferred_name', 'employer', 'org', 'work_email',
                         'work_phone']),
     ParameterDefinition=(IDENTITY + ['range_datatype', 'dimensions']),
-    ParameterRelation=['referenced_relation', 'correlates_parameter'],
+    ParameterRelation=['id', 'referenced_relation', 'correlates_parameter'],
     Port=['id', 'name', 'of_product', 'type_of_port'],
     Product=(PGXN_REQD['Product']
              + ['id_ns', 'abbreviation', 'public']
              + SYSTEM),
     ProductType=IDENTITY,
-    ProductTypeParameterDefinition=['used_in_product_type',
+    ProductTypeParameterDefinition=['id', 'used_in_product_type',
                                     'parameter_definition'],
     Project=(IDENTITY + ['parent_organization']),
     ProjectSystemUsage=['id', 'project', 'system', 'system_role'],
@@ -71,7 +72,8 @@ MAIN_VIEWS = dict(
                  'allocated_to_system', 'req_level', 'version',
                  'version_sequence', 'iteration', 'validated', 'public'
                  ]),
-    RoleAssignment=['assigned_role', 'assigned_to', 'role_assignment_context'],
+    RoleAssignment=['id', 'assigned_role', 'assigned_to',
+                    'role_assignment_context'],
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
     )
 
@@ -100,7 +102,7 @@ DEFAULT_CLASS_DATA_ELEMENTS = {'HardwareProduct': ['Vendor', 'TRL']}
 DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {'': []}
 
 # DEFAULT_CLASS_PARAMETERS:  default parameters of objects by class
-DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start', 't_end'],
+DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start'],
                             'Mission': ['duration'],
                             'HardwareProduct': ['m', 'P', 'R_D']}
 
@@ -168,7 +170,7 @@ M2M = {
                                  'range'  : 'ActCompRel'},
 
        # *** M2M:  Acu (Assembly Component Usage)
-       # inverse of ''
+       # inverse of 'assembly'
        'components' :           {'domain' : 'Product',
                                  'range'  : 'Acu'},
        # inverse of 'component'
