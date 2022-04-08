@@ -18,8 +18,6 @@ do
     fi
 done
 
-# test_entity.py \
-
 # clean up home directory used in tests
 
 if [ -d pangalaxian_test ]; then

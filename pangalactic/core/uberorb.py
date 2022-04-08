@@ -27,9 +27,6 @@ from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
-from pangalactic.core.entity      import (load_dmz, save_dmz,
-                                          schemaz, load_schemaz, save_schemaz,
-                                          load_ent_histz, save_ent_histz)
 from pangalactic.core.registry    import PanGalacticRegistry
 from pangalactic.core.utils.meta  import uncook_datetime
 from pangalactic.core.mapping     import schema_maps, schema_version
@@ -368,12 +365,6 @@ class UberORB(object):
         # that the schema version doesn't match and we have to load data from a
         # dump)
         self.load_reference_data()
-        # ---------------------------------------------------------------------
-        # ### NOTE:  user or app configured schemas can override reference data
-        # -- if schemas are specified in "config", they are updated here ...
-        if config.get('schemaz'):
-            schemaz.update(config['schemaz'])
-        # ---------------------------------------------------------------------
         self._load_diagramz()
         # create 'role_product_types' cache
         self.role_product_types = {}
@@ -412,10 +403,6 @@ class UberORB(object):
         # TODO:  clean up boilerplate ...
         save_data_elementz(self.home)
         save_parmz(self.home)
-        # save_entz(self.home)
-        save_ent_histz(self.home)
-        save_schemaz(self.home)
-        save_dmz(self.home)
         return self.home
 
     def init_registry(self, home, db_url, force_new_core=False, version='',
@@ -482,8 +469,7 @@ class UberORB(object):
 
     def save_caches(self, dir_path=None):
         """
-        Serialize all caches (data_elementz, parameterz, ent_histz, schemaz,
-        and dmz) to files and:
+        Serialize all caches (data_elementz, parameterz) to files and:
 
             1. if no directory is specified, save the files in the home
                directory and save copies to a backup directory named with the
@@ -505,9 +491,6 @@ class UberORB(object):
         # [1] save all caches to home
         save_data_elementz(self.home)
         save_parmz(self.home)
-        save_ent_histz(self.home)
-        save_schemaz(self.home)
-        save_dmz(self.home)
         save_mode_defz(self.home)
         self.log.info('  cache saves completed ...')
         # [2] save all caches to backup dir
@@ -521,9 +504,6 @@ class UberORB(object):
             os.makedirs(dir_path)
         save_data_elementz(dir_path)
         save_parmz(dir_path)
-        save_ent_histz(dir_path)
-        save_schemaz(dir_path)
-        save_dmz(dir_path)
         save_mode_defz(dir_path)
         self.cache_dump_complete = True
         if backup:
@@ -846,12 +826,6 @@ class UberORB(object):
         # ********************************************************************
         self.data_elementz_status = load_data_elementz(self.home)
         self.parmz_status = load_parmz(self.home)
-        # self.log.debug('* loading ent_histz ...')
-        load_ent_histz(self.home)
-        # self.log.debug('* loading schemaz ...')
-        load_schemaz(self.home)
-        # self.log.debug('* loading dmz ...')
-        load_dmz(self.home)
         # self.log.debug('  dmz: {}'.format(str(dmz)))
         self.recompute_parmz()
         # [4] check for updates to parameter definitions and contexts

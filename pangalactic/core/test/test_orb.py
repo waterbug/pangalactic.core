@@ -38,7 +38,7 @@ from pangalactic.core.test.utils  import (create_test_users,
 from pangalactic.core.uberorb     import orb
 from pangalactic.core.utils.reports   import write_mel_xlsx_from_model
 
-orb.start(home='pangalaxian_test', debug=True)
+orb.start(home='pangalaxian_test')
 serialized_test_objects = create_test_users()
 serialized_test_objects += create_test_project()
 prefs['default_data_elements'] = ['TRL', 'Vendor']
