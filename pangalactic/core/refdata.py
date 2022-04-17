@@ -58,6 +58,16 @@ initial = [
     'name': 'Observer',
     'create_datetime': epoch,
     'mod_datetime': epoch
+    },
+{   ' _cname': 'RoleAssignment',
+    'assigned_role': 'pgefobjects:Role.Administrator',
+    'assigned_to': 'pgefobjects:admin',
+    'create_datetime': epoch,
+    'creator': ';pgefobjects:admin',
+    'id': 'admin_global_admin',
+    'mod_datetime': epoch,
+    'modifier': 'pgefobjects:admin',
+    'oid': 'pgefobjects:RA.admin:global_admin'
     }
 ]
 
