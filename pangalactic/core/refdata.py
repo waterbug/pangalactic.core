@@ -59,15 +59,16 @@ initial = [
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
-{   ' _cname': 'RoleAssignment',
+
+{   '_cname': 'RoleAssignment',
+    'oid': 'pgefobjects:RA.admin:global_admin',
     'assigned_role': 'pgefobjects:Role.Administrator',
     'assigned_to': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'creator': ';pgefobjects:admin',
+    'creator': 'pgefobjects:admin',
     'id': 'admin_global_admin',
-    'mod_datetime': epoch,
-    'modifier': 'pgefobjects:admin',
-    'oid': 'pgefobjects:RA.admin:global_admin'
+    'mod_datetime': '2022-01-01 00:00:00',
+    'modifier': 'pgefobjects:admin'
     }
 ]
 
