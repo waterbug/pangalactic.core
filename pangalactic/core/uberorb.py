@@ -71,9 +71,6 @@ class UberORB(object):
 
     Attributes:
         classes (dict):  a mapping of `meta_id`s to runtime app classes.
-        data (dict):  in-memory cache of DataMatrix instances
-        data_store (str):  path to directory in which tsv-serialized instances
-            of DataMatrix are stored
         db (Session):  interface to the local db
         db_engine (SQLAlchemy orm):  result of registry `create_engine`
         error_log (Logger):  instance of pgorb_error_logger
@@ -296,12 +293,6 @@ class UberORB(object):
                 shutil.rmtree(os.path.join(pgx_home, '.creds'),
                               ignore_errors=True)
                 self.log.debug('      done with keys.')
-        # create in-memory cache for DataMatrix instances
-        self.data = {}
-        # create storage area for serialized DataMatrix instances (.tsv files)
-        self.data_store = os.path.join(pgx_home, 'data')
-        if not os.path.exists(self.data_store):
-            os.makedirs(self.data_store, mode=0o755)
         # * copy test data files from 'p.test.data' module to test_data_dir
         self.test_data_dir = os.path.join(pgx_home, 'test_data')
         current_test_files = set()
