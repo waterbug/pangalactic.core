@@ -65,7 +65,7 @@ Comp = namedtuple('Comp', 'oid usage_oid quantity reference_designator')
 #           of the content of ParameterDefinition objects
 # format:  {'parameter id': {parameter properties}
 #                            ...}}
-# ... where parameter definition properties are:
+# ... where "parameter properties" are the attributes of ParameterDefinition:
 # -----------------------------------------------------------------------------
 # name, label, variable, context, description, dimensions, range_datatype,
 # computed, mod_datetime
@@ -1305,6 +1305,8 @@ COMPUTES = {
     ('m', 'Margin'):   compute_margin,
     ('P', 'CBE'):      compute_assembly_parameter,
     ('P', 'Total'):    compute_assembly_parameter,
+    ('P', 'Peak'):     compute_assembly_parameter,
+    ('P', 'Survival'): compute_assembly_parameter,
     ('P', 'MEV'):      compute_mev,
     ('P', 'Margin'):   compute_margin,
     ('R_D', 'CBE'):    compute_assembly_parameter,

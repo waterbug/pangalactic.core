@@ -33,6 +33,11 @@
 
   - a parameter's value is only editable if `computed` is False
 
+  - if a parameter context is `computed`, it must have an associated "compute"
+    function in the p.core.parametrics module's 'COMPUTES' dict, which will be
+    used to recompute the parameter's value (typically by recursively rolling
+    up the values of that parameter from the assembled product's components.
+
   - FUTURE PLAN:  a parameter can be "specified", "computed", "correlated"
 
     + specified:  "fixed" (within the context)
@@ -107,8 +112,8 @@
 
 ## Future Parameter Performance and Scalability Considerations
 
-The average size of the representation of parameters (a python dictionary with
-10 keys) is around 2K to 3K each.
+The representation of a parameter instance (a key-value pair in a python
+dictionary) is typically between 10 and 20 bytes.
 
 Bear in mind that each object and its parameters are represented only once --
 even if an object is used in several assemblies, its usages still point to the
@@ -116,24 +121,11 @@ same object so the total memory space of its parameters remains constant.
 Therefore, only the number of objects in the library determines the required
 memory for parameters -- assembly usages have no impact.
 
-Memory impact could be greatly optimized by a more compact representation --
-e.g. using just an "id", "value", "unit" tuple would reduce the size to around
-100 bytes per parameter.
-
 The main reason for using dictionaries, which are optimized for speed but not
 memory consumption, is that they are very flexible -- fields can be easily
 added or removed or have their structures change if necessary.  A more
 optimized but rigid structure will be considered when the current system is
 mature and even more performance and space efficiency are needed.
-
-Both size and performance can be optimized further by ...
-
-* using Lightning Memory-Mapped Database (LMDB) -- choices:
-    - lmdb (0.9.22 in conda pkgs/main) -- only on Linux and Windows (?)
-    - py-lmdb -- ctypes-based binding, only for Python 3 (cross-platform)
-* using PyTables / HDF5 storage
-* writing a parameter-handling module using Cython (which generates a C extension
-module from python code).
 
 ## ParameterDefinition Objects
 
