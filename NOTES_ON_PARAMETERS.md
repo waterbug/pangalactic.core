@@ -31,12 +31,13 @@
     ParameterDefinition (in other words, the ParameterDefinition can be
     regarded as a kind of template for parameters)
 
-  - a parameter's value is only editable if `computed` is False
+  - a parameter's value is only editable if `computed` is False OR if it has
+    no components
 
   - if a parameter context is `computed`, it must have an associated "compute"
     function in the p.core.parametrics module's 'COMPUTES' dict, which will be
-    used to recompute the parameter's value (typically by recursively rolling
-    up the values of that parameter from the assembled product's components.
+    used to recompute the parameter's value (typically by recursively summing
+    the values of that parameter in the assembled product's components.
 
   - FUTURE PLAN:  a parameter can be "specified", "computed", "correlated"
 

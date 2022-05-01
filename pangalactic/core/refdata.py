@@ -1531,7 +1531,7 @@ pdc = [
 
 {   '_cname': 'ParameterContext',
     'abbreviation': 'Peak',
-    'computed': True,
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
@@ -1539,7 +1539,7 @@ pdc = [
     'description': 'Peak value',
     'id': 'Peak',
     'id_ns': 'pgef',
-    'mod_datetime': '2022-01-01 00:00:00',
+    'mod_datetime': '2022-04-28 00:00:00',
     'modifier': 'pgefobjects:admin',
     'name': 'Peak',
     'oid': 'pgef:ParameterContext.Peak',
@@ -1626,19 +1626,19 @@ pdc = [
     'owner': 'pgefobjects:PGANA'},
 
 {   '_cname': 'ParameterContext',
-    'abbreviation': 'survival',
-    'computed': True,
+    'abbreviation': 'Survival',
+    'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
     'create_datetime': '2020-01-01 00:00:00',
     'creator': 'pgefobjects:admin',
     'description': 'Survival level',
-    'id': 'survival',
+    'id': 'Survival',
     'id_ns': 'pgef',
-    'mod_datetime': '2022-01-01 00:00:00',
+    'mod_datetime': '2022-04-28 00:00:00',
     'modifier': 'pgefobjects:admin',
     'name': 'Survival',
-    'oid': 'pgef:ParameterContext.survival',
+    'oid': 'pgef:ParameterContext.Survival',
     'owner': 'pgefobjects:PGANA'},
 
 {   '_cname': 'ParameterContext',
@@ -4226,6 +4226,8 @@ deprecated = [
     'pgef:ParameterDefinition.P_throughput',
     'pgef:ParameterDefinition.T_operational',
     'pgef:ParameterDefinition.T_survival',
+    # "Survival" context is now upper case
+    'pgef:ParameterContext.survival'
     # TODO: for ProductTypes, all HW objects have to be checked and modified if
     # necessary ...
     # 'pgefobjects:ProductType.cdh_electronics_box',

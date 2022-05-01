@@ -473,7 +473,7 @@ def get_variable_and_context(parameter_id):
             return (var, ctx)
         except:
             return ('', '')
-    return ('', '')
+    return (parameter_id, '')
 
 def get_parameter_name(variable_name, context_abbr):
     """
@@ -618,21 +618,21 @@ def add_default_parameters(obj, parms=None):
     pids = OrderedSet()
     cname = obj.__class__.__name__
     pids |= OrderedSet(DEFAULT_CLASS_PARAMETERS.get(cname, []))
-    # if config does not have 'default_parms' set, set it ... it will still be
-    # user-editable
-    if not config.get('default_parms'):
-        config['default_parms'] = [
+    # if prefs does not have 'default_parms' set, set it
+    if not prefs.get('default_parms'):
+        prefs['default_parms'] = [
                             'm', 'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
                             'P', 'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
-                            'P[Peak]', 'P[survival]',
-                            'T[max]', 'T[min]', 'T[operational]',
-                            'T[survival]', 'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
+                            'P[Peak]', 'P[Survival]',
+                            'T[operational_max]', 'T[operational_min]',
+                            'T[survival_max]', 'T[survival_min]',
+                            'T[Survival]', 'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
                             'R_D[MEV]', 'height', 'width', 'depth', 'Cost']
     if cname == 'HardwareProduct':
         # default for "default_parms":  mass, power, data rate
         # (state is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
-        pids |= OrderedSet(parms or config['default_parms'])
+        pids |= OrderedSet(parms or prefs['default_parms'])
         if obj.product_type:
             pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
                                getattr(obj.product_type, 'id', '') or []))
@@ -826,12 +826,12 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
             not set
     """
     # NOTE: uncomment debug logging for EXTREMELY verbose debugging output
-    # log.debug('* _compute_pval() for variable "{}"'.format(variable))
+    # NOTE:  THE OBJECT DOES NOT ALWAYS HAVE TO HAVE THE VARIABLE
+    pid = get_parameter_id(variable, context_id)
+    # log.debug(f'* _compute_pval() for pid "{pid}"')
     # log.debug('                  of item with oid "{}"'.format(oid))
     # log.debug('                  in context "{}"'.format(context_id))
     val = 0.0
-    # NOTE:  THE OBJECT DOES NOT ALWAYS HAVE TO HAVE THE VARIABLE
-    pid = get_parameter_id(variable, context_id)
     pdz = parm_defz.get(pid) or {}
     if not pdz:
         # log.debug('  "{}" not found in parm_defz'.format(pid))
@@ -843,11 +843,11 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
         # expression, found using the ParameterRelation relationship
         if not parameterz.get(oid):
             parameterz[oid] = {}
-        compute = COMPUTES.get((variable, context_id))
+        compute = COMPUTES.get(pid)
         if compute:
             # log.debug('  compute function is {!s}'.format(getattr(
                                         # compute, '__name__', None)))
-            val = compute(oid, variable) or 0.0
+            val = compute(oid, pid) or 0.0
             # log.debug('  value is {}'.format(val))
         else:
             return val
@@ -1040,7 +1040,7 @@ def set_pval_from_str(oid, pid, str_val, units='', local=True):
         # log.debug('* {}'.format(msg.format(str_val)))
         pass
 
-def compute_assembly_parameter(product_oid, variable):
+def compute_assembly_parameter(product_oid, pid):
     """
     Compute the total assembly value of a linearly additive variable (e.g.,
     mass, power consumption, data rate) for a product based on the recursively
@@ -1061,6 +1061,7 @@ def compute_assembly_parameter(product_oid, variable):
     """
     # This logging is VERY verbose, even for debugging!
     # log.debug('* compute_assembly_parameter()')
+    variable, context = get_variable_and_context(pid)
     if (product_oid in parameterz):
         range_datatype = parm_defz[variable]['range_datatype']
         dtype = DATATYPES[range_datatype]
@@ -1080,7 +1081,47 @@ def compute_assembly_parameter(product_oid, variable):
     else:
         return 0.0
 
-def compute_mev(oid, variable):
+def compute_assembly_context_parameter(product_oid, pid):
+    """
+    Compute the total assembly value of a linearly additive context parameter
+    (e.g., peak power, survival power) for a product based on the recursively
+    summed values of the parameter over all of the product's known components.
+    If no components are defined for the product, simply return the value of
+    the parameter as specified for the product, or the default (usually 0).
+    Note that if the product specified by the oid has components, a value will
+    be returned that represents the rolled up assembly parameter even if the
+    product specified does not have any parameters assigned to it.
+
+    CAUTION: this will obviously return a wildly inaccurate value if the
+    list of components in a specified assembly is incomplete.
+
+    Args:
+        product_oid (str): the oid of the Product whose total parameter is
+            being estimated
+        variable (str): variable for which the assembly value is being computed
+    """
+    # This logging is VERY verbose, even for debugging!
+    # log.debug('* compute_assembly_context_parameter()')
+    if (product_oid in parameterz):
+        range_datatype = parm_defz[pid]['range_datatype']
+        dtype = DATATYPES[range_datatype]
+        # cz, if it exists, will be a list of namedtuples ...
+        cz = componentz.get(product_oid)
+        if cz:
+            # dtype cast is used here in case some component didn't have this
+            # parameter or didn't exist and we got a 0.0 value for it ...
+            summation = fsum(
+            [dtype(compute_assembly_context_parameter(c.oid, pid) * c.quantity)
+             for c in cz])
+            return round_to(summation)
+        else:
+            # if the product has no known components, return its specified
+            # value for the variable (note that the default here is 0.0)
+            return get_pval(product_oid, pid)
+    else:
+        return 0.0
+
+def compute_mev(oid, pid):
     """
     Compute the Maximum Expected Value of a parameter based on either [1] if it
     has components, the sum of their MEVs or [2] if it does not have
@@ -1097,6 +1138,7 @@ def compute_mev(oid, variable):
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
+    variable, context = get_variable_and_context(pid)
     if oid not in parameterz or parameterz[oid] is None:
         parameterz[oid] = {}
     # log.debug('* compute_mev "{}": "{}"'.format(oid, variable))
@@ -1171,7 +1213,7 @@ def get_flight_units(product_oid, assembly_oid, default=1):
                 return component['quantity']
     return default
 
-def compute_margin(usage_oid, variable, default=0):
+def compute_margin(usage_oid, pid, default=0):
     """
     Compute the "Margin" for the specified variable (base parameter) at the
     specified function or system role. So far, "Margin" is only defined for
@@ -1191,6 +1233,7 @@ def compute_margin(usage_oid, variable, default=0):
         default (any): a value to be returned if the parameter is not found
     """
     # log.debug('* compute_margin()')
+    variable, context = get_variable_and_context(pid)
     # log.debug('  using req_allocz: {}'.format(str(req_allocz)))
     # find requirements allocated to the specified usage and constraining the
     # specified variable
@@ -1296,23 +1339,22 @@ def compute_requirement_margin(req_oid, default=0):
     # log.debug('  ... margin is {}%'.format(margin * 100.0))
     return (usage_oid, pid, nte, nte_units, margin)
 
-# the COMPUTES dict maps variable and context id to applicable compute
-# functions
+# the COMPUTES dict maps parameter id to applicable compute function
 COMPUTES = {
-    ('m', 'CBE'):      compute_assembly_parameter,
-    ('m', 'Total'):    compute_assembly_parameter,
-    ('m', 'MEV'):      compute_mev,
-    ('m', 'Margin'):   compute_margin,
-    ('P', 'CBE'):      compute_assembly_parameter,
-    ('P', 'Total'):    compute_assembly_parameter,
-    ('P', 'Peak'):     compute_assembly_parameter,
-    ('P', 'Survival'): compute_assembly_parameter,
-    ('P', 'MEV'):      compute_mev,
-    ('P', 'Margin'):   compute_margin,
-    ('R_D', 'CBE'):    compute_assembly_parameter,
-    ('R_D', 'Total'):  compute_assembly_parameter,
-    ('R_D', 'MEV'):    compute_mev,
-    ('R_D', 'Margin'): compute_margin
+    ('m[CBE]'):      compute_assembly_parameter,
+    ('m[Total]'):    compute_assembly_parameter,
+    ('m[MEV]'):      compute_mev,
+    ('m[Margin]'):   compute_margin,
+    ('P[CBE]'):      compute_assembly_parameter,
+    ('P[Total]'):    compute_assembly_parameter,
+    ('P[Peak]'):     compute_assembly_context_parameter,
+    ('P[Survival]'): compute_assembly_context_parameter,
+    ('P[MEV]'):      compute_mev,
+    ('P[Margin]'):   compute_margin,
+    ('R_D[CBE]'):    compute_assembly_parameter,
+    ('R_D[Total]'):  compute_assembly_parameter,
+    ('R_D[MEV]'):    compute_mev,
+    ('R_D[Margin]'): compute_margin
     }
 
 ################################################
