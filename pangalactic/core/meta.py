@@ -481,7 +481,7 @@ PGEF_DIMENSION_ORDER = {
             'power': 'Power',
             'bitrate': 'Data Rate',
             'length': 'Length',
-            'temperature': 'Thermal',
+            'temperature': 'Temperature',
             'area': 'Area',
             'moment of inertia': 'Moment of Inertia',
             'frequency': 'Frequency',

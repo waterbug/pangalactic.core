@@ -55,6 +55,9 @@ from pangalactic.core.utils.datetimes import dtstamp, file_dts, file_date_stamp
 from pangalactic.core.log         import get_loggers
 from pangalactic.core.validation  import get_assembly
 
+DEPRECATED_PARAMETERS = ['P[max]', 'P[min]',
+                         'T', 'T[max]', 'T[min]', 'T[Survival]']
+
 
 class UberORB(object):
     """
@@ -877,105 +880,8 @@ class UberORB(object):
             # self.log.debug('    updates completed.')
         # else:
             # self.log.debug('    no updates found.')
-        # [7] delete deprecated reference data
-        self.log.debug('  + checking for deprecated reference data ...')
-        deprecated_objs = [self.get(oid) for oid in refdata.deprecated]
-        to_delete = [obj for obj in deprecated_objs if obj is not None]
-        if to_delete:
-            self.delete(to_delete)
-            # if a deprecated object was a ParameterDefinition or
-            # ParameterContext, remove all related parameters
-        self.log.debug('    deprecated items found, checking parameters ...')
-        n_pds = 0
-        n_pcs = 0
-        obj_oids = parameterz.keys()
-        for oid in refdata.deprecated:
-            if 'DataElementDefinition' in oid:
-                deid = oid.split('.')[-1]
-                for obj_oid in obj_oids:
-                    if deid in parameterz[obj_oid]:
-                        del parameterz[obj_oid][deid]
-                        n_pds += 1
-                # also check config, prefs, and state
-                if deid in config.get('default_data_elements', []):
-                    config['default_data_elements'].remove(deid)
-                    self.log.debug(f'    {deid} removed from config.')
-                if deid in prefs.get('default_data_elements', []):
-                    prefs['default_data_elements'].remove(deid)
-                    self.log.debug(f'    {deid} removed from prefs.')
-                if deid in state.get('app_default_data_elements', []):
-                    state['app_default_data_elements'].remove(deid)
-                    self.log.debug(f'    {deid} removed from state.')
-            if 'ParameterDefinition' in oid:
-                pid = oid.split('.')[-1]
-                for obj_oid in obj_oids:
-                    if pid in parameterz[obj_oid]:
-                        del parameterz[obj_oid][pid]
-                        n_pds += 1
-                # also check config, prefs, and state
-                if pid in config.get('default_parms', []):
-                    config['default_parms'].remove(pid)
-                    self.log.debug(f'    {pid} removed from config.')
-                if pid in prefs.get('default_parms', []):
-                    prefs['default_parms'].remove(pid)
-                    self.log.debug(f'    {pid} removed from prefs.')
-                if pid in state.get('app_default_parms', []):
-                    state['app_default_parms'].remove(pid)
-                    self.log.debug(f'    {pid} removed from state.')
-            elif 'ParameterContext' in oid:
-                context_str = '[' + oid.split('.')[-1] + ']'
-                for obj_oid in obj_oids:
-                    for pid in parameterz[obj_oid]:
-                        if context_str in pid:
-                            del parameterz[obj_oid][pid]
-                            n_pcs += 1
-                # also check config and prefs
-                config_rm = []
-                for pid in config.get('default_parms', []):
-                    if context_str in pid:
-                        config_rm.append(pid)
-                if config_rm:
-                    for pid in config_rm:
-                        config['default_parms'].remove(pid)
-                        self.log.debug(f'    {pid} removed from config.')
-                prefs_rm = []
-                for pid in prefs.get('default_parms', []):
-                    if context_str in pid:
-                        prefs_rm.append(pid)
-                if prefs_rm:
-                    for pid in prefs_rm:
-                        prefs['default_parms'].remove(pid)
-                        self.log.debug(f'    {pid} removed from prefs.')
-                state_rm = []
-                for pid in state.get('app_default_parms', []):
-                    if context_str in pid:
-                        state_rm.append(pid)
-                if state_rm:
-                    for pid in state_rm:
-                        state['app_default_parms'].remove(pid)
-                        self.log.debug(f'    {pid} removed from state.')
-        self.log.debug(f'    {len(obj_oids)} objects checked ...')
-        self.log.debug(f'    {n_pds} deprecated parameters removed.')
-        context_msg = 'parameters with deprecated contexts removed.'
-        self.log.debug(f'    {n_pcs} {context_msg}')
-        # also remove any parameters that don't make sense from parameterz,
-        # config, prefs, and state
-        self.log.debug('    removing other deprecated parameters ...')
-        for pid in ['T', 'T[max]', 'T[min]', 'T[Survival]']:
-            for obj_oid in obj_oids:
-                if pid in parameterz[obj_oid]:
-                    del parameterz[obj_oid][pid]
-                    n_pds += 1
-            # also check config, prefs, and state
-            if pid in config.get('default_parms', []):
-                config['default_parms'].remove(pid)
-                self.log.debug(f'    {pid} removed from config.')
-            if pid in prefs.get('default_parms', []):
-                prefs['default_parms'].remove(pid)
-                self.log.debug(f'    {pid} removed from prefs.')
-            if pid in state.get('app_default_parms', []):
-                state['app_default_parms'].remove(pid)
-                self.log.debug(f'    {pid} removed from state.')
+        # [7] remove deprecated reference data and parameters
+        self.remove_deprecated_data()
         # build the 'componentz' runtime cache, which is used in recomputing
         # parameters ...
         self._build_componentz_cache()
@@ -1157,6 +1063,107 @@ class UberORB(object):
                 # de_defz[deid]['label'] = state_dedef_labels[deid]
         # self.log.debug('  - data element defs created: {}'.format(
                                                 # str(list(de_defz.keys()))))
+
+    def remove_deprecated_data(self):
+        self.log.debug('  + checking for deprecated reference data ...')
+        deprecated_objs = [self.get(oid) for oid in refdata.deprecated]
+        to_delete = [obj for obj in deprecated_objs if obj is not None]
+        if to_delete:
+            self.delete(to_delete)
+            # if a deprecated object was a ParameterDefinition or
+            # ParameterContext, remove all related parameters
+        self.log.debug('    deprecated items found, checking parameters ...')
+        n_pds = 0
+        n_pcs = 0
+        obj_oids = parameterz.keys()
+        for oid in refdata.deprecated:
+            if 'DataElementDefinition' in oid:
+                deid = oid.split('.')[-1]
+                for obj_oid in obj_oids:
+                    if deid in parameterz[obj_oid]:
+                        del parameterz[obj_oid][deid]
+                        n_pds += 1
+                # also check config, prefs, and state
+                if deid in config.get('default_data_elements', []):
+                    config['default_data_elements'].remove(deid)
+                    self.log.debug(f'    {deid} removed from config.')
+                if deid in prefs.get('default_data_elements', []):
+                    prefs['default_data_elements'].remove(deid)
+                    self.log.debug(f'    {deid} removed from prefs.')
+                if deid in state.get('app_default_data_elements', []):
+                    state['app_default_data_elements'].remove(deid)
+                    self.log.debug(f'    {deid} removed from state.')
+            if 'ParameterDefinition' in oid:
+                pid = oid.split('.')[-1]
+                for obj_oid in obj_oids:
+                    if pid in parameterz[obj_oid]:
+                        del parameterz[obj_oid][pid]
+                        n_pds += 1
+                # also check config, prefs, and state
+                if pid in config.get('default_parms', []):
+                    config['default_parms'].remove(pid)
+                    self.log.debug(f'    {pid} removed from config.')
+                if pid in prefs.get('default_parms', []):
+                    prefs['default_parms'].remove(pid)
+                    self.log.debug(f'    {pid} removed from prefs.')
+                if pid in state.get('app_default_parms', []):
+                    state['app_default_parms'].remove(pid)
+                    self.log.debug(f'    {pid} removed from state.')
+            elif 'ParameterContext' in oid:
+                context_str = '[' + oid.split('.')[-1] + ']'
+                for obj_oid in obj_oids:
+                    for pid in parameterz[obj_oid]:
+                        if context_str in pid:
+                            del parameterz[obj_oid][pid]
+                            n_pcs += 1
+                # also check config and prefs
+                config_rm = []
+                for pid in config.get('default_parms', []):
+                    if context_str in pid:
+                        config_rm.append(pid)
+                if config_rm:
+                    for pid in config_rm:
+                        config['default_parms'].remove(pid)
+                        self.log.debug(f'    {pid} removed from config.')
+                prefs_rm = []
+                for pid in prefs.get('default_parms', []):
+                    if context_str in pid:
+                        prefs_rm.append(pid)
+                if prefs_rm:
+                    for pid in prefs_rm:
+                        prefs['default_parms'].remove(pid)
+                        self.log.debug(f'    {pid} removed from prefs.')
+                state_rm = []
+                for pid in state.get('app_default_parms', []):
+                    if context_str in pid:
+                        state_rm.append(pid)
+                if state_rm:
+                    for pid in state_rm:
+                        state['app_default_parms'].remove(pid)
+                        self.log.debug(f'    {pid} removed from state.')
+        self.log.debug(f'    {len(obj_oids)} objects checked ...')
+        self.log.debug(f'    {n_pds} deprecated parameters removed.')
+        context_msg = 'parameters with deprecated contexts removed.'
+        self.log.debug(f'    {n_pcs} {context_msg}')
+        # also remove any parameters that don't make sense from parameterz,
+        # config, prefs, and state
+        self.log.debug('    removing other deprecated parameters ...')
+        for pid in DEPRECATED_PARAMETERS:
+            for obj_oid in obj_oids:
+                if pid in parameterz[obj_oid]:
+                    del parameterz[obj_oid][pid]
+                    n_pds += 1
+            # also check config, prefs, and state
+            if pid in config.get('default_parms', []):
+                config['default_parms'].remove(pid)
+                self.log.debug(f'    {pid} removed from config.')
+            if pid in prefs.get('default_parms', []):
+                prefs['default_parms'].remove(pid)
+                self.log.debug(f'    {pid} removed from prefs.')
+            if pid in state.get('app_default_parms', []):
+                state['app_default_parms'].remove(pid)
+                self.log.debug(f'    {pid} removed from state.')
+        self.log.debug('  + all deprecated reference data removed.')
 
     ##########################################################################
     # DB FUNCTIONS
