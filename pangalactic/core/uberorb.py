@@ -1112,7 +1112,7 @@ class UberORB(object):
             elif 'ParameterContext' in oid:
                 context_str = '[' + oid.split('.')[-1] + ']'
                 for obj_oid in obj_oids:
-                    pids = parameterz[obj_oid].keys()[:]
+                    pids = list(parameterz[obj_oid])
                     for pid in pids:
                         if context_str in pid:
                             del parameterz[obj_oid][pid]
