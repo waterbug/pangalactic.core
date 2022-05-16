@@ -623,10 +623,10 @@ def add_default_parameters(obj, parms=None):
         prefs['default_parms'] = [
                             'm', 'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
                             'P', 'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
-                            'P[Peak]', 'P[Survival]',
+                            'P[peak]', 'P[survival]',
                             'T[operational_max]', 'T[operational_min]',
                             'T[survival_max]', 'T[survival_min]',
-                            'T[Survival]', 'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
+                            'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
                             'R_D[MEV]', 'height', 'width', 'depth', 'Cost']
     if cname == 'HardwareProduct':
         # default for "default_parms":  mass, power, data rate
@@ -1347,8 +1347,6 @@ COMPUTES = {
     ('m[Margin]'):   compute_margin,
     ('P[CBE]'):      compute_assembly_parameter,
     ('P[Total]'):    compute_assembly_parameter,
-    ('P[Peak]'):     compute_assembly_context_parameter,
-    ('P[Survival]'): compute_assembly_context_parameter,
     ('P[MEV]'):      compute_mev,
     ('P[Margin]'):   compute_margin,
     ('R_D[CBE]'):    compute_assembly_parameter,
