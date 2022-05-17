@@ -402,13 +402,24 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/flow_context -->
+    <!-- http://pangalactic.us/pgef/start_port_context -->
 
-    <owl:ObjectProperty rdf:about="&pgef;flow_context">
+    <owl:ObjectProperty rdf:about="&pgef;start_port_context">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The context (higher-level object) within which a Flow is defined. For example, a Flow that represents an electrical connection between the ports of two components in an assembled product is defined within the context of the assembled product, so the assembled product is the flow_context for that Flow; conversely, the Flow belongs to the internal (white box) model of that assembled product.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The Assembly Component Usage (Acu) context of the start_port for a Flow. For example, a Flow that represents an electrical connection between the ports of two components in an assembled product is defined within the context of the usages of those components within the assembled product, so those usages represent the start_port_context and end_port_context for that Flow; conversely, the Flow belongs to the internal (white box) model of the assembled product, which is the assembly attribute of those two contexts.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Flow"/>
-        <rdfs:range rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:range rdf:resource="&pgef;Acu"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/end_port_context -->
+
+    <owl:ObjectProperty rdf:about="&pgef;end_port_context">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Assembly Component Usage (Acu) context of the end_port for a Flow. For example, a Flow that represents an electrical connection between the ports of two components in an assembled product is defined within the context of the usages of those components within the assembled product, so those usages represent the start_port_context and end_port_context of the ports for that Flow; conversely, the Flow belongs to the internal (white box) model of the assembled product, which is the assembly attribute of those two contexts.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Flow"/>
+        <rdfs:range rdf:resource="&pgef;Acu"/>
     </owl:ObjectProperty>
 
 
