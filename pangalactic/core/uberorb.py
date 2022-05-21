@@ -1640,19 +1640,29 @@ class UberORB(object):
         else:
             return []
 
-    def get_internal_flows_of(self, managed_object):
+    def get_internal_flows_of(self, product):
         """
-        Get all flows of which the specified ManagedObject is the
-        'flow_context'.
+        Get all flows internal to the specified Product.
 
         Args:
-            managed_object (ManagedObject):  the specified object
+            product (Product):  the specified Product instance
         """
         # handle exception in case we get something that's not a Product
         # self.log.debug('* get_internal_flows_of()')
         try:
-            flows = self.search_exact(cname='Flow',
-                                      flow_context=managed_object)
+            if len(product.components) == 0:
+                return []
+            ports = []
+            for comp in product.components:
+                ports += comp.ports
+            ports += product.ports
+            for comp in product.components:
+                start_flows = self.search_exact(cname='Flow',
+                                                start_port_context=comp)
+                end_flows = self.search_exact(cname='Flow',
+                                              end_port_context=comp)
+                flows = [f for f in start_flows + end_flows
+                         if f.start_port in ports and f.end_port in ports]
             return flows
         except:
             return []
@@ -1689,23 +1699,31 @@ class UberORB(object):
             return []
         # self.log.debug(f'  - assembly id: "{assembly.id}"')
         # self.log.debug(f'  - component id: "{component.id}"')
-        context_flows = self.search_exact(cname='Flow', flow_context=assembly)
-        # self.log.debug(f'  - # of context flows: {len(context_flows)}')
+        start_context_flows = self.search_exact(cname='Flow',
+                                                start_port_context=usage)
+        # self.log.debug(f'  - start port flows: {len(start_context_flows)}')
+        end_context_flows = self.search_exact(cname='Flow',
+                                              end_port_context=usage)
+        # self.log.debug(f'  - end port flows: {len(end_context_flows)}')
         ports = component.ports
         # np = len(ports)
         # port_ids = [p.id for p in component.ports]
         # self.log.debug(f'  - {np} component ports: {port_ids}')
-        flows = [flow for flow in context_flows
-                 if flow.start_port in ports or flow.end_port in ports]
-        # if flows:
-            # flow_ids = [flow.id for flow in flows]
-            # nf = len(flow_ids)
-            # self.log.debug(f'  - {nf} associated flows: {flow_ids}')
+        starting_flows = [flow for flow in start_context_flows
+                          if flow.start_port in ports]
+        ending_flows = [flow for flow in end_context_flows
+                        if flow.end_port in ports]
+        flows = starting_flows + ending_flows
+        if flows:
+            flow_ids = [flow.id for flow in flows]
+            nf = len(flow_ids)
+            self.log.debug(f'  - {nf} associated flows: {flow_ids}')
         return flows
 
     def gazoutas(self, port):
         """
-        Get start_ports of all flows connecting to a port.
+        Get start_ports of all flows connecting to a port, regardless of usage
+        contexts.
 
         Args:
             port (Port):  the specified Port
@@ -1715,7 +1733,8 @@ class UberORB(object):
 
     def gazintas(self, port):
         """
-        Get end_ports of all flows connecting to a port.
+        Get end_ports of all flows connecting to a port, regardless of usage
+        contexts.
 
         Args:
             port (Port):  the specified Port
@@ -1726,7 +1745,7 @@ class UberORB(object):
     def get_all_port_flows(self, port):
         """
         For a Port instance, get all flows defined to or from it (gazintas and
-        gazoutas).
+        gazoutas), regardless of usage contexts.
 
         Args:
             port (Port):  the specified Port

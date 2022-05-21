@@ -397,6 +397,84 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             # oid = asciify(d['oid'])
             oid = d['oid']
             # if oid:
+            if cname == 'Flow' and d.get('flow_context'):
+                ###########################################################
+                # SPECIAL CASE: convert pre-3.0 Flow instances
+                ###########################################################
+                flow_id = d['id']
+                orb.log.debug('  pre-3.0 schema Flow object:')
+                orb.log.debug(f'  id: "{flow_id}" [oid: {oid}]')
+                start_port = orb.get(d.get('start_port'))
+                end_port = orb.get(d.get('end_port'))
+                flow_context = orb.get(d.get('flow_context'))
+                if start_port and end_port and flow_context:
+                    txt = "start port, end port and flow context found."
+                    orb.log.debug(f'    {txt}')
+                    # flow_context is assembly
+                    assembly = flow_context
+                    component = None
+                    port_is_on_assembly = False
+                    if start_port.of_product.oid == flow_context.oid:
+                        port_is_on_assembly = True
+                        txt = "start port is a port on the assembly"
+                        orb.log.debug(f'    {txt}')
+                        start_port_context = None
+                        end_port_context = flow_context.oid
+                        component = end_port.of_product
+                        assembly = start_port.of_product
+                    elif end_port.of_product.oid == flow_context.oid:
+                        port_is_on_assembly = True
+                        txt = "end port is a port on the assembly"
+                        orb.log.debug(f'    {txt}')
+                        start_port_context = flow_context.oid
+                        end_port_context = None
+                        component = start_port.of_product
+                        assembly = end_port.of_product
+                    if port_is_on_assembly:
+                        if assembly and component:
+                            acus = orb.search_exact(cname='Acu',
+                                                   assembly=assembly,
+                                                   component=component)
+                            if acus and (start_port_context is None):
+                                d['end_port_context'] = acus[0].oid
+                                d['start_port_context'] = ''
+                                orb.log.debug('  - success:')
+                                orb.log.debug('    contexts defined.')
+                            elif acus and (end_port_context is None):
+                                d['start_port_context'] = acus[0].oid
+                                d['end_port_context'] = ''
+                                orb.log.debug('  - success:')
+                                orb.log.debug('    contexts defined.')
+                    else:
+                        # flow is between components within an assembly
+                        assembly = flow_context
+                        start_component = start_port.of_product
+                        end_component = end_port.of_product
+                        start_acus = orb.search_exact(
+                                            cname='Acu',
+                                            assembly=assembly,
+                                            component=start_component)
+                        end_acus = orb.search_exact(
+                                            cname='Acu',
+                                            assembly=assembly,
+                                            component=end_component)
+                        if start_acus and end_acus:
+                            d['start_port_context'] = start_acus[0].oid
+                            d['end_port_context'] = end_acus[0].oid
+                            orb.log.debug('  - success:')
+                            orb.log.debug('    contexts defined.')
+                        else:
+                            # new Flow MUST have both contexts
+                            orb.log.debug('  - ignored:')
+                            orb.log.debug('    indeterminable contexts.')
+                            ignores.append(oid)
+                else:
+                    # pre-3.0 Flow must have start_port, end_port, and
+                    # flow_context
+                    orb.log.debug('  - ignored:')
+                    txt = "missing start port, end port or flow context."
+                    orb.log.debug(f'    {txt}')
+                    ignores.append(oid)
             if oid in current_oids:
                 # orb.log.debug('  - object exists in db ...')
                 # the serialized object exists in the db
@@ -492,14 +570,17 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                             orb.log.debug('        is missing of_product;')
                             orb.log.debug('        will be ignored.')
                             ignores.append(oid)
-                        # a Flow MUST have "start_port", "end_port" and
-                        # "flow_context" objects
-                        if fk in ["start_port", "end_port", "flow_context"]:
+                        # a Flow MUST have "start_port", "end_port",
+                        # "start_port_context" and "end_port_context" objects
+                        if fk in ["start_port", "end_port",
+                                  "start_port_context", "end_port_context"]:
                             orb.log.debug('      invalid Flow instance:')
                             oid = d['oid']
                             orb.log.debug(f'      - oid: "{oid}"')
                             orb.log.debug('        is missing start_port,')
-                            orb.log.debug('        end_port, or flow_context;')
+                            orb.log.debug('        end_port,')
+                            orb.log.debug('        start_port_context,')
+                            orb.log.debug('        or end_port_context;')
                             orb.log.debug('        will be ignored.')
                             ignores.append(oid)
             cls = orb.classes[cname]

@@ -529,45 +529,65 @@ def get_next_port_seq(obj, port_type):
     except:
         return 0
 
-def get_port_id(port_type_id, seq):
+def get_port_id(of_product_id, port_type_id, seq):
     """
     Create an id for a new Port.
 
     Args:
+        of_product_id (str):  the id of the port's "of_product" (Product)
         port_type_id (str):  the id of the port's type_of_port (PortType)
         seq (int):  the sequence number assigned to the port
     """
-    return '-'.join([port_type_id, str(seq)])
+    return '-'.join([of_product_id, port_type_id, str(seq)])
 
-def get_port_name(port_type_name, seq):
+def get_port_name(of_product_name, port_type_name, seq):
     """
     Create a name for a new Port.
 
     Args:
+        of_product_name (str):  the name of the port's "of_product" (Product)
         port_type_name (str):  the name of the port's type_of_port (PortType)
         seq (int):  the sequence number assigned to the port
     """
-    return ' '.join([port_type_name, str(seq)])
+    return ' '.join([of_product_name, port_type_name, str(seq)])
 
-def get_flow_id(start_port_id, end_port_id):
+def get_port_abbr(port_type_abbr, seq):
     """
-    Create an id for a new Flow.
+    Create an abbreviation for a new Port.
 
     Args:
+        port_type_abbr (str):  the abbreviation of the port's type_of_port
+            (PortType)
+        seq (int):  the sequence number assigned to the port
+    """
+    return '-'.join([port_type_abbr, str(seq)])
+
+def get_flow_id(start_context_id, start_port_id, end_context_id, end_port_id):
+    """
+    Create a unique id for a new Flow.
+
+    Args:
+        start_context_id:  the id of the start_port_context
         start_port_id:  the id of the start_port
+        end_context_id:  the id of the end_port_context
         end_port_id:  the id of the end_port
     """
-    return '-'.join(['flow', start_port_id, end_port_id])
+    return '-'.join(['flow', start_context_id, start_port_id, end_context_id,
+                     end_port_id])
 
-def get_flow_name(start_port_name, end_port_name):
+def get_flow_name(start_context_name, start_port_name, end_context_name,
+                  end_port_name):
     """
     Create a name for a new Flow.
 
     Args:
+        start_context_name:  the name of the start_port_context
         start_port_name:  the name of the start_port
+        end_context_name:  the name of the end_port_context
         end_port_name:  the name of the end_port
     """
-    return ' '.join(['Flow:', start_port_name, 'to', end_port_name])
+    return ' '.join(['Flow:', start_context_name, start_port_name, 'to',
+                     end_context_name, end_port_name])
 
 def display_id(obj):
     """

@@ -3616,7 +3616,7 @@ dict(
     'description': 'Electrical power port',
     'id': 'electrical_power',
     'name': 'Electrical Power',
-    'abbreviation': 'Elec',
+    'abbreviation': 'Power',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -3636,7 +3636,7 @@ dict(
     'description': 'Electronic control signal port',
     'id': 'electronic_control',
     'name': 'Electronic Control',
-    'abbreviation': 'ElecCtrl',
+    'abbreviation': 'Control',
     'create_datetime': epoch,
     'mod_datetime': epoch
     },
@@ -3682,7 +3682,7 @@ dict(
     'description': 'Thermal (power) port',
     'id': 'thermal',
     'name': 'Thermal',
-    'abbreviation': 'Thermal',
+    'abbreviation': 'Therm',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,

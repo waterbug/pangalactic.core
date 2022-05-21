@@ -362,8 +362,24 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             return perms
         # [5] is it a Flow?
         elif isinstance(obj, orb.classes['Flow']):
-            # access depends on the user's permissions on 'flow_context'
-            perms = get_perms(obj.flow_context, user=user)
+            # access depends on the user's permissions on 'context'
+            perms = []
+            try:
+                start_assmb_oid = obj.start_port_context.assembly.oid
+                end_assmb_oid = obj.end_port_context.assembly.oid
+                if start_assmb_oid == end_assmb_oid:
+                    # case 1: flow is between components in an assembly
+                    perms = get_perms(obj.start_port_context.assembly,
+                                      user=user)
+                else:
+                    # case 2: flow is between a component and an assembly port
+                    if start_assmb_oid == obj.end_port.of_product.oid:
+                        perms = get_perms(obj.end_port.of_product, user=user)
+                    else:
+                        perms = get_perms(obj.start_port.of_product, user=user)
+            except:
+                # perms could not be determined
+                perms = []
             if debugging:
                 perms.append('[5] role-based perms (Flow)')
             return perms
