@@ -3887,7 +3887,7 @@ le_role_obj = core_objs['gsfc:Role.lead_engineer']
 # [SCW] datetime stamp for create_datetime / mod_datetime of new
 # DisciplineProductType relationships created for electro_mechanical and
 # eee_part on 2020-11-24
-dts = datetime.datetime(2020, 11, 24)
+dts = str(datetime.datetime(2020, 11, 24))
 
 for discipline_oid in [
     'pgefobjects:Discipline.acs',

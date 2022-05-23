@@ -1653,16 +1653,18 @@ class UberORB(object):
             if len(product.components) == 0:
                 return []
             ports = []
-            for comp in product.components:
-                ports += comp.ports
+            for acu in product.components:
+                ports += acu.component.ports
             ports += product.ports
+            flows = set()
             for comp in product.components:
                 start_flows = self.search_exact(cname='Flow',
                                                 start_port_context=comp)
                 end_flows = self.search_exact(cname='Flow',
                                               end_port_context=comp)
-                flows = [f for f in start_flows + end_flows
-                         if f.start_port in ports and f.end_port in ports]
+                flows |= set([f for f in start_flows + end_flows
+                              if f.start_port in ports
+                              and f.end_port in ports])
             return flows
         except:
             return []
@@ -1688,7 +1690,6 @@ class UberORB(object):
             # self.log.debug('  - no flows (Project context cannot have flows).')
             return []
         if isinstance(usage, self.classes['Acu']):
-            assembly = usage.assembly
             component = usage.component
         else:
             # self.log.debug('  usage was not an Acu -> no flows.')
@@ -1697,7 +1698,7 @@ class UberORB(object):
         if not component or not component.ports:
             # self.log.debug('  usage had no components/ports -> no flows.')
             return []
-        # self.log.debug(f'  - assembly id: "{assembly.id}"')
+        # self.log.debug(f'  - assembly id: "{usage.assembly.id}"')
         # self.log.debug(f'  - component id: "{component.id}"')
         start_context_flows = self.search_exact(cname='Flow',
                                                 start_port_context=usage)
