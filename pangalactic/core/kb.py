@@ -277,11 +277,7 @@ class PanGalacticKnowledgeBase(Graph):
         identifiers (names).
 
         @param nsprefix:  the name (a.k.a. "prefix") of a namespace
-        @type  nsprefix:  C{unicode} or C{str}
-
-        @param unicode:  if True, return names as C{unicode} instances;
-            otherwise, return them as C{str}s
-        @type  unicode:  C{bool}
+        @type  nsprefix:  C{str}
 
         @return:  set of Class names
         @rtype:   L{set} of L{str}
@@ -306,11 +302,7 @@ class PanGalacticKnowledgeBase(Graph):
 
         @param scope:  if not None, only get base names within the namespaces
             specified
-        @type  scope:  C{list} (of C{str} or C{unicode})
-
-        @param unicode:  if True, return names as C{unicode} instances;
-            otherwise, return them as C{str}s
-        @type  unicode:  C{bool}
+        @type  scope:  C{list} of C{str}
 
         @return:  the set of base names of the specified Class
         @rtype:   C{str}
@@ -356,10 +348,6 @@ class PanGalacticKnowledgeBase(Graph):
 
         @param pname:  the local name of a Property
         @type  pname:  C{str}
-
-        @param unicode:  if True, return names as C{unicode} instances;
-            otherwise, return them as C{str}s
-        @type  unicode:  C{bool}
 
         @return:  a dictionary of Property node attribute names to their
             values
@@ -461,10 +449,6 @@ class PanGalacticKnowledgeBase(Graph):
 
         @param name:  the local name of a Class node in KB
         @type  name:  C{str}
-
-        @param unicode:  if True, return names as C{unicode} instances;
-            otherwise, return them as C{str}s
-        @type  unicode:  C{bool}
 
         @return:  a dictionary mapping names of attributes to their types
         @rtype:   L{dict}
