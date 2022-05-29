@@ -903,8 +903,7 @@ class PanGalacticRegistry(object):
     # # the same Class name to be used in multiple Ontologies (realistic, albeit
     # # also potentially confusing)
     # id_ns = Column(String, ForeignKey('ontologies.prefix'))
-    # # 'name' is actually unicode (sa 'String' supports unicode); 'id' is
-    # # asciified 'name'
+    # # 'id' is asciified 'name'
     # name = Column(String)
     # # TODO: rdfs:subClassOf -- the list of bases
     # # figure out how to do this (either FK rel. or list of strings / ENUM)
@@ -928,8 +927,7 @@ class PanGalacticRegistry(object):
     # # TODO:  possibly make id+id_ns a compound foreign key, which would permit
     # # the same Property name to be used in multiple Classes
     # id_ns = Column(String, ForeignKey('classes.id'))
-    # # 'name' is actually unicode (sa 'String' supports unicode); 'id' is
-    # # asciified 'name'
+    # # 'id' is asciified 'name'
     # name = Column(String)
     # type = Column(String)
     # abbreviation = Column(String)

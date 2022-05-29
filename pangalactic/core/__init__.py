@@ -30,9 +30,6 @@ datatypes = {
     (True, 'float', True)     : Float,    # ***
                                 # *** cf. sa notes about Numeric/Decimal
     (True, 'float', False)    : set,
-    (True, 'unicode', True)   : Unicode,
-                                # narrative -> UnicodeText
-    (True, 'unicode', False)  : set,
     # kb.py maps xsd:base64Binary to Python 'bytes', which is here mapped to sa
     # 'LargeBinary'.  The 'bytes' datatype is intended for data values which
     # may be used as Python 3.0.dev0 identifiers
@@ -80,12 +77,12 @@ datatypes = {
 # SOFTWARE.
 
 xsd_datatypes = {  #  (schema->python, python->schema)  Does not validate.
-    URIRef('http://www.w3.org/2001/XMLSchema#string') : ('unicode', str),
-    URIRef('http://www.w3.org/2001/XMLSchema#normalizedString') : ('unicode',
+    URIRef('http://www.w3.org/2001/XMLSchema#string') : ('str', str),
+    URIRef('http://www.w3.org/2001/XMLSchema#normalizedString') : ('str',
                                                                    str),
     # 'token' added -- maps to single-word text values
     URIRef('http://www.w3.org/2001/XMLSchema#token') : ('str', str),
-    URIRef('http://www.w3.org/2001/XMLSchema#language') : ('unicode', str),
+    URIRef('http://www.w3.org/2001/XMLSchema#language') : ('str', str),
     URIRef('http://www.w3.org/2001/XMLSchema#boolean') : ('bool', 
                                                 lambda i:str(i).lower()),
     URIRef('http://www.w3.org/2001/XMLSchema#decimal') : ('float', str),
