@@ -432,16 +432,16 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         assembly = end_port.of_product
                     if port_is_on_assembly:
                         if assembly and component:
-                            acus = orb.search_exact(cname='Acu',
-                                                   assembly=assembly,
-                                                   component=component)
-                            if acus and (start_port_context is None):
-                                d['end_port_context'] = acus[0].oid
+                            rel_acus = orb.search_exact(cname='Acu',
+                                                        assembly=assembly,
+                                                        component=component)
+                            if rel_acus and (start_port_context is None):
+                                d['end_port_context'] = rel_acus[0].oid
                                 d['start_port_context'] = ''
                                 orb.log.debug('  - success:')
                                 orb.log.debug('    contexts defined.')
-                            elif acus and (end_port_context is None):
-                                d['start_port_context'] = acus[0].oid
+                            elif rel_acus and (end_port_context is None):
+                                d['start_port_context'] = rel_acus[0].oid
                                 d['end_port_context'] = ''
                                 orb.log.debug('  - success:')
                                 orb.log.debug('    contexts defined.')

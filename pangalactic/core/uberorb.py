@@ -34,6 +34,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           add_default_parameters,
                                           add_default_data_elements,
                                           add_parameter, componentz,
+                                          save_compz,
                                           _compute_pval,
                                           compute_requirement_margin,
                                           data_elementz, de_defz,
@@ -42,6 +43,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           save_data_elementz,
                                           load_mode_defz, save_mode_defz,
                                           load_parmz, save_parmz,
+                                          save_parmz_by_dimz,
                                           parameterz, parm_defz,
                                           parmz_by_dimz, refresh_componentz,
                                           refresh_req_allocz, req_allocz,
@@ -494,6 +496,8 @@ class UberORB(object):
         save_data_elementz(self.home)
         save_parmz(self.home)
         save_mode_defz(self.home)
+        save_compz(self.home)
+        save_parmz_by_dimz(self.home)
         self.log.info('  cache saves completed ...')
         # [2] save all caches to backup dir
         if not dir_path:
@@ -696,11 +700,12 @@ class UberORB(object):
         Build the `componentz` cache (which maps Product oids to the oids of
         their components) at startup.
         """
-        # self.log.debug('* _build_componentz_cache()')
+        self.log.debug('  + building componentz cache ...')
         for product in self.get_all_subtypes('Product'):
             if product.components:
                 refresh_componentz(product)
-        # self.log.debug('  componentz cache ready.')
+        compz = len(componentz)
+        self.log.debug(f'    componentz cache has {compz} items.')
 
     def start_logging(self, home=None, console=False, debug=False):
         """

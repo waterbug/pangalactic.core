@@ -36,16 +36,7 @@ DATATYPES = SELECTABLE_VALUES['range_datatype']
 NULL = dict(float=0.0, int=0, str='', bool=False, text='', array=[])
 TWOPLACES = Decimal('0.01')
 
-# NOTE! #####################################################################
-# For Data Element handling, see DATA ELEMENT SECTION
-# For Mode handling, see MODE SECTION
-# NOTE! #####################################################################
-
-################################################
-# PARAMETER SECTION
-################################################
-
-# PARAMETER CACHES ##########################################################
+# componentz cache **********************************************************
 
 # componentz:  runtime assembly component cache
 # purpose:  enable fast computation of assembly parameters *and* determine
@@ -59,6 +50,79 @@ TWOPLACES = Decimal('0.01')
 componentz = {}
 Comp = namedtuple('Comp', 'oid usage_oid quantity reference_designator')
 
+def serialize_compz(compz_data):
+    """
+    Serialize a `componentz` data set to a json-dumpable format.
+    """
+    log.debug('* serialize_compz() ...')
+    ser_compz = {}
+    for oid, compz in compz_data.items():
+        comps = []
+        for comp in compz:
+            compdict = comp._asdict()
+            comps.append(compdict)
+        ser_compz[oid] = comps
+    return ser_compz
+
+def deserialize_compz(ser_compz):
+    """
+    Deserialize a `componentz` data set from a json-dumped format.
+
+    NOTE: the deserialize_compz() function is only used to deserialize
+    componentz data received from the server.
+    """
+    log.debug('* deserialize_compz() ...')
+    deser_compz = {}
+    for oid, comps in ser_compz.items():
+        compz = []
+        for comp in comps:
+            comptuple = Comp(**comp)
+            compz.append(comptuple)
+        deser_compz[oid] = compz
+    n = len(deser_compz)
+    log.debug(f'  - componentz deserialized ({n} product assemblies).')
+    return deser_compz
+
+def save_compz(dir_path):
+    """
+    Save the `componentz` cache to a json file.
+    """
+    fpath = os.path.join(dir_path, 'components.json')
+    ser_compz = serialize_compz(componentz)
+    with open(fpath, 'w') as f:
+        f.write(json.dumps(ser_compz, separators=(',', ':'),
+                           indent=4, sort_keys=True))
+
+def load_compz(dir_path):
+    """
+    Load the `componentz` cache from a json file.
+    """
+    fpath = os.path.join(dir_path, 'components.json')
+    if os.path.exists(fpath):
+        with open(fpath) as f:
+            try:
+                stored_componentz = json.loads(f.read())
+            except:
+                return 'fail'
+        componentz.update(deserialize_compz(stored_componentz))
+        return 'success'
+    else:
+        log.debug('  - "components.json" was not found.')
+        return 'not found'
+
+# ***************************************************************************
+
+# NOTE #####################################################################
+# For Data Element handling, see DATA ELEMENT SECTION
+# For Mode handling, see MODE SECTION
+# NOTE #####################################################################
+
+################################################
+# PARAMETER SECTION
+################################################
+
+# PARAMETER CACHES ##########################################################
+
 # parm_defz:  runtime cache of parameter definitions (both base and context
 #             parameter definitions are included)
 # purpose:  enable fast lookup of parameter metadata & compact representation
@@ -71,6 +135,41 @@ Comp = namedtuple('Comp', 'oid usage_oid quantity reference_designator')
 # computed, mod_datetime
 # -----------------------------------------------------------------------------
 parm_defz = {}
+
+def load_parm_defz(dir_path):
+    """
+    Load the `parm_defz` cache from a json file.
+    """
+    log.debug('* load_parm_defz() ...')
+    fpath = os.path.join(dir_path, 'parm_defs.json')
+    if os.path.exists(fpath):
+        with open(fpath) as f:
+            try:
+                stored_parm_defz = json.loads(f.read())
+            except:
+                log.debug('  - reading of "parm_defs.json" failed.')
+                return 'fail'
+        parm_defz.update(stored_parm_defz)
+        log.debug('  - parm_defz cache loaded.')
+        return 'success'
+    else:
+        log.debug('  - "parm_defs.json" was not found.')
+        return 'not found'
+
+def save_parm_defz(dir_path):
+    """
+    Save `parm_defz` cache to a json file.
+    """
+    log.debug('* save_parm_defz() ...')
+    try:
+        fpath = os.path.join(dir_path, 'parm_defs.json')
+        with open(fpath, 'w') as f:
+            f.write(json.dumps(parm_defz,
+                               separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        log.debug('  ... parm_defs.json file written.')
+    except:
+        log.debug('  ... writing parm_defs.json file failed!')
 
 # parameterz:  persistent** cache of assigned parameter values
 #              ** persisted in the file 'parameters.json' in the
@@ -175,7 +274,7 @@ def deserialize_parms(oid, ser_parms, cname=None):
 
 def load_parmz(dir_path):
     """
-    Load the `parameterz` dict from json file in cache format.
+    Load the `parameterz` cache from json file.
     """
     log.debug('* load_parmz() ...')
     fpath = os.path.join(dir_path, 'parameters.json')
@@ -235,9 +334,8 @@ def load_parmz(dir_path):
 
 def save_parmz(dir_path):
     """
-    Save `parameterz` dict to a json file in cache format.
+    Save `parameterz` cache to a json file.
     """
-    log.debug('* save_parmz() ...')
     stored_parameterz = {}
     for oid, parms in parameterz.items():
         # NOTE: serialize_parms() uses deepcopy()
@@ -246,12 +344,35 @@ def save_parmz(dir_path):
     with open(fpath, 'w') as f:
         f.write(json.dumps(stored_parameterz, separators=(',', ':'),
                            indent=4, sort_keys=True))
-    log.debug(f'  ... parameters.json file written to {dir_path}.')
 
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
 # format:  {dimension : [ids of ParameterDefinitions having that dimension]}
 # NOTE:  see orb function 'create_parmz_by_dimz'
 parmz_by_dimz = {}
+
+def load_parmz_by_dimz(dir_path):
+    """
+    Load the `parmz_by_dimz` dict from json file in cache format.
+    """
+    fpath = os.path.join(dir_path, 'parms_by_dims.json')
+    if os.path.exists(fpath):
+        with open(fpath) as f:
+            try:
+                parmz_by_dimz = json.loads(f.read())
+            except:
+                return 'fail'
+        return 'success'
+    else:
+        return 'not found'
+
+def save_parmz_by_dimz(dir_path):
+    """
+    Save `parmz_by_dimz` dict to a json file in cache format.
+    """
+    fpath = os.path.join(dir_path, 'parms_by_dims.json')
+    with open(fpath, 'w') as f:
+        f.write(json.dumps(parmz_by_dimz, separators=(',', ':'),
+                           indent=4, sort_keys=True))
 
 # req_allocz:  runtime requirement allocations cache
 # purpose:  optimize performance of margin calculations
@@ -283,6 +404,64 @@ parmz_by_dimz = {}
 req_allocz = {}
 Constraint = namedtuple('Constraint',
              'units target max min tol upper lower constraint_type tol_type')
+
+def serialize_req_allocz(req_allocz_data):
+    """
+    Serialize a `req_allocz` data set to a json-dumpable format.
+    """
+    log.debug('* serialize_req_allocz() ...')
+    ser_req_allocz = {}
+    for oid, alloc in req_allocz_data.items():
+        usage_oid, obj_oid, alloc_ref, pid, constraint = alloc
+        constraint_dict = constraint._asdict()
+        ser_alloc = [usage_oid, obj_oid, alloc_ref, pid, constraint_dict]
+        ser_req_allocz[oid] = ser_alloc
+    return ser_req_allocz
+
+def deserialize_req_allocz(ser_req_allocz):
+    """
+    Deserialize a `req_allocz` data set from a json-dumped format.
+
+    NOTE: the deserialize_req_allocz() function is only used to deserialize
+    req_allocz data received from the server.
+    """
+    log.debug('* deserialize_req_allocz() ...')
+    req_allocz_data = {}
+    for oid, ser_alloc in ser_req_allocz.items():
+        usage_oid, obj_oid, alloc_ref, pid, ser_constraint = ser_alloc
+        constraint = Constraint(**ser_constraint)
+        req_allocz_data[oid] = [usage_oid, obj_oid, alloc_ref, pid, constraint]
+    n = len(req_allocz_data)
+    log.debug(f'  - req_allocz deserialized ({n} req allocations).')
+    return req_allocz_data
+
+def save_req_allocz(dir_path):
+    """
+    Save the `req_allocz` cache to a json file.
+    """
+    fpath = os.path.join(dir_path, 'req_allocs.json')
+    ser_req_allocz = serialize_req_allocz(req_allocz)
+    with open(fpath, 'w') as f:
+        f.write(json.dumps(ser_req_allocz, separators=(',', ':'),
+                           indent=4, sort_keys=True))
+
+def load_req_allocz(dir_path):
+    """
+    Load the `req_allocz` cache from a json file.
+    """
+    fpath = os.path.join(dir_path, 'req_allocs.json')
+    if os.path.exists(fpath):
+        with open(fpath) as f:
+            try:
+                stored_req_allocz = json.loads(f.read())
+            except:
+                return 'fail'
+        req_allocz.update(deserialize_req_allocz(stored_req_allocz))
+        return 'success'
+    else:
+        log.debug('  - "req_allocs.json" was not found.')
+        return 'not found'
+
 #############################################################################
 
 def round_to(x, n=4):
@@ -329,7 +508,6 @@ def refresh_componentz(product):
                                         acu.reference_designator))
                                    for acu in product.components
                                    if acu.component]
-                                 # and acu.component.oid != 'pgefobjects:TBD']
 
 def refresh_req_allocz(req):
     """
@@ -1341,18 +1519,18 @@ def compute_requirement_margin(req_oid, default=0):
 
 # the COMPUTES dict maps parameter id to applicable compute function
 COMPUTES = {
-    ('m[CBE]'):      compute_assembly_parameter,
-    ('m[Total]'):    compute_assembly_parameter,
-    ('m[MEV]'):      compute_mev,
-    ('m[Margin]'):   compute_margin,
-    ('P[CBE]'):      compute_assembly_parameter,
-    ('P[Total]'):    compute_assembly_parameter,
-    ('P[MEV]'):      compute_mev,
-    ('P[Margin]'):   compute_margin,
-    ('R_D[CBE]'):    compute_assembly_parameter,
-    ('R_D[Total]'):  compute_assembly_parameter,
-    ('R_D[MEV]'):    compute_mev,
-    ('R_D[Margin]'): compute_margin
+    ('m[CBE]'):        compute_assembly_parameter,
+    ('m[assembly]'):   compute_assembly_parameter,
+    ('m[MEV]'):        compute_mev,
+    ('m[Margin]'):     compute_margin,
+    ('P[CBE]'):        compute_assembly_parameter,
+    ('P[assembly]'):   compute_assembly_parameter,
+    ('P[MEV]'):        compute_mev,
+    ('P[Margin]'):     compute_margin,
+    ('R_D[CBE]'):      compute_assembly_parameter,
+    ('R_D[assembly]'): compute_assembly_parameter,
+    ('R_D[MEV]'):      compute_mev,
+    ('R_D[Margin]'):   compute_margin
     }
 
 ################################################
@@ -1376,6 +1554,41 @@ COMPUTES = {
 # create_de_defz() will use to update de_defz after populating it from the db
 # DataElementDefinition objects.
 de_defz = {}
+
+def load_de_defz(dir_path):
+    """
+    Load the `de_defz` cache from a json file.
+    """
+    log.debug('* load_de_defz() ...')
+    fpath = os.path.join(dir_path, 'de_defs.json')
+    if os.path.exists(fpath):
+        with open(fpath) as f:
+            try:
+                stored_de_defz = json.loads(f.read())
+            except:
+                log.debug('  - reading of "de_defs.json" failed.')
+                return 'fail'
+        de_defz.update(stored_de_defz)
+        log.debug('  - de_defz cache loaded.')
+        return 'success'
+    else:
+        log.debug('  - "de_defs.json" was not found.')
+        return 'not found'
+
+def save_de_defz(dir_path):
+    """
+    Save `de_defz` cache to a json file.
+    """
+    log.debug('* save_de_defz() ...')
+    try:
+        fpath = os.path.join(dir_path, 'de_defs.json')
+        with open(fpath, 'w') as f:
+            f.write(json.dumps(de_defz,
+                               separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        log.debug('  ... de_defs.json file written.')
+    except:
+        log.debug('  ... writing de_defs.json file failed!')
 
 # data_elementz:  persistent** cache of assigned data element values
 #              ** persisted in the file 'data_elements.json' in the
@@ -1854,34 +2067,6 @@ def load_mode_defz(dir_path):
             except:
                 log.debug('  - reading of "mode_defs.json" failed.')
                 return 'fail'
-        # remove any blank modes
-        # proj_oids = list(stored_mode_defz)
-        # if proj_oids:
-            # for proj_oid in proj_oids:
-                # mode_dict = stored_mode_defz[proj_oid].get('modes') or {}
-                # sys_dict = stored_mode_defz[proj_oid].get('systems') or {}
-                # comp_dict = stored_mode_defz[proj_oid].get('components') or {}
-                # modes = list(mode_dict)
-                # sys_oids = list(sys_dict)
-                # comp_sys_oids = list(comp_dict)
-                # for mode in modes:
-                    # if not mode:
-                        # del mode_dict[mode]
-                # for sys in sys_oids:
-                    # if sys_dict[sys]:
-                        # sys_modes = list(sys_dict[sys])
-                        # for mode in sys_modes:
-                            # if not mode:
-                                # del sys_dict[sys][mode]
-                # for sys in comp_sys_oids:
-                    # if comp_dict[sys]:
-                        # comp_oids = list(comp_dict[sys])
-                        # for comp in comp_oids:
-                            # if comp_dict[sys][comp]:
-                                # comp_modes = list(comp_dict[sys][comp])
-                                # for mode in comp_modes:
-                                    # if not mode:
-                                        # del comp_dict[sys][comp][mode]
         mode_defz.update(stored_mode_defz)
         log.debug('  - mode_defz cache loaded.')
         return 'success'
@@ -1894,34 +2079,6 @@ def save_mode_defz(dir_path):
     Save `mode_defz` dict to a file in cache format.
     """
     log.debug('* save_mode_defz() ...')
-    # remove any blank modes before saving
-    # proj_oids = list(mode_defz)
-    # if proj_oids:
-        # for proj_oid in proj_oids:
-            # mode_dict = mode_defz[proj_oid].get('modes') or {}
-            # sys_dict = mode_defz[proj_oid].get('systems') or {}
-            # comp_dict = mode_defz[proj_oid].get('components') or {}
-            # modes = list(mode_dict)
-            # sys_oids = list(sys_dict)
-            # comp_sys_oids = list(comp_dict)
-            # for mode in modes:
-                # if not mode:
-                    # del mode_dict[mode]
-            # for sys in sys_oids:
-                # if sys_dict[sys]:
-                    # sys_modes = list(sys_dict[sys])
-                    # for mode in sys_modes:
-                        # if not mode:
-                            # del sys_dict[sys][mode]
-            # for sys in comp_sys_oids:
-                # if comp_dict[sys]:
-                    # comp_oids = list(comp_dict[sys])
-                    # for comp in comp_oids:
-                        # if comp_dict[sys][comp]:
-                            # comp_modes = list(comp_dict[sys][comp])
-                            # for mode in comp_modes:
-                                # if not mode:
-                                    # del comp_dict[sys][comp][mode]
     fpath = os.path.join(dir_path, 'mode_defs.json')
     with open(fpath, 'w') as f:
         f.write(json.dumps(mode_defz, separators=(',', ':'),
