@@ -405,6 +405,11 @@ req_allocz = {}
 Constraint = namedtuple('Constraint',
              'units target max min tol upper lower constraint_type tol_type')
 
+# allocz:   maps usage oids to a list of the oids of reqts. allocated to them
+# purpose:  used in "marv" package reqts. manager
+# format:  {usage_oid : [reqt_oids]}
+allocz = {}
+
 def serialize_req_allocz(req_allocz_data):
     """
     Serialize a `req_allocz` data set to a json-dumpable format.
@@ -460,6 +465,32 @@ def load_req_allocz(dir_path):
         return 'success'
     else:
         log.debug('  - "req_allocs.json" was not found.')
+        return 'not found'
+
+def save_allocz(dir_path):
+    """
+    Save the `allocz` cache to a json file.
+    """
+    fpath = os.path.join(dir_path, 'allocs.json')
+    with open(fpath, 'w') as f:
+        f.write(json.dumps(allocz, separators=(',', ':'),
+                           indent=4, sort_keys=True))
+
+def load_allocz(dir_path):
+    """
+    Load the `allocz` cache from a json file.
+    """
+    fpath = os.path.join(dir_path, 'allocs.json')
+    if os.path.exists(fpath):
+        with open(fpath) as f:
+            try:
+                stored_allocz = json.loads(f.read())
+            except:
+                return 'fail'
+        allocz.update(stored_allocz)
+        return 'success'
+    else:
+        log.debug('  - "allocs.json" was not found.')
         return 'not found'
 
 #############################################################################
