@@ -719,8 +719,9 @@ class PanGalacticRegistry(object):
         """
         Generate a plain text report on the registry's contents (ontology).
         """
-        output = '\n===========================\n'
-        output += 'PanGalactic Ontology Report\n===========================\n'
+        output = '\n===============================================\n'
+        output += 'The Pan Galactic Engineering Framework Ontology\n'
+        output += '===============================================\n'
         if self.version:
             output += 'version: {}\n'.format(self.version)
         output += '--------------------------------------------------\n'
@@ -757,10 +758,11 @@ class PanGalacticRegistry(object):
         """
         output = '<html>'
         output += '<head>'
-        output += '<title>Pan Galactic Ontology Report</title>'
+        output += '<title>The Pan Galactic Engineering Framework Ontology'
+        output += '</title>'
         output += '</head>'
         output += '<body>'
-        output += '<h1>Pan Galactic Ontology Report</h1>'
+        output += '<h1>The Pan Galactic Engineering Framework Ontology</h1>'
         if self.version:
             output += '<h3>version: <font color="red">'
             output += '{}</font></h3>'.format(self.version)
