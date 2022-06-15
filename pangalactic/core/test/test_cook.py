@@ -6,7 +6,7 @@ import unittest
 from datetime import date, datetime
 
 # pangalactic
-from pangalactic.core.utils.meta import cookers
+from pangalactic.core.serializers import cookers
 
 
 class CookTestCases(unittest.TestCase):

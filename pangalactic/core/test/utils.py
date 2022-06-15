@@ -5,8 +5,8 @@ Create PGEF test data.
 from copy import deepcopy
 import random
 from pangalactic.core.parametrics import de_defz, parm_defz, round_to
-from pangalactic.core.utils.meta import (get_port_id, get_port_name,
-                                         get_port_abbr)
+from pangalactic.core.names       import (get_port_id, get_port_name,
+                                          get_port_abbr)
 from pangalactic.core.utils.datetimes import dtstamp
 
 NOW = str(dtstamp())

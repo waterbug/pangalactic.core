@@ -2,13 +2,23 @@
 """
 Objects and services for handling identifiers, addresses, and namespaces.
 """
-from collections import OrderedDict
-from urllib.parse import urlparse
+import inflect
+import re
 import xml.etree.ElementTree as ET
+
+from collections import OrderedDict
+from textwrap import wrap
+from urllib.parse import urlparse
+
+# rdflib
 from rdflib.term import URIRef
 
 from pangalactic.core.datastructures import OrderedSet
-from pangalactic.core.utils.meta     import asciify
+from pangalactic.core.meta import (asciify, PLURALS, ATTR_EXT_NAMES, EXT_NAMES,
+                                   EXT_NAMES_PLURAL)
+
+
+_inf = inflect.engine()
 
 
 class NS(OrderedSet):
@@ -410,4 +420,545 @@ def get_uri(identifier):
         # identifier is either a qname or a local name
         uri = q2u(identifier)
     return URIRef(uri)
+
+def get_external_name(cname):
+    return EXT_NAMES.get(cname, to_external_name(cname))
+
+def get_external_name_plural(cname):
+    return EXT_NAMES_PLURAL.get(cname,
+                                to_external_name(cname)+'s')
+
+def get_attr_ext_name(cname, aname):
+    return (ATTR_EXT_NAMES.get(cname) or {}).get(
+                                            aname, ' '.join(aname.split('_')))
+
+def to_external_name(cname):
+    """
+    Convert a standard metaobject (class, interface, or schema) camelcase name
+    into a user-interface-friendly name.
+
+    @param cname: a camelcase metaobject name
+    @type  cname: L{str}
+
+    @return: an "external name"
+    @rtype:  L{str}
+    """
+    patt = re.compile('([A-Z])')
+    l = re.split(patt, cname)
+    parts = l[1:]
+    if 0 < len(parts) < 3:
+        vname = parts[0] + parts[1]
+    elif len(parts) > 2:
+        vname = parts[0] + parts[1]
+        i = 2
+        while i < len(parts):
+            if i % 2 == 0:
+                vname += ' '
+            vname += parts[i]
+            i += 1
+    return vname
+
+def to_table_name(cname):
+    """
+    Convert a standard (camelcase) class name into an underscore-delimited,
+    lowercase table name.
+
+    @param cname: a camelcase class name
+    @type  cname: L{str}
+
+    @return: a table name
+    @rtype:  L{str}
+    """
+    patt = re.compile('([A-Z])')
+    l = re.split(patt, cname)
+    parts = l[1:]
+    if 0 < len(parts) < 3:
+        tname = (parts[0] + parts[1]).lower()
+    elif len(parts) > 2:
+        tname = parts[0] + parts[1]
+        i = 2
+        while i < len(parts):
+            if i % 2 == 0:
+                tname += '_'
+            tname += parts[i]
+            i += 1
+        tname = tname.lower()
+    return tname +  '_'
+
+def pname_to_header_label(pname):
+    """
+    Convert a standard property name into a header-friendly name.
+
+    @param pname: a Property name
+    @type  pname: L{str}
+
+    @return: an "external name"
+    @rtype:  L{str}
+    """
+    parts = ' '.join(pname.split('_'))
+    wrapped = ' \n '.join(wrap(parts, width=7, break_long_words=False))
+    return ' ' + wrapped + ' '
+
+def to_media_name(cname):
+    """
+    Convert a standard (camelcase) class name into a media name (primarily for
+    use with pyqt drag and drop data).
+
+    @param cname: a camelcase class name
+    @type  cname: L{str}
+
+    @return: a media name
+    @rtype:  L{str}
+    """
+    patt = re.compile('([A-Z])')
+    l = re.split(patt, cname)
+    parts = l[1:]
+    if 0 < len(parts) < 3:
+        tname = (parts[0] + parts[1]).lower()
+    elif len(parts) > 2:
+        tname = parts[0] + parts[1]
+        i = 2
+        while i < len(parts):
+            if i % 2 == 0:
+                tname += '-'
+            tname += parts[i]
+            i += 1
+        tname = tname.lower()
+    return "application/x-pgef-" + tname
+
+def to_collection_name(cname):
+    """
+    Convert a standard metaobject (class, interface, or schema) camelcase name
+    into the name of an attribute that refers to a collection of that kind of
+    object -- e.g.: 'Class' -> 'classes', 'Person' -> 'people', etc.
+
+    @param cname: a camelcase metaobject name
+    @type  cname: L{str}
+
+    @return: a table name
+    @rtype:  L{str}
+    """
+    return str(to_table_name(PLURALS.get(
+               cname, _inf.plural(cname)))[:-1])
+
+def to_class_name(table_name):
+    """
+    Convert an underscore-delimited, lowercase table name into a
+    metaobject (class, interface, or schema) camelcase name.
+
+    @param table_name: table name
+    @type  table_name: L{str}
+
+    @return: C{Interface} name
+    @rtype:  L{str}
+    """
+    tn = table_name[:-1] # drop trailing '_'
+    parts = tn.split('_')
+    i = 0
+    metaobject_name = ''
+    while i < len(parts):
+        metaobject_name += parts[i].capitalize()
+        i += 1
+    return str(metaobject_name)
+
+def classnamify(base, tablename, table):
+    """
+    Specifically for use as the value of SqlAlchemy AutomapBase argument
+    `classname_for_table`.  Clearly, it is simply a wrapper for
+    `to_class_name`, converting a table name (with trailing underscore) to
+    the corresponding class name.
+    """
+    return to_class_name(tablename)
+
+def get_data_element_definition_oid(deid):
+    """
+    Return the oid of the DataElementDefinition for the specified data element
+    id.
+
+    Args:
+        deid (str): the 'id' defined in the DataElementDefinition
+    """
+    return 'pgef:DataElementDefinition.' + deid
+
+def get_parameter_definition_oid(variable):
+    """
+    Return the oid of the ParameterDefinition for the specified variable.
+
+    Args:
+        variable (str): the variable defined by the ParameterDefinition
+    """
+    return 'pgef:ParameterDefinition.' + variable
+
+def get_parameter_context_oid(pcid):
+    """
+    Return the oid of the ParameterContext with the specified 'id'.
+
+    Args:
+        pcid (str): the ParameterContext 'id'
+    """
+    return 'pgef:ParameterContext.' + pcid
+
+def get_state_oid(sid):
+    """
+    Return the oid of the State with the specified 'id'.
+
+    Args:
+        sid (str): the State 'id'
+    """
+    return 'pgef:State.' + sid
+
+def get_ra_id(ra_context_id, role_id, fname, mi, lname):
+    """
+    Create an 'id' for a new RoleAssignment.
+
+    Args:
+        ra_context_id: 'id' of the role_assignment_context (Org)
+        role_id:  the 'id' of the Role
+        fname:  first name of the Person
+        mi:  middle name or initial of the Person
+        lname:  last name of the Person
+    """
+    if ra_context_id:
+        return '-'.join([ra_context_id, role_id,
+                         '_'.join([lname, fname, mi])])
+    else:
+        return '-'.join([role_id, '_'.join([lname, fname, mi])])
+
+def get_next_ref_des(assembly, component, prefix=None, product_type=None):
+    """
+    Get the next reference designator for the specified assembly and component.
+
+    This function assumes that reference designators are strings of the form
+    'prefix-n', where 'n' can be cast to an integer.
+
+    Args:
+        assembly (Product): the product containing the component
+        component (Product): the constituent product
+
+    Keyword Args:
+        prefix (str): a string to be used as the prefix of the reference
+            designator
+        product_type (ProductType): a product type to use if component is None
+            or does not have a product_type
+    """
+    prefix = ''
+    if getattr(component, 'product_type', None):
+        prefix = (component.product_type.abbreviation or
+                  component.product_type.name)
+    if not prefix and product_type:
+        prefix = product_type.abbreviation or product_type.name
+    if not prefix:
+        prefix = 'Generic'
+    acus = assembly.components
+    if acus:
+        rds = [acu.reference_designator for acu in acus]
+        # product_type abbreviation should not contain '-', but it can
+        all_prefixes = [(''.join(rd.split('-')[:-1])) for rd in rds if rd]
+        these_prefixes = [p for p in all_prefixes if p == prefix]
+        new_nbr = len(these_prefixes) + 1
+        refdes = prefix + '-' + str(new_nbr)
+        while 1:
+            if refdes not in rds:
+                break
+            else:
+                new_nbr += 1
+                refdes = prefix + '-' + str(new_nbr)
+        return refdes
+    else:
+        return prefix + '-1'
+
+def get_ra_name(ra_context_id, role_id, fname, mi, lname):
+    """
+    Create a 'name' for a new RoleAssignment.
+
+    Args:
+        ra_context_id:  the id of the ra 'context' (Org or Project)
+        role_id:  the id of the assigned Role
+        fname:  first name of the assignee
+        mi:  middle initial of the assignee
+        lname:  last name of the assignee
+    """
+    if ra_context_id:
+        return ': '.join([ra_context_id, role_id,
+                         ' '.join([lname, fname, mi])])
+    else:
+        return ': '.join([role_id, ' '.join([lname, fname, mi])])
+
+def get_acr_id(comp_act_id, sub_act_role):
+    """
+    Create an 'id' for a new ActCompRel.
+
+    Args:
+        comp_act_id:  the 'id' of the composite activity (Activity)
+        sub_act_role:  the sub_activity_role
+    """
+    return comp_act_id + '-' + '-'.join(sub_act_role.split(' '))
+
+def get_acr_name(comp_act_name, sub_act_role):
+    """
+    Create a 'name' for a new ActCompRel.
+
+    Args:
+        comp_act_name:  the 'name' of the composite activity (Activity)
+        sub_act_role:  the sub_activity_role
+    """
+    return comp_act_name + '-' + '-'.join(sub_act_role.split(' '))
+
+def get_acu_id(assembly_id, ref_des):
+    """
+    Create an 'id' for a new Acu.
+
+    Args:
+        assembly_id:  the 'id' of the assembly (Product)
+        ref_des:  the reference_designator of the Acu, created using
+            get_next_ref_des()
+    """
+    return assembly_id + '-' + '-'.join(ref_des.split(' '))
+
+def get_acu_name(assembly_name, ref_des):
+    """
+    Create a 'name' for a new Acu.
+
+    Args:
+        assembly_name:  the 'name' of the assembly (Product)
+        ref_des:  the reference_designator of the Acu, created using
+            get_next_ref_des()
+    """
+    return assembly_name + ' : ' + ref_des
+
+def get_link_name(link):
+    """
+    Get a canonical name for a "link" (an Acu or ProjectSystemUsage).
+    Used in generating the Modes Table (system power modes).
+    """
+    if hasattr(link, 'system'):
+        # link is a psu
+        return '[' + link.system_role + '] ' + link.system.name
+    elif hasattr(link, 'component'):
+        # link is an acu
+        return '[' + link.reference_designator + '] ' + link.component.name
+    else:
+        return '[unknown]'
+
+def get_link_object(link):
+    """
+    Get the "child" object for a "link" (an Acu or ProjectSystemUsage).
+    Used in generating the Modes Table (system power modes).
+    """
+    if hasattr(link, 'system'):
+        # link is a psu
+        return link.system
+    elif hasattr(link, 'component'):
+        # link is an acu
+        return link.component
+    else:
+        return None
+
+def get_mel_item_name(item):
+    """
+    Create a unique name for a line item in a MEL (Master Equipment List).
+
+    Args:
+        item (Product, Acu, or ProjectSystemUsage):  the MEL line item
+    """
+    # newlines *should* not occur in a product name but have been known to --
+    # hence the '\n' replacements ...
+    if hasattr(item, 'component'):
+        # item is an Acu
+        name = (getattr(item.component, 'name', '') or 'unknown').replace(
+                                                        '\n', ' ').strip()
+        if item.reference_designator:
+            return '[' + item.reference_designator + '] ' + name
+        else:
+            return name
+    elif hasattr(item, 'system'):
+        # item is an ProjectSystemUsage
+        name = (getattr(item.system, 'name', '') or 'unknown').replace(
+                                                        '\n', ' ').strip()
+        if item.system_role:
+            return '[' + item.system_role + '] ' + name
+        else:
+            return name
+    else:
+        # item is a Product
+        name = (getattr(item, 'name', '') or 'unknown').replace(
+                                                        '\n', ' ').strip()
+        return name
+
+def get_rel_id(context_id, role_id):
+    """
+    Create an 'id' for a new Relation.
+
+    Args:
+        context_id (str):  the 'id' of related context (a Requirement, e.g.)
+        role_id (str):  the role of the Relation in the specified context
+    """
+    return context_id + '-' + role_id + '-relation'
+
+def get_rel_name(context_name, role_name):
+    """
+    Create a name for a new Relation.
+
+    Args:
+        context_name (str):  the name of related context (a Requirement, e.g.)
+        role_name (str):  its role name in the specified context
+    """
+    return context_name + ' ' + role_name + ' Relation'
+
+def get_parm_rel_id(rel_id, pid):
+    """
+    Create an 'id' for a new ParameterRelation.
+
+    Args:
+        rel_id (str):  the 'id' of related Relation
+        pid (str):  the parameter id of the related ParameterDefinition
+    """
+    return rel_id + '-' + pid + '-parm-rel'
+
+def get_parm_rel_name(rel_name, pname):
+    """
+    Create a name for a new ParameterRelation.
+
+    Args:
+        rel_name (str):  the name of related Relation
+        pname (str):  the parameter name of the related ParameterDefinition
+    """
+    return rel_name + ' ' + pname + ' Parameter Relation'
+
+def get_next_port_seq(obj, port_type):
+    """
+    Get the next sequence number for an object and a type of port.
+
+    Args:
+        obj (Modelable):  object that may have ports
+        port_type (PortType):  the PortType to be considered
+    """
+    if not getattr(obj, 'ports', None):
+        return 0
+    try:
+        seq_ints = [int(port.id.split('-')[-1]) for port in obj.ports
+                    if port.type_of_port is port_type]
+        if seq_ints:
+            return max(seq_ints) + 1
+        else:
+            return 0
+    except:
+        return 0
+
+def get_port_id(of_product_id, port_type_id, seq):
+    """
+    Create an id for a new Port.
+
+    Args:
+        of_product_id (str):  the id of the port's "of_product" (Product)
+        port_type_id (str):  the id of the port's type_of_port (PortType)
+        seq (int):  the sequence number assigned to the port
+    """
+    return '-'.join([of_product_id, port_type_id, str(seq)])
+
+def get_port_name(of_product_name, port_type_name, seq):
+    """
+    Create a name for a new Port.
+
+    Args:
+        of_product_name (str):  the name of the port's "of_product" (Product)
+        port_type_name (str):  the name of the port's type_of_port (PortType)
+        seq (int):  the sequence number assigned to the port
+    """
+    return ' '.join([of_product_name, port_type_name, str(seq)])
+
+def get_port_abbr(port_type_abbr, seq):
+    """
+    Create an abbreviation for a new Port.
+
+    Args:
+        port_type_abbr (str):  the abbreviation of the port's type_of_port
+            (PortType)
+        seq (int):  the sequence number assigned to the port
+    """
+    return '-'.join([port_type_abbr, str(seq)])
+
+def get_flow_id(start_context_id, start_port_id, end_context_id, end_port_id):
+    """
+    Create a unique id for a new Flow.
+
+    Args:
+        start_context_id:  the id of the start_port_context
+        start_port_id:  the id of the start_port
+        end_context_id:  the id of the end_port_context
+        end_port_id:  the id of the end_port
+    """
+    return '-'.join(['flow', start_context_id, start_port_id, end_context_id,
+                     end_port_id])
+
+def get_flow_name(start_context_name, start_port_name, end_context_name,
+                  end_port_name):
+    """
+    Create a name for a new Flow.
+
+    Args:
+        start_context_name:  the name of the start_port_context
+        start_port_name:  the name of the start_port
+        end_context_name:  the name of the end_port_context
+        end_port_name:  the name of the end_port
+    """
+    return ' '.join(['Flow:', start_context_name, start_port_name, 'to',
+                     end_context_name, end_port_name])
+
+def display_id(obj):
+    """
+    Return a string to display as 'id' that will include, if `obj` is an
+    instance of Product, its 'version' string if it is not null.
+
+    Args:
+        obj (Identifiable):  object whose id is to be displayed
+    """
+    version = getattr(obj, 'version', None)
+    obj_id = getattr(obj, 'id', None) or 'unknown'
+    if version:
+        return obj_id + '.v.' + version
+    else:
+        return obj_id
+
+def get_display_name(obj):
+    """
+    Return a string to display as 'name' that will include, if `obj` is an
+    instance of Product, its 'version' string if it is not null.
+
+    Args:
+        obj (Identifiable):  object whose name is to be displayed
+    """
+    version = getattr(obj, 'version', None)
+    name = getattr(obj, 'name', None) or 'Unidentified'
+    if version:
+        return ' v. '.join([name, version])
+    else:
+        return name
+
+def get_block_model_id(obj):
+    """
+    Get canonical 'id' for a pgx block model.
+
+    Args:
+        obj (Modelable):  the object that is the subject of the model
+    """
+    return '_'.join([display_id(obj), 'pgx_ibd'])
+
+def get_block_model_name(obj):
+    """
+    Get canonical 'name' for a pgx block model.
+
+    Args:
+        obj (Modelable):  the object that is the subject of the model
+    """
+    return ' '.join([get_display_name(obj), 'Pgx IBD'])
+
+def get_block_model_file_name(obj):
+    """
+    Get canonical file name for a pgx block model.
+
+    Args:
+        obj (Modelable):  the object that is the subject of the model
+    """
+    return get_block_model_id(obj) + '.json'
 

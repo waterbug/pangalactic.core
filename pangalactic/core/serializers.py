@@ -2,14 +2,14 @@
 """
 Serializers / deserializers for pangalactic domain objects and parameters.
 """
-# SQLAlchemy
-from sqlalchemy import ForeignKey
+from datetime import date, datetime
 
-# PanGalactic
-from pangalactic.core.meta        import M2M, ONE2M
+# python-dateutil
+import dateutil.parser as dtparser
+
+from pangalactic.core.meta import asciify, M2M, ONE2M
 from pangalactic.core.refdata     import ref_oids
-from pangalactic.core.utils.meta  import cookers, uncookers, uncook_datetime
-from pangalactic.core.utils.datetimes  import earlier
+from pangalactic.core.utils.datetimes import earlier, EPOCH, EPOCH_DATE
 from pangalactic.core.parametrics import (deserialize_des,
                                           deserialize_parms,
                                           refresh_componentz,
@@ -17,6 +17,243 @@ from pangalactic.core.parametrics import (deserialize_des,
                                           serialize_des, serialize_parms,
                                           update_de_defz, update_parm_defz,
                                           update_parmz_by_dimz)
+
+def cook_string(value):
+    return asciify(value)
+
+def cook_unicode(value):
+    return value
+
+def cook_int(value):
+    return value
+
+def cook_float(value):
+    return str(value)
+
+def cook_bool(value):
+    return value
+
+def cook_date(value):
+    return str(value)
+
+def cook_time(value):
+    return str(value)
+
+def cook_datetime(value):
+    return str(value)
+
+# python 2 strings, obviously
+cookers = {
+           # 'bytes'    : cook_string,
+           'str'      : cook_string,
+           'unicode'  : cook_unicode,
+           'int'      : cook_int,
+           'float'    : cook_float,
+           'bool'     : cook_bool,
+           'date'     : cook_date,
+           'time'     : cook_time,
+           'datetime' : cook_datetime
+           }
+
+# * "uncookers" are deserializing functions
+#
+# * they cast a "cooked" [serialized] value to the specified range type
+#
+# * the uncookers dictionary is an optimization to enable quick look-up of
+#   deserialization functions
+
+def uncook_string(value):
+    """
+    Deserialize a string or bytes field.
+
+    Args:
+        value (str, bytes, or None):  the value being "uncooked"
+    """
+    return asciify(value) if value is not None else None
+
+def uncook_strings(value):
+    """
+    Deserialize a set or list of strings.
+
+    Args:
+        value (set or list of strs):  the value being "uncooked"
+    """
+    if type(value) is set:
+        return set(asciify(s) for s in value)
+    return list(asciify(s) for s in value)
+
+def uncook_unicode(value):
+    """
+    Deserialize a unicode field.
+
+    Args:
+        value (unicode or None):  the value being "uncooked"
+    """
+    return asciify(value)
+
+def uncook_unicodes(value):
+    """
+    Deserialize a set or list of strings that represents a set or list of
+    unicode objects, respectively.
+
+    Args:
+        value (set or list of strs):  the value being "uncooked"
+    """
+    if type(value) is set:
+        return set(asciify(s) for s in value)
+    return list(asciify(s) for s in value)
+
+def uncook_int(value):
+    """
+    Deserialize a string that represents an integer.
+
+    Args:
+        value (str):  the value being "uncooked"
+    """
+    if value:
+        return int(value)
+    return None
+
+def uncook_ints(value):
+    """
+    Deserialize a set or list of strings that represents a set or list of
+    ints, respectively.
+
+    Args:
+        value (set or list of strs):  the value being "uncooked"
+    """
+    if type(value) is set:
+        return set([uncook_int(v) for v in value])
+    return [int(v) for v in value]
+
+def uncook_float(value):
+    """
+    Deserialize a string that represents a float.
+
+    Args:
+        value (str):  the value being "uncooked"
+    """
+    if type(value) is float:
+        return value
+    elif value:
+        return float(value)
+    return None
+
+def uncook_floats(value):
+    """
+    Deserialize a set or list of strings that represents a set or list of
+    floats, respectively.
+
+    Args:
+        value (set or list of strs):  the value being "uncooked"
+    """
+    if type(value) is set:
+        return set([uncook_float(v) for v in value])
+    return [uncook_float(v) for v in value]
+
+def uncook_bool(value):
+    """
+    Deserialize a string that represents a boolean.
+
+    Args:
+        value (str):  the value being "uncooked"
+    """
+    if type(value) is bool:
+        return value
+    return (value == 'True') if value is not None else None
+
+def uncook_bools(value):
+    """
+    Deserialize a set or list of strings that represents a set or list of
+    bools, respectively.
+
+    Args:
+        value (set or list of strs):  the value being "uncooked"
+    """
+    if type(value) is set:
+        return set([uncook_bool(v) for v in value])
+    return [uncook_bool(v) for v in value]
+
+def uncook_date(value):
+    """
+    Deserialize a string value that represents a date.  If value *is* a date,
+    return it; otherwise try to parse it; if that fails, return EPOCH_DATE.
+
+    Args:
+        value (str):  the value being "uncooked"
+    """
+    if type(value) is date:
+        return value
+    elif value is None:
+        return None
+    try:
+        return dtparser.parse(value).date()
+    except:
+        return EPOCH_DATE
+
+def uncook_dates(value):
+    """
+    Deserialize a set or list of strings that represents a set or list of
+    dates, respectively.
+
+    Args:
+        value (set or list of strs):  the value being "uncooked"
+    """
+    if type(value) is set:
+        return set([uncook_date(v) for v in value])
+    return [uncook_date(v) for v in value]
+
+def uncook_datetime(value):
+    """
+    Deserialize a string value that represents a datetime.  If value *is* a
+    datetime, return it; otherwise try to parse it; if that fails, return
+    EPOCH.
+
+    Args:
+        value (str):  the value being "uncooked"
+    """
+    if type(value) is datetime:
+        return value
+    elif value is None:
+        return None
+    try:
+        return dtparser.parse(value)
+    except:
+        return EPOCH
+
+def uncook_datetimes(value):
+    """
+    Deserialize a set or list of strings that represents a set or list of
+    datetimes, respectively.
+
+    Args:
+        value (set or list of strs):  the value being "uncooked"
+    """
+    if type(value) is set:
+        return set([uncook_datetime(v) for v in value])
+    return [uncook_datetime(v) for v in value]
+
+# dictionary of uncook functions, indexed by the Property attributes
+# (range, functional)
+
+uncookers = {
+             # ('bytes', True)     : uncook_string,
+             # ('bytes', False)    : uncook_strings,
+             ('str', True)       : uncook_string,
+             ('str', False)      : uncook_strings,
+             ('unicode', True)   : uncook_unicode,
+             ('unicode', False)  : uncook_unicodes,
+             ('int', True)       : uncook_int,
+             ('int', False)      : uncook_ints,
+             ('float', True)     : uncook_float,
+             ('float', False)    : uncook_floats,
+             ('bool', True)      : uncook_bool,
+             ('bool', False)     : uncook_bools,
+             ('date', True)      : uncook_date,
+             ('date', False)     : uncook_dates,
+             ('datetime', True)  : uncook_datetime,
+             ('datetime', False) : uncook_datetimes
+             }
 
 
 def serialize(orb, objs, include_components=False,
@@ -144,7 +381,7 @@ def serialize(orb, objs, include_components=False,
             if getattr(obj, name, None) is None:
                 # ignore None values
                 continue
-            elif schema['fields'][name]['field_type'] is ForeignKey:
+            elif schema['fields'][name]['field_type'] == 'object':
                 if schema['fields'][name]['is_inverse']:
                     if include_inverse_attrs:
                         # inverse properties will be serialized if
@@ -273,6 +510,7 @@ DESERIALIZATION_ORDER = [
                     'RepresentationFile',
                     'Requirement'
                     ]
+
 
 def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 force_no_recompute=False, force_update=False):

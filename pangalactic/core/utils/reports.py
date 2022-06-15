@@ -9,7 +9,7 @@ from pangalactic.core.parametrics  import (get_pval, get_dval, de_defz,
                                            parm_defz, round_to)
 from pangalactic.core.uberorb      import orb
 from pangalactic.core.units        import in_si
-from pangalactic.core.utils.meta   import get_mel_item_name
+from pangalactic.core.names        import get_mel_item_name
 from pangalactic.core.utils.styles import xlsx_styles
 
 

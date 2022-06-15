@@ -27,10 +27,9 @@ from pangalactic.core.datastructures import OrderedSet
 from pangalactic.core.meta           import PGEF_PROPS_ORDER
 from pangalactic.core.kb             import PanGalacticKnowledgeBase as KB
 from pangalactic.core.kb             import get_ontology_prefix
-from pangalactic.core.names          import namespaces
-from pangalactic.core.utils.meta     import dump_metadata, load_metadata
-from pangalactic.core.utils.meta     import property_to_field
-from pangalactic.core.utils.meta     import to_table_name
+from pangalactic.core.meta           import dump_metadata, load_metadata
+from pangalactic.core.meta           import property_to_field
+from pangalactic.core.names          import namespaces, to_table_name
 
 
 # create SqlAlchemy declarative 'Base' class for MetaObject classes

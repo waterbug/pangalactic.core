@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-Pan Galactic meta characteristics
+Pan Galactic meta characteristics and utilities
 """
+import codecs
+import json
+import string
+import unicodedata
+
+from pangalactic.core       import datatypes
+from pangalactic.core.units import in_si
+
 # NOTE:  As a "simplest thing that works", this module adds interface default
 # settings that reference the classes of the PGEF ontology (which is not an
 # appropriate vehicle to specify interface characteristics).
 #
 # Ultimately both aspects will be loosely coupled via a "master model", but
 # that architecture is still being worked out.
-
-from pangalactic.core.units import in_si
 
 # PGXN_REQD:  Properties that are validated by PgxnObject to be non-empty
 # SEE ALSO:  PGXN_HIDE and PGXN_MASK (fields never shown for a class -- defined
@@ -619,4 +625,102 @@ PLURALS = {
     'RoleAssignment'     : 'RoleAssignments',
     'Role'               : 'Roles'
     }
+
+
+def asciify(u):
+    """
+    "Intelligently" convert a unicode string to the ASCII character set --
+    a.k.a. "The Stupid American", a.k.a. "The UNICODE Hammer".  Its main
+    purpose is to convert things that might be used in Python identifiers so
+    they can be typed on an en-us encoded keyboard!
+
+    Credit: http://code.activestate.com/recipes/251871/ (this is not that
+    recipe but an elegant one-liner from one of the comments on the recipe).
+
+    Args:
+        u (str or bytes): input value
+
+    Returns:
+        str
+    """
+    # Python 3: returns utf-8 string
+    if isinstance(u, str):
+        return unicodedata.normalize('NFKD', u).encode(
+                                'ASCII', 'ignore').decode('utf-8')
+    elif isinstance(u, bytes):
+        return u.decode('utf-8')
+    # allow only printable chars
+    printable = set(string.printable)
+    clean = filter(lambda x: x in printable, str(u))
+    return clean
+
+
+def property_to_field(name, pe):
+    """
+    Create a field dict from a property extract.  The field dict has the
+    following form (terminology adopted from django-metaservice api):
+
+    {
+     'id'            : [the name of the field],
+     'id_ns'         : [namespace in which name of the field exists],
+     'field_type'    : [the field type, a SqlAlchemy class],
+     'local'         : [bool:  True -> locally defined; False -> inherited],
+     'related_cname' : [for fk fields, name of the related class],
+     'functional'    : [bool:  True -> single-valued],
+     'range'         : [python datatype name or, if fk, related class name],
+     'inverse_functional' : [bool:  True -> one-to-one],
+     'is_inverse'    : [bool:  True -> property is an inverse ("backref")],
+     'inverse_of'    : [name of property of which this one is an inverse],
+     'choices'       : [choices list -- i.e., a discrete range],
+     'max_length'    : [maximum length of a string field],
+     'null'          : [bool:  whether the field can be null],
+     'editable'      : [bool:  opposite of read-only],
+     'unique'        : [bool:  same as the sql concept],
+     'external_name' : [name displayed in user interfaces],
+     'definition'    : [definition of the field],
+     'help_text'     : [extra help text, in addition to definition],
+     'db_column'     : [name of the db column (default is field name)]
+    }
+
+    The 'fields' key in a schema dict will consist of a dict that maps
+    field names to field dicts of this form.
+    """
+    field = {}
+    field['id'] = pe['id']
+    field['id_ns'] = pe['id_ns']
+    field['definition'] = pe['definition']
+    field['functional'] = pe['functional']
+    field['range'] = pe['range']
+    field['editable'] = not name in READONLY
+    field['external_name'] = ' '.join(pe['id'].split('_'))
+    if pe['is_datatype']:
+        field['field_type'] = datatypes[(pe['is_datatype'],
+                                         pe['range'],
+                                         pe['functional'])]
+        field['is_inverse'] = False
+        field['inverse_of'] = ''
+        field['max_length'] = MAX_LENGTH.get(pe['id'], 80)
+    else:
+        field['field_type'] = 'object'
+        field['related_cname'] = pe['range']
+        field['is_inverse'] = pe['is_inverse']
+        field['inverse_of'] = pe['inverse_of']
+    return field
+
+def dump_metadata(extr, fpath):
+    """
+    JSON-serialize an extract and write it utf-8-encoded into file.
+    """
+    f = codecs.open(fpath, 'w', 'utf-8')
+    json.dump(extr, f, sort_keys=True, indent=4, ensure_ascii=True)
+    f.close()
+
+def load_metadata(fpath):
+    """
+    Read and deserialize a utf-8-encoded JSON-serialized extract from a file.
+    """
+    f = codecs.open(fpath, 'r', 'utf-8')
+    data = f.read()
+    f.close()
+    return json.loads(data)
 

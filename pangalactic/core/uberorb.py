@@ -28,7 +28,6 @@ from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
 from pangalactic.core.registry    import PanGalacticRegistry
-from pangalactic.core.utils.meta  import uncook_datetime
 from pangalactic.core.mapping     import schema_maps, schema_version
 from pangalactic.core.parametrics import (add_context_parm_def,
                                           add_default_parameters,
@@ -49,7 +48,8 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           refresh_req_allocz, req_allocz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
-from pangalactic.core.serializers import serialize, deserialize
+from pangalactic.core.serializers import (serialize, deserialize,
+                                          uncook_datetime)
 from pangalactic.core.test        import data as test_data_mod
 from pangalactic.core.test        import vault as test_vault_mod
 from pangalactic.core.test.utils  import gen_test_dvals, gen_test_pvals
@@ -1498,6 +1498,43 @@ class UberORB(object):
         if isinstance(obj, self.classes['Template']):
             abbrev += '-Template'
         return '-'.join([owner_id, abbrev, next_sufx])
+
+    def gen_req_id(self, reqt):
+        """
+        Generate the `id` attribute for a requirement. (NOTE:  this function
+        assumes that the requirement has already been saved and is therefore
+        included in the count of requirements for the project). The format of the
+        returned `id` is as follows:
+
+            [project_id].[level].[seq]
+
+        where "level" is the level of the requirement and must be 1 lower than that
+        of the lowest level ancestor requirement, if any.
+
+        Args:
+            reqt (Requirement):  the requirement
+        """
+        self.log.debug('* generating a new requirement id ...')
+        project_id = getattr(reqt.owner, 'id', 'NO-PROJECT')
+        level = getattr(reqt, 'level', 1) or 1
+        reqs = self.search_exact(cname='Requirement', level=level)
+        seq = 1
+        if reqs:
+            prev_seqs = [r.id.split('.')[-1] for r in reqs]
+            if prev_seqs:
+                prev_seqs.reverse()
+                for n in prev_seqs:
+                    try:
+                        int(n)
+                    except:
+                        continue
+                    break
+            seq = n + 1
+        else:
+            seq = 1
+        new_id = project_id + '-' + str(level) + '.' + str(seq)
+        self.log.debug(f'  generated id: {new_id}')
+        return new_id
 
     def get_idvs(self, cname=None):
         """

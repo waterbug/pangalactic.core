@@ -5,8 +5,7 @@ Unit tests for "uncook" (deserialize) functions
 import unittest
 from datetime import date, datetime
 
-# pangalactic
-from pangalactic.core.utils.meta import cookers, uncookers
+from pangalactic.core.serializers import cookers, uncookers
 
 
 class UncookTestCases(unittest.TestCase):

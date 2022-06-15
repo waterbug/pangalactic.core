@@ -23,9 +23,9 @@ from rdflib import Graph, Namespace, RDF
 # PanGalactic
 from pangalactic.core                import xsd_datatypes
 from pangalactic.core.datastructures import OrderedSet
+from pangalactic.core.meta           import asciify
 from pangalactic.core.names          import namespaces, register_namespaces
 from pangalactic.core.names          import u2q, q2u, get_uri, get_prefix
-from pangalactic.core.utils.meta     import asciify
 
 
 def fix_funky_uris(s):
