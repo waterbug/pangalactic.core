@@ -94,7 +94,8 @@ def check_for_cycles(product):
             # log.debug('  - level 2 components ok.')
         comps2 = []
         for comp in comps1:
-            comps2 += [acu.component for acu in comp.components]
+            comps2 += [acu.component for acu in comp.components
+                       if acu.component]
         if comps2:
             comps += comps2
         else:
@@ -110,7 +111,8 @@ def check_for_cycles(product):
             # log.debug('  - level 3 components ok.')
         comps3 = []
         for comp in comps2:
-            comps3 += [acu.component for acu in comp.components]
+            comps3 += [acu.component for acu in comp.components
+                       if acu.component]
         if comps3:
             comps += comps3
         else:
