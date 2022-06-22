@@ -731,10 +731,13 @@ def get_link_name(link):
     Get a canonical name for a "link" (an Acu or ProjectSystemUsage).
     Used in generating the Modes Table (system power modes).
     """
-    if hasattr(link, 'system'):
+    cname = link.__class__.__name__
+    if cname == 'ProjectSystemUsage':
         # link is a psu
-        return '[' + link.system_role + '] ' + link.system.name
-    elif hasattr(link, 'component'):
+        sys_role = getattr(link, 'system_role', 'no role') or 'no role'
+        sys_name = getattr(link.system, 'name', 'no name') or 'no name'
+        return '[' + sys_role + '] ' + sys_name
+    if cname == 'Acu':
         # link is an acu
         return '[' + link.reference_designator + '] ' + link.component.name
     else:
