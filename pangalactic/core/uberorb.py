@@ -1979,10 +1979,8 @@ class UberORB(object):
                 psus = self.search_exact(cname='ProjectSystemUsage',
                                          project=obj)
                 if obj.systems:
-                    txt = 'attempting to delete systems for PSU'
+                    txt = 'attempting to delete PSUs from project '
                     info.append('   - {} "{}" ...'.format(txt, obj.id))
-                    # NOTE: this will also delete any Flows that have this
-                    # Project as their 'flow_context':
                     self.delete(obj.systems)
             elif isinstance(obj, self.classes['Person']):
                 # Note that it is assumed the permissions of the user have been
