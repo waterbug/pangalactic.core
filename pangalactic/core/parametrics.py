@@ -50,6 +50,49 @@ TWOPLACES = Decimal('0.01')
 componentz = {}
 Comp = namedtuple('Comp', 'oid usage_oid quantity reference_designator')
 
+def refresh_componentz(product):
+    """
+    Refresh the `componentz` cache for a Product instance. This must be called
+    before calling orb.recompute_parmz() whenever a new Acu that references
+    that Product instance as its assembly is created, deleted, or modified.
+    The 'componentz' dictionary has the form
+
+        {product.oid :
+          list of Comp('oid', 'usage_oid', 'quantity', 'reference_designator')}
+
+    where the list of `Comp` namedtuples is created from `product.components`
+    (Acus of the product), using Acu.component.oid, Acu.oid, Acu.quantity, and
+    Acu.reference_designator.
+
+    Args:
+        product (Product):  the Product instance
+    """
+    if product:
+        # log.debug('* refresh_componentz({})'.format(product.id))
+        componentz[product.oid] = [Comp._make((
+                                        getattr(acu.component, 'oid', None),
+                                        acu.oid,
+                                        acu.quantity or 1,
+                                        acu.reference_designator))
+                                   for acu in product.components
+                                   if acu.component]
+
+def node_count(product_oid):
+    """
+    Get the number of nodes in the assembly tree of the product with the
+    specified oid.
+
+    Args:
+        product_oid (str):  oid of a Product instance
+    """
+    count = 0
+    if componentz.get(product_oid):
+        count += len(componentz[product_oid])
+        if count:
+            for c in componentz[product_oid]:
+                count += node_count(c.oid)
+    return count
+
 def serialize_compz(compz_data):
     """
     Serialize a `componentz` data set to a json-dumpable format.
@@ -513,33 +556,6 @@ def round_to(x, n=4):
         return int(val)
     return val
 
-def refresh_componentz(product):
-    """
-    Refresh the `componentz` cache for a Product instance. This must be called
-    before calling orb.recompute_parmz() whenever a new Acu that references
-    that Product instance as its assembly is created, deleted, or modified.
-    The 'componentz' dictionary has the form
-
-        {product.oid :
-          list of Comp('oid', 'usage_oid', 'quantity', 'reference_designator')}
-
-    where the list of `Comp` namedtuples is created from `product.components`
-    (Acus of the product), using Acu.component.oid, Acu.oid, Acu.quantity, and
-    Acu.reference_designator.
-
-    Args:
-        product (Product):  the Product instance
-    """
-    if product:
-        # log.debug('* refresh_componentz({})'.format(product.id))
-        componentz[product.oid] = [Comp._make((
-                                        getattr(acu.component, 'oid', None),
-                                        acu.oid,
-                                        acu.quantity or 1,
-                                        acu.reference_designator))
-                                   for acu in product.components
-                                   if acu.component]
-
 def refresh_req_allocz(req):
     """
     Refresh the `req_allocz` cache for a Requirement instance.  This must be
@@ -643,22 +659,6 @@ def refresh_req_allocz(req):
     else:
         # log.debug('  no parameter found; treat as functional req.')
         req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
-
-def node_count(product_oid):
-    """
-    Get the number of nodes in the assembly tree of the product with the
-    specified oid.
-
-    Args:
-        product_oid (str):  oid of a Product instance
-    """
-    count = 0
-    if componentz.get(product_oid):
-        count += len(componentz[product_oid])
-        if count:
-            for c in componentz[product_oid]:
-                count += node_count(c.oid)
-    return count
 
 def get_parameter_id(variable, context_id):
     """

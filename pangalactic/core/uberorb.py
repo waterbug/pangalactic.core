@@ -1983,7 +1983,7 @@ class UberORB(object):
                     info.append('   - {} "{}" ...'.format(txt, obj.id))
                     # NOTE: this will also delete any Flows that have this
                     # Project as their 'flow_context':
-                    self.delete([obj.systems])
+                    self.delete(obj.systems)
             elif isinstance(obj, self.classes['Person']):
                 # Note that it is assumed the permissions of the user have been
                 # checked and the user is a Global Administrator -- only they
