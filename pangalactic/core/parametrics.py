@@ -153,6 +153,123 @@ def load_compz(dir_path):
         log.debug('  - "components.json" was not found.')
         return 'not found'
 
+# systemz cache **********************************************************
+
+# systemz:  runtime project systems cache
+# purpose:  provide a cache to substitute for the "systems" inverse attr
+#           which the "Marvin" thin client cannot use
+# format:  {project.oid : list of System namedtuples}
+#          ... where each System is:
+#            oid (str): ProjectSystemUsage.system.oid
+#            usage_oid (str): ProjectSystemUsage.oid
+#            system_role (str): ProjectSystemUsage.system_role
+systemz = {}
+System = namedtuple('System', 'oid usage_oid system_role')
+
+def refresh_systemz(project):
+    """
+    Refresh the `systemz` cache for a Project instance. This must be called
+    whenever a new ProjectSystemUsage that references that Project instance as
+    its project is created, deleted, or modified.  The 'systemz' dictionary has
+    the form
+
+        {project.oid :
+          list of System('oid', 'usage_oid', 'system_role')}
+
+    where the list of `System` namedtuples is created from `project.systems`
+    (ProjectSystemUsages of the project), using the system oid, psu oid,
+    psu system_role attributes.
+
+    Args:
+        project (Project):  the Project instance
+    """
+    if project:
+        # log.debug('* refresh_systemz({})'.format(project.id))
+        systemz[project.oid] = [System._make((
+                                        getattr(psu.system, 'oid', ''),
+                                        psu.oid,
+                                        psu.system_role))
+                                   for psu in project.systems
+                                   if psu.system]
+
+def project_node_count(project_oid):
+    """
+    Get the number of nodes in the assembly tree of the project with the
+    specified oid.
+
+    Args:
+        project_oid (str):  oid of a Project instance
+    """
+    count = 0
+    if systemz.get(project_oid):
+        count += len(systemz[project_oid])
+        if count:
+            for system in systemz[project_oid]:
+                count += node_count(system.oid)
+    return count
+
+def serialize_systemz(systemz_data):
+    """
+    Serialize a `systemz` data set to a json-dumpable format.
+    """
+    log.debug('* serialize_systemz() ...')
+    ser_systemz = {}
+    for oid, systems in systemz_data.items():
+        sysdicts = []
+        for system in systems:
+            sysdict = system._asdict()
+            sysdicts.append(sysdict)
+        ser_systemz[oid] = sysdicts
+    return ser_systemz
+
+def deserialize_systemz(ser_systemz):
+    """
+    Deserialize a `systemz` data set from a json-dumped format.
+
+    NOTE: the deserialize_systemz() function is only used to deserialize
+    systems data received from the server.
+    """
+    log.debug('* deserialize_systemz() ...')
+    deser_systemz = {}
+    for oid, sysdicts in ser_systemz.items():
+        systemz = []
+        for sysdict in sysdicts:
+            system = System(**sysdict)
+            systemz.append(system)
+        deser_systemz[oid] = systemz
+    n = len(deser_systemz)
+    log.debug(f'  - systemz deserialized ({n} project assemblies).')
+    return deser_systemz
+
+def save_systemz(dir_path):
+    """
+    Save the `systemz` cache to a json file.
+    """
+    fpath = os.path.join(dir_path, 'systems.json')
+    ser_systemz = serialize_systemz(systemz)
+    with open(fpath, 'w') as f:
+        f.write(json.dumps(ser_systemz, separators=(',', ':'),
+                           indent=4, sort_keys=True))
+
+def load_systemz(dir_path):
+    """
+    Load the `systemz` cache from a json file.
+    """
+    fpath = os.path.join(dir_path, 'systems.json')
+    if os.path.exists(fpath):
+        with open(fpath) as f:
+            try:
+                stored_systemz = json.loads(f.read())
+            except:
+                return 'fail'
+        # use clear() first in case any stale entries
+        systemz.clear()
+        systemz.update(deserialize_systemz(stored_systemz))
+        return 'success'
+    else:
+        log.debug('  - "systems.json" was not found.')
+        return 'not found'
+
 # ***************************************************************************
 
 # NOTE #####################################################################

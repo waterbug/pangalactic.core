@@ -46,6 +46,8 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           parameterz, parm_defz,
                                           parmz_by_dimz, refresh_componentz,
                                           refresh_req_allocz, req_allocz,
+                                          refresh_systemz,
+                                          save_systemz, systemz,
                                           update_parm_defz,
                                           update_parmz_by_dimz)
 from pangalactic.core.serializers import (serialize, deserialize,
@@ -462,7 +464,7 @@ class UberORB(object):
                 os.makedirs(dir_path)
             fname = 'db-dump-' + dts + '.yaml'
         self.log.info('  dumping database to yaml ...')
-        s_objs = serialize(orb, orb.get_all_subtypes('Identifiable'),
+        s_objs = serialize(self, self.get_all_subtypes('Identifiable'),
                            include_refdata=True)
         f = open(os.path.join(dir_path, fname), 'w')
         f.write(yaml.safe_dump(s_objs, default_flow_style=False))
@@ -497,6 +499,7 @@ class UberORB(object):
         save_parmz(self.home)
         save_mode_defz(self.home)
         save_compz(self.home)
+        save_systemz(self.home)
         save_parmz_by_dimz(self.home)
         self.log.info('  cache saves completed ...')
         # [2] save all caches to backup dir
@@ -707,6 +710,18 @@ class UberORB(object):
         compz = len(componentz)
         self.log.debug(f'    componentz cache has {compz} items.')
 
+    def _build_systemz_cache(self):
+        """
+        Build the `systemz` cache (which maps Project oids to the oids of their
+        top-level systems) at startup.
+        """
+        self.log.debug('  + building systemz cache ...')
+        for project in self.get_by_type('Project'):
+            if project.systems:
+                refresh_systemz(project)
+        sys_len = len(systemz)
+        self.log.debug(f'    systemz cache has {sys_len} items.')
+
     def start_logging(self, home=None, console=False, debug=False):
         """
         Create a pangalaxian orb (`pgorb`) log and begin writing to it.
@@ -887,9 +902,9 @@ class UberORB(object):
             # self.log.debug('    no updates found.')
         # [7] remove deprecated reference data and parameters
         self.remove_deprecated_data()
-        # build the 'componentz' runtime cache, which is used in recomputing
-        # parameters ...
+        # build the 'componentz' and 'systemz' runtime caches
         self._build_componentz_cache()
+        self._build_systemz_cache()
         # update the req_allocz runtime cache (used in computing margins)
         self.recompute_parmz()
         self.log.info('  + all reference data loaded.')
@@ -1002,7 +1017,7 @@ class UberORB(object):
                 # making sure to save their 'label' fields separately since
                 # they are not yet supported by DataElementDefinition ...
                 dt = dtstamp()
-                admin = orb.get('pgefobjects:admin')
+                admin = self.get('pgefobjects:admin')
                 DataElementDefinition = self.classes.get(
                                                     'DataElementDefinition')
                 for deid in new_state_dedef_ids:
@@ -1251,7 +1266,7 @@ class UberORB(object):
                     # is changed, the associated Flows must be deleted first,
                     # so it is assumed that has been done ...
                     if comp_changed:
-                        # find all req allocations to this Acu them ...
+                        # find all req allocations to this Acu ...
                         msg = 'component was changed, checking for '
                         msg += 'allocated requirements ...'
                         self.log.debug(f'   {msg}')
@@ -1281,18 +1296,41 @@ class UberORB(object):
                          add_parameter(obj.oid, pid)
                 recompute_required = True
             elif cname == 'ProjectSystemUsage':
-                # if not new:
-                    # # find all allocations to this PSU and refresh them ...
-                    # alloc_reqs = [req_oid for req_oid in req_allocz
-                                  # if req_allocz[req_oid][0] == obj.oid]
-                    # if alloc_reqs:
-                        # for req_oid in alloc_reqs:
-                            # req = self.get(req_oid)
-                            # if req:
-                                # recompute_required = True
-                            # else:
-                                # # if requirement not there, remove alloc
-                                # del alloc_reqs[req_oid]
+                system_oid = getattr(obj.system, 'oid', None)
+                # use 'systemz' cache to determine whether the PSU's
+                # system has changed
+                cur_project_psu_systems = []
+                if obj.project.oid in systemz:
+                    cur_project_psu_systems = [(s.usage_oid, s.oid) for s
+                                                in systemz[obj.project.oid]]
+                if (obj.oid, system_oid) in cur_project_psu_systems:
+                    system_changed = False
+                else:
+                    system_changed = True
+                # after checking for a changed system, refresh 'systemz'
+                refresh_systemz(obj.project)
+                if not new:
+                    if system_changed:
+                        # find all req allocations to this PSU ...
+                        msg = 'system was changed, checking for '
+                        msg += 'allocated requirements ...'
+                        self.log.debug(f'   {msg}')
+                        alloc_reqs = [req_oid for req_oid in req_allocz
+                                      if req_allocz[req_oid][0] == obj.oid]
+                        if alloc_reqs:
+                            for req_oid in alloc_reqs:
+                                req = self.get(req_oid)
+                                if req:
+                                    self.log.debug('   alloc reqts found ...')
+                                    recompute_required = True
+                                    self.log.debug('   recompute will be done')
+                                else:
+                                    # if requirement not there, remove alloc
+                                    del alloc_reqs[req_oid]
+                        else:
+                            self.log.debug('   no allocated reqts found.')
+                    else:
+                        self.log.debug('   system not changed.')
                 recompute_required = True
             elif cname == 'Requirement':
                 # in the future, functional reqts. can be allocated
@@ -1320,7 +1358,7 @@ class UberORB(object):
         """
         # self.log.debug('* rebuilding de_defz ...')
         de_defz = {}
-        for de_def_obj in orb.get_by_type('DataElementDefinition'):
+        for de_def_obj in self.get_by_type('DataElementDefinition'):
             de_defz[de_def_obj.id] = {
                 'name': de_def_obj.name,
                 'description': de_def_obj.description,
@@ -1771,7 +1809,7 @@ class UberORB(object):
         Args:
             port (Port):  the specified Port
         """
-        flowzintas = orb.search_exact(cname='Flow', end_port=port)
+        flowzintas = self.search_exact(cname='Flow', end_port=port)
         return [flow.start_port for flow in flowzintas]
 
     def gazintas(self, port):
@@ -1782,7 +1820,7 @@ class UberORB(object):
         Args:
             port (Port):  the specified Port
         """
-        flowzoutas = orb.search_exact(cname='Flow', start_port=port)
+        flowzoutas = self.search_exact(cname='Flow', start_port=port)
         return [flow.end_port for flow in flowzoutas]
 
     def get_all_port_flows(self, port):
@@ -1794,8 +1832,8 @@ class UberORB(object):
             port (Port):  the specified Port
         """
         self.log.debug('* get_all_port_flows()')
-        flowzoutas = orb.search_exact(cname='Flow', start_port=port)
-        flowzintas = orb.search_exact(cname='Flow', end_port=port)
+        flowzoutas = self.search_exact(cname='Flow', start_port=port)
+        flowzintas = self.search_exact(cname='Flow', end_port=port)
         return flowzoutas + flowzintas
 
     def get_objects_for_project(self, project):
@@ -1949,6 +1987,7 @@ class UberORB(object):
         info = []
         recompute_required = False
         refresh_assemblies = []
+        refresh_systems = []
         local_user_obj = self.get(state.get('local_user_oid', 'me'))
         for obj in objs:
             delete_not_allowed = False
@@ -1982,6 +2021,8 @@ class UberORB(object):
                     txt = 'attempting to delete PSUs from project '
                     info.append('   - {} "{}" ...'.format(txt, obj.id))
                     self.delete(obj.systems)
+                if obj.oid in systemz:
+                    del systemz[obj.oid]
             elif isinstance(obj, self.classes['Person']):
                 # Note that it is assumed the permissions of the user have been
                 # checked and the user is a Global Administrator -- only they
@@ -2029,10 +2070,9 @@ class UberORB(object):
                     self.log.debug('    ... composite activity rels deleted.')
                 else:
                     self.log.debug('     no composite activity rels found.')
-            elif isinstance(obj, (self.classes['Acu'],
-                                  self.classes['ProjectSystemUsage'])):
-                # check for and delete any Flows to/from its component/system
-                # in the context of its assembly/project
+            elif isinstance(obj, (self.classes['Acu'])):
+                # check for and delete any Flows to/from its component in the
+                # context of its assembly
                 self.log.debug('   - orb checking for flows ...')
                 flows = self.get_all_usage_flows(obj)
                 # *** NOTE: CAUTION! Flows must be deleted before the Acu!
@@ -2136,9 +2176,12 @@ class UberORB(object):
                 del parameterz[obj.oid]
                 recompute_required = True
             elif isinstance(obj, self.classes['Acu']):
-                if getattr(obj.assembly, 'oid') in componentz:
+                if getattr(obj.assembly, 'oid', None) in componentz:
                     refresh_assemblies.append(obj.assembly)
                 recompute_required = True
+            elif isinstance(obj, self.classes['ProjectSystemUsage']):
+                if getattr(obj.project, 'oid', None) in systemz:
+                    refresh_systems.append(obj.project)
             creator = getattr(obj, 'creator', None)
             obj_id = getattr(obj, 'id', 'no id')
             obj_name = getattr(obj, 'name', 'no name')
@@ -2179,6 +2222,9 @@ class UberORB(object):
         if refresh_assemblies:
             for assembly in refresh_assemblies:
                 refresh_componentz(assembly)
+        if refresh_systems:
+            for project in refresh_systems:
+                refresh_systemz(project)
         if recompute_required:
             self.recompute_parmz()
 
