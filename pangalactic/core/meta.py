@@ -75,10 +75,8 @@ MAIN_VIEWS = dict(
     Relation=(IDENTITY + ['formulation']),
     Representation=(IDENTITY + ['of_object', 'representation_purpose']),
     RepresentationFile=(IDENTITY + ['of_representation']),
-    Requirement=(IDENTITY + ['owner', 'req_type', 'allocated_to_function',
-                 'allocated_to_system', 'req_level', 'version',
-                 'version_sequence', 'iteration', 'validated', 'public'
-                 ]),
+    Requirement=['id', 'req_level', 'name', 'req_type', 'req_compliance',
+                 'description', 'rationale', 'justification', 'comment'],
     RoleAssignment=['id', 'assigned_role', 'assigned_to',
                     'role_assignment_context'],
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
