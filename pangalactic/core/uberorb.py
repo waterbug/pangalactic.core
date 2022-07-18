@@ -1555,18 +1555,23 @@ class UberORB(object):
         self.log.debug('* generating a new requirement id ...')
         project_id = getattr(reqt.owner, 'id', 'NO-PROJECT')
         level = getattr(reqt, 'level', 1) or 1
-        reqs = self.search_exact(cname='Requirement', level=level)
+        reqs = self.search_exact(cname='Requirement', level=level,
+                                 owner=reqt.owner)
         seq = 1
-        if reqs:
-            prev_seqs = [r.id.split('.')[-1] for r in reqs]
-            if prev_seqs:
-                prev_seqs.reverse()
-                for n in prev_seqs:
-                    try:
-                        int(n)
-                    except:
-                        continue
-                    break
+        req_ids = [getattr(req, 'id', None) or 'unknown'
+                   for req in reqs]
+        real_ids = [rid for rid in req_ids if rid != 'unknown']
+        prev_seqs = [req_id.split('.')[-1] for req_id in real_ids]
+        if prev_seqs:
+            prev_seqs.reverse()
+            for seq in prev_seqs:
+                try:
+                    n = int(seq)
+                    if n > seq:
+                        seq = n
+                except:
+                    continue
+                break
             seq = n + 1
         else:
             seq = 1
