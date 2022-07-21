@@ -1544,7 +1544,7 @@ class UberORB(object):
         included in the count of requirements for the project). The format of the
         returned `id` is as follows:
 
-            [project_id].[level].[seq]
+            [project_id]-[level].[seq]
 
         where "level" is the level of the requirement and must be 1 lower than that
         of the lowest level ancestor requirement, if any.
@@ -1555,14 +1555,32 @@ class UberORB(object):
         self.log.debug('* generating a new requirement id ...')
         project_id = getattr(reqt.owner, 'id', 'NO-PROJECT')
         level = getattr(reqt, 'level', 1) or 1
-        reqs = self.search_exact(cname='Requirement', level=level,
-                                 owner=reqt.owner)
+        seq = self.get_next_req_seq(reqt.owner, level)
+        new_id = project_id + '-' + str(level) + '.' + str(seq)
+        self.log.debug(f'  generated id: {new_id}')
+        return new_id
+
+    def get_next_req_seq(self, owner, level):
+        """
+        Get the next sequence number for a given project and requirement level.
+        This is intended for use in creating a new requirement "id" in the
+        following format:
+
+            [owner.id]-[level].[seq]
+
+        Args:
+            owner (Organization or Project):  the owner of the requirement
+            level (int):  the level of the requirement
+        """
+        level = level or 0
+        reqs = orb.search_exact(cname='Requirement', level=level, owner=owner)
         seq = 1
         req_ids = [getattr(req, 'id', None) or 'unknown'
                    for req in reqs]
         real_ids = [rid for rid in req_ids if rid != 'unknown']
         prev_seqs = [req_id.split('.')[-1] for req_id in real_ids]
         if prev_seqs:
+            n = 1
             prev_seqs.reverse()
             for seq in prev_seqs:
                 try:
@@ -1573,11 +1591,7 @@ class UberORB(object):
                     continue
                 break
             seq = n + 1
-        else:
-            seq = 1
-        new_id = project_id + '-' + str(level) + '.' + str(seq)
-        self.log.debug(f'  generated id: {new_id}')
-        return new_id
+        return seq
 
     def get_idvs(self, cname=None):
         """
