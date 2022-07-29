@@ -658,8 +658,9 @@ class OrbTest(unittest.TestCase):
     def test_22_2_compute_cbe_without_components(self):
         """
         CASE:  compute the mass CBE (Current Best Estimate) of a product whose
-        components are not specified (i.e. it has no Acu's of components).  Its
-        CBE value ('m[CBE]') should be the same as its spec value ('m').
+        components are not specified (i.e. it does not occur as the "assembly"
+        attribute of any Acu).  Its CBE value ('m[CBE]') should be the same as
+        its spec value ('m').
         """
         orb.recompute_parmz()
         # NOTE:  get_pval() for a computed parameter will fetch the cached
