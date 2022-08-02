@@ -516,11 +516,12 @@ def load_parmz_by_dimz(dir_path):
     """
     fpath = os.path.join(dir_path, 'parms_by_dims.json')
     if os.path.exists(fpath):
-        with open(fpath) as f:
-            try:
-                parmz_by_dimz = json.loads(f.read())
-            except:
-                return 'fail'
+        try:
+            with open(fpath) as f:
+                stored_parmz_by_dimz = json.loads(f.read())
+        except:
+            return 'fail'
+        parmz_by_dimz.update(stored_parmz_by_dimz)
         return 'success'
     else:
         return 'not found'
