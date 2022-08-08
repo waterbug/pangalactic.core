@@ -13,6 +13,7 @@ from pangalactic.core.utils.datetimes import earlier, EPOCH, EPOCH_DATE
 from pangalactic.core.parametrics import (deserialize_des,
                                           deserialize_parms,
                                           refresh_componentz,
+                                          refresh_systemz,
                                           # refresh_req_allocz,
                                           serialize_des, serialize_parms,
                                           update_de_defz, update_parm_defz,
@@ -569,6 +570,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     one2m_or_m2m = list(ONE2M) + list(M2M)
     recompute_parmz_required = False
     refresh_componentz_required = False
+    refresh_systemz_required = False
     req_oids = set()
     acus = set()
     psus = set()
@@ -831,6 +833,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 objs.append(obj)
                 if cname == 'Acu':
                     refresh_componentz_required = True
+                if cname == 'ProjectSystemUsage':
+                    refresh_systemz_required = True
                 if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                     recompute_parmz_required = True
                 elif cname == 'ParameterDefinition':
@@ -859,6 +863,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         acus.add(obj)
                         refresh_componentz_required = True
                     elif cname in ['ProjectSystemUsage']:
+                        refresh_systemz_required = True
                         psus.add(obj)
                     elif isinstance(obj, orb.classes['Product']):
                         products.append(obj)
@@ -871,6 +876,10 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 if getattr(obj, 'assembly', None):
                     refresh_componentz(obj.assembly)
                     refresh_componentz_required = False
+            if refresh_systemz_required:
+                if getattr(obj, 'project', None):
+                    refresh_systemz(obj.project)
+                    refresh_systemz_required = False
     orb.db.commit()
     # log_txt = '* deserializer:'
     # if created:
