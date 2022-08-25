@@ -1574,7 +1574,7 @@ class UberORB(object):
         """
         level = level or 0
         reqs = orb.search_exact(cname='Requirement', level=level, owner=owner)
-        seq = 1
+        seq = 0
         req_ids = [getattr(req, 'id', None) or 'unknown'
                    for req in reqs]
         real_ids = [rid for rid in req_ids if rid != 'unknown']
@@ -1584,14 +1584,14 @@ class UberORB(object):
             prev_seqs.reverse()
             for seq in prev_seqs:
                 try:
-                    n = int(seq)
-                    if n > seq:
-                        seq = n
+                    seq = int(seq)
                 except:
                     continue
-                break
-            seq = n + 1
-        return seq
+                while 1:
+                    if n > seq:
+                        break
+                    n += 1
+        return n
 
     def get_idvs(self, cname=None):
         """
