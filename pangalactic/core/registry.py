@@ -791,14 +791,20 @@ class PanGalacticRegistry(object):
             field_names = schema['field_names']
             field_names.sort()
             if schema['base_names']:
-                base_names = ', '.join(schema['base_names'])
+                base_names = schema['base_names']
             else:
                 base_names = '[none]'
             output += '<li>'
             output += '<a name="{}"></a>'.format(name)
             output += '<b>Class:</b> '
             output += '<b><i><font color="red">%s</font></b></i><br>' % name
-            output += '<b>Base Class(es):</b> <i>%s</i><br>' % str(base_names)
+            output += '<b>Base Class:</b>'
+            if base_names == '[none]':
+                output += ' <i>[none]</i>'
+            elif len(base_names) > 0:
+                for bn in base_names:
+                    output += f' <a href="#{bn}"><i>{bn}</i></a>'
+            output += '<br>'
             output += '<dl><dt><b>Definition:</b></dt>'
             output += '<dd>'
             output += schema.get('definition', '[none]')
@@ -811,6 +817,11 @@ class PanGalacticRegistry(object):
                 output += '<b>Local Properties:</b>'
                 output += '<ul>'
                 for p in local_properties:
+                    r_type = schema['fields'][p]['range']
+                    if r_type in cnames:
+                        p_range = f' (<a href="#{r_type}">{r_type}</a>)'
+                    else:
+                        p_range = f' <font color="blue">({r_type})</font>'
                     inv = ''
                     if schema['fields'][p]['is_inverse']:
                         inv = ''.join(
@@ -819,9 +830,7 @@ class PanGalacticRegistry(object):
                                      '<font color="red">]</font>'])
                     output += ''.join(['<li><i><b>',
                                      schema['fields'][p]['id'],
-                                     ' <font color="blue">(',
-                                     schema['fields'][p]['range'],
-                                     ')</font>',
+                                     p_range,
                                      inv,
                                      '</b></i>: ',
                                      schema['fields'][p]['definition'],
@@ -832,6 +841,11 @@ class PanGalacticRegistry(object):
                 output += '<b>Inherited Properties:</b>'
                 output += '<ul>'
                 for p in inherited_properties:
+                    r_type = schema['fields'][p]['range']
+                    if r_type in cnames:
+                        p_range = f' (<a href="#{r_type}">{r_type}</a>)'
+                    else:
+                        p_range = f' <font color="blue">({r_type})</font>'
                     inv = ''
                     if schema['fields'][p]['is_inverse']:
                         inv = ''.join(
@@ -840,9 +854,7 @@ class PanGalacticRegistry(object):
                                      '<font color="red">]</font>'])
                     output += ''.join(['<li><i><b>',
                                      schema['fields'][p]['id'],
-                                     ' <font color="blue">(',
-                                     schema['fields'][p]['range'],
-                                     ')</font>',
+                                     p_range,
                                      inv,
                                      '</b></i>: ',
                                      schema['fields'][p]['definition'],
