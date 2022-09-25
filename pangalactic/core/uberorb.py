@@ -1895,13 +1895,13 @@ class UberORB(object):
                 self.log.debug('  - {} assemblies found'.format(
                                len(assemblies)))
             objs += assemblies
-            # get Missions and Activities related to project systems
+            # get Activities related to project systems
             activities = []
             for system in systems:
                 if system.activities:
                     activities += system.activities
             if activities:
-                self.log.debug('  - {} Mission(s)/Activities found'.format(
+                self.log.debug('  - {} Activities found'.format(
                                len(activities)))
             objs += activities
         else:
