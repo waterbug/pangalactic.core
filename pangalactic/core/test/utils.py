@@ -192,7 +192,6 @@ def create_test_project():
         dict(
             _cname='Mission', oid='test:Mission.H2G2',
             id='h2g2_mission', id_ns='test',
-            activity_of='test:spacecraft0',
             creator='test:steve', modifier='test:steve',
             create_datetime=NOW, mod_datetime=NOW,
             name='Hitchhike the Galaxy'),
