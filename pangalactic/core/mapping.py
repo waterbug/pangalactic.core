@@ -25,6 +25,10 @@ Examples of schema mods that require a conversion function include:
 
 # version 3.0.0:
 #   * mods:
+#     - Flow now has attrs "start_port_context" and "end_port_context", which
+#       are the Acus of the products that have the ports -- this is important
+#       since Flows only exist in the context of the assembly that contains the
+#       product usages
 #     - Activity was subclass of Modelable; now subclass of ManagedObject
 #       (reason: Activity needed "owner" attribute)
 #       + was subclass of Modelable; now subclass of ManagedObject
