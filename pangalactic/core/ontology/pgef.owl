@@ -656,23 +656,89 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/activity_of -->
+    <!-- http://pangalactic.us/pgef/of_function -->
 
-    <owl:ObjectProperty rdf:about="&pgef;activity_of">
+    <owl:ObjectProperty rdf:about="&pgef;of_function">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The Product or system of which this is an Activity.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The function of which this is an Activity.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Activity"/>
-        <rdfs:range rdf:resource="&pgef;Product"/>
+        <rdfs:range rdf:resource="&pgef;Acu"/>
     </owl:ObjectProperty>
 
 
 
-    <!-- http://pangalactic.us/pgef/activities -->
+    <!-- http://pangalactic.us/pgef/function_activities -->
 
-    <owl:ObjectProperty rdf:about="&pgef;activities">
-        <owl:inverseOf rdf:resource="&pgef;activity_of"/>
-        <rdfs:comment rdf:datatype="&xsd;string">All Activities of a Product.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Product"/>
+    <owl:ObjectProperty rdf:about="&pgef;function_activities">
+        <owl:inverseOf rdf:resource="&pgef;of_function"/>
+        <rdfs:comment rdf:datatype="&xsd;string">All Activities of a function.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Acu"/>
+        <rdfs:range rdf:resource="&pgef;Activity"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/of_system -->
+
+    <owl:ObjectProperty rdf:about="&pgef;of_system">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The system role of which this is an Activity.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Activity"/>
+        <rdfs:range rdf:resource="&pgef;ProjectSystemUsage"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/system_activities -->
+
+    <owl:ObjectProperty rdf:about="&pgef;system_activities">
+        <owl:inverseOf rdf:resource="&pgef;of_system"/>
+        <rdfs:comment rdf:datatype="&xsd;string">All Activities of a top-level system.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
+        <rdfs:range rdf:resource="&pgef;Activity"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/condition -->
+
+    <owl:ObjectProperty rdf:about="&pgef;condition">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The determinant of a Decision: a boolean-valued Relation.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Decision"/>
+        <rdfs:range rdf:resource="&pgef;Relation"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/antecedent -->
+
+    <owl:ObjectProperty rdf:about="&pgef;antecedent">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The antecedent is the activity that immediately precedes an activity control object in a sequence of activities.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ActivityControl"/>
+        <rdfs:range rdf:resource="&pgef;Activity"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/next_activity -->
+
+    <owl:ObjectProperty rdf:about="&pgef;next_activity">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The activity following a Decision if its condition evaluates as true.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Decision"/>
+        <rdfs:range rdf:resource="&pgef;Activity"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/alternative_activity -->
+
+    <owl:ObjectProperty rdf:about="&pgef;alternative_activity">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The activity following a Decision if its condition evaluates as false.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Decision"/>
         <rdfs:range rdf:resource="&pgef;Activity"/>
     </owl:ObjectProperty>
 
@@ -1048,7 +1114,7 @@
     <owl:DatatypeProperty rdf:about="&pgef;comment">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">General information about or views on an object.  The meaning of a comment is determined by the application context.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
+        <rdfs:domain rdf:resource="&pgef;Identifiable"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -1816,13 +1882,13 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
 
 
-    <!-- http://pangalactic.us/pgef/sub_activity_role -->
+    <!-- http://pangalactic.us/pgef/sub_activity_sequence -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;sub_activity_role">
+    <owl:DatatypeProperty rdf:about="&pgef;sub_activity_sequence">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The sub-activity role is the role of an activity within the context of a composite Activity in which it occurs.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">An integer indicating the sequential position of an activity within the list of sub-activities of a composite Activity.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;ActCompRel"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
 
 
@@ -2318,7 +2384,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/Activity -->
 
     <owl:Class rdf:about="&pgef;Activity">
-        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
         <rdfs:comment rdf:datatype="&xsd;string">A named, structured procedural concept which is realized and applied systematically to achieve an objective.</rdfs:comment>
     </owl:Class>
 
@@ -2328,7 +2394,34 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
 
     <owl:Class rdf:about="&pgef;ActivityType">
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The type of an Activity.  Reference examples are "Operation", "Event", "Cycle".</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of an Activity.  Examples are "Operation", "Event", "Cycle".</rdfs:comment>
+    </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/ActivityControl -->
+
+    <owl:Class rdf:about="&pgef;ActivityControl">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A flow control in a sequence of Activities.  Subclasses include "Decision" and "Merge".</rdfs:comment>
+    </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/Decision -->
+
+    <owl:Class rdf:about="&pgef;Decision">
+        <rdfs:subClassOf rdf:resource="&pgef;ActivityControl"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A point in a sequence of activities in which the following activity is determined based on a condition (a boolean-valued Relation).</rdfs:comment>
+    </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/Merge -->
+
+    <owl:Class rdf:about="&pgef;Merge">
+        <rdfs:subClassOf rdf:resource="&pgef;ActivityControl"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A point in a sequence of activities in which the preceding activity (antecedent) was the last activity in an alternative set of activities that resulted from a Decision.</rdfs:comment>
     </owl:Class>
 
 

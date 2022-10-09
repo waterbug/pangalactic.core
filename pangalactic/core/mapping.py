@@ -23,6 +23,28 @@ Examples of schema mods that require a conversion function include:
 """
 # NOTES:
 
+# version 3.0.0:
+#   * mods:
+#     - Activity was subclass of Modelable; now subclass of ManagedObject
+#       (reason: Activity needed "owner" attribute)
+#       + was subclass of Modelable; now subclass of ManagedObject
+#       + removed attribute "activity_of" (referenced Product)
+#       + added attributes
+#         * "of_function":  references Acu (of which this is Activity)
+#           inverse: "function_activities" (of Acu)
+#         * "of_system":  references ProjectSystemUsage
+#           inverse: "system_activities" (of PSU)
+#     - new class: ActivityControl (subclass of Identifiable)
+#       + attribute: "antecedent" (Activity immediately preceding the control)
+#     - new class: Merge (subclass of ActivityControl)
+#       (rejoins activity sequence after a Decision branch)
+#     - new class: Decision (subclass of ActivityControl)
+#       (branches an activity sequence)
+#       + attribute: "condition" (boolean-valued Relation)
+#       + attribute: "next_activity" (next Activity if condition is true)
+#       + attribute: "alternative_activity" (next Activity if condition is
+#         false)
+
 # version 2.0.0:
 #   * mods:
 #     - Activity was subclass of DigitalProduct; now subclass of Modelable
@@ -57,9 +79,9 @@ Examples of schema mods that require a conversion function include:
 
 from copy import deepcopy
 
-schema_mods = ['1.0.4', '1.5.0', '2.0.0']
+schema_mods = ['1.0.4', '1.5.0', '2.0', '3.0']
 
-schema_version = '2.0.0'
+schema_version = '3.0.0'
 
 
 def to_x_x_x(sos):
