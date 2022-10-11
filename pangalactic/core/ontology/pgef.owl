@@ -2402,7 +2402,7 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <!-- http://pangalactic.us/pgef/ActivityControl -->
 
     <owl:Class rdf:about="&pgef;ActivityControl">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
         <rdfs:comment rdf:datatype="&xsd;string">A flow control in a sequence of Activities.  Subclasses include "Decision" and "Merge".</rdfs:comment>
     </owl:Class>
 
