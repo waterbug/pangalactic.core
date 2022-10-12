@@ -1874,6 +1874,7 @@ class UberORB(object):
         if not isinstance(project, self.classes['Project']):
             self.log.debug('  - object provided is not a Project.')
             return []
+        # objs now includes Activities owned by the project
         objs = self.search_exact(owner=project)
         psus = project.systems
         if psus:
@@ -1895,15 +1896,6 @@ class UberORB(object):
                 self.log.debug('  - {} assemblies found'.format(
                                len(assemblies)))
             objs += assemblies
-            # get Activities related to project systems
-            activities = []
-            for system in systems:
-                if system.activities:
-                    activities += system.activities
-            if activities:
-                self.log.debug('  - {} Activities found'.format(
-                               len(activities)))
-            objs += activities
         else:
             self.log.debug('  - no project-level systems found')
         objs.append(project)

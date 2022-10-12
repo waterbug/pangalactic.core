@@ -38,7 +38,7 @@ Examples of schema mods that require a conversion function include:
 #           inverse: "function_activities" (of Acu)
 #         * "of_system":  references ProjectSystemUsage
 #           inverse: "system_activities" (of PSU)
-#     - new class: ActivityControl (subclass of Identifiable)
+#     - new class: ActivityControl (subclass of ManagedObject)
 #       + attribute: "antecedent" (Activity immediately preceding the control)
 #     - new class: Merge (subclass of ActivityControl)
 #       (rejoins activity sequence after a Decision branch)

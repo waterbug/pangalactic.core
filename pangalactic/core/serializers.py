@@ -499,11 +499,11 @@ DESERIALIZATION_ORDER = [
                     'HardwareProduct',
                     'SoftwareProduct',
                     'DigitalProduct',
-                    'Activity',  # Activity.activity_of references Products
-                    'Mission',
-                    'ActCompRel',
                     'Acu',
                     'ProjectSystemUsage',
+                    'Activity', # Activity references Acu and PSU
+                    'Mission',
+                    'ActCompRel',
                     'Model',
                     'Port',
                     'Flow',
