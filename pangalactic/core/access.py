@@ -153,8 +153,10 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         # global admin is omnipotent, except for deleting projects ...
         # orb.log.debug('  ******* user is a global admin.')
         perms = ['view']
-        if state.get('connected'):
-            # deletions and are only allowed if connected
+        if (state.get('connected')
+            or obj.oid not in state.get('synced_oids', [])):
+            # deletions and are only allowed if connected or object has not
+            # been synced to the server
             # first check whether frozen
             if frozen:
                 # if frozen, view-only even for global admin (although global
@@ -165,20 +167,34 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         if debugging:
             perms.append('global admin perms')
         return perms
-    # user has write permissions if Admin for owner org or if user has a
-    # discipline role in the owner org that corresponds to the object's
-    # 'product_type'
+    elif (not state.get('connected') and
+          obj.oid not in state.get('synced_oids', [])):
+        # user always has full perms when not connected AND the object has not
+        # been synced to the repo (which implies that the user created the
+        # object)
+        orb.log.debug('  full perms: offline & object not synced.')
+        perms = ['view', 'modify', 'delete', 'offline & object not synced']
+        return perms
     else:
-        # did the user create the object?
-        # if the object is not an instance of Person and is not frozen, full
-        # perms ...
+        # -------------------------------------------------------------------
+        # user has write permissions if Admin for owner org or if user has a
+        # discipline role in the owner org that corresponds to the object's
+        # 'product_type'
+        # -------------------------------------------------------------------
+        # Did the user create the object?  Then if the object is not an
+        # instance of Person and is not frozen, full perms ...
         if (not frozen and hasattr(obj, 'creator') and obj.creator is user and
             not isinstance(obj, orb.classes['Person'])):
-            # orb.log.debug('  user is object creator.')
-            # creator has full perms
+            orb.log.debug('  user is object creator.')
             perms = ['view']
-            if state.get('connected'):
-                # deletions and mods are only allowed if connected
+            # creator has full perms when connected or if the object has not
+            # been synced to the repo
+            if (state.get('connected')
+                or obj.oid not in state.get('synced_oids', [])):
+                orb.log.debug('  "connected" OR object is not synced.')
+                # deletions and mods are only allowed if either: (1) connected
+                # or (2) object does not yet exist on the server (i.e. its oid
+                # is not in 'synced_oids')
                 perms += ['delete', 'modify']
             # orb.log.debug('  perms: {}'.format(perms))
             if debugging:

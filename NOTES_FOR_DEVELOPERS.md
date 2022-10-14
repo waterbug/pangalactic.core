@@ -209,15 +209,14 @@
     `    NOTE:  for project-independent role assignments, 'global' is used in`
     `    place of a project oid.`
 
-    `[3]: the "synced_oids" list is used in determining whether an object may be`
-    `     deleted while the client is offline (not connected to the repository):`
-    `     any object that has been synced to the repository *cannot* be deleted`
-    `     while offline, because it may be used in an assembly by another user`
-    `     and deleting it before removing it from the assembly would break`
-    `     referential integrity.`
+    `[3]: the "synced_oids" list is used in determining whether an object may`
+    `     be modified or deleted while the client is offline (not connected to`
+    `     the repository): any object that has been synced to the repository`
+    `     *cannot* be modified or deleted while offline, because it may be`
+    `     used in an assembly by another user.`
 
-    `[4]: Projects only need to be synced when a project is first used during an`
-    `     online session because objects may have been added, deleted, or`
+    `[4]: Projects only need to be synced when a project is first used during`
+    `     an online session because objects may have been added, deleted, or`
     `     modified while the user was offline. During a session, the bulk`
     `     project sync is only done once because during the online session all`
     `     objects are kept in sync by messages. The "synced_projects" list is`
