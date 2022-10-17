@@ -487,9 +487,9 @@ def to_table_name(cname):
 
 def pname_to_header_label(pname):
     """
-    Convert a standard property name into a header-friendly name.
+    Convert a property or parameter name into a header-friendly name.
 
-    @param pname: a Property name
+    @param pname: a name
     @type  pname: L{str}
 
     @return: an "external name"
