@@ -15,7 +15,7 @@ from sqlalchemy import (Boolean, Date, DateTime, Float, Integer, LargeBinary,
 import ruamel_yaml as yaml
 
 # pangalactic version
-__version__ = '3.0.dev0'
+__version__ = '3.0.dev1'
 
 # `diagramz` is a module-level variable for the diagram cache
 # (see pangalactic.node.gui.diagrams.view for more detail)
@@ -32,7 +32,7 @@ datatypes = {
     (True, 'float', False)    : set,
     # kb.py maps xsd:base64Binary to Python 'bytes', which is here mapped to sa
     # 'LargeBinary'.  The 'bytes' datatype is intended for data values which
-    # may be used as Python 3.0.dev0 identifiers
+    # may be used as Python 3.0.dev1 identifiers
     (True, 'bytes', True)     : LargeBinary,
     (True, 'str', True)       : String,
                                 # narrative -> "Text" (multi-line)
