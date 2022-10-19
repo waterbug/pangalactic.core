@@ -608,88 +608,83 @@ class UberORB(object):
         server is authoritative.
         """
         self.log.debug('* recompute_parmz()')
-        if state.get('connected'):
-            self.log.debug('  - sending "get parmz" signal ...')
-            # refresh parameter cache (and other caches) from server
-            dispatcher.send(signal='get parmz')
-        else:
-            # TODO:  preferred contexts should override defaults
-            # default descriptive contexts:  CBE, MEV
-            d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or [
-                                                                    'CBE', 'MEV']
-            variables = config.get('variables', ['m', 'P', 'R_D']) or []
-            # NOTE: this iterates only over assembly oids (i.e., keys in the
-            # 'componentz' cache), because _compute_pval() is recursive and will
-            # recompute all lower-level component/subassembly values in each call
-            # NOTE: a further implication is that non-products (e.g. Port,
-            # PortTemplate, etc.) DO NOT HAVE COMPUTED PARAMETERS ...
-            for context in d_contexts:
-                for variable in variables:
-                    # slightly kludgy, but ALL HW (and ONLY HW) should have ALL
-                    # these variables and context parameters, period!
-                    for oid in self.get_oids(cname='HardwareProduct'):
-                        pid = get_parameter_id(variable, context)
-                        _compute_pval(oid, variable, context)
-                        # val = _compute_pval(oid, variable, context)
-                        # NOTE: this should be superfluous: "_compute_pval" sets it
-                        # if oid not in parameterz:
-                            # parameterz[oid] = {}
-                        # if pid not in parameterz[oid]:
-                            # add_parameter(oid, pid)
-                        # parameterz[oid][pid]['value'] = val
-            # Recompute Margins for all performance requirements
-            # [0] Remove any previously computed performance requirements (NTEs and
-            #     Margins) in case any requirements have been deleted or
-            #     re-allocated
-            pid_deletions = []
-            oid_deletions = set()
-            for oid in parameterz:
-                if parameterz[oid] is not None:
-                    for pid in parameterz[oid]:
-                        if 'Margin' in pid or 'NTE' in pid:
-                            pid_deletions.append((oid, pid))
-                else:
-                    oid_deletions.add(oid)
-            for oid, pid in pid_deletions:
-                del parameterz[oid][pid]
-                if not parameterz[oid]:
-                    oid_deletions.add(oid)
-            for oid in oid_deletions:
-                del parameterz[oid]
-            # [1] refresh allocations for current requirements
-            for req in self.get_by_type('Requirement'):
-                refresh_req_allocz(req)
-            # [2] iterate over current set of performance requirements, which
-            # should already have been identified by running refresh_req_allocz()
-            for req_oid in req_allocz:
-                # compute_requirement_margin() returns a tuple:
-                # 0: oid of Acu or PSU to which reqt is allocated
-                # 1: id of performance parameter
-                # 2: nte value (max) of performance parameter
-                # 3: units of nte value
-                # 4: margin [result] (expressed as a %)
-                oid, pid, nte, nte_units, result = compute_requirement_margin(
-                                                                        req_oid)
-                if oid:
-                    margin_pid = get_parameter_id(pid, 'Margin')
-                    nte_pid = get_parameter_id(pid, 'NTE')
-                    # self.log.debug('  - {} at {}: {}'.format(pid, oid,
-                                                                   # result))
-                    if oid not in parameterz:
-                        parameterz[oid] = {}
-                    if isinstance(result, (int, float)):
-                        # if result is int or float, set it as margin; otherwise,
-                        # it is a message indicating that margin could not be
-                        # computed
-                        parameterz[oid][margin_pid] = result
-                    parameterz[oid][nte_pid] = nte
-                else:
-                    # if oid is empty, reason for failure will be in "result"
-                    # self.log.debug(' - margin comp. failed for req with oid:')
-                    # self.log.debug('   "{}"'.format(req_oid))
-                    # self.log.debug('   computation result: {}'.format(result))
-                    pass
-            dispatcher.send('parameters recomputed')
+        # TODO:  preferred contexts should override defaults
+        # default descriptive contexts:  CBE, MEV
+        d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or [
+                                                                'CBE', 'MEV']
+        variables = config.get('variables', ['m', 'P', 'R_D']) or []
+        # NOTE: this iterates only over assembly oids (i.e., keys in the
+        # 'componentz' cache), because _compute_pval() is recursive and will
+        # recompute all lower-level component/subassembly values in each call
+        # NOTE: a further implication is that non-products (e.g. Port,
+        # PortTemplate, etc.) DO NOT HAVE COMPUTED PARAMETERS ...
+        for context in d_contexts:
+            for variable in variables:
+                # slightly kludgy, but ALL HW (and ONLY HW) should have ALL
+                # these variables and context parameters, period!
+                for oid in self.get_oids(cname='HardwareProduct'):
+                    pid = get_parameter_id(variable, context)
+                    _compute_pval(oid, variable, context)
+                    # val = _compute_pval(oid, variable, context)
+                    # NOTE: this should be superfluous: "_compute_pval" sets it
+                    # if oid not in parameterz:
+                        # parameterz[oid] = {}
+                    # if pid not in parameterz[oid]:
+                        # add_parameter(oid, pid)
+                    # parameterz[oid][pid]['value'] = val
+        # Recompute Margins for all performance requirements
+        # [0] Remove any previously computed performance requirements (NTEs and
+        #     Margins) in case any requirements have been deleted or
+        #     re-allocated
+        pid_deletions = []
+        oid_deletions = set()
+        for oid in parameterz:
+            if parameterz[oid] is not None:
+                for pid in parameterz[oid]:
+                    if 'Margin' in pid or 'NTE' in pid:
+                        pid_deletions.append((oid, pid))
+            else:
+                oid_deletions.add(oid)
+        for oid, pid in pid_deletions:
+            del parameterz[oid][pid]
+            if not parameterz[oid]:
+                oid_deletions.add(oid)
+        for oid in oid_deletions:
+            del parameterz[oid]
+        # [1] refresh allocations for current requirements
+        for req in self.get_by_type('Requirement'):
+            refresh_req_allocz(req)
+        # [2] iterate over current set of performance requirements, which
+        # should already have been identified by running refresh_req_allocz()
+        for req_oid in req_allocz:
+            # compute_requirement_margin() returns a tuple:
+            # 0: oid of Acu or PSU to which reqt is allocated
+            # 1: id of performance parameter
+            # 2: nte value (max) of performance parameter
+            # 3: units of nte value
+            # 4: margin [result] (expressed as a %)
+            oid, pid, nte, nte_units, result = compute_requirement_margin(
+                                                                    req_oid)
+            if oid:
+                margin_pid = get_parameter_id(pid, 'Margin')
+                nte_pid = get_parameter_id(pid, 'NTE')
+                # self.log.debug('  - {} at {}: {}'.format(pid, oid,
+                                                               # result))
+                if oid not in parameterz:
+                    parameterz[oid] = {}
+                if isinstance(result, (int, float)):
+                    # if result is int or float, set it as margin; otherwise,
+                    # it is a message indicating that margin could not be
+                    # computed
+                    parameterz[oid][margin_pid] = result
+                parameterz[oid][nte_pid] = nte
+            else:
+                # if oid is empty, reason for failure will be in "result"
+                # self.log.debug(' - margin comp. failed for req with oid:')
+                # self.log.debug('   "{}"'.format(req_oid))
+                # self.log.debug('   computation result: {}'.format(result))
+                pass
+        dispatcher.send('parameters recomputed')
 
     def assign_test_parameters(self, objs, parms=None, des=None):
         """
