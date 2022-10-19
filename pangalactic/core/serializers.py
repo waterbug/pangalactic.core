@@ -4,6 +4,9 @@ Serializers / deserializers for pangalactic domain objects and parameters.
 """
 from datetime import date, datetime
 
+# Louie
+# from louie import dispatcher
+
 # python-dateutil
 import dateutil.parser as dtparser
 
@@ -556,6 +559,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     # input_len = len(serialized)
     serialized = [so for so in serialized if so and so.get('oid')]
     new_len = len(serialized)
+    # dispatcher.send(signal='deserializing', n=new_len)
     # if new_len < input_len:
         # orb.log.debug('  {} empty objects removed.'.format(
                                                     # input_len - new_len))
@@ -851,8 +855,10 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 # orb.log.debug('  kwargs: {}'.format(str(list(kwargs))))
                 obj = cls(**kwargs)
                 if obj:
-                    orb.log.debug('* new object: [{}] {}'.format(cname,
-                                                      obj.id or '(no id)'))
+                    obj_id = obj.id or '(no id)'
+                    msg = f'* new object: [{cname}] {obj_id}'
+                    orb.log.debug(msg)
+                    # dispatcher.send(signal='deserialized object', msg=msg)
                     orb.db.add(obj)
                     objs.append(obj)
                     created.append(obj.id)
