@@ -559,6 +559,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     # input_len = len(serialized)
     serialized = [so for so in serialized if so and so.get('oid')]
     new_len = len(serialized)
+    # NOTE: this signal was part of a progress method that didn't work
     # dispatcher.send(signal='deserializing', n=new_len)
     # if new_len < input_len:
         # orb.log.debug('  {} empty objects removed.'.format(
@@ -629,6 +630,9 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             loadable['other'].append(so)
     order = [c for c in DESERIALIZATION_ORDER if c in loadable]
     order.append('other')
+    # NOTE: this `i` was part of a progress method that didn't work
+    # keep count of deserialized objs for progress signal
+    # i = 0
     for group in order:
         for d in loadable[group]:
             cname = d.get('_cname', '')
@@ -858,7 +862,10 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     obj_id = obj.id or '(no id)'
                     msg = f'* new object: [{cname}] {obj_id}'
                     orb.log.debug(msg)
-                    # dispatcher.send(signal='deserialized object', msg=msg)
+                    # NOTE: this was a progress method that didn't work
+                    # i += 1
+                    # dispatcher.send(signal='deserialized object',
+                                    # msg=msg, n=new_len, i=i)
                     orb.db.add(obj)
                     objs.append(obj)
                     created.append(obj.id)
