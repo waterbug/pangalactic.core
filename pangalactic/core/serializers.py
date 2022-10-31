@@ -538,6 +538,11 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             [3] unmodified:  objects that existed in the database and the
                 serialized object's mod_datetime was the same or earlier
             [4] error:  deserialization encountered an error
+        force_no_recompute (bool):  [default: False] if True, do not recompute
+            parameters -- this is used when further deserializations are
+            planned that will trigger the recomputation of parameters
+        force_update (bool):  [default: False] if True, update objects even if
+            the datetimes are earlier than the existing objects'
 
     Deserialize a collection of objects that have been serialized using
     `serialize()`.
