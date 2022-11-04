@@ -92,7 +92,7 @@ class UberORB(object):
             ProductType ids (used by the 'access' module, which determines user
             permissions relative to domain objects
         schemas (dict):  see definition in
-            p.meta.registry._update_schemas_from_extracts
+            p.core.registry._update_schemas_from_extracts
     """
     started = False
     startup_msg = '* orb starting up ...'

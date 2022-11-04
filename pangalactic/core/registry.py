@@ -338,7 +338,7 @@ class PanGalacticRegistry(object):
         }
 
         ... where the structure of the field dicts (`field-n-attrs`) is
-        documented in `pangalactic.meta.utils.property_to_field`.
+        documented in `pangalactic.core.meta.property_to_field`.
         """
         # self.log.debug('* updating schemas from extracts')
         to_build = [meta_id for meta_id in self.metaobject_build_order()
