@@ -14,9 +14,9 @@ from urllib.parse import urlparse
 from rdflib.term import URIRef
 
 from pangalactic.core.datastructures import OrderedSet
-from pangalactic.core.meta import (asciify, PLURALS, ATTR_EXT_NAMES, EXT_NAMES,
-                                   EXT_NAMES_PLURAL)
-
+from pangalactic.core.meta           import (asciify, PLURALS, ATTR_EXT_NAMES,
+                                             EXT_NAMES, EXT_NAMES_PLURAL)
+from pangalactic.core.parametrics    import parm_defz
 
 _inf = inflect.engine()
 
@@ -487,17 +487,19 @@ def to_table_name(cname):
 
 def pname_to_header_label(pname):
     """
-    Convert a property or parameter name into a header-friendly name.
+    Convert a property name, data element id, or parameter id into a
+    header-friendly name.
 
-    @param pname: a name
+    @param pname: a property name, data element id, or parameter id
     @type  pname: L{str}
 
     @return: an "external name"
     @rtype:  L{str}
     """
+    if pname in parm_defz:
+        return ' ' + pname + ' '
     parts = ' '.join(pname.split('_'))
-    wrapped = ' \n '.join(wrap(parts, width=7, break_long_words=False))
-    return ' ' + wrapped + ' '
+    return ' \n '.join(wrap(parts, width=7, break_long_words=False))
 
 def to_media_name(cname):
     """
