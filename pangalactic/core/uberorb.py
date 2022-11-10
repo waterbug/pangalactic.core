@@ -601,11 +601,10 @@ class UberORB(object):
         contexts.  This is required at startup or when a parameter is created,
         modified, or deleted, or in several other cases.
 
-        If running on client side and in "connected" state, send the dispatcher
-        message "get parmz", which triggers pangalaxian to call
-        vger.get_parmz() to get the parameter cache data from the server rather
-        than recomputing locally, which risks an out-of-sync condition -- the
-        server is authoritative.
+        NOTE: recompute_parmz() should NOT be called when running on client
+        side and in "connected" state; instead, call vger.get_parmz() to get
+        the parameter cache data from the server rather than recomputing
+        locally, which risks creating an out-of-sync condition.
         """
         self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
