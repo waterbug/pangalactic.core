@@ -823,7 +823,9 @@ def create_test_project():
             id_ns='test',
             name='H2G2 1.0 Spacecraft Mass',
             owner='H2G2',
-            allocated_to_system='test:H2G2:system-1',
+            allocated_to='test:H2G2:system-1',
+            # DEPRECATED:
+            # allocated_to_system='test:H2G2:system-1',
             req_type='performance',
             req_constraint_type='maximum',
             req_maximum_value=5000.0,
@@ -1080,7 +1082,9 @@ related_test_objects = [
         id_ns='test',
         name='OTHER 1.0 Spacecraft Mass',
         owner='test:OTHER',
-        allocated_to_system='test:OTHER:system-1',
+        allocated_to='test:OTHER:system-1',
+        # DEPRECATED:
+        # allocated_to_system='test:OTHER:system-1',
         req_type='performance',
         req_constraint_type='maximum',
         req_maximum_value=4000.0,

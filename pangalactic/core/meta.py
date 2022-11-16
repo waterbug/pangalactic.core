@@ -290,12 +290,13 @@ ONE2M = {
          # inverse of 'of_representation'
          'has_files' :            {'domain' : 'Representation',
                                    'range'  : 'RepresentationFile'},
-         # inverse of 'allocated_to_function'
-         'allocated_requirements' : {'domain' : 'Acu',
-                                   'range'  : 'Requirement'},
+         # DEPRECATED:  inverse of 'allocated_to_function'
+         # NEW:  inverse of 'allocated_to'
+         'allocated_requirements' : {'domain' : 'Modelable',
+                                     'range'  : 'Requirement'},
          # inverse of 'allocated_to_system'
-         'system_requirements' :  {'domain' : 'ProjectSystemUsage',
-                                   'range'  : 'Requirement'},
+         # 'system_requirements' :  {'domain' : 'ProjectSystemUsage',
+                                   # 'range'  : 'Requirement'},
          # inverse of 'role_assignment_context'
          'organizational_role_assignments' : {'domain' :
                                               'Organization',
@@ -411,9 +412,9 @@ SELECTABLE_VALUES = dict(
         ('output', 'output')
         ]),
     req_compliance=dict([
-        ('Full', 'Full'),
+        ('None', 'None'),
         ('Partial', 'Partial'),
-        ('None', 'None')])
+        ('Full', 'Full')])
         )
 
 # TEXT_PROPERTIES:  Properties that get a TextWidget interface
@@ -561,8 +562,10 @@ PGEF_COL_NAMES = {
 # TODO:  for m2m attributes, these may eventually become editable, when
 # PgxnObject implements that capability
 READONLY = [
-            'allocated_to_functions', # m2m (Requirement:Acu)
-            'allocated_to_systems', # m2m (Requirement:ProjectSystemUsage)
+            'allocated_to', # m2m (Requirement:Modelable)
+            # DEPRECATED: allocated_to_[x] is just 'allocated_to' now
+            # 'allocated_to_functions', # m2m (Requirement:Acu)
+            # 'allocated_to_systems', # m2m (Requirement:ProjectSystemUsage)
             'creator',          #  "   "    "   "
             'create_datetime',  # tds
             'has_models',       # inverse of 'of_thing' property of Model

@@ -900,13 +900,13 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/allocated_to_function -->
+    <!-- http://pangalactic.us/pgef/allocated_to -->
 
-    <owl:ObjectProperty rdf:about="&pgef;allocated_to_function">
+    <owl:ObjectProperty rdf:about="&pgef;allocated_to">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The Assembly Component Usage (Acu) relationship (functional role) to which this requirement is allocated.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The item to which this requirement is allocated.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&pgef;Acu"/>
+        <rdfs:range rdf:resource="&pgef;Modelable"/>
     </owl:ObjectProperty>
 
 
@@ -914,31 +914,9 @@
     <!-- http://pangalactic.us/pgef/allocated_requirements -->
 
     <owl:ObjectProperty rdf:about="&pgef;allocated_requirements">
-        <owl:inverseOf rdf:resource="&pgef;allocated_to_function"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The requirements that have been allocated to this function (Acu).</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Acu"/>
-        <rdfs:range rdf:resource="&pgef;Requirement"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/allocated_to_system -->
-
-    <owl:ObjectProperty rdf:about="&pgef;allocated_to_system">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The ProjectSystemUsage relationship (system role in a project) to which this requirement is allocated.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Requirement"/>
-        <rdfs:range rdf:resource="&pgef;ProjectSystemUsage"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/system_requirements -->
-
-    <owl:ObjectProperty rdf:about="&pgef;system_requirements">
-        <owl:inverseOf rdf:resource="&pgef;allocated_to_system"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The requirements that have been allocated to this ProjectSystemUsage relationship.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
+        <owl:inverseOf rdf:resource="&pgef;allocated_to"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The requirements that have been allocated to this item.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Modelable"/>
         <rdfs:range rdf:resource="&pgef;Requirement"/>
     </owl:ObjectProperty>
 

@@ -58,10 +58,10 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         return ['view', 'object is TBD']
     if config.get('local_admin') or permissive:
         # *********************************************************************
-        # NOTE: USE WITH EXTREME CAUTION! These settings can lead to database
-        # corruption and major malfunctions in collaborative projects if
-        # repository objects are edited or deleted offline and then the client
-        # is synced with a repository!
+        # NOTE: USE WITH EXTREME CAUTION! These settings can lead to major
+        # malfunctions in collaborative projects if repository objects are
+        # edited or deleted offline and then the client is synced with a
+        # repository!
         # *********************************************************************
         # orb.log.debug('  "local_admin" or "permissive" configured.')
         perms = ['view', 'modify', 'delete', 'local admin or permissive']

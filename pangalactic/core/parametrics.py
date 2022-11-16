@@ -723,16 +723,34 @@ def refresh_req_allocz(req):
     usage_oid = None
     alloc_ref = None
     obj_oid = None
-    if req.allocated_to_function:
-        acu = req.allocated_to_function
-        alloc_ref = acu.reference_designator or acu.name or acu.id
-        usage_oid = acu.oid
-        obj_oid = getattr(acu.component, 'oid', None)
-    elif req.allocated_to_system:
-        psu = req.allocated_to_system
-        alloc_ref = psu.system_role or psu.name or psu.id
-        usage_oid = psu.oid
-        obj_oid = getattr(psu.system, 'oid', None)
+    # DEPRECATED:  allocated_to_[function|system] is now just allocated_to
+    # if req.allocated_to_function:
+        # acu = req.allocated_to_function
+        # alloc_ref = acu.reference_designator or acu.name or acu.id
+        # usage_oid = acu.oid
+        # obj_oid = getattr(acu.component, 'oid', None)
+    # elif req.allocated_to_system:
+        # psu = req.allocated_to_system
+        # alloc_ref = psu.system_role or psu.name or psu.id
+        # usage_oid = psu.oid
+        # obj_oid = getattr(psu.system, 'oid', None)
+    if req.allocated_to:
+        if hasattr(req.allocated_to, 'component'):
+            acu = req.allocated_to
+            alloc_ref = acu.reference_designator or acu.name or acu.id
+            usage_oid = acu.oid
+            obj_oid = getattr(acu.component, 'oid', None)
+        elif hasattr(req.allocated_to, 'system'):
+            psu = req.allocated_to
+            alloc_ref = psu.system_role or psu.name or psu.id
+            usage_oid = psu.oid
+            obj_oid = getattr(psu.system, 'oid', None)
+        else:
+            # allocated to a project
+            project = req.allocated_to
+            alloc_ref = project.id
+            usage_oid = project.oid
+            obj_oid = getattr(project, 'oid', None)
     else:
         # req is not allocated; if present, remove it
         # log.debug('  req is not allocated')

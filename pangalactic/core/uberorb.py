@@ -1352,7 +1352,7 @@ class UberORB(object):
         # self.log.debug('  orb.save:  committing db session.')
         # obj has already been "added" to the db (session) above, so commit ...
         self.db.commit()
-        if recompute_required and recompute:
+        if recompute_required and recompute and not state.get('connected'):
             self.recompute_parmz()
         return True
 
@@ -2241,7 +2241,7 @@ class UberORB(object):
         if refresh_systems:
             for project in refresh_systems:
                 refresh_systemz(project)
-        if recompute_required:
+        if recompute_required and not state.get('connected'):
             self.recompute_parmz()
 
     def is_versioned(self, obj):

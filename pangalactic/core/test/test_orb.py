@@ -736,6 +736,14 @@ class OrbTest(unittest.TestCase):
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
         req = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         state["connected"] = False
+        # ***************************************************************
+        # TODO: test for full perms when offline and object is not synced
+        # ***************************************************************
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
         value = [
             set(get_perms(sc, user=steve)),           #  1 Adm/sc:  view only
             set(get_perms(sc, user=carefulwalker)),   #  2 SE/sc:   view only

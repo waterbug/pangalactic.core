@@ -918,8 +918,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             req_oids.update([r.oid for r in acu.allocated_requirements])
     for psu in psus:
         # look for requirement allocations to psus ...
-        if psu.system_requirements:
-            req_oids.update([r.oid for r in psu.system_requirements])
+        if psu.allocated_requirements:
+            req_oids.update([r.oid for r in psu.allocated_requirements])
     if recompute_parmz_required and not force_no_recompute:
         # orb.log.debug('  - deserialize recomputing parameters ...')
         orb.recompute_parmz()
