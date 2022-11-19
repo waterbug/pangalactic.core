@@ -540,8 +540,8 @@ def save_parmz_by_dimz(dir_path):
 # format:  {req_oid : [usage_oid, obj_oid, alloc_ref, pid, constraint]}
 # ... where:
 #   req_oid (str):  the oid of the requirement
-#   usage_oid (str): the oid of the Acu or ProjectSystemUsage to which
-#       the requirement is allocated
+#   usage_oid (str): the oid of the Acu, ProjectSystemUsage, or Project to
+#       which the requirement is allocated
 #   obj_oid (str):  the oid of the component or system of the usage
 #   alloc_ref (str):  the reference_designator or system_role of the usage
 #   pid (str):  the parameter base id
@@ -718,8 +718,8 @@ def refresh_req_allocz(req):
     Args:
         req (Requirement):  a Requirement instance
     """
-    # req_oid = getattr(req, 'oid', 'no oid') or 'no oid'
-    # log.debug(f'* refresh_req_allocz({req_oid})')
+    req_id = getattr(req, 'id', 'no id') or 'no id'
+    log.debug(f'* refresh_req_allocz({req_id})')
     usage_oid = None
     alloc_ref = None
     obj_oid = None
@@ -1548,10 +1548,6 @@ def get_flight_units(product_oid, assembly_oid, default=1):
     Keyword Args:
         default (any): a value to be returned if the parameter is not found
     """
-    # log.debug('* compute_margin()')
-    # log.debug('  using req_allocz: {}'.format(str(req_allocz)))
-    # find requirements allocated to the specified usage and constraining the
-    # specified variable
     if assembly_oid in componentz:
         for component in componentz[assembly_oid]:
             if component['oid'] == product_oid:

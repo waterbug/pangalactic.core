@@ -17,7 +17,7 @@ from pangalactic.core.parametrics import (deserialize_des,
                                           deserialize_parms,
                                           refresh_componentz,
                                           refresh_systemz,
-                                          # refresh_req_allocz,
+                                          refresh_req_allocz,
                                           serialize_des, serialize_parms,
                                           update_de_defz, update_parm_defz,
                                           update_parmz_by_dimz)
@@ -589,6 +589,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     # products: list of deserialized objects that are instances of Product
     # subclasses
     products = []
+    # requirements: list of deserialized objects that are Requirement instances
+    requirements = []
     # created: list of all deserialized objects which are new
     created = []
     # updates: list of all deserialized objects which are updates
@@ -885,6 +887,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         psus.add(obj)
                     elif isinstance(obj, orb.classes['Product']):
                         products.append(obj)
+                    elif cname == 'Requirement':
+                        requirements.append(obj)
                     if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
                         recompute_parmz_required = True
                 # else:
@@ -907,8 +911,6 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         # ids = str([o.id for o in updates.values()])
         # orb.log.info('{} updated object(s) deserialized: {}'.format(
                                                         # log_txt, ids))
-    # if there are any Requirement objects or Product, Acu, PSU with allocated
-    # requirements, refresh the req_allocz cache for the relevant requirements
     for product in products:
         acus.update(product.where_used)
         psus.update(product.projects_using_system)
@@ -924,6 +926,9 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         # orb.log.debug('  - deserialize recomputing parameters ...')
         orb.recompute_parmz()
         # orb.log.debug('    done.')
+    for req in requirements:
+        # if there are any Requirement objects, refresh the req_allocz cache
+        refresh_req_allocz(req)
     if dictify:
         return output
     else:
