@@ -802,20 +802,19 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             # orb.log.debug('  + checking for fk fields')
             fks = [a for a in field_names
                    if ((not schema['fields'][a]['is_inverse'])
-                        and (schema['fields'][a].get('related_cname')
+                        and (schema['fields'][a].get('range')
                              in orb.classes))]
             if fks:
-                # orb.log.debug('    fk fields found: {}'.format(asciify(fks)))
+                # orb.log.debug(f'    fk fields found: {fks}')
                 for fk in fks:
                     # get the related object by its oid (i.e. d[fk])
                     # orb.log.debug('    * rel obj oid: "{}"'.format(
-                                   # asciify(d.get(asciify(fk)))))
-                    # if d.get(asciify(fk)):
+                                   # d.get(fk)))
                     if d.get(fk):
                         # orb.log.debug('      rel obj found.')
-                        # kw[asciify(fk)] = orb.get(asciify(d[asciify(fk)]))
                         kw[fk] = orb.get(d[fk])
                     else:
+                        # orb.log.debug('      rel obj NOT found.')
                         # "of_product" is REQUIRED for a Port (it is NOT
                         # required for a PortTemplate, a subtype of Port)
                         if fk == 'of_product' and cname == 'Port':
@@ -838,6 +837,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                             orb.log.debug('        or end_port_context;')
                             orb.log.debug('        will be ignored.')
                             ignores.append(oid)
+            # else:
+                # orb.log.debug('    no fk fields found.')
             cls = orb.classes[cname]
             if d['oid'] in updates and d['oid'] not in ignores:
                 # orb.log.debug('* updating object with oid "{}"'.format(

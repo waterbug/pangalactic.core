@@ -85,7 +85,7 @@ from copy import deepcopy
 
 schema_mods = ['1.0.4', '1.5.0', '2.0', '3.0']
 
-schema_version = '3.0.0'
+schema_version = '3.1.0'
 
 
 def to_x_x_x(sos):

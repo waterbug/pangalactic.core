@@ -824,8 +824,6 @@ def create_test_project():
             name='H2G2 1.0 Spacecraft Mass',
             owner='H2G2',
             allocated_to='test:H2G2:system-1',
-            # DEPRECATED:
-            # allocated_to_system='test:H2G2:system-1',
             req_type='performance',
             req_constraint_type='maximum',
             req_maximum_value=5000.0,
@@ -842,7 +840,7 @@ def create_test_project():
 owned_test_objects = [
     dict(
          _cname='Organization', oid='test:yoyoinst', id='YOYOINST',
-         id_ns='pangalactic', name='Yoyodyne Instrument Systems',
+         id_ns='test', name='Yoyodyne Instrument Systems',
          name_code='YIS', city='Grovers Mill',
          state_or_province='NJ', owner='pgefobjects:PGANA'),
     dict(
@@ -868,7 +866,7 @@ owned_test_objects = [
 locally_owned_test_objects = [
     dict(
          _cname='Organization', oid='test:yoyodyne', id='YOYODYNE',
-         id_ns='pangalactic', name='Yoyodyne Propulsion Systems',
+         id_ns='test', name='Yoyodyne Propulsion Systems',
          name_code='YPS', city='Grovers Mill',
          state_or_province='NJ', owner='pgefobjects:PGANA'),
     dict(

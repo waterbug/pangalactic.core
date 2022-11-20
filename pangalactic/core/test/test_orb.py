@@ -106,7 +106,7 @@ class OrbTest(unittest.TestCase):
 
     def test_04_load_reference_data(self):
         """
-        CASE:  deserialize the data in p.repo.refdata
+        CASE:  verify that the data in p.repo.refdata has been deserialized.
         """
         # Reference data in p.repo.refdata should be deserialized into objects
         # and saved in the db:  this test simply verifies that for each
@@ -147,20 +147,32 @@ class OrbTest(unittest.TestCase):
         for serialized_object in serialized_test_objects:
             if not serialized_object['oid'].startswith('pgefobjects:'):
                 oids.append(serialized_object['oid'])
-        Identifiable = orb.classes['Identifiable']
-        deserialize(orb, serialized_test_objects)
+        objs = deserialize(orb, serialized_test_objects)
+        orb.db.commit()
         # assign test parameters and data elements to HWProducts for use in
         # subsequent tests ...
-        objs = orb.get_by_type('HardwareProduct')
-        orb.assign_test_parameters(objs)
+        hw = orb.get_by_type('HardwareProduct')
+        orb.assign_test_parameters(hw)
         save_parmz('pangalaxian_test')
         save_data_elementz('pangalaxian_test')
-        value = orb.db.query(Identifiable).filter(
-                             Identifiable.oid.in_(oids)).count()
-        expected = len(oids)
+        value_oids = set(oids) - set([o.oid for o in objs])
+        expected_oids = set()
+        req = orb.select('Requirement', id_ns='test')
+        expected_req_oid = 'test:H2G2:Spacecraft-Mass'
+        value = [value_oids, req.oid]
+        expected = [expected_oids, expected_req_oid]
         self.assertEqual(expected, value)
 
-    def test_07_test_assigned_parameters_and_data_elements(self):
+    def test_07_verify_deserialized_requirement_with_alloc(self):
+        """
+        CASE:  verify that deserialized requirement has an allocation.
+        """
+        req = orb.get('test:H2G2:Spacecraft-Mass')
+        value = getattr(req.allocated_to, 'oid', '')
+        expected = 'test:H2G2:system-1'
+        self.assertEqual(expected, value)
+
+    def test_08_test_assigned_parameters_and_data_elements(self):
         """
         CASE:  test the parameters and data elements assigned to the serialized
         test objects.
@@ -197,7 +209,7 @@ class OrbTest(unittest.TestCase):
                 expected.append(True)
         self.assertEqual(expected, value)
 
-    def test_08_get(self):
+    def test_09_get(self):
         """
         CASE:  test orb.get()
         """
@@ -220,7 +232,7 @@ class OrbTest(unittest.TestCase):
         # pass
     # test_search.todo = 'not done.'
 
-    def test_12_serialize_simple(self):
+    def test_11_serialize_simple(self):
         """
         CASE:  serialize a simple object (no parameters, no components)
         """
@@ -247,7 +259,7 @@ class OrbTest(unittest.TestCase):
                     obj.name_code]
         self.assertEqual(expected, value)
 
-    def test_12_1_yaml_dump_and_load_numeric_string_attr(self):
+    def test_12_yaml_dump_and_load_numeric_string_attr(self):
         """
         CASE:  Use yaml to dump and load a serialized object that has an
         attribute whose value is a string consisting of all numeric characters
