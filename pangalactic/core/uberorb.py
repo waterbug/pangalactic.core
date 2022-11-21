@@ -606,6 +606,14 @@ class UberORB(object):
         the parameter cache data from the server rather than recomputing
         locally, which risks creating an out-of-sync condition.
         """
+        # ********************************************************************
+        # NOTE: CAUTION CAUTION CAUTION !!!
+        # ********************************************************************
+        # The use of "d_contexts" (CBE, MEV) and the specified variables (m, P,
+        # R_D) IMPLIES THAT THEY ARE THE ONLY COMPUTED PARAMETERS AND CONTEXTS
+        # ... THIS MAY NOT BE THE CASE IN THE FUTURE! -> "Cost" and other
+        # parameters may need to be rolled up ...
+        # ********************************************************************
         self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
         # default descriptive contexts:  CBE, MEV
@@ -622,8 +630,8 @@ class UberORB(object):
                 # slightly kludgy, but ALL HW (and ONLY HW) should have ALL
                 # these variables and context parameters, period!
                 for oid in self.get_oids(cname='HardwareProduct'):
-                    pid = get_parameter_id(variable, context)
                     _compute_pval(oid, variable, context)
+                    # pid = get_parameter_id(variable, context)
                     # val = _compute_pval(oid, variable, context)
                     # NOTE: this should be superfluous: "_compute_pval" sets it
                     # if oid not in parameterz:
@@ -1225,8 +1233,8 @@ class UberORB(object):
                            getattr(obj, 'id', '[unknown]'), cname)
                 self.log.debug('* {}'.format(log_txt))
                 self.db.add(obj)
-                if obj.oid in self.new_oids:
-                    self.new_oids.remove(obj.oid)
+                if oid in self.new_oids:
+                    self.new_oids.remove(oid)
             else:
                 # updating an existing object
                 log_txt = 'orb.save: "{}" is existing {}, updating ...'.format(
@@ -1260,7 +1268,7 @@ class UberORB(object):
                 if obj.assembly.oid in componentz:
                     cur_assembly_acu_comps = [(c.usage_oid, c.oid) for c
                                               in componentz[obj.assembly.oid]]
-                if (obj.oid, comp_oid) in cur_assembly_acu_comps:
+                if (oid, comp_oid) in cur_assembly_acu_comps:
                     comp_changed = False
                 else:
                     comp_changed = True
@@ -1276,7 +1284,7 @@ class UberORB(object):
                         msg += 'allocated requirements ...'
                         self.log.debug(f'   {msg}')
                         alloc_reqs = [req_oid for req_oid in req_allocz
-                                      if req_allocz[req_oid][0] == obj.oid]
+                                      if req_allocz[req_oid][0] == oid]
                         if alloc_reqs:
                             for req_oid in alloc_reqs:
                                 req = self.get(req_oid)
@@ -1294,11 +1302,11 @@ class UberORB(object):
                 recompute_required = True
             elif cname == 'HardwareProduct':
                 # make sure HW Products have mass, power, data rate parms
-                if obj.oid not in parameterz:
-                    parameterz[obj.oid] = {}
+                if oid not in parameterz:
+                    parameterz[oid] = {}
                 for pid in ['m', 'P', 'R_D']:
-                    if not parameterz[obj.oid].get(pid):
-                         add_parameter(obj.oid, pid)
+                    if not parameterz[oid].get(pid):
+                         add_parameter(oid, pid)
                 recompute_required = True
             elif cname == 'ProjectSystemUsage':
                 system_oid = getattr(obj.system, 'oid', None)
@@ -1308,7 +1316,7 @@ class UberORB(object):
                 if obj.project.oid in systemz:
                     cur_project_psu_systems = [(s.usage_oid, s.oid) for s
                                                 in systemz[obj.project.oid]]
-                if (obj.oid, system_oid) in cur_project_psu_systems:
+                if (oid, system_oid) in cur_project_psu_systems:
                     system_changed = False
                 else:
                     system_changed = True
@@ -1321,7 +1329,7 @@ class UberORB(object):
                         msg += 'allocated requirements ...'
                         self.log.debug(f'   {msg}')
                         alloc_reqs = [req_oid for req_oid in req_allocz
-                                      if req_allocz[req_oid][0] == obj.oid]
+                                      if req_allocz[req_oid][0] == oid]
                         if alloc_reqs:
                             for req_oid in alloc_reqs:
                                 req = self.get(req_oid)

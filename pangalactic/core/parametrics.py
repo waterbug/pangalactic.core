@@ -718,8 +718,8 @@ def refresh_req_allocz(req):
     Args:
         req (Requirement):  a Requirement instance
     """
-    req_id = getattr(req, 'id', 'no id') or 'no id'
-    log.debug(f'* refresh_req_allocz({req_id})')
+    # req_id = getattr(req, 'id', 'no id') or 'no id'
+    # log.debug(f'* refresh_req_allocz({req_id})')
     usage_oid = None
     alloc_ref = None
     obj_oid = None

@@ -141,26 +141,33 @@ class OrbTest(unittest.TestCase):
         """
         # orb.load_serialized_test_objects(None, test=True) deserializes the
         # serialized test objects returned by create_test_objects() and saves
-        # them in the db:  this test simply verifies that for each serialized
-        # test object there is an object in the db with the same 'oid'.
+        # them in the db:  this test verifies that for each serialized test
+        # object there is an object in the db with the same 'oid', that the
+        # "dictified" output is correct, and that the included requirement has
+        # been deserialized.
         oids = []
         for serialized_object in serialized_test_objects:
             if not serialized_object['oid'].startswith('pgefobjects:'):
                 oids.append(serialized_object['oid'])
-        objs = deserialize(orb, serialized_test_objects)
+        output = deserialize(orb, serialized_test_objects, dictify=True)
         orb.db.commit()
+        objs = []
+        for label in ['new', 'modified', 'unmodified']:
+            if output.get(label):
+                objs += output[label]
+        new_objs = output['new']
         # assign test parameters and data elements to HWProducts for use in
         # subsequent tests ...
         hw = orb.get_by_type('HardwareProduct')
         orb.assign_test_parameters(hw)
         save_parmz('pangalaxian_test')
         save_data_elementz('pangalaxian_test')
-        value_oids = set(oids) - set([o.oid for o in objs])
+        value_oids = set(oids) - set([o.oid for o in new_objs])
         expected_oids = set()
         req = orb.select('Requirement', id_ns='test')
         expected_req_oid = 'test:H2G2:Spacecraft-Mass'
-        value = [value_oids, req.oid]
-        expected = [expected_oids, expected_req_oid]
+        value = [value_oids, new_objs, req.oid]
+        expected = [expected_oids, objs, expected_req_oid]
         self.assertEqual(expected, value)
 
     def test_07_verify_deserialized_requirement_with_alloc(self):
@@ -168,8 +175,11 @@ class OrbTest(unittest.TestCase):
         CASE:  verify that deserialized requirement has an allocation.
         """
         req = orb.get('test:H2G2:Spacecraft-Mass')
-        value = getattr(req.allocated_to, 'oid', '')
-        expected = 'test:H2G2:system-1'
+        alloc_oid = getattr(req.allocated_to, 'oid', '')
+        comp_form_oid = getattr(req.computable_form, 'oid', '')
+        value = [alloc_oid, comp_form_oid]
+        expected = ['test:H2G2:system-1',
+                    'test:H2G2:Spacecraft-Mass-Computable-Form']
         self.assertEqual(expected, value)
 
     def test_08_test_assigned_parameters_and_data_elements(self):
