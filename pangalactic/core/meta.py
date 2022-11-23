@@ -534,7 +534,7 @@ PGEF_COL_WIDTHS = {
             'org': 200,
             'owner': 100,
             'oid': 100,
-            'product_type': 150,
+            'product_type': 80,
             'purpose': 250,
             'range_datatype': 50,
             'rationale': 200,
