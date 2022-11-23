@@ -9,7 +9,7 @@ from rdflib import URIRef
 
 # SqlAlchemy
 from sqlalchemy import (Boolean, Date, DateTime, Float, Integer, LargeBinary,
-                        String, Time, Unicode)
+                        String, Time)
 
 # ruamel_yaml
 import ruamel_yaml as yaml
