@@ -13,10 +13,12 @@ from urllib.parse import urlparse
 # rdflib
 from rdflib.term import URIRef
 
+from pangalactic.core                import prefs
 from pangalactic.core.datastructures import OrderedSet
 from pangalactic.core.meta           import (asciify, PLURALS, ATTR_EXT_NAMES,
                                              EXT_NAMES, EXT_NAMES_PLURAL)
-from pangalactic.core.parametrics    import parm_defz
+from pangalactic.core.parametrics    import de_defz, mode_defz, parm_defz
+from pangalactic.core.units          import in_si
 
 _inf = inflect.engine()
 
@@ -485,7 +487,7 @@ def to_table_name(cname):
         tname = tname.lower()
     return tname +  '_'
 
-def pname_to_header_label(pname):
+def pname_to_header_label(pname, project_oid=None):
     """
     Convert a property name, data element id, or parameter id into a
     header-friendly name.
@@ -496,8 +498,26 @@ def pname_to_header_label(pname):
     @return: an "external name"
     @rtype:  L{str}
     """
-    if pname in parm_defz:
-        return ' ' + pname + ' '
+    pd = parm_defz.get(pname)
+    de_def = de_defz.get(pname, '')
+    if pd:
+        units = prefs.get('units', {}).get(pd['dimensions'], '') or in_si.get(
+                                                         pd['dimensions'], '')
+        if units:
+            units = '(' + units + ')'
+        return '   \n   '.join(wrap(pd['name'], width=7,
+                               break_long_words=False) + [units])
+    elif de_def:
+        return '   \n   '.join(wrap(de_def['name'], width=7,
+                               break_long_words=False))
+    elif project_oid:
+        modes = (mode_defz.get(project_oid) or {}).get('modes')
+        if modes and pname in modes:
+            units = prefs.get('units', {}).get('power') or 'W'
+            if units:
+                units = '(' + units + ')'
+            return '   \n   '.join(wrap(pname, width=7,
+                                   break_long_words=False) + [units])
     parts = ' '.join(pname.split('_'))
     return ' \n '.join(wrap(parts, width=7, break_long_words=False))
 
