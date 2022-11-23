@@ -518,7 +518,7 @@ def pname_to_header_label(pname, project_oid=None):
             return '   \n   '.join(wrap(pname, width=7,
                                    break_long_words=False) + [units])
     parts = ' '.join(pname.split('_'))
-    return ' \n '.join(wrap(parts, width=7, break_long_words=False)).title()
+    return ' \n '.join(wrap(parts, width=7, break_long_words=False))
 
 def to_media_name(cname):
     """
