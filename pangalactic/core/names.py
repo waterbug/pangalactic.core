@@ -430,9 +430,8 @@ def get_external_name_plural(cname):
     return EXT_NAMES_PLURAL.get(cname,
                                 to_external_name(cname)+'s')
 
-def get_attr_ext_name(cname, aname):
-    return (ATTR_EXT_NAMES.get(cname) or {}).get(
-                                            aname, ' '.join(aname.split('_')))
+def get_attr_ext_name(aname):
+    return ATTR_EXT_NAMES.get(aname, ' '.join(aname.split('_')))
 
 def to_external_name(cname):
     """
@@ -519,7 +518,7 @@ def pname_to_header_label(pname, project_oid=None):
             return '   \n   '.join(wrap(pname, width=7,
                                    break_long_words=False) + [units])
     parts = ' '.join(pname.split('_'))
-    return ' \n '.join(wrap(parts, width=7, break_long_words=False))
+    return ' \n '.join(wrap(parts, width=7, break_long_words=False)).title()
 
 def to_media_name(cname):
     """

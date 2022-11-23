@@ -447,22 +447,19 @@ EXT_NAMES_PLURAL = {
     'Property'            : 'Properties',
     }
 
-# Special external names of attributes of PGEF classes
+# Special external names of PGEF properties
 ATTR_EXT_NAMES = {
-    'Requirement' :
-        {
-         'description' : 'text',
-         'req_type' : 'reqt type',
-         'req_level' : 'level',
-         'req_compliance' : 'compliance',
-         'req_constraint_type' : 'constraint type',
-         'req_dimensions' : 'dimensions',
-         'req_maximum_value' : 'maximum',
-         'req_minimum_value' : 'minimum',
-         'req_tolerance': 'tolerance (+/-)',
-         'req_tolerance_lower': 'lower tolerance',
-         'req_tolerance_upper': 'upper tolerance'
-        }
+     'description' : 'text',
+     'req_type' : 'reqt type',
+     'req_level' : 'level',
+     'req_compliance' : 'compliance',
+     'req_constraint_type' : 'constraint type',
+     'req_dimensions' : 'dimensions',
+     'req_maximum_value' : 'maximum',
+     'req_minimum_value' : 'minimum',
+     'req_tolerance': 'tolerance (+/-)',
+     'req_tolerance_lower': 'lower tolerance',
+     'req_tolerance_upper': 'upper tolerance'
     }
 
 # Default ordering of the important ManagedObject properties
