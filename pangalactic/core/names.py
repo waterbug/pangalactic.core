@@ -504,19 +504,19 @@ def pname_to_header_label(pname, project_oid=None):
                                                          pd['dimensions'], '')
         if units:
             units = '(' + units + ')'
-        return '   \n   '.join(wrap(pd['name'], width=7,
-                               break_long_words=False) + [units])
+        return '  \n  '.join(wrap(pd['name'], width=7,
+                             break_long_words=False) + [units])
     elif de_def:
-        return '   \n   '.join(wrap(de_def['name'], width=7,
-                               break_long_words=False))
+        return '  \n  '.join(wrap(de_def['name'], width=7,
+                             break_long_words=False))
     elif project_oid:
         modes = (mode_defz.get(project_oid) or {}).get('modes')
         if modes and pname in modes:
             units = prefs.get('units', {}).get('power') or 'W'
             if units:
                 units = '(' + units + ')'
-            return '   \n   '.join(wrap(pname, width=7,
-                                   break_long_words=False) + [units])
+            return '  \n  '.join(wrap(pname, width=7,
+                                 break_long_words=False) + [units])
     parts = ' '.join(pname.split('_'))
     return ' \n '.join(wrap(parts, width=7, break_long_words=False))
 

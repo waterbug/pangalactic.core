@@ -2174,8 +2174,17 @@ def add_default_data_elements(obj, des=None):
 # MODE CACHES ##########################################################
 
 # mode_defz:  persistent** cache of system power mode definitions, which
-#             consist of a set of systems / subsystems and the applicable power
-#             states of each during a specified mode
+#             consist of a set of systems (ProjectSystemUsages) and subsystems
+#             (Assembly Component Usages or Acus) and the applicable power
+#             states of each (i.e. of their "system" or "component",
+#             respectively) during a specified mode. The 'systems' sub-dict
+#             contains all items that have been explicitly added to the modes
+#             definitions.  If a 'system' has components, its components are
+#             added to the 'components' sub-dict and its modes' power values
+#             will be computed from the sum of its components power values for
+#             each mode.  If a 'system' has no components, then its modes'
+#             power values have to be explicitly defined rather than computed.
+#
 #             ** persisted in the file 'mode_defs.json' in the
 #             application home directory -- see the functions
 #             `save_mode_defz` and `load_mode_defz`
