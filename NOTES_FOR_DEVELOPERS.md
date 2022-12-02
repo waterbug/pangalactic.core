@@ -141,6 +141,8 @@
 
     `active_users:     (list) ids of users that have registered public keys`
 
+    `client:           (bool) whether running as client (True) or server`
+
     `cloaked:          (list) oids of local cloaked objects`
 
     `connected:        (bool) true if logged in to message bus`
