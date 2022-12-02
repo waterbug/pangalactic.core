@@ -14,7 +14,7 @@ do
     response=y
     read response
     if [ "$response" != 'n' ]; then
-        pytest $x;
+        pytest -v $x;
     fi
 done
 

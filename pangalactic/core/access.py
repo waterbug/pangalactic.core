@@ -68,17 +68,18 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         # orb.log.debug('  perms: {}'.format(perms))
         return perms
     perms = set()
+    frozen = getattr(obj, 'frozen', False)
     # Products can be "frozen", in which case if they would otherwise be
     # viewable (i.e. either "public" or the user has a role in the project that
     # owns them) then they are view-only
-    frozen = getattr(obj, 'frozen', False)
-    # if frozen:
-        # orb.log.debug(f'* object {obj.oid} is frozen.')
     # an Acu in a frozen assembly
     if (hasattr(obj, 'assembly') and
         getattr(obj.assembly, 'frozen', False)):
-        orb.log.debug('  Any Acu in a frozen assembly is frozen')
+        # orb.log.debug('  Any Acu in a frozen assembly is frozen')
         frozen = True
+    if frozen:
+        # orb.log.debug(f'* object {obj.oid} is frozen.')
+        return set(['view'])
     if isinstance(obj, orb.classes['Product']):
         # Products can be "cloaked" ("non-public")
         if getattr(obj, 'public', False):
@@ -149,29 +150,31 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         perms = ['view', 'modify', 'delete', 'universally modifiable']
         return perms
     # if we get this far, we have a user_oid and a user object
+
+    # set up some convenience values
+    server = not state.get('client')
+    client = state.get('client')
+    connected = state.get('connected')
+    object_not_synced = obj.oid not in state.get('synced_oids', [])
     if is_global_admin(user):
         # global admin is omnipotent, except for deleting projects ...
         # orb.log.debug('  ******* user is a global admin.')
         perms = ['view']
-        if (state.get('connected')
-            or obj.oid not in state.get('synced_oids', [])):
-            # deletions and are only allowed if connected or object has not
-            # been synced to the server
-            # first check whether frozen
-            if frozen:
-                # if frozen, view-only even for global admin (although global
-                # admin has access to "thaw")
-                return perms   # i.e. ["view"]
+        # if (state.get('client') and
+            # (state.get('connected') or
+             # obj.oid not in state.get('synced_oids', []))):
+        if server or (client and (connected or object_not_synced)):
+            # deletions and are only allowed on the client if connected or
+            # object has not been synced to the server
             perms += ['modify', 'delete']
         # orb.log.debug('  perms: {}'.format(perms))
         if debugging:
             perms.append('global admin perms')
         return perms
-    elif (not state.get('connected') and
-          obj.oid not in state.get('synced_oids', [])):
-        # user always has full perms when not connected AND the object has not
-        # been synced to the repo (which implies that the user created the
-        # object)
+    if client and (not connected and object_not_synced):
+        # client user always has full perms when not connected AND the object
+        # has not been synced to the repo (which implies that the user created
+        # the object)
         orb.log.debug('  full perms: offline & object not synced.')
         perms = ['view', 'modify', 'delete', 'offline & object not synced']
         return perms
@@ -182,19 +185,12 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         # 'product_type'
         # -------------------------------------------------------------------
         # Did the user create the object?  Then if the object is not an
-        # instance of Person and is not frozen, full perms ...
-        if (not frozen and hasattr(obj, 'creator') and obj.creator is user and
+        # instance of Person, full perms ...
+        if (hasattr(obj, 'creator') and obj.creator is user and
             not isinstance(obj, orb.classes['Person'])):
             orb.log.debug('  user is object creator.')
             perms = ['view']
-            # creator has full perms when connected or if the object has not
-            # been synced to the repo
-            if (state.get('connected')
-                or obj.oid not in state.get('synced_oids', [])):
-                orb.log.debug('  "connected" OR object is not synced.')
-                # deletions and mods are only allowed if either: (1) connected
-                # or (2) object does not yet exist on the server (i.e. its oid
-                # is not in 'synced_oids')
+            if server or (client and connected):
                 perms += ['delete', 'modify']
             # orb.log.debug('  perms: {}'.format(perms))
             if debugging:
@@ -231,9 +227,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                         # '  user is authorized for ProductType "{}".'.format(
                         # pt_id))
                     perms = ['view']
-                    if state.get('connected') and not frozen:
-                        # mods and deletions are only allowed if connected and
-                        # the object is not frozen
+                    if server or (client and connected):
+                        # mods and deletions are only allowed on the server or
+                        # a connected client
                         perms += ['modify', 'delete']
                     # orb.log.debug('  perms: {}'.format(perms))
                     if debugging:
@@ -253,8 +249,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                             'lead_engineer'])
             if req_mgrs & role_ids:
                 perms = ['view']
-                if state.get('connected') and not frozen:
-                    # mods and deletions are only allowed if connected
+                if server or (client and connected):
+                    # mods and deletions are only allowed on server or a
+                    # connected client
                     perms += ['modify', 'delete']
                 # orb.log.debug('  perms: {}'.format(perms))
                 if debugging:
@@ -303,8 +300,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if assembly_type in subsystem_types:
                 # orb.log.debug('  - assembly product_type is relevant.')
                 perms = ['view']
-                if state.get('connected') and not frozen:
-                    # mods and deletions are only allowed if connected
+                if server or (client and connected):
+                    # mods and deletions are only allowed on server or a
+                    # connected client
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 if debugging:
@@ -328,8 +326,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 if pt in subsystem_types:
                     # orb.log.debug('  - TBD product_type_hint is relevant.')
                     perms = ['view']
-                    if state.get('connected') and not frozen:
-                        # mods and deletions are only allowed if connected
+                    if server or (client and connected):
+                        # mods and deletions are only allowed on server or a
+                        # connected client
                         perms += ['modify', 'delete']
                     # orb.log.debug('    perms: {}'.format(perms))
                     if debugging:
@@ -362,8 +361,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 # orb.log.debug('  - user is authorized by role(s) ...')
                 # orb.log.debug('    {}'.format(list(roles & auth_roles)))
                 perms = ['view']
-                if state.get('connected'):
-                    # mods and deletions are only allowed if connected
+                if server or (client and connected):
+                    # mods and deletions are only allowed on server or a
+                    # connected client
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 if debugging:
