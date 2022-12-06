@@ -978,9 +978,14 @@ def add_default_parameters(obj, parms=None):
         # (state is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
         pids |= OrderedSet(parms or prefs['default_parms'])
-        if obj.product_type:
-            pids |= OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
-                               getattr(obj.product_type, 'id', '') or []))
+        prod_type = obj.product_type
+        prod_type_id = getattr(prod_type, 'id', '')
+        if prod_type_id:
+            def_pids = OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
+                                                                prod_type_id))
+            txt = '  - found default parameters'
+            log.debug(f'{txt} for product type "{prod_type_id}": {def_pids}')
+            pids |= def_pids
     pids_to_add =  pids - set(parameterz.get(obj.oid, {}))
     if pids_to_add:
         log.debug(f'  - adding default parameters {pids_to_add} ...')

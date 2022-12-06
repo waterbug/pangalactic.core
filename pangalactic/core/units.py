@@ -8,22 +8,22 @@ PGEF units:  reference data for numeric values with units.
 # [e.g.]
 #   unit = getattr(u, 'A')    # the "Amperes" object)
 
-from collections import OrderedDict
 import pint
 
 ureg = pint.UnitRegistry()
 
 # in_si maps "dimensions" to their associated base SI units
-in_si = OrderedDict([
+in_si = dict([
     ('', ''),
     (None, ''),
     ('None', ''),
     ('dimensionless', ''),
     ('acceleration', 'm/s^2'),              # meter / second^2
-    ('angle', 'radian'),                    # degree
-    ('angular acceleration', 'degree/s^2'), # degree / second^2
+    ('angle', 'radian'),                    # radian
+    ('angular acceleration', 'radian/s^2'), # radian / second^2
     ('angular momentum', 'N*m*s'),          # Newton-meter-second, etc.
-    ('angular velocity', 'degree/s'),       # degree / second
+    ('angular sensitivity', 'm/radian'),    # meters / radian
+    ('angular velocity', 'radian/s'),       # radian / second
     ('area', 'm^2'),                        # square meter
     ('bitrate', 'bit/s'),                   # bit / second
     ('capacitance', 'F'),                   # farad
@@ -49,6 +49,7 @@ in_si = OrderedDict([
     ('pressure', 'Pa'),                     # pascal
     ('radiation', 'rads'),                  # rads -- not 'rad' (== 'radian')
     ('substance', 'mol'),                   # moles
+    ('translational sensitivity', 'm/m'),   # meters / meter
     ('temperature', 'K'),                   # Kelvin
     ('time', 's'),                          # second
     ('torque', 'N*m'),                      # newton-meter
@@ -57,9 +58,10 @@ in_si = OrderedDict([
     ])
 
 # alt_units maps "dimensions" to lists of their most commonly used units
-alt_units = OrderedDict([
-    ('', ['', 'radian', 'degree', 'arcminute', 'arcsecond', 'steradian']),
-    ('angle', ['radian', 'degree', 'arcminute', 'arcsecond', 'steradian']),
+alt_units = dict([
+    ('angle', ['radian', 'nradian', 'degree', 'arcminute', 'arcsecond',
+               'steradian']),
+    ('angular sensitivity', ['m/radian', 'nm/nradian']),
     ('area', ['m^2', 'cm^2', 'mm^2']),
     ('bitrate', ['bit/s', 'kbit/s', 'Mbit/s', 'Gbit/s', 'Tbit/s', 'kB/s',
                  'MB/s', 'GB/s', 'TB/s', 'Mbit/day', 'Gbit/day', 'Tbit/day']),
@@ -91,6 +93,7 @@ alt_units = OrderedDict([
     ('temperature', ['K', 'degC', 'degF']),
     ('time', ['s', 'ms', 'us', 'ns', 'hr', 'day', 'week', 'fortnight', 'month',
               'year']),
+    ('translational sensitivity', ['m/m', 'nm/nm']),
     ('volume', ['m^3', 'liter', 'cc']),
     ('velocity', ['m/s', 'kph', 'mph', 'mile/s', 'c', 'furlong/fortnight'])
     ])

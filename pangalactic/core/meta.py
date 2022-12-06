@@ -120,6 +120,20 @@ DEFAULT_PRODUCT_TYPE_PARAMETERS = {
     'medium_gain_antenna': ['Gain_antenna'],
     'high_gain_antenna': ['Gain_antenna'],
     'power_amplifier': ['Gain'],
+    'optical_component': ['RoC', 'K',
+                          'X_OpticalSurfaceVertex',
+                          'Y_OpticalSurfaceVertex',
+                          'Z_OpticalSurfaceVertex',
+                          'RotX_OpticalSurfaceVertex',
+                          'RotY_OpticalSurfaceVertex',
+                          'RotZ_OpticalSurfaceVertex',
+                          'S_X', 'S_Y', 'S_Z',
+                          'S_RotX', 'S_RotY', 'S_RotZ',
+                          'SLoS_XX', 'SLoS_XY', 'SLoS_XZ',
+                          'SLoS_XRotX', 'SLoS_XRotY', 'SLoS_XRotZ',
+                          'SLoS_YX', 'SLoS_YY', 'SLoS_YZ',
+                          'SLoS_YRotX', 'SLoS_YRotY', 'SLoS_YRotZ',
+                          ],
     'transponder': ['f_downlink', 'f_uplink'],
     'transmitter': ['f_downlink', 'f_uplink'],
     'receiver': ['f_downlink', 'f_uplink']
@@ -449,7 +463,6 @@ EXT_NAMES_PLURAL = {
 
 # Special external names of PGEF properties
 ATTR_EXT_NAMES = {
-     'description' : 'text',
      'req_type' : 'reqt type',
      'req_level' : 'level',
      'req_compliance' : 'compliance',
