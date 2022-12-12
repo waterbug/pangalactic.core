@@ -2762,6 +2762,32 @@ dict(
     },
 
 {   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.lens',
+    'id': 'lens',
+    'name': 'Lens',
+    'abbreviation': 'Lens',
+    'description': 'Lens',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
+    'create_datetime': '2022-12-01 00:00:00',
+    'mod_datetime': '2022-12-01 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.mirror',
+    'id': 'mirror',
+    'name': 'Mirror',
+    'abbreviation': 'Mirror',
+    'description': 'Mirror',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
+    'create_datetime': '2022-12-01 00:00:00',
+    'mod_datetime': '2022-12-01 00:00:00'
+    },
+
+{   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.optical_system',
     'id': 'optical_system',
     'name': 'Optical System',
@@ -4534,7 +4560,10 @@ for pt_oid in [
 optics_discipline_obj = core_objs['pgefobjects:Discipline.optics']
 for pt_oid in [
     'pgefobjects:ProductType.instrument',
-    'pgefobjects:ProductType.optical_component'
+    'pgefobjects:ProductType.optical_system',
+    'pgefobjects:ProductType.optical_component',
+    'pgefobjects:ProductType.lens',
+    'pgefobjects:ProductType.mirror'
     ]:
     pt_obj = core_objs[pt_oid]
     dpt_oid = '.'.join(['pgefobjects:DisciplineProductType', pt_obj['id'],

@@ -121,23 +121,27 @@ DEFAULT_PRODUCT_TYPE_PARAMETERS = {
     'high_gain_antenna': ['Gain_antenna'],
     'power_amplifier': ['Gain'],
     'optical_component': ['RoC', 'K',
-                          'X_OpticalSurfaceVertex',
-                          'Y_OpticalSurfaceVertex',
-                          'Z_OpticalSurfaceVertex',
-                          'RotX_OpticalSurfaceVertex',
-                          'RotY_OpticalSurfaceVertex',
-                          'RotZ_OpticalSurfaceVertex',
-                          'dRMSWFE_dx', 'dRMSWFE_dy', 'dRMSWFE_dz',
-                          'dRMSWFE_rx', 'dRMSWFE_ry', 'dRMSWFE_rz',
-                          'dLOSx_dx', 'dLOSx_dy', 'dLOSx_dz',
-                          'dLOSx_rx', 'dLOSx_ry', 'dLOSx_rz',
-                          'dLOSy_dx', 'dLOSy_dy', 'dLOSy_dz',
-                          'dLOSy_rx', 'dLOSy_ry', 'dLOSy_rz',
                           ],
     'transponder': ['f_downlink', 'f_uplink'],
     'transmitter': ['f_downlink', 'f_uplink'],
     'receiver': ['f_downlink', 'f_uplink']
     }
+
+# NOTE: these parameters go into the Acu that connects an optical component to
+# an optical system -- for now, just keep them handy ...
+
+# 'X_OpticalSurfaceVertex',
+# 'Y_OpticalSurfaceVertex',
+# 'Z_OpticalSurfaceVertex',
+# 'RotX_OpticalSurfaceVertex',
+# 'RotY_OpticalSurfaceVertex',
+# 'RotZ_OpticalSurfaceVertex',
+# 'dRMSWFE_dx', 'dRMSWFE_dy', 'dRMSWFE_dz',
+# 'dRMSWFE_rx', 'dRMSWFE_ry', 'dRMSWFE_rz',
+# 'dLOSx_dx', 'dLOSx_dy', 'dLOSx_dz',
+# 'dLOSx_rx', 'dLOSx_ry', 'dLOSx_rz',
+# 'dLOSy_dx', 'dLOSy_dy', 'dLOSy_dz',
+# 'dLOSy_rx', 'dLOSy_ry', 'dLOSy_rz',
 
 # PGXN_PLACEHOLDERS:  Placeholder text for fields in PgxnObject forms
 PGXN_PLACEHOLDERS = {'id': 'unique identifier; no spaces',
