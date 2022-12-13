@@ -725,6 +725,20 @@ deds = [
     'range_datatype': 'str',
     'description': 'FEM Surface Grid ID'},
 
+{   '_cname': 'DataElementDefinition',
+    'oid': 'pgef:DataElementDefinition.position_in_optical_path',
+    'id': 'position_in_optical_path',
+    'id_ns': 'pgef',
+    'label': 'Position in\nOptical Path',
+    'name': 'Position in Optical Path',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': '2022-12-03 00:00:00',
+    'mod_datetime': '2022-12-03 00:00:00',
+    'modifier': 'pgefobjects:admin',
+    'range_datatype': 'int',
+    'description': 'Position of a component in an optical path.'},
+
     ]
 
 # parameter_definitions_and_contexts
