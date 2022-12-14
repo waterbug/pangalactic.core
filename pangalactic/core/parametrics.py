@@ -36,6 +36,55 @@ DATATYPES = SELECTABLE_VALUES['range_datatype']
 NULL = dict(float=0.0, int=0, str='', bool=False, text='', array=[])
 TWOPLACES = Decimal('0.01')
 
+def make_parm_html(pid, tag='b'):
+    """
+    HTML-ize a parameter id for use in labels and headers.
+
+    Args:
+        pid (str): the parameter id
+
+    Keyword Args:
+        tag (str): html tag to use -- default is "b", which is good for labels;
+            for headers, "h3" works better.
+    """
+    if not isinstance(pid, str):
+        return '<b>oops</b>'
+    if '[' in pid:
+        base, tail = pid.split('[')
+        ctxt = '[' + tail
+    else:
+        base = pid
+        ctxt = ''
+    parts = base.split('_')
+    if len(parts) > 1:
+        return f'<{tag}>{parts[0]}<sub>{parts[1]}</sub>{ctxt}</{tag}>'
+    else:
+        return f'<{tag}>{base}{ctxt}</{tag}>'
+
+def make_de_html(deid, tag='b'):
+    """
+    HTML-ize a data element id for use in labels and headers.
+
+    Args:
+        deid (str): the data element id
+
+    Keyword Args:
+        tag (str): html tag to use -- default is "b", which is good for labels;
+            for headers, "h3" works better.
+    """
+    if not isinstance(deid, str):
+        return '<b>oops</b>'
+    parts = deid.split('_')
+    name_parts = [p.capitalize() for p in parts]
+    studly_name = ' '.join(name_parts)
+    if len(parts) > 1:
+        return f'<{tag}>{studly_name}</{tag}>'
+    elif deid == 'TRL':
+        # yes, ugly :(
+        return f'<{tag}>TRL</{tag}>'
+    else:
+        return f'<{tag}>{deid.capitalize()}</{tag}>'
+
 # componentz cache **********************************************************
 
 # componentz:  runtime assembly component cache

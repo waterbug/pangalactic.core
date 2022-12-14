@@ -130,12 +130,12 @@ DEFAULT_PRODUCT_TYPE_PARAMETERS = {
 # NOTE: these parameters go into the Acu that connects an optical component to
 # an optical system -- for now, just keep them handy ...
 
-# 'X_OpticalSurfaceVertex',
-# 'Y_OpticalSurfaceVertex',
-# 'Z_OpticalSurfaceVertex',
-# 'RotX_OpticalSurfaceVertex',
-# 'RotY_OpticalSurfaceVertex',
-# 'RotZ_OpticalSurfaceVertex',
+# 'X_vertex',
+# 'Y_vertex',
+# 'Z_vertex',
+# 'RotX_vertex',
+# 'RotY_vertex',
+# 'RotZ_vertex',
 # 'dRMSWFE_dx', 'dRMSWFE_dy', 'dRMSWFE_dz',
 # 'dRMSWFE_rx', 'dRMSWFE_ry', 'dRMSWFE_rz',
 # 'dLOSx_dx', 'dLOSx_dy', 'dLOSx_dz',
