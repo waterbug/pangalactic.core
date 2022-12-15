@@ -486,7 +486,7 @@ def to_table_name(cname):
         tname = tname.lower()
     return tname +  '_'
 
-def pname_to_header_label(pname, project_oid=None):
+def pname_to_header_label(pname, headers_are_ids=False, project_oid=None):
     """
     Convert a property name, data element id, or parameter id into a
     header-friendly name.
@@ -496,6 +496,7 @@ def pname_to_header_label(pname, project_oid=None):
 
     Keyword Args:
         project_oid (str):  oid of the current project
+        headers_are_ids (bool):  use ids instead of names
 
     returns: external name (str)
     """
@@ -506,11 +507,17 @@ def pname_to_header_label(pname, project_oid=None):
                                                          pd['dimensions'], '')
         if units:
             units = '(' + units + ')'
-        return '  \n  '.join(wrap(pd['name'], width=7,
-                             break_long_words=False) + [units])
+        if headers_are_ids:
+            return '  \n  '.join([pname, units])
+        else:
+            return '  \n  '.join(wrap(pd['name'], width=7,
+                                 break_long_words=False) + [units])
     elif de_def:
-        return '  \n  '.join(wrap(de_def['name'], width=7,
-                             break_long_words=False))
+        if headers_are_ids:
+            return pname
+        else:
+            return '  \n  '.join(wrap(de_def['name'], width=7,
+                                 break_long_words=False))
     elif project_oid:
         modes = (mode_defz.get(project_oid) or {}).get('modes')
         if modes and pname in modes:
