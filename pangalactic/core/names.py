@@ -17,10 +17,7 @@ from pangalactic.core                import prefs
 from pangalactic.core.datastructures import OrderedSet
 from pangalactic.core.meta           import (asciify, PLURALS, ATTR_EXT_NAMES,
                                              EXT_NAMES, EXT_NAMES_PLURAL)
-from pangalactic.core.parametrics    import (de_defz, make_parm_html,
-                                             make_de_html, mode_defz,
-                                             parm_defz)
-
+from pangalactic.core.parametrics    import de_defz, mode_defz, parm_defz
 from pangalactic.core.units          import in_si
 
 _inf = inflect.engine()
@@ -489,7 +486,7 @@ def to_table_name(cname):
         tname = tname.lower()
     return tname +  '_'
 
-def pname_to_header_label(pname, cols_are_ids=False, project_oid=None):
+def pname_to_header_label(pname, project_oid=None):
     """
     Convert a property name, data element id, or parameter id into a
     header-friendly name.
@@ -498,8 +495,6 @@ def pname_to_header_label(pname, cols_are_ids=False, project_oid=None):
         pname: (str): a property name, data element id, or parameter id
 
     Keyword Args:
-        cols_are_ids (str):  use ids of column items as their titles;
-            otherwise, use item names or labels (default: False)
         project_oid (str):  oid of the current project
 
     returns: external name (str)
@@ -511,19 +506,11 @@ def pname_to_header_label(pname, cols_are_ids=False, project_oid=None):
                                                          pd['dimensions'], '')
         if units:
             units = '(' + units + ')'
-        if cols_are_ids:
-            # return '  \n  '.join([pname, units])
-            return f'{make_parm_html(pname)}<br>{units}'
-        else:
-            return '  \n  '.join(wrap(pd['name'], width=7,
-                                 break_long_words=False) + [units])
+        return '  \n  '.join(wrap(pd['name'], width=7,
+                             break_long_words=False) + [units])
     elif de_def:
-        if cols_are_ids:
-            # return '  \n  '.join([pname, units])
-            return f'{make_de_html(pname)}<br>{units}'
-        else:
-            return '  \n  '.join(wrap(de_def['name'], width=7,
-                                 break_long_words=False))
+        return '  \n  '.join(wrap(de_def['name'], width=7,
+                             break_long_words=False))
     elif project_oid:
         modes = (mode_defz.get(project_oid) or {}).get('modes')
         if modes and pname in modes:

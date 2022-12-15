@@ -38,14 +38,13 @@ TWOPLACES = Decimal('0.01')
 
 def make_parm_html(pid, tag='b'):
     """
-    HTML-ize a parameter id for use in labels and headers.
+    HTML-ize a parameter id for use in labels.
 
     Args:
         pid (str): the parameter id
 
     Keyword Args:
-        tag (str): html tag to use -- default is "b", which is good for labels;
-            for headers, "h3" works better.
+        tag (str): html tag to use -- default is "b"
     """
     if not isinstance(pid, str):
         return '<b>oops</b>'
@@ -63,14 +62,13 @@ def make_parm_html(pid, tag='b'):
 
 def make_de_html(deid, tag='b'):
     """
-    HTML-ize a data element id for use in labels and headers.
+    HTML-ize a data element id for use in labels.
 
     Args:
         deid (str): the data element id
 
     Keyword Args:
-        tag (str): html tag to use -- default is "b", which is good for labels;
-            for headers, "h3" works better.
+        tag (str): html tag to use -- default is "b"
     """
     if not isinstance(deid, str):
         return '<b>oops</b>'
