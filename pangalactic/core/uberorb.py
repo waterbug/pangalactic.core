@@ -614,7 +614,7 @@ class UberORB(object):
         # ... THIS MAY NOT BE THE CASE IN THE FUTURE! -> "Cost" and other
         # parameters may need to be rolled up ...
         # ********************************************************************
-        self.log.debug('* recompute_parmz()')
+        # self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
         # default descriptive contexts:  CBE, MEV
         d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or [
