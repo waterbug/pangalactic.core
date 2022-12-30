@@ -744,46 +744,24 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/composite_activity -->
-
-    <owl:ObjectProperty rdf:about="&pgef;composite_activity">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The composite activity in an Activity Composition Relationship (ActCompRel).</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ActCompRel"/>
-        <rdfs:range rdf:resource="&pgef;Activity"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/sub_activities -->
 
     <owl:ObjectProperty rdf:about="&pgef;sub_activities">
-        <owl:inverseOf rdf:resource="&pgef;composite_activity"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The activities into which a composite activity can be decomposed.</rdfs:comment>
+        <owl:inverseOf rdf:resource="&pgef;sub_activity_of"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Activities which are sub-activities of an Activity.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Activity"/>
-        <rdfs:range rdf:resource="&pgef;ActCompRel"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/sub_activity -->
-
-    <owl:ObjectProperty rdf:about="&pgef;sub_activity">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The constituent activity in an Activity Composition Relationship (ActCompRel).</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ActCompRel"/>
         <rdfs:range rdf:resource="&pgef;Activity"/>
     </owl:ObjectProperty>
 
 
 
-    <!-- http://pangalactic.us/pgef/where_occurs -->
+    <!-- http://pangalactic.us/pgef/sub_activity_of -->
 
-    <owl:ObjectProperty rdf:about="&pgef;where_occurs">
-        <owl:inverseOf rdf:resource="&pgef;sub_activity"/>
-        <rdfs:comment rdf:datatype="&xsd;string">All composite activities in which this activity occurs.</rdfs:comment>
+    <owl:ObjectProperty rdf:about="&pgef;sub_activity_of">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Activity of which an Activity is a sub-activity.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Activity"/>
-        <rdfs:range rdf:resource="&pgef;ActCompRel"/>
+        <rdfs:range rdf:resource="&pgef;Activity"/>
     </owl:ObjectProperty>
 
 
@@ -1864,8 +1842,8 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
     <owl:DatatypeProperty rdf:about="&pgef;sub_activity_sequence">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">An integer indicating the sequential position of an activity within the list of sub-activities of a composite Activity.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ActCompRel"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An integer indicating the sequential position of an Activity within the Activity of which it is a sub-activity.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Activity"/>
         <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
 
@@ -2104,15 +2082,6 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <owl:Class rdf:about="&pgef;Qacu">
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">The Qacu (quantified assembly constituent usage) is the relationship between a continuous product (the constituent) and an assembled product (the assembly) of which it is a constituent; a Qacu is a many-to-many relationship in that an assembly may contain multiple continuous products, and any given product may be a constituent in many assemblies.</rdfs:comment>
-    </owl:Class>
-
-
-
-    <!-- http://pangalactic.us/pgef/ActCompRel -->
-
-    <owl:Class rdf:about="&pgef;ActCompRel">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The ActCompRel (Activity Composition Relationship) is the relationship between a composite Activity and one of the constituent activities into which it can be decomposed; a ActCompRel is a many-to-many relationship in that a composite Activity may be composed of multiple sub-activities, and any given Activity may occur in multiple composite Activities.</rdfs:comment>
     </owl:Class>
 
 
