@@ -423,10 +423,7 @@ def serialize(orb, objs, include_components=False,
         # 'include_sub_activities' only applies to Activities ... and only
         # "direct sub_activities" will be included (not recursive)
         if include_sub_activities and getattr(obj, 'sub_activities', None):
-            ser_acrs = serialize(orb, obj.sub_activities)
-            serialized += ser_acrs
-            ser_acts = serialize(orb, [acr.sub_activity
-                                       for acr in obj.sub_activities])
+            ser_acts = serialize(orb, obj.sub_activities)
             serialized += ser_acts
         ###################################################################
         # NOTE:  Ports and Flows need to be part of a "product definition"

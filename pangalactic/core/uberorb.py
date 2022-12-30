@@ -2076,24 +2076,15 @@ class UberORB(object):
                     for owned_obj in obj.owned_objects:
                         owned_obj.owner = new_owner
             elif isinstance(obj, self.classes['Activity']):
-                self.log.debug('   - checking for sub-activity rels ...')
-                if obj.where_occurs:
-                    # delete all ActCompRel with obj as sub_activity
-                    for acr in obj.where_occurs:
-                        self.db.delete(acr)
-                    self.db.commit()
-                    self.log.debug('    ... sub-activity rels deleted.')
-                else:
-                    self.log.debug('     no sub-activity rels found.')
-                self.log.debug('   - checking for composite-activity rels...')
+                self.log.debug('   - checking for sub-activities ...')
                 if obj.sub_activities:
-                    # delete all ActCompRel with obj as composite_activity
-                    for acr in obj.sub_activities:
-                        self.db.delete(acr)
+                    # remove references
+                    for act in obj.sub_activities:
+                        act.sub_activity_of = None 
                     self.db.commit()
-                    self.log.debug('    ... composite activity rels deleted.')
+                    self.log.debug('    ... refs from sub-activities removed.')
                 else:
-                    self.log.debug('     no composite activity rels found.')
+                    self.log.debug('     no sub-activities found.')
             elif isinstance(obj, (self.classes['Acu'])):
                 # check for and delete any Flows to/from its component in the
                 # context of its assembly
