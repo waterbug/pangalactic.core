@@ -25,6 +25,15 @@ Examples of schema mods that require a conversion function include:
 
 # version 3.0.0:
 #   * mods:
+#     - Removed class "ActCompRel" (many-to-many relationship between Activity
+#       and parent "composite" Activity instances) because Activities are not
+#       really "components" and are not reusable (that would be "Procedure",
+#       which might in the future be a useful class but is not relevant now) --
+#       an Activity object is by nature a one-time occurrence and may or may
+#       not be a "sub-activity" of another Activity.
+
+# version 3.0.0:
+#   * mods:
 #     - Flow now has attrs "start_port_context" and "end_port_context", which
 #       are the Acus of the products that have the ports -- this is important
 #       since Flows only exist in the context of the assembly that contains the
@@ -83,9 +92,9 @@ Examples of schema mods that require a conversion function include:
 
 from copy import deepcopy
 
-schema_mods = ['1.0.4', '1.5.0', '2.0', '3.0']
+schema_mods = ['1.0.4', '1.5.0', '2.0', '3.0', '3.1.0']
 
-schema_version = '3.1.0'
+schema_version = '3.2.0'
 
 
 def to_x_x_x(sos):
