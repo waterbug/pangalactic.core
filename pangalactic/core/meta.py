@@ -109,9 +109,16 @@ DEFAULT_CLASS_DATA_ELEMENTS = {'HardwareProduct': ['Vendor', 'TRL']}
 DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {'': []}
 
 # DEFAULT_CLASS_PARAMETERS:  default parameters of objects by class
-DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start'],
+DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start', 't_end'],
                             'Mission': ['duration'],
-                            'HardwareProduct': ['m', 'P', 'R_D']}
+                            'HardwareProduct': [
+                                'm', 'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
+                                'P', 'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
+                                'P[peak]', 'P[survival]',
+                                'T[operational_max]', 'T[operational_min]',
+                                'T[survival_max]', 'T[survival_min]',
+                                'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
+                                'R_D[MEV]', 'height', 'width', 'depth', 'Cost']}
 
 # DEFAULT_PRODUCT_TYPE_PARAMETERS:  default parameters by ProductType id
 DEFAULT_PRODUCT_TYPE_PARAMETERS = {

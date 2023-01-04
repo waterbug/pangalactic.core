@@ -1010,16 +1010,6 @@ def add_default_parameters(obj, parms=None):
     pids = OrderedSet()
     cname = obj.__class__.__name__
     pids |= OrderedSet(DEFAULT_CLASS_PARAMETERS.get(cname, []))
-    # if prefs does not have 'default_parms' set, set it
-    if not prefs.get('default_parms'):
-        prefs['default_parms'] = [
-                            'm', 'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
-                            'P', 'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
-                            'P[peak]', 'P[survival]',
-                            'T[operational_max]', 'T[operational_min]',
-                            'T[survival_max]', 'T[survival_min]',
-                            'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
-                            'R_D[MEV]', 'height', 'width', 'depth', 'Cost']
     if cname == 'HardwareProduct':
         # default for "default_parms":  mass, power, data rate
         # (state is read in p.node.gui.startup, and will be overridden by
