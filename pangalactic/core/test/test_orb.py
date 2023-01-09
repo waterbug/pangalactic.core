@@ -22,7 +22,11 @@ from pangalactic.core.parametrics import (compute_margin,
                                           deserialize_parms,
                                           get_dval, data_elementz,
                                           get_pval, parameterz,
+                                          # get_modal_powerstate_value,
                                           load_parmz, load_data_elementz,
+                                          load_mode_defz, save_mode_defz,
+                                          mode_defz,
+                                          # PowerState,
                                           req_allocz, round_to,
                                           serialize_des,
                                           serialize_parms,
@@ -873,6 +877,40 @@ class OrbTest(unittest.TestCase):
         # expected = deser_parms
         # # save parameters.json file for forensics ...
         # orb._save_parmz()
+        # self.assertEqual(expected, value)
+
+    # def test_30_create_powerstates(self):
+        # """
+        # Create PowerState instances.
+        # """
+        # null_ps = PowerState()
+        # expected = null_ps._asdict()
+        # value = dict(value_type='value', context='', cbe=0.0, ctgcy=30.0,
+                     # mev=0.0)
+        # self.assertEqual(expected, value)
+
+    # def test_31_load_mode_defz(self):
+        # """
+        # Load Mode Definitions from a serialized file.
+        # """
+        # mode_defs_path = os.path.join('pangalaxian_test', 'mode_defs.json')
+        # shutil.copyfile('mode_defs.json', mode_defs_path)
+        # load_mode_defz(orb.home)
+        # expected = ['H2G2']
+        # value = list(mode_defz.keys())
+        # self.assertEqual(expected, value)
+
+    # def test_32_get_modal_power_state(self):
+        # """
+        # Test get_modal_power_state().
+        # """
+        # # sys_dict = mode_defz[project_oid].get('systems') or {}
+        # # comp_dict = mode_defz[project_oid].get('components') or {}
+        # powerstate = get_modal_powerstate_value('H2G2', 'test:H2G2:system-1',
+                                                # 'test:H2G2:acu-5',
+                                                # 'Calibration')
+        # expected = powerstate.cbe
+        # value = 25.0
         # self.assertEqual(expected, value)
 
     def test_50_write_mel(self):
