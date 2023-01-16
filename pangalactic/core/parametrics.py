@@ -1014,7 +1014,7 @@ def add_default_parameters(obj, parms=None):
         # default for "default_parms":  mass, power, data rate
         # (state is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
-        pids |= OrderedSet(parms or prefs['default_parms'])
+        pids |= OrderedSet(parms or prefs.get('default_parms', []))
         prod_type = obj.product_type
         prod_type_id = getattr(prod_type, 'id', '')
         if prod_type_id:

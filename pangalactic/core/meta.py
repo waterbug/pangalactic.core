@@ -127,8 +127,7 @@ DEFAULT_PRODUCT_TYPE_PARAMETERS = {
     'medium_gain_antenna': ['Gain_antenna'],
     'high_gain_antenna': ['Gain_antenna'],
     'power_amplifier': ['Gain'],
-    'optical_component': ['RoC', 'K',
-                          ],
+    'optical_component': ['RoC', 'K'],
     'transponder': ['f_downlink', 'f_uplink'],
     'transmitter': ['f_downlink', 'f_uplink'],
     'receiver': ['f_downlink', 'f_uplink']
