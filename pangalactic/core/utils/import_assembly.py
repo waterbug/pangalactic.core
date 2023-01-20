@@ -1,16 +1,15 @@
-import os, sys, time
+import sys
 from optparse import OptionParser
-from pangalactic.core.uberorb import orb
-# TODO:  rewrite to use part21.py
-from pangalactic.core.utils import part21
+# from pangalactic.core.uberorb import orb
+# from pangalactic.core.utils import part21
 
 # nauo attrs:
 #     - id                   (identifier) [product_definition_relationship]
 #     - name                 (label)      [product_definition_relationship]
-#     - description          (text)       [product_definition_relationship]
+#     - description [OPTIONAL](text)      [product_definition_relationship]
 #     - relating_product_def (product_definition) [product_definition_relationship]
 #     - related_product_def  (product_definition) [product_definition_relationship]
-#     - reference_designator (identifier) [acu]
+#     - reference_designator [OPTIONAL](identifier) [acu]
 
 # product_definition attrs:
 #     - id                 : identifier
@@ -35,6 +34,7 @@ from pangalactic.core.utils import part21
 #     - discipline_type    : label
 
 
+# TODO:  rewrite to use part21.py
 # def getAssemblies(f):
     # """
     # Extract assembly structures from a STEP file.
@@ -44,7 +44,7 @@ from pangalactic.core.utils import part21
     # """
     # data = readStepFile(f)
     # projid = os.path.basename(f).split('.')[0].upper()
-    # print ' - project id: ', projid
+    # print(f' - project id: {projid}')
     # # TODO:
     # #   - this function really needs a wizard
     # #     + pick a namespace (default to user's preferred ns)
@@ -73,7 +73,7 @@ from pangalactic.core.utils import part21
         # children.add(child)
     # # product_definitions
     # pdset = parents | children
-    # print('pdset ='.format(pdset))
+    # print(f'pdset = {pdset}')
     # pd = {}
     # for pdref in pdset:
         # pdfref = data['contents'][pdref].split(',')[2].strip(" \n\r#'")
@@ -98,16 +98,16 @@ from pangalactic.core.utils import part21
               # for p in pd]
     # return project, acus, models
 
-# if __name__ == '__main__':
-    # usage = 'usage:  %prog [options] file.p21'
-    # opt = OptionParser(usage)
+if __name__ == '__main__':
+    usage = 'usage:  %prog [options] file.p21'
+    opt = OptionParser(usage)
     # opt.add_option("-p", "--perf", action='store_true',
                    # dest="performance", default=False,
                    # help="run the parser's unit tests")
-    # (options, args) = opt.parse_args(args=sys.argv)
-    # # debugging:
-    # # print("options:  {}".format(str(options)))
-    # # print("args:     {}".format(str(args)))
+    (options, args) = opt.parse_args(args=sys.argv)
+    # debugging:
+    print(f"options:  {options}")
+    print(f"args:     {args}")
     # if len(args) > 1:
         # if options.performance:
             # start = time.clock()
@@ -115,7 +115,7 @@ from pangalactic.core.utils import part21
         # if options.performance:
             # end = time.clock()
             # print("\nTotal time: %6.2f sec" % (end - start))
-        # print(len(list(nauo)), {}".format(assemblies\n"))
+        # print(f"{len(list(nauo))} assemblies")
     # else:
         # opt.print_help()
 

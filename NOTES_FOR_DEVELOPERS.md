@@ -155,6 +155,8 @@
 
     `datasets:         (list) names of currently stored datasets`
 
+    `diagram needs refresh: (bool) block diagram needs to be refreshed`
+
     `height:           (int)  pixel height of pangalaxian gui`
 
     `width:            (int)  pixel width of pangalaxian gui`

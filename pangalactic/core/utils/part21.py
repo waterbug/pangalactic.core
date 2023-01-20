@@ -53,7 +53,8 @@ TYPED_PARAMETER = Forward()
 PARAMETER_LIST = Forward()
 LIST << groupInParens( Optional(PARAMETER_LIST) )
 
-# replacing '^' with '|' in the next two expressions accounted for most of the performance speedup
+# replacing '^' with '|' in the next two expressions accounted for most of the
+# performance speedup
 UNTYPED_PARAMETER << ("$" | REAL | INTEGER | STRING | ENTITY_INSTANCE_NAME
                       | ENUMERATION | BINARY | LIST)
 PARAMETER << (TYPED_PARAMETER | UNTYPED_PARAMETER | OMITTED_PARAMETER)

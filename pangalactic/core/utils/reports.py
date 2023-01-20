@@ -829,6 +829,72 @@ def get_contextual_item_data(item, cols, schema, level, summary=False, qty=1):
     return data
 
 
+def write_mel_to_xlsx(context, schema=None, pref_units=False, summary=False,
+                      file_path='dash_data.xlsx'):
+    """
+    Output a customized Master Equipment List (MEL) report to Excel .xlsx
+    format, including system / subsystem / component names and assembly levels,
+    with the specified schema (set of parameters, and data elements).
+
+    Args:
+        context (Project or Product):  the project or system of which this is
+            the MEL
+
+    Keyword Args:
+        schema (list of str):  ids of the parameters and data elements to be
+            included
+        pref_units (bool):  express values in the user's preferred units;
+            default is False (use mks units); if True, units will be specified
+            in headers
+        summary (bool):  if True, combine all instances of a product in a given
+            asssembly into one line item with a computed quantity; otherwise,
+            tag each usage with its reference designator
+        file_path (str):  path to data file
+    """
+    context_id = getattr(context, 'id', None) or '[unknown id]'
+    orb.log.debug(f'* writing Mini MEL data for {context_id} to xlsx ...')
+    headers = []
+    std_headers = ['System Name', 'ID', 'Level', 'Qty']
+    if schema and isinstance(schema, list):
+        schema_with_units = []
+        for col_id in schema:
+            if col_id in parm_defz:
+                # it's a parameter ...
+                if 'Ctgcy' in col_id:
+                    schema_with_units.append(col_id + ' (%)')
+                else:
+                    pd = parm_defz.get(col_id)
+                    if pref_units:
+                        units = prefs['units'].get(pd['dimensions'], '')
+                        units = units or in_si.get(pd['dimensions'], '')
+                    else:
+                        units = in_si.get(pd['dimensions'], '')
+                    schema_with_units.append(col_id + f' ({units})')
+            else:
+                schema_with_units.append(col_id)
+        headers = std_headers + schema_with_units
+    else:
+        headers = std_headers
+        schema = []
+    data = get_mel_data(context, schema, summary=summary)
+    book = xlsxwriter.Workbook(file_path)
+    worksheet = book.add_worksheet()
+    # xlsxwriter specifies widths in "characters" (as does Excel)
+    # TODO: set widths more appropriately (look up cols) ...
+    col_widths = [80, 30, 7, 5] + (len(headers)-4) * [15]
+    for i, width in enumerate(col_widths):
+        worksheet.set_column(i, i, width)
+    for i, h in enumerate(headers):
+        worksheet.write(0, i, h)  # maybe use formatting (4 position)
+    for r, d in enumerate(data):
+        factor = int(d['level'])
+        prefix = '    ' * (factor - 1) + '*' * factor
+        d['system_name'] = prefix + d['system_name']
+        for col, val in enumerate(d.values()):
+            worksheet.write(r+1, col, val)
+    book.close()
+
+
 def write_data_to_tsv(data, file_path='data.tsv'):
     """
     Output data in "list of dicts" format to a .tsv file.
