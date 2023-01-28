@@ -821,17 +821,14 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                             orb.log.debug('        is missing of_product;')
                             orb.log.debug('        will be ignored.')
                             ignores.append(oid)
-                        # a Flow MUST have "start_port", "end_port",
-                        # "start_port_context" and "end_port_context" objects
-                        if fk in ["start_port", "end_port",
-                                  "start_port_context", "end_port_context"]:
+                        # a Flow MUST have "start_port" and "end_port",
+                        # objects
+                        if fk in ["start_port", "end_port"]:
                             orb.log.debug('      invalid Flow instance:')
                             oid = d['oid']
                             orb.log.debug(f'      - oid: "{oid}"')
-                            orb.log.debug('        is missing start_port,')
-                            orb.log.debug('        end_port,')
-                            orb.log.debug('        start_port_context,')
-                            orb.log.debug('        or end_port_context;')
+                            orb.log.debug('        is missing start_port')
+                            orb.log.debug('        or end_port;')
                             orb.log.debug('        will be ignored.')
                             ignores.append(oid)
             # else:
