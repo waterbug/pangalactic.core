@@ -36,7 +36,7 @@ DATATYPES = SELECTABLE_VALUES['range_datatype']
 NULL = dict(float=0.0, int=0, str='', bool=False, text='', array=[])
 TWOPLACES = Decimal('0.01')
 
-def make_parm_html(pid, tag='p', style=''):
+def make_parm_html(pid, tag='p', style='', flag=False):
     """
     HTML-ize a parameter id for use in labels.
 
@@ -46,6 +46,7 @@ def make_parm_html(pid, tag='p', style=''):
     Keyword Args:
         tag (str): html tag to use -- default is "p"
         style (str): css spec to use -- default is ""
+        flag (bool):  add an asterisk if computed
     """
     begin_tag = tag
     if tag == 'p' and style:
@@ -60,9 +61,14 @@ def make_parm_html(pid, tag='p', style=''):
         ctxt = ''
     parts = base.split('_')
     if len(parts) > 1:
-        return f'<{begin_tag}>{parts[0]}<sub>{parts[1]}</sub>{ctxt}</{tag}>'
+        pname = f'{parts[0]}<sub>{parts[1]}</sub>{ctxt}'
+        # return f'<{begin_tag}>{parts[0]}<sub>{parts[1]}</sub>{ctxt}</{tag}>'
     else:
-        return f'<{begin_tag}>{base}{ctxt}</{tag}>'
+        pname = f'{base}{ctxt}'
+        # return f'<{begin_tag}>{base}{ctxt}</{tag}>'
+    if flag and parm_defz[pid].get('computed'):
+        pname += ' *'
+    return f'<{begin_tag}>{pname}</{tag}>'
 
 def make_de_html(deid, tag='p', style=''):
     """
