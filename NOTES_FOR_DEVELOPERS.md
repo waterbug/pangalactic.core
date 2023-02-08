@@ -287,30 +287,16 @@ optimize performance.
 
 * See `NOTES_ON_DIAGRAMS`
 
-## Application-level Signals (louie)
+## DEPRECATED: "louie" ("dispatcher") signals
 
-The `louie` package provides the capability to broadcast signals among any
-objects active within a python application.  This mechanism can be used, e.g.,
-for propagating events related to context items [`mode`, `project`, `system`,
-etc.]
+------------------------------------------------------------------------------
 
-Note that in pangalactic, `louie` is used *only* on the client side
+"louie" (a.k.a. "dispatcher") signals are now deprecated in pangalactic because
+they can cause paint errors, crashes, and segfaults due to not playing nice
+with the underling Qt event loop -- they are being replaced by the Qt signals
+and slots mechanism (in pyqt, pyqtSignal and pyqtSlot).
 
-* define a signal:
-    dispatcher.connect(handler, signal_name)`,
-  where `handler` is a callable and `signal_name` is a string -- e.g.:  
-  `dispatcher.connect(self.on_deleted_object_signal, 'deleted object')`
-
-* create senders for signals in context of item events  
-  e.g., `deleted object` (of some type):  
-  `dispatcher.send(signal='deleted object', [kwargs for signal content])`
-
-* create handler functions to trigger respons(es) to the signal  
-  e.g., `on_deleted_object_signal([kwargs for signal content])`
-
-* NOTE: signals are used in some `pangalaxian.Main` `property` constructs:
-  - setter dispatches the signal `[item] changed`
-  - getter gets the value from `state["item"]`
+------------------------------------------------------------------------------
 
 ## Random notes on the orb
 

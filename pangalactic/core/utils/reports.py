@@ -13,64 +13,6 @@ from pangalactic.core.names        import get_mel_item_name
 from pangalactic.core.utils.styles import xlsx_styles
 
 
-def gen_error_budget(system, file_path='Error_Budget.xlsx'):
-    """
-    Generate an Error Budget for an optical system.
-
-    Args:
-        system (Product):  the system of which this is the Error Budget
-
-    Keyword args:
-        file_path (str):  path to write the error budget file
-    """
-    book = xlsxwriter.Workbook(file_path)
-    worksheet = book.add_worksheet()
-    bold = book.add_format({'bold': True})
-    # cell_widths = []
-    # for col in range(len(headers)):
-        # cell_widths.append([len(rec[col]) for rec in headers + records])
-    # col_widths = [max(widths) for widths in cell_widths]
-    # # print('col_widths = {}'.format(str(col_widths)))
-    # for i, width in enumerate(col_widths):
-        # worksheet.set_column(i, i, width)
-    worksheet.write('G2', 'Error Values', bold)
-    worksheet.write('B3', 'System WFE', bold)
-    worksheet.write('C4', 'System Reserve', bold)
-    worksheet.write('C5', 'System AI&T', bold)
-    worksheet.write('C6', 'Ground to Orbit', bold)
-    worksheet.write('D7', 'Gravity Release', bold)
-    worksheet.write('D8', 'Cooldown', bold)
-    worksheet.write('D9', 'Moisture Desorption/Dryout', bold)
-    worksheet.write('C10', 'On-orbit Stability', bold)
-    worksheet.write('D11', 'Thermal', bold)
-    worksheet.write('D12', 'Jitter', bold)
-    worksheet.write('D13', 'Material Stability', bold)
-    worksheet.write('C14', 'Instrument', bold)
-    worksheet.write('D15', 'Component 1', bold)
-    worksheet.write('E16', 'Fabrication', bold)
-    worksheet.write('E17', 'Alignment', bold)
-    worksheet.write('E18', 'Gravity', bold)
-    worksheet.write('E19', 'Thermal', bold)
-    worksheet.write('D20', 'Component 2', bold)
-    worksheet.write('E21', 'Fabrication', bold)
-    worksheet.write('E22', 'Alignment', bold)
-    worksheet.write('E23', 'Gravity', bold)
-    worksheet.write('E24', 'Thermal', bold)
-    # data
-    worksheet.write('G3', 100.0)
-    for col in ['G4', 'G5', 'G6', 'G10', 'G14']:
-        worksheet.write(col, 44.7)
-    for col in ['G7', 'G8', 'G9', 'G11', 'G12', 'G13']:
-        worksheet.write(col, 25.8)
-    for col in ['G15', 'G20']:
-        worksheet.write(col, 31.6)
-    for col in ['G16', 'G17', 'G18', 'G19']:
-        worksheet.write(col, 15.8)
-    for col in ['G21', 'G22', 'G23', 'G24']:
-        worksheet.write(col, 15.8)
-    book.close()
-
-
 def product_type_report(output=None):
     """
     Report on the current Product Types in the database and which Disciplnes
