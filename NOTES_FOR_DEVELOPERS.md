@@ -517,6 +517,13 @@ Object X:
     nor are present in the user's trash are pushed to the client (i.e., any
     locally "missing" objects created by the user are "restored").
 
+* **IMPORTANT**: avoidance of Qt paint errors and segfaults requires that
+  if the Hardware Library is currently instantiated and a HardwareProduct
+  instance is to be deleted, its row in the HW Library must first be removed
+  (using the `del_object` method of the ObjectTableModel) before the object
+  is deleted using orb.delete() ... this is done by doing (almost) all object
+  deletions in the `pangalaxian.delete_object()` method).
+
 ## Features Requiring Platform Detection
 
 Some features require the desktop application to detect the platform on which
