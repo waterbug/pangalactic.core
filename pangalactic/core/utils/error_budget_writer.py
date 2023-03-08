@@ -63,17 +63,26 @@ def gen_error_budget(instrument, file_path='Error_Budget.xlsx'):
     # the inputs need to be >1 otherwise things might not work
     # for i, instrument in enumerate(instruments):
     # (initially, just 1 instrument ...)
-    error_list.append(instrument.name)
-    level_three_errors.append(instrument.name)
+    if instrument:
+        instrument_name = instrument.name
+        components = [acu.component for acu in instrument.components]
+        comp_names = [c.name for c in components]
+    else:
+        # generate "example" error budget
+        instrument_name = "Example Instrument"
+        comp_names = ["Example Component 1",
+                      "Example Component 2",
+                      "Example Component 3"]
+    error_list.append(instrument_name)
+    level_three_errors.append(instrument_name)
     error_list.extend([level_four_errors[0]])
-    components = [acu.component for acu in instrument.components]
-    num_components = len(components)
+    num_components = len(comp_names)
     if num_components == 0:
         # error budget cannot be generated
         return
-    for j, comp in enumerate(components):
-        error_list.append(comp.name)
-        level_four_errors.append(comp.name)
+    for j, comp_name in enumerate(comp_names):
+        error_list.append(comp_name)
+        level_four_errors.append(comp_name)
         error_list.extend(level_five_errors)        
 
     def rctc(r,c):

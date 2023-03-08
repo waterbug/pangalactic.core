@@ -2104,7 +2104,7 @@ class UberORB(object):
                     self.log.debug('     no flows found.')
             elif isinstance(obj, self.classes['Product']):
                 if obj.where_used:
-                    self.log.debug('    used in assemblies; cannot delete.')
+                    # self.log.debug('    used in assemblies; cannot delete.')
                     continue
                 # for Products, first delete related Flows, Ports, Acus, and
                 # ProjectSystemUsages
