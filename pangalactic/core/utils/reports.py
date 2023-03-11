@@ -890,7 +890,7 @@ def write_mel_to_xlsx(context, schema=None, pref_units=False, summary=False,
         worksheet.write(0, i, h)  # maybe use formatting (4 position)
     for r, d in enumerate(data):
         factor = int(d['level'])
-        prefix = '    ' * (factor - 1) + '*' * factor
+        prefix = '    ' * (factor - 1)
         d['system_name'] = prefix + d['system_name']
         for col, val in enumerate(d.values()):
             worksheet.write(r+1, col, val)
