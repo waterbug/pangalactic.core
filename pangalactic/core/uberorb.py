@@ -1872,7 +1872,7 @@ class UberORB(object):
         """
         Get all the objects relevant to the specified project, including
         [1] the project object, [2] objects for which the project is the
-        `owner` or `user` (i.e., to which the project has a
+        `owner` or `project` (i.e., to which the project has a
         `ProjectSystemUsage` relationship), and [3] all related objects
         (assemblies and related components, ports, flows, etc.).
 
