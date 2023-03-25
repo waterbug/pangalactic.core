@@ -7,6 +7,9 @@ format).
 import sys, string
 from optparse import OptionParser
 from pprint import pprint
+
+# import pyparsing
+# pyparsing.ParserElement.enablePackrat()
 from pyparsing import Word, Optional, Forward, ZeroOrMore
 from pyparsing import delimitedList
 
@@ -14,8 +17,7 @@ from pyparsing import delimitedList
 from pyparsing import Combine, sglQuotedString, Group, Suppress, removeQuotes
 from pyparsing import Dict, OneOrMore, cppStyleComment
 
-# import time
-# time.clock()
+import time
 
 def groupInParens(expr):
     return Group(Suppress("(") + expr + Suppress(")"))
@@ -83,20 +85,15 @@ EXCHANGE_FILE.ignore(cppStyleComment)
 if __name__ == '__main__':
     usage = 'usage:  %prog [options] file[.p21|.stp|.step]'
     optparser = OptionParser(usage)
-    # optparser.add_option("-t", "--time", action='store_true',
-                         # dest="show_time", default=False,
-                         # help="show the time consumed")
+    optparser.add_option("-t", "--time", action='store_true',
+                         dest="show_time", default=False,
+                         help="show the time consumed")
     (options, args) = optparser.parse_args(args=sys.argv[1:] or ['-h'])
     if args[0] != '-h':
         data = open(args[0]).read()
-        # if options.show_time:
-            # startTime = time.clock()
+        if options.show_time:
+            startTime = time.time()
         res = EXCHANGE_FILE.parseString(data)
-        # if options.show_time:
-            # endTime = time.clock()
-            # totalTime = endTime - startTime
-            # print("\nTotal parse time: %6.2f sec" % totalTime)
-            # print(len(data.split("\n"))," lines\n")
         print('res.HEADER:')
         print('==============================================================')
         print(res.HEADER)
@@ -109,6 +106,11 @@ if __name__ == '__main__':
         print('==============================================================')
         pprint( res.asList() )
         print('==============================================================')
+        if options.show_time:
+            endTime = time.time()
+            totalTime = endTime - startTime
+            print("\nTotal parse time: %6.2f sec" % totalTime)
+            print(len(data.split("\n"))," lines\n")
         # keylist = list(res.DATA.keys())
         # print('\nitem IDs are:', keylist)
         # print('\nfirst 10 items are:')

@@ -1,5 +1,10 @@
 #!/bin/sh
 
+#################################################################
+## This env var is used to test compatibility with sqlalchemy 2.0
+#################################################################
+# export SQLALCHEMY_WARN_20=1
+
 for x in \
 test_datetimes.py \
 test_cook.py \
@@ -26,3 +31,4 @@ if [ -d pangalaxian_test ]; then
     rm -r ./pangalaxian_test
 fi
 
+# SQLALCHEMY_WARN_20=0

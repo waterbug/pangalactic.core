@@ -8,7 +8,7 @@ intended to be a singleton).
 import json, os, shutil, sys, traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 # Louie: dispatcher
 from louie import dispatcher
@@ -17,7 +17,7 @@ from louie import dispatcher
 import ruamel_yaml as yaml
 
 # SQLAlchemy
-from sqlalchemy     import sql
+from sqlalchemy     import select
 from sqlalchemy.orm import sessionmaker, with_polymorphic
 
 # PanGalactic
@@ -1622,12 +1622,12 @@ class UberORB(object):
         if cname in self.versionables:
             return [(o.id, o.version) for o in self.get_by_type(cname)]
         else:
-            ident = self.classes['Identifiable'].__table__
+            ident = self.classes['Identifiable']
             if not cname:
-                s = sql.select([ident])
+                s = select(ident)
             elif cname:
-                s = sql.select([ident]).where(ident.c.pgef_type == cname)
-            return [(row['id'], '') for row in self.db.execute(s)]
+                s = select(ident).where(ident.pgef_type == cname)
+            return [(obj.id, '') for obj in self.db.scalars(s)]
 
     def get_mod_dts(self, cnames=None, oids=None, datetimes=False):
         """
@@ -1649,25 +1649,27 @@ class UberORB(object):
         Returns:
             dict:  mapping of oids to 'mod_datetime' strings.
         """
-        ident = self.classes['Identifiable'].__table__
+        # ident = self.classes['Identifiable'].__table__
+        ident = self.classes['Identifiable']
         if not cnames and not oids:
-            s = sql.select([ident]).where(ident.c.mod_datetime != None)
+            s = select(ident).where(ident.mod_datetime != None)
         elif cnames:
-            s = sql.select([ident]).where(sql.and_(
-                                        ident.c.mod_datetime != None,
-                                        ident.c.pgef_type.in_(cnames)
-                                        ))
+            s = select(ident).where(
+                                ident.mod_datetime != None
+                                ).where(
+                                ident.pgef_type.in_(cnames)
+                                )
         elif oids:
-            s = sql.select([ident]).where(sql.and_(
-                                        ident.c.mod_datetime != None,
-                                        ident.c.oid.in_(oids)
-                                        ))
+            s = select(ident).where(ident.mod_datetime != None
+                                    ).where(
+                                        ident.oid.in_(oids)
+                                        )
         if datetimes:
-            return {row['oid'] : row['mod_datetime']
-                    for row in self.db.execute(s)}
+            return {obj.oid : obj.mod_datetime
+                    for obj in self.db.scalars(s)}
         else:
-            return {row['oid'] : str(row['mod_datetime'])
-                    for row in self.db.execute(s)}
+            return {obj.oid : str(obj.mod_datetime)
+                    for obj in self.db.scalars(s)}
 
     def get_oid_cnames(self, oids=None, cname=None):
         """
@@ -1679,18 +1681,18 @@ class UberORB(object):
         Returns:
             dict:  mapping of oids to class names.
         """
-        ident = self.classes['Identifiable'].__table__
+        ident = self.classes['Identifiable']
         if oids:
-            s = sql.select([ident]).where(ident.c.oid.in_(oids))
+            s = select(ident).where(ident.oid.in_(oids))
         elif cname:
-            s = sql.select([ident]).where(sql.and_(
-                                        ident.c.oid.in_(oids),
-                                        ident.c.pgef_type == cname
-                                        ))
+            s = select(ident).where(ident.oid.in_(oids)
+                                     ).where(
+                                     ident.pgef_type == cname
+                                     )
         else:
             return {}
-        return {row['oid'] : str(row['pgef_type'])
-                for row in self.db.execute(s)}
+        return {obj.oid : str(obj.pgef_type)
+                for obj in self.db.scalars(s)}
 
     def select(self, cname, **kw):
         """

@@ -19,8 +19,9 @@ from collections import OrderedDict
 # SqlAlchemy
 from sqlalchemy                 import Column, create_engine
 from sqlalchemy                 import ForeignKey, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm             import relationship
+# declarative_base has been moved in sqlalchemy 2.0
+# from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm             import declarative_base, relationship
 
 # PanGalactic
 from pangalactic.core.datastructures import OrderedSet
@@ -157,8 +158,9 @@ class PanGalacticRegistry(object):
         self.nses = {}
         if db_url:
             self.log.info('* initializing db at "{}"'.format(db_url))
-            self.log.info('  with encoding="utf-8"')
-            self.db_engine = create_engine(db_url, encoding='utf-8')
+            # self.log.info('  with encoding="utf-8"')
+            # self.db_engine = create_engine(db_url, encoding='utf-8')
+            self.db_engine = create_engine(db_url)
         else:
             # if no db_url is specified, set up a local (sqlite) db in home
             self.log.info('* initializing local sqlite db.')
