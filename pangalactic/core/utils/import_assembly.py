@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import sys
 from optparse import OptionParser
+from pprint import pprint
 # from pangalactic.core.uberorb import orb
-# from pangalactic.core.utils import part21
+from pangalactic.core.utils.part21 import parse_p21_data
 
 # nauo attrs:
 #     - id                   (identifier) [product_definition_relationship]
@@ -35,14 +38,17 @@ from optparse import OptionParser
 
 
 # TODO:  rewrite to use part21.py
-def getAssemblies(f):
+def getAssemblies(fpath):
     """
     Extract assembly structures from a STEP file.
 
-    @param f:  name of a STEP file
-    @type  f:  C{str}
+    @param fpath:  path of a STEP file
+    @type  fpath:  str
     """
-    data = readStepFile(f)
+    f = open(fpath)
+    p21_data = f.read()
+    f.close()
+    data = parse_p21_data(p21_data)
     # projid = os.path.basename(f).split('.')[0].upper()
     # print(f' - project id: {projid}')
     # TODO:
@@ -51,13 +57,16 @@ def getAssemblies(f):
     #     + ask if user wants to create a context related to this data
     #     + pick a project (default to current project if user has permission;
     #       otherwise, default to user's preferred project, if any)
-    project = orb.classes['Project'](_schema=orb.schemas['Project'],
-                                     id=projid,
-                                     id_ns='sandbox')
+    # project = orb.classes['Project'](_schema=orb.schemas['Project'],
+                                     # id=projid,
+                                     # id_ns='sandbox')
     nauo = {}
-    id_ns = project.oid
+    # id_ns = project.oid
     parents = set()
     children = set()
+    if not data['typeinst'].get('NEXT_ASSEMBLY_USAGE_OCCURRENCE'):
+        print('No assemblies found.')
+        return
     for n in data['typeinst']['NEXT_ASSEMBLY_USAGE_OCCURRENCE']:
         parent, child = [x.strip(" \n\r#'")
                          for x in data['contents'][n].split(',')[3:5]]
@@ -88,38 +97,47 @@ def getAssemblies(f):
                   or data['contents'][mpref].split(',')[0].strip(" \n\r#'"))
         product_id = '-'.join([pre_id, pdref])
         product_name = ' '.join([pre_id, '( STEP file instance:', pdref, ')'])
-        pd[pdref] = {'id'           : pdref,
-                     'id_ns'        : id_ns,
-                     'cm_authority' : project.oid,
+        pd[pdref] = {'id'           : product_id,
+                     # 'id_ns'        : id_ns,
+                     # 'cm_authority' : project.oid,
                      # version from pdf
                      'version'      : version,
                      # modeled product
                      'name'         : product_name
                      }
-    acus = [orb.classes['Acu'](_schema=orb.schemas['Acu'], **nauo[n])
-            for n in nauo]
-    models = [orb.classes['Model'](_schema=orb.schemas['Model'], **pd[p])
-              for p in pd]
-    return project, acus, models
+    # acus = [orb.classes['Acu'](_schema=orb.schemas['Acu'], **nauo[n])
+            # for n in nauo]
+    # models = [orb.classes['Model'](_schema=orb.schemas['Model'], **pd[p])
+              # for p in pd]
+    # return project, acus, models
+    print('-------------------------------------')
+    print('Product Definitions:')
+    print('-------------------------------------')
+    pprint(pd)
+    print('-------------------------------------')
+    print('NAUOs:')
+    print('-------------------------------------')
+    pprint(nauo)
+    print('-------------------------------------')
 
 if __name__ == '__main__':
+    import time
     usage = 'usage:  %prog [options] file.p21'
     opt = OptionParser(usage)
-    # opt.add_option("-p", "--perf", action='store_true',
-                   # dest="performance", default=False,
-                   # help="run the parser's unit tests")
+    opt.add_option("-p", "--perf", action='store_true',
+                   dest="performance", default=False,
+                   help="run the parser's unit tests")
     (options, args) = opt.parse_args(args=sys.argv)
     # debugging:
     print(f"options:  {options}")
     print(f"args:     {args}")
     if len(args) > 1:
-        # if options.performance:
-            # start = time.clock()
-        project, nauo, pdset = getAssemblies(f=args[1])
-        # if options.performance:
-            # end = time.clock()
-            # print("\nTotal time: %6.2f sec" % (end - start))
-        # print(f"{len(list(nauo))} assemblies")
+        if options.performance:
+            start = time.time()
+        getAssemblies(args[1])
+        if options.performance:
+            end = time.time()
+            print("\nTotal time: %6.2f sec" % (end - start))
     else:
         opt.print_help()
 
