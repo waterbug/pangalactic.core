@@ -8,7 +8,7 @@ intended to be a singleton).
 import json, os, shutil, sys, traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 # Louie: dispatcher
 from louie import dispatcher
@@ -604,18 +604,20 @@ class UberORB(object):
         contexts.  This is required at startup or when a parameter is created,
         modified, or deleted, or in several other cases.
 
-        NOTE: recompute_parmz() should NOT be called when running on client
-        side and in "connected" state; instead, call vger.get_parmz() to get
-        the parameter cache data from the server rather than recomputing
+        NOTE: recompute_parmz() be a no-op when running on client side and in
+        "connected" state; instead, the client must call vger.get_parmz() to
+        get the parameter cache data from the server rather than recomputing
         locally, which risks creating an out-of-sync condition.
         """
+        if state.get("client") and state.get("connected"):
+            return
         # ********************************************************************
         # NOTE: CAUTION CAUTION CAUTION !!!
         # ********************************************************************
-        # The use of "d_contexts" (CBE, MEV) and the specified variables (m, P,
-        # R_D) IMPLIES THAT THEY ARE THE ONLY COMPUTED PARAMETERS AND CONTEXTS
-        # ... THIS MAY NOT BE THE CASE IN THE FUTURE! -> "Cost" and other
-        # parameters may need to be rolled up ...
+        # FIXME: The use of "d_contexts" (CBE, MEV) and the specified variables
+        # (m, P, R_D) IMPLIES THAT THEY ARE THE ONLY COMPUTED PARAMETERS AND
+        # CONTEXTS ... THIS MAY NOT BE THE CASE IN THE FUTURE! -> "Cost" and
+        # other parameters may need to be rolled up ...
         # ********************************************************************
         # self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
@@ -1363,7 +1365,7 @@ class UberORB(object):
         # self.log.debug('  orb.save:  committing db session.')
         # obj has already been "added" to the db (session) above, so commit ...
         self.db.commit()
-        if recompute_required and recompute and not state.get('connected'):
+        if recompute_required and recompute:
             self.recompute_parmz()
         return True
 
@@ -2243,7 +2245,7 @@ class UberORB(object):
         if refresh_systems:
             for project in refresh_systems:
                 refresh_systemz(project)
-        if recompute_required and not state.get('connected'):
+        if recompute_required:
             self.recompute_parmz()
 
     def is_versioned(self, obj):
