@@ -157,13 +157,9 @@
 
     `diagram needs refresh: (bool) block diagram needs to be refreshed`
 
-    `height:           (int)  pixel height of pangalaxian gui`
-
-    `width:            (int)  pixel width of pangalaxian gui`
-
     `disabled:         (bool) true if user has Disabled role (global)`
 
-    `height:           (int)  current pixel height of pangalaxian gui`
+    `height:           (int)  pixel height of pangalaxian gui`
 
     `icon_type:        (str)  suffix for platform-specific icons [e.g., '.ico']`
 
@@ -198,7 +194,7 @@
 
     `version:          (str)  version of client`
 
-    `width:            (int)  current pixel width of pangalaxian gui`
+    `width:            (int)  pixel width of pangalaxian gui`
 
     `[1]: "load_extra_data" is intended for use on the server (vger)`
     `     for special data not included in "refdata", such as data specific to`
