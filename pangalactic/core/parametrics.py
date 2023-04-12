@@ -1704,12 +1704,16 @@ def compute_requirement_margin(req_oid, default=0):
         msg = 'Requirement {} is not a performance reqt.'.format(req_oid)
         return (None, None, None, None, msg)
     if constraint.constraint_type == 'maximum':
-        nte = constraint.max
-        nte_units = constraint.units
-        # convert NTE value to base units, if necessary
-        quan = nte * ureg.parse_expression(nte_units)
-        quan_base = quan.to_base_units()
-        converted_nte = quan_base.magnitude
+        try:
+            nte = constraint.max
+            nte_units = constraint.units
+            # convert NTE value to base units, if necessary
+            quan = nte * ureg.parse_expression(nte_units)
+            quan_base = quan.to_base_units()
+            converted_nte = quan_base.magnitude
+        except:
+            msg = 'Could not convert NTE units to base units'
+            return (None, None, None, None, msg)
     else:
         msg = 'Constraint type is not "maximum" -- cannot handle (yet).'
         # txt = 'constraint_type is "{}"; ignored (for now).'
