@@ -1345,10 +1345,8 @@
 
     <owl:DatatypeProperty rdf:about="&pgef;iteration">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">An identifier for incremental snapshots of working copies of a specific version of a product.  Iterations are a zero-based sequence of integers in which the unmodified version is itself the 0th iteration.
-
-Working copies of iterations can be used as parallel evolution threads toward the next version.  Iterations are used to identify and manage experimental configurations of a product that may never become a formal version but which need to be documented as part of the design and analysis process.  Since products cannot be changed once committed to a repository, the value of their iteration must be regarded as frozen. The policy for saving iterations in the repository can be set by the project or user: all iterations, all iterations since the last version, etc.  In early prototyping exercises, iterations may be used exclusively for CM (on, say, the 0th version of everything).</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:comment rdf:datatype="&xsd;string">An identifier for incremental snapshots of working copies of a specific version of a ManagedObject.  Iterations are a zero-based sequence of integers in which the unmodified version is itself the 0th iteration.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
         <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
 
@@ -1997,7 +1995,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <owl:DatatypeProperty rdf:about="&pgef;version">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">A user-modifiable alphanumeric string used to identify one in a series of modifications of an object.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -2008,7 +2006,7 @@ Working copies of iterations can be used as parallel evolution threads toward th
     <owl:DatatypeProperty rdf:about="&pgef;version_sequence">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">An integer indicating the sequence of versions (since the version attribute itself may not have a well-defined sort order).</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
         <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
 
@@ -2018,8 +2016,8 @@ Working copies of iterations can be used as parallel evolution threads toward th
 
     <owl:DatatypeProperty rdf:about="&pgef;frozen">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A flag indicating that this version can have no further modifications or iterations. When a specified version of an object is frozen, a new version of the object can be created by cloning the specified version or another version, by cloning another object, or from a clean slate.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Product"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A flag indicating that this working version can have no further modifications or iterations. When a specified version of an object is frozen, a new version of the object can be created by cloning the specified version or another version, by cloning another object, or from a clean slate. In general, a freeze can be reversed by an administrator, for example if corrections are needed, and the object can be re-frozen after edits are done -- this should be done using caution since it can effect configuration management.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ManagedObject"/>
         <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
 
