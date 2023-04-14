@@ -92,9 +92,9 @@ Examples of schema mods that require a conversion function include:
 
 from copy import deepcopy
 
-schema_mods = ['1.0.4', '1.5.0', '2.0', '3.0', '3.1.0']
+schema_mods = ['1.0.4', '1.5.0', '2.0', '3.0', '3.1.0', '3.2.0']
 
-schema_version = '3.2.0'
+schema_version = '3.3.0'
 
 
 def to_x_x_x(sos):
