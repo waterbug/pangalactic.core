@@ -5,11 +5,12 @@ Pan Galactic Report Writer
 import xlsxwriter
 
 from pangalactic.core              import prefs
+from pangalactic.core.meta         import MAIN_VIEWS
+from pangalactic.core.names        import get_mel_item_name
 from pangalactic.core.parametrics  import (get_pval, get_dval, de_defz,
                                            parm_defz, round_to)
 from pangalactic.core.uberorb      import orb
 from pangalactic.core.units        import in_si
-from pangalactic.core.names        import get_mel_item_name
 from pangalactic.core.utils.styles import xlsx_styles
 
 
@@ -894,6 +895,86 @@ def write_mel_to_xlsx(context, schema=None, pref_units=False, summary=False,
         d['system_name'] = prefix + d['system_name']
         for col, val in enumerate(d.values()):
             worksheet.write(r+1, col, val)
+    book.close()
+
+
+def write_objects_to_xlsx(objs, file_path, view=None, use_level=False):
+    """
+    Write a list of objects to .xlsx format.
+
+    Args:
+        objs (list of objects):  the objects to be included
+        file_path (str): path of file to be written
+
+    Keyword Args:
+        view (list of str):  set of attributes, parameters, and data elements
+            to write
+        use_level (bool):  whether to use "level" attr to format output
+    """
+    book = xlsxwriter.Workbook(file_path)
+    sheet = book.add_worksheet()
+    fmts = {name : book.add_format(style)
+            for name, style in xlsx_styles.items()}
+    # TODO: figure out to apply levels to requirements ... for now, ignore
+    # level_fmts = {1: fmts['ctr_black_bg_12'],
+                  # 2: fmts['ctr_gray_bold_12'],
+                  # 3: fmts['ctr_12']
+                  # }
+    # name_fmts = {1: fmts['left_black_bg_12'],
+                 # 2: fmts['left_gray_bold_12'],
+                 # 3: fmts['left_12']
+                 # }
+    data_fmts = {1: fmts['float_right_black_bg_12'],
+                 2: fmts['float_right_gray_bold_12'],
+                 3: fmts['float_right_12']
+                 }
+    int_fmts = {1: fmts['int_right_black_bg_12'],
+                2: fmts['int_right_gray_bold_12'],
+                3: fmts['int_right_12']
+                }
+    txt_fmts = {1: fmts['txt_left_black_bg_12'],
+                2: fmts['txt_left_gray_bold_12'],
+                3: fmts['txt_left_12']
+                }
+    # if use_level:
+        # # first write the formatting to the whole row to set the bg color
+        # sheet.write_row(row, 0, [' ']*48, level_fmts.get(level, level_fmts[3]))
+        # # then write the "LEVEL" cell
+        # sheet.write(row, 0, level, level_fmts.get(level, level_fmts[3]))
+        # # level-based indentation
+        # spaces = '   ' * level
+        # sheet.write(row, 1, spaces + reqt.name,
+                    # name_fmts.get(level, name_fmts[3]))
+        # data_fmt = data_fmts.get(level, data_fmts[3])
+        # int_fmt = int_fmts.get(level, int_fmts[3])
+        # txt_fmt = txt_fmts.get(level, txt_fmts[3])
+    data_fmt = data_fmts[3]
+    int_fmt = int_fmts[3]
+    txt_fmt = txt_fmts[3]
+    txt_fmt.set_text_wrap()
+    dt_map = {'float': data_fmt,
+              'int': int_fmt,
+              'str': txt_fmt,
+              'text': txt_fmt}
+    if objs:
+        cname = objs[0].__class__.__name__
+    else:
+        cname = ''
+    if not view:
+        view = MAIN_VIEWS.get(cname, ['id', 'name', 'description'])
+    col_widths = {'id': 20,
+                  'name': 40,
+                  'description': 100,
+                  'level': 7,
+                  'rationale': 40}
+    for j, a in enumerate(view):
+        sheet.set_column(j, j, col_widths.get(a, 20))
+        sheet.write(0, j, a, fmts['ctr_black_bg_12'])
+    for i, obj in enumerate(objs):
+        for j, a in enumerate(view):
+            val = getattr(obj, a, '')
+            dtype = (de_defz.get(a) or {}).get('range_datatype')
+            sheet.write(i+1, j, val, dt_map.get(dtype, txt_fmt))
     book.close()
 
 
