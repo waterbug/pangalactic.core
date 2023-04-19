@@ -84,6 +84,22 @@ MAIN_VIEWS = dict(
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
     )
 
+# STANDARD_VIEWS:  Class-specific standard fields for data exchange -- each
+# view maps a set of external names to their corresponding class attribute
+# names
+STANDARD_VIEWS = dict(
+    Requirement=['id',
+                 'name',
+                 'allocated_to',
+                 'req_level',
+                 'description',
+                 'rationale',
+                 'justification',
+                 'verification_method',
+                 'req_compliance',
+                 'comment']
+    )
+
 # PGXN_VIEWS:  Default fields/ordering for the PgxnObject "info", "narrative"
 # and "admin" tabs
 PGXN_VIEWS = dict(
@@ -471,18 +487,24 @@ EXT_NAMES_PLURAL = {
     'Property'            : 'Properties',
     }
 
-# Special external names of PGEF properties
 ATTR_EXT_NAMES = {
-     'req_type' : 'reqt type',
-     'req_level' : 'level',
-     'req_compliance' : 'compliance',
-     'req_constraint_type' : 'constraint type',
-     'req_dimensions' : 'dimensions',
-     'req_maximum_value' : 'maximum',
-     'req_minimum_value' : 'minimum',
-     'req_tolerance': 'tolerance (+/-)',
-     'req_tolerance_lower': 'lower tolerance',
-     'req_tolerance_upper': 'upper tolerance'
+    'Requirement': {
+        'allocated_to' : 'section',
+        'comment' : 'comments',
+        'id' : 'ruid',
+        'name' : 'title',
+        'req_type' : 'reqt type',
+        'req_level' : 'level',
+        'req_compliance' : 'compliance',
+        'req_constraint_type' : 'constraint type',
+        'req_dimensions' : 'dimensions',
+        'req_maximum_value' : 'maximum',
+        'req_minimum_value' : 'minimum',
+        'req_tolerance': 'tolerance (+/-)',
+        'req_tolerance_lower': 'lower tolerance',
+        'req_tolerance_upper': 'upper tolerance',
+        'description' : 'text',
+        'verification_method': 'verification method'}
     }
 
 # Default ordering of the important ManagedObject properties
