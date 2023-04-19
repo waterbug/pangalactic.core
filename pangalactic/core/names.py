@@ -431,7 +431,7 @@ def get_external_name_plural(cname):
                                 to_external_name(cname)+'s')
 
 def get_attr_ext_name(cname, aname):
-    return ATTR_EXT_NAMES.get(cname, {}).get(aname, ' '.join(aname.split('_')))
+    return ATTR_EXT_NAMES.get(cname, {}).get(aname, aname.replace('_', ' '))
 
 def to_external_name(cname):
     """
@@ -486,13 +486,14 @@ def to_table_name(cname):
         tname = tname.lower()
     return tname +  '_'
 
-def pname_to_header_label(pname, headers_are_ids=False, project_oid=None):
+def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
     """
     Convert a property name, data element id, or parameter id into a
     header-friendly name.
 
     Args:
         pname: (str): a property name, data element id, or parameter id
+        cname: (str): relevant class name
 
     Keyword Args:
         project_oid (str):  oid of the current project
@@ -526,8 +527,9 @@ def pname_to_header_label(pname, headers_are_ids=False, project_oid=None):
                 units = '(' + units + ')'
             return '  \n  '.join(wrap(pname, width=7,
                                  break_long_words=False) + [units])
-    parts = ' '.join(pname.split('_'))
-    return ' \n '.join(wrap(parts, width=7, break_long_words=False))
+    # parts = ' '.join(pname.split('_'))
+    ext_name = get_attr_ext_name(cname, pname)
+    return ' \n '.join(wrap(ext_name, width=7, break_long_words=False))
 
 def to_media_name(cname):
     """
