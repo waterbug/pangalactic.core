@@ -127,3 +127,35 @@ class NamesTests(unittest.TestCase):
         expected = [ga_a, ga_b, ga_c, ga_d, ga_e, ga_f, ga_g]
         self.assertEqual(expected, value)
 
+    def test_08_get_attr_ext_name(self):
+        """CASE: get_attr_ext_name"""
+        a = names.get_attr_ext_name('Requirement', 'description')
+        gaen_a = 'text'
+        b = names.get_attr_ext_name('Requirement', 'rationale')
+        gaen_b = 'rationale'
+        c = names.get_attr_ext_name('', 'create_datetime')
+        gaen_c = 'create datetime'
+        d = names.get_attr_ext_name('', 'version')
+        gaen_d = 'version'
+        e = names.get_attr_ext_name('', None)
+        gaen_e = 'unknown'
+        value = [a, b, c, d, e]
+        expected = [gaen_a, gaen_b, gaen_c, gaen_d, gaen_e]
+        self.assertEqual(expected, value)
+
+    def test_09_get_ext_name_attr(self):
+        """CASE: get_ext_name_attr"""
+        a = names.get_ext_name_attr('Requirement', 'text')
+        gean_a = 'description'
+        b = names.get_ext_name_attr('Requirement', 'rationale')
+        gean_b = 'rationale'
+        c = names.get_ext_name_attr('', 'create datetime')
+        gean_c = 'create_datetime'
+        d = names.get_ext_name_attr('', 'version')
+        gean_d = 'version'
+        e = names.get_ext_name_attr('', None)
+        gean_e = 'unknown'
+        value = [a, b, c, d, e]
+        expected = [gean_a, gean_b, gean_c, gean_d, gean_e]
+        self.assertEqual(expected, value)
+

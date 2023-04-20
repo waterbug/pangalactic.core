@@ -16,7 +16,8 @@ from rdflib.term import URIRef
 from pangalactic.core                import prefs
 from pangalactic.core.datastructures import OrderedSet
 from pangalactic.core.meta           import (asciify, PLURALS, ATTR_EXT_NAMES,
-                                             EXT_NAMES, EXT_NAMES_PLURAL)
+                                             EXT_NAME_ATTRS, EXT_NAMES,
+                                             EXT_NAMES_PLURAL)
 from pangalactic.core.parametrics    import de_defz, mode_defz, parm_defz
 from pangalactic.core.units          import in_si
 
@@ -431,7 +432,18 @@ def get_external_name_plural(cname):
                                 to_external_name(cname)+'s')
 
 def get_attr_ext_name(cname, aname):
-    return ATTR_EXT_NAMES.get(cname, {}).get(aname, aname.replace('_', ' '))
+    try:
+        return ATTR_EXT_NAMES.get(cname, {}).get(aname,
+                                                 aname.replace('_', ' '))
+    except:
+        return 'unknown'
+
+def get_ext_name_attr(cname, extname):
+    try:
+        return EXT_NAME_ATTRS.get(cname, {}).get(extname,
+                                             extname.replace(' ', '_').lower())
+    except:
+        return 'unknown'
 
 def to_external_name(cname):
     """
@@ -530,6 +542,52 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
     # parts = ' '.join(pname.split('_'))
     ext_name = get_attr_ext_name(cname, pname)
     return ' \n '.join(wrap(ext_name, width=7, break_long_words=False))
+
+def header_to_pname(header, cname='', headers_are_ids=False, project_oid=None):
+    """
+    Convert a header name to its corresponding data element id, parameter id,
+    or attribute name.
+
+    Args:
+        header: (str): a header name
+
+    Keyword Args:
+        cname: (str): relevant class name
+        project_oid (str):  oid of the current project
+        headers_are_ids (bool):  use ids instead of names
+
+    returns: external name (str)
+    """
+    # FIXME:  handle parameters, data elements, etc.
+    # pd = parm_defz.get(pname)
+    # de_def = de_defz.get(pname, '')
+    # if pd:
+        # units = prefs.get('units', {}).get(pd['dimensions'], '') or in_si.get(
+                                                         # pd['dimensions'], '')
+        # if units:
+            # units = '(' + units + ')'
+        # if headers_are_ids:
+            # return '  \n  '.join([pname, units])
+        # else:
+            # return '  \n  '.join(wrap(pd['name'], width=7,
+                                 # break_long_words=False) + [units])
+    # elif de_def:
+        # if headers_are_ids:
+            # return pname
+        # else:
+            # return '  \n  '.join(wrap(de_def['name'], width=7,
+                                 # break_long_words=False))
+    # elif project_oid:
+        # modes = (mode_defz.get(project_oid) or {}).get('modes')
+        # if modes and pname in modes:
+            # units = prefs.get('units', {}).get('power') or 'W'
+            # if units:
+                # units = '(' + units + ')'
+            # return '  \n  '.join(wrap(pname, width=7,
+                                 # break_long_words=False) + [units])
+    # # parts = ' '.join(pname.split('_'))
+    # ext_name = get_attr_ext_name(cname, pname)
+    return get_ext_name_attr(cname, header)
 
 def to_media_name(cname):
     """

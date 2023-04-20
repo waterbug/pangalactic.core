@@ -487,24 +487,43 @@ EXT_NAMES_PLURAL = {
     'Property'            : 'Properties',
     }
 
+# attr_ext_alias, ATTR_EXT_NAMES, and EXT_NAME_ATTRS are internal to the meta
+# module and are only used in the names module's get_attr_ext_name() and
+# get_ext_name_attr() functions, respectively.  They are specified here to
+# capture external names that are not "derivable" from the attribute name.
+# These are "colloquial" and may later be labeled as to their namespaces.
+attr_ext_alias = {
+    'Requirement': [
+        ('allocated_to', 'section'),
+        ('comment', 'comments'),
+        ('id', 'ruid'),
+        ('name', 'title'),
+        ('req_type', 'reqt type'),
+        ('req_level', 'level'),
+        ('req_compliance', 'compliance'),
+        ('req_constraint_type', 'constraint type'),
+        ('req_dimensions', 'dimensions'),
+        ('req_maximum_value', 'maximum'),
+        ('req_minimum_value', 'minimum'),
+        ('req_tolerance', 'tolerance'),
+        ('req_tolerance_lower', 'lower tolerance'),
+        ('req_tolerance_upper', 'upper tolerance'),
+        ('description', 'text'),
+        ('verification_method', 'verification method')
+        ]
+    }
+
+# mapping of attributes to their external names in the context of a class
 ATTR_EXT_NAMES = {
-    'Requirement': {
-        'allocated_to' : 'section',
-        'comment' : 'comments',
-        'id' : 'ruid',
-        'name' : 'title',
-        'req_type' : 'reqt type',
-        'req_level' : 'level',
-        'req_compliance' : 'compliance',
-        'req_constraint_type' : 'constraint type',
-        'req_dimensions' : 'dimensions',
-        'req_maximum_value' : 'maximum',
-        'req_minimum_value' : 'minimum',
-        'req_tolerance': 'tolerance (+/-)',
-        'req_tolerance_lower': 'lower tolerance',
-        'req_tolerance_upper': 'upper tolerance',
-        'description' : 'text',
-        'verification_method': 'verification method'}
+    cname : dict(attr_ext_alias[cname])
+    for cname in attr_ext_alias
+    }
+
+# mapping of external names to their attributes in the context of a class
+EXT_NAME_ATTRS = {
+    cname : dict(
+        [(a[1], a[0]) for a in attr_ext_alias[cname]])
+    for cname in attr_ext_alias
     }
 
 # Default ordering of the important ManagedObject properties
