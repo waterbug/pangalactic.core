@@ -467,65 +467,6 @@ NUMERIC_FORMATS = ['Thousands Commas', 'No Commas', 'Scientific Notation']
 # NUMERIC_PRECISION:  Maximum precision assumed for parameter values
 NUMERIC_PRECISION = ['3', '4', '5', '6', '7', '8', '9']
 
-# Special external names of PGEF classes
-EXT_NAMES = {
-    'Acu'                 : 'Assembly Component Usage',
-    'EeePart'             : 'EEE Part',
-    'Mime'                : 'MIME Type',
-    'ParameterDefinition' : 'Parameter Definition',
-    }
-
-# Special plurals of external names of PGEF classes
-EXT_NAMES_PLURAL = {
-    'Activity'            : 'Activities',
-    'Acu'                 : 'Assembly Component Usages',
-    'EeePart'             : 'EEE Parts',
-    'HardwareProduct'     : 'Hardware Products',
-    'Mime'                : 'MIME Types',
-    'ParameterDefinition' : 'Parameter Definitions',
-    'Port'                : 'Ports',
-    'Property'            : 'Properties',
-    }
-
-# attr_ext_alias, ATTR_EXT_NAMES, and EXT_NAME_ATTRS are internal to the meta
-# module and are only used in the names module's get_attr_ext_name() and
-# get_ext_name_attr() functions, respectively.  They are specified here to
-# capture external names that are not "derivable" from the attribute name.
-# These are "colloquial" and may later be labeled as to their namespaces.
-attr_ext_alias = {
-    'Requirement': [
-        ('allocated_to', 'section'),
-        ('comment', 'comments'),
-        ('id', 'ruid'),
-        ('name', 'title'),
-        ('req_type', 'reqt type'),
-        ('req_level', 'level'),
-        ('req_compliance', 'compliance'),
-        ('req_constraint_type', 'constraint type'),
-        ('req_dimensions', 'dimensions'),
-        ('req_maximum_value', 'maximum'),
-        ('req_minimum_value', 'minimum'),
-        ('req_tolerance', 'tolerance'),
-        ('req_tolerance_lower', 'lower tolerance'),
-        ('req_tolerance_upper', 'upper tolerance'),
-        ('description', 'text'),
-        ('verification_method', 'verification method')
-        ]
-    }
-
-# mapping of attributes to their external names in the context of a class
-ATTR_EXT_NAMES = {
-    cname : dict(attr_ext_alias[cname])
-    for cname in attr_ext_alias
-    }
-
-# mapping of external names to their attributes in the context of a class
-EXT_NAME_ATTRS = {
-    cname : dict(
-        [(a[1], a[0]) for a in attr_ext_alias[cname]])
-    for cname in attr_ext_alias
-    }
-
 # Default ordering of the important ManagedObject properties
 PGEF_PROPS_ORDER = [
             'oid',
@@ -609,15 +550,6 @@ PGEF_COL_WIDTHS = {
             'version_sequence': 50
             }
 
-# Column names to use for specified properties
-PGEF_COL_NAMES = {
-            'version': 'ver.',
-            'iteration': 'iter.',
-            'version_sequence': 'seq.',
-            'range_datatype': 'range',
-            'abbreviation': 'abbrev.'
-            }
-
 # Properties displayed as READ-ONLY by the PgxnObject viewer/editor
 # TODO:  do this in a configurable way, as part of the Schemas
 # TODO:  for m2m attributes, these may eventually become editable, when
@@ -661,38 +593,6 @@ READONLYNS = [
               'xml',
               'xsd'
               ]
-
-# "Internal" plurals of PGEF class names, particularly for use in "back
-# references" in a foreign key relationship
-
-PLURALS = {
-    'Activity'           : 'Activities',
-    'Acu'                : 'Acus',
-    'DataPackage'        : 'DataPackages',
-    'DataSet'            : 'DataSets',
-    'DigitalProduct'     : 'DigitalProducts',
-    'DigitalFile'        : 'DigitalFiles',
-    'Document'           : 'Documents',
-    'EeePart'            : 'EeeParts',
-    'Identifiable'       : 'Identifiables',
-    'Mime'               : 'Mimes',
-    'Model'              : 'Models',
-    'Organization'       : 'Organizations',
-    'ManagedObject'      : 'ManagedObjects',
-    'ProductInstance'    : 'ProductInstances',
-    'Product'            : 'Products',
-    'PartModel'          : 'PartModels',
-    'PartsListItem'      : 'PartsListItems',
-    'PartsList'          : 'PartsLists',
-    'Person'             : 'Persons',
-    'Product'            : 'Products',
-    'Project'            : 'Projects',
-    'Property'           : 'Properties',
-    'Representation'     : 'Representations',
-    'RoleAssignment'     : 'RoleAssignments',
-    'Role'               : 'Roles'
-    }
-
 
 def asciify(u):
     """

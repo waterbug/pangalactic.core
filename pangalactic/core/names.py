@@ -15,9 +15,7 @@ from rdflib.term import URIRef
 
 from pangalactic.core                import prefs
 from pangalactic.core.datastructures import OrderedSet
-from pangalactic.core.meta           import (asciify, PLURALS, ATTR_EXT_NAMES,
-                                             EXT_NAME_ATTRS, EXT_NAMES,
-                                             EXT_NAMES_PLURAL)
+from pangalactic.core.meta           import asciify
 from pangalactic.core.parametrics    import de_defz, mode_defz, parm_defz
 from pangalactic.core.units          import in_si
 
@@ -382,7 +380,6 @@ def q2u(qname):
             raise ValueError('unknown prefix: {}'.format(prefix))
     return URIRef(uri)
 
-
 def q2eturi(qname):
     """
     Get the ElementTree-style URI for a qname -- i.e., using {}.
@@ -404,7 +401,6 @@ def q2eturi(qname):
             raise ValueError('unknown prefix: {}'.format(prefix))
     return uri
 
-
 def get_uri(identifier):
     """
     Get the address (a.k.a. URI) corresponding to an identifier.  If the
@@ -423,6 +419,72 @@ def get_uri(identifier):
         # identifier is either a qname or a local name
         uri = q2u(identifier)
     return URIRef(uri)
+
+# Special external names of PGEF classes
+EXT_NAMES = {
+    'Acu'                 : 'Assembly Component Usage',
+    'EeePart'             : 'EEE Part',
+    'Mime'                : 'MIME Type',
+    'ParameterDefinition' : 'Parameter Definition',
+    }
+
+# Special plurals of external names of PGEF classes
+EXT_NAMES_PLURAL = {
+    'Activity'            : 'Activities',
+    'Acu'                 : 'Assembly Component Usages',
+    'EeePart'             : 'EEE Parts',
+    'HardwareProduct'     : 'Hardware Products',
+    'Mime'                : 'MIME Types',
+    'ParameterDefinition' : 'Parameter Definitions',
+    'Port'                : 'Ports',
+    'Property'            : 'Properties',
+    }
+
+# attr_ext_alias, ATTR_EXT_NAMES, and EXT_NAME_ATTRS are internal, intended
+# only for use in the get_attr_ext_name() and get_ext_name_attr() functions,
+# respectively.  They are specified in order to capture external names that are
+# not "derivable" from the attribute name.  These are "colloquial" and may
+# later be restricted to specified namespaces.
+attr_ext_alias = {
+    'HardwareProduct': [
+        ('version', 'ver'),
+        ('iteration', 'iter'),
+        ('version_sequence', 'seq'),
+        ('range_datatype', 'range'),
+        ('abbreviation', 'abbrev')
+        ],
+    'Requirement': [
+        ('allocated_to', 'section'),
+        ('comment', 'comments'),
+        ('id', 'ruid'),
+        ('name', 'title'),
+        ('req_type', 'reqt type'),
+        ('req_level', 'level'),
+        ('req_compliance', 'compliance'),
+        ('req_constraint_type', 'constraint type'),
+        ('req_dimensions', 'dimensions'),
+        ('req_maximum_value', 'maximum'),
+        ('req_minimum_value', 'minimum'),
+        ('req_tolerance', 'tolerance'),
+        ('req_tolerance_lower', 'lower tolerance'),
+        ('req_tolerance_upper', 'upper tolerance'),
+        ('description', 'text'),
+        ('verification_method', 'verification method')
+        ]
+    }
+
+# mapping of attributes to their external names in the context of a class
+ATTR_EXT_NAMES = {
+    cname : dict(attr_ext_alias[cname])
+    for cname in attr_ext_alias
+    }
+
+# mapping of external names to their attributes in the context of a class
+EXT_NAME_ATTRS = {
+    cname : dict(
+        [(a[1], a[0]) for a in attr_ext_alias[cname]])
+    for cname in attr_ext_alias
+    }
 
 def get_external_name(cname):
     return EXT_NAMES.get(cname, to_external_name(cname))
@@ -529,7 +591,9 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
         if headers_are_ids:
             return pname
         else:
-            return '  \n  '.join(wrap(de_def['name'], width=7,
+            de_name = de_def.get('name') or pname
+            ext_name = get_attr_ext_name(cname, de_name)
+            return '  \n  '.join(wrap(ext_name, width=7,
                                  break_long_words=False))
     elif project_oid:
         modes = (mode_defz.get(project_oid) or {}).get('modes')
@@ -615,6 +679,37 @@ def to_media_name(cname):
             i += 1
         tname = tname.lower()
     return "application/x-pgef-" + tname
+
+# "Internal" plurals of PGEF class names, particularly for use in "back
+# references" in a foreign key relationship
+
+PLURALS = {
+    'Activity'           : 'Activities',
+    'Acu'                : 'Acus',
+    'DataPackage'        : 'DataPackages',
+    'DataSet'            : 'DataSets',
+    'DigitalProduct'     : 'DigitalProducts',
+    'DigitalFile'        : 'DigitalFiles',
+    'Document'           : 'Documents',
+    'EeePart'            : 'EeeParts',
+    'Identifiable'       : 'Identifiables',
+    'Mime'               : 'Mimes',
+    'Model'              : 'Models',
+    'Organization'       : 'Organizations',
+    'ManagedObject'      : 'ManagedObjects',
+    'ProductInstance'    : 'ProductInstances',
+    'Product'            : 'Products',
+    'PartModel'          : 'PartModels',
+    'PartsListItem'      : 'PartsListItems',
+    'PartsList'          : 'PartsLists',
+    'Person'             : 'Persons',
+    'Product'            : 'Products',
+    'Project'            : 'Projects',
+    'Property'           : 'Properties',
+    'Representation'     : 'Representations',
+    'RoleAssignment'     : 'RoleAssignments',
+    'Role'               : 'Roles'
+    }
 
 def to_collection_name(cname):
     """
