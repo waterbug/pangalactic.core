@@ -84,12 +84,12 @@ MAIN_VIEWS = dict(
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
     )
 
-# STANDARD_VIEWS:  Class-specific standard fields for data exchange -- each
-# view maps a set of external names to their corresponding class attribute
-# names
+# STANDARD_VIEWS:  Class-specific "standard" fields -- each view maps a set of
+# standardized external names to their corresponding class attribute names
 STANDARD_VIEWS = dict(
     Requirement=['id',
                  'name',
+                 'req_type',
                  'allocated_to',
                  'req_level',
                  'description',
