@@ -6,7 +6,7 @@ import xlsxwriter
 
 from pangalactic.core              import prefs
 from pangalactic.core.meta         import MAIN_VIEWS
-from pangalactic.core.names        import get_mel_item_name
+from pangalactic.core.names        import get_mel_item_name, pname_to_header
 from pangalactic.core.parametrics  import (get_pval, get_dval, de_defz,
                                            parm_defz, round_to)
 from pangalactic.core.uberorb      import orb
@@ -916,26 +916,6 @@ def write_objects_to_xlsx(objs, file_path, view=None, use_level=False):
     fmts = {name : book.add_format(style)
             for name, style in xlsx_styles.items()}
     # TODO: figure out to apply levels to requirements ... for now, ignore
-    # level_fmts = {1: fmts['ctr_black_bg_12'],
-                  # 2: fmts['ctr_gray_bold_12'],
-                  # 3: fmts['ctr_12']
-                  # }
-    # name_fmts = {1: fmts['left_black_bg_12'],
-                 # 2: fmts['left_gray_bold_12'],
-                 # 3: fmts['left_12']
-                 # }
-    data_fmts = {1: fmts['float_right_black_bg_12'],
-                 2: fmts['float_right_gray_bold_12'],
-                 3: fmts['float_right_12']
-                 }
-    int_fmts = {1: fmts['int_right_black_bg_12'],
-                2: fmts['int_right_gray_bold_12'],
-                3: fmts['int_right_12']
-                }
-    txt_fmts = {1: fmts['txt_left_black_bg_12'],
-                2: fmts['txt_left_gray_bold_12'],
-                3: fmts['txt_left_12']
-                }
     # if use_level:
         # # first write the formatting to the whole row to set the bg color
         # sheet.write_row(row, 0, [' ']*48, level_fmts.get(level, level_fmts[3]))
@@ -948,33 +928,34 @@ def write_objects_to_xlsx(objs, file_path, view=None, use_level=False):
         # data_fmt = data_fmts.get(level, data_fmts[3])
         # int_fmt = int_fmts.get(level, int_fmts[3])
         # txt_fmt = txt_fmts.get(level, txt_fmts[3])
-    data_fmt = data_fmts[3]
-    int_fmt = int_fmts[3]
-    txt_fmt = txt_fmts[3]
-    txt_fmt.set_text_wrap()
-    dt_map = {'float': data_fmt,
-              'int': int_fmt,
-              'str': txt_fmt,
-              'text': txt_fmt}
     if objs:
         cname = objs[0].__class__.__name__
     else:
         cname = ''
     if not view:
         view = MAIN_VIEWS.get(cname, ['id', 'name', 'description'])
-    col_widths = {'id': 20,
-                  'name': 40,
-                  'description': 100,
-                  'level': 7,
-                  'rationale': 40}
+    col_widths = {'id': 15,
+                  'name': 30,
+                  'req_level': 8,
+                  'req_type': 15,
+                  'req_compliance': 12,
+                  'description': 40,
+                  'comment': 30,
+                  'rationale': 30
+                  }
     for j, a in enumerate(view):
         sheet.set_column(j, j, col_widths.get(a, 20))
-        sheet.write(0, j, a, fmts['ctr_black_bg_12'])
+        header = pname_to_header(a, cname)
+        sheet.write(0, j, header, fmts['ctr_black_bg_12'])
+    cell_format = book.add_format()
+    cell_format.set_text_wrap()
     for i, obj in enumerate(objs):
+        # d is a dict with string representations of all values, including
+        # values that are objects
+        d = orb.obj_view_to_dict(obj, view)
         for j, a in enumerate(view):
-            val = getattr(obj, a, '')
-            dtype = (de_defz.get(a) or {}).get('range_datatype')
-            sheet.write(i+1, j, val, dt_map.get(dtype, txt_fmt))
+            val = d.get(a, '') or ''
+            sheet.write(i+1, j, val, cell_format)
     book.close()
 
 
