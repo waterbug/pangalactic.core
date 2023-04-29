@@ -593,7 +593,7 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
         else:
             de_name = de_def.get('name') or pname
             ext_name = get_attr_ext_name(cname, de_name)
-            return '  \n  '.join(wrap(ext_name, width=7,
+            return '  \n  '.join(wrap(ext_name, width=20,
                                  break_long_words=False))
     elif project_oid:
         modes = (mode_defz.get(project_oid) or {}).get('modes')
@@ -605,7 +605,7 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
                                  break_long_words=False) + [units])
     # parts = ' '.join(pname.split('_'))
     ext_name = get_attr_ext_name(cname, pname)
-    return ' \n '.join(wrap(ext_name, width=7, break_long_words=False))
+    return ' \n '.join(wrap(ext_name, width=20, break_long_words=False))
 
 def header_to_pname(header, cname='', headers_are_ids=False, project_oid=None):
     """
