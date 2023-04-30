@@ -84,22 +84,6 @@ MAIN_VIEWS = dict(
     Test=(IDENTITY + ['verifies', 'purpose', 'comment']),
     )
 
-# STANDARD_VIEWS:  Class-specific "standard" fields -- each view maps a set of
-# standardized external names to their corresponding class attribute names
-STANDARD_VIEWS = dict(
-    Requirement=['id',
-                 'name',
-                 'req_type',
-                 'allocated_to',
-                 'req_level',
-                 'description',
-                 'rationale',
-                 'justification',
-                 'verification_method',
-                 'req_compliance',
-                 'comment']
-    )
-
 # PGXN_VIEWS:  Default fields/ordering for the PgxnObject "info", "narrative"
 # and "admin" tabs
 PGXN_VIEWS = dict(

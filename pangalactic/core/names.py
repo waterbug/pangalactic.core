@@ -440,6 +440,23 @@ EXT_NAMES_PLURAL = {
     'Property'            : 'Properties',
     }
 
+# STANDARD_VIEWS:  Class-specific "standard" fields -- each view maps a set of
+# standardized external names to their corresponding class attribute names
+# TODO:  Add namespaces, to enable different "vocabularies" of standard names
+STANDARD_VIEWS = dict(
+    Requirement=['id',
+                 'name',
+                 'req_type',
+                 'allocated_to',
+                 'req_level',
+                 'description',
+                 'rationale',
+                 'justification',
+                 'verification_method',
+                 'req_compliance',
+                 'comment']
+    )
+
 # attr_ext_alias, ATTR_EXT_NAMES, and EXT_NAME_ATTRS are internal, intended
 # only for use in the get_attr_ext_name() and get_ext_name_attr() functions,
 # respectively.  They are specified in order to capture external names that are
@@ -447,29 +464,29 @@ EXT_NAMES_PLURAL = {
 # later be restricted to specified namespaces.
 attr_ext_alias = {
     'HardwareProduct': [
-        ('version', 'ver'),
-        ('iteration', 'iter'),
-        ('version_sequence', 'seq'),
-        ('range_datatype', 'range'),
-        ('abbreviation', 'abbrev')
+        ('version', 'Ver'),
+        ('iteration', 'Iter'),
+        ('version_sequence', 'Seq'),
+        ('range_datatype', 'Range'),
+        ('abbreviation', 'Abbrev')
         ],
     'Requirement': [
-        ('allocated_to', 'section'),
-        ('comment', 'comments'),
-        ('id', 'ruid'),
-        ('name', 'title'),
-        ('req_type', 'reqt type'),
-        ('req_level', 'level'),
-        ('req_compliance', 'compliance'),
-        ('req_constraint_type', 'constraint type'),
-        ('req_dimensions', 'dimensions'),
-        ('req_maximum_value', 'maximum'),
-        ('req_minimum_value', 'minimum'),
-        ('req_tolerance', 'tolerance'),
-        ('req_tolerance_lower', 'lower tolerance'),
-        ('req_tolerance_upper', 'upper tolerance'),
-        ('description', 'text'),
-        ('verification_method', 'verification method')
+        ('allocated_to', 'Section'),
+        ('comment', 'Comments'),
+        ('id', 'ID'),
+        ('name', 'Title'),
+        ('req_type', 'Reqt Type'),
+        ('req_level', 'Level'),
+        ('req_compliance', 'Compliance'),
+        ('req_constraint_type', 'Constraint Type'),
+        ('req_dimensions', 'Dimensions'),
+        ('req_maximum_value', 'Maximum'),
+        ('req_minimum_value', 'Minimum'),
+        ('req_tolerance', 'Tolerance'),
+        ('req_tolerance_lower', 'Lower Tolerance'),
+        ('req_tolerance_upper', 'Upper Tolerance'),
+        ('description', 'Text'),
+        ('verification_method', 'Verification Method')
         ]
     }
 
@@ -496,9 +513,9 @@ def get_external_name_plural(cname):
 def get_attr_ext_name(cname, aname):
     try:
         return ATTR_EXT_NAMES.get(cname, {}).get(aname,
-                                                 aname.replace('_', ' '))
+                                         aname.replace('_', ' ').title())
     except:
-        return 'unknown'
+        return 'Unknown'
 
 def get_ext_name_attr(cname, extname):
     try:
@@ -586,7 +603,7 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
             return '  \n  '.join([pname, units])
         else:
             return '  \n  '.join(wrap(pd['name'], width=7,
-                                 break_long_words=False) + [units])
+                                      break_long_words=False) + [units])
     elif de_def:
         if headers_are_ids:
             return pname
@@ -594,7 +611,7 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
             de_name = de_def.get('name') or pname
             ext_name = get_attr_ext_name(cname, de_name)
             return '  \n  '.join(wrap(ext_name, width=20,
-                                 break_long_words=False))
+                                      break_long_words=False))
     elif project_oid:
         modes = (mode_defz.get(project_oid) or {}).get('modes')
         if modes and pname in modes:
@@ -602,7 +619,7 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
             if units:
                 units = '(' + units + ')'
             return '  \n  '.join(wrap(pname, width=7,
-                                 break_long_words=False) + [units])
+                                      break_long_words=False) + [units])
     # parts = ' '.join(pname.split('_'))
     ext_name = get_attr_ext_name(cname, pname)
     return ' \n '.join(wrap(ext_name, width=20, break_long_words=False))
