@@ -1946,6 +1946,17 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/domain -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;domain">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The name of the class that is the domain of a Property Definition.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;PropertyDefinition"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/dimensions -->
 
     <owl:DatatypeProperty rdf:about="&pgef;dimensions">
@@ -2286,6 +2297,15 @@ pgef:Model in the engineering domain generally maps to step:product_definition, 
     <owl:Class rdf:about="&pgef;ProductType">
         <rdfs:subClassOf rdf:resource="&pgef;ManagedObject"/>
         <rdfs:comment rdf:datatype="&xsd;string">A functional category or classification of a product.</rdfs:comment>
+    </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/PropertyDefinition -->
+
+    <owl:Class rdf:about="&pgef;PropertyDefinition">
+        <rdfs:subClassOf rdf:resource="&pgef;DataElementDefinition"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A property definition defines a data element that has a specified class as its domain.</rdfs:comment>
     </owl:Class>
 
 
