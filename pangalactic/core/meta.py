@@ -435,6 +435,9 @@ SELECTABLE_VALUES = dict(
         ('input', 'input'),
         ('output', 'output')
         ]),
+    req_type=dict([
+        ('functional', 'functional'),
+        ('performance', 'performance')]),
     req_compliance=dict([
         ('None', 'None'),
         ('Partial', 'Partial'),
