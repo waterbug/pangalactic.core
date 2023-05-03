@@ -440,10 +440,10 @@ EXT_NAMES_PLURAL = {
     'Property'            : 'Properties',
     }
 
-# STANDARD_VIEWS:  Class-specific "standard" fields -- each view maps a set of
+# STD_VIEWS:  Class-specific "standard" fields -- each view maps a set of
 # standardized external names to their corresponding class attribute names
 # TODO:  Add namespaces, to enable different "vocabularies" of standard names
-STANDARD_VIEWS = dict(
+STD_VIEWS = dict(
     Requirement=['id',
                  'name',
                  'req_type',
@@ -455,6 +455,35 @@ STANDARD_VIEWS = dict(
                  'verification_method',
                  'req_compliance',
                  'comment']
+    )
+
+# STD_ALIASES:  Class-specific aliases that map to names in STD_VIEWS
+STD_ALIASES = dict(
+    Requirement={
+        'id': 'id',
+        'ruid': 'id',
+        'title': 'name',
+        'name': 'name',
+        'req type': 'req_type',
+        'reqt type': 'req_type',
+        'type': 'req_type',
+        'allocated to': 'allocated_to',
+        'section': 'allocated_to',
+        'req level': 'req_level',
+        'reqt level': 'req_level',
+        'level': 'req_level',
+        'description': 'description',
+        'text': 'description',
+        'rationale': 'rationale',
+        'justification': 'justification',
+        'verification method': 'verification_method',
+        'verification': 'verification_method',
+        'req compliance': 'req_compliance',
+        'reqt compliance': 'req_compliance',
+        'compliance': 'req_compliance',
+        'comment': 'comment',
+        'comments': 'comment'
+        }
     )
 
 # attr_ext_alias, ATTR_EXT_NAMES, and EXT_NAME_ATTRS are internal, intended
