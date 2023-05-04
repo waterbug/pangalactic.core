@@ -1614,7 +1614,7 @@ class UberORB(object):
         """
         self.log.debug('* generating a new requirement id ...')
         project_id = getattr(reqt.owner, 'id', 'NO-PROJECT')
-        level = getattr(reqt, 'level', 1) or 1
+        level = getattr(reqt, 'level', 0) or 0
         seq = self.get_next_req_seq(reqt.owner, level)
         new_id = project_id + '-' + str(level) + '.' + str(seq)
         self.log.debug(f'  generated id: {new_id}')
