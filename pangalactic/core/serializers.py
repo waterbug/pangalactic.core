@@ -14,7 +14,7 @@ from pangalactic.core.parametrics import (deserialize_des,
                                           deserialize_parms,
                                           refresh_componentz,
                                           refresh_systemz,
-                                          refresh_req_allocz,
+                                          refresh_rqt_allocz,
                                           serialize_des, serialize_parms,
                                           update_de_defz, update_parm_defz,
                                           update_parmz_by_dimz)
@@ -565,7 +565,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     recompute_parmz_required = False
     refresh_componentz_required = False
     refresh_systemz_required = False
-    req_oids = set()
+    rqt_oids = set()
     acus = set()
     psus = set()
     # objs: list of all deserialized objects
@@ -895,18 +895,18 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     for acu in acus:
         # look for requirement allocations to acus ...
         if acu.allocated_requirements:
-            req_oids.update([r.oid for r in acu.allocated_requirements])
+            rqt_oids.update([r.oid for r in acu.allocated_requirements])
     for psu in psus:
         # look for requirement allocations to psus ...
         if psu.allocated_requirements:
-            req_oids.update([r.oid for r in psu.allocated_requirements])
+            rqt_oids.update([r.oid for r in psu.allocated_requirements])
     if recompute_parmz_required and not force_no_recompute:
         # orb.log.debug('  - deserialize recomputing parameters ...')
         orb.recompute_parmz()
         # orb.log.debug('    done.')
     for req in requirements:
-        # if there are any Requirement objects, refresh the req_allocz cache
-        refresh_req_allocz(req)
+        # if there are any Requirement objects, refresh the rqt_allocz cache
+        refresh_rqt_allocz(req)
     if dictify:
         return output
     else:

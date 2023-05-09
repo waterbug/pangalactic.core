@@ -47,7 +47,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           save_compz, save_parmz_by_dimz,
                                           parameterz, parm_defz,
                                           parmz_by_dimz, refresh_componentz,
-                                          refresh_req_allocz, req_allocz,
+                                          refresh_rqt_allocz, rqt_allocz,
                                           refresh_systemz,
                                           save_systemz, systemz,
                                           update_parm_defz,
@@ -668,10 +668,10 @@ class UberORB(object):
             del parameterz[oid]
         # [1] refresh allocations for current requirements
         for req in self.get_by_type('Requirement'):
-            refresh_req_allocz(req)
+            refresh_rqt_allocz(req)
         # [2] iterate over current set of performance requirements, which
-        # should already have been identified by running refresh_req_allocz()
-        for req_oid in req_allocz:
+        # should already have been identified by running refresh_rqt_allocz()
+        for rqt_oid in rqt_allocz:
             # compute_requirement_margin() returns a tuple:
             # 0: oid of Acu or PSU to which reqt is allocated
             # 1: id of performance parameter
@@ -679,7 +679,7 @@ class UberORB(object):
             # 3: units of nte value
             # 4: margin [result] (expressed as a %)
             oid, pid, nte, nte_units, result = compute_requirement_margin(
-                                                                    req_oid)
+                                                                    rqt_oid)
             if oid:
                 margin_pid = get_parameter_id(pid, 'Margin')
                 nte_pid = get_parameter_id(pid, 'NTE')
@@ -696,7 +696,7 @@ class UberORB(object):
             else:
                 # if oid is empty, reason for failure will be in "result"
                 # self.log.debug(' - margin comp. failed for req with oid:')
-                # self.log.debug('   "{}"'.format(req_oid))
+                # self.log.debug('   "{}"'.format(rqt_oid))
                 # self.log.debug('   computation result: {}'.format(result))
                 pass
         dispatcher.send('parameters recomputed')
@@ -926,7 +926,7 @@ class UberORB(object):
         # build the 'componentz' and 'systemz' runtime caches
         self._build_componentz_cache()
         self._build_systemz_cache()
-        # update the req_allocz runtime cache (used in computing margins)
+        # update the rqt_allocz runtime cache (used in computing margins)
         self.recompute_parmz()
         self.log.info('  + all reference data loaded.')
 
@@ -1291,18 +1291,18 @@ class UberORB(object):
                         msg = 'component was changed, checking for '
                         msg += 'allocated requirements ...'
                         self.log.debug(f'   {msg}')
-                        alloc_reqs = [req_oid for req_oid in req_allocz
-                                      if req_allocz[req_oid][0] == oid]
+                        alloc_reqs = [rqt_oid for rqt_oid in rqt_allocz
+                                      if rqt_allocz[rqt_oid][0] == oid]
                         if alloc_reqs:
-                            for req_oid in alloc_reqs:
-                                req = self.get(req_oid)
+                            for rqt_oid in alloc_reqs:
+                                req = self.get(rqt_oid)
                                 if req:
                                     self.log.debug('   alloc reqts found ...')
                                     recompute_required = True
                                     self.log.debug('   recompute will be done')
                                 else:
                                     # if requirement not there, remove alloc
-                                    del alloc_reqs[req_oid]
+                                    del alloc_reqs[rqt_oid]
                         else:
                             self.log.debug('   no allocated reqts found.')
                     else:
@@ -1336,18 +1336,18 @@ class UberORB(object):
                         msg = 'system was changed, checking for '
                         msg += 'allocated requirements ...'
                         self.log.debug(f'   {msg}')
-                        alloc_reqs = [req_oid for req_oid in req_allocz
-                                      if req_allocz[req_oid][0] == oid]
+                        alloc_reqs = [rqt_oid for rqt_oid in rqt_allocz
+                                      if rqt_allocz[rqt_oid][0] == oid]
                         if alloc_reqs:
-                            for req_oid in alloc_reqs:
-                                req = self.get(req_oid)
+                            for rqt_oid in alloc_reqs:
+                                req = self.get(rqt_oid)
                                 if req:
                                     self.log.debug('   alloc reqts found ...')
                                     recompute_required = True
                                     self.log.debug('   recompute will be done')
                                 else:
                                     # if requirement not there, remove alloc
-                                    del alloc_reqs[req_oid]
+                                    del alloc_reqs[rqt_oid]
                         else:
                             self.log.debug('   no allocated reqts found.')
                     else:
@@ -1597,7 +1597,7 @@ class UberORB(object):
             abbrev += '-Template'
         return '-'.join([owner_id, abbrev, next_sufx])
 
-    def gen_req_id(self, reqt):
+    def gen_rqt_id(self, reqt):
         """
         Generate the `id` attribute for a requirement. (NOTE:  this function
         assumes that the requirement has already been saved and is therefore
@@ -1615,12 +1615,12 @@ class UberORB(object):
         self.log.debug('* generating a new requirement id ...')
         project_id = getattr(reqt.owner, 'id', 'NO-PROJECT')
         level = getattr(reqt, 'level', 0) or 0
-        seq = self.get_next_req_seq(reqt.owner, level)
+        seq = self.get_next_rqt_seq(reqt.owner, level)
         new_id = project_id + '-' + str(level) + '.' + str(seq)
         self.log.debug(f'  generated id: {new_id}')
         return new_id
 
-    def get_next_req_seq(self, owner, level):
+    def get_next_rqt_seq(self, owner, level):
         """
         Get the next sequence number for a given project and requirement level.
         This is intended for use in creating a new requirement "id" in the
@@ -1635,10 +1635,10 @@ class UberORB(object):
         level = level or 0
         reqs = orb.search_exact(cname='Requirement', level=level, owner=owner)
         seq = 0
-        req_ids = [getattr(req, 'id', None) or 'unknown'
+        rqt_ids = [getattr(req, 'id', None) or 'unknown'
                    for req in reqs]
-        real_ids = [rid for rid in req_ids if rid != 'unknown']
-        prev_seqs = [req_id.split('.')[-1] for req_id in real_ids]
+        real_ids = [rid for rid in rqt_ids if rid != 'unknown']
+        prev_seqs = [rqt_id.split('.')[-1] for rqt_id in real_ids]
         if prev_seqs:
             n = 1
             prev_seqs.reverse()
@@ -2230,9 +2230,9 @@ class UberORB(object):
                         info.append('         delete failed, rolled back.')
                     # computable_form -> require recompute
                     recompute_required = True
-                # if its oid is in req_allocz, remove it
-                if obj.oid in req_allocz:
-                    del req_allocz[obj.oid]
+                # if its oid is in rqt_allocz, remove it
+                if obj.oid in rqt_allocz:
+                    del rqt_allocz[obj.oid]
             if obj.oid in parameterz:
                 # NOTE: VERY IMPORTANT! remove oid from parameterz
                 del parameterz[obj.oid]

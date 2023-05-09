@@ -936,9 +936,9 @@ def write_objects_to_xlsx(objs, file_path, view=None, use_level=False):
         view = MAIN_VIEWS.get(cname, ['id', 'name', 'description'])
     col_widths = {'id': 15,
                   'name': 30,
-                  'req_level': 8,
-                  'req_type': 15,
-                  'req_compliance': 15,
+                  'rqt_level': 8,
+                  'rqt_type': 15,
+                  'rqt_compliance': 15,
                   'description': 40,
                   'comment': 30,
                   'rationale': 30

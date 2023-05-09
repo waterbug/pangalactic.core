@@ -596,11 +596,11 @@ def save_parmz_by_dimz(dir_path):
         f.write(json.dumps(parmz_by_dimz, separators=(',', ':'),
                            indent=4, sort_keys=True))
 
-# req_allocz:  runtime requirement allocations cache
+# rqt_allocz:  runtime requirement allocations cache
 # purpose:  optimize performance of margin calculations
-# format:  {req_oid : [usage_oid, obj_oid, alloc_ref, pid, constraint]}
+# format:  {rqt_oid : [usage_oid, obj_oid, alloc_ref, pid, constraint]}
 # ... where:
-#   req_oid (str):  the oid of the requirement
+#   rqt_oid (str):  the oid of the requirement
 #   usage_oid (str): the oid of the Acu, ProjectSystemUsage, or Project to
 #       which the requirement is allocated
 #   obj_oid (str):  the oid of the component or system of the usage
@@ -623,7 +623,7 @@ def save_parmz_by_dimz(dir_path):
 #       ['single_value' | 'maximum' | 'minimum' ]
 #   tol_type (str): name of tolerance type, one of:
 #       ['symmetric' | 'asymmetric']
-req_allocz = {}
+rqt_allocz = {}
 Constraint = namedtuple('Constraint',
              'units target max min tol upper lower constraint_type tol_type')
 
@@ -632,61 +632,61 @@ Constraint = namedtuple('Constraint',
 # format:  {usage_oid : [reqt_oids]}
 allocz = {}
 
-def serialize_req_allocz(req_allocz_data):
+def serialize_rqt_allocz(rqt_allocz_data):
     """
-    Serialize a `req_allocz` data set to a json-dumpable format.
+    Serialize a `rqt_allocz` data set to a json-dumpable format.
     """
-    log.debug('* serialize_req_allocz() ...')
-    ser_req_allocz = {}
-    for oid, alloc in req_allocz_data.items():
+    log.debug('* serialize_rqt_allocz() ...')
+    ser_rqt_allocz = {}
+    for oid, alloc in rqt_allocz_data.items():
         usage_oid, obj_oid, alloc_ref, pid, constraint = alloc
         constraint_dict = constraint._asdict()
         ser_alloc = [usage_oid, obj_oid, alloc_ref, pid, constraint_dict]
-        ser_req_allocz[oid] = ser_alloc
-    return ser_req_allocz
+        ser_rqt_allocz[oid] = ser_alloc
+    return ser_rqt_allocz
 
-def deserialize_req_allocz(ser_req_allocz):
+def deserialize_rqt_allocz(ser_rqt_allocz):
     """
-    Deserialize a `req_allocz` data set from a json-dumped format.
+    Deserialize a `rqt_allocz` data set from a json-dumped format.
 
-    NOTE: the deserialize_req_allocz() function is only used to deserialize
-    req_allocz data received from the server.
+    NOTE: the deserialize_rqt_allocz() function is only used to deserialize
+    rqt_allocz data received from the server.
     """
-    log.debug('* deserialize_req_allocz() ...')
-    req_allocz_data = {}
-    for oid, ser_alloc in ser_req_allocz.items():
+    log.debug('* deserialize_rqt_allocz() ...')
+    rqt_allocz_data = {}
+    for oid, ser_alloc in ser_rqt_allocz.items():
         usage_oid, obj_oid, alloc_ref, pid, ser_constraint = ser_alloc
         constraint = Constraint(**ser_constraint)
-        req_allocz_data[oid] = [usage_oid, obj_oid, alloc_ref, pid, constraint]
-    n = len(req_allocz_data)
-    log.debug(f'  - req_allocz deserialized ({n} req allocations).')
-    return req_allocz_data
+        rqt_allocz_data[oid] = [usage_oid, obj_oid, alloc_ref, pid, constraint]
+    n = len(rqt_allocz_data)
+    log.debug(f'  - rqt_allocz deserialized ({n} req allocations).')
+    return rqt_allocz_data
 
-def save_req_allocz(dir_path):
+def save_rqt_allocz(dir_path):
     """
-    Save the `req_allocz` cache to a json file.
+    Save the `rqt_allocz` cache to a json file.
     """
-    fpath = os.path.join(dir_path, 'req_allocs.json')
-    ser_req_allocz = serialize_req_allocz(req_allocz)
+    fpath = os.path.join(dir_path, 'rqt_allocs.json')
+    ser_rqt_allocz = serialize_rqt_allocz(rqt_allocz)
     with open(fpath, 'w') as f:
-        f.write(json.dumps(ser_req_allocz, separators=(',', ':'),
+        f.write(json.dumps(ser_rqt_allocz, separators=(',', ':'),
                            indent=4, sort_keys=True))
 
-def load_req_allocz(dir_path):
+def load_rqt_allocz(dir_path):
     """
-    Load the `req_allocz` cache from a json file.
+    Load the `rqt_allocz` cache from a json file.
     """
-    fpath = os.path.join(dir_path, 'req_allocs.json')
+    fpath = os.path.join(dir_path, 'rqt_allocs.json')
     if os.path.exists(fpath):
         with open(fpath) as f:
             try:
-                stored_req_allocz = json.loads(f.read())
+                stored_rqt_allocz = json.loads(f.read())
             except:
                 return 'fail'
-        req_allocz.update(deserialize_req_allocz(stored_req_allocz))
+        rqt_allocz.update(deserialize_rqt_allocz(stored_rqt_allocz))
         return 'success'
     else:
-        log.debug('  - "req_allocs.json" was not found.')
+        log.debug('  - "rqt_allocs.json" was not found.')
         return 'not found'
 
 def save_allocz(dir_path):
@@ -735,9 +735,9 @@ def round_to(x, n=4):
         return int(val)
     return val
 
-def refresh_req_allocz(req):
+def refresh_rqt_allocz(req):
     """
-    Refresh the `req_allocz` cache for a Requirement instance.  This must be
+    Refresh the `rqt_allocz` cache for a Requirement instance.  This must be
     called whenever a Requirement instance is created, modified, or deleted or
     an Acu or ProjectSystemUsage is deleted or modified, which could affect the
     'obj_oid' and/or 'alloc_ref' items.
@@ -746,13 +746,13 @@ def refresh_req_allocz(req):
     caches, nor does it update the parameterz cache, so it can be used by any
     margin computation function.
 
-    The 'req_allocz' dictionary has the form:
+    The 'rqt_allocz' dictionary has the form:
 
-        {req_oid : [usage_oid, obj_oid, alloc_ref, pid, constraint]}
+        {rqt_oid : [usage_oid, obj_oid, alloc_ref, pid, constraint]}
 
     ... where:
 
-      req_oid (str):  the oid of the requirement
+      rqt_oid (str):  the oid of the requirement
       usage_oid (str): the oid of the Acu or ProjectSystemUsage to which
           the requirement is allocated
       obj_oid (str):  the oid of the component or system of the usage
@@ -779,8 +779,8 @@ def refresh_req_allocz(req):
     Args:
         req (Requirement):  a Requirement instance
     """
-    # req_id = getattr(req, 'id', 'no id') or 'no id'
-    # log.debug(f'* refresh_req_allocz({req_id})')
+    # rqt_id = getattr(req, 'id', 'no id') or 'no id'
+    # log.debug(f'* refresh_rqt_allocz({rqt_id})')
     usage_oid = None
     alloc_ref = None
     obj_oid = None
@@ -815,14 +815,14 @@ def refresh_req_allocz(req):
     else:
         # req is not allocated; if present, remove it
         # log.debug('  req is not allocated')
-        if req.oid in req_allocz:
-            del req_allocz[req.oid]
-            # log.debug('  + removed from req_allocz.')
+        if req.oid in rqt_allocz:
+            del rqt_allocz[req.oid]
+            # log.debug('  + removed from rqt_allocz.')
         return
-    if req.req_type == 'functional':
+    if req.rqt_type == 'functional':
         # log.debug('  functional req (no parameter or constraint).')
         if usage_oid:
-            req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+            rqt_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
     relation = req.computable_form
     pid = None
     if relation:
@@ -834,28 +834,28 @@ def refresh_req_allocz(req):
             pid = parm_def.id
         else:
             # log.debug('  no ParameterRelation found -> functional req.')
-            req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+            rqt_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
             return
     else:
         # log.debug('  no computable_form found -> functional req.')
-        req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+        rqt_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
         return
     if pid:
-        req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, pid,
+        rqt_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, pid,
                                  Constraint._make((
-                                     req.req_units,
-                                     req.req_target_value,
-                                     req.req_maximum_value,
-                                     req.req_minimum_value,
-                                     req.req_tolerance,
-                                     req.req_tolerance_upper,
-                                     req.req_tolerance_lower,
-                                     req.req_constraint_type,
-                                     req.req_tolerance_type
+                                     req.rqt_units,
+                                     req.rqt_target_value,
+                                     req.rqt_maximum_value,
+                                     req.rqt_minimum_value,
+                                     req.rqt_tolerance,
+                                     req.rqt_tolerance_upper,
+                                     req.rqt_tolerance_lower,
+                                     req.rqt_constraint_type,
+                                     req.rqt_tolerance_type
                                      ))]
     else:
         # log.debug('  no parameter found; treat as functional req.')
-        req_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+        rqt_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
 
 def get_parameter_id(variable, context_id):
     """
@@ -1631,21 +1631,21 @@ def compute_margin(usage_oid, pid, default=0):
     """
     # log.debug('* compute_margin()')
     variable, context = get_variable_and_context(pid)
-    # log.debug('  using req_allocz: {}'.format(str(req_allocz)))
+    # log.debug('  using rqt_allocz: {}'.format(str(rqt_allocz)))
     # find requirements allocated to the specified usage and constraining the
     # specified variable
-    allocated_req_oids = [req_oid for req_oid in req_allocz
-                          if req_allocz[req_oid][0] == usage_oid
-                          and req_allocz[req_oid][3] == variable]
-    if not allocated_req_oids:
+    allocated_rqt_oids = [rqt_oid for rqt_oid in rqt_allocz
+                          if rqt_allocz[rqt_oid][0] == usage_oid
+                          and rqt_allocz[rqt_oid][3] == variable]
+    if not allocated_rqt_oids:
         # no requirement constraining the specified variable is allocated to
         # this usage
         # txt = 'usage "{}" has no reqt allocated to it constraining "{}".'
         # log.debug('  {}'.format(txt.format(usage_oid, variable)))
         return 'undefined'
     # for now, assume there is only one reqt that satisfies
-    req_oid = allocated_req_oids[0]
-    usage_oid, obj_oid, alloc_ref, pid, constraint = req_allocz[req_oid]
+    rqt_oid = allocated_rqt_oids[0]
+    usage_oid, obj_oid, alloc_ref, pid, constraint = rqt_allocz[rqt_oid]
     if constraint.constraint_type == 'maximum':
         nte = constraint.max
         nte_units = constraint.units
@@ -1674,7 +1674,7 @@ def compute_margin(usage_oid, pid, default=0):
     # log.debug('  ... margin is {}%'.format(margin * 100.0))
     return margin
 
-def compute_requirement_margin(req_oid, default=0):
+def compute_requirement_margin(rqt_oid, default=0):
     """
     Compute the "Margin" for the specified performance requirement. So far,
     "Margin" is only defined for performance requirements that specify a
@@ -1683,7 +1683,7 @@ def compute_requirement_margin(req_oid, default=0):
     system or component to which the requirement is currently allocated.
 
     Args:
-        req_oid (str): the oid of the performance requirement for which margin
+        rqt_oid (str): the oid of the performance requirement for which margin
             is to be computed
 
     Keyword Args:
@@ -1695,13 +1695,13 @@ def compute_requirement_margin(req_oid, default=0):
         allocated_to_oid, parameter_id, margin (tuple)
     """
     # log.debug('* compute_requirement_margin()')
-    if req_oid not in req_allocz:
+    if rqt_oid not in rqt_allocz:
         # TODO: notify user 
-        msg = 'Requirement {} is not allocated.'.format(req_oid)
+        msg = 'Requirement {} is not allocated.'.format(rqt_oid)
         return (None, None, None, None, msg)
-    usage_oid, obj_oid, alloc_ref, pid, constraint = req_allocz[req_oid]
+    usage_oid, obj_oid, alloc_ref, pid, constraint = rqt_allocz[rqt_oid]
     if not pid:
-        msg = 'Requirement {} is not a performance reqt.'.format(req_oid)
+        msg = 'Requirement {} is not a performance reqt.'.format(rqt_oid)
         return (None, None, None, None, msg)
     if constraint.constraint_type == 'maximum':
         try:

@@ -1363,9 +1363,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_compliance -->
+    <!-- http://pangalactic.us/pgef/rqt_compliance -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_compliance">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_compliance">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The extent to which the mission, system, or component to which the Requirement is allocated meets the Requirement.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1374,9 +1374,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_level -->
+    <!-- http://pangalactic.us/pgef/rqt_level -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_level">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_level">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The level of a requirement within the hierarchy of a system's requirements.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1407,9 +1407,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_type -->
+    <!-- http://pangalactic.us/pgef/rqt_type -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_type">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_type">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The type of a Requirement: functional or performance.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1418,9 +1418,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_constraint_type -->
+    <!-- http://pangalactic.us/pgef/rqt_constraint_type -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_constraint_type">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_constraint_type">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The type of constraint specified by a Requirement: a specified maximum or minimum, a specified value with a tolerance, or an allowable range specified by a pair of maximum and minimum values.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1429,9 +1429,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_subject -->
+    <!-- http://pangalactic.us/pgef/rqt_subject -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_subject">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_subject">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The initial element in a performance Requirement RDF-style "triple", composed of the name of the system/subsystem or function to which the Requirement is allocated and the dimensions of the parameter to be constrained (e.g. "Mass").</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1440,9 +1440,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_predicate -->
+    <!-- http://pangalactic.us/pgef/rqt_predicate -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_predicate">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_predicate">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The middle element in a performance Requirement RDF-style "triple", composed of a verb phrase "shall [be]" and some form of constraint expression (e.g., "less than", etc.).</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1451,9 +1451,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_object -->
+    <!-- http://pangalactic.us/pgef/rqt_object -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_object">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_object">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The final element in a performance Requirement RDF-style "triple", composed of some combination of values and units.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1462,9 +1462,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_tolerance_type -->
+    <!-- http://pangalactic.us/pgef/rqt_tolerance_type -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_tolerance_type">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_tolerance_type">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The type of tolerance (symmetric or asymmetric) specified for a Requirement with specified value.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1473,9 +1473,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_tolerance -->
+    <!-- http://pangalactic.us/pgef/rqt_tolerance -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_tolerance">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_tolerance">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is a specified value with a symmetric tolerance, the value of the tolerance.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1484,9 +1484,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_tolerance_lower -->
+    <!-- http://pangalactic.us/pgef/rqt_tolerance_lower -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_tolerance_lower">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_tolerance_lower">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">For a requirement whose constraint is a specified value with an asymmetric tolerance, the value of the lower tolerance limit.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1495,9 +1495,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_tolerance_upper -->
+    <!-- http://pangalactic.us/pgef/rqt_tolerance_upper -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_tolerance_upper">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_tolerance_upper">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is a specified value with an asymmetric tolerance, the value of the upper tolerance limit.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1506,9 +1506,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_minimum_value -->
+    <!-- http://pangalactic.us/pgef/rqt_minimum_value -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_minimum_value">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_minimum_value">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint has a minimum, the value of the minimum.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1517,9 +1517,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_maximum_value -->
+    <!-- http://pangalactic.us/pgef/rqt_maximum_value -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_maximum_value">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_maximum_value">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint has a maximum, the value of the maximum.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1528,9 +1528,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_target_value -->
+    <!-- http://pangalactic.us/pgef/rqt_target_value -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_target_value">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_target_value">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">For a Requirement whose constraint is expressed as a specific value (possibly with a symmetric or asymmetric tolerance), the value.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>
@@ -1539,9 +1539,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/req_units -->
+    <!-- http://pangalactic.us/pgef/rqt_units -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;req_units">
+    <owl:DatatypeProperty rdf:about="&pgef;rqt_units">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">For a performance Requirement, the units in which all related constraint values are expressed.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Requirement"/>

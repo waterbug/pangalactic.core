@@ -27,7 +27,7 @@ from pangalactic.core.parametrics import (compute_margin,
                                           load_mode_defz, save_mode_defz,
                                           mode_defz,
                                           # PowerState,
-                                          req_allocz, round_to,
+                                          rqt_allocz, round_to,
                                           serialize_des,
                                           serialize_parms,
                                           save_parmz, save_data_elementz)
@@ -169,9 +169,9 @@ class OrbTest(unittest.TestCase):
         value_oids = set(oids) - set([o.oid for o in new_objs])
         expected_oids = set()
         req = orb.select('Requirement', id_ns='test')
-        expected_req_oid = 'test:H2G2:Spacecraft-Mass'
+        expected_rqt_oid = 'test:H2G2:Spacecraft-Mass'
         value = [value_oids, new_objs, req.oid]
-        expected = [expected_oids, objs, expected_req_oid]
+        expected = [expected_oids, objs, expected_rqt_oid]
         self.assertEqual(expected, value)
 
     def test_07_verify_deserialized_requirement_with_alloc(self):
@@ -612,7 +612,7 @@ class OrbTest(unittest.TestCase):
         """
         CASE:  deserialize a collection of related objects.  Note that this
         also tests the deserializer's refreshing of the requirement allocation
-        cache, 'req_allocz', since 'related_test_objects' contains an allocated
+        cache, 'rqt_allocz', since 'related_test_objects' contains an allocated
         requirement and its allocation, which will be further exercised in
         'test_22_compute_margin' and 'test_23_compute_requirement_margin'.
         """
@@ -620,7 +620,7 @@ class OrbTest(unittest.TestCase):
         by_oid = {o.oid : o for o in objs}
         sc_acu_oids = [f'test:spacecraft3-acu-{n}' for n in range(1, 7)]
         value = [
-            bool('test:OTHER:Spacecraft-Mass' in req_allocz),
+            bool('test:OTHER:Spacecraft-Mass' in rqt_allocz),
             by_oid['test:OTHER:system-1'].project,
             by_oid['test:OTHER:system-1'].system,
             by_oid['test:spacecraft3'].components,
@@ -716,7 +716,7 @@ class OrbTest(unittest.TestCase):
         value = compute_margin('test:OTHER:system-1', 'm')
         mev = get_pval('test:spacecraft3', 'm[MEV]')
         perf_reqt = orb.get('test:OTHER:Spacecraft-Mass')
-        nte = perf_reqt.req_maximum_value
+        nte = perf_reqt.rqt_maximum_value
         expected = round_to(((nte - mev) / nte))
         self.assertEqual(expected, value)
 
@@ -728,10 +728,10 @@ class OrbTest(unittest.TestCase):
         value = compute_requirement_margin('test:OTHER:Spacecraft-Mass')
         mev = get_pval('test:spacecraft3', 'm[MEV]')
         perf_reqt = orb.get('test:OTHER:Spacecraft-Mass')
-        nte = perf_reqt.req_maximum_value
+        nte = perf_reqt.rqt_maximum_value
         margin = round_to(((nte - mev) / nte))
         # expected output is (oid of allocated node, parameter id, margin)
-        expected = ('test:OTHER:system-1', 'm', nte, perf_reqt.req_units, margin)
+        expected = ('test:OTHER:system-1', 'm', nte, perf_reqt.rqt_units, margin)
         self.assertEqual(expected, value)
 
     def test_26_role_based_perms(self):

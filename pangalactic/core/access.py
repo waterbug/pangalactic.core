@@ -247,9 +247,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                     return perms
         if isinstance(obj, orb.classes['Requirement']):
             # Requirements (subclass of ManagedObject) are a special case
-            req_mgrs = set(['Administrator', 'systems_engineer',
+            rqt_mgrs = set(['Administrator', 'systems_engineer',
                             'lead_engineer'])
-            if req_mgrs & role_ids:
+            if rqt_mgrs & role_ids:
                 perms = ['view']
                 if server_or_connected_client:
                     # mods and deletions are only allowed on server or a

@@ -77,7 +77,7 @@ MAIN_VIEWS = dict(
     Relation=(IDENTITY + ['formulation']),
     Representation=(IDENTITY + ['of_object', 'representation_purpose']),
     RepresentationFile=(IDENTITY + ['of_representation']),
-    Requirement=['id', 'req_level', 'name', 'req_type', 'req_compliance',
+    Requirement=['id', 'rqt_level', 'name', 'rqt_type', 'rqt_compliance',
                  'description', 'rationale', 'justification', 'comment'],
     RoleAssignment=['id', 'assigned_role', 'assigned_to',
                     'role_assignment_context'],
@@ -87,13 +87,13 @@ MAIN_VIEWS = dict(
 # PGXN_VIEWS:  Default fields/ordering for the PgxnObject "info", "narrative"
 # and "admin" tabs
 PGXN_VIEWS = dict(
-    info=['public', 'computable_form', 'req_type', 'req_constraint_type',
-          'req_dimensions', 'req_target_value', 'req_tolerance',
-          'req_tolerance_type', 'req_tolerance_lower', 'req_tolerance_upper',
-          'req_maximum_value', 'req_minimum_value', 'validated',
+    info=['public', 'computable_form', 'rqt_type', 'rqt_constraint_type',
+          'rqt_dimensions', 'rqt_target_value', 'rqt_tolerance',
+          'rqt_tolerance_type', 'rqt_tolerance_lower', 'rqt_tolerance_upper',
+          'rqt_maximum_value', 'rqt_minimum_value', 'validated',
           'verification_method'],
-    narrative=['comment', 'rationale', 'purpose', 'req_subject',
-               'req_predicate', 'req_object'],
+    narrative=['comment', 'rationale', 'purpose', 'rqt_subject',
+               'rqt_predicate', 'rqt_object'],
     admin=['oid', 'url', 'creator', 'create_datetime', 'modifier',
            'mod_datetime'])
 
@@ -435,10 +435,10 @@ SELECTABLE_VALUES = dict(
         ('input', 'input'),
         ('output', 'output')
         ]),
-    req_type=dict([
+    rqt_type=dict([
         ('functional', 'functional'),
         ('performance', 'performance')]),
-    req_compliance=dict([
+    rqt_compliance=dict([
         ('None', 'None'),
         ('Partial', 'Partial'),
         ('Full', 'Full')])
@@ -528,9 +528,9 @@ PGEF_COL_WIDTHS = {
             'range_datatype': 50,
             'rationale': 200,
             'representations': 100,
-            'req_compliance': 100,
-            'req_level': 50,
-            'req_type': 100,
+            'rqt_compliance': 100,
+            'rqt_level': 50,
+            'rqt_type': 100,
             'text': 300,
             'url': 100,
             'version': 50,
