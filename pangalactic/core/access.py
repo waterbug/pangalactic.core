@@ -1,6 +1,7 @@
 """
 Functions related to object access permissions
 """
+import traceback
 from pangalactic.core         import state, config
 from pangalactic.core.uberorb import orb
 
@@ -155,6 +156,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     server = not state.get('client')
     client = state.get('client')
     connected = state.get('connected')
+    server_or_connected_client = server or (client and connected)
     object_not_synced = obj.oid not in state.get('synced_oids', [])
     if is_global_admin(user):
         # global admin is omnipotent, except for deleting projects ...
@@ -164,18 +166,18 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             # (state.get('connected') or
              # obj.oid not in state.get('synced_oids', []))):
         if server or (client and (connected or object_not_synced)):
-            # deletions and are only allowed on the client if connected or
+            # deletions and mods are only allowed on the client if connected or
             # object has not been synced to the server
             perms += ['modify', 'delete']
         # orb.log.debug('  perms: {}'.format(perms))
         if debugging:
             perms.append('global admin perms')
         return perms
-    if client and (not connected and object_not_synced):
+    if client and not connected and object_not_synced:
         # client user always has full perms when not connected AND the object
         # has not been synced to the repo (which implies that the user created
         # the object)
-        orb.log.debug('  full perms: offline & object not synced.')
+        # orb.log.debug('  full perms: offline & object not synced.')
         perms = ['view', 'modify', 'delete', 'offline & object not synced']
         return perms
     else:
@@ -188,9 +190,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         # instance of Person, full perms ...
         if (hasattr(obj, 'creator') and obj.creator is user and
             not isinstance(obj, orb.classes['Person'])):
-            orb.log.debug('  user is object creator.')
+            # orb.log.debug('  user is object creator.')
             perms = ['view']
-            if server or (client and connected):
+            if server_or_connected_client:
                 perms += ['delete', 'modify']
             # orb.log.debug('  perms: {}'.format(perms))
             if debugging:
@@ -227,7 +229,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                         # '  user is authorized for ProductType "{}".'.format(
                         # pt_id))
                     perms = ['view']
-                    if server or (client and connected):
+                    if server_or_connected_client:
                         # mods and deletions are only allowed on the server or
                         # a connected client
                         perms += ['modify', 'delete']
@@ -249,7 +251,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                             'lead_engineer'])
             if req_mgrs & role_ids:
                 perms = ['view']
-                if server or (client and connected):
+                if server_or_connected_client:
                     # mods and deletions are only allowed on server or a
                     # connected client
                     perms += ['modify', 'delete']
@@ -300,7 +302,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if assembly_type in subsystem_types:
                 # orb.log.debug('  - assembly product_type is relevant.')
                 perms = ['view']
-                if server or (client and connected):
+                if server_or_connected_client:
                     # mods and deletions are only allowed on server or a
                     # connected client
                     perms += ['modify', 'delete']
@@ -313,8 +315,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                   in subsystem_types):
                 # orb.log.debug('  - component product_type is relevant.')
                 perms = ['view']
-                if state.get('connected') and not frozen:
-                    # mods and deletions are only allowed if connected
+                if server_or_connected_client:
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 if debugging:
@@ -326,9 +327,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 if pt in subsystem_types:
                     # orb.log.debug('  - TBD product_type_hint is relevant.')
                     perms = ['view']
-                    if server or (client and connected):
-                        # mods and deletions are only allowed on server or a
-                        # connected client
+                    if server_or_connected_client:
                         perms += ['modify', 'delete']
                     # orb.log.debug('    perms: {}'.format(perms))
                     if debugging:
@@ -361,9 +360,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 # orb.log.debug('  - user is authorized by role(s) ...')
                 # orb.log.debug('    {}'.format(list(roles & auth_roles)))
                 perms = ['view']
-                if server or (client and connected):
-                    # mods and deletions are only allowed on server or a
-                    # connected client
+                if server_or_connected_client:
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 if debugging:
@@ -378,23 +375,21 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             return perms
         # [5] is it a Flow?
         elif isinstance(obj, orb.classes['Flow']):
-            # access depends on the user's permissions on 'context'
+            # orb.log.debug('* get_perms for Flow ...')
+            # any user with permissions on 'context' *or* on either Port of the
+            # Flow will have the superset of those permissions
             perms = []
             try:
-                start_assmb_oid = obj.start_port_context.assembly.oid
-                end_assmb_oid = obj.end_port_context.assembly.oid
-                if start_assmb_oid == end_assmb_oid:
-                    # case 1: flow is between components in an assembly
-                    perms = get_perms(obj.start_port_context.assembly,
-                                      user=user)
-                else:
-                    # case 2: flow is between a component and an assembly port
-                    if start_assmb_oid == obj.end_port.of_product.oid:
-                        perms = get_perms(obj.end_port.of_product, user=user)
-                    else:
-                        perms = get_perms(obj.start_port.of_product, user=user)
+                s = set(get_perms(obj.start_port_context, user=user))
+                s |= set(get_perms(obj.end_port_context, user=user))
+                s |= set(get_perms(obj.end_port.of_product, user=user))
+                s |= set(get_perms(obj.start_port.of_product, user=user))
+                perms = list(s)
+                # orb.log.debug(f'  perms: {perms}')
             except:
                 # perms could not be determined
+                orb.log.debug('* get_perms() encountered an exception:')
+                orb.log.debug(f'  {traceback.format_exc}')
                 perms = []
             if debugging:
                 perms.append('[5] role-based perms (Flow)')
