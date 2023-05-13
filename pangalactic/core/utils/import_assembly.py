@@ -6,38 +6,39 @@ from pprint import pprint
 # from pangalactic.core.uberorb import orb
 from pangalactic.core.utils.part21 import parse_p21_data
 
-# nauo attrs:
-#     - id                   (identifier) [product_definition_relationship]
-#     - name                 (label)      [product_definition_relationship]
-#     - description [OPTIONAL](text)      [product_definition_relationship]
-#     - relating_product_def (product_definition) [product_definition_relationship]
-#     - related_product_def  (product_definition) [product_definition_relationship]
-#     - reference_designator [OPTIONAL](identifier) [acu]
+# Defined in STEP Part 41:
 
-# product_definition attrs:
-#     - id                 : identifier
-#     - description        : text
-#     - formation          : product_definition_formation
-#     - frame_of_reference : product_definition_context
+# next_assembly_usage_occurrence (nauo)
+#     - id                   (str)
+#     - name                 (str)
+#     - description          (str) [OPTIONAL]
+#     - relating_product_def (product_definition)
+#     - related_product_def  (product_definition)
+#     - reference_designator (str) [OPTIONAL]
 
-# product_definition_formation attrs:
-#     - id                 : identifier
-#     - description        : text
-#     - of_product         : product
+# product_definition
+#     - id                 (str)
+#     - description        (str)
+#     - formation          (product_definition_formation)
+#     - frame_of_reference (product_definition_context)
 
-# product attrs:
-#     - id                 : identifier
-#     - name               : label
-#     - description        : text
+# product_definition_formation
+#     - id                 (str)
+#     - description        (str)
+#     - of_product         (product)
+
+# product
+#     - id                 (str)
+#     - name               (str)
+#     - description        (str)
 #     - frame_of_reference : SET [1:?] OF product_context
 
-# product_context attrs:
-#     - name               : label                [application_context]
-#     - frame_of_reference : application_context  [application_context]
-#     - discipline_type    : label
+# product_context
+#     - name               (str)
+#     - frame_of_reference (application_context)
+#     - discipline_type    (str)
 
 
-# TODO:  rewrite to use part21.py
 def getAssemblies(fpath):
     """
     Extract assembly structures from a STEP file.
@@ -52,7 +53,7 @@ def getAssemblies(fpath):
     # projid = os.path.basename(f).split('.')[0].upper()
     # print(f' - project id: {projid}')
     # TODO:
-    #   - this function really needs a wizard
+    #   - this function could have a wizard:
     #     + pick a namespace (default to user's preferred ns)
     #     + ask if user wants to create a context related to this data
     #     + pick a project (default to current project if user has permission;
@@ -62,30 +63,23 @@ def getAssemblies(fpath):
                                      # id_ns='sandbox')
     nauo = {}
     # id_ns = project.oid
-    parents = set()
-    children = set()
+    assemblies = set()
+    components = set()
     if not data['typeinst'].get('NEXT_ASSEMBLY_USAGE_OCCURRENCE'):
         print('No assemblies found.')
         return
     for n in data['typeinst']['NEXT_ASSEMBLY_USAGE_OCCURRENCE']:
-        parent, child = [x.strip(" \n\r#'")
+        assembly, component = [x.strip(" \n\r#'")
                          for x in data['contents'][n].split(',')[3:5]]
         nauo[n] = {'id'     : n,
-                   # 'id_ns'  : id_ns,
-                   # relating_product_definition (4th attr)
-                   ### DEPRECATED:
-                   ### 'parent' : ':'.join([id_ns, parent]),
-                   'assembly' : parent,
-                   # related_product_definition (5th attr)
-                   ### DEPRECATED:
-                   ### 'child'  : ':'.join([id_ns, child]),
-                   'component' : child,
-                   'reference_designator' : '' # test data doesn't have
+                   'assembly' : assembly,  # relating_product_definition
+                   'component' : component,  # related_product_definition
+                   'reference_designator' : ''
                    }
-        parents.add(parent)
-        children.add(child)
+        assemblies.add(assembly)
+        components.add(component)
     # product_definitions
-    pdset = parents | children
+    pdset = assemblies | components
     print(f'pdset = {pdset}')
     pd = {}
     for pdref in pdset:
@@ -98,12 +92,8 @@ def getAssemblies(fpath):
         product_id = '-'.join([pre_id, pdref])
         product_name = ' '.join([pre_id, '( STEP file instance:', pdref, ')'])
         pd[pdref] = {'id'           : product_id,
-                     # 'id_ns'        : id_ns,
-                     # 'cm_authority' : project.oid,
-                     # version from pdf
-                     'version'      : version,
-                     # modeled product
-                     'name'         : product_name
+                     'version'      : version,        # version from pdf
+                     'name'         : product_name    # modeled product
                      }
     # acus = [orb.classes['Acu'](_schema=orb.schemas['Acu'], **nauo[n])
             # for n in nauo]
