@@ -83,7 +83,7 @@ class Part21Processor(dp.DispatchProcessor):
         self.verbose = verbose
         # contents:  maps entity inst nbr (n) to unparsed content
         # insttype:  maps entity inst nbr (n) to KEYWORD (i.e. type)
-        # typeinst:  maps KEYWORD (i.e. type) (n) to entity inst numbers
+        # typeinst:  maps KEYWORD (i.e. type) (n) to entity inst numbers list
         self.res['contents'] = {}
         self.res['insttype'] = {}
         self.res['typeinst'] = {}
