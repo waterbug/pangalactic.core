@@ -5,8 +5,6 @@ Classes corresponding to STEP Entities
 """
 import sys
 from optparse import OptionParser
-from pprint import pprint
-# from collections import namedtuple
 from typing import NamedTuple
 
 # from pangalactic.core.uberorb import orb
@@ -77,14 +75,23 @@ class Nauo(NamedTuple):
     reference_designator: str
 
 
-step_classes = {
-    "PRODUCT": Product,
-    "PRODUCT_DEFINITION": ProductDefinition,
-    "PRODUCT_DEFINITION_WITH_ASSOCIATED_DOCUMENTS": Pdwad,
-    "PRODUCT_DEFINITION_FORMATION":   ProductDefinitionFormation,
-    "PRODUCT_CONTEXT":                ProductContext,
-    "NEXT_ASSEMBLY_USAGE_OCCURRENCE": Nauo
-    }
+step_entities = [
+    "PRODUCT",
+    "PRODUCT_DEFINITION_FORMATION",
+    "PRODUCT_DEFINITION",
+    "PRODUCT_DEFINITION_WITH_ASSOCIATED_DOCUMENTS",
+    "PRODUCT_CONTEXT",
+    "NEXT_ASSEMBLY_USAGE_OCCURRENCE"
+    ]
+
+step_classes = [
+    Product,
+    ProductDefinitionFormation,
+    ProductDefinition,
+    Pdwad,
+    ProductContext,
+    Nauo
+    ]
 
 def get_p21_data(fpath):
     """
@@ -105,126 +112,83 @@ def get_p21_data(fpath):
     data = parse_p21_data(p21_data)
     return data
 
-def make_step_obj(name, contents):
+def make_step_obj(name, n, contents, data, db):
     """
     Construct a STEP python object from the unparsed parameter content of an
-    entity in a part 21 file.
+    entity in a part 21 file. This recursively creates any objects that may be
+    needed to populate object-valued fields (attributes) of the object being
+    constructed.
 
     Args:
         name (str): type name of a STEP entity
+        n (str): numeric identifier ("ENTITY_INSTANCE_NAME", w/o "#")
         contents (str): its unparsed parameter content
+        data (dict): parsed content of the containing p21 file
+        db (dict): collection of python objects created from the p21 file
     """
-    cls = step_classes.get(name)
-    if cls is None:
+    if name in step_entities:
+        cls = step_classes[step_entities.index(name)]
+    else:
         return None
-    t = [x.strip(" \n\r#'") for x in contents.split(',')]
     # for now, SET() attrs don't matter -- leave them unparsed
-    return cls(*t)
+    parsed = [x.strip(" \n\r#'") for x in contents.split(',')]
+    t = []
+    for i, field in enumerate(cls._fields):
+        ftype = cls.__annotations__[field]
+        # identify any object-valued fields
+        if ftype in step_classes:
+            inst_n = parsed[i]
+            if db.get('by_nbr') and inst_n in db['by_nbr']:
+                t.append(db['by_nbr'][inst_n])
+            else:
+                contents = data['contents'][inst_n]
+                obj = make_step_obj(step_entities[step_classes.index(ftype)],
+                                    inst_n, contents, data, db)
+                t.append(obj)
+        else:
+            t.append(parsed[i])
+    obj = cls(*t)
+    db['by_nbr'][n] = obj
+    if not db['by_type'].get(name):
+        db['by_type'][name] = [obj]
+    else:
+        db['by_type'][name].append(obj)
+    return obj
 
-def get_step_db(fpath):
+def make_step_db(fpath):
     """
     Return a set of linked python step objects created from the entities in a
     part 21 file.
     """
     data = get_p21_data(fpath)
-    objs_by_nbr = {}
-    objs_by_type = {}
-    for entity_name in data['typeinst']:
-        if entity_name in step_classes:
-            objs_by_type[entity_name] = []
+    db = {}
+    db['by_nbr'] = {}
+    db['by_type'] = {}
+    for entity_name in step_entities:
+        if entity_name in data['typeinst']:
             for inst_nbr in data['typeinst'][entity_name]:
                 contents = data['contents'][inst_nbr]
-                obj = make_step_obj(entity_name, contents)
-                objs_by_nbr[inst_nbr] = obj
-                objs_by_type[entity_name].append(obj)
+                make_step_obj(entity_name, inst_nbr, contents, data, db)
+    return db
 
-def getAssemblies(fpath):
+def get_assembly(fpath):
     """
-    Extract assembly structures from a STEP file.
+    Extract assembly tree from a STEP file.
 
     @param fpath:  path of a STEP file
     @type  fpath:  str
     """
-    data = get_p21_data(fpath)
-    # projid = os.path.basename(f).split('.')[0].upper()
-    # print(f' - project id: {projid}')
-    # TODO:
-    #   - this function could have a wizard:
-    #     + pick a namespace (default to user's preferred ns)
-    #     + ask if user wants to create a context related to this data
-    #     + pick a project (default to current project if user has permission;
-    #       otherwise, default to user's preferred project, if any)
-    # project = orb.classes['Project'](_schema=orb.schemas['Project'],
-                                     # id=projid,
-                                     # id_ns='sandbox')
-    # nauos maps p21 ids to extracted Nauo instances
-    nauos = {}
-    # id_ns = project.oid
-    assemblies = set()
-    components = set()
-    if not data['typeinst'].get('NEXT_ASSEMBLY_USAGE_OCCURRENCE'):
-        print('No assemblies found.')
-        return
-    for n in data['typeinst']['NEXT_ASSEMBLY_USAGE_OCCURRENCE']:
-        assembly, component = [x.strip(" \n\r#'")
-                         for x in data['contents'][n].split(',')[3:5]]
-        nauos[n] = {'id'     : n,
-                   'assembly' : assembly,  # relating_product_definition
-                   'component' : component,  # related_product_definition
-                   'reference_designator' : ''
-                   }
-        assemblies.add(assembly)
-        components.add(component)
-    # product_definition (and subtype) instances
-    pdset = assemblies | components
-    print(f'pdset = {pdset}')
-    pd = {}
-    for pdref in pdset:
-        pdfref = data['contents'][pdref].split(',')[2].strip(" \n\r#'")
-        version = data['contents'][pdfref].split(',')[0].strip(" \n\r#'")
-        mpref = data['contents'][pdfref].split(',')[2].strip(" \n\r#'")
-        # product name (or id if name attr is empty)
-        pre_id = (data['contents'][mpref].split(',')[1].strip(" \n\r#'")
-                  or data['contents'][mpref].split(',')[0].strip(" \n\r#'"))
-        product_id = '-'.join([pre_id, pdref])
-        product_name = ' '.join([pre_id, '( STEP file instance:', pdref, ')'])
-        pd[pdref] = {'id'           : product_id,
-                     'version'      : version,        # version from pdf
-                     'name'         : product_name    # modeled product
-                     }
-    # acus = [orb.classes['Acu'](_schema=orb.schemas['Acu'], **nauos[n])
-            # for n in nauos]
-    # models = [orb.classes['Model'](_schema=orb.schemas['Model'], **pd[p])
-              # for p in pd]
-    # return project, acus, models
-    print('-------------------------------------')
-    print('Product Definitions:')
-    print('-------------------------------------')
-    pprint(pd)
-    print('-------------------------------------')
-    print('NAUOs:')
-    print('-------------------------------------')
-    pprint(nauos)
-    print('-------------------------------------')
+    db = make_step_db(fpath)
+    # TODO: build the tree from the NAUOs ...
+    return db['by_type']['NEXT_ASSEMBLY_USAGE_OCCURRENCE']
+
 
 if __name__ == '__main__':
-    import time
     usage = 'usage:  %prog [options] file.p21'
     opt = OptionParser(usage)
-    opt.add_option("-p", "--perf", action='store_true',
-                   dest="performance", default=False,
-                   help="run the parser's unit tests")
     (options, args) = opt.parse_args(args=sys.argv)
     # debugging:
     print(f"options:  {options}")
     print(f"args:     {args}")
-    if len(args) > 1:
-        if options.performance:
-            start = time.time()
-        getAssemblies(args[1])
-        if options.performance:
-            end = time.time()
-            print("\nTotal time: %6.2f sec" % (end - start))
-    else:
-        opt.print_help()
+    print(get_assembly(args[1]))
 
