@@ -606,7 +606,8 @@ def to_table_name(cname):
         tname = tname.lower()
     return tname +  '_'
 
-def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
+def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None,
+                    width=20, pwidth=7):
     """
     Convert a property name, data element id, or parameter id into a
     header-friendly name.
@@ -618,6 +619,8 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
     Keyword Args:
         project_oid (str):  oid of the current project
         headers_are_ids (bool):  use ids instead of names
+        width (int):  width to use in wrapping header text
+        pwidth (int):  width to use in wrapping parameter headers
 
     returns: external name (str)
     """
@@ -631,7 +634,7 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
         if headers_are_ids:
             return '  \n  '.join([pname, units])
         else:
-            return '  \n  '.join(wrap(pd['name'], width=7,
+            return '  \n  '.join(wrap(pd['name'], width=pwidth,
                                       break_long_words=False) + [units])
     elif de_def:
         if headers_are_ids:
@@ -639,7 +642,7 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
         else:
             de_name = de_def.get('name') or pname
             ext_name = get_attr_ext_name(cname, de_name)
-            return '  \n  '.join(wrap(ext_name, width=20,
+            return '  \n  '.join(wrap(ext_name, width=width,
                                       break_long_words=False))
     elif project_oid:
         modes = (mode_defz.get(project_oid) or {}).get('modes')
@@ -647,11 +650,11 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None):
             units = prefs.get('units', {}).get('power') or 'W'
             if units:
                 units = '(' + units + ')'
-            return '  \n  '.join(wrap(pname, width=7,
+            return '  \n  '.join(wrap(pname, width=width,
                                       break_long_words=False) + [units])
     # parts = ' '.join(pname.split('_'))
     ext_name = get_attr_ext_name(cname, pname)
-    return ' \n '.join(wrap(ext_name, width=20, break_long_words=False))
+    return ' \n '.join(wrap(ext_name, width=width, break_long_words=False))
 
 def header_to_pname(header, cname='', headers_are_ids=False, project_oid=None):
     """
