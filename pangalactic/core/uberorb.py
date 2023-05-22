@@ -39,7 +39,9 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           compute_requirement_margin,
                                           data_elementz, de_defz,
                                           get_parameter_id,
-                                          get_dval_as_str, get_pval_as_str,
+                                          get_dval, get_pval,
+                                          get_dval_as_str,
+                                          get_pval_as_str,
                                           load_data_elementz,
                                           save_data_elementz,
                                           load_mode_defz, save_mode_defz,
@@ -1399,7 +1401,11 @@ class UberORB(object):
                                                         'Person', 'Project']:
                         d[a] = rel_obj.id or rel_obj.name or '[unnamed]'
                     else:
-                        d[a] = getattr(rel_obj, 'name', None) or '[unnamed]'
+                        if rel_obj is None:
+                            d[a] = '[None]'
+                        else:
+                            d[a] = (getattr(rel_obj, 'id', None) or
+                                    '[unidentified]')
                 else:
                     d[a] = str(getattr(obj, a))
             elif a in parm_defz:
@@ -1538,6 +1544,104 @@ class UberORB(object):
         if cname:
             query = query.filter(Identifiable.pgef_type == cname)
         return [row[0] for row in query.all()]
+
+    def get_prop_value(self, obj, pname):
+        """
+        Return the value of the specified property for the specified object.
+
+        Args:
+            obj (Identifiable): the object
+            pname (str): name of the property (attr, parameter, or data element)
+        """
+        schema = self.schemas.get(obj.__class__.__name__)
+        field_names = []
+        if schema:
+            field_names = schema.get('field_names', [])
+        if field_names and pname in field_names:
+            return getattr(obj, pname, '') or ''
+        elif pname in parm_defz:
+            pd = parm_defz.get(pname)
+            units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                    pd['dimensions'], '')
+            return get_pval(obj.oid, pname, units=units)
+        elif pname in de_defz:
+            return get_dval(obj.oid, pname)
+        return ''
+
+    def get_prop_str_value(self, obj, pname):
+        """
+        Return the string-cast value of the specified property for the specified
+        object.
+
+        Args:
+            obj (Identifiable): the object
+            pname (str): name of the property (attr, parameter, or data element)
+        """
+        schema = orb.schemas.get(obj.__class__.__name__)
+        field_names = []
+        if schema:
+            field_names = schema.get('field_names', [])
+        if field_names and pname in field_names:
+            return getattr(obj, pname, '') or ''
+        elif pname in parm_defz:
+            pd = parm_defz.get(pname)
+            units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                    pd['dimensions'], '')
+            return get_pval_as_str(obj.oid, pname, units=units)
+        elif pname in de_defz:
+            return get_dval_as_str(obj.oid, pname)
+        return '[undefined]'
+
+    def set_prop_value(self, obj, pname, val):
+        """
+        Set the value of the specified property for the specified object.
+
+        Args:
+            obj (Identifiable): the object
+            pname (str): name of the property (attr, parameter, or data
+                         element)
+            val (any): value to be set
+        """
+        schema = self.schemas.get(obj.__class__.__name__)
+        field_names = []
+        if schema:
+            field_names = schema.get('field_names', [])
+        if field_names and pname in field_names:
+            # TODO: cast to correct datatype
+            setattr(obj, pname, val)
+        elif pname in parm_defz:
+            # TODO: cast to correct datatype
+            pd = parm_defz.get(pname)
+            units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                    pd['dimensions'], '')
+            set_pval(obj.oid, pname, units=units)
+        elif pname in de_defz:
+            # TODO: cast to correct datatype
+            set_dval(obj.oid, pname)
+
+    def set_prop_str_value(self, obj, pname, val):
+        """
+        Set the value of the specified property for the specified object,
+        casting to the correct datatype.
+
+        Args:
+            obj (Identifiable): the object
+            pname (str): name of the property (attr, parameter, or data element)
+        """
+        schema = orb.schemas.get(obj.__class__.__name__)
+        field_names = []
+        if schema:
+            field_names = schema.get('field_names', [])
+        if field_names and pname in field_names:
+            return getattr(obj, pname, '') or ''
+        elif pname in parm_defz:
+            pd = parm_defz.get(pname)
+            units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                    pd['dimensions'], '')
+            return get_pval_as_str(obj.oid, pname, units=units)
+        elif pname in de_defz:
+            return get_dval_as_str(obj.oid, pname)
+        return '[undefined]'
 
     def gen_product_id(self, obj):
         """
