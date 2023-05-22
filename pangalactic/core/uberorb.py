@@ -40,6 +40,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           data_elementz, de_defz,
                                           get_parameter_id,
                                           get_dval, get_pval,
+                                          set_dval, set_pval,
                                           get_dval_as_str,
                                           get_pval_as_str,
                                           load_data_elementz,
@@ -67,6 +68,8 @@ from pangalactic.core.validation  import get_assembly
 
 DEPRECATED_PARAMETERS = ['P[max]', 'P[min]',
                          'T', 'T[max]', 'T[min]', 'T[Survival]']
+
+dtypes = {'str': str, 'float': float, 'int': int, 'bool': bool}
 
 
 class UberORB(object):
@@ -1582,7 +1585,7 @@ class UberORB(object):
         if schema:
             field_names = schema.get('field_names', [])
         if field_names and pname in field_names:
-            return getattr(obj, pname, '') or ''
+            return str(getattr(obj, pname, '')) or ''
         elif pname in parm_defz:
             pd = parm_defz.get(pname)
             units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
@@ -1594,7 +1597,8 @@ class UberORB(object):
 
     def set_prop_value(self, obj, pname, val):
         """
-        Set the value of the specified property for the specified object.
+        Set the value of the specified property for the specified object,
+        casting the value to the correct datatype if necessary.
 
         Args:
             obj (Identifiable): the object
@@ -1607,41 +1611,33 @@ class UberORB(object):
         if schema:
             field_names = schema.get('field_names', [])
         if field_names and pname in field_names:
-            # TODO: cast to correct datatype
-            setattr(obj, pname, val)
+            rng = schema['fields'][pname]['range']
+            if rng in self.classes:
+                if isinstance(val, rng):
+                    setattr(obj, pname, val)
+                else:
+                    raise ValueError('value is instance of incorrect class')
+            else:
+                if rng in dtypes:
+                    setattr(obj, pname, dtypes[rng](val))
+                else:
+                    raise ValueError('value has incorrect datatype')
         elif pname in parm_defz:
-            # TODO: cast to correct datatype
-            pd = parm_defz.get(pname)
+            pd = parm_defz[pname]
             units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
                                                     pd['dimensions'], '')
-            set_pval(obj.oid, pname, units=units)
+            if pd.range_datatype in dtypes:
+                v = dtypes[pd.range_datatype]
+                set_pval(obj.oid, pname, v, units=units)
+            else:
+                raise ValueError('value has incorrect parameter datatype')
         elif pname in de_defz:
-            # TODO: cast to correct datatype
-            set_dval(obj.oid, pname)
-
-    def set_prop_str_value(self, obj, pname, val):
-        """
-        Set the value of the specified property for the specified object,
-        casting to the correct datatype.
-
-        Args:
-            obj (Identifiable): the object
-            pname (str): name of the property (attr, parameter, or data element)
-        """
-        schema = orb.schemas.get(obj.__class__.__name__)
-        field_names = []
-        if schema:
-            field_names = schema.get('field_names', [])
-        if field_names and pname in field_names:
-            return getattr(obj, pname, '') or ''
-        elif pname in parm_defz:
-            pd = parm_defz.get(pname)
-            units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
-                                                    pd['dimensions'], '')
-            return get_pval_as_str(obj.oid, pname, units=units)
-        elif pname in de_defz:
-            return get_dval_as_str(obj.oid, pname)
-        return '[undefined]'
+            dedef = de_defz[pname]
+            if dedef.range_datatype in dtypes:
+                v = dtypes[dedef.range_datatype]
+                set_dval(obj.oid, pname, v)
+            else:
+                raise ValueError('value has incorrect data element datatype')
 
     def gen_product_id(self, obj):
         """
