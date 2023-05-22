@@ -1626,15 +1626,15 @@ class UberORB(object):
             pd = parm_defz[pname]
             units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
                                                     pd['dimensions'], '')
-            if pd.range_datatype in dtypes:
-                v = dtypes[pd.range_datatype]
+            if pd['range_datatype'] in dtypes:
+                v = dtypes[pd['range_datatype']](val)
                 set_pval(obj.oid, pname, v, units=units)
             else:
                 raise ValueError('value has incorrect parameter datatype')
         elif pname in de_defz:
             dedef = de_defz[pname]
-            if dedef.range_datatype in dtypes:
-                v = dtypes[dedef.range_datatype]
+            if dedef['range_datatype'] in dtypes:
+                v = dtypes[dedef['range_datatype']](val)
                 set_dval(obj.oid, pname, v)
             else:
                 raise ValueError('value has incorrect data element datatype')
