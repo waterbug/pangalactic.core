@@ -394,7 +394,30 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if debugging:
                 perms.append('[5] role-based perms (Flow)')
             return perms
-        # [6] if none of the above, log the relevant info for debugging ...
+        # [6] is it an Activity?
+        elif isinstance(obj, orb.classes['Activity']):
+            ras = orb.search_exact(cname='RoleAssignment',
+                                   assigned_to=user,
+                                   role_assignment_context=obj.owner)
+            roles = set([ra.assigned_role.id for ra in ras])
+            auth_roles = set(['administrator', 'lead_engineer',
+                              'systems_engineer'])
+            if roles & auth_roles:
+                # orb.log.debug('  - user is authorized by role(s) ...')
+                # orb.log.debug('    {}'.format(list(roles & auth_roles)))
+                perms = ['view']
+                if server_or_connected_client:
+                    perms += ['modify', 'delete']
+                # orb.log.debug('    perms: {}'.format(perms))
+                if debugging:
+                    perms.append('[6] role-based perms (Activity)')
+                return perms
+            # otherwise, perms are those of the "of_function" or "of_system"
+            elif (getattr(obj, 'of_function', None) or
+                  getattr(obj, 'of_system', None)):
+                return get_perms(getattr(obj, 'of_function', None) or
+                                 getattr(obj, 'of_system', None))
+        # [7] if none of the above, log the relevant info for debugging ...
         else:
             return list(perms)
             # orb.log.debug('  - object type: {}'.format(obj.__class__.__name__))
