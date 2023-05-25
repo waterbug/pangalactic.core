@@ -440,24 +440,37 @@ EXT_NAMES_PLURAL = {
     'Property'            : 'Properties',
     }
 
-# STD_VIEWS:  Class-specific "standard" fields -- each view maps a set of
-# standardized external names to their corresponding class attribute names
+# STD_VIEWS:  Class-specific "standard" views -- maps class names to dicts
+# that map a standard set of class attribute names (see STD_ALIASES for the
+# "external names" that map to the std attribute names) to an appropriate
+# column width (used when exporting data to Excel):
+#
+#   cname1:
+#       attr1: width1
+#       attr2: width2
+#   cname2:
+#       attr3: width3
+#       attr4: width4
+#
 # TODO:  Add namespaces, to enable different "vocabularies" of standard names
 STD_VIEWS = dict(
-    Requirement=['id',
-                 'name',
-                 'rqt_type',
-                 'allocated_to',
-                 'rqt_level',
-                 'description',
-                 'rationale',
-                 'justification',
-                 'verification_method',
-                 'rqt_compliance',
-                 'comment']
+    Requirement={'id': 15,
+                 'name': 30,
+                 'rqt_level': 8,
+                 'rqt_type': 15,
+                 'rqt_compliance': 15,
+                 'description': 40,
+                 'comment': 30,
+                 'rationale': 30,
+                 'justification': 0,
+                 'verification_method': 0,
+                 'rqt_compliance': 0,
+                 'comment': 0
+                 }
     )
 
-# STD_ALIASES:  Class-specific aliases that map to names in STD_VIEWS
+# STD_ALIASES:  Class-specific aliases (a.k.a. external names) that map to
+# names in STD_VIEWS
 STD_ALIASES = dict(
     Requirement={
         'id': 'id',
@@ -491,9 +504,10 @@ STD_ALIASES = dict(
 
 # attr_ext_alias, ATTR_EXT_NAMES, and EXT_NAME_ATTRS are internal, intended
 # only for use in the get_attr_ext_name() and get_ext_name_attr() functions,
-# respectively.  They are specified in order to capture external names that are
-# not "derivable" from the attribute name.  These are "colloquial" and may
-# later be restricted to specified namespaces.
+# respectively.  They are specified in order to capture "standard" external
+# names that are not derivable from the attribute name, and are specified as
+# tuples because they are intended to be bidirectional mappings.  However,
+# these are colloquial standards and may later be qualified by namespaces.
 attr_ext_alias = {
     'HardwareProduct': [
         ('version', 'Ver'),
