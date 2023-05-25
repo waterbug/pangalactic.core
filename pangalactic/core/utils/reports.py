@@ -6,7 +6,8 @@ import xlsxwriter
 
 from pangalactic.core              import prefs
 from pangalactic.core.meta         import MAIN_VIEWS
-from pangalactic.core.names        import get_mel_item_name, pname_to_header
+from pangalactic.core.names        import (get_mel_item_name, pname_to_header,
+                                           STD_VIEWS)
 from pangalactic.core.parametrics  import (get_pval, get_dval, de_defz,
                                            parm_defz, round_to)
 from pangalactic.core.uberorb      import orb
@@ -915,7 +916,7 @@ def write_objects_to_xlsx(objs, file_path, view=None, use_level=False):
     sheet = book.add_worksheet()
     fmts = {name : book.add_format(style)
             for name, style in xlsx_styles.items()}
-    # TODO: figure out to apply levels to requirements ... for now, ignore
+    # TODO: figure out how to apply levels to requirements ... for now, ignore
     # if use_level:
         # # first write the formatting to the whole row to set the bg color
         # sheet.write_row(row, 0, [' ']*48, level_fmts.get(level, level_fmts[3]))
@@ -934,17 +935,9 @@ def write_objects_to_xlsx(objs, file_path, view=None, use_level=False):
         cname = ''
     if not view:
         view = MAIN_VIEWS.get(cname, ['id', 'name', 'description'])
-    col_widths = {'id': 15,
-                  'name': 30,
-                  'rqt_level': 8,
-                  'rqt_type': 15,
-                  'rqt_compliance': 15,
-                  'description': 40,
-                  'comment': 30,
-                  'rationale': 30
-                  }
+    col_widths = STD_VIEWS.get(cname, {})
     for j, a in enumerate(view):
-        sheet.set_column(j, j, col_widths.get(a, 20))
+        sheet.set_column(j, j, col_widths.get(a) or 20)
         header = pname_to_header(a, cname)
         sheet.write(0, j, header, fmts['ctr_black_bg_12'])
     cell_format = book.add_format()
