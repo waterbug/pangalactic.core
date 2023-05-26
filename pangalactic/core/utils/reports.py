@@ -899,7 +899,8 @@ def write_mel_to_xlsx(context, schema=None, pref_units=False, summary=False,
     book.close()
 
 
-def write_objects_to_xlsx(objs, file_path, view=None, use_level=False):
+def write_objects_to_xlsx(objs, file_path, view=None, cname='',
+                          use_level=False):
     """
     Write a list of objects to .xlsx format.
 
@@ -910,6 +911,7 @@ def write_objects_to_xlsx(objs, file_path, view=None, use_level=False):
     Keyword Args:
         view (list of str):  set of attributes, parameters, and data elements
             to write
+        cname (str):  class name
         use_level (bool):  whether to use "level" attr to format output
     """
     book = xlsxwriter.Workbook(file_path)
@@ -932,7 +934,7 @@ def write_objects_to_xlsx(objs, file_path, view=None, use_level=False):
     if objs:
         cname = objs[0].__class__.__name__
     else:
-        cname = ''
+        objs = []
     if not view:
         view = MAIN_VIEWS.get(cname, ['id', 'name', 'description'])
     col_widths = STD_VIEWS.get(cname, {})
