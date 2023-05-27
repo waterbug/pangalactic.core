@@ -17,7 +17,8 @@
 
     + this cannot be enforced by normal python class management, since
       parameters are not python attributes
-    + it is enforced at the application level, e.g. by PgxnObject
+    + it is enforced at the application level, e.g. by PgxnObject and other
+      interfaces that create or modify domain objects
 
   - The 'id' and 'oid' attributes of ParameterDefinition have a special
     relationship (also true for ParameterContext objects):
