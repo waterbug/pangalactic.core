@@ -460,12 +460,24 @@ STD_VIEWS = dict(
                  'rqt_type': 15,
                  'rqt_compliance': 15,
                  'description': 40,
-                 'comment': 30,
                  'rationale': 30,
                  'justification': 0,
                  'verification_method': 0,
-                 'rqt_compliance': 0,
                  'comment': 0
+                 }
+    )
+
+PREFERRED_ALIASES = dict(
+    Requirement={'id': 'ID',
+                 'name': 'Title',
+                 'rqt_level': 'Level',
+                 'rqt_type': 'Type',
+                 'rqt_compliance': 'Compliance',
+                 'description': 'Text',
+                 'rationale': 'Rationale',
+                 'justification': 'Justification',
+                 'verification_method': 'Verification Method',
+                 'comment': 'Notes'
                  }
     )
 
@@ -497,6 +509,7 @@ STD_ALIASES = dict(
         'req compliance': 'rqt_compliance',
         'reqt compliance': 'rqt_compliance',
         'compliance': 'rqt_compliance',
+        'notes': 'comment',
         'comment': 'comment',
         'comments': 'comment'
         }
