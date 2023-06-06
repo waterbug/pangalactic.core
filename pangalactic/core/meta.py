@@ -40,8 +40,7 @@ PGXN_REQD = dict(
 # TODO:  support for field "aliases" (a.k.a. "display names")
 SYSTEM = ['version', 'version_sequence', 'iteration']
 MAIN_VIEWS = dict(
-    Activity=(IDENTITY + ['owner', 'activity_type', 'of_function',
-                          'of_system']),
+    Activity=(IDENTITY + ['owner', 'activity_type', 'of_system']),
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
          'assembly_level', 'product_type_hint'],
     Discipline=IDENTITY,
@@ -296,11 +295,8 @@ M2M = {
 # populating a one-to-many relationship with objects.
 # Format is {property name : one2m relationship range class name}
 ONE2M = {
-         # inverse of 'of_function'
-         'function_activities' :  {'domain' : 'Acu',
-                                   'range'  : 'Activity'},
          # inverse of 'of_system'
-         'system_activities' :    {'domain' : 'ProjectSystemUsage',
+         'activities' :           {'domain' : 'Modelable',
                                    'range'  : 'Activity'},
          # inverse of 'creator'
          'created_objects' :      {'domain' : 'Actor',

@@ -23,7 +23,18 @@ Examples of schema mods that require a conversion function include:
 """
 # NOTES:
 
-# version 3.0.0:
+# version 3.3.0:
+#   * mods:
+#       + removed attribute "of_function", which specifically referenced Acu;
+#         that is now subsumed in the "of_system" attribute, which references
+#         Modelable and can be Acu, PSU, or any Modelable, although in practice
+#         for a manufactured product it will reference either Acu or PSU; for a
+#         naturally occurring Modelable, such as an environment or a physical
+#         phenomenon, it simply references the thing itself.
+#       + inverse attribute of "of_system", which was previously called
+#         "system_activities", is now simply "activities".
+
+# version 3.1.0:
 #   * mods:
 #     - Removed class "ActCompRel" (many-to-many relationship between Activity
 #       and parent "composite" Activity instances) because Activities are not

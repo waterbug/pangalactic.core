@@ -656,45 +656,23 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/of_function -->
-
-    <owl:ObjectProperty rdf:about="&pgef;of_function">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The function of which this is an Activity.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Activity"/>
-        <rdfs:range rdf:resource="&pgef;Acu"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/function_activities -->
-
-    <owl:ObjectProperty rdf:about="&pgef;function_activities">
-        <owl:inverseOf rdf:resource="&pgef;of_function"/>
-        <rdfs:comment rdf:datatype="&xsd;string">All Activities of a function.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Acu"/>
-        <rdfs:range rdf:resource="&pgef;Activity"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/of_system -->
 
     <owl:ObjectProperty rdf:about="&pgef;of_system">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The system role of which this is an Activity.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Activity"/>
-        <rdfs:range rdf:resource="&pgef;ProjectSystemUsage"/>
+        <rdfs:range rdf:resource="&pgef;Modelable"/>
     </owl:ObjectProperty>
 
 
 
-    <!-- http://pangalactic.us/pgef/system_activities -->
+    <!-- http://pangalactic.us/pgef/activities -->
 
-    <owl:ObjectProperty rdf:about="&pgef;system_activities">
+    <owl:ObjectProperty rdf:about="&pgef;activities">
         <owl:inverseOf rdf:resource="&pgef;of_system"/>
         <rdfs:comment rdf:datatype="&xsd;string">All Activities of a top-level system.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ProjectSystemUsage"/>
+        <rdfs:domain rdf:resource="&pgef;Modelable"/>
         <rdfs:range rdf:resource="&pgef;Activity"/>
     </owl:ObjectProperty>
 

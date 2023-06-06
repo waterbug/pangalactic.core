@@ -412,11 +412,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 if debugging:
                     perms.append('[6] role-based perms (Activity)')
                 return perms
-            # otherwise, perms are those of the "of_function" or "of_system"
-            elif (getattr(obj, 'of_function', None) or
-                  getattr(obj, 'of_system', None)):
-                return get_perms(getattr(obj, 'of_function', None) or
-                                 getattr(obj, 'of_system', None))
+            # otherwise, perms are those of the "of_system"
+            elif getattr(obj, 'of_system', None):
+                return get_perms(getattr(obj, 'of_system', None))
         # [7] if none of the above, log the relevant info for debugging ...
         else:
             return list(perms)
