@@ -3904,6 +3904,17 @@ dict(
     },
 
 {   '_cname': 'ModelFamily',
+    'oid': 'pgefobjects:ModelFamily.Optics',
+    'description': 'Optical model types.',
+    'id': 'Optics',
+    'id_ns': 'pgef',
+    'name': 'Optics',
+    'abbreviation': 'Optics',
+    'create_datetime': '2023-06-01 00:00:00',
+    'mod_datetime': '2023-06-01 00:00:00'
+    },
+
+{   '_cname': 'ModelFamily',
     'oid': 'pgefobjects:ModelFamily.42',
     'description': '42 standard family of model types.',
     'id': '42',
@@ -3972,6 +3983,18 @@ dict(
     'model_type_family': 'pgefobjects:ModelFamily.42',
     'create_datetime': '2021-01-01 00:00:00',
     'mod_datetime': '2021-01-01 00:00:00'
+    },
+
+{   '_cname': 'ModelType',
+    'oid': 'pgefobjects:ModelType.Optics.LOM',
+    'id': 'LOM',
+    'id_ns': 'nasa',
+    'name': 'Linear Optical Model',
+    'abbreviation': 'LOM',
+    'description': 'Linear Optical Model',
+    'model_type_family': 'pgefobjects:ModelFamily.Optics',
+    'create_datetime': '2023-06-01 00:00:00',
+    'mod_datetime': '2023-06-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
