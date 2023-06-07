@@ -2181,11 +2181,11 @@
 
     <owl:Class rdf:about="&pgef;Model">
         <rdfs:subClassOf rdf:resource="&pgef;DigitalProduct"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A constructed realization of the properties and/or behaviors of a concept or a real-world thing.  A pgef:Model instance can be used for analysis, simulation, description, specification, or presentation of some aspect(s) of a domain object.
+        <rdfs:comment rdf:datatype="&xsd;string">A constructed realization of the properties and/or behaviors of a concept or a real-world thing.  A Model instance can be used for analysis, simulation, description, specification, or presentation of some aspect(s) of a domain object.
 
-pgef:Model in the engineering domain generally maps to step:product_definition, but there may be other mappings for particular STEP Application Protocols and other types of models.
+Model in the engineering domain generally maps to step:product_definition, but there may be other mappings for particular STEP Application Protocols and other types of models.
 
-(Note that the characteristics of any pgef:Model instance can be the subject of a pgef:Model at a higher level of abstraction.  The higher-level pgef:Model instance in this context is sometimes referred to as a &quot;meta-model&quot; relative to the pgef:Model instance whose characteristics it models.)</rdfs:comment>
+(Note that the characteristics of any Model instance can be the subject of a Model at a higher level of abstraction.  The higher-level Model instance in this context is sometimes referred to as a &quot;meta-model&quot; relative to the Model instance whose characteristics it models.)</rdfs:comment>
     </owl:Class>
 
 
