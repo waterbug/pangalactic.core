@@ -112,7 +112,7 @@ class UberORB(object):
     data_elementz_status: str = 'unknown'
     parmz_status: str = 'unknown'
 
-    def start(self, home: str = None, db_url: str = None,
+    def start(self, home: str = '', db_url: str = '',
               console: bool = False, debug: bool = False,
               log_msgs: Optional[list[str]] = None, **kw) -> str:
         """
@@ -129,7 +129,7 @@ class UberORB(object):
             log_msgs (list of str):  initial log message(s)
         """
         if self.started:
-            return
+            return ''
         self.log_msgs = log_msgs or []
         # set home directory -- in order of precedence (A, B, C):
         # [A] 'home' kw arg (this should be set by the application, if any)
@@ -138,7 +138,7 @@ class UberORB(object):
             pgx_home = home
         # [B] from 'PANGALACTIC_HOME' env var
         elif 'PANGALACTIC_HOME' in os.environ:
-            pgx_home = os.environ['PANGALACTIC_HOME']
+            pgx_home = os.environ.get('PANGALACTIC_HOME', '')
         # [C] create a 'pangalaxian' directory in the user's home dir
         else:
             if sys.platform == 'win32':
@@ -146,7 +146,7 @@ class UberORB(object):
                 if os.path.exists(default_home):
                     pgx_home = os.path.join(default_home, 'pangalaxian')
             else:
-                user_home: str = os.environ.get('HOME')
+                user_home: str = os.environ.get('HOME', '') or ''
                 if user_home:
                     pgx_home = os.path.join(user_home, 'pangalaxian')
                 else:
@@ -304,8 +304,8 @@ class UberORB(object):
                 # if found, copy key to user home dir and remove '.creds' dir
                 p = Path(pgx_home)
                 absp = p.resolve()
-                user_home = absp.parent
-                new_key_path = os.path.join(str(user_home), 'cattens.key')
+                user_home = str(absp.parent)
+                new_key_path = os.path.join(user_home, 'cattens.key')
                 # only copy key to new_key_path if there is no key there ...
                 # i.e. if user has not used a new dev version
                 if os.path.exists(new_key_path):
@@ -329,7 +329,8 @@ class UberORB(object):
             current_test_files = set(os.listdir(self.test_data_dir))
         # self.log.debug('  - found {} data files'.format(
                        # len(current_test_files)))
-        test_data_mod_path = test_data_mod.__path__[0]
+        test_data_mod_path = os.path.dirname(
+                                    os.path.abspath(test_data_mod.__file__))
         test_data_files = set([s for s in os.listdir(test_data_mod_path)
                                if (not s.startswith('__init__')
                                and not s.startswith('__pycache__'))
@@ -356,7 +357,8 @@ class UberORB(object):
         # if current_vault_files:
             # for fpath in current_vault_files:
                 # self.log.debug('    {}'.format(fpath))
-        vault_mod_path = test_vault_mod.__path__[0]
+        vault_mod_path = os.path.dirname(
+                                    os.path.abspath(test_vault_mod.__file__))
         test_vault_files = set([s for s in os.listdir(vault_mod_path)
                                if (not s.startswith('__init__')
                                and not s.startswith('__pycache__'))
