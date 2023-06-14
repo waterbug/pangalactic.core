@@ -1186,6 +1186,17 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/checksum -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;checksum">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A sha-256 hash generated from the file contents</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/file_role -->
 
     <owl:DatatypeProperty rdf:about="&pgef;file_role">
