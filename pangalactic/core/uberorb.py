@@ -1550,6 +1550,26 @@ class UberORB(object):
             query = query.filter(Identifiable.pgef_type == cname)
         return [row[0] for row in query.all()]
 
+    def get_digital_file_checksums(self):
+        """
+        Get the checksums (sha256 hashes) of all DigitalFile (and subclasses)
+        objects from the db -- used for checking whether a given file exists in
+        the vault.
+        """
+        DigitalFile = self.classes['DigitalFile']
+        query = self.db.query(DigitalFile.checksum)
+        return [row[0] for row in query.all()]
+
+    def get_rep_file_checksums(self):
+        """
+        Get the checksums (sha256 hashes) of all RepresentationFile objects
+        from the db -- used for checking whether a given RepresentationFile
+        file exists in the vault.
+        """
+        RepresentationFile = self.classes['RepresentationFile']
+        query = self.db.query(RepresentationFile.checksum)
+        return [row[0] for row in query.all()]
+
     def get_prop_value(self, obj, pname):
         """
         Return the value of the specified property for the specified object.
