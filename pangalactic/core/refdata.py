@@ -3904,14 +3904,14 @@ dict(
     },
 
 {   '_cname': 'ModelFamily',
-    'oid': 'pgefobjects:ModelFamily.Optics',
-    'description': 'Optical model types.',
-    'id': 'Optics',
+    'oid': 'pgefobjects:ModelFamily.LOM',
+    'description': 'Linear Optical Model',
+    'id': 'LOM',
     'id_ns': 'pgef',
-    'name': 'Optics',
-    'abbreviation': 'Optics',
-    'create_datetime': '2023-06-01 00:00:00',
-    'mod_datetime': '2023-06-01 00:00:00'
+    'name': 'Linear Optical Model',
+    'abbreviation': 'LOM',
+    'create_datetime': '2023-06-10 00:00:00',
+    'mod_datetime': '2023-06-10 00:00:00'
     },
 
 {   '_cname': 'ModelFamily',
@@ -3927,109 +3927,109 @@ dict(
 
 {   '_cname': 'ModelType',
     'oid': 'pgefobjects:ModelType.42.SC',
-    'id': 'SC',
+    'id': '42.SC',
     'id_ns': '42',
     'name': '42 Spacecraft Model',
     'abbreviation': 'SC',
     'description': '42 Spacecraft Model',
     'model_type_family': 'pgefobjects:ModelFamily.42',
     'create_datetime': '2021-01-01 00:00:00',
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2023-01-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
     'oid': 'pgefobjects:ModelType.42.Orb',
-    'id': 'Orb',
+    'id': '42.Orb',
     'id_ns': '42',
     'name': '42 Reference Orbit Model',
     'abbreviation': 'Orb',
     'description': '42 Reference Orbit Model',
     'model_type_family': 'pgefobjects:ModelFamily.42',
     'create_datetime': '2021-01-01 00:00:00',
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2023-01-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
     'oid': 'pgefobjects:ModelType.42.Geom',
-    'id': 'Geom',
+    'id': '42.Geom',
     'id_ns': '42',
     'name': '42 Geometry Model',
     'abbreviation': 'Geom',
     'description': '42 Geometry Model',
     'model_type_family': 'pgefobjects:ModelFamily.42',
     'create_datetime': '2021-01-01 00:00:00',
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2023-01-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
     'oid': 'pgefobjects:ModelType.42.Material',
-    'id': 'Material',
+    'id': '42.Material',
     'id_ns': '42',
     'name': '42 Material Model',
     'abbreviation': 'Material',
     'description': '42 Material Model',
     'model_type_family': 'pgefobjects:ModelFamily.42',
     'create_datetime': '2021-01-01 00:00:00',
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2023-01-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
     'oid': 'pgefobjects:ModelType.42.Sim',
-    'id': 'Sim',
+    'id': '42.Sim',
     'id_ns': '42',
     'name': '42 Simulation Model',
     'abbreviation': 'Sim',
     'description': '42 Simulation Model',
     'model_type_family': 'pgefobjects:ModelFamily.42',
     'create_datetime': '2021-01-01 00:00:00',
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2023-01-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
-    'oid': 'pgefobjects:ModelType.Optics.LOM',
+    'oid': 'pgefobjects:ModelType.LOM.LOM',
     'id': 'LOM',
     'id_ns': 'nasa',
     'name': 'Linear Optical Model',
     'abbreviation': 'LOM',
     'description': 'Linear Optical Model',
-    'model_type_family': 'pgefobjects:ModelFamily.Optics',
+    'model_type_family': 'pgefobjects:ModelFamily.LOM',
     'create_datetime': '2023-06-01 00:00:00',
     'mod_datetime': '2023-06-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
-    'oid': 'pgefobjects:Spec',
-    'id': 'pgef.Spec',
+    'oid': 'pgefobjects:ModelType.Spec',
+    'id': 'Spec',
     'name': 'Specification',
     'abbreviation': 'Spec',
     'description': 'The specification for a part is a model that contains '
                    'a set of testable parameters that define the part.',
     'model_type_family': 'pgefobjects:ModelFamily.PGEF',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2023-06-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
-    'oid': 'pgefobjects:Block',
-    'id': 'pgef.Block',
+    'oid': 'pgefobjects:ModelType.Block',
+    'id': 'Block',
     'name': 'Block Model',
     'abbreviation': 'Block Model',
     'description': 'Pan Galactic Engineering Framework Block Model',
     'model_type_family': 'pgefobjects:ModelFamily.PGEF',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2023-06-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
-    'oid': 'pgefobjects:ConOps',
-    'id': 'pgef.ConOps',
+    'oid': 'pgefobjects:ModelType.ConOps',
+    'id': 'ConOps',
     'name': 'Concept of Operations Model',
     'abbreviation': 'ConOps Model',
     'description':
         'Pan Galactic Engineering Framework Concept of Operations Model',
     'model_type_family': 'pgefobjects:ModelFamily.PGEF',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2023-06-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
@@ -4077,73 +4077,74 @@ dict(
     },
 
 {   '_cname': 'ModelType',
-    'oid': 'step:203',
+    'oid': 'step:STEP',
     'description': 'STEP 3D Mechanical CAD model',
-    'id': 'STEP.203',
+    'id': 'STEP',
+    'model_type_family': 'pgefobjects:ModelFamily.STEP',
+    'name': 'STEP MCAD model (AP203/214/242) -- which application protocol '
+            'applies will be documented in the file header section.',
+    'abbreviation': 'STEP',
+    'create_datetime': epoch,
+    'mod_datetime': '2023-06-01 00:00:00'
+    },
+
+{   '_cname': 'ModelType',
+    'oid': 'step:AP203',
+    'description': 'STEP 3D Mechanical CAD model',
+    'id': 'AP203',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'ISO 10303-203: Configuration controlled 3D designs '
             'of mechanical parts and assemblies',
     'abbreviation': 'AP203',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2023-06-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
-    'oid': 'step:209',
+    'oid': 'step:AP209',
     'description': 'STEP 3D FEA / Composite analysis model',
-    'id': 'STEP.209',
+    'id': 'AP209',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'ISO 10303-209: Composite and metallic structural '
             'analysis and related design',
     'abbreviation': 'AP209',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2023-06-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
-    'oid': 'step:210',
+    'oid': 'step:AP210',
     'description': 'STEP 3D Electronic CAD model',
-    'id': 'STEP.210',
+    'id': 'AP210',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'ISO 10303-210: Electronic assembly, interconnect '
             'and packaging design',
     'abbreviation': 'AP210',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2023-06-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
-    'oid': 'step:214',
+    'oid': 'step:AP214',
     'description': 'STEP 3D Mechanical CAD model',
-    'id': 'STEP.214',
+    'id': 'AP214',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'ISO 10303-214: Core data for automotive mechanical '
             'design processes',
     'abbreviation': 'AP214',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2023-06-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
-    'oid': 'step:242',
+    'oid': 'step:AP242',
     'description': 'STEP 3D Mechanical CAD model',
-    'id': 'STEP.242',
+    'id': 'AP242',
     'model_type_family': 'pgefobjects:ModelFamily.STEP',
     'name': 'ISO 10303-242: Managed model-based 3D engineering',
     'abbreviation': 'AP242',
     'create_datetime': epoch,
-    'mod_datetime': epoch
-    },
-
-{   '_cname': 'ModelType',
-    'oid': 'step:TAS',
-    'description': 'STEP-TAS thermal model',
-    'id': 'STEP-TAS',
-    'model_type_family': 'pgefobjects:ModelFamily.STEP',
-    'name': 'STEP-TAS: Thermal Analysis for Space',
-    'abbreviation': 'STEP-TAS',
-    'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2023-06-01 00:00:00'
     },
 
 {   '_cname': 'PortType',
@@ -4794,7 +4795,18 @@ deprecated = [
     'pgef:ParameterContext.Target',
     'pgef:ParameterContext.Tolerance',
     'pgef:ParameterContext.Tolerance_Lower',
-    'pgef:ParameterContext.Tolerance_Upper'
+    'pgef:ParameterContext.Tolerance_Upper',
+    'pgefobjects:ModelType.Optics.LOM',
+    'pgefobjects:Spec',
+    'pgefobjects:Block',
+    'pgefobjects:ConOps',
+    'step:203',
+    'step:209',
+    'step:210',
+    'step:214',
+    'step:242',
+    'step:TAS',
+    'step:step',
     ]
 ############################################################################
 """
