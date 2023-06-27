@@ -133,7 +133,6 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         orb.classes['Discipline'],
         orb.classes['DisciplineProductType'],
         orb.classes['DisciplineRole'],
-        orb.classes['ModelFamily'],
         orb.classes['ModelType'],
         orb.classes['ParameterContext'],
         orb.classes['PortTemplate'],

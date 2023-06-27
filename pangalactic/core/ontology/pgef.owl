@@ -359,17 +359,6 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/model_type_family -->
-
-    <owl:ObjectProperty rdf:about="&pgef;model_type_family">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The model family to which a type of model belongs.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;ModelType"/>
-        <rdfs:range rdf:resource="&pgef;ModelFamily"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/model_definition_context --> 
 
     <owl:ObjectProperty rdf:about="&pgef;model_definition_context">
@@ -2120,20 +2109,11 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/ModelFamily -->
-
-    <owl:Class rdf:about="&pgef;ModelFamily">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A Model Family is intended to characterize a family of Model Types. Some Model Families are standardized, such as SysML, but a Model Family may also refer to a collection of custom or enterprise-specific Model Types. Examples:  The Systems Modeling Language (SysML) Model Family owns Model Types of Block, Internal Block, Parametric, etc.; the Mechanical Engineering Model Family owns the Model Type of Mechanical CAD, etc.</rdfs:comment>
-    </owl:Class>
-
-
-
     <!-- http://pangalactic.us/pgef/ModelType -->
 
     <owl:Class rdf:about="&pgef;ModelType">
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A type of Model -- e.g., "Block" (as would occur in a Systems block diagram -> SysML BDD), "Internal Block" (Block containing internal structure -> SysML "IBD"), Mechanical CAD (MCAD), Electrical CAD (ECAD), circuit schematic, etc.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">A type of Model -- e.g., MCAD (e.g. STEP AP203), ECAD (e.g. circuit schematic, STEP AP210, etc.), Structural Analysis (e.g. NASTRAN), System (e.g. SysML), etc.</rdfs:comment>
     </owl:Class>
 
 
