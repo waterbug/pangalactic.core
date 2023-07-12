@@ -1273,17 +1273,6 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/representation_type -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;representation_type">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A string that specifies the type of Representation, for example in the case of an MCAD model, it may have a native Representation that is specific to a CAD vendor and it may also have a "STEP" Representation.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Representation"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/is_composable -->
 
     <owl:DatatypeProperty rdf:about="&pgef;is_composable">
