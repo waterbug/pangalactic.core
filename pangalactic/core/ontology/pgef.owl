@@ -281,18 +281,6 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/content_mime_type -->
-
-    <owl:ObjectProperty rdf:about="&pgef;content_mime_type">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The MIME type of the value of the &apos;content&apos; attribute.  (This does not imply that a document has an intrinsic MIME type.  In general, each representation of a document will have a MIME type, and they may all be different.)
-</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Document"/>
-        <rdfs:range rdf:resource="&pgef;Mime"/>
-    </owl:ObjectProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/creator -->
 
     <owl:ObjectProperty rdf:about="&pgef;creator">
@@ -344,17 +332,6 @@
         <rdfs:comment rdf:datatype="&xsd;string">The product of which a specific physical object is a realization.</rdfs:comment>
         <rdfs:range rdf:resource="&pgef;Product"/>
         <rdfs:domain rdf:resource="&pgef;ProductInstance"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/mime_type -->
-
-    <owl:ObjectProperty rdf:about="&pgef;mime_type">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The MIME type/subtype of a file&apos;s content, specifying the format of a file and aiding an application in choosing an appropriate tool to process its content.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
-        <rdfs:range rdf:resource="&pgef;Mime"/>
     </owl:ObjectProperty>
 
 
@@ -1043,6 +1020,17 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/mime_type -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;mime_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The MIME type/subtype of file content, specifying the format of a file and aiding an application in choosing an appropriate tool to process its content.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/quantity -->
 
     <owl:DatatypeProperty rdf:about="&pgef;quantity">
@@ -1280,6 +1268,17 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The namespace within which an id is unique.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/representation_type -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;representation_type">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A string that specifies the type of Representation, for example in the case of an MCAD model, it may have a native Representation that is specific to a CAD vendor and it may also have a "STEP" Representation.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Representation"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -1545,28 +1544,6 @@
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The identifier assigned to a hardware product by its manufacturer.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;HardwareProduct"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/media_subtype -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;media_subtype">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The MIME Media Subtype per &lt;http://www.iana.org/assignments/media-types/&gt; (or a custom subtype).</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Mime"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/media_type -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;media_type">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The MIME Media Type per &lt;http://www.iana.org/assignments/media-types/&gt; (or a custom type).</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Mime"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -2155,15 +2132,6 @@
     <owl:Class rdf:about="&pgef;Modelable">
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A Modelable object is any object of sufficient domain interest to warrant being modeled: it has properties to indicate who created it (an Actor) and who last modified it.</rdfs:comment>
-    </owl:Class>
-
-
-
-    <!-- http://pangalactic.us/pgef/Mime -->
-
-    <owl:Class rdf:about="&pgef;Mime">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">Multi-purpose Internet Mail Extension (MIME) types.</rdfs:comment>
     </owl:Class>
 
 
