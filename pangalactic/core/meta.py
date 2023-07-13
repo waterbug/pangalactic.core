@@ -74,7 +74,7 @@ MAIN_VIEWS = dict(
     Project=(IDENTITY + ['parent_organization']),
     ProjectSystemUsage=['id', 'project', 'system', 'system_role'],
     Relation=(IDENTITY + ['formulation']),
-    RepresentationFile=(IDENTITY + ['of_representation']),
+    RepresentationFile=(IDENTITY + ['of_object']),
     Requirement=['id', 'rqt_level', 'name', 'rqt_type', 'rqt_compliance',
                  'description', 'rationale', 'justification', 'comment'],
     RoleAssignment=['id', 'assigned_role', 'assigned_to',
@@ -463,7 +463,6 @@ PGEF_PROPS_ORDER = [
             'modifier',
             'mod_datetime',
             'url',
-            'representations',
             'abbreviation'
             ]
 
@@ -519,7 +518,6 @@ PGEF_COL_WIDTHS = {
             'purpose': 250,
             'range_datatype': 50,
             'rationale': 200,
-            'representations': 100,
             'rqt_compliance': 100,
             'rqt_level': 50,
             'rqt_type': 100,

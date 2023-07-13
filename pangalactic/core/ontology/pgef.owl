@@ -460,7 +460,7 @@
 
     <owl:ObjectProperty rdf:about="&pgef;has_files">
         <owl:inverseOf rdf:resource="&pgef;of_object"/>
-        <rdfs:comment rdf:datatype="&xsd;string">Constituent files of a representation.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">RepresentationFiles related to a DigitalProduct.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:range rdf:resource="&pgef;RepresentationFile"/>
     </owl:ObjectProperty>
@@ -1731,17 +1731,6 @@
         <rdfs:comment rdf:datatype="&xsd;string">An integer indicating the sequential position of an Activity within the Activity of which it is a sub-activity.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Activity"/>
         <rdfs:range rdf:resource="&xsd;int"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/representation_type -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;representation_type">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The type of representation that a RepresentationFile encodes -- e.g.  STEP (ISO 10303) -- which may in some cases correspond to a mime type.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;RepresentationFile"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
 

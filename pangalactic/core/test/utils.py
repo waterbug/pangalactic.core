@@ -760,7 +760,6 @@ def create_test_project():
             name='Rocinante v0 MCAD v0 STEP File 0',
             description='Rocinante v0 MCAD v0 STEP File 0',
             of_object='test:Rocinante.0.MCAD.Model.0',
-            representation_type='STEP',
             mime_type='application/step',
             url='vault://Rocinante_0_MCAD_0_R0_File0.step',
             creator='test:steve',
@@ -1246,7 +1245,6 @@ related_test_objects = [
         name='Rocinante v3 MCAD v0 STEP File 0',
         description='Rocinante v3 MCAD v0 STEP File 0',
         of_object='test:spacecraft3.mcad.model.0',
-        representation_type='STEP',
         mime_type='application/step',
         # (same file as used for 'test:spacecraft0')
         url='vault://Rocinante_0_MCAD_0_R0_File0.step',
