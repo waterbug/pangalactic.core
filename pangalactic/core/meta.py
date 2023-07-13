@@ -74,7 +74,6 @@ MAIN_VIEWS = dict(
     Project=(IDENTITY + ['parent_organization']),
     ProjectSystemUsage=['id', 'project', 'system', 'system_role'],
     Relation=(IDENTITY + ['formulation']),
-    Representation=(IDENTITY + ['of_object', 'representation_purpose']),
     RepresentationFile=(IDENTITY + ['of_representation']),
     Requirement=['id', 'rqt_level', 'name', 'rqt_type', 'rqt_compliance',
                  'description', 'rationale', 'justification', 'comment'],
@@ -305,10 +304,7 @@ ONE2M = {
          'has_models' :           {'domain' : 'Modelable',
                                    'range'  : 'Model'},
          # inverse of 'of_object'
-         'has_representations' :  {'domain' : 'DigitalProduct',
-                                   'range'  : 'Representation'},
-         # inverse of 'of_representation'
-         'has_files' :            {'domain' : 'Representation',
+         'has_files' :            {'domain' : 'DigitalProduct',
                                    'range'  : 'RepresentationFile'},
          # DEPRECATED:  inverse of 'allocated_to_function'
          # NEW:  inverse of 'allocated_to'
@@ -377,7 +373,7 @@ PGXN_HIDE_PARMS = [
                    'ProductTypeParameterDefinition',
                    'Project',
                    'ProjectSystemUsage',
-                   'Representation',
+                   'RepresentationFile',
                    'RoleAssignment'
                    ]
 

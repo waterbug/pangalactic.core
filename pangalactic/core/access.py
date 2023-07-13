@@ -10,7 +10,7 @@ modifiables = [
         'ActCompRel',
         'ParameterRelation',
         'Relation',
-        'Representation',
+        'RepresentationFile',
         'RequirementAncestry']
 
 

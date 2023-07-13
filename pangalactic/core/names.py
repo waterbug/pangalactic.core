@@ -785,7 +785,7 @@ PLURALS = {
     'Product'            : 'Products',
     'Project'            : 'Projects',
     'Property'           : 'Properties',
-    'Representation'     : 'Representations',
+    'RepresentationFile' : 'RepresentationFiles',
     'RoleAssignment'     : 'RoleAssignments',
     'Role'               : 'Roles'
     }

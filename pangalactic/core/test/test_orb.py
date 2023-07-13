@@ -627,12 +627,9 @@ class OrbTest(unittest.TestCase):
             by_oid['test:spacecraft3'].has_models,
             by_oid['test:spacecraft3'].owner,
             by_oid['test:spacecraft3.mcad.model.0'].of_thing,
-            by_oid['test:spacecraft3.mcad.model.0'].has_representations,
-            by_oid['test:spacecraft3.mcad.0.representation'].of_object,
-            by_oid['test:spacecraft3.mcad.0.representation'].has_files,
-            by_oid['test:spacecraft3.mcad.0.representationfile.0'
-                   ].of_representation,
-            by_oid['test:spacecraft3.mcad.0.representationfile.0'].url
+            by_oid['test:spacecraft3.mcad.model.0'].has_files,
+            by_oid['test:spacecraft3.mcad.0.RepresentationFile.0'].of_object,
+            by_oid['test:spacecraft3.mcad.0.RepresentationFile.0'].url
             ]
         expected = [
             True,
@@ -642,10 +639,8 @@ class OrbTest(unittest.TestCase):
             [by_oid['test:spacecraft3.mcad.model.0']],
             by_oid['test:OTHER'],
             by_oid['test:spacecraft3'],
-            [by_oid['test:spacecraft3.mcad.0.representation']],
+            [by_oid['test:spacecraft3.mcad.0.RepresentationFile.0']],
             by_oid['test:spacecraft3.mcad.model.0'],
-            [by_oid['test:spacecraft3.mcad.0.representationfile.0']],
-            by_oid['test:spacecraft3.mcad.0.representation'],
             'vault://Rocinante_0_MCAD_0_R0_File0.step'
             ]
         self.assertEqual(expected, value)

@@ -449,31 +449,9 @@
 
     <owl:ObjectProperty rdf:about="&pgef;of_object">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The object (a digital product) that a representation represents.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Representation"/>
-        <rdfs:range rdf:resource="&pgef;DigitalProduct"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/has_representations -->
-
-    <owl:ObjectProperty rdf:about="&pgef;has_representations">
-        <owl:inverseOf rdf:resource="&pgef;of_object"/>
-        <rdfs:comment rdf:datatype="&xsd;string">Representations of a digital product.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;DigitalProduct"/>
-        <rdfs:range rdf:resource="&pgef;Representation"/>
-    </owl:ObjectProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/of_representation -->
-
-    <owl:ObjectProperty rdf:about="&pgef;of_representation">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The representation that a representation file is related to.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The DigitalProduct (usually a model or a document) that a representation file is related to.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;RepresentationFile"/>
-        <rdfs:range rdf:resource="&pgef;Representation"/>
+        <rdfs:range rdf:resource="&pgef;DigitalProduct"/>
     </owl:ObjectProperty>
 
 
@@ -481,9 +459,9 @@
     <!-- http://pangalactic.us/pgef/has_files -->
 
     <owl:ObjectProperty rdf:about="&pgef;has_files">
-        <owl:inverseOf rdf:resource="&pgef;of_representation"/>
+        <owl:inverseOf rdf:resource="&pgef;of_object"/>
         <rdfs:comment rdf:datatype="&xsd;string">Constituent files of a representation.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Representation"/>
+        <rdfs:domain rdf:resource="&pgef;DigitalProduct"/>
         <rdfs:range rdf:resource="&pgef;RepresentationFile"/>
     </owl:ObjectProperty>
 
@@ -1273,40 +1251,6 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/is_composable -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;is_composable">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A flag, for which a true value indicates that a representation contains sufficient computationally accessible data to (re)create or edit the digital object it represents, and/or to create some other representation of that object.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Representation"/>
-        <rdfs:range rdf:resource="&xsd;boolean"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/is_generable -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;is_generable">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A flag which, if true, indicates that a representation can be generated -- e.g., from a model.
-</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Representation"/>
-        <rdfs:range rdf:resource="&xsd;boolean"/>
-    </owl:DatatypeProperty>
-
-
-
-    <!-- http://pangalactic.us/pgef/is_object_source -->
-
-    <owl:DatatypeProperty rdf:about="&pgef;is_object_source">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">Indicates whether this representation is the original source from which its parent object was instantiated in the repository or in the current application context.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Representation"/>
-        <rdfs:range rdf:resource="&xsd;boolean"/>
-    </owl:DatatypeProperty>
-
-
-
     <!-- http://pangalactic.us/pgef/iteration -->
 
     <owl:DatatypeProperty rdf:about="&pgef;iteration">
@@ -1791,12 +1735,12 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/representation_purpose -->
+    <!-- http://pangalactic.us/pgef/representation_type -->
 
-    <owl:DatatypeProperty rdf:about="&pgef;representation_purpose">
+    <owl:DatatypeProperty rdf:about="&pgef;representation_type">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The purpose or meaning of this Representation -- e.g.  &quot;publication&quot;, &quot;presentation&quot;, &quot;exchange&quot;, etc.  The semantics of this Property are heavily context-dependent.</rdfs:comment>
-        <rdfs:domain rdf:resource="&pgef;Representation"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The type of representation that a RepresentationFile encodes -- e.g.  STEP (ISO 10303) -- which may in some cases correspond to a mime type.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RepresentationFile"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
 
@@ -2397,20 +2341,11 @@ Model in the engineering domain generally maps to step:product_definition, but t
 
 
 
-    <!-- http://pangalactic.us/pgef/Representation -->
-
-    <owl:Class rdf:about="&pgef;Representation">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A Representation is a collection of one or more digital artifacts that implement a digital product (e.g., a mechanical model, a data set, a document) and can be thought of as a reified relationship between an object and one or more digital files. Representations include both presentations, such as PDF or HTML for a document, and more general representations such as exchange data (e.g., for an engineering model, e.g. STEP, SysML, etc.).  A representation references one or more file-like objects (representation files) that are used in publishing, displaying, serializing, exporting, importing, or transmitting a digital product.  The concept is general and can apply to serialization, presentation, or data exchange use-cases, among others.</rdfs:comment>
-    </owl:Class>
-
-
-
     <!-- http://pangalactic.us/pgef/RepresentationFile -->
 
     <owl:Class rdf:about="&pgef;RepresentationFile">
         <rdfs:subClassOf rdf:resource="&pgef;DigitalFile"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A file-like object that contains all or part of a digital representation of some object.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">A file-like object that contains all or part of a representation of a DigitalProduct.</rdfs:comment>
     </owl:Class>
 
 

@@ -504,7 +504,6 @@ DESERIALIZATION_ORDER = [
                     'Model',
                     'Port',
                     'Flow',
-                    'Representation',
                     'RepresentationFile',
                     'Requirement'
                     ]

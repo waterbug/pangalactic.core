@@ -2086,21 +2086,13 @@ class UberORB(object):
             o_models = list(getattr(o, 'has_models', []))
             if o_models:
                 models += o_models
-        representations = []
+        rep_files = []
         if models:
-            # get Representations of Models (if any)
+            # get RepresentationFiles of Models (if any)
             for m in models:
-                m_reps = list(m.has_representations)
-                if m_reps:
-                    representations += m_reps
-        if representations:
-            objs += representations
-            # get RepresentationFiles of Representations (if any)
-            rep_files = []
-            for r in representations:
-                r_files = list(r.has_files)
-                if r_files:
-                    rep_files += r_files
+                files = list(m.has_files)
+                if files:
+                    rep_files += files
             if rep_files:
                 objs += rep_files
         reqts = self.search_exact(cname='Requirement', owner=project)
