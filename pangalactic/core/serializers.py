@@ -429,17 +429,28 @@ def serialize(orb, objs, include_components=False,
         # more broadly, white/black box Product objects!  Maybe use a new
         # 'product_definition' attribute that can be white or black box ...
         if isinstance(obj, orb.classes['Product']):
-            # + for now, ALWAYS include ports (white box)
+            # ---------------------------------------------------------------
+            # + NOTE: Models and RepresentationFiles are NOT included by
+            # default with the Products they represent because they may have
+            # different "owners" and access controls
+            # ---------------------------------------------------------------
+            # + ALWAYS include ports (white box)
             if obj.ports:
                 s_ports = serialize(orb, obj.ports)
                 serialized += s_ports
-            # + for now, ALWAYS include flows (white box)
+            # + ALWAYS include flows (white box)
             #   NOTE: technically any ManagedObject can be a flow_context but
             #   as a practical matter, only Products are currently supported
             flows = orb.get_internal_flows_of(obj)
             if flows:
                 s_flows = serialize(orb, flows)
                 serialized += s_flows
+        ###################################################################
+        if isinstance(obj, orb.classes['Model']):
+            # + ALWAYS include related RepresentationFile instances
+            if obj.has_files:
+                s_rfiles = serialize(orb, obj.has_files)
+                serialized += s_rfiles
         ###################################################################
         if isinstance(obj, orb.classes['RoleAssignment']):
             # include Role object
