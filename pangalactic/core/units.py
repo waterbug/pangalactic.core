@@ -25,20 +25,24 @@ in_si = dict([
     ('angular sensitivity', 'm/radian'),    # meters / radian
     ('angular velocity', 'radian/s'),       # radian / second
     ('area', 'm^2'),                        # square meter
+    ('areal density', 'kg/m^2'),            # kg / meter^2
     ('bitrate', 'bit/s'),                   # bit / second
     ('capacitance', 'F'),                   # farad
     ('charge', 'C'),                        # coulomb
     ('data', 'bit'),                        # bit
     ('decibels-isotropic', 'dBi'),          # dBi (decibels-isotropic)
     ('decibels', 'dB'),                     # dB (decibels)
+    ('density', 'kg/m^3'),                  # kg / meter^3
     ('electrical current', 'A'),            # ampere
     ('electrical potential', 'V'),          # volt
     ('electrical resistance', 'Ohm'),       # ohm
     ('energy', 'J'),                        # joule
     ('force', 'N'),                         # newton
     ('frequency', 'Hz'),                    # hertz (== s^-1)
+    ('heat transport capacity', 'W*m'),     # Watt * meter
     ('inductance', 'H'),                    # henry
     ('length', 'm'),                        # meter
+    ('linear density', 'kg/m'),             # kg / meter
     ('luminosity', 'cd'),                   # candela, cd, candle (old)
     ('mass', 'kg'),                         # kilogram
     ('moment of inertia', 'kg*m^2'),        # kg * meter^2
@@ -46,9 +50,11 @@ in_si = dict([
     ('money', '$'),                         # dollar
     ('percent', '%'),                       # .01 * value
     ('power', 'W'),                         # watt
+    ('power density', 'W/m^3'),             # watt / meter^3
     ('pressure', 'Pa'),                     # pascal
     ('radiation', 'rads'),                  # rads -- not 'rad' (== 'radian')
     ('substance', 'mol'),                   # moles
+    ('surface power density', 'W/m^2'),     # watt / meter^2
     ('translational sensitivity', 'm/m'),   # meters / meter
     ('temperature', 'K'),                   # Kelvin
     ('time', 's'),                          # second
