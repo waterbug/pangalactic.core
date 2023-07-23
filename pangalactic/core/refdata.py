@@ -1482,7 +1482,7 @@ pdc = [
 {   '_cname': 'ParameterDefinition',
     'create_datetime': '2023-07-01 00:00:00',
     'creator': 'pgefobjects:admin',
-    'description': 'Capability to transport heat',
+    'description': 'Capacity to transport heat',
     'dimensions': 'heat transport capacity',
     'id': 'HeatTransportCapacity',
     'id_ns': 'pgef',

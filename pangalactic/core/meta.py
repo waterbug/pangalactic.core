@@ -103,9 +103,6 @@ PGXN_PARAMETERS = ['m', 'P', 'R_D', 'Cost', 'height', 'width',
 # DEFAULT_CLASS_DATA_ELEMENTS:  default data elements of objects by class
 DEFAULT_CLASS_DATA_ELEMENTS = {'HardwareProduct': ['Vendor', 'TRL']}
 
-# DEFAULT_PRODUCT_TYPE_DATA_ELMTS:  default data elements by ProductType id
-DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {'': []}
-
 # DEFAULT_CLASS_PARAMETERS:  default parameters of objects by class
 DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start', 't_end'],
                             'Mission': ['duration'],
@@ -118,12 +115,27 @@ DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start', 't_end'],
                                 'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
                                 'R_D[MEV]', 'height', 'width', 'depth', 'Cost']}
 
+# DEFAULT_PRODUCT_TYPE_DATA_ELMTS:  default data elements by ProductType id
+DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {
+    'heat_pipe':
+        ['working_fluid', # Ammonia, Ethane
+         'extrusion'      # Aluminum
+         ],
+    'multi_layer_insulation':
+        ['Size',          # Large, Small, Cable Wrap
+         'Layup'          # Number of Layers
+         ],
+    }
+
 # DEFAULT_PRODUCT_TYPE_PARAMETERS:  default parameters by ProductType id
 DEFAULT_PRODUCT_TYPE_PARAMETERS = {
     'antenna': ['Gain_antenna'],
     'omni_antenna': ['Gain_antenna'],
     'medium_gain_antenna': ['Gain_antenna'],
+    'heat_pipe': ['d', 'LinearDensity', 'FreezingPoint',
+                  'HeatTransportCapacity'],
     'high_gain_antenna': ['Gain_antenna'],
+    'multi_layer_insulation': ['ArealDensity'],
     'power_amplifier': ['Gain'],
     'optical_component': ['RoC', 'K'],
     'transponder': ['f_downlink', 'f_uplink'],
