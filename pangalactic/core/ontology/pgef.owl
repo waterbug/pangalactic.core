@@ -1152,6 +1152,17 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/file_size -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;file_size">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The size of the file in bytes.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DigitalFile"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/file_role -->
 
     <owl:DatatypeProperty rdf:about="&pgef;file_role">
