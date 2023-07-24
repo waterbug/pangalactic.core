@@ -734,7 +734,7 @@ def create_test_project():
         dict(
             # using a CAX-IF STEP model for test purposes
             _cname='Model',
-            oid='test:Rocinante.0.MCAD.Model.0',
+            oid='Rocinante.0.MCAD.Model.0',
             id='Rocinante.0.MCAD.Model',
             id_ns='test',
             iteration=0,
@@ -754,14 +754,17 @@ def create_test_project():
             ),
         dict(
             _cname='RepresentationFile',
-            oid='test:Rocinante.0.MCAD.0.RepresentationFile.0',
+            oid='Rocinante_0_MCAD_0_R0',
             id='Rocinante.0.MCAD.0.RepresentationFile.0',
             id_ns='test',
             name='Rocinante v0 MCAD v0 STEP File 0',
             description='Rocinante v0 MCAD v0 STEP File 0',
-            of_object='test:Rocinante.0.MCAD.Model.0',
+            of_object='Rocinante.0.MCAD.Model.0',
             mime_type='application/step',
             url='vault://Rocinante_0_MCAD_0_R0_File0.step',
+            # vault file name: 'Rocinante_0_MCAD_0_R0_File0.step'
+            user_file_name='File0.step',
+            file_size=22820,
             creator='test:steve',
             create_datetime=NOW,
             modifier='test:steve',
