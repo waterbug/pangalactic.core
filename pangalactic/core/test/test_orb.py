@@ -641,7 +641,7 @@ class OrbTest(unittest.TestCase):
             by_oid['test:spacecraft3'],
             [by_oid['test:spacecraft3.mcad.0.RepresentationFile.0']],
             by_oid['test:spacecraft3.mcad.model.0'],
-            'vault://Rocinante_0_MCAD_0_R0_File0.step'
+            'vault://Other_0_MCAD_0_R0_File0.step'
             ]
         self.assertEqual(expected, value)
 
