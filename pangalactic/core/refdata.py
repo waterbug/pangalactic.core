@@ -4614,12 +4614,14 @@ comm_discipline_obj = core_objs['pgefobjects:Discipline.rf_comm']
 for pt_oid in [
     'pgefobjects:ProductType.antenna_gimbal',
     'pgefobjects:ProductType.communications_system',
+    'pgefobjects:ProductType.diplexer',
     'pgefobjects:ProductType.eee_part',
     'pgefobjects:ProductType.electro_mechanical',
     'pgefobjects:ProductType.antenna',
     'pgefobjects:ProductType.omni_antenna',
     'pgefobjects:ProductType.medium_gain_antenna',
     'pgefobjects:ProductType.high_gain_antenna',
+    'pgefobjects:ProductType.hybrid_divider',
     'pgefobjects:ProductType.transponder',
     'pgefobjects:ProductType.transmitter',
     'pgefobjects:ProductType.receiver',
@@ -4633,7 +4635,7 @@ for pt_oid in [
         dict(_cname='DisciplineProductType', oid=dpt_oid, id=dpt_id,
              relevant_product_type=pt_obj['oid'],
              used_in_discipline=comm_discipline_obj['oid'],
-             create_datetime=dts, mod_datetime=dts))
+             create_datetime=dts, mod_datetime='2023-07-03 00:00:00'))
 
 # Systems ProductTypes
 systems_discipline_obj = core_objs['pgefobjects:Discipline.systems']
