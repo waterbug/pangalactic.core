@@ -767,6 +767,34 @@ deds = [
     'range_datatype': 'str',
     'description': 'The material extruded to create a heat pipe.'},
 
+{   '_cname': 'DataElementDefinition',
+    'oid': 'pgef:DataElementDefinition.size',
+    'id': 'size',
+    'id_ns': 'pgef',
+    'label': 'Size',
+    'name': 'Size',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': '2023-07-03 00:00:00',
+    'mod_datetime': '2023-07-03 00:00:00',
+    'modifier': 'pgefobjects:admin',
+    'range_datatype': 'str',
+    'description': 'A relative, inexact quantity -- e.g. for multi-layer insulation: "small", "large", "cable wrap".'},
+
+{   '_cname': 'DataElementDefinition',
+    'oid': 'pgef:DataElementDefinition.layup',
+    'id': 'layup',
+    'id_ns': 'pgef',
+    'label': 'Layup',
+    'name': 'Layup',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': '2023-07-03 00:00:00',
+    'mod_datetime': '2023-07-03 00:00:00',
+    'modifier': 'pgefobjects:admin',
+    'range_datatype': 'str',
+    'description': 'Qualitative description of the layers of multi-layer insulation.'},
+
     ]
 
 # parameter_definitions_and_contexts

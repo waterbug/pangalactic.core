@@ -122,8 +122,8 @@ DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {
          'extrusion'      # Aluminum
          ],
     'multi_layer_insulation':
-        ['Size',          # Large, Small, Cable Wrap
-         'Layup'          # Number of Layers
+        ['size',          # Large, Small, Cable Wrap
+         'layup'          # Number of Layers
          ],
     }
 
