@@ -511,11 +511,14 @@ PGEF_DIMENSION_ORDER = {
             'electrical potential': 'Voltage',
             'time': 'Time',
             'substance': 'Moles',
-            'money': 'Cost'
+            'money': 'Cost',
+            '': 'Dimensionless',
+            None: 'Dimensionless',
+            'None': 'Dimensionless',
+            'dimensionless': 'Dimensionless',
             }
 all_dims = {dim: dim.title() for dim in in_si
-            if (dim not in ('', None, 'None', 'dimensionless')
-                and dim not in PGEF_DIMENSION_ORDER)}
+            if dim and dim not in PGEF_DIMENSION_ORDER}
 PGEF_DIMENSION_ORDER.update(all_dims)
 
 # max length of string fields (default: 80)
