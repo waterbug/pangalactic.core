@@ -117,13 +117,22 @@ DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start', 't_end'],
 
 # DEFAULT_PRODUCT_TYPE_DATA_ELMTS:  default data elements by ProductType id
 DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {
+    'heater':
+        ['MountingMaterial', # acrylic adhesive
+         ],
     'heat_pipe':
-        ['working_fluid', # Ammonia, Ethane
-         'extrusion'      # Aluminum
+        ['WorkingFluid', # Ammonia, Ethane
+         'extrusion'     # Aluminum
          ],
     'multi_layer_insulation':
         ['size',          # Large, Small, Cable Wrap
          'layup'          # Number of Layers
+         ],
+    'thermal_fabric':
+        ['material'
+         ],
+    'thermal_louver':
+        ['TempRangeFromClosedToOpen'
          ],
     }
 
@@ -132,12 +141,21 @@ DEFAULT_PRODUCT_TYPE_PARAMETERS = {
     'antenna': ['Gain_antenna'],
     'omni_antenna': ['Gain_antenna'],
     'medium_gain_antenna': ['Gain_antenna'],
-    'heat_pipe': ['d', 'LinearDensity', 'FreezingPoint',
+    'heater': ['Density_areal', 'T[max]', 'T[min]'],
+    'heat_pipe': ['d', 'Density_linear', 'FreezingPoint',
                   'HeatTransportCapacity'],
     'high_gain_antenna': ['Gain_antenna'],
-    'multi_layer_insulation': ['ArealDensity'],
+    'multi_layer_insulation': ['Density_areal'],
     'power_amplifier': ['Gain'],
     'optical_component': ['RoC', 'K'],
+    'temperature_sensor': ['T[max]', 'T[min]'],
+    'thermal_coating': ['Density_areal', 'Emittance', 'Absorptance',
+                        'thickness'],
+    'thermal_fabric': ['Density_areal', 'Emittance', 'Absorptance',
+                       'thickness'],
+    'thermal_louver': ['Density_areal', 'EffectiveEmittance_closed',
+                       'EffectiveEmittance_open'],
+    'thermostat': ['T[max]', 'T[min]'],
     'transponder': ['f_downlink', 'f_uplink'],
     'transmitter': ['f_downlink', 'f_uplink'],
     'receiver': ['f_downlink', 'f_uplink']
