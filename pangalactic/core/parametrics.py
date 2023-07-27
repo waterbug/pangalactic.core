@@ -1028,12 +1028,12 @@ def add_default_parameters(obj, parms=None):
         # default for "default_parms":  mass, power, data rate
         # (state is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
-        pids |= OrderedSet(parms or prefs.get('default_parms', []))
+        pids |= OrderedSet(parms or prefs.get('default_parms') or [])
         prod_type = obj.product_type
         prod_type_id = getattr(prod_type, 'id', '')
         if prod_type_id:
             def_pids = OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
-                                                                prod_type_id))
+                                                       prod_type_id) or [])
             txt = '  - found default parameters'
             log.debug(f'{txt} for product type "{prod_type_id}": {def_pids}')
             pids |= def_pids
@@ -1042,25 +1042,6 @@ def add_default_parameters(obj, parms=None):
         log.debug(f'  - adding default parameters {pids_to_add} ...')
         for pid in pids_to_add:
             add_parameter(obj.oid, pid)
-
-def add_product_type_parameters(obj, pt):
-    """
-    Assign the parameters associated with the specified product type to an
-    object.
-
-    Args:
-        obj (Identifiable):  the object to receive parameters
-        pt (ProductType):  the product type
-    """
-    # log.debug('* assigning parameters for product type "{}"'.format(pt.id))
-    # then check for parameters specific to the product_type, if any
-    if pt:
-        # check if the product_type has parameters
-        pt_parmz = parameterz.get(pt.oid)
-        if pt_parmz:
-            # if so, replicate them directly (with values)
-            for pid in pt_parmz:
-                parameterz[obj.oid][pid] = pt_parmz[pid]
 
 def delete_parameter(oid, pid, local=True):
     """
@@ -2218,10 +2199,9 @@ def add_default_data_elements(obj, des=None):
         deids |= OrderedSet(des or config['default_data_elements'])
         if obj.product_type:
             deids |= OrderedSet(DEFAULT_PRODUCT_TYPE_DATA_ELMTS.get(
-                                obj.product_type.id, []))
-    # add default parameters first ...
-    # log.debug('  - adding data elements {} ...'.format(str(deids)))
-    deids_to_add = deids - set(data_elementz.get(obj.oid, {}))
+                                obj.product_type.id) or [])
+    log.debug('  - adding data elements {} ...'.format(str(deids)))
+    deids_to_add = deids - set(data_elementz.get(obj.oid) or [])
     if deids_to_add:
         log.debug(f'  - adding default data elements {deids_to_add} ...')
         for deid in deids_to_add:

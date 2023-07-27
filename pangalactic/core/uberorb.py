@@ -34,8 +34,7 @@ from pangalactic.core.meta        import TEXT_PROPERTIES
 from pangalactic.core.parametrics import (add_context_parm_def,
                                           add_default_parameters,
                                           add_default_data_elements,
-                                          add_parameter, componentz,
-                                          _compute_pval,
+                                          componentz, _compute_pval,
                                           compute_requirement_margin,
                                           data_elementz, de_defz,
                                           get_parameter_id,
@@ -1316,12 +1315,12 @@ class UberORB(object):
                         self.log.debug('   component not changed.')
                 recompute_required = True
             elif cname == 'HardwareProduct':
-                # make sure HW Products have mass, power, data rate parms
+                # make sure all HW Products have their default parameters and
+                # data elements
                 if oid not in parameterz:
                     parameterz[oid] = {}
-                for pid in ['m', 'P', 'R_D']:
-                    if not parameterz[oid].get(pid):
-                         add_parameter(oid, pid)
+                add_default_parameters(obj)
+                add_default_data_elements(obj)
                 recompute_required = True
             elif cname == 'ProjectSystemUsage':
                 system_oid = getattr(obj.system, 'oid', None)
