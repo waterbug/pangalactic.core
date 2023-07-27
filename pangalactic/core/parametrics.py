@@ -72,7 +72,8 @@ def make_parm_html(pid, tag='p', style='', flag=False):
 
 def make_de_html(deid, tag='p', style=''):
     """
-    HTML-ize a data element id for use in labels.
+    HTML-ize a data element id for use in labels -- if "label" field is
+    populated in the data element definition, use it.
 
     Args:
         deid (str): the data element id
@@ -82,20 +83,27 @@ def make_de_html(deid, tag='p', style=''):
         style (str): css spec to use -- default is ""
     """
     begin_tag = tag
-    if tag == 'p' and style:
-        begin_tag = f'p style="{style}"'
-    if not isinstance(deid, str):
-        return '<b>oops</b>'
-    parts = deid.split('_')
-    name_parts = [p.capitalize() for p in parts]
-    studly_name = ' '.join(name_parts)
-    if len(parts) > 1:
-        return f'<{begin_tag}>{studly_name}</{tag}>'
-    elif deid == 'TRL':
-        # yes, ugly :(
-        return f'<{begin_tag}>TRL</{tag}>'
+    de_def = de_defz.get(deid)
+    if de_def and de_def.get('label'):
+        # if label is found, use it
+        label = de_def['label']
+        return f'<{begin_tag}>{label}</{tag}>'
     else:
-        return f'<{begin_tag}>{deid.capitalize()}</{tag}>'
+        # if label is not found, use deid
+        if tag == 'p' and style:
+            begin_tag = f'p style="{style}"'
+        if not isinstance(deid, str):
+            return '<b>oops</b>'
+        parts = deid.split('_')
+        name_parts = [p.capitalize() for p in parts]
+        studly_name = ' '.join(name_parts)
+        if len(parts) > 1:
+            return f'<{begin_tag}>{studly_name}</{tag}>'
+        elif deid == 'TRL':
+            # yes, ugly :(
+            return f'<{begin_tag}>TRL</{tag}>'
+        else:
+            return f'<{begin_tag}>{deid.capitalize()}</{tag}>'
 
 # componentz cache **********************************************************
 
