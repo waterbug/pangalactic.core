@@ -740,8 +740,8 @@ deds = [
     'description': 'Position of a component in an optical path.'},
 
 {   '_cname': 'DataElementDefinition',
-    'oid': 'pgef:DataElementDefinition.WorkingFluid',
-    'id': 'WorkingFluid',
+    'oid': 'pgef:DataElementDefinition.working_fluid',
+    'id': 'working_fluid',
     'id_ns': 'pgef',
     'label': 'Working Fluid',
     'name': 'Working Fluid',
@@ -796,10 +796,10 @@ deds = [
     'description': 'Qualitative description of the layers of multi-layer insulation.'},
 
 {   '_cname': 'DataElementDefinition',
-    'oid': 'pgef:DataElementDefinition.TempRangeFromClosedToOpen',
-    'id': 'TempRangeFromClosedToOpen',
+    'oid': 'pgef:DataElementDefinition.temp_range_closed_open',
+    'id': 'temp_range_closed_open',
     'id_ns': 'pgef',
-    'label': 'Temperature Range from Closed to Open',
+    'label': 'Temp Range Closed/Open',
     'name': 'Temperature Range from Closed to Open',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
@@ -810,11 +810,11 @@ deds = [
     'description': 'Temperature range from when a louver is fully closed to when it is fully open.'},
 
 {   '_cname': 'DataElementDefinition',
-    'oid': 'pgef:DataElementDefinition.MountingMaterial',
-    'id': 'MountingMaterial',
+    'oid': 'pgef:DataElementDefinition.mounting_material',
+    'id': 'mounting_material',
     'id_ns': 'pgef',
-    'label': 'MountingMaterial',
-    'name': 'MountingMaterial',
+    'label': 'Mounting Material',
+    'name': 'Mounting Material',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'create_datetime': '2023-07-03 00:00:00',
@@ -2717,7 +2717,7 @@ core = [
     'oid': 'pgefobjects:Discipline.mechanical',
     'id': 'mechanical',
     'name': 'Mechanical Systems',
-    'abbreviation': 'Mech',
+    'abbreviation': 'MechSys',
     'description': 'Design of Mechanical Structures and Systems',
     'create_datetime': epoch,
     'mod_datetime': '2020-01-01 00:00:00'
@@ -2937,39 +2937,39 @@ dict(
     'oid': 'pgefobjects:ProductType.instrument',
     'id': 'instrument',
     'name': 'Instrument',
-    'abbreviation': 'Instr',
+    'abbreviation': 'Instrument',
     'description': 'Instrument',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-10-03 00:00:00'
+    'mod_datetime': '2023-07-03 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.observatory',
     'id': 'observatory',
     'name': 'Observatory',
-    'abbreviation': 'Observ',
+    'abbreviation': 'Observatory',
     'description': 'Observatory',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-10-02 00:00:00'
+    'mod_datetime': '2023-07-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.spacecraft',
     'id': 'spacecraft',
     'name': 'Spacecraft',
-    'abbreviation': 'SC',
+    'abbreviation': 'Spacecraft',
     'description': 'Spacecraft',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2981,7 +2981,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -2994,7 +2994,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3007,7 +3007,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-02-25 00:00:00'
+    'mod_datetime': '2023-07-02 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3020,20 +3020,20 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-01-02 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.cryogenic_system',
     'id': 'cryogenic_system',
     'name': 'Cryogenic System',
-    'abbreviation': 'Cryo',
+    'abbreviation': 'CryoSys',
     'description': 'Cryogenic System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-24 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3046,7 +3046,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-24 01:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3059,33 +3059,33 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.electro_mechanical',
     'id': 'electro_mechanical',
     'name': 'Electro Mechanical Device',
-    'abbreviation': 'EMech',
+    'abbreviation': 'ElectroMech',
     'description': 'Electro Mechanical Devices',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.optical_component',
     'id': 'optical_component',
     'name': 'Optical Component',
-    'abbreviation': 'OpticComp',
+    'abbreviation': 'OpticalComp',
     'description': 'Optical Components',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3098,7 +3098,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2022-12-01 00:00:00',
-    'mod_datetime': '2022-12-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3111,20 +3111,20 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2022-12-01 00:00:00',
-    'mod_datetime': '2022-12-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.optical_system',
     'id': 'optical_system',
     'name': 'Optical System',
-    'abbreviation': 'OpticSys',
+    'abbreviation': 'OpticalSys',
     'description': 'Optical Systems',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3137,7 +3137,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-01-02 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3150,7 +3150,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-01-02 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3163,33 +3163,33 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-01-02 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.eee_part',
     'id': 'eee_part',
     'name': 'EEE Part',
-    'abbreviation': 'EEE',
+    'abbreviation': 'EEEPart',
     'description': 'Electrical, Electronic, or Electromechanical Component',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-02-02 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.communications_system',
     'id': 'communications_system',
     'name': 'Communications System',
-    'abbreviation': 'Comm',
+    'abbreviation': 'CommSys',
     'description': 'Communications System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3202,7 +3202,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3215,20 +3215,20 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.power_system',
     'id': 'power_system',
     'name': 'Power System',
-    'abbreviation': 'Power',
+    'abbreviation': 'PowerSys',
     'description': 'Power System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3241,46 +3241,46 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-01-25 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.mechanical_system',
     'id': 'mechanical_system',
     'name': 'Mechanical System',
-    'abbreviation': 'Mech',
+    'abbreviation': 'MechSys',
     'description': 'Mechanical System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.propulsion_system',
     'id': 'propulsion_system',
     'name': 'Propulsion System',
-    'abbreviation': 'Prop',
+    'abbreviation': 'PropSys',
     'description': 'Propulsion System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_control_system',
     'id': 'thermal_control_system',
     'name': 'Thermal Control System',
-    'abbreviation': 'Thermal',
+    'abbreviation': 'ThermalSys',
     'description': 'Thermal Control System',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3293,7 +3293,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3306,7 +3306,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-06-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3319,7 +3319,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-10-22 00:01:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3332,7 +3332,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3345,7 +3345,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3358,7 +3358,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3371,7 +3371,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3384,7 +3384,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3397,7 +3397,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3410,7 +3410,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3423,7 +3423,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3436,7 +3436,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3449,7 +3449,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3462,7 +3462,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3475,7 +3475,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3488,20 +3488,20 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.propellant_filter',
     'id': 'propellant_filter',
     'name': 'Propellant Filter',
-    'abbreviation': 'PropFltr',
+    'abbreviation': 'PropFilter',
     'description': 'Propellant Filter',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3514,7 +3514,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 01:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3527,7 +3527,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3540,20 +3540,20 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.pressure_transducer',
     'id': 'pressure_transducer',
     'name': 'Pressure Transducer',
-    'abbreviation': 'PressXducr',
+    'abbreviation': 'PressureXducr',
     'description': 'Pressure Transducer',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3566,7 +3566,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3579,20 +3579,20 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.sep_engine_gimbal',
     'id': 'sep_engine_gimbal',
     'name': 'SEP Engine Gimbal',
-    'abbreviation': 'SEPEngGmbl',
+    'abbreviation': 'SEPEngGimbal',
     'description': 'SEP Engine Gimbal',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3605,7 +3605,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3618,33 +3618,33 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.temperature_sensor',
     'id': 'temperature_sensor',
     'name': 'Temperature Sensor',
-    'abbreviation': 'TempSens',
+    'abbreviation': 'TempSensor',
     'description': 'Temperature Sensor',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_controller',
     'id': 'thermal_controller',
     'name': 'Thermal Controller',
-    'abbreviation': 'ThermCtrlr',
+    'abbreviation': 'ThermalCtrlr',
     'description': 'Thermal Controller',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-02 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3657,20 +3657,20 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_coating',
     'id': 'thermal_coating',
     'name': 'Thermal Coating',
-    'abbreviation': 'ThermCtng',
+    'abbreviation': 'ThermalCtng',
     'description': 'Thermal Coating',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3683,7 +3683,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3696,7 +3696,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2023-07-26 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3709,7 +3709,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3722,33 +3722,33 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_strap',
     'id': 'thermal_strap',
     'name': 'Thermal Strap',
-    'abbreviation': 'ThermStrap',
+    'abbreviation': 'ThermalStrap',
     'description': 'Thermal Strap',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.thermal_louver',
     'id': 'thermal_louver',
     'name': 'Thermal Louver',
-    'abbreviation': 'ThermLvr',
+    'abbreviation': 'ThermalLvr',
     'description': 'Thermal Louver',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3761,7 +3761,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3774,7 +3774,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3787,7 +3787,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3800,33 +3800,33 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.solar_array_actuator',
     'id': 'solar_array_actuator',
     'name': 'Solar Array Actuator',
-    'abbreviation': 'SolrAryAct',
+    'abbreviation': 'SolarArrayAct',
     'description': 'Solar Array Actuator',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.antenna_gimbal',
     'id': 'antenna_gimbal',
     'name': 'Antenna Gimbal',
-    'abbreviation': 'AntGimbl',
+    'abbreviation': 'AntGimbal',
     'description': 'Antenna Gimbal',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3839,7 +3839,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3852,7 +3852,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3865,20 +3865,20 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.battery',
     'id': 'battery',
     'name': 'Battery',
-    'abbreviation': 'Batt',
+    'abbreviation': 'Battery',
     'description': 'Battery',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3891,7 +3891,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3904,7 +3904,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3917,20 +3917,20 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
     'oid': 'pgefobjects:ProductType.power_harness',
     'id': 'power_harness',
     'name': 'Power Harness',
-    'abbreviation': 'PwrHarness',
+    'abbreviation': 'PowerHarness',
     'description': 'Power Harness',
     'owner': 'pgefobjects:PGANA',
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3944,7 +3944,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-01-02 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3957,7 +3957,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3970,7 +3970,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3983,7 +3983,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -3996,7 +3996,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4009,7 +4009,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4022,7 +4022,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4035,7 +4035,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4048,7 +4048,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-05-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4061,7 +4061,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4074,7 +4074,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4086,7 +4086,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2020-04-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4099,7 +4099,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-01-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4112,7 +4112,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-02-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4125,7 +4125,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-02-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ProductType',
@@ -4138,7 +4138,7 @@ dict(
     'creator': 'pgefobjects:admin',
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
-    'mod_datetime': '2021-02-01 00:00:00'
+    'mod_datetime': '2023-07-01 00:00:00'
     },
 
 {   '_cname': 'ModelType',
@@ -4146,7 +4146,7 @@ dict(
     'id': '42',
     'id_ns': 'pgef',
     'name': '42 Attitude Control System Model',
-    'abbreviation': 'SC',
+    'abbreviation': '42',
     'description': 'A model implemented in the 42 Attitude Control System modeling and simulation system developed at Goddard Space Flight Center.',
     'create_datetime': '2021-01-01 00:00:00',
     'mod_datetime': '2023-01-01 00:00:00'
@@ -4845,6 +4845,11 @@ deprecated = [
     'pgef:ParameterDefinition.P_throughput',
     'pgef:ParameterDefinition.T_operational',
     'pgef:ParameterDefinition.T_survival',
+    'pgef:ParameterDefinition.ArealDensity',
+    'pgef:ParameterDefinition.LinearDensity',
+    'pgef:DataElementDefinition.MountingMaterial',
+    'pgef:DataElementDefinition.WorkingFluid',
+    'pgef:DataElementDefinition.TempRangeFromClosedToOpen',
     # most contexts are now lower case
     'pgef:ParameterContext.Assembly',
     'pgef:ParameterContext.Average',

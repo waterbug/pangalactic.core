@@ -118,10 +118,10 @@ DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start', 't_end'],
 # DEFAULT_PRODUCT_TYPE_DATA_ELMTS:  default data elements by ProductType id
 DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {
     'heater':
-        ['MountingMaterial', # acrylic adhesive
+        ['mounting_material', # acrylic adhesive
          ],
     'heat_pipe':
-        ['WorkingFluid', # Ammonia, Ethane
+        ['working_fluid', # Ammonia, Ethane
          'extrusion'     # Aluminum
          ],
     'multi_layer_insulation':
@@ -132,7 +132,7 @@ DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {
         ['material'
          ],
     'thermal_louver':
-        ['TempRangeFromClosedToOpen'
+        ['temp_range_closed_open'
          ],
     }
 
@@ -547,7 +547,7 @@ PGEF_COL_WIDTHS = {
             'org': 200,
             'owner': 100,
             'oid': 100,
-            'product_type': 80,
+            'product_type': 100,
             'purpose': 250,
             'range_datatype': 50,
             'rationale': 200,
