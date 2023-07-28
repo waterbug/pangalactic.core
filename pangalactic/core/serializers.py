@@ -10,7 +10,9 @@ import dateutil.parser as dtparser
 from pangalactic.core.meta import asciify, M2M, ONE2M
 from pangalactic.core.refdata     import ref_oids
 from pangalactic.core.utils.datetimes import earlier, EPOCH, EPOCH_DATE
-from pangalactic.core.parametrics import (deserialize_des,
+from pangalactic.core.parametrics import (add_default_parameters,
+                                          add_default_data_elements,
+                                          deserialize_des,
                                           deserialize_parms,
                                           refresh_componentz,
                                           refresh_systemz,
@@ -902,6 +904,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     for product in products:
         acus.update(product.where_used)
         psus.update(product.projects_using_system)
+        add_default_parameters(product)
+        add_default_data_elements(product)
     for acu in acus:
         # look for requirement allocations to acus ...
         if acu.allocated_requirements:
