@@ -1042,12 +1042,12 @@ def add_default_parameters(obj, parms=None):
         if prod_type_id:
             def_pids = OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
                                                        prod_type_id) or [])
-            txt = '  - found default parameters'
-            log.debug(f'{txt} for product type "{prod_type_id}": {def_pids}')
+            # txt = '  - found default parameters'
+            # log.debug(f'{txt} for product type "{prod_type_id}": {def_pids}')
             pids |= def_pids
-    pids_to_add =  pids - set(parameterz.get(obj.oid, {}))
+    pids_to_add =  pids - set(parameterz.get(obj.oid) or [])
     if pids_to_add:
-        log.debug(f'  - adding default parameters {pids_to_add} ...')
+        # log.debug(f'  - adding default parameters {pids_to_add} ...')
         for pid in pids_to_add:
             add_parameter(obj.oid, pid)
 
@@ -2195,7 +2195,7 @@ def add_default_data_elements(obj, des=None):
                                                                  # obj.id))
     deids = OrderedSet()
     cname = obj.__class__.__name__
-    deids |= OrderedSet(DEFAULT_CLASS_DATA_ELEMENTS.get(cname, []))
+    deids |= OrderedSet(DEFAULT_CLASS_DATA_ELEMENTS.get(cname) or [])
     # TODO: let user set default data elements in their prefs
     if not config.get('default_data_elements'):
         config['default_data_elements'] = ['TRL', 'Vendor',
@@ -2208,10 +2208,10 @@ def add_default_data_elements(obj, des=None):
         if obj.product_type:
             deids |= OrderedSet(DEFAULT_PRODUCT_TYPE_DATA_ELMTS.get(
                                 obj.product_type.id) or [])
-    log.debug('  - adding data elements {} ...'.format(str(deids)))
+    # log.debug('  - adding data elements {} ...'.format(str(deids)))
     deids_to_add = deids - set(data_elementz.get(obj.oid) or [])
     if deids_to_add:
-        log.debug(f'  - adding default data elements {deids_to_add} ...')
+        # log.debug(f'  - adding default data elements {deids_to_add} ...')
         for deid in deids_to_add:
             add_data_element(obj.oid, deid)
 
