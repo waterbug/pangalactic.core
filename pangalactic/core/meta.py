@@ -407,10 +407,6 @@ PGXN_HIDE_PARMS = [
                    'RoleAssignment'
                    ]
 
-# MODEL_TYPE_PREFS:  preferred model types
-# (for now, the only ones we can render ... ;)
-MODEL_TYPE_PREFS = ['step:203', 'step:214', 'step:242', 'pgefobjects:Block']
-
 # SELECTION_VIEWS:  Class-specific default sets of columns for tabular display
 # of objects in the foreign key object selection dialog for PgxnObject
 SELECTION_VIEWS = dict(
