@@ -901,11 +901,14 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         # ids = str([o.id for o in updates.values()])
         # orb.log.info('{} updated object(s) deserialized: {}'.format(
                                                         # log_txt, ids))
+    all_proj_ids = orb.get_ids(cname='Project')
     for product in products:
         acus.update(product.where_used)
         psus.update(product.projects_using_system)
         add_default_parameters(product)
         add_default_data_elements(product)
+        # fix product id's to conform to new format (as of 3.2.dev9)
+        orb.fix_product_id(product, all_proj_ids)
     for acu in acus:
         # look for requirement allocations to acus ...
         if acu.allocated_requirements:

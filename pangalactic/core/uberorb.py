@@ -110,6 +110,8 @@ class UberORB(object):
     # "parameters.json" and "data_elements.json" files
     data_elementz_status: str = 'unknown'
     parmz_status: str = 'unknown'
+    # all_pt_abbrs will be updated by load_reference_data()
+    all_pt_abbrs = []
 
     def start(self, home: str = '', db_url: str = '',
               console: bool = False, debug: bool = False,
@@ -932,6 +934,9 @@ class UberORB(object):
         # build the 'componentz' and 'systemz' runtime caches
         self._build_componentz_cache()
         self._build_systemz_cache()
+        # update the all_pt_abbrs cache, used in fix_product_id()
+        self.all_pt_abbrs = [pt.abbreviation
+                             for pt in orb.get_by_type('ProductType')]
         # update the rqt_allocz runtime cache (used in computing margins)
         self.recompute_parmz()
         self.log.info('  + all reference data loaded.')
@@ -1684,18 +1689,31 @@ class UberORB(object):
                                                 # str(current_id_parts)))
         if current_id_parts[-1] in id_suffixes:
             id_suffixes.remove(current_id_parts[-1])
-        owner_id = getattr(obj.owner, 'id', 'Owner-unspecified')
-        # self.log.debug('  owner_id: {}'.format(owner_id))
+        # NOTE: as of 3.2.dev9, the product id will only include the "owner_id"
+        # if the owner is a Project, and therefore the spec would be
+        # inappropriate for direct reuse and should be immediately identifiable
+        # as owned by a project -- otherwise the spec is most likely either a
+        # COTS product spec, owned by a vendor, or a generic or standard spec.
         pt_abbr = getattr(obj.product_type, 'abbreviation', 'TBD') or 'TBD'
         # self.log.debug('  pt_abbr: {}'.format(pt_abbr))
         # test whether current id already conforms -- i.e., first part is
         # [owner.id or "Vendor"] + '-' + [product_type.abbrev.] + '-'
         # and last part (suffix) is unique
-        if (len(current_id_parts) >= 3 and
-            ((obj.id or '').startswith(owner_id + '-' + pt_abbr + '-')) and
-            # suffix is unique (has been removed from id_suffixes once)
-            current_id_parts[-1] not in id_suffixes):
-            return obj.id
+        owner_id = ''
+        if isinstance(obj.owner, orb.classes['Project']):
+            owner_id = obj.owner.id
+            # self.log.debug(f'  owner id: {owner_id}')
+            if (len(current_id_parts) >= 3 and
+                ((obj.id or '').startswith(owner_id + '-' + pt_abbr + '-')) and
+                # suffix is unique (has been removed from id_suffixes once)
+                current_id_parts[-1] not in id_suffixes):
+                return obj.id
+        else:
+            if (len(current_id_parts) >= 2 and
+                ((obj.id or '').startswith(pt_abbr + '-')) and
+                # suffix is unique (has been removed from id_suffixes once)
+                current_id_parts[-1] not in id_suffixes):
+                return obj.id
         hw_id_ints = [0]
         for i in id_suffixes:
             try:
@@ -1709,14 +1727,40 @@ class UberORB(object):
             else:
                 next_int = max(hw_id_ints) + 1
                 next_sufx = str(next_int).zfill(7)
-        owner_id = owner_id or 'Vendor'
         abbrev = getattr(obj.product_type, 'abbreviation', 'TBD') or 'TBD'
         if not isinstance(obj.product_type, self.classes['ProductType']):
             # no product_type assigned yet
             abbrev = 'TBD'
         if isinstance(obj, self.classes['Template']):
             abbrev += '-Template'
-        return '-'.join([owner_id, abbrev, next_sufx])
+        if owner_id:
+            return '-'.join([owner_id, abbrev, next_sufx])
+        else:
+            return '-'.join([abbrev, next_sufx])
+
+    def fix_product_id(self, obj, all_proj_ids):
+        """
+        If 'id' attribute for a HardwareProduct or Template does not conform to
+        the new id format introduced in 3.2.dev9, fix it.
+
+        Args:
+            obj (HardwareProduct or Template):  obj for which to fix the 'id'
+        """
+        # only fix id if prefix is neither a project id nor a
+        # ProductType.abbreviation
+        # NOTE: since project ids may contain dashes, this loop must be used to
+        # leave ids that begin with a project id alone ...
+        for proj_id in all_proj_ids:
+            if obj.id.startswith(proj_id):
+                return
+        # next, make sure that the id has not already been fixed (i.e. begins
+        # with a product type abbreviation)
+        current_id_parts = (obj.id or '').split('-')
+        prefix = current_id_parts[0]
+        if prefix not in self.all_pt_abbrs:
+            obj.id = '-'.join(current_id_parts[1:])
+            orb.db.commit()
+            self.log.debug(f'* fixed id: {obj.id}')
 
     def gen_rqt_id(self, reqt):
         """
