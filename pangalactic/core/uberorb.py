@@ -934,7 +934,7 @@ class UberORB(object):
         # build the 'componentz' and 'systemz' runtime caches
         self._build_componentz_cache()
         self._build_systemz_cache()
-        # update the all_pt_abbrs cache, used in fix_product_id()
+        # update the all_pt_abbrs cache, used in fix_hwproduct_id()
         self.all_pt_abbrs = [pt.abbreviation
                              for pt in orb.get_by_type('ProductType')]
         # update the rqt_allocz runtime cache (used in computing margins)
@@ -1738,7 +1738,7 @@ class UberORB(object):
         else:
             return '-'.join([abbrev, next_sufx])
 
-    def fix_product_id(self, obj, all_proj_ids):
+    def fix_hwproduct_id(self, obj, all_proj_ids):
         """
         If 'id' attribute for a HardwareProduct or Template does not conform to
         the new id format introduced in 3.2.dev9, fix it.

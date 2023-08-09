@@ -169,12 +169,14 @@ def clone(what, include_ports=True, include_components=True,
             # the clone gets the product_type of the original object
             newkw['product_type'] = obj.product_type
     if issubclass(orb.classes[cname], orb.classes['ManagedObject']):
-        if project:
-            newkw['owner'] = project
-        else:
-            # use PGANA
-            pgana = orb.get('pgefobjects:PGANA')
-            newkw['owner'] = pgana
+        # in the absence of a specified owner, use the project ...
+        if not newkw.get('owner'):
+            if project:
+                newkw['owner'] = project
+            else:
+                # use PGANA
+                pgana = orb.get('pgefobjects:PGANA')
+                newkw['owner'] = pgana
     new_obj = cls(**newkw)
     orb.db.add(new_obj)
     # When cloning an existing object that has parameters or data elements,

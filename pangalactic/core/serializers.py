@@ -582,9 +582,10 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     psus = set()
     # objs: list of all deserialized objects
     objs = []
-    # products: list of deserialized objects that are instances of Product
+    # hwproducts: list of deserialized objects that are instances of
+    # HardwareProduct
     # subclasses
-    products = []
+    hwproducts = []
     # requirements: list of deserialized objects that are Requirement instances
     requirements = []
     # created: list of all deserialized objects which are new
@@ -875,8 +876,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     elif cname in ['ProjectSystemUsage']:
                         refresh_systemz_required = True
                         psus.add(obj)
-                    elif isinstance(obj, orb.classes['Product']):
-                        products.append(obj)
+                    elif isinstance(obj, orb.classes['HardwareProduct']):
+                        hwproducts.append(obj)
                     elif cname == 'Requirement':
                         requirements.append(obj)
                     if cname in ['Acu', 'ProjectSystemUsage', 'Requirement']:
@@ -902,13 +903,13 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         # orb.log.info('{} updated object(s) deserialized: {}'.format(
                                                         # log_txt, ids))
     all_proj_ids = orb.get_ids(cname='Project')
-    for product in products:
-        acus.update(product.where_used)
-        psus.update(product.projects_using_system)
-        add_default_parameters(product)
-        add_default_data_elements(product)
-        # fix product id's to conform to new format (as of 3.2.dev9)
-        orb.fix_product_id(product, all_proj_ids)
+    for hwproduct in hwproducts:
+        acus.update(hwproduct.where_used)
+        psus.update(hwproduct.projects_using_system)
+        add_default_parameters(hwproduct)
+        add_default_data_elements(hwproduct)
+        # fix hwproduct id's to conform to new format (as of 3.2.dev9)
+        orb.fix_hwproduct_id(hwproduct, all_proj_ids)
     for acu in acus:
         # look for requirement allocations to acus ...
         if acu.allocated_requirements:

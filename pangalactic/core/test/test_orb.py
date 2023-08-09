@@ -843,7 +843,7 @@ class OrbTest(unittest.TestCase):
             set(['view', 'modify', 'delete']), #  7
             set(['view']),                     #  8
             set(['view', 'modify', 'delete']), #  8a
-            set(['view']),                     #  8b
+            set(['view', 'modify', 'delete']), #  8b
             set(['view', 'modify', 'delete']), #  9
             set(['view', 'modify', 'delete']), # 10
             set(['view', 'modify', 'delete']), # 11
