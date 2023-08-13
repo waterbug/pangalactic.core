@@ -193,6 +193,50 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/related_item -->
+
+    <owl:ObjectProperty rdf:about="&pgef;related_item">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Modelable instance referenced by a DocumentReference relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DocumentReference"/>
+        <rdfs:range rdf:resource="&pgef;Modelable"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/doc_references -->
+
+    <owl:ObjectProperty rdf:about="&pgef;doc_references">
+        <owl:inverseOf rdf:resource="&pgef;related_item"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The DocumentReference relationships in which a Modelable item is referenced.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Modelable"/>
+        <rdfs:range rdf:resource="&pgef;DocumentReference"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/related_to_document -->
+
+    <owl:ObjectProperty rdf:about="&pgef;related_to_document">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Document referenced by a DocumentReference relationship.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DocumentReference"/>
+        <rdfs:range rdf:resource="&pgef;Document"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/item_relationships -->
+
+    <owl:ObjectProperty rdf:about="&pgef;item_relationships">
+        <owl:inverseOf rdf:resource="&pgef;related_to_document"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The DocumentReference relationships relating Modelable items to a Document.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Document"/>
+        <rdfs:range rdf:resource="&pgef;DocumentReference"/>
+    </owl:ObjectProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/assigned_role -->
 
     <owl:ObjectProperty rdf:about="&pgef;assigned_role">
@@ -2373,6 +2417,15 @@ Model in the engineering domain generally maps to step:product_definition, but t
     <owl:Class rdf:about="&pgef;DisciplineRole">
         <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A DisciplineRole is the relationship between a Role and a Discipline. DisciplineRole is a many-to-many relationship in that a Role may be associated with multiple Disciplines and a Discipline may have several Roles related to it.</rdfs:comment>
+    </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/DocumentReference -->
+
+    <owl:Class rdf:about="&pgef;DocumentReference">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A DocumentReference is the relationship between a Document and a Modelable instance. DocumentReference is a many-to-many relationship in that a Document may be associated with multiple Modelables and a Modelable may have several Documents related to it.</rdfs:comment>
     </owl:Class>
 
 

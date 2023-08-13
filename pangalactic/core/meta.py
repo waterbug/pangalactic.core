@@ -307,6 +307,18 @@ M2M = {
                      'domain' : 'Discipline',
                      'range'  : 'DisciplineProductType'},
 
+       # *** M2M:  DocumentReference
+       # inverse of 'related_item'
+       # complementary to 'item_relationships'
+       'doc_references' : {
+                     'domain' : 'Modelable',
+                     'range'  : 'DocumentReference'},
+       # inverse of 'related_to_document'
+       # complementary to 'related_item'
+       'item_relationships' : {
+                     'domain' : 'Document',
+                     'range'  : 'DocumentReference'},
+
        # *** M2M:  ProductTypeParameterDefinition
        # inverse of 'used_in_product_type'
        # complementary to 'used_in_product_types'
