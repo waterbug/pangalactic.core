@@ -21,8 +21,8 @@ def get_step_file_path(model):
     Returns:
         the path to the STEP file in the orb's "vault"
     """
-    orb.log.debug('* get_step_model_path(model with oid "{}")'.format(
-                  getattr(model, 'oid', 'None')))
+    # orb.log.debug('* get_step_model_path(model with oid "{}")'.format(
+                  # getattr(model, 'oid', 'None')))
     if (model.has_files and model.type_of_model.id == "MCAD"):
         for rep_file in model.has_files:
             if rep_file.user_file_name.endswith(
