@@ -509,6 +509,8 @@ DESERIALIZATION_ORDER = [
                     'HardwareProduct',
                     'SoftwareProduct',
                     'DigitalProduct',
+                    'Document',
+                    'DocumentReference',
                     'Acu',
                     'ProjectSystemUsage',
                     'Activity', # Activity references Acu and PSU
