@@ -215,9 +215,9 @@
 
 
 
-    <!-- http://pangalactic.us/pgef/related_to_document -->
+    <!-- http://pangalactic.us/pgef/document -->
 
-    <owl:ObjectProperty rdf:about="&pgef;related_to_document">
+    <owl:ObjectProperty rdf:about="&pgef;document">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:comment rdf:datatype="&xsd;string">The Document referenced by a DocumentReference relationship.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;DocumentReference"/>
@@ -229,7 +229,7 @@
     <!-- http://pangalactic.us/pgef/item_relationships -->
 
     <owl:ObjectProperty rdf:about="&pgef;item_relationships">
-        <owl:inverseOf rdf:resource="&pgef;related_to_document"/>
+        <owl:inverseOf rdf:resource="&pgef;document"/>
         <rdfs:comment rdf:datatype="&xsd;string">The DocumentReference relationships relating Modelable items to a Document.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Document"/>
         <rdfs:range rdf:resource="&pgef;DocumentReference"/>

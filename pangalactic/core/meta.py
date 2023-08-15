@@ -313,7 +313,7 @@ M2M = {
        'doc_references' : {
                      'domain' : 'Modelable',
                      'range'  : 'DocumentReference'},
-       # inverse of 'related_to_document'
+       # inverse of 'document'
        # complementary to 'related_item'
        'item_relationships' : {
                      'domain' : 'Document',
