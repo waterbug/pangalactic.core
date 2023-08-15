@@ -79,10 +79,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     if (hasattr(obj, 'assembly') and
         getattr(obj.assembly, 'frozen', False)):
         # orb.log.debug('  Any Acu in a frozen assembly is frozen')
-        frozen = True
-    if frozen:
-        # orb.log.debug(f'* object {obj.oid} is frozen.')
-        return set(['view'])
+        return ['view', 'Acu in frozen assembly is frozen']
     if isinstance(obj, orb.classes['Product']):
         # Products can be "cloaked" ("non-public")
         if getattr(obj, 'public', False):
@@ -231,6 +228,9 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                         # '  user is authorized for ProductType "{}".'.format(
                         # pt_id))
                     perms = ['view', 'add related objects']
+                    if frozen:
+                        # orb.log.debug(f'* object {obj.oid} is frozen.')
+                        return perms
                     if server_or_connected_client:
                         # mods and deletions are only allowed on the server or
                         # a connected client
