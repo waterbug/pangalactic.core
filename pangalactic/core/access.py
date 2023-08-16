@@ -363,7 +363,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 # orb.log.debug('    {}'.format(list(roles & auth_roles)))
                 perms = ['view']
                 if server_or_connected_client:
-                    perms += ['modify', 'delete']
+                    perms += ['modify', 'add related objects', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 if debugging:
                     perms.append('[3] role-based perms (PSU)')
