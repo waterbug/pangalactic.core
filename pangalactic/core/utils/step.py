@@ -11,32 +11,6 @@ from pangalactic.core.uberorb import orb
 from pangalactic.core.utils.part21 import parse_p21_data
 
 
-def get_step_file_path(model):
-    """
-    Find the path of a STEP file for a model.
-
-    Args:
-        model (Model):  the Model instance for which the STEP file is sought
-
-    Returns:
-        the path to the STEP file in the orb's "vault"
-    """
-    # orb.log.debug('* get_step_model_path(model with oid "{}")'.format(
-                  # getattr(model, 'oid', 'None')))
-    if (model.has_files and model.type_of_model.id == "MCAD"):
-        for rep_file in model.has_files:
-            if rep_file.user_file_name.endswith(
-                            ('.stp', '.STP', '.step', '.STEP', '.p21', '.P21')):
-                vault_fname = rep_file.oid + '_' + rep_file.user_file_name
-                fpath = os.path.join(orb.vault, vault_fname)
-                if os.path.exists(fpath):
-                    return fpath
-            else:
-                continue
-    else:
-        return ''
-
-
 class Product(NamedTuple):
     """
     A product concept
