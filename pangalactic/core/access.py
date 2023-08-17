@@ -36,7 +36,8 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
 
             'view'
             'modify'
-            'add related objects'
+            'add docs'
+            'add models'
             'delete'
     """
     # NOTE:  the authoritative source for data on roles and role assignments
@@ -66,7 +67,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         # repository!
         # *********************************************************************
         # orb.log.debug('  "local_admin" or "permissive" configured.')
-        perms = ['view', 'modify', 'delete', 'add related objects',
+        perms = ['view', 'modify', 'delete', 'add docs', 'add models',
                  'local admin or permissive']
         # orb.log.debug('  perms: {}'.format(perms))
         return perms
@@ -166,7 +167,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         if server or (client and (connected or object_not_synced)):
             # deletions and mods are only allowed on the client if connected or
             # object has not been synced to the server
-            perms += ['modify', 'add related objects', 'delete']
+            perms += ['modify', 'add docs', 'add models', 'delete']
         # orb.log.debug('  perms: {}'.format(perms))
         if debugging:
             perms.append('global admin perms')
@@ -176,7 +177,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         # has not been synced to the repo (which implies that the user created
         # the object)
         # orb.log.debug('  full perms: offline & object not synced.')
-        perms = ['view', 'modify', 'add related objects', 'delete',
+        perms = ['view', 'modify', 'add docs', 'add models', 'delete',
                  'offline & object not synced']
         return perms
     else:
@@ -192,7 +193,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             # orb.log.debug('  user is object creator.')
             perms = ['view']
             if server_or_connected_client:
-                perms += ['delete', 'add related objects', 'modify']
+                perms += ['delete', 'add docs', 'add models', 'modify']
             # orb.log.debug('  perms: {}'.format(perms))
             if debugging:
                 perms.append('object creator perms')
@@ -227,7 +228,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                     # orb.log.debug(
                         # '  user is authorized for ProductType "{}".'.format(
                         # pt_id))
-                    perms = ['view', 'add related objects']
+                    perms = ['view', 'add docs', 'add models']
                     if frozen:
                         # orb.log.debug(f'* object {obj.oid} is frozen.')
                         return perms
@@ -252,7 +253,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             rqt_mgrs = set(['Administrator', 'systems_engineer',
                             'lead_engineer'])
             if rqt_mgrs & role_ids:
-                perms = ['view', 'add related objects']
+                perms = ['view', 'add docs']
                 if server_or_connected_client:
                     # mods and deletions are only allowed on server or a
                     # connected client
@@ -363,7 +364,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 # orb.log.debug('    {}'.format(list(roles & auth_roles)))
                 perms = ['view']
                 if server_or_connected_client:
-                    perms += ['modify', 'add related objects', 'delete']
+                    perms += ['modify', 'add docs', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 if debugging:
                     perms.append('[3] role-based perms (PSU)')
@@ -407,7 +408,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if roles & auth_roles:
                 # orb.log.debug('  - user is authorized by role(s) ...')
                 # orb.log.debug('    {}'.format(list(roles & auth_roles)))
-                perms = ['view', 'add related objects']
+                perms = ['view', 'add docs']
                 if server_or_connected_client:
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
