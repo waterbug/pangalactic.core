@@ -214,10 +214,6 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 return ['view']
             # orb.log.debug('  user has roles: {}'.format(role_ids))
             if isinstance(obj, orb.classes['HardwareProduct']):
-                if obj.public:
-                    # any user can view or add docs or models to a "public"
-                    # object
-                    perms = ['view', 'add docs', 'add models']
                 # permissions determined by product_type only apply to HW
                 subsystem_types = set()
                 if role_ids:
@@ -248,7 +244,12 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 else:
                     # txt = f'  user NOT authorized for ProductType "{pt_id}")
                     # orb.log.debug(txt)
-                    perms = ['view']
+                    if obj.public:
+                        # any user can view or add docs or models to a "public"
+                        # object
+                        perms = ['view', 'add docs', 'add models']
+                    else:
+                        perms = ['view']
                     # orb.log.debug('  perms: {}'.format(perms))
                     if debugging:
                         perms.append('role-based product type perms (HW)')
