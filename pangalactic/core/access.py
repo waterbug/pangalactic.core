@@ -208,10 +208,10 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         TBD = orb.get('pgefobjects:TBD')
         # [1] is the object a Product?
         if isinstance(obj, orb.classes['Product']):
-            # orb.log.debug('  - object is a Product ...')
+            orb.log.debug('  - object is a Product ...')
             if not obj.owner:
-                # orb.log.debug('    owner not specified -- view only.')
-                return ['view']
+                orb.log.debug('    owner not specified -- view only.')
+                return ['view', 'add docs', 'add models']
             # orb.log.debug('  user has roles: {}'.format(role_ids))
             if isinstance(obj, orb.classes['HardwareProduct']):
                 # permissions determined by product_type only apply to HW
@@ -221,34 +221,34 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                            for r in role_ids]
                     if rpt:
                         subsystem_types = set.union(*rpt)
-                # orb.log.debug('  user is authorized for subsystem types:')
-                # orb.log.debug('  {}'.format(subsystem_types))
+                orb.log.debug('  user is authorized for subsystem types:')
+                orb.log.debug('  {}'.format(subsystem_types))
                 pt_id = getattr(obj.product_type, 'id', 'unknown')
-                # orb.log.debug('  this ProductType is "{}"'.format(pt_id))
+                orb.log.debug('  this ProductType is "{}"'.format(pt_id))
                 if pt_id in subsystem_types:
-                    # orb.log.debug(
-                        # '  user is authorized for ProductType "{}".'.format(
-                        # pt_id))
+                    orb.log.debug(
+                        '  user is authorized for ProductType "{}".'.format(
+                        pt_id))
                     perms = ['view', 'add docs', 'add models']
                     if frozen:
-                        # orb.log.debug(f'* object {obj.oid} is frozen.')
+                        orb.log.debug(f'* object {obj.oid} is frozen.')
                         return perms
                     if server_or_connected_client:
                         # mods and deletions are only allowed on the server or
                         # a connected client
                         perms += ['modify', 'delete']
-                    # orb.log.debug('  perms: {}'.format(perms))
                     if debugging:
                         perms.append('role-based product type perms (HW)')
+                    orb.log.debug('  perms: {}'.format(perms))
                     return perms
                 else:
-                    # txt = f'  user NOT authorized for ProductType "{pt_id}")
-                    # orb.log.debug(txt)
                     if obj.public:
-                        # any user can view or add docs or models to a "public"
-                        # object
+                        txt = ' "public" -- any user can add docs/models'
+                        orb.log.debug(txt)
                         perms = ['view', 'add docs', 'add models']
                     else:
+                        txt = f'  unauthorized to modify ProductType "{pt_id}"'
+                        orb.log.debug(txt)
                         perms = ['view']
                     # orb.log.debug('  perms: {}'.format(perms))
                     if debugging:
