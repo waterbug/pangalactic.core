@@ -203,7 +203,8 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                                    assigned_to=user,
                                    role_assignment_context=obj.owner)
             role_ids = set([ra.assigned_role.id for ra in ras])
-        # From here on, access depends on roles and product_types
+        # From here on, access depends on roles, product_types, and "public"
+        # status of the object
         TBD = orb.get('pgefobjects:TBD')
         # [1] is the object a Product?
         if isinstance(obj, orb.classes['Product']):
@@ -213,6 +214,10 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 return ['view']
             # orb.log.debug('  user has roles: {}'.format(role_ids))
             if isinstance(obj, orb.classes['HardwareProduct']):
+                if obj.public:
+                    # any user can view or add docs or models to a "public"
+                    # object
+                    perms = ['view', 'add docs', 'add models']
                 # permissions determined by product_type only apply to HW
                 subsystem_types = set()
                 if role_ids:
