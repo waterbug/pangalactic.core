@@ -2111,8 +2111,9 @@ class UberORB(object):
         Get all the objects relevant to the specified project, including
         [1] the project object, [2] objects for which the project is the
         `owner` or `project` (i.e., to which the project has a
-        `ProjectSystemUsage` relationship), and [3] all related objects
-        (assemblies and related components, ports, flows, etc.).
+        `ProjectSystemUsage` relationship), and [3] all related objects, such
+        as assemblies and related components, ports, flows, RepresentationFiles
+        related to Models and Documents, etc.
 
         Args:
             project (Project):  the specified project
@@ -2125,16 +2126,17 @@ class UberORB(object):
         if not isinstance(project, self.classes['Project']):
             self.log.debug('  - object provided is not a Project.')
             return []
-        # objs now includes Activities owned by the project
-        objs = self.search_exact(owner=project)
-        psus = project.systems
+        # objs now includes Activities, Documents, and Models owned by the
+        # project
+        objs = set(self.search_exact(owner=project))
+        psus = set(project.systems)
         if psus:
-            objs += psus
-            systems = [psu.system for psu in psus]
-            objs += systems
+            objs |= psus
+            systems = set([psu.system for psu in psus])
+            objs |= systems
             # get all assemblies
             # TODO: possibly have a "lazy" option (only top-level assemblies)
-            assemblies = []
+            assemblies = set()
             # TODO: check for cycles
             # for system in systems:
                 # cycles = check_for_cycles(system)
@@ -2142,52 +2144,63 @@ class UberORB(object):
                     # self.log.info(f'  - {cycles}')
             for system in systems:
                 # NOTE:  get_assembly is recursive, gets *all* sub-assemblies
-                assemblies += get_assembly(system)
+                assemblies |= set(get_assembly(system))
             if assemblies:
                 self.log.debug('  - {} assemblies found'.format(
                                len(assemblies)))
-            objs += assemblies
+            objs |= assemblies
         else:
             self.log.debug('  - no project-level systems found')
-        objs.append(project)
-        models = []
+        objs.add(project)
+        models = set(self.search_exact(cname='Model', owner=project))
+        # NOTE: at this point, objs already includes these models for which the
+        # project is the "owner" -- which may be different from all models of
+        # project objects, since the project may own models that are of objects
+        # not owned by the project (e.g. they may be models of "public" product
+        # specs, etc.)
         for o in objs:
-            o_models = list(getattr(o, 'has_models', []))
+            o_models = set(getattr(o, 'has_models', []))
             if o_models:
-                models += o_models
-        rep_files = []
+                models |= o_models
+        rep_files = set()
         if models:
             # get RepresentationFiles of Models (if any)
             for m in models:
-                files = list(m.has_files)
+                files = set(m.has_files)
                 if files:
-                    rep_files += files
-            if rep_files:
-                objs += rep_files
-        reqts = self.search_exact(cname='Requirement', owner=project)
+                    rep_files |= files
+        docs = set(self.search_exact(cname='Document', owner=project))
+        # NOTE: these docs are already included, as part of "owned" objs
+        # but we need to get their RepresentationFiles (if any)
+        for doc in docs:
+            files = set(doc.has_files)
+            if files:
+                rep_files |= files
+        objs |= rep_files
+        reqts = set(self.search_exact(cname='Requirement', owner=project))
+        # NOTE: these reqts are already included, as part of "owned" objs
         if reqts:
             # include all Relations that are 'computable_form' of a reqt
             # and their ParameterRelations (rel.correlates_parameters)
             for reqt in reqts:
                 if reqt.computable_form:
-                    objs.append(reqt.computable_form)
-                    prs = reqt.computable_form.correlates_parameters
+                    objs.add(reqt.computable_form)
+                    prs = set(reqt.computable_form.correlates_parameters)
                     if prs:
-                        objs += prs
+                        objs |= prs
         # include all ports and flows relevant to products
+        ports_and_flows = set()
         for obj in objs:
             if isinstance(obj, self.classes['Product']):
-                objs += obj.ports
-                objs += self.get_internal_flows_of(obj)
-        # TODO:  get the files too (fpath = rep_file.url)
-        # use set() to eliminate dups
-        res = [o for o in set(objs) if o]
-        self.log.debug('  - total project objects found: {}'.format(len(res)))
-        # if res:
-            # for o in res:
+                ports_and_flows |= set(obj.ports)
+                ports_and_flows |= set(self.get_internal_flows_of(obj))
+        objs |= ports_and_flows
+        self.log.debug('  - total project objects found: {}'.format(len(objs)))
+        # if objs:
+            # for o in objs:
                 # self.log.debug('  - {}: {}'.format(
                                # o.__class__.__name__, o.id))
-        return res
+        return list(objs)
 
     def get_reqts_for_project(self, project):
         """
