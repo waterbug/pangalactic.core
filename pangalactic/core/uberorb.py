@@ -2152,31 +2152,22 @@ class UberORB(object):
         else:
             self.log.debug('  - no project-level systems found')
         objs.add(project)
+        # --------------------------------------------------------------------
+        # collect all relevant RepresentationFile and DocumentReference
+        # instances ...
         models = set(self.search_exact(cname='Model', owner=project))
-        # NOTE: at this point, objs already includes these models for which the
-        # project is the "owner" -- which may be different from all models of
-        # project objects, since the project may own models that are of objects
-        # not owned by the project (e.g. they may be models of "public" product
-        # specs, etc.)
-        for o in objs:
-            o_models = set(getattr(o, 'has_models', []))
-            if o_models:
-                models |= o_models
-        rep_files = set()
         if models:
             # get RepresentationFiles of Models (if any)
             for m in models:
-                files = set(m.has_files)
-                if files:
-                    rep_files |= files
+                objs |= set(m.has_files)
         docs = set(self.search_exact(cname='Document', owner=project))
-        # NOTE: these docs are already included, as part of "owned" objs
-        # but we need to get their RepresentationFiles (if any)
+        # NOTE: these docs are already included as part of "owned" objs
+        # but we need to get their RepresentationFiles (if any) and
+        # "item_relationships" (DocumentReference instances)
         for doc in docs:
-            files = set(doc.has_files)
-            if files:
-                rep_files |= files
-        objs |= rep_files
+            objs |= set(doc.has_files)
+            objs |= set(doc.item_relationships)
+        # --------------------------------------------------------------------
         reqts = set(self.search_exact(cname='Requirement', owner=project))
         # NOTE: these reqts are already included, as part of "owned" objs
         if reqts:
@@ -2189,13 +2180,11 @@ class UberORB(object):
                     if prs:
                         objs |= prs
         # include all ports and flows relevant to products
-        ports_and_flows = set()
-        for obj in objs:
-            if isinstance(obj, self.classes['Product']):
-                ports_and_flows |= set(obj.ports)
-                ports_and_flows |= set(self.get_internal_flows_of(obj))
-        objs |= ports_and_flows
-        self.log.debug('  - total project objects found: {}'.format(len(objs)))
+        products = [o for o in objs if isinstance(o, self.classes['Product'])]
+        for p in products:
+            objs |= set(p.ports)
+            objs |= set(self.get_internal_flows_of(p))
+        self.log.debug('  - total project objects: {}'.format(len(objs)))
         # if objs:
             # for o in objs:
                 # self.log.debug('  - {}: {}'.format(
