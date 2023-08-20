@@ -198,10 +198,27 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if debugging:
                 perms.append('object creator perms')
             return perms
+        # --------------------------------------------------------------------
+        # NOTE: THIS SETS ROLE_IDS FOR PROJECT-OWNED ITEMS:
+        # only users with an appropriate discipline role assigned in the
+        # context of the project (obj.owner) have "modify" permission
+        # --------------------------------------------------------------------
         if isinstance(obj, orb.classes['ManagedObject']):
             ras = orb.search_exact(cname='RoleAssignment',
                                    assigned_to=user,
                                    role_assignment_context=obj.owner)
+            role_ids = set([ra.assigned_role.id for ra in ras])
+        # --------------------------------------------------------------------
+        # NOTE: THIS OVERRIDES ROLE_IDS FOR NON-PROJECT (I.E. REUSABLE) ITEMS:
+        # users with an appropriate discipline role in ANY context (not just
+        # the "owner" context) have "modify" perm for the object -- so ANY
+        # discipline engineer can help maintain reusable library items in their
+        # discipline!
+        # --------------------------------------------------------------------
+        if (isinstance(obj, orb.classes['HardwareProduct'])
+            and not isinstance(obj.owner, orb.classes['Project'])):
+            ras = orb.search_exact(cname='RoleAssignment',
+                                   assigned_to=user)
             role_ids = set([ra.assigned_role.id for ra in ras])
         # From here on, access depends on roles, product_types, and "public"
         # status of the object
