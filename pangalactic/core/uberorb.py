@@ -1964,6 +1964,19 @@ class UberORB(object):
         else:
             return []
 
+    def get_vault_fname(self, rep_file):
+        """
+        Find the name of a vault file that corresponds to a RepresentationFile
+        instance.
+
+        Args:
+            rep_file (RepresentationFile):  the RepresentationFile instance
+
+        Returns:
+            the name of the physical file in the orb's "vault"
+        """
+        return rep_file.oid + '_' + rep_file.user_file_name
+
     def get_vault_fpath(self, rep_file):
         """
         Find the path of a vault file that corresponds to a RepresentationFile
@@ -1975,7 +1988,7 @@ class UberORB(object):
         Returns:
             the path to the physical file in the orb's "vault"
         """
-        vault_fname = rep_file.oid + '_' + rep_file.user_file_name
+        vault_fname = self.get_vault_fname(rep_file)
         return os.path.join(self.vault, vault_fname)
 
     def get_step_file_path(self, model):
