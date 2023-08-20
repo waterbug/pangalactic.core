@@ -1964,6 +1964,20 @@ class UberORB(object):
         else:
             return []
 
+    def get_vault_fpath(self, rep_file):
+        """
+        Find the path of a vault file that corresponds to a RepresentationFile
+        instance.
+
+        Args:
+            rep_file (RepresentationFile):  the RepresentationFile instance
+
+        Returns:
+            the path to the physical file in the orb's "vault"
+        """
+        vault_fname = rep_file.oid + '_' + rep_file.user_file_name
+        return os.path.join(self.vault, vault_fname)
+
     def get_step_file_path(self, model):
         """
         Find the path of a STEP file for a model.
@@ -1976,18 +1990,17 @@ class UberORB(object):
         """
         # self.log.debug('* get_step_model_path(model with oid "{}")'.format(
                       # getattr(model, 'oid', 'None')))
+        vault_fpath = ''
         if (model.has_files and model.type_of_model.id == "MCAD"):
             for rep_file in model.has_files:
                 if rep_file.user_file_name.endswith(
-                                ('.stp', '.STP', '.step', '.STEP', '.p21', '.P21')):
-                    vault_fname = rep_file.oid + '_' + rep_file.user_file_name
-                    fpath = os.path.join(self.vault, vault_fname)
+                        ('.stp', '.STP', '.step', '.STEP', '.p21', '.P21')):
+                    fpath = self.get_vault_fpath(rep_file)
                     if os.path.exists(fpath):
-                        return fpath
+                        vault_fpath = fpath
                 else:
                     continue
-        else:
-            return ''
+        return vault_fpath
 
 
     def get_internal_flows_of(self, product):
