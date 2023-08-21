@@ -2512,5 +2512,8 @@ class UberORB(object):
 
 # A node has only one instance of UberORB, the 'orb', which is intended to be
 # imported by all application components.
-orb = UberORB()
+if config.get('torb', False):
+    from pangalactic.core.torb import orb
+else:
+    orb = UberORB()
 
