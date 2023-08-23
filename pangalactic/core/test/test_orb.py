@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Unit tests for pangalactic.core.uberorb.orb
+Unit tests for orb
 """
 from math import fsum
 import os, shutil
@@ -12,8 +12,11 @@ import ruamel_yaml as yaml
 # python-dateutil
 import dateutil.parser as dtparser
 
+# set the orb
+import pangalactic.core.set_uberorb
+
 # pangalactic
-from pangalactic.core             import (refdata, state, prefs,
+from pangalactic.core             import (orb, refdata, state, prefs,
                                           write_config, write_prefs)
 from pangalactic.core.access      import get_perms
 from pangalactic.core.parametrics import (compute_margin,
@@ -39,7 +42,6 @@ from pangalactic.core.test.utils  import (create_test_users,
                                           locally_owned_test_objects,
                                           owned_test_objects,
                                           related_test_objects)
-from pangalactic.core.uberorb     import orb
 from pangalactic.core.utils.reports   import write_mel_xlsx_from_model
 
 orb.start(home='pangalaxian_test')

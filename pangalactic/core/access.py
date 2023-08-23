@@ -2,8 +2,7 @@
 Functions related to object access permissions
 """
 import traceback
-from pangalactic.core         import state, config
-from pangalactic.core.uberorb import orb
+from pangalactic.core import orb, state, config
 
 
 modifiables = [

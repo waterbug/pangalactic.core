@@ -5,7 +5,7 @@ Error Budget Writer
 import os, sys, xlsxwriter
 from xlsxwriter.utility import xl_rowcol_to_cell
 
-from pangalactic.core.uberorb import orb
+from pangalactic.core import orb
 
 
 def gen_error_budget(instrument, file_path='Error_Budget.xlsx'):

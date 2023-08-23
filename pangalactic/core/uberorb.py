@@ -2510,8 +2510,8 @@ class UberORB(object):
         """
         return isinstance(obj, self.classes['Product'])
 
-# A node has only one instance of UberORB, the 'orb', which is intended to be
-# imported by all application components.
+# A node has only one instance of 'orb', which is intended to be imported by
+# all application components.
 if config.get('torb', False):
     from pangalactic.core.torb import orb
 else:

@@ -4,13 +4,12 @@ Pan Galactic Report Writer
 """
 import xlsxwriter
 
-from pangalactic.core              import prefs
+from pangalactic.core              import orb, prefs
 from pangalactic.core.meta         import MAIN_VIEWS
 from pangalactic.core.names        import (get_mel_item_name, pname_to_header,
                                            STD_VIEWS)
 from pangalactic.core.parametrics  import (get_pval, get_dval, de_defz,
                                            parm_defz, round_to)
-from pangalactic.core.uberorb      import orb
 from pangalactic.core.units        import in_si
 from pangalactic.core.utils.styles import xlsx_styles
 

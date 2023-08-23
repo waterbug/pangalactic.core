@@ -8,7 +8,7 @@ from pangalactic.core.parametrics  import (Comp, System,
                                            serialize_des, serialize_parms,
                                            componentz, systemz)
 from pangalactic.core.refdata      import ref_oids
-from pangalactic.tach.tachistry    import matrix, schemas
+from pangalactic.core.tachistry    import matrix, schemas
 
 
 def serialize(orb, objs, include_components=False,

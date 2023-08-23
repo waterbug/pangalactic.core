@@ -579,7 +579,7 @@ class TachyOrb(object):
                                   console=console,
                                   force_new_core=force_new_core)
         self.home = self.registry.home
-        self.schemas = self.registry.schemas
+        self.schemas = schemas
         # NOTE: self.classes is constructed in the start() method
         self.mbo = self.registry.metaobject_build_order()
 
@@ -1751,6 +1751,34 @@ class TachyOrb(object):
         attribute is sufficient.
         """
         return (hasattr(obj, 'version') and hasattr(obj, 'iteration'))
+
+    # =============================================================================
+    # new section from "p.marv.perms" ...
+
+    def get_user_orgs(self):
+        """
+        Get all orgs in which the local user has a role.
+
+        Returns:
+            list of orgs
+        """
+        ra_context_oids = set([ra['role_assignment_context']
+                               for ra in self.user_raz])
+        return [orb.get(oid) for oid in ra_context_oids]
+
+    def am_global_admin(self):
+        """
+        Return True if the local user is a global admin; otherwise False.
+
+        Returns:
+            boolean
+        """
+        global_admin = [ra for ra in self.user_raz
+                    if (ra.get('assigned_role') == 'pgefobjects:Role.Administrator'
+                        and ra.get('role_assignment_context', None) is None)]
+        return bool(global_admin)
+
+    # =============================================================================
 
     def get_project_psus(self, project):
         """

@@ -8,7 +8,7 @@ from uuid import uuid4
 # Louie
 from louie import dispatcher
 
-from pangalactic.core             import state
+from pangalactic.core             import orb, state
 from pangalactic.core.names       import (get_acu_id, get_acu_name,
                                           get_next_port_seq, get_next_ref_des,
                                           get_port_abbr, get_port_id,
@@ -18,7 +18,6 @@ from pangalactic.core.parametrics import (add_default_data_elements,
                                           data_elementz, get_pval,
                                           parameterz, set_pval,
                                           refresh_componentz)
-from pangalactic.core.uberorb     import orb
 from pangalactic.core.utils.datetimes import dtstamp
 
 

@@ -12,7 +12,9 @@ test_uncook.py \
 test_names.py \
 test_kb.py \
 test_registry.py \
-test_orb.py
+test_orb.py \
+test_tachistry.py \
+test_torb.py
 do
     echo
     echo -n "run $x ? (y/n) [y]"
@@ -29,6 +31,12 @@ if [ -d pangalaxian_test ]; then
     # echo '\npreserving test home dir (pangalaxian_test) ...\n'
     echo '\nremoving test home dir (pangalaxian_test) ...\n'
     rm -r ./pangalaxian_test
+fi
+
+if [ -d marvin_test ]; then
+    # echo '\npreserving test home dir (marvin_test) ...\n'
+    echo '\nremoving test home dir (marvin_test) ...\n'
+    rm -r ./marvin_test
 fi
 
 # SQLALCHEMY_WARN_20=0

@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 from openpyxl import load_workbook
 
-from pangalactic.core.uberorb import orb
+from pangalactic.core import orb
 
 
 def get_raw_xlsx_data(file_path, clear_empty_rows=True, read_only=False):
