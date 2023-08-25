@@ -26,16 +26,19 @@ from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata
 from pangalactic.core.mapping     import schema_maps, schema_version
+from pangalactic.core.meta        import TEXT_PROPERTIES
 from pangalactic.core.parametrics import (add_default_parameters,
                                           add_default_data_elements,
                                           add_parameter,
                                           componentz, systemz,
-                                          data_elementz,
+                                          data_elementz, de_defz,
+                                          get_dval_as_str,
+                                          get_pval_as_str,
                                           load_allocz, load_compz,
                                           load_rqt_allocz, load_data_elementz,
                                           load_parmz, load_de_defz,
                                           load_parm_defz, load_parmz_by_dimz,
-                                          load_systemz, parameterz,
+                                          load_systemz, parameterz, parm_defz,
                                           save_allocz, save_compz,
                                           save_systemz, save_rqt_allocz,
                                           save_data_elementz, save_parmz,
@@ -46,7 +49,9 @@ from pangalactic.core.tachistry    import Tachistry, matrix, schemas
 from pangalactic.core.test         import data as test_data_mod
 from pangalactic.core.test         import vault as test_vault_mod
 from pangalactic.core.test.utils   import gen_test_dvals, gen_test_pvals
-from pangalactic.core.utils.datetimes import file_dts, file_date_stamp
+from pangalactic.core.units        import in_si
+from pangalactic.core.utils.datetimes import (file_dts, file_date_stamp,
+                                              dt2local_tz_str)
 from pangalactic.core.log          import get_loggers
 from pangalactic.core.validation   import get_assembly
 
@@ -1050,6 +1055,49 @@ class TachyOrb(object):
             elif cname == 'Role':
                 self.role_oids_to_ids[obj.oid] = obj.id
         return True
+
+    def obj_view_to_dict(self, obj, view):
+        d = {}
+        schema = schemas.get(obj.__class__.__name__)
+        if not schema:
+            # this will only be the case for a NullObject, which is only used for
+            # ObjectSelectionDialog as a "None" choice, so the only fields needed
+            # are id, name, description
+            return {'id': 'None',
+                    'name': '',
+                    'description': ''}
+        for a in view:
+            if a in schema['field_names']:
+                if a == 'id':
+                    d[a] = obj.id
+                elif a in TEXT_PROPERTIES:
+                    d[a] = (getattr(obj, a) or ' ').replace('\n', ' ')
+                elif schema['fields'][a]['range'] == 'datetime':
+                    d[a] = dt2local_tz_str(getattr(obj, a))
+                elif schema['fields'][a]['field_type'] == 'object':
+                    rel_obj = getattr(obj, a)
+                    if rel_obj.__class__.__name__ == 'ProductType':
+                        d[a] = rel_obj.abbreviation or ''
+                    elif rel_obj.__class__.__name__ in ['HardwareProduct',
+                                                        'Organization',
+                                                        'Person', 'Project']:
+                        d[a] = rel_obj.id or rel_obj.name or '[unnamed]'
+                    else:
+                        if rel_obj is None:
+                            d[a] = '[None]'
+                        else:
+                            d[a] = (getattr(rel_obj, 'id', None) or
+                                    '[unidentified]')
+                else:
+                    d[a] = str(getattr(obj, a))
+            elif a in parm_defz:
+                pd = parm_defz.get(a)
+                units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                        pd['dimensions'], '')
+                d[a] = get_pval_as_str(obj.oid, a, units=units)
+            elif a in de_defz:
+                d[a] = get_dval_as_str(obj.oid, a)
+        return d
 
     def get(self, *args, **kw):
         """
