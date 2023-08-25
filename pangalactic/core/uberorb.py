@@ -102,6 +102,7 @@ class UberORB(object):
         schemas (dict):  see definition in
             p.core.registry._update_schemas_from_extracts
     """
+    is_torb = False
     started: bool = False
     startup_msg: str = '* orb starting up ...'
     new_oids: list[str] = []

@@ -271,34 +271,34 @@ class TachyOrb(object):
         # set home directory -- in order of precedence (A, B, C):
         # [A] 'home' kw arg (this should be set by the application, if any)
         if home:
-            pgx_home = home
+            marv_home = home
         # [B] from 'PANGALACTIC_HOME' env var
         elif 'PANGALACTIC_HOME' in os.environ:
-            pgx_home = os.environ['PANGALACTIC_HOME']
+            marv_home = os.environ['PANGALACTIC_HOME']
         # [C] create a 'marvin_home' directory in the user's home dir
         else:
             if sys.platform == 'win32':
                 default_home = os.path.join(os.environ.get('USERPROFILE'))
                 if os.path.exists(default_home):
-                    pgx_home = os.path.join(default_home, 'marvin_home')
+                    marv_home = os.path.join(default_home, 'marvin_home')
             else:
                 user_home = os.environ.get('HOME')
                 if user_home:
-                    pgx_home = os.path.join(user_home, 'marvin_home')
+                    marv_home = os.path.join(user_home, 'marvin_home')
                 else:
-                    # TODO:  a first-time dialog/wizard to set pgx_home ...
+                    # TODO:  a first-time dialog/wizard to set marv_home ...
                     # current fallback is just to use the current directory
-                    pgx_home = os.path.join(os.getcwd(), 'marvin_home')
-        if not os.path.exists(pgx_home):
-            os.makedirs(pgx_home, mode=0o755)
-        pgx_home = os.path.abspath(pgx_home)
+                    marv_home = os.path.join(os.getcwd(), 'marvin_home')
+        if not os.path.exists(marv_home):
+            os.makedirs(marv_home, mode=0o755)
+        marv_home = os.path.abspath(marv_home)
         # --------------------------------------------------------------------
         # ### NOTE:  user-set config overrides app config
         # --------------------------------------------------------------------
         # If values in the "config" file have been edited, they will take
         # precedence over any config set by app defaults:  'read_config()' does
         # config.update() from the "config" file contents.
-        read_config(os.path.join(pgx_home, 'config'))
+        read_config(os.path.join(marv_home, 'config'))
         # --------------------------------------------------------------------
         # ### NOTE:  saved "state" file represents most recently saved state
         # ###        of the app -- so in case any new items have been added to
@@ -307,18 +307,18 @@ class TachyOrb(object):
         # ###        the saved state with it as necessary ... in particular,
         # ###        check for any new dashboards.
         app_state = deepcopy(state)
-        read_state(os.path.join(pgx_home, 'state'))
+        read_state(os.path.join(marv_home, 'state'))
         # --------------------------------------------------------------------
         # Saved prefs and trash are read here; will be overridden by
         # any new prefs and trash set at runtime.
-        read_prefs(os.path.join(pgx_home, 'prefs'))
-        read_trash(os.path.join(pgx_home, 'trash'))
+        read_prefs(os.path.join(marv_home, 'prefs'))
+        read_trash(os.path.join(marv_home, 'trash'))
         # create "file vault"
-        self.vault = os.path.join(pgx_home, 'vault')
+        self.vault = os.path.join(marv_home, 'vault')
         if not os.path.exists(self.vault):
             os.makedirs(self.vault, mode=0o755)
         self.logging_initialized = False
-        self.start_logging(home=pgx_home, console=console, debug=debug)
+        self.start_logging(home=marv_home, console=console, debug=debug)
         # self.log.debug('* config read ...')
         self.log.debug('* state read ...')
         self.log.debug('  checking for updates to state ...')
@@ -369,7 +369,7 @@ class TachyOrb(object):
         self.log.debug('* trash read ({} objects).'.format(len(trash)))
         if 'units' not in prefs:
             prefs['units'] = {}
-        self.cache_path = os.path.join(pgx_home, 'cache')
+        self.cache_path = os.path.join(marv_home, 'cache')
         home_schema_version = state.get('schema_version')
         if (home_schema_version is None or
             home_schema_version == schema_version):
@@ -381,7 +381,7 @@ class TachyOrb(object):
             # debug=True.
             self.log.debug(f'* schema version {schema_version} matches ...')
             self.log.debug('  initializing registry ...')
-            self.init_registry(pgx_home, version=schema_version, log=self.log,
+            self.init_registry(marv_home, version=schema_version, log=self.log,
                                debug=False, console=console)
             self.log.debug('  registry initialized.')
             self.classes = {cname : metathing(cname, (), {})
@@ -393,12 +393,12 @@ class TachyOrb(object):
             self.log.debug(f'    home schema version = {home_schema_version}')
             # if the state 'schema_version' does not match the current
             # package's schema_version:
-            dump_path = os.path.join(pgx_home, 'db.yaml')
+            dump_path = os.path.join(marv_home, 'db.yaml')
             # [1] remove .json caches and "cache" directory:
             self.log.debug('  [1] removing caches ...')
             for prefix in ['data_elements', 'diagrams', 'parameters',
                            'schemas']:
-                fpath = os.path.join(pgx_home, prefix + '.json')
+                fpath = os.path.join(marv_home, prefix + '.json')
                 if os.path.exists(fpath):
                     os.remove(fpath)
             self.log.debug('      + json caches removed.')
@@ -408,7 +408,7 @@ class TachyOrb(object):
             # [2] initialize registry with "force_new_core" to create the new
             #     classes and db:
             self.log.debug('  [2] initializing registry ...')
-            self.init_registry(pgx_home, force_new_core=True,
+            self.init_registry(marv_home, force_new_core=True,
                                version=schema_version, debug=False,
                                console=console)
             self.classes = {cname : metathing(cname, (), {})
@@ -422,15 +422,15 @@ class TachyOrb(object):
             if serialized_data:
                 deserialize(self, serialized_data, include_refdata=True)
             state['schema_version'] = schema_version
-            write_state(os.path.join(pgx_home, 'state'))
+            write_state(os.path.join(marv_home, 'state'))
             # check for private key in old key path
             self.log.debug('  [5] checking for old private keys ...')
             self.log.debug('      (for transition from 1.4.x versions)')
-            old_key_path = os.path.join(pgx_home, '.creds', 'private.key')
+            old_key_path = os.path.join(marv_home, '.creds', 'private.key')
             if os.path.exists(old_key_path):
                 self.log.debug('      found old "private.key" ...')
                 # if found, copy key to user home dir and remove '.creds' dir
-                p = Path(pgx_home)
+                p = Path(marv_home)
                 absp = p.resolve()
                 user_home = absp.parent
                 new_key_path = os.path.join(str(user_home), 'cattens.key')
@@ -444,16 +444,16 @@ class TachyOrb(object):
                     self.log.debug('      copying old key to new location ...')
                     self.log.debug('      should be able to log in now.')
                 # in any case, remove the old key, since it's not used now
-                shutil.rmtree(os.path.join(pgx_home, '.creds'),
+                shutil.rmtree(os.path.join(marv_home, '.creds'),
                               ignore_errors=True)
                 self.log.debug('      done with keys.')
         #############################################
         # POST registry-initialization operations ...
         #############################################
         # * copy test data files from 'p.test.data' module to test_data_dir
-        self.test_data_dir = os.path.join(pgx_home, 'test_data')
+        self.test_data_dir = os.path.join(marv_home, 'test_data')
         current_test_files = set()
-        self.log.debug('* checking for test data in [pgx_home]/test_data...')
+        self.log.debug('* checking for test data in [marv_home]/test_data...')
         if not os.path.exists(self.test_data_dir):
             os.makedirs(self.test_data_dir)
         else:
@@ -480,7 +480,7 @@ class TachyOrb(object):
         # else:
             # self.log.debug('  - all test data files already installed.')
         # * copy files from 'p.test.vault' module to vault_dir
-        # self.log.debug('* checking for files in [pgx_home]/vault ...')
+        # self.log.debug('* checking for files in [marv_home]/vault ...')
         current_vault_files = set(os.listdir(self.vault))
         # self.log.debug('  - found {} vault files:'.format(
                        # len(current_vault_files)))
