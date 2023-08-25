@@ -211,6 +211,7 @@ class TachyOrb(object):
         user_raz (list): cache of serialized RoleAssignment objects for roles
             assigned to the local user
     """
+    is_torb = True
     started = False
     new_oids = []
     classes = {}
