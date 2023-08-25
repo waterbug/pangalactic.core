@@ -177,7 +177,10 @@ def clone(what, include_ports=True, include_components=True,
                 pgana = orb.get('pgefobjects:PGANA')
                 newkw['owner'] = pgana
     new_obj = cls(**newkw)
-    orb.db.add(new_obj)
+    if orb.is_torb:
+        new_obj = orb.create_or_update_thing(cname, **newkw)
+    else:
+        orb.db.add(new_obj)
     # When cloning an existing object that has parameters or data elements,
     # copy them to the clone
     if from_object:
@@ -212,14 +215,24 @@ def clone(what, include_ports=True, include_components=True,
                                               port.type_of_port.name, seq)
                     port_abbr = get_port_abbr(port.type_of_port.abbreviation,
                                               seq)
-                    p = Port(oid=port_oid, id=port_id, name=port_name,
-                             abbreviation=port_abbr,
-                             type_of_port=port.type_of_port,
-                             of_product=new_obj, creator=new_obj.creator,
-                             modifier=new_obj.creator, create_datetime=NOW,
-                             mod_datetime=NOW)
-                    new_ports.append(p)
-                    orb.db.add(p)
+                    if orb.is_torb:
+                        p = orb.create_or_update_thing('Port',
+                                oid=port_oid, id=port_id, name=port_name,
+                                abbreviation=port_abbr,
+                                type_of_port=port.type_of_port,
+                                of_product=new_obj, creator=new_obj.creator,
+                                modifier=new_obj.creator, create_datetime=NOW,
+                                mod_datetime=NOW)
+                        new_ports.append(p)
+                    else:
+                        p = Port(oid=port_oid, id=port_id, name=port_name,
+                                 abbreviation=port_abbr,
+                                 type_of_port=port.type_of_port,
+                                 of_product=new_obj, creator=new_obj.creator,
+                                 modifier=new_obj.creator, create_datetime=NOW,
+                                 mod_datetime=NOW)
+                        new_ports.append(p)
+                        orb.db.add(p)
             # if we are including components, add them ...
             # NOTE:  "include_specified_components" overrides
             # "include_components" -- if components are specified, ONLY those
@@ -234,34 +247,62 @@ def clone(what, include_ports=True, include_components=True,
                         continue
                     acu_oid = str(uuid4())
                     ref_des = get_next_ref_des(new_obj, acu.component)
-                    acu = Acu(oid=acu_oid,
-                              id=get_acu_id(new_obj.id, ref_des),
-                              name=get_acu_name(new_obj.name, ref_des),
-                              assembly=new_obj, component=acu.component,
-                              product_type_hint=acu.product_type_hint,
-                              reference_designator=ref_des,
-                              creator=new_obj.creator,
-                              modifier=new_obj.creator, create_datetime=NOW,
-                              mod_datetime=NOW)
+                    if orb.is_torb:
+                        acu = orb.create_or_update_thing('Acu',
+                                  oid=acu_oid, id=get_acu_id(new_obj.id,
+                                  ref_des), name=get_acu_name(new_obj.name,
+                                  ref_des), assembly=new_obj,
+                                  component=acu.component,
+                                  product_type_hint=acu.product_type_hint,
+                                  reference_designator=ref_des,
+                                  creator=new_obj.creator,
+                                  modifier=new_obj.creator,
+                                  create_datetime=NOW, mod_datetime=NOW)
+                    else:
+                        acu = Acu(oid=acu_oid,
+                                  id=get_acu_id(new_obj.id, ref_des),
+                                  name=get_acu_name(new_obj.name, ref_des),
+                                  assembly=new_obj, component=acu.component,
+                                  product_type_hint=acu.product_type_hint,
+                                  reference_designator=ref_des,
+                                  creator=new_obj.creator,
+                                  modifier=new_obj.creator, create_datetime=NOW,
+                                  mod_datetime=NOW)
+                        orb.db.add(acu)
                     new_acus.append(acu)
-                    orb.db.add(acu)
-                refresh_componentz(new_obj)
+                if orb.is_torb:
+                    # TODO:  get new 'componentz' cache from server
+                    pass
+                else:
+                    refresh_componentz(new_obj)
             elif include_components and getattr(obj, 'components', None):
                 Acu = orb.classes['Acu']
                 for acu in obj.components:
                     acu_oid = str(uuid4())
                     ref_des = get_next_ref_des(new_obj, acu.component)
-                    acu = Acu(oid=acu_oid,
-                              id=get_acu_id(new_obj.id, ref_des),
-                              name=get_acu_name(new_obj.name, ref_des),
-                              assembly=new_obj, component=acu.component,
-                              product_type_hint=acu.product_type_hint,
-                              reference_designator=ref_des,
-                              creator=new_obj.creator,
-                              modifier=new_obj.creator, create_datetime=NOW,
-                              mod_datetime=NOW)
+                    if orb.is_torb:
+                        acu = orb.create_or_update_thing('Acu',
+                                  oid=acu_oid, id=get_acu_id(new_obj.id,
+                                  ref_des), name=get_acu_name(new_obj.name,
+                                  ref_des), assembly=new_obj,
+                                  component=acu.component,
+                                  product_type_hint=acu.product_type_hint,
+                                  reference_designator=ref_des,
+                                  creator=new_obj.creator,
+                                  modifier=new_obj.creator,
+                                  create_datetime=NOW, mod_datetime=NOW)
+                    else:
+                        acu = Acu(oid=acu_oid,
+                                  id=get_acu_id(new_obj.id, ref_des),
+                                  name=get_acu_name(new_obj.name, ref_des),
+                                  assembly=new_obj, component=acu.component,
+                                  product_type_hint=acu.product_type_hint,
+                                  reference_designator=ref_des,
+                                  creator=new_obj.creator,
+                                  modifier=new_obj.creator,
+                                  create_datetime=NOW, mod_datetime=NOW)
+                        orb.db.add(acu)
                     new_acus.append(acu)
-                    orb.db.add(acu)
                 refresh_componentz(new_obj)
             elif (not include_components and not include_specified_components
                   and flatten):
@@ -271,13 +312,6 @@ def clone(what, include_ports=True, include_components=True,
                     pid_cbe = pid + '[CBE]'
                     cbe_val = get_pval(obj.oid, pid_cbe)
                     set_pval(new_obj.oid, pid, cbe_val)
-        else:   # NOT from_object -> new_obj is a brand-new object
-            # NOTE:  this will add both class-specific and (for HardwareProducts)
-            # ProductType-specific default parameters, as well as any custom
-            # parameters specified in "config" and "prefs" for HardwareProduct
-            # instances ...
-            add_default_data_elements(new_obj)
-            add_default_parameters(new_obj)
         new_obj.id = orb.gen_product_id(new_obj)
         new_objs = []
         new_objs += new_ports
@@ -287,11 +321,8 @@ def clone(what, include_ports=True, include_components=True,
         if save_hw:
             dispatcher.send(signal='new hardware clone', product=new_obj,
                             objs=new_objs)
-    else:   # not a HardwareProduct
-        if not from_object:
-            # NOTE:  this will add class-specific parameters and data elements
-            add_default_data_elements(new_obj)
-            add_default_parameters(new_obj)
+    add_default_data_elements(new_obj)
+    add_default_parameters(new_obj)
     if recompute_needed:
         if state.get('connected'):
             dispatcher.send(signal='get parmz')
