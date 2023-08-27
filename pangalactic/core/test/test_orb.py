@@ -240,9 +240,17 @@ class OrbTest(unittest.TestCase):
         # pass
     # test_save.todo = 'not done.'
 
-    # def test_10_search_exact(self, ...):
-        # pass
-    # test_search.todo = 'not done.'
+    def test_10_search_exact(self):
+        """
+        CASE:  test orb.search_exact()
+        """
+        sc_type = orb.get('pgefobjects:ProductType.spacecraft')
+        value = orb.search_exact(cname='HardwareProduct', product_type=sc_type)
+        sc0 = orb.get('test:spacecraft0')
+        sc1 = orb.get('test:spacecraft1')
+        sc2 = orb.get('test:spacecraft2')
+        expected = [sc0, sc1, sc2]
+        self.assertEqual(expected, value)
 
     # def test_11_select(self, ...):
         # pass

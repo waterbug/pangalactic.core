@@ -32,17 +32,20 @@ from pangalactic.core.parametrics import (add_default_parameters,
                                           add_parameter,
                                           componentz, systemz,
                                           data_elementz, de_defz,
+                                          get_parameter_id,
+                                          get_parameter_name,
+                                          get_parameter_description,
                                           get_dval_as_str,
                                           get_pval_as_str,
                                           load_allocz, load_compz,
                                           load_rqt_allocz, load_data_elementz,
                                           load_parmz, load_de_defz,
-                                          load_parm_defz, load_parmz_by_dimz,
+                                          load_parmz_by_dimz,
                                           load_systemz, parameterz, parm_defz,
                                           save_allocz, save_compz,
                                           save_systemz, save_rqt_allocz,
                                           save_data_elementz, save_parmz,
-                                          save_de_defz, save_parm_defz,
+                                          save_de_defz,
                                           save_parmz_by_dimz)
 from pangalactic.core.smerializers import serialize, deserialize
 from pangalactic.core.tachistry    import Tachistry, matrix, schemas
@@ -50,8 +53,8 @@ from pangalactic.core.test         import data as test_data_mod
 from pangalactic.core.test         import vault as test_vault_mod
 from pangalactic.core.test.utils   import gen_test_dvals, gen_test_pvals
 from pangalactic.core.units        import in_si
-from pangalactic.core.utils.datetimes import (file_dts, file_date_stamp,
-                                              dt2local_tz_str)
+from pangalactic.core.utils.datetimes import (dtstamp, file_dts,
+                                              file_date_stamp, dt2local_tz_str)
 from pangalactic.core.log          import get_loggers
 from pangalactic.core.validation   import get_assembly
 
@@ -645,7 +648,6 @@ class TachyOrb(object):
         self.save_user_raz(self.home)
         save_allocz(self.home)
         save_de_defz(self.home)
-        save_parm_defz(self.home)
         save_parmz_by_dimz(self.home)
         save_compz(self.home)
         save_systemz(self.home)
@@ -666,7 +668,6 @@ class TachyOrb(object):
         self.save_user_raz(dir_path)
         save_allocz(dir_path)
         save_de_defz(dir_path)
-        save_parm_defz(dir_path)
         save_parmz_by_dimz(dir_path)
         save_compz(dir_path)
         save_systemz(dir_path)
@@ -874,14 +875,18 @@ class TachyOrb(object):
         # [1] load any parameter definitions and contexts that may be missing
         #     from the current db (in a first-time installation, this will of
         #     course be *all* parameter definitions and contexts)
-        missing_p = [so for so in refdata.pdc if so['oid'] not in db_oids]
-        if missing_p:
-            self.log.debug('  + missing some reference parameters/contexts:')
-            self.log.debug('  {}'.format([so['oid'] for so in missing_p]))
-            p_objs = deserialize(self, [so for so in missing_p],
-                                 include_refdata=True,
-                                 force_no_recompute=True)
-            self.save(p_objs)
+        # ---------------------------------------------------------------------
+        # NOTE: THIS STEP IS UNNECESSARY IN THE TORB SINCE 'parm_defz' is
+        # recreated from refdata at runtime.
+        # ---------------------------------------------------------------------
+        # missing_p = [so for so in refdata.pdc if so['oid'] not in db_oids]
+        # if missing_p:
+            # self.log.debug('  + missing some reference parameters/contexts:')
+            # self.log.debug('  {}'.format([so['oid'] for so in missing_p]))
+            # p_objs = deserialize(self, [so for so in missing_p],
+                                 # include_refdata=True,
+                                 # force_no_recompute=True)
+            # self.save(p_objs)
         # [1.1] load any data element definitions that may be missing
         #     from the current db (in a first-time installation, this will of
         #     course be *all* data element definitions)
@@ -896,8 +901,8 @@ class TachyOrb(object):
         # [2] XXX IMPORTANT!  Load the parameter definitions caches
         # ('parm_defz', 'parmz_by_dimz' 'de_defz') before loading parameters
         # from 'parameters.json' -- the deserializer uses these caches.
+        self.create_parm_defz()
         load_de_defz(self.home)
-        load_parm_defz(self.home)
         load_parmz_by_dimz(self.home)
         # *** NOTE ***********************************************************
         # [3] run _load_parmz() and _load_data_elementz() before checking for
@@ -990,6 +995,73 @@ class TachyOrb(object):
     # be removed from the db and become independent of the orb, and move back
     # to the parametrics module ...
     #########################################################################
+
+    def create_parm_defz(self):
+        """
+        Create the `parm_defz` cache of ParameterDefinitions from refdata, in
+        the format:
+
+            {parameter_id : {name, variable, context, context_type, description,
+                             dimensions, range_datatype, computed, mod_datetime},
+             data_element_id : {name, description, range_datatype, mod_datetime},
+             ...}
+        """
+        # --------------------------------------------------------------------
+        # NOTE: all parameters containing '_operational', '_survival',
+        # '_throughput' are deprecated -- these have now been implemented as
+        # ParameterContexts [2022-01-16 SCW]
+        # --------------------------------------------------------------------
+        # self.log.debug('* create_parm_defz')
+        pds = [so for so in refdata.pdc
+               if so['_cname'] == 'ParameterDefinition']
+        # first, the "variable" parameters ...
+        pd_dict = {pd['id'] :
+                   {'name': pd['name'],
+                    'variable': pd['id'],
+                    'context': None,
+                    'context_type': None,
+                    'description': pd['description'],
+                    'dimensions': pd['dimensions'],
+                    'range_datatype': pd['range_datatype'],
+                    'computed': False,
+                    'mod_datetime':
+                        str(pd.get('mod_datetime', '') or dtstamp())
+                    } for pd in pds}
+        parm_defz.update(pd_dict)
+        # var_ids = sorted(list(pd_dict), key=str.lower)
+        # self.log.debug('      bases created: {}'.format(
+                                                # str(list(pd_dict.keys()))))
+        # add PDs for the descriptive contexts (CBE, Contingency, MEV) for the
+        # variables (Mass, Power, Datarate) for which functions have been defined
+        # to compute the CBE and MEV values
+        all_contexts = [so for so in refdata.pdc
+                        if so['_cname'] == 'ParameterContext']
+        # self.log.debug('      adding context parms for: {}'.format(
+                                        # str([c.id for c in all_contexts])))
+        for pd in pds:
+            for c in all_contexts:
+                parm_defz[get_parameter_id(pd['id'], c['id'])] = {
+                    'name': get_parameter_name(pd['name'],
+                                               c['abbreviation'] or c['id']),
+                    'variable': pd['id'],
+                    'context': c['id'],
+                    'context_type': c['context_type'],
+                    'description': get_parameter_description(
+                                        pd['description'], c['description']),
+                    'dimensions': c.get('context_dimensions') or pd[
+                                                            'dimensions'],
+                    'range_datatype': c.get('context_datatype') or pd[
+                                                            'range_datatype'],
+                    'computed': c['computed'],
+                    'mod_datetime': str(dtstamp())}
+
+    def create_parmz_by_dimz(self):
+        """
+        Create the `parmz_by_dimz` cache, where the cache has the form
+
+            {dimension : [ids of ParameterDefinitions having that dimension]}
+        """
+        self.log.debug('* create_parmz_by_dimz')
 
     ##########################################################################
     # DB FUNCTIONS
@@ -1456,47 +1528,55 @@ class TachyOrb(object):
         Returns:
             list:  a list of objects
         """
-        # self.log.debug(f'* search_exact(**({str(kw)}))')
+        self.log.debug(f'* search_exact(**({str(kw)}))')
         cname = kw.pop('cname', None)
         if cname:
             if cname in schemas:
+                # self.log.debug(f'* cname "{cname}" in schemas ...')
                 schema = schemas[cname]
-                attrs = [a for a in kw if a in schema]
+                attrs = [a for a in kw if a in schema['field_names']]
             else:
                 # cname is not valid
                 return []
         else:
             attrs = [a for a in kw if a in self.registry.pes]
+        # self.log.debug(f'* attrs: {attrs}')
         if attrs:
             domains = [self.registry.pes[a]['domain'] for a in attrs]
             idx = max([self.mbo.index(d) for d in domains])
             domain = self.mbo[idx]
+            # self.log.debug(f'  - domain: {domain}')
             ok_kw = {a : kw[a] for a in attrs}
             if cname:
                 # if cname is supplied, check that it contains all attrs
-                bases = self.get_subclass_names(cname)
-                # self.log.debug('  - bases of cname: {}'.format(
-                                 # str(bases)))
-                if bases and not (domain in bases):
-                    # class does not have all attrs: return empty list
+                extr = self.registry.ces.get(cname)
+                if extr:
+                    bases = self.registry.all_your_base(extr) | set([cname])
+                    # self.log.debug(f'  - bases of cname: {bases}')
+                    if not domain in bases:
+                        # class does not have all attrs: return empty list
+                        return []
+                else:
+                    # cname is not a valid class: return empty list
                     return []
             elif not cname:
                 # no cname specified -- find the most general class that
                 # contains all specified parameters
                 cname = domain
-                # self.log.debug('  - no cname kw, using: {}'.format(cname))
-            # self.log.debug('  - ok_kw: {}'.format(str(ok_kw)))
+                self.log.debug(f'  - no cname kw, using: {cname}')
+            # self.log.debug(f'  - ok_kw: {ok_kw}')
             schema = schemas[cname]
             objs = self.get_all_subtypes(cname)
             obj_kw = {a : kw[a] for a in ok_kw
                       if schema['fields'][a]['range'] in schemas}
             data_kw = {a : kw[a] for a in ok_kw if a not in obj_kw}
             result = []
+            matching = {}
             for o in objs:
                 data_res = True
                 obj_res = True
-                # obj_oid = getattr(o, 'oid', 'no oid') or 'unknown'
-                # matching[obj_oid] = []
+                obj_oid = getattr(o, 'oid', 'no oid') or 'unknown'
+                matching[obj_oid] = []
                 if data_kw:
                     data_res = all([getattr(o, k) == data_kw[k] for k in data_kw])
                 if obj_kw:
@@ -1505,24 +1585,26 @@ class TachyOrb(object):
                     for k in obj_kw:
                         if obj_kw[k] is None and getattr(o, k, '') is None:
                             res.append(True)
-                            # matching[obj_oid].append(
-                                        # f'  {k}: None is None')
+                            matching[obj_oid].append(f'  {k}: None is None')
                         else:
                             o_oid = getattr(getattr(o, k, None),
                                             'oid', 'this') or 'this'
                             k_oid = getattr(obj_kw[k], 'oid', 'that') or 'that'
                             if k_oid == o_oid:
                                 res.append(True)
-                                # matching[obj_oid].append(
-                                        # f'  {k}: "{o_oid}" == "{k_oid}"')
+                                matching[obj_oid].append(
+                                        f'  {k}: "{o_oid}" == "{k_oid}"')
                             else:
                                 res.append(False)
                     obj_res = all(res)
                 if data_res and obj_res:
-                    # self.log.debug(f'  object "{o.id}" matched:')
+                    # self.log.debug(f'  object "{o.id}" (oid {o.oid}) matched')
                     # for x in matching[obj_oid]:
                         # self.log.debug(f'  {x}')
                     result.append(o)
+            self.log.debug(f'  result: {len(result)} objects:')
+            for o in result:
+                self.log.debug(f'  - "{o.id}" (oid {o.oid})')
             return result
         else:
             return []

@@ -365,41 +365,6 @@ def load_systemz(dir_path):
 # -----------------------------------------------------------------------------
 parm_defz = {}
 
-def load_parm_defz(dir_path):
-    """
-    Load the `parm_defz` cache from a json file.
-    """
-    log.debug('* load_parm_defz() ...')
-    fpath = os.path.join(dir_path, 'parm_defs.json')
-    if os.path.exists(fpath):
-        with open(fpath) as f:
-            try:
-                stored_parm_defz = json.loads(f.read())
-            except:
-                log.debug('  - reading of "parm_defs.json" failed.')
-                return 'fail'
-        parm_defz.update(stored_parm_defz)
-        log.debug('  - parm_defz cache loaded.')
-        return 'success'
-    else:
-        log.debug('  - "parm_defs.json" was not found.')
-        return 'not found'
-
-def save_parm_defz(dir_path):
-    """
-    Save `parm_defz` cache to a json file.
-    """
-    log.debug('* save_parm_defz() ...')
-    try:
-        fpath = os.path.join(dir_path, 'parm_defs.json')
-        with open(fpath, 'w') as f:
-            f.write(json.dumps(parm_defz,
-                               separators=(',', ':'),
-                               indent=4, sort_keys=True))
-        log.debug('  ... parm_defs.json file written.')
-    except:
-        log.debug('  ... writing parm_defs.json file failed!')
-
 # parameterz:  persistent** cache of assigned parameter values
 #              ** persisted in the file 'parameters.json' in the
 #              application home directory -- see the functions
