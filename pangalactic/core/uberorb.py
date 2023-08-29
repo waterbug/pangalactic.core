@@ -1368,15 +1368,6 @@ class UberORB(object):
             elif cname == 'Requirement':
                 # in the future, functional reqts. can be allocated
                 recompute_required = True
-            elif cname == 'DataElementDefinition':
-                # NOTE:  all DataElementDefinitions are public
-                obj.public = True
-                self.rebuild_de_defz()
-            elif cname == 'ParameterDefinition':
-                # NOTE:  all ParameterDefinitions are public
-                obj.public = True
-                update_parm_defz(obj)
-                update_parmz_by_dimz(obj)
         # self.log.debug('  orb.save:  committing db session.')
         # obj has already been "added" to the db (session) above, so commit ...
         self.db.commit()

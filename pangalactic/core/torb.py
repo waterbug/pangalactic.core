@@ -29,8 +29,7 @@ from pangalactic.core.mapping     import schema_maps, schema_version
 from pangalactic.core.meta        import TEXT_PROPERTIES
 from pangalactic.core.parametrics import (add_default_parameters,
                                           add_default_data_elements,
-                                          add_parameter,
-                                          componentz, systemz,
+                                          Comp, componentz, systemz,
                                           data_elementz, de_defz,
                                           get_parameter_id,
                                           get_parameter_name,
@@ -39,9 +38,9 @@ from pangalactic.core.parametrics import (add_default_parameters,
                                           get_pval_as_str,
                                           load_allocz, load_compz,
                                           load_rqt_allocz, load_data_elementz,
-                                          load_parmz, load_de_defz,
-                                          load_parmz_by_dimz,
-                                          load_systemz, parameterz, parm_defz,
+                                          load_parmz, load_systemz,
+                                          parameterz, parm_defz, parmz_by_dimz,
+                                          refresh_systemz, rqt_allocz,
                                           save_allocz, save_compz,
                                           save_systemz, save_rqt_allocz,
                                           save_data_elementz, save_parmz,
@@ -887,23 +886,27 @@ class TachyOrb(object):
                                  # include_refdata=True,
                                  # force_no_recompute=True)
             # self.save(p_objs)
+        # ---------------------------------------------------------------------
+        # NOTE: THIS STEP IS UNNECESSARY IN THE TORB SINCE 'de_defz' is
+        # recreated from refdata at runtime.
+        # ---------------------------------------------------------------------
         # [1.1] load any data element definitions that may be missing
         #     from the current db (in a first-time installation, this will of
         #     course be *all* data element definitions)
-        missing_d = [so for so in refdata.deds if so['oid'] not in db_oids]
-        if missing_d:
-            self.log.debug('  + missing some reference data elements:')
-            self.log.debug('  {}'.format([so['oid'] for so in missing_d]))
-            d_objs = deserialize(self, [so for so in missing_d],
-                                 include_refdata=True,
-                                 force_no_recompute=True)
-            self.save(d_objs)
+        # missing_d = [so for so in refdata.deds if so['oid'] not in db_oids]
+        # if missing_d:
+            # self.log.debug('  + missing some reference data elements:')
+            # self.log.debug('  {}'.format([so['oid'] for so in missing_d]))
+            # d_objs = deserialize(self, [so for so in missing_d],
+                                 # include_refdata=True,
+                                 # force_no_recompute=True)
+            # self.save(d_objs)
         # [2] XXX IMPORTANT!  Load the parameter definitions caches
-        # ('parm_defz', 'parmz_by_dimz' 'de_defz') before loading parameters
+        # ('parmz_by_dimz' 'de_defz') before loading parameters
         # from 'parameters.json' -- the deserializer uses these caches.
         self.create_parm_defz()
-        load_de_defz(self.home)
-        load_parmz_by_dimz(self.home)
+        self.create_de_defz()
+        self.create_parmz_by_dimz()
         # *** NOTE ***********************************************************
         # [3] run _load_parmz() and _load_data_elementz() before checking for
         # updates to data element definitions and parameter definitions and
@@ -915,24 +918,26 @@ class TachyOrb(object):
         self.data_elementz_status = load_data_elementz(self.home)
         self.parmz_status = load_parmz(self.home)
         # self.log.debug('  dmz: {}'.format(str(dmz)))
+        # --------------------------------------------------------------------
+        # NOTE: STEP [4] IS NOW UNNECESSARY SINCE WE ARE RECREATING ALL
+        # PARAMETER DEFINITIONS AND CONTEXTS AT STARTUP
+        # --------------------------------------------------------------------
         # [4] check for updates to parameter definitions and contexts
-        # self.log.debug('  + checking for updates to parameter definitions ...')
-        all_pds = refdata.pdc
-        all_pd_oids = [so['oid'] for so in all_pds]
-        # get mod_datetimes of all current ref data objects
-        pd_mod_dts = self.get_mod_dts(oids=all_pd_oids)
-        # compare them to all newly imported refdata objects
-        updated_pds = [so for so in all_pds
-                       if (so.get('mod_datetime') and
-                           pd_mod_dts.get(so['oid']) and
-                           (so.get('mod_datetime') >
-                            pd_mod_dts.get(so['oid'])))] 
-        if updated_pds:
-            # self.log.debug('    {} updates found ...'.format(len(updated_pds)))
-            deserialize(self, updated_pds, include_refdata=True)
-            # self.log.debug('    parameter definition updates completed.')
-        # else:
-            # self.log.debug('    no updates found.')
+        # all_pds = refdata.pdc
+        # all_pd_oids = [so['oid'] for so in all_pds]
+        # # get mod_datetimes of all current ref data objects
+        # pd_mod_dts = self.get_mod_dts(oids=all_pd_oids)
+        # # compare them to all newly imported refdata objects
+        # updated_pds = [so for so in all_pds
+                       # if (so.get('mod_datetime') and
+                           # pd_mod_dts.get(so['oid']) and
+                           # (so.get('mod_datetime') >
+                            # pd_mod_dts.get(so['oid'])))] 
+        # if updated_pds:
+            # deserialize(self, updated_pds, include_refdata=True)
+            # # self.log.debug('    parameter definition updates completed.')
+        # # else:
+            # # self.log.debug('    no updates found.')
         # [5] load balance of any reference data missing from db
         missing_c = [so for so in refdata.core if so['oid'] not in db_oids]
         objs = []
@@ -946,10 +951,12 @@ class TachyOrb(object):
             if hasattr(o, 'owner'):
                 o.owner = pgana
                 o.creator = o.modifier = admin
-        # [6] check for updates to reference data other than parameter defs
+        # [6] check for updates to reference data other than parameter defs and
+        # de defs ...
         # self.log.debug('  + checking for updates to reference data ...')
-        all_ref = refdata.initial + refdata.core + refdata.deds
-        all_ref_oids = [so['oid'] for so in all_ref]
+        all_ref = refdata.initial + refdata.core
+        # all_ref_oids = [so['oid'] for so in all_ref]
+        all_ref_oids = refdata.ref_oids
         # get mod_datetimes of all current ref data objects
         mod_dts = self.get_mod_dts(oids=all_ref_oids)
         # compare them to all newly imported refdata objects
@@ -1003,7 +1010,6 @@ class TachyOrb(object):
 
             {parameter_id : {name, variable, context, context_type, description,
                              dimensions, range_datatype, computed, mod_datetime},
-             data_element_id : {name, description, range_datatype, mod_datetime},
              ...}
         """
         # --------------------------------------------------------------------
@@ -1055,6 +1061,29 @@ class TachyOrb(object):
                     'computed': c['computed'],
                     'mod_datetime': str(dtstamp())}
 
+
+    def create_de_defz(self):
+        """
+        Create the `de_defz` cache of DataElementDefinitions from refdata, in
+        the format:
+
+            {data_element_id : {name, description, label, range_datatype,
+                                mod_datetime},
+             ...}
+        """
+        # self.log.debug('* create_de_defz')
+        deds = [so for so in refdata.pdc
+               if so['_cname'] == 'DataElementDefinition']
+        de_dict = {ded['id'] :
+                   {'name': ded['name'],
+                    'description': ded['description'],
+                    'dimensions': ded['dimensions'],
+                    'range_datatype': ded['range_datatype'],
+                    'mod_datetime':
+                        str(ded.get('mod_datetime', '') or dtstamp())
+                    } for ded in deds}
+        de_defz.update(de_dict)
+
     def create_parmz_by_dimz(self):
         """
         Create the `parmz_by_dimz` cache, where the cache has the form
@@ -1062,10 +1091,69 @@ class TachyOrb(object):
             {dimension : [ids of ParameterDefinitions having that dimension]}
         """
         self.log.debug('* create_parmz_by_dimz')
+        pds = [so for so in refdata.pdc
+               if so['_cname'] == 'ParameterDefinition']
+        dimz = set([pd['dimensions'] for pd in pds])
+        parmz_by_dimz.update({dim : [pd['id'] for pd in pds
+                              if pd['dimensions'] == dim]
+                              for dim in dimz})
 
     ##########################################################################
     # DB FUNCTIONS
     ##########################################################################
+
+    def adjust_componentz(self, acu):
+        """
+        Adjust the `componentz` cache for a Product (assembly) instance when an
+        Acu instance is saved.
+
+        The 'componentz' dictionary has the form
+
+            {product.oid : # where "product" is the assembly
+                list of Comp('oid', 'usage_oid', 'quantity',
+                             'reference_designator')}
+
+        where the list of `Comp` namedtuples is created using
+        Acu.component.oid, Acu.oid, Acu.quantity, and Acu.reference_designator.
+
+        Args:
+            product (Product): the Product instance
+        """
+        self.log.debug(f'* orb.adjust_componentz({acu.id})')
+        if acu.assembly.oid in componentz:
+            # if the assembly exists in componentz, check whether this acu
+            # (usage) already exists there too, in which case this adjustment
+            # may represent a mod to the existing acu ...
+            usage_oids = [c.usage_oid for c in componentz[acu.assembly.oid]]
+            comp_oid = getattr(acu.component, 'oid', '') or ''
+            if acu.oid in usage_oids:
+                # this acu was one of the usages in the assembly
+                for c in componentz[acu.assembly.oid]:
+                    if c.usage_oid == acu.oid and c.oid != comp_oid:
+                        # this is the acu but its component was different, so
+                        # remove the "old version" of the acu ...
+                        componentz[acu.assembly.oid].remove(c)
+                        # and append the "new version" ...
+                        componentz[acu.assembly.oid].append(Comp._make((
+                                        comp_oid,
+                                        acu.oid,
+                                        acu.quantity or 1,
+                                        acu.reference_designator)))
+            else:
+                # assembly exists in componentz but this acu was not one of its
+                # usages, so add it ...
+                componentz[acu.assembly.oid].append(Comp._make((
+                                        comp_oid,
+                                        acu.oid,
+                                        acu.quantity or 1,
+                                        acu.reference_designator)))
+        else:
+            # product had no components, so this is the only one ...
+            componentz[acu.assembly.oid] = [Comp._make((
+                                        getattr(acu.component, 'oid', None),
+                                        acu.oid,
+                                        acu.quantity or 1,
+                                        acu.reference_designator))]
 
     def save(self, objs, recompute=True):
         """
@@ -1117,15 +1205,87 @@ class TachyOrb(object):
                 else:
                     # ultimate fallback:  owner is PGANA
                     obj.owner = self.get('pgefobjects:PGANA')
+            if cname == 'Acu':
+                comp_oid = getattr(obj.component, 'oid', '') or ''
+                assembly_oid = getattr(obj.assembly, 'oid', '') or ''
+                # use 'componentz' cache to determine whether the Acu's
+                # component has changed
+                cur_assembly_acu_comps = []
+                if assembly_oid in componentz:
+                    cur_assembly_acu_comps = [(c.usage_oid, c.oid) for c
+                                              in componentz[obj.assembly.oid]]
+                if (oid, comp_oid) in cur_assembly_acu_comps:
+                    comp_changed = False
+                else:
+                    comp_changed = True
+                self.adjust_componentz(obj)
+                if not new:
+                    # NOTE: when an existing Acu is modified and the component
+                    # is changed, the associated Flows must be deleted first,
+                    # so it is assumed that has been done ...
+                    if comp_changed:
+                        # find all req allocations to this Acu ...
+                        msg = 'component was changed, checking for '
+                        msg += 'allocated requirements ...'
+                        self.log.debug(f'   {msg}')
+                        alloc_reqs = [rqt_oid for rqt_oid in rqt_allocz
+                                      if rqt_allocz[rqt_oid][0] == oid]
+                        if alloc_reqs:
+                            for rqt_oid in alloc_reqs:
+                                req = self.get(rqt_oid)
+                        else:
+                            self.log.debug('   no allocated reqts found.')
+                    else:
+                        self.log.debug('   component not changed.')
             elif cname == 'HardwareProduct':
-                # make sure HW Products have mass, power, data rate parms
-                if obj.oid not in parameterz:
-                    parameterz[obj.oid] = {}
-                for pid in ['m', 'P', 'R_D']:
-                    if not parameterz[obj.oid].get(pid):
-                         add_parameter(obj.oid, pid)
-            elif cname == 'Role':
-                self.role_oids_to_ids[obj.oid] = obj.id
+                # make sure all HW Products have their default parameters and
+                # data elements
+                if oid not in parameterz:
+                    parameterz[oid] = {}
+                add_default_parameters(obj)
+                add_default_data_elements(obj)
+            elif cname == 'ProjectSystemUsage':
+                system_oid = getattr(obj.system, 'oid', None)
+                # use 'systemz' cache to determine whether the PSU's
+                # system has changed
+                cur_project_psu_systems = []
+                if obj.project.oid in systemz:
+                    cur_project_psu_systems = [(s.usage_oid, s.oid) for s
+                                                in systemz[obj.project.oid]]
+                if (oid, system_oid) in cur_project_psu_systems:
+                    system_changed = False
+                else:
+                    system_changed = True
+                # after checking for a changed system, refresh 'systemz'
+                refresh_systemz(obj.project)
+                if not new:
+                    if system_changed:
+                        # find all req allocations to this PSU ...
+                        msg = 'system was changed, checking for '
+                        msg += 'allocated requirements ...'
+                        self.log.debug(f'   {msg}')
+                        alloc_reqs = [rqt_oid for rqt_oid in rqt_allocz
+                                      if rqt_allocz[rqt_oid][0] == oid]
+                        if alloc_reqs:
+                            for rqt_oid in alloc_reqs:
+                                req = self.get(rqt_oid)
+                                if req:
+                                    self.log.debug('   alloc reqts found ...')
+                                    recompute_required = True
+                                    self.log.debug('   recompute will be done')
+                                else:
+                                    # if requirement not there, remove alloc
+                                    del alloc_reqs[rqt_oid]
+                        else:
+                            self.log.debug('   no allocated reqts found.')
+                    else:
+                        self.log.debug('   system not changed.')
+                recompute_required = True
+            elif cname == 'Requirement':
+                # in the future, functional reqts. can be allocated
+                recompute_required = True
+        # self.log.debug('  orb.save:  committing db session.')
+        # obj has already been "added" to the db (session) above, so commit ...
         return True
 
     def obj_view_to_dict(self, obj, view):
@@ -1197,7 +1357,8 @@ class TachyOrb(object):
             # self.log.debug('* get(oids=%s)' % str(oids))
             # self.log.debug('* get(oids=({} oids))'.format(len(oids)))
             if oids:
-                return [db.get(oid) for oid in oids]
+                return [db.get(oid) for oid in oids
+                        if db.get(oid)]
             else:
                 return []
         else:
@@ -1411,8 +1572,9 @@ class TachyOrb(object):
             return {o.oid: o.mod_datetime for o in objs
                     if o.mod_datetime is not None}
         else:
-            return {o.oid: str(o.mod_datetime) for o in objs
-                    if o.mod_datetime is not None}
+            return {o.oid: str(getattr(o, 'mod_datetime', '') or '')
+                    for o in objs
+                    if (getattr(o, 'mod_datetime', '') or '') is not None}
 
     def get_oid_cnames(self, oids=None, cname=None):
         """
@@ -1578,7 +1740,8 @@ class TachyOrb(object):
                 obj_oid = getattr(o, 'oid', 'no oid') or 'unknown'
                 matching[obj_oid] = []
                 if data_kw:
-                    data_res = all([getattr(o, k) == data_kw[k] for k in data_kw])
+                    data_res = all([getattr(o, k) == data_kw[k]
+                                    for k in data_kw])
                 if obj_kw:
                     obj_res = False
                     res = []
@@ -1598,7 +1761,8 @@ class TachyOrb(object):
                                 res.append(False)
                     obj_res = all(res)
                 if data_res and obj_res:
-                    # self.log.debug(f'  object "{o.id}" (oid {o.oid}) matched')
+                    # self.log.debug(
+                    #     f'  object "{o.id}" (oid {o.oid}) matched')
                     # for x in matching[obj_oid]:
                         # self.log.debug(f'  {x}')
                     result.append(o)

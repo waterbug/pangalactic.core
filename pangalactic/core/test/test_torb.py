@@ -11,8 +11,12 @@ import unittest
 # import ruamel_yaml as yaml
 
 # pangalactic
+
+# set the orb
+import pangalactic.core.set_torb
+
 # core
-from pangalactic.core              import refdata, prefs
+from pangalactic.core              import orb, refdata, prefs
                                            # write_config, write_prefs)
 from pangalactic.core.parametrics  import (componentz, data_elementz,
                                            parameterz, rqt_allocz)
@@ -111,7 +115,9 @@ class OrbTest(unittest.TestCase):
         # starts with a fresh test "installation" so should always pass.)
         # oids = [o['oid'] for o in refdata.initial]
         # oids += [o['oid'] for o in refdata.core]
-        oids = refdata.ref_oids
+        oids = (set(refdata.ref_oids)
+                - set(refdata.ref_pd_oids)
+                - set(refdata.ref_de_oids))
         res = orb.get(oids=oids)
         found_oids = [o.oid for o in res]
         value = set(oids) - set(found_oids)
