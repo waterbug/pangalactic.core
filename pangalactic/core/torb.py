@@ -29,23 +29,21 @@ from pangalactic.core.mapping     import schema_maps, schema_version
 from pangalactic.core.meta        import TEXT_PROPERTIES
 from pangalactic.core.parametrics import (add_default_parameters,
                                           add_default_data_elements,
-                                          Comp, componentz, systemz,
+                                          Comp, componentz,
+                                          System, systemz,
                                           data_elementz, de_defz,
                                           get_parameter_id,
                                           get_parameter_name,
                                           get_parameter_description,
                                           get_dval_as_str,
                                           get_pval_as_str,
-                                          load_allocz, load_compz,
+                                          load_allocz,
                                           load_rqt_allocz, load_data_elementz,
-                                          load_parmz, load_systemz,
+                                          load_parmz,
                                           parameterz, parm_defz, parmz_by_dimz,
-                                          refresh_systemz, rqt_allocz,
-                                          save_allocz, save_compz,
-                                          save_systemz, save_rqt_allocz,
-                                          save_data_elementz, save_parmz,
-                                          save_de_defz,
-                                          save_parmz_by_dimz)
+                                          rqt_allocz, save_allocz,
+                                          save_rqt_allocz,
+                                          save_data_elementz, save_parmz)
 from pangalactic.core.smerializers import serialize, deserialize
 from pangalactic.core.tachistry    import Tachistry, matrix, schemas
 from pangalactic.core.test         import data as test_data_mod
@@ -646,10 +644,6 @@ class TachyOrb(object):
         self.save_matrix(self.home)
         self.save_user_raz(self.home)
         save_allocz(self.home)
-        save_de_defz(self.home)
-        save_parmz_by_dimz(self.home)
-        save_compz(self.home)
-        save_systemz(self.home)
         save_rqt_allocz(self.home)
         self.log.info('  cache saves completed ...')
         # [2] save all caches to backup dir
@@ -666,10 +660,6 @@ class TachyOrb(object):
         self.save_matrix(dir_path)
         self.save_user_raz(dir_path)
         save_allocz(dir_path)
-        save_de_defz(dir_path)
-        save_parmz_by_dimz(dir_path)
-        save_compz(dir_path)
-        save_systemz(dir_path)
         save_rqt_allocz(dir_path)
         self.cache_dump_complete = True
         if backup:
@@ -983,16 +973,19 @@ class TachyOrb(object):
             self.log.debug('  {}'.format([oid for oid in deprecated]))
             for oid in deprecated:
                 self.delete([self.get(oid) for oid in deprecated])
-        ####################################################################
+        # ******************************************************************
+        # build the 'componentz' and 'systemz' runtime caches ...
+        # ******************************************************************
+        self._build_componentz_cache()
+        self._build_systemz_cache()
+        # ******************************************************************
         self.log.info('  + all reference data loaded.')
 
     def load_assembly_cache_data(self):
         """
-        Load caches of assembly structures ("componentz") and requirement
-        allocations.
+        THIS MIGHT BE A BAD IDEA!  CHECK ON  ...
+        Load caches of requirement allocations.
         """
-        load_compz(self.home)
-        load_systemz(self.home)
         load_allocz(self.home)
         load_rqt_allocz(self.home)
 
@@ -1104,8 +1097,8 @@ class TachyOrb(object):
 
     def adjust_componentz(self, acu):
         """
-        Adjust the `componentz` cache for a Product (assembly) instance when an
-        Acu instance is saved.
+        Adjust the `componentz` cache when an Acu (Assembly Component Usage) is
+        saved.
 
         The 'componentz' dictionary has the form
 
@@ -1117,7 +1110,7 @@ class TachyOrb(object):
         Acu.component.oid, Acu.oid, Acu.quantity, and Acu.reference_designator.
 
         Args:
-            product (Product): the Product instance
+            acu (Acu): the Acu instance
         """
         self.log.debug(f'* orb.adjust_componentz({acu.id})')
         if acu.assembly.oid in componentz:
@@ -1154,6 +1147,77 @@ class TachyOrb(object):
                                         acu.oid,
                                         acu.quantity or 1,
                                         acu.reference_designator))]
+
+    def _build_componentz_cache(self):
+        """
+        Build the `componentz` cache (which maps Product oids to the oids of
+        their components) at startup.
+        """
+        self.log.debug('  + building componentz cache ...')
+        for acu in self.get_by_type('Acu'):
+            self.adjust_componentz(acu)
+        compz = len(componentz)
+        self.log.debug(f'    componentz cache has {compz} items.')
+
+    def adjust_systemz(self, psu):
+        """
+        Adjust the `systemz` cache when a ProjectSystemUsage instance is saved.
+
+        The 'systemz' dictionary has the form
+
+            {project.oid : list of System namedtuples}
+                ... where each System is:
+                oid (str): ProjectSystemUsage.system.oid
+                usage_oid (str): ProjectSystemUsage.oid
+                system_role (str): ProjectSystemUsage.system_role
+
+        Args:
+            product (Product): the Product instance
+        """
+        self.log.debug(f'* orb.adjust_systemz({psu.id})')
+        if psu.system.oid in systemz:
+            # if the assembly exists in systemz, check whether this psu
+            # (usage) already exists there too, in which case this adjustment
+            # may represent a mod to the existing psu ...
+            usage_oids = [system.usage_oid
+                          for system in systemz[psu.system.oid]]
+            system_oid = getattr(psu.system, 'oid', '') or ''
+            if psu.oid in usage_oids:
+                # this psu was one of the usages in the assembly
+                for system in systemz[psu.system.oid]:
+                    if (system.usage_oid == psu.oid and
+                        system.oid != system_oid):
+                        # this is the psu but its system was different, so
+                        # remove the "old version" of the psu ...
+                        systemz[psu.system.oid].remove(system)
+                        # and append the "new version" ...
+                        systemz[psu.system.oid].append(System._make((
+                                        system_oid,
+                                        psu.oid,
+                                        psu.system_role)))
+            else:
+                # assembly exists in systemz but this psu was not one of its
+                # usages, so add it ...
+                systemz[psu.system.oid].append(System._make((
+                                        system_oid,
+                                        psu.oid,
+                                        psu.system_role)))
+        else:
+            # product had no systems, so this is the only one ...
+            systemz[psu.system.oid] = [System._make((
+                                        psu.system.oid,
+                                        psu.oid,
+                                        psu.system_role))]
+
+    def _build_systemz_cache(self):
+        """
+        Build the `systemz` cache (which maps Project oids to the oids of their
+        systems) at startup.
+        """
+        self.log.debug('  + building systemz cache ...')
+        for psu in self.get_by_type('ProjectSystemUsage'):
+            self.adjust_systemz(psu)
+        self.log.debug(f'    systemz cache has {len(systemz)} items.')
 
     def save(self, objs, recompute=True):
         """
@@ -1257,7 +1321,7 @@ class TachyOrb(object):
                 else:
                     system_changed = True
                 # after checking for a changed system, refresh 'systemz'
-                refresh_systemz(obj.project)
+                self.adjust_systemz(obj)
                 if not new:
                     if system_changed:
                         # find all req allocations to this PSU ...
