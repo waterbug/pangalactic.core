@@ -44,7 +44,8 @@ from pangalactic.core.parametrics import (add_default_parameters,
                                           rqt_allocz, save_allocz,
                                           save_rqt_allocz,
                                           save_data_elementz, save_parmz)
-from pangalactic.core.smerializers import serialize, deserialize
+from pangalactic.core.smerializers import (DESERIALIZATION_ORDER,
+                                           serialize, deserialize)
 from pangalactic.core.tachistry    import Tachistry, matrix, schemas
 from pangalactic.core.test         import data as test_data_mod
 from pangalactic.core.test         import vault as test_vault_mod
@@ -525,7 +526,6 @@ class TachyOrb(object):
                 cname = matrix[oid]['_cname']
                 # self.create_or_update_thing(matrix[oid]['_cname'], oid=oid)
                 cls = self.classes[cname]
-                # db[oid] = cls(oid=oid)
                 objs.append(cls(oid=oid))
             self.save(objs)
             self.log.debug(f'  - initialized with {len(db)} objects.')
@@ -1237,7 +1237,15 @@ class TachyOrb(object):
         Args:
             objs (iterable of objects):  the objects to be saved
         """
-        for obj in objs:
+        ordered_objs = []
+        for cname in DESERIALIZATION_ORDER:
+            for o in objs:
+                if o.__class__.__name__ == cname:
+                    ordered_objs.append(o)
+        for o in objs:
+            if o.__class__.__name__ not in DESERIALIZATION_ORDER:
+                ordered_objs.append(o)
+        for obj in ordered_objs:
             cname = obj.__class__.__name__
             oid = getattr(obj, 'oid', None)
             new = bool(oid in self.new_oids)

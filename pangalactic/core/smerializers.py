@@ -305,17 +305,16 @@ def deserialize(orb, serialized, include_refdata=False,
                     # we have the associated project and system
                     objs.append(orb.create_or_update_thing(_cname, **so))
                     # do a temp update to systemz, pending a full refresh
-                    # ** NO: this is handled by orb.save() !!!
-                    # s = System(so['system'], so['oid'],
-                               # so.get('system_role', 'system'))
-                    # orb.log.debug('  - System:')
-                    # orb.log.debug(f'      oid: {s.oid}')
-                    # orb.log.debug(f'      usage_oid: {s.usage_oid}')
-                    # orb.log.debug(f'      system_role: {s.system_role}')
-                    # if systemz.get(so['project']):
-                        # systemz[so['project']].append(s)
-                    # else:
-                        # systemz[so['project']] = [s]
+                    s = System(so['system'], so['oid'],
+                               so.get('system_role', 'system'))
+                    orb.log.debug('  - System:')
+                    orb.log.debug(f'      oid: {s.oid}')
+                    orb.log.debug(f'      usage_oid: {s.usage_oid}')
+                    orb.log.debug(f'      system_role: {s.system_role}')
+                    if systemz.get(so['project']):
+                        systemz[so['project']].append(s)
+                    else:
+                        systemz[so['project']] = [s]
                 else:
                     # ignore if we don't have both the project and the system
                     continue
@@ -326,19 +325,18 @@ def deserialize(orb, serialized, include_refdata=False,
                     # we have the associated assembly and component
                     objs.append(orb.create_or_update_thing(_cname, **so))
                     # do a temp update to componentz, pending a full refresh
-                    # ** NO: this is handled by orb.save() !!!
-                    # c = Comp(so['component'], so['oid'],
-                             # so.get('quantity', 1),
-                             # so.get('reference_designator', 'no_ref_des'))
-                    # orb.log.debug('  - Comp:')
-                    # orb.log.debug(f'      oid: {c.oid}')
-                    # orb.log.debug(f'      usage_oid: {c.usage_oid}')
-                    # orb.log.debug(f'      quantity: {c.quantity}')
-                    # orb.log.debug(f'      ref des: {c.reference_designator}')
-                    # if componentz.get(so['assembly']):
-                        # componentz[so['assembly']].append(c)
-                    # else:
-                        # componentz[so['assembly']] = [c]
+                    c = Comp(so['component'], so['oid'],
+                             so.get('quantity', 1),
+                             so.get('reference_designator', 'no_ref_des'))
+                    orb.log.debug('  - Comp:')
+                    orb.log.debug(f'      oid: {c.oid}')
+                    orb.log.debug(f'      usage_oid: {c.usage_oid}')
+                    orb.log.debug(f'      quantity: {c.quantity}')
+                    orb.log.debug(f'      ref des: {c.reference_designator}')
+                    if componentz.get(so['assembly']):
+                        componentz[so['assembly']].append(c)
+                    else:
+                        componentz[so['assembly']] = [c]
                 else:
                     # ignore if we don't have both the assembly and the
                     # component
