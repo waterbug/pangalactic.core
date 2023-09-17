@@ -1722,8 +1722,7 @@ COMPUTES = {
 #                             ...}}
 # ... where data element definition properties are:
 # -----------------------------------------------------------------------------
-# name, label, variable, context, description, dimensions, range_datatype,
-# computed, mod_datetime
+# name, label, description, range_datatype, mod_datetime
 # -----------------------------------------------------------------------------
 # NOTE:  although "label" (a formatted label to use as a column header) is not
 # an attribute of DataElementDefinition, the label item can be set from a data

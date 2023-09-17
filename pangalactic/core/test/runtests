@@ -14,7 +14,7 @@ test_kb.py \
 test_registry.py \
 test_orb.py \
 test_tachistry.py \
-test_torb.py
+test_fastorb.py
 do
     echo
     echo -n "run $x ? (y/n) [y]"

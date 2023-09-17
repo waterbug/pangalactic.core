@@ -216,7 +216,7 @@ class TachyOrb(object):
         user_raz (list): cache of serialized RoleAssignment objects for roles
             assigned to the local user
     """
-    is_torb = True
+    is_fastorb = True
     started = False
     new_oids = []
     classes = {}
@@ -518,13 +518,16 @@ class TachyOrb(object):
         self.matrix_status = self.load_matrix(self.home)
         if self.matrix_status == 'success':
             self.log.debug(f'* matrix loaded with {len(matrix)} entries.')
-            # initialize db objects ...
+            # NOTE: initializing db objects MUST be done using orb.save() !!!
             self.log.debug('  initializing "db" (object cache) ...')
+            objs = []
             for oid in matrix:
                 cname = matrix[oid]['_cname']
                 # self.create_or_update_thing(matrix[oid]['_cname'], oid=oid)
                 cls = self.classes[cname]
-                db[oid] = cls(oid=oid)
+                # db[oid] = cls(oid=oid)
+                objs.append(cls(oid=oid))
+            self.save(objs)
             self.log.debug(f'  - initialized with {len(db)} objects.')
         # load (and update) ref data ... note that this must be done AFTER
         # config and state have been created and updated (except in the case
@@ -532,8 +535,9 @@ class TachyOrb(object):
         # dump)
         self.load_user_raz(self.home)
         self.load_reference_data()
-        # load "componentz" and allocation-related caches
-        self.load_assembly_cache_data()
+        # load allocation-related caches
+        # NOTE: BAD IDEA: THIS SHOULD BE DONE BY orb.save() ...!
+        self.load_allocz_cache_data()
         # load the cached block diagrams
         self._load_diagramz()
         # populate 'role_oids_to_ids' cache
@@ -865,7 +869,7 @@ class TachyOrb(object):
         #     from the current db (in a first-time installation, this will of
         #     course be *all* parameter definitions and contexts)
         # ---------------------------------------------------------------------
-        # NOTE: THIS STEP IS UNNECESSARY IN THE TORB SINCE 'parm_defz' is
+        # NOTE: THIS STEP IS UNNECESSARY SINCE 'parm_defz' is
         # recreated from refdata at runtime.
         # ---------------------------------------------------------------------
         # missing_p = [so for so in refdata.pdc if so['oid'] not in db_oids]
@@ -877,7 +881,7 @@ class TachyOrb(object):
                                  # force_no_recompute=True)
             # self.save(p_objs)
         # ---------------------------------------------------------------------
-        # NOTE: THIS STEP IS UNNECESSARY IN THE TORB SINCE 'de_defz' is
+        # NOTE: THIS STEP IS UNNECESSARY SINCE 'de_defz' is
         # recreated from refdata at runtime.
         # ---------------------------------------------------------------------
         # [1.1] load any data element definitions that may be missing
@@ -981,9 +985,10 @@ class TachyOrb(object):
         # ******************************************************************
         self.log.info('  + all reference data loaded.')
 
-    def load_assembly_cache_data(self):
+    def load_allocz_cache_data(self):
         """
-        THIS MIGHT BE A BAD IDEA!  CHECK ON  ...
+        BAD IDEA!
+        THIS SHOULD BE DONE BY orb.save() ...!
         Load caches of requirement allocations.
         """
         load_allocz(self.home)
@@ -1065,16 +1070,14 @@ class TachyOrb(object):
              ...}
         """
         # self.log.debug('* create_de_defz')
-        deds = [so for so in refdata.pdc
-               if so['_cname'] == 'DataElementDefinition']
         de_dict = {ded['id'] :
                    {'name': ded['name'],
+                    'label': ded['label'],
                     'description': ded['description'],
-                    'dimensions': ded['dimensions'],
                     'range_datatype': ded['range_datatype'],
                     'mod_datetime':
                         str(ded.get('mod_datetime', '') or dtstamp())
-                    } for ded in deds}
+                    } for ded in refdata.deds}
         de_defz.update(de_dict)
 
     def create_parmz_by_dimz(self):
@@ -1269,7 +1272,14 @@ class TachyOrb(object):
                 else:
                     # ultimate fallback:  owner is PGANA
                     obj.owner = self.get('pgefobjects:PGANA')
-            if cname == 'Acu':
+            if cname == 'HardwareProduct':
+                # make sure all HW Products have their default parameters and
+                # data elements
+                if oid not in parameterz:
+                    parameterz[oid] = {}
+                add_default_parameters(obj)
+                add_default_data_elements(obj)
+            elif cname == 'Acu':
                 comp_oid = getattr(obj.component, 'oid', '') or ''
                 assembly_oid = getattr(obj.assembly, 'oid', '') or ''
                 # use 'componentz' cache to determine whether the Acu's
@@ -1301,13 +1311,6 @@ class TachyOrb(object):
                             self.log.debug('   no allocated reqts found.')
                     else:
                         self.log.debug('   component not changed.')
-            elif cname == 'HardwareProduct':
-                # make sure all HW Products have their default parameters and
-                # data elements
-                if oid not in parameterz:
-                    parameterz[oid] = {}
-                add_default_parameters(obj)
-                add_default_data_elements(obj)
             elif cname == 'ProjectSystemUsage':
                 system_oid = getattr(obj.system, 'oid', None)
                 # use 'systemz' cache to determine whether the PSU's
@@ -1348,8 +1351,7 @@ class TachyOrb(object):
             elif cname == 'Requirement':
                 # in the future, functional reqts. can be allocated
                 recompute_required = True
-        # self.log.debug('  orb.save:  committing db session.')
-        # obj has already been "added" to the db (session) above, so commit ...
+            db[obj.oid] = obj
         return True
 
     def obj_view_to_dict(self, obj, view):
@@ -2293,9 +2295,9 @@ class TachyOrb(object):
         return []
 
     def get_bom_oids(self, product):
-        return set([getattr(p, 'oid', '') or ''
+        return set([getattr(p, 'oid', '')
                     for p in self.get_bom_from_compz(product)
-                    if hasattr(p, 'oid')])
+                    if getattr(p, 'oid', '')])
 
 
 # A node has only one instance of TachyOrb, called 'orb', which is intended to

@@ -177,7 +177,7 @@ def clone(what, include_ports=True, include_components=True,
                 pgana = orb.get('pgefobjects:PGANA')
                 newkw['owner'] = pgana
     new_obj = cls(**newkw)
-    if orb.is_torb:
+    if orb.is_fastorb:
         new_obj = orb.create_or_update_thing(cname, **newkw)
     else:
         orb.db.add(new_obj)
@@ -215,7 +215,7 @@ def clone(what, include_ports=True, include_components=True,
                                               port.type_of_port.name, seq)
                     port_abbr = get_port_abbr(port.type_of_port.abbreviation,
                                               seq)
-                    if orb.is_torb:
+                    if orb.is_fastorb:
                         p = orb.create_or_update_thing('Port',
                                 oid=port_oid, id=port_id, name=port_name,
                                 abbreviation=port_abbr,
@@ -247,7 +247,7 @@ def clone(what, include_ports=True, include_components=True,
                         continue
                     acu_oid = str(uuid4())
                     ref_des = get_next_ref_des(new_obj, acu.component)
-                    if orb.is_torb:
+                    if orb.is_fastorb:
                         acu = orb.create_or_update_thing('Acu',
                                   oid=acu_oid, id=get_acu_id(new_obj.id,
                                   ref_des), name=get_acu_name(new_obj.name,
@@ -270,7 +270,7 @@ def clone(what, include_ports=True, include_components=True,
                                   mod_datetime=NOW)
                         orb.db.add(acu)
                     new_acus.append(acu)
-                if orb.is_torb:
+                if orb.is_fastorb:
                     # TODO:  get new 'componentz' cache from server
                     pass
                 else:
@@ -280,7 +280,7 @@ def clone(what, include_ports=True, include_components=True,
                 for acu in obj.components:
                     acu_oid = str(uuid4())
                     ref_des = get_next_ref_des(new_obj, acu.component)
-                    if orb.is_torb:
+                    if orb.is_fastorb:
                         acu = orb.create_or_update_thing('Acu',
                                   oid=acu_oid, id=get_acu_id(new_obj.id,
                                   ref_des), name=get_acu_name(new_obj.name,

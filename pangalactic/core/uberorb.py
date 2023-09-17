@@ -102,7 +102,7 @@ class UberORB(object):
         schemas (dict):  see definition in
             p.core.registry._update_schemas_from_extracts
     """
-    is_torb = False
+    is_fastorb = False
     started: bool = False
     startup_msg: str = '* orb starting up ...'
     new_oids: list[str] = []
@@ -2504,8 +2504,8 @@ class UberORB(object):
 
 # A node has only one instance of 'orb', which is intended to be imported by
 # all application components.
-if config.get('torb', False):
-    from pangalactic.core.torb import orb
+if config.get('fastorb', False):
+    from pangalactic.core.fastorb import orb
 else:
     orb = UberORB()
 

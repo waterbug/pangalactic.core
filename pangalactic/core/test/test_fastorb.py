@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Unit tests for pangalactic.core.torb.orb
+Unit tests for pangalactic.core.fastorb.orb
 """
 # from math import fsum
 import os
@@ -13,7 +13,7 @@ import unittest
 # pangalactic
 
 # set the orb
-import pangalactic.core.set_torb
+import pangalactic.core.set_fastorb
 
 # core
 from pangalactic.core              import orb, refdata, prefs
@@ -32,7 +32,7 @@ from pangalactic.core.utils.datetimes import dtstamp
 # tach
 # from pangalactic.tach.tports       import write_mel_xlsx_from_model
 from pangalactic.core.smerializers import serialize, deserialize
-from pangalactic.core.torb         import orb
+from pangalactic.core.fastorb      import orb
 
 orb.start(home='marvin_test', debug=True)
 serialized_test_objects = create_test_users()
