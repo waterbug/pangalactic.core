@@ -593,29 +593,25 @@ class TachyOrb(object):
         # NOTE: self.classes is constructed in the start() method
         self.mbo = self.registry.metaobject_build_order()
 
-    def dump_db(self, fpath=None, dir_path=None):
+    def dump_db(self, fname=None, dir_path=None):
         """
         Serialize the database objects to `db-dump-[dts].yaml` (or '.json', if
         specified) in the specified directory.
 
         Keyword Args:
-            fpath (str):  file path to save to (overrides dir_path)
+            fname (str):  file name to save to
             dir_path (str):  directory path to save to
         """
         self.log.info('* dump_db()')
         dts = file_dts()
-        if fpath:
-            dir_path, fname = os.path.split(fpath)
-            if not os.path.exists(dir_path):
-                os.makedirs(dir_path)
-        else:
-            if not dir_path:
-                # if neither fpath nor dir_path specified, assume backup
-                dir_path = os.path.join(self.home, 'backup')
-            if not os.path.exists(dir_path):
-                os.makedirs(dir_path)
+        if not dir_path:
+            # if dir_path is not specified, assume backup
+            dir_path = os.path.join(self.home, 'backup')
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        if not fname:
             fname = 'db-dump-' + dts + '.yaml'
-        self.log.info('  dumping matrix to yaml ...')
+        self.log.info('  dumping db to yaml ...')
         serialized_objs = serialize(self, db.values())
         f = open(os.path.join(dir_path, fname), 'w')
         f.write(yaml.safe_dump(serialized_objs, default_flow_style=False))
@@ -671,9 +667,9 @@ class TachyOrb(object):
         else:
             self.log.info('  cache dump completed.')
 
-    def dump_all(self, dir_path=None):
+    def dump_all(self, db_fname=None, dir_path=None):
         self.save_caches(dir_path=dir_path)
-        # self.dump_db(dir_path=dir_path)
+        self.dump_db(fname=db_fname, dir_path=dir_path)
 
     def _load_diagramz(self):
         """
@@ -977,12 +973,6 @@ class TachyOrb(object):
             self.log.debug('  {}'.format([oid for oid in deprecated]))
             for oid in deprecated:
                 self.delete([self.get(oid) for oid in deprecated])
-        # ******************************************************************
-        # build the 'componentz' and 'systemz' runtime caches ...
-        # ******************************************************************
-        self._build_componentz_cache()
-        self._build_systemz_cache()
-        # ******************************************************************
         self.log.info('  + all reference data loaded.')
 
     def load_allocz_cache_data(self):
@@ -1115,7 +1105,7 @@ class TachyOrb(object):
         Args:
             acu (Acu): the Acu instance
         """
-        self.log.debug(f'* orb.adjust_componentz({acu.id})')
+        # self.log.debug(f'* orb.adjust_componentz({acu.id})')
         if acu.assembly.oid in componentz:
             # if the assembly exists in componentz, check whether this acu
             # (usage) already exists there too, in which case this adjustment
@@ -1151,6 +1141,9 @@ class TachyOrb(object):
                                         acu.quantity or 1,
                                         acu.reference_designator))]
 
+    # ====================================================================
+    # NOTE: unnecessary since componentz cache is rebuilt a part of save()
+    # ====================================================================
     def _build_componentz_cache(self):
         """
         Build the `componentz` cache (which maps Product oids to the oids of
@@ -1177,41 +1170,45 @@ class TachyOrb(object):
         Args:
             product (Product): the Product instance
         """
-        self.log.debug(f'* orb.adjust_systemz({psu.id})')
-        if psu.system.oid in systemz:
-            # if the assembly exists in systemz, check whether this psu
+        # self.log.debug(f'* orb.adjust_systemz({psu.id})')
+        if psu.project.oid in systemz:
+            # if the project exists in systemz, check whether this psu
             # (usage) already exists there too, in which case this adjustment
             # may represent a mod to the existing psu ...
             usage_oids = [system.usage_oid
-                          for system in systemz[psu.system.oid]]
+                          for system in systemz[psu.project.oid]]
             system_oid = getattr(psu.system, 'oid', '') or ''
             if psu.oid in usage_oids:
-                # this psu was one of the usages in the assembly
-                for system in systemz[psu.system.oid]:
+                # this psu was one of the usages in the project
+                for system in systemz[psu.project.oid]:
                     if (system.usage_oid == psu.oid and
                         system.oid != system_oid):
                         # this is the psu but its system was different, so
                         # remove the "old version" of the psu ...
-                        systemz[psu.system.oid].remove(system)
+                        systemz[psu.project.oid].remove(system)
                         # and append the "new version" ...
-                        systemz[psu.system.oid].append(System._make((
+                        systemz[psu.project.oid].append(System._make((
                                         system_oid,
                                         psu.oid,
                                         psu.system_role)))
             else:
-                # assembly exists in systemz but this psu was not one of its
+                # project exists in systemz but this psu was not one of its
                 # usages, so add it ...
-                systemz[psu.system.oid].append(System._make((
+                systemz[psu.project.oid].append(System._make((
                                         system_oid,
                                         psu.oid,
                                         psu.system_role)))
         else:
-            # product had no systems, so this is the only one ...
-            systemz[psu.system.oid] = [System._make((
+            # project had no systems, so this is the only one ...
+            systemz[psu.project.oid] = [System._make((
                                         psu.system.oid,
                                         psu.oid,
                                         psu.system_role))]
+        # self.log.debug(f'* systemz is now: {systemz}')
 
+    # ====================================================================
+    # NOTE: unnecessary since systemz cache is rebuilt a part of save()
+    # ====================================================================
     def _build_systemz_cache(self):
         """
         Build the `systemz` cache (which maps Project oids to the oids of their
