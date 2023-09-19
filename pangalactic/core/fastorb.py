@@ -1254,9 +1254,9 @@ class TachyOrb(object):
                     self.new_oids.remove(obj.oid)
             else:
                 # updating an existing object
-                log_txt = 'orb.save: "{}" is existing {}, updating ...'.format(
-                           getattr(obj, 'id', '[unknown]'), cname)
-                self.log.debug('* {}'.format(log_txt))
+                # log_txt = 'orb.save: "{}" is existing {}, updating ...'.format(
+                           # getattr(obj, 'id', '[unknown]'), cname)
+                # self.log.debug('* {}'.format(log_txt))
                 # NOTE:  in new paradigm, obj is versioned iff
                 # [1] it has a 'version' attr and
                 # [2] a non-null version has been assigned to it (i.e. neither
@@ -1304,18 +1304,18 @@ class TachyOrb(object):
                     # so it is assumed that has been done ...
                     if comp_changed:
                         # find all req allocations to this Acu ...
-                        msg = 'component was changed, checking for '
-                        msg += 'allocated requirements ...'
-                        self.log.debug(f'   {msg}')
+                        # msg = 'component was changed, checking for '
+                        # msg += 'allocated requirements ...'
+                        # self.log.debug(f'   {msg}')
                         alloc_reqs = [rqt_oid for rqt_oid in rqt_allocz
                                       if rqt_allocz[rqt_oid][0] == oid]
                         if alloc_reqs:
                             for rqt_oid in alloc_reqs:
                                 req = self.get(rqt_oid)
-                        else:
-                            self.log.debug('   no allocated reqts found.')
-                    else:
-                        self.log.debug('   component not changed.')
+                        # else:
+                            # self.log.debug('   no allocated reqts found.')
+                    # else:
+                        # self.log.debug('   component not changed.')
             elif cname == 'ProjectSystemUsage':
                 system_oid = getattr(obj.system, 'oid', None)
                 # use 'systemz' cache to determine whether the PSU's
@@ -1333,25 +1333,25 @@ class TachyOrb(object):
                 if not new:
                     if system_changed:
                         # find all req allocations to this PSU ...
-                        msg = 'system was changed, checking for '
-                        msg += 'allocated requirements ...'
-                        self.log.debug(f'   {msg}')
+                        # msg = 'system was changed, checking for '
+                        # msg += 'allocated requirements ...'
+                        # self.log.debug(f'   {msg}')
                         alloc_reqs = [rqt_oid for rqt_oid in rqt_allocz
                                       if rqt_allocz[rqt_oid][0] == oid]
                         if alloc_reqs:
                             for rqt_oid in alloc_reqs:
                                 req = self.get(rqt_oid)
                                 if req:
-                                    self.log.debug('   alloc reqts found ...')
+                                    # self.log.debug('   alloc reqts found ...')
                                     recompute_required = True
-                                    self.log.debug('   recompute will be done')
+                                    # self.log.debug('   recompute will be done')
                                 else:
                                     # if requirement not there, remove alloc
                                     del alloc_reqs[rqt_oid]
-                        else:
-                            self.log.debug('   no allocated reqts found.')
-                    else:
-                        self.log.debug('   system not changed.')
+                        # else:
+                            # self.log.debug('   no allocated reqts found.')
+                    # else:
+                        # self.log.debug('   system not changed.')
                 recompute_required = True
             elif cname == 'Requirement':
                 # in the future, functional reqts. can be allocated
