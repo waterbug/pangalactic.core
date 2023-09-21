@@ -1105,19 +1105,23 @@ class FastOrb(object):
         Args:
             acu (Acu): the Acu instance
         """
-        # self.log.debug(f'* orb.adjust_componentz({acu.id})')
+        # self.log.debug(f'* orb.adjust_componentz({acu.id} ({acu.oid}))')
         if acu.assembly.oid in componentz:
             # if the assembly exists in componentz, check whether this acu
             # (usage) already exists there too, in which case this adjustment
             # may represent a mod to the existing acu ...
             usage_oids = [c.usage_oid for c in componentz[acu.assembly.oid]]
             comp_oid = getattr(acu.component, 'oid', '') or ''
+            # self.log.debug(f'  - acu component oid: ({comp_oid})')
             if acu.oid in usage_oids:
+                # self.log.debug('  - this acu is already in componentz ...')
                 # this acu is one of the usages in the assembly
                 for c in componentz[acu.assembly.oid]:
                     if c.usage_oid == acu.oid and c.oid != comp_oid:
                         # this is the acu but its component was different, so
                         # remove the "old version" of the acu ...
+                        # self.log.debug(f'    but the comp oid is "{c.oid}"')
+                        # self.log.debug('    removing/replacing ...')
                         componentz[acu.assembly.oid].remove(c)
                         # and append the "new version" ...
                         componentz[acu.assembly.oid].append(Comp._make((
@@ -1128,6 +1132,7 @@ class FastOrb(object):
             else:
                 # assembly exists in componentz but this acu was not one of its
                 # usages, so add it ...
+                # self.log.debug('  - this acu is not in componentz, adding ...')
                 componentz[acu.assembly.oid].append(Comp._make((
                                         comp_oid,
                                         acu.oid,
@@ -1135,11 +1140,20 @@ class FastOrb(object):
                                         acu.reference_designator)))
         else:
             # product had no components, so this is the only one ...
+            # self.log.debug('  - this acu is not in componentz, adding ...')
             componentz[acu.assembly.oid] = [Comp._make((
                                     getattr(acu.component, 'oid', '') or '',
                                     acu.oid,
                                     acu.quantity or 1,
                                     acu.reference_designator))]
+        # comps = ''
+        # for c in componentz[acu.assembly.oid]:
+            # comp = self.get(c.oid)
+            # usage = f'{c.reference_designator} ({c.usage_oid})'
+            # comps += f' + {usage} : {comp.id} ("{c.oid}")\n'
+        # msg = f'  assembly of {acu.assembly.id} in componentz is now:'
+        # self.log.debug(msg)
+        # self.log.debug(comps)
 
     # ====================================================================
     # NOTE: unnecessary since componentz cache is rebuilt a part of save()

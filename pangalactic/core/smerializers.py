@@ -4,14 +4,13 @@ Serializers / deserializers for pangalactic domain objects and parameters.
 """
 # pangalactic
 
-from pangalactic.core.parametrics  import (Comp, System,
-                                           serialize_des, serialize_parms,
+from pangalactic.core.parametrics  import (serialize_des, serialize_parms,
                                            componentz, systemz)
 from pangalactic.core.refdata      import ref_oids
 from pangalactic.core.tachistry    import matrix, schemas
 
 
-def serialize(orb, objs, include_components=False,
+def serialize(orb, objs, include_components=False, include_systems=False,
               include_sub_activities=False, include_refdata=False,
               include_inverse_attrs=False):
     """
@@ -135,6 +134,13 @@ def serialize(orb, objs, include_components=False,
             serialized += sacus
             scomps = serialize(orb, [acu.component for acu in acus])
             serialized += scomps
+        # 'include_systems' only applies to Projects
+        if include_systems and obj.oid in systemz:
+            psus = [orb.get(comp.usage_oid) for comp in systemz[obj.oid]]
+            spsus = serialize(orb, psus)
+            serialized += spsus
+            ssystems = serialize(orb, [psu.system for psu in psus])
+            serialized += ssystems
         # 'include_sub_activities' only applies to Activities ... and only
         # "direct sub_activities" will be included (not recursive)
         # *********************************************************************
@@ -304,17 +310,6 @@ def deserialize(orb, serialized, include_refdata=False,
                 if orb.get(so.get('project')) and orb.get(so.get('system')):
                     # we have the associated project and system
                     objs.append(orb.create_or_update_thing(_cname, **so))
-                    # do a temp update to systemz, pending a full refresh
-                    s = System(so['system'], so['oid'],
-                               so.get('system_role', 'system'))
-                    orb.log.debug('  - System:')
-                    orb.log.debug(f'      oid: {s.oid}')
-                    orb.log.debug(f'      usage_oid: {s.usage_oid}')
-                    orb.log.debug(f'      system_role: {s.system_role}')
-                    if systemz.get(so['project']):
-                        systemz[so['project']].append(s)
-                    else:
-                        systemz[so['project']] = [s]
                 else:
                     # ignore if we don't have both the project and the system
                     continue
@@ -324,19 +319,6 @@ def deserialize(orb, serialized, include_refdata=False,
                     and orb.get(so.get('component'))):
                     # we have the associated assembly and component
                     objs.append(orb.create_or_update_thing(_cname, **so))
-                    # do a temp update to componentz, pending a full refresh
-                    c = Comp(so['component'], so['oid'],
-                             so.get('quantity', 1),
-                             so.get('reference_designator', 'no_ref_des'))
-                    orb.log.debug('  - Comp:')
-                    orb.log.debug(f'      oid: {c.oid}')
-                    orb.log.debug(f'      usage_oid: {c.usage_oid}')
-                    orb.log.debug(f'      quantity: {c.quantity}')
-                    orb.log.debug(f'      ref des: {c.reference_designator}')
-                    if componentz.get(so['assembly']):
-                        componentz[so['assembly']].append(c)
-                    else:
-                        componentz[so['assembly']] = [c]
                 else:
                     # ignore if we don't have both the assembly and the
                     # component
