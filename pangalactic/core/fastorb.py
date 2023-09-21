@@ -1261,9 +1261,10 @@ class FastOrb(object):
             oid = getattr(obj, 'oid', None)
             new = bool(oid not in db)
             if new:
-                log_txt = 'orb.save: {} is a new {}, saving it ...'.format(
-                           getattr(obj, 'id', '[unknown]'), cname)
-                self.log.debug('* {}'.format(log_txt))
+                # log_txt = 'orb.save: {} is a new {}, saving it ...'.format(
+                           # getattr(obj, 'id', '[unknown]'), cname)
+                # self.log.debug('* {}'.format(log_txt))
+                pass
             else:
                 # updating an existing object
                 # log_txt = 'orb.save: "{}" is existing {}, updating ...'.format(
@@ -1353,21 +1354,13 @@ class FastOrb(object):
                         if alloc_reqs:
                             for rqt_oid in alloc_reqs:
                                 req = self.get(rqt_oid)
-                                if req:
-                                    # self.log.debug('   alloc reqts found ...')
-                                    recompute_required = True
-                                    # self.log.debug('   recompute will be done')
-                                else:
+                                if not req:
                                     # if requirement not there, remove alloc
                                     del alloc_reqs[rqt_oid]
                         # else:
                             # self.log.debug('   no allocated reqts found.')
                     # else:
                         # self.log.debug('   system not changed.')
-                recompute_required = True
-            elif cname == 'Requirement':
-                # in the future, functional reqts. can be allocated
-                recompute_required = True
             db[obj.oid] = obj
             if obj.oid in self.new_oids:
                 self.new_oids.remove(obj.oid)
