@@ -173,27 +173,27 @@ class metathing(type):
 db = {}
 
 
-class TachyOrb(object):
+class FastOrb(object):
     """
-    The Tachy Object Request Broker (Torb) is intended to be a vastly speedier
-    and more flexible replacement for the UberORB.  Like the UberORB, the
-    TachyOrb mediates all communications with local objects and the local
+    The Fast Object Request Broker (FastOrb) is intended to be a vastly
+    speedier and more flexible replacement for the UberORB.  Like the UberORB,
+    the FastOrb mediates all communications with local objects and the local
     metadata registry.
 
-    The principal difference between the TachyOrb and the UberORB is that the
+    The principal difference between the FastOrb and the UberORB is that the
     classes that the UberORB manages are created using SqlAlchemy and always
     exist in a database session, connected to a relational database backend,
-    whereas the classes that the TachyOrb manages are subclasses of the class
+    whereas the classes that the FastOrb manages are subclasses of the class
     Thing (named in homage to the root class of the OWL [Web Ontology Language]
     ontological universe).  Subclasses of Thing do not have a relational
     database backend but share a global dictionary that holds their attributes.
     Their persistence mechanism is a YAML-based serialization.
 
-    IMPORTANT:  The TachyOrb, like the UberORB, is intended to be a singleton.
-    The TachyOrb class should *not* be imported; instead, import 'orb', the
+    IMPORTANT:  The FastOrb, like the UberORB, is intended to be a singleton.
+    The FastOrb class should *not* be imported; instead, import 'orb', the
     module-level instance created at the end of this module.
 
-    NOTE:  the TachyOrb eschews the use of an __init__() method in order to
+    NOTE:  the FastOrb eschews the use of an __init__() method in order to
     avoid side-effects of importing the module-level instance that is created
     -- its start() method must be explicitly called to initialize it.
 
@@ -207,7 +207,7 @@ class TachyOrb(object):
             by orb.start()
         log (Logger):  instance of pgorb_logger
         new_oids (list of str):  oids of objects that have been created but not
-            saved
+            saved (i.e. not in `db`)
         registry (Tachistry):  instance of Tachistry
         role_product_types (dict): cache that maps Role ids to corresponding
             ProductType ids (used by the 'access' module, which determines user
@@ -219,13 +219,13 @@ class TachyOrb(object):
     """
     is_fastorb = True
     started = False
-    new_oids = []
     classes = {}
     # parmz_status and data_elementz_status are used to determine whether saved
     # parameter and data_element data have been loaded successfully from the
     # "parameters.json" and "data_elements.json" files
     data_elementz_status = 'unknown'
     parmz_status = 'unknown'
+    new_oids = []
 
     def save_matrix(self, dir_path):
         """
@@ -1113,7 +1113,7 @@ class TachyOrb(object):
             usage_oids = [c.usage_oid for c in componentz[acu.assembly.oid]]
             comp_oid = getattr(acu.component, 'oid', '') or ''
             if acu.oid in usage_oids:
-                # this acu was one of the usages in the assembly
+                # this acu is one of the usages in the assembly
                 for c in componentz[acu.assembly.oid]:
                     if c.usage_oid == acu.oid and c.oid != comp_oid:
                         # this is the acu but its component was different, so
@@ -1136,10 +1136,10 @@ class TachyOrb(object):
         else:
             # product had no components, so this is the only one ...
             componentz[acu.assembly.oid] = [Comp._make((
-                                        getattr(acu.component, 'oid', None),
-                                        acu.oid,
-                                        acu.quantity or 1,
-                                        acu.reference_designator))]
+                                    getattr(acu.component, 'oid', '') or '',
+                                    acu.oid,
+                                    acu.quantity or 1,
+                                    acu.reference_designator))]
 
     # ====================================================================
     # NOTE: unnecessary since componentz cache is rebuilt a part of save()
@@ -1245,13 +1245,11 @@ class TachyOrb(object):
         for obj in ordered_objs:
             cname = obj.__class__.__name__
             oid = getattr(obj, 'oid', None)
-            new = bool(oid in self.new_oids)
+            new = bool(oid not in db)
             if new:
                 log_txt = 'orb.save: {} is a new {}, saving it ...'.format(
                            getattr(obj, 'id', '[unknown]'), cname)
                 self.log.debug('* {}'.format(log_txt))
-                if obj.oid in self.new_oids:
-                    self.new_oids.remove(obj.oid)
             else:
                 # updating an existing object
                 # log_txt = 'orb.save: "{}" is existing {}, updating ...'.format(
@@ -1357,6 +1355,8 @@ class TachyOrb(object):
                 # in the future, functional reqts. can be allocated
                 recompute_required = True
             db[obj.oid] = obj
+            if obj.oid in self.new_oids:
+                self.new_oids.remove(obj.oid)
         return True
 
     def obj_view_to_dict(self, obj, view):
@@ -2090,7 +2090,7 @@ class TachyOrb(object):
         """
         Delete the specified objects from the local db.
 
-        First, note that in the "TachyOrb", there are no "local deletions" --
+        First, note that in the "FastOrb", there are no "local deletions" --
         all deletions are performed on the server and the client only deletes
         local objects when it receives messages from the server to that effect.
 
@@ -2149,7 +2149,7 @@ class TachyOrb(object):
     def get_project_psus(self, project):
         """
         Return the ProjectSystemUsages for the specified project.  Note that
-        this function is specific to the TachyOrb and is not needed in the
+        this function is specific to the FastOrb and is not needed in the
         Uberorb, which uses the inverse attribute "systems" of Project.
         """
         maybe_psus = [self.get(system.usage_oid)
@@ -2305,7 +2305,7 @@ class TachyOrb(object):
                     if getattr(p, 'oid', '')])
 
 
-# A node has only one instance of TachyOrb, called 'orb', which is intended to
+# A node has only one instance of FastOrb, called 'orb', which is intended to
 # be imported by all application components.
-orb = TachyOrb()
+orb = FastOrb()
 
