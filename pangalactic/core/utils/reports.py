@@ -8,7 +8,8 @@ from pangalactic.core              import orb, prefs
 from pangalactic.core.meta         import MAIN_VIEWS
 from pangalactic.core.names        import (get_mel_item_name, pname_to_header,
                                            STD_VIEWS)
-from pangalactic.core.parametrics  import (get_pval, get_dval, de_defz,
+from pangalactic.core.parametrics  import (componentz,
+                                           get_pval, get_dval, de_defz,
                                            parm_defz, round_to)
 from pangalactic.core.units        import in_si
 from pangalactic.core.utils.styles import xlsx_styles
@@ -597,8 +598,13 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
             designator
         qty (int):  quantity of the item (used for summary)
     """
+    # orb.log.debug('* get_item_data()')
+    # item_id = getattr(item, 'id', 'unknown') or 'no id'
+    item_oid = getattr(item, 'oid', 'unknown') or 'no oid'
+    # orb.log.debug(f'  - item: {item_id} ({item_oid})')
     # NB:  levels are 1-based
-    if isinstance(item, orb.classes['Product']):
+    if isinstance(item, orb.classes['HardwareProduct']):
+        # orb.log.debug('  - item is a HardwareProduct')
         if not summary:
             # if not summary, the item being a Product instance implies that
             # it's the "root" item, so level and qty are 1
@@ -612,13 +618,16 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
         # Acu or ProjectSystemUsage
         if hasattr(item, 'component'):
             # Acu
+            # orb.log.debug('  - item is an Acu')
             component = item.component
             qty = item.quantity or 1
         else:
             # ProjectSystemUsage
+            # orb.log.debug('  - item is a PSU')
             component = item.system
             qty = 1
         comp_name = (level - 1) * '  ' + get_mel_item_name(item)
+    # orb.log.debug(f'  - "component" is {component}')
     data = []
     vals = []
     for col_id in schema:
@@ -648,12 +657,12 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
     data.append(dict(zip(cols, [comp_name, comp_id, str(level), str(qty)]
                                 + vals)))
     # orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
-    if component.components:
+    if item_oid in componentz:
         next_level = level + 1
         if summary:
-            products_by_oid = {acu.component.oid : acu.component
-                               for acu in component.components
-                               if acu.component.oid != 'pgefobjects:TBD'}
+            products_by_oid = {comp.oid : orb.get(comp.oid)
+                               for comp in componentz[item_oid]
+                               if comp.oid != 'pgefobjects:TBD'}
             qty_by_oid = {}
             for acu in component.components:
                 oid = acu.component.oid
