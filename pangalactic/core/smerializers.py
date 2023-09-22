@@ -15,7 +15,7 @@ def serialize(orb, objs, include_components=False, include_systems=False,
               include_inverse_attrs=False):
     """
     Args:
-        orb (Tachyorb): the (singleton) `orb` instance
+        orb (FastOrb): the (singleton) `orb` instance
         objs (iterable of objects):  the objects to be serialized.
 
     Keyword Args:
