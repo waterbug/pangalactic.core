@@ -600,7 +600,7 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
     """
     # orb.log.debug('* get_item_data()')
     # item_id = getattr(item, 'id', 'unknown') or 'no id'
-    item_oid = getattr(item, 'oid', 'unknown') or 'no oid'
+    # item_oid = getattr(item, 'oid', 'unknown') or 'no oid'
     # orb.log.debug(f'  - item: {item_id} ({item_oid})')
     # NB:  levels are 1-based
     if isinstance(item, orb.classes['HardwareProduct']):
@@ -657,14 +657,15 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
     data.append(dict(zip(cols, [comp_name, comp_id, str(level), str(qty)]
                                 + vals)))
     # orb.log.debug(f'getting "{comp_name}" at level {str(level)}')
-    if item_oid in componentz:
+    if component.oid in componentz:
         next_level = level + 1
         if summary:
             products_by_oid = {comp.oid : orb.get(comp.oid)
-                               for comp in componentz[item_oid]
+                               for comp in componentz[component.oid]
                                if comp.oid != 'pgefobjects:TBD'}
             qty_by_oid = {}
-            for acu in component.components:
+            acus = [orb.get(c.usage_oid) for c in componentz[component.oid]]
+            for acu in acus:
                 oid = acu.component.oid
                 if qty_by_oid.get(oid):
                     qty_by_oid[oid] += acu.quantity or 1
@@ -675,11 +676,12 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
                                       schema, next_level, qty=qty_by_oid[oid],
                                       summary=True)
         else:
+            acus = [orb.get(c.usage_oid) for c in componentz[component.oid]]
             item_names = [get_mel_item_name(acu)
-                          for acu in component.components]
+                          for acu in acus]
             item_names.sort()
             acus_by_item_name = {get_mel_item_name(acu) : acu
-                                 for acu in component.components}
+                                 for acu in acus}
             for item_name in item_names:
                 data += get_item_data(acus_by_item_name[item_name], cols,
                                       schema, next_level)
