@@ -1851,21 +1851,83 @@ class FastOrb(object):
         else:
             return []
 
-    def get_internal_flows_of(self, managed_object):
+    def get_vault_fname(self, rep_file):
         """
-        Get all flows of which the specified ManagedObject is the
-        'flow_context'.
+        Find the name of a vault file that corresponds to a RepresentationFile
+        instance.
 
         Args:
-            managed_object (ManagedObject):  the specified object
+            rep_file (RepresentationFile):  the RepresentationFile instance
+
+        Returns:
+            the name of the physical file in the orb's "vault"
+        """
+        return rep_file.oid + '_' + rep_file.user_file_name
+
+    def get_vault_fpath(self, rep_file):
+        """
+        Find the path of a vault file that corresponds to a RepresentationFile
+        instance.
+
+        Args:
+            rep_file (RepresentationFile):  the RepresentationFile instance
+
+        Returns:
+            the path to the physical file in the orb's "vault"
+        """
+        vault_fname = self.get_vault_fname(rep_file)
+        return os.path.join(self.vault, vault_fname)
+
+    def get_step_file_path(self, model):
+        """
+        Find the path of a STEP file for a model.
+
+        Args:
+            model (Model):  the Model instance for which the STEP file is sought
+
+        Returns:
+            the path to the model's STEP file in the orb's "vault"
+        """
+        # self.log.debug('* get_step_model_path(model with oid "{}")'.format(
+                      # getattr(model, 'oid', 'None')))
+        vault_fpath = ''
+        if (model.has_files and model.type_of_model.id == "MCAD"):
+            for rep_file in model.has_files:
+                if rep_file.user_file_name.endswith(
+                        ('.stp', '.STP', '.step', '.STEP', '.p21', '.P21')):
+                    fpath = self.get_vault_fpath(rep_file)
+                    if os.path.exists(fpath):
+                        vault_fpath = fpath
+                else:
+                    continue
+        return vault_fpath
+
+    def get_internal_flows_of(self, product):
+        """
+        Get all flows internal to the specified Product.
+
+        Args:
+            product (Product):  the specified Product instance
         """
         # handle exception in case we get something that's not a Product
         # self.log.debug('* get_internal_flows_of()')
         try:
-            flows = self.get_by_type('Flow')
-            relevant_flows = [f for f in flows
-                              if f.flow_context is managed_object]
-            return relevant_flows
+            if len(product.components) == 0:
+                return []
+            ports = []
+            for acu in product.components:
+                ports += acu.component.ports
+            ports += product.ports
+            flows = set()
+            for comp in product.components:
+                start_flows = self.search_exact(cname='Flow',
+                                                start_port_context=comp)
+                end_flows = self.search_exact(cname='Flow',
+                                              end_port_context=comp)
+                flows |= set([f for f in start_flows + end_flows
+                              if f.start_port in ports
+                              and f.end_port in ports])
+            return flows
         except:
             return []
 

@@ -2007,7 +2007,6 @@ class UberORB(object):
                     continue
         return vault_fpath
 
-
     def get_internal_flows_of(self, product):
         """
         Get all flows internal to the specified Product.
