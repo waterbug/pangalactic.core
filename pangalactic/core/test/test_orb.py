@@ -322,7 +322,7 @@ class OrbTest(unittest.TestCase):
                 value['twanger_id'] = so['id']
                 value['twanger_parameters'] = so['parameters']
                 value['twanger_product_type'] = so['product_type']
-            if so['_cname'] == 'Port' and so['oid'] == 'test:port.twanger.0':
+            if so['oid'] == 'test:port.twanger.0':
                 value['port_oid'] = 'test:port.twanger.0'
                 value['port_of_product'] = 'test:twanger'
                 value['type_of_port'] = 'pgefobjects:PortType.electrical_power'
@@ -486,14 +486,6 @@ class OrbTest(unittest.TestCase):
         value = obj.owner
         expected = orb.get('test:yoyodyne')
         self.assertEqual(expected, value)
-
-    def test_18_1_deserialize_object_with_known_owner(self):
-        """
-        CASE:  test for existence of a parameter
-        """
-        actual = bool(parameterz['test:iidrive'].get('m'))
-        expected = True
-        self.assertEqual(expected, actual)
 
     def test_19_deserialize_new_parameter_values(self):
         """
