@@ -8,7 +8,7 @@ from pangalactic.core              import orb, prefs
 from pangalactic.core.meta         import MAIN_VIEWS
 from pangalactic.core.names        import (get_mel_item_name, pname_to_header,
                                            STD_VIEWS)
-from pangalactic.core.parametrics  import (componentz,
+from pangalactic.core.parametrics  import (componentz, systemz,
                                            get_pval, get_dval, de_defz,
                                            parm_defz, round_to)
 from pangalactic.core.units        import in_si
@@ -316,10 +316,11 @@ def write_mel_xlsx_from_model(context, is_project=True,
         mel_label = 'MISSION: {}'.format(project.id)
         worksheet.write(hrow1, 1, mel_label, fmts['left_pale_blue_bold_12'])
         start_row = hrow3
-        system_names = [psu.system.name.lower() for psu in project.systems]
+        psus = [orb.get(s.usage_oid) for s in systemz.get(project.oid, [])]
+        system_names = [psu.system.name.lower() for psu in psus]
         system_names.sort()
         system_by_name = {psu.system.name.lower() : psu.system
-                          for psu in project.systems}
+                          for psu in psus}
         for system_name in system_names:
             last_row = write_component_rows_xlsx(worksheet, level_fmts,
                                                  name_fmts, data_fmts,
@@ -491,8 +492,10 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
             dtype = (de_defz.get(col_id) or {}).get('range_datatype')
             sheet.write(row, i, val, dt_map.get(dtype, txt_fmt))
     real_comps = []
-    if component.components:
-        real_comps = [acu for acu in component.components
+    component_acus = [orb.get(comp.usage_oid)
+                      for comp in componentz.get(component.oid, [])]
+    if component_acus:
+        real_comps = [acu for acu in component_acus
                       if hasattr(acu.component, 'oid') and
                       acu.component.oid != 'pgefobjects:TBD']
     if real_comps:
