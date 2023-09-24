@@ -7,6 +7,7 @@ intended to be a singleton).
 """
 import json, os, shutil, sys, traceback
 from copy import deepcopy
+from functools import reduce
 from pathlib import Path
 from typing import Optional
 
@@ -2500,6 +2501,54 @@ class UberORB(object):
         an object is versioned to change in the future.
         """
         return isinstance(obj, self.classes['Product'])
+
+    def get_bom_from_compz(self, product):
+        """
+        Return a list of all known components at every level of assembly in the
+        specified product.
+
+        Args:
+            product (Product) the subject product
+        """
+        try:
+            # NOTE: this will explode if assembly contains cycles!
+            if product:
+                comps = [self.get(comp.oid)
+                         for comp in (componentz.get(product.oid) or [])]
+                if comps:
+                    comps = reduce(lambda x,y: x+y,
+                                   [self.get_bom_from_compz(c)
+                                    for c in comps],
+                                   comps)
+                return comps
+            return []
+        except:
+            # self.log.debug('bom exploded -- probably contained a cycle.')
+            return []
+
+    def get_assembly_from_compz(self, product):
+        """
+        Return the product's assembly structure, including all Acu instances plus
+        all (known) components used at every level of assembly of the specified
+        product.
+        """
+        if product:
+            comps = self.get_bom_from_compz(product)
+            base_acus = [self.get(c.usage_oid)
+                         for c in (componentz.get(product.oid) or [])]
+            acus = reduce(lambda x,y: x + y,
+                          [[self.get(comp.usage_oid) for comp in
+                            (componentz.get(c.oid) or [])]
+                           for c in comps],
+                          base_acus)
+            return comps + acus
+        return []
+
+    def get_bom_oids(self, product):
+        return set([getattr(p, 'oid', '')
+                    for p in self.get_bom_from_compz(product)
+                    if getattr(p, 'oid', '')])
+
 
 # A node has only one instance of 'orb', which is intended to be imported by
 # all application components.
