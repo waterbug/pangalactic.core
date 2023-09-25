@@ -2549,6 +2549,19 @@ class UberORB(object):
                     for p in self.get_bom_from_compz(product)
                     if getattr(p, 'oid', '')])
 
+    def is_a(self, obj, cname):
+        """
+        Determine if an object is an instance of an orb domain class -- used in
+        place of 'isinstance()' for instances of orb classes, since instances
+        of the "thing" class are inheritance-unaware.
+
+        Args:
+            cname (str):  the supertype class name
+
+        Returns:
+            bool:  True if a subtype.
+        """
+        return isinstance(obj, self.classes.get(cname))
 
 # A node has only one instance of 'orb', which is intended to be imported by
 # all application components.

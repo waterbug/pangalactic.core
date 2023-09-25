@@ -214,6 +214,7 @@ class FastOrb(object):
             permissions relative to domain objects)
         role_oids_to_ids (dict): cache that maps Role oids to their ids (mainly
             for use by the 'access' module
+        schemas (dict): pangalactic.core.tachistry.schemas
         user_raz (list): cache of serialized RoleAssignment objects for roles
             assigned to the local user
     """
