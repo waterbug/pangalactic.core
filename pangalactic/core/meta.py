@@ -426,17 +426,13 @@ SELECTION_VIEWS = dict(
     Domain=['id', 'description']
     )
 
-# SELECTION_FILTERS:  Field-specific filters for valid objects to be included
-# in the tabular display of objects in the foreign key object selection dialog
-# for PgxnObject in format:
-#   {field: {class_name_1: filter1,
-#            class_name_2: filter2}, ...}
-# ... where a filter is a dict or None, which means "all".
+# SELECTION_FILTERS:  class names of the valid objects to be included in the
+# tabular display of objects in the foreign key object selection dialog for
+# PgxnObject
 SELECTION_FILTERS = dict(
-    owner={'Project': None,
-           'Organization': None},
-    product_type_hint={'ProductType': None},
-    product_type={'ProductType': None}
+    owner=['Project', 'Organization'],
+    product_type_hint=['ProductType'],
+    product_type=['ProductType']
     )
 
 def intconv(val):
