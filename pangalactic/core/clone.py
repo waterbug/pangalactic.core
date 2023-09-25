@@ -326,7 +326,7 @@ def clone(what, include_ports=True, include_components=True,
     if recompute_needed:
         if state.get('connected'):
             dispatcher.send(signal='get parmz')
-        else:
+        elif not orb.is_fastorb:
             orb.recompute_parmz()
     return new_obj
 
