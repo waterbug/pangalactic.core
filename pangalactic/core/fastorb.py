@@ -169,7 +169,7 @@ class metathing(type):
         return super().__new__(cls, cname, bases, namespace)
 
 
-# db:  a runtime cache used by the orb that maps oids to Thing instances
+# db:  a runtime cache used by the orb that maps oids to objects
 db = {}
 
 
@@ -183,11 +183,12 @@ class FastOrb(object):
     The principal difference between the FastOrb and the UberORB is that the
     classes that the UberORB manages are created using SqlAlchemy and always
     exist in a database session, connected to a relational database backend,
-    whereas the classes that the FastOrb manages are subclasses of the class
-    Thing (named in homage to the root class of the OWL [Web Ontology Language]
-    ontological universe).  Subclasses of Thing do not have a relational
-    database backend but share a global dictionary that holds their attributes.
-    Their persistence mechanism is a YAML-based serialization.
+    whereas the classes that the FastOrb manages are instances of classes that
+    are created using the metaclasss "metathing" (named in homage to the root
+    class "Thing" of the OWL [Web Ontology Language] ontological universe).
+    These objects do not have a relational database backend but share a global
+    dictionary that holds their attributes.  Their persistence mechanism is a
+    YAML-based serialization.
 
     IMPORTANT:  The FastOrb, like the UberORB, is intended to be a singleton.
     The FastOrb class should *not* be imported; instead, import 'orb', the
@@ -698,7 +699,7 @@ class FastOrb(object):
 
     def create_or_update_thing(self, cname, **kw):
         """
-        Create an instance of Thing with the specified attributes.
+        Create an instance (thing) with the specified attributes.
         NOTE: if an oid is specified and an object with that oid exists, the
         existing object will be returned and the matrix will be updated with
         the other keyword args if the 'mod_datetime' is later than the one
@@ -1489,7 +1490,7 @@ class FastOrb(object):
         """
         Determine if an object is an instance of an orb domain class -- used in
         place of 'isinstance()' for instances of orb classes, since instances
-        of the "thing" class are inheritance-unaware.
+        created using the "metathing" metaclass are inheritance-unaware.
 
         Args:
             cname (str):  the supertype class name
@@ -1769,7 +1770,7 @@ class FastOrb(object):
         Returns:
             list:  a list of objects
         """
-        self.log.debug(f'* search_exact(**({str(kw)}))')
+        # self.log.debug(f'* search_exact(**({str(kw)}))')
         cname = kw.pop('cname', None)
         if cname:
             if cname in schemas:
@@ -1845,9 +1846,9 @@ class FastOrb(object):
                     # for x in matching[obj_oid]:
                         # self.log.debug(f'  {x}')
                     result.append(o)
-            self.log.debug(f'  result: {len(result)} objects:')
-            for o in result:
-                self.log.debug(f'  - "{o.id}" (oid {o.oid})')
+            # self.log.debug(f'  result: {len(result)} objects:')
+            # for o in result:
+                # self.log.debug(f'  - "{o.id}" (oid {o.oid})')
             return result
         else:
             return []
@@ -2156,7 +2157,7 @@ class FastOrb(object):
         self.log.debug('  - rqts count: {n}')
         return n
 
-    def delete(self, oids):
+    def delete(self, objs):
         """
         Delete the specified objects from the local db.
 
@@ -2170,8 +2171,8 @@ class FastOrb(object):
         self.log.debug('* orb.delete() called ...')
         # TODO: make sure appropriate relationships in which these objects
         # are the parent or child are also deleted
-        for oid in oids:
-            obj = orb.get(oid)
+        for obj in objs:
+            oid = obj.oid
             if obj:
                 del obj
             if oid in db:
