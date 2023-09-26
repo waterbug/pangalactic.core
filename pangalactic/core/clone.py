@@ -271,8 +271,7 @@ def clone(what, include_ports=True, include_components=True,
                         orb.db.add(acu)
                     new_acus.append(acu)
                 if orb.is_fastorb:
-                    # TODO:  get new 'componentz' cache from server
-                    pass
+                    orb.adjust_componentz()
                 else:
                     refresh_componentz(new_obj)
             elif include_components and getattr(obj, 'components', None):
