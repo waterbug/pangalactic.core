@@ -292,7 +292,7 @@ def deserialize(orb, serialized, include_refdata=False,
     loadable['other'] = []
     for so in valid_sos:
         _cname = so['_cname']
-        orb.log.debug(f'  - {_cname}')
+        # orb.log.debug(f'  - {_cname}')
         if _cname in DESERIALIZATION_ORDER:
             if _cname in loadable:
                 loadable[_cname].append(so)
