@@ -130,7 +130,7 @@ def property_to_field(name, pe):
 #   }
 #
 # ... and the field (property) schemas are in the format specified in
-# property_to_field() (see below)
+# property_to_field() (see above)
 
 schemas = {}
 
@@ -416,7 +416,7 @@ class Tachistry:
         }
 
         ... where the structure of the field dicts (`field-n-attrs`) is
-        documented in `pangalactic.core.meta.property_to_field()`.
+        documented in property_to_field(), above.
         """
         # self.log.debug('* updating schemas from extracts')
         to_build = [meta_id for meta_id in self.metaobject_build_order()
