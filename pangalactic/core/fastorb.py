@@ -1108,6 +1108,8 @@ class FastOrb(object):
             acu (Acu): the Acu instance
         """
         # self.log.debug(f'* orb.adjust_componentz({acu.id} ({acu.oid}))')
+        if not acu.assembly:
+            return
         if acu.assembly.oid in componentz:
             # if the assembly exists in componentz, check whether this acu
             # (usage) already exists there too, in which case this adjustment

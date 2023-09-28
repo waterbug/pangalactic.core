@@ -919,17 +919,17 @@ def get_next_ref_des(assembly, component, prefix=None, product_type=None):
         # product_type abbreviation should not contain '-', but it can
         all_prefixes = [(''.join(rd.split('-')[:-1])) for rd in rds if rd]
         these_prefixes = [p for p in all_prefixes if p == prefix]
-        new_nbr = len(these_prefixes) + 1
-        refdes = prefix + '-' + str(new_nbr)
+        n = len(these_prefixes) + 1
+        refdes = f'{prefix}-{n:03}'
         while 1:
             if refdes not in rds:
                 break
             else:
-                new_nbr += 1
-                refdes = prefix + '-' + str(new_nbr)
+                n += 1
+                refdes = f'{prefix}-{n:03}'
         return refdes
     else:
-        return prefix + '-1'
+        return prefix + '-001'
 
 def get_ra_name(ra_context_id, role_id, fname, mi, lname):
     """
