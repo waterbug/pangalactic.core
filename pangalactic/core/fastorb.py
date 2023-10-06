@@ -1970,15 +1970,21 @@ class FastOrb(object):
             return []
         self.log.debug(f'  - assembly id: "{assembly.id}"')
         self.log.debug(f'  - component id: "{component.id}"')
-        flows = self.get_by_type('Flow')
-        context_flows = [f for f in flows if f.flow_context is assembly]
-        self.log.debug(f'  - # of context flows: {len(context_flows)}')
+        start_context_flows = self.search_exact(cname='Flow',
+                                                start_port_context=usage)
+        # self.log.debug(f'  - start port flows: {len(start_context_flows)}')
+        end_context_flows = self.search_exact(cname='Flow',
+                                              end_port_context=usage)
+        # self.log.debug(f'  - end port flows: {len(end_context_flows)}')
         ports = component.ports
         np = len(ports)
         port_ids = [p.id for p in component.ports]
         self.log.debug(f'  - {np} component ports: {port_ids}')
-        flows = [flow for flow in context_flows
-                 if flow.start_port in ports or flow.end_port in ports]
+        starting_flows = [flow for flow in start_context_flows
+                          if flow.start_port in ports]
+        ending_flows = [flow for flow in end_context_flows
+                        if flow.end_port in ports]
+        flows = starting_flows + ending_flows
         if flows:
             flow_ids = [flow.id for flow in flows]
             nf = len(flow_ids)
