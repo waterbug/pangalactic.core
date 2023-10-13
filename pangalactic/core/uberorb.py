@@ -71,6 +71,18 @@ DEPRECATED_PARAMETERS = ['P[max]', 'P[min]',
 
 dtypes = {'str': str, 'float': float, 'int': int, 'bool': bool}
 
+NULL_VALUE = {'str' : '',
+              'unicode' : '',
+              'datetime' : '0',
+              'time' : '0',
+              'int' : 0,
+              'float' : 0.0,
+              'bool' : False,
+              'bytes' : b'',
+              'set' : set([])}
+
+
+
 
 class UberORB(object):
     """
@@ -1573,7 +1585,8 @@ class UberORB(object):
 
         Args:
             obj (Identifiable): the object
-            pname (str): name of the property (attr, parameter, or data element)
+            pname (str): name of the property (attr, parameter, or data
+                element)
         """
         schema = self.schemas.get(obj.__class__.__name__)
         field_names = []
@@ -1592,19 +1605,21 @@ class UberORB(object):
 
     def get_prop_str_value(self, obj, pname):
         """
-        Return the string-cast value of the specified property for the specified
-        object.
+        Return the string-cast value of the specified property for the
+        specified object.
 
         Args:
             obj (Identifiable): the object
-            pname (str): name of the property (attr, parameter, or data element)
+            pname (str): name of the property (attr, parameter, or data
+                element)
         """
         schema = orb.schemas.get(obj.__class__.__name__)
         field_names = []
         if schema:
             field_names = schema.get('field_names', [])
         if field_names and pname in field_names:
-            return str(getattr(obj, pname, '')) or ''
+            dtype = schema['fields'][pname]['range']
+            return str(getattr(obj, pname, None) or NULL_VALUE.get(dtype))
         elif pname in parm_defz:
             pd = parm_defz.get(pname)
             units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
@@ -1759,13 +1774,13 @@ class UberORB(object):
         """
         Generate the `id` attribute for a requirement. (NOTE:  this function
         assumes that the requirement has already been saved and is therefore
-        included in the count of requirements for the project). The format of the
-        returned `id` is as follows:
+        included in the count of requirements for the project). The format of
+        the returned `id` is as follows:
 
             [project_id]-[level].[seq]
 
-        where "level" is the level of the requirement and must be 1 lower than that
-        of the lowest level ancestor requirement, if any.
+        where "level" is the level of the requirement and must be 1 lower than
+        that of the lowest level ancestor requirement, if any.
 
         Args:
             reqt (Requirement):  the requirement

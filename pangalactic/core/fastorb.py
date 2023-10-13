@@ -56,6 +56,10 @@ from pangalactic.core.utils.datetimes import (dtstamp, file_dts,
 from pangalactic.core.log          import get_loggers
 from pangalactic.core.validation   import get_assembly
 
+DEPRECATED_PARAMETERS = ['P[max]', 'P[min]',
+                         'T', 'T[max]', 'T[min]', 'T[Survival]']
+
+dtypes = {'str': str, 'float': float, 'int': int, 'bool': bool}
 
 NULL_VALUE = {'str' : '',
               'unicode' : '',
@@ -66,7 +70,6 @@ NULL_VALUE = {'str' : '',
               'bool' : False,
               'bytes' : b'',
               'set' : set([])}
-
 
 # 'inverses' is a cached mapping of all one-to-many inverse attributes to their
 # values, which has the format:
@@ -2048,6 +2051,8 @@ class FastOrb(object):
         if project.__class__.__name__ != 'Project':
             self.log.debug('  - object provided is not a Project.')
             return []
+        # objs now includes Activities, Documents, and Models owned by the
+        # project
         mos = self.get_by_type('ManagedObject')
         objs = [obj for obj in mos if obj.owner is project]
         psus = self.get_project_psus(project)
