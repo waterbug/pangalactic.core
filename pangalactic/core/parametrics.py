@@ -969,10 +969,11 @@ def add_parameter(oid, pid):
     # Temperature).
     if pid in parameterz[oid]:
         # if the object already has that parameter, do nothing
+        log.debug(f'   obj with oid "{oid}" already has "{pid}"; not adding.')
         return True
     pdz = parm_defz.get(pid)
     if not pdz:
-        log.debug(f'  {pid} not in parm_defz; not adding.')
+        log.debug(f'  "{pid}" not in parm_defz; not adding.')
         return False
     range_datatype = pdz.get('range_datatype', 'float')
     p_defaults = state.get('p_defaults') or {}
@@ -983,7 +984,7 @@ def add_parameter(oid, pid):
     else:    # use a "NULL" value
         value = NULL.get(range_datatype, 0.0)
     parameterz[oid][pid] = value
-    log.debug(f'  {pid} added to oid {oid}')
+    log.debug(f'  "{pid}" added to obj with oid "{oid}"')
     return True
 
 def add_default_parameters(obj, parms=None):
