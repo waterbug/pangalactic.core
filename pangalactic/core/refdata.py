@@ -2715,12 +2715,12 @@ core = [
 
 {   '_cname': 'ActivityType',
     'oid': 'pgefobjects:ActivityType.Operation',
-    'id': 'operation',
+    'id': 'op',
     'id_ns': 'pgef',
-    'name': 'Operation',
+    'name': 'Op',
     'abbreviation': 'Op',
     'create_datetime': epoch,
-    'mod_datetime': epoch
+    'mod_datetime': '2023-10-01 00:00:00'
     },
 
 {   '_cname': 'ActivityType',
