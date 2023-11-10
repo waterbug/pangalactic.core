@@ -11,9 +11,10 @@ requirements:
     - setuptools
 
   run:
+    - inflect
+    - louie
     - openpyxl
     - pint
-    - pynacl
     - python {{PY_VER}}
     - python-dateutil
     - pytz
@@ -25,7 +26,6 @@ requirements:
     - xlwt
     - xlsxwriter
     # locally created conda packages
-    - inflect
     - rdflib
 
 about:
