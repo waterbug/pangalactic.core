@@ -606,6 +606,8 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
     # item_oid = getattr(item, 'oid', 'unknown') or 'no oid'
     # orb.log.debug(f'  - item: {item_id} ({item_oid})')
     # NB:  levels are 1-based
+    if not item:
+        return []
     if isinstance(item, orb.classes['HardwareProduct']):
         # orb.log.debug('  - item is a HardwareProduct')
         if not summary:
