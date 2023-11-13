@@ -1579,7 +1579,7 @@ class UberORB(object):
         query = self.db.query(RepresentationFile.checksum)
         return [row[0] for row in query.all()]
 
-    def get_prop_value(self, obj, pname):
+    def get_prop_val(self, obj, pname):
         """
         Return the value of the specified property for the specified object.
 
@@ -1603,7 +1603,7 @@ class UberORB(object):
             return get_dval(obj.oid, pname)
         return ''
 
-    def get_prop_str_value(self, obj, pname):
+    def get_prop_val_as_str(self, obj, pname):
         """
         Return the string-cast value of the specified property for the
         specified object.
@@ -1629,7 +1629,7 @@ class UberORB(object):
             return get_dval_as_str(obj.oid, pname)
         return '[undefined]'
 
-    def set_prop_value(self, obj, pname, val):
+    def set_prop_val(self, obj, pname, val):
         """
         Set the value of the specified property for the specified object,
         casting the value to the correct datatype if necessary.
