@@ -2409,19 +2409,19 @@ pdc = [
     'owner': 'pgefobjects:PGANA'},
 
 {   '_cname': 'ParameterContext',
-    'abbreviation': 'quiescent',
+    'abbreviation': 'standby',
     'computed': False,
     'context_datatype': 'float',
     'context_type': 'descriptive',
-    'create_datetime': '2020-01-01 00:00:00',
+    'create_datetime': '2023-11-01 00:00:00',
     'creator': 'pgefobjects:admin',
-    'description': 'quiescent value',
-    'id': 'quiescent',
+    'description': 'standby value',
+    'id': 'standby',
     'id_ns': 'pgef',
-    'mod_datetime': '2022-07-28 00:00:00',
+    'mod_datetime': '2023-11-01 00:00:00',
     'modifier': 'pgefobjects:admin',
-    'name': 'quiescent',
-    'oid': 'pgef:ParameterContext.quiescent',
+    'name': 'standby',
+    'oid': 'pgef:ParameterContext.standby',
     'owner': 'pgefobjects:PGANA'},
 
 {   '_cname': 'ParameterContext',
@@ -4956,6 +4956,7 @@ for pt_oid in [
 ############################################################################
 # Deprecated reference data -- will be deleted by orb.load_reference_data()
 deprecated = [
+    'pgef:ParameterContext.quiescent',
     'pgef:ParameterDefinition.P_operational',
     'pgef:ParameterDefinition.P_survival',
     'pgef:ParameterDefinition.P_throughput',
