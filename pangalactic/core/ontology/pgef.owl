@@ -648,7 +648,7 @@
 
     <owl:ObjectProperty rdf:about="&pgef;of_system">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The system role of which this is an Activity.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The system or component usage of which this is an Activity.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Activity"/>
         <rdfs:range rdf:resource="&pgef;Modelable"/>
     </owl:ObjectProperty>
@@ -659,7 +659,7 @@
 
     <owl:ObjectProperty rdf:about="&pgef;activities">
         <owl:inverseOf rdf:resource="&pgef;of_system"/>
-        <rdfs:comment rdf:datatype="&xsd;string">All Activities of a top-level system.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">All Activities of a system or component usage.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Modelable"/>
         <rdfs:range rdf:resource="&pgef;Activity"/>
     </owl:ObjectProperty>
@@ -2443,7 +2443,7 @@ Model in the engineering domain generally maps to step:product_definition, but t
 
     <owl:Class rdf:about="&pgef;Mission">
         <rdfs:subClassOf rdf:resource="&pgef;Activity"/>
-        <rdfs:comment rdf:datatype="&xsd;string">A Mission is an activity which is defined by a project and is accomplished by means of a collection of systems.  It will typically be decomposed into a set of phases for which the Mission concept of operations specification will associate sets of parameter values with the states of the physical systems and components used to accomplish the Mission goal.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">A Mission is an activity which is defined by a project and is accomplished by means of a collection of systems. Although an Activity typically is related to a specific object (specified by its &quot;of_system&quot; property) the Mission does not have a specific object, but is regarded as the parent of all activities of the project systems. It will typically be decomposed into a set of phases for which the Mission concept of operations specification will associate sets of parameter values with the states of the physical systems and components used to accomplish the Mission goal.</rdfs:comment>
     </owl:Class>
 
 
