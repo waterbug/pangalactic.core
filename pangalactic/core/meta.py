@@ -110,7 +110,7 @@ DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start', 't_end'],
                             'HardwareProduct': [
                                 'm', 'm[CBE]', 'm[Ctgcy]', 'm[MEV]',
                                 'P', 'P[CBE]', 'P[Ctgcy]', 'P[MEV]',
-                                'P[peak]', 'P[survival]',
+                                'P[peak]', 'P[standby]', 'P[survival]',
                                 'T[operational_max]', 'T[operational_min]',
                                 'T[survival_max]', 'T[survival_min]',
                                 'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
