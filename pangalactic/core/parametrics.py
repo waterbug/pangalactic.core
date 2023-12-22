@@ -2194,7 +2194,7 @@ def add_default_data_elements(obj, des=None):
 #             (Assembly Component Usages or Acus) and the applicable power
 #             states of each (i.e. of their "system" or "component",
 #             respectively) during a specified mode. The 'systems' sub-dict
-#             contains all items that have been explicitly added to the modes
+#             contains all items that have been explicitly added to the mode
 #             definitions.  If a 'system' has components, its components are
 #             added to the 'components' sub-dict and its modes' power values
 #             will be computed from the sum of its components power values for
@@ -2206,27 +2206,24 @@ def add_default_data_elements(obj, des=None):
 #             `save_mode_defz` and `load_mode_defz`
 #
 # format:  {project A oid:
-#               'modes': {mode 1 name: default context,
+#               'modes': {mode 1 name: default context*,
 #                         mode 2 name: default context,
 #                         ...},
 #               'systems':
-#                  {psu 1 oid: {mode 1 name: context,
-#                               mode 2 name: context,
+#                  {psu 1 oid: {mode 1 name: mode 1 value**,
+#                               mode 2 name: mode 2 value**,
 #                                ...},
-#                   psu 2 oid: {mode 1 name: context,
-#                               mode 2 name: context,
-#                                ...},
-#                   acu 1 oid: {mode 1 name: context,
-#                               mode 2 name: context,
+#                   acu 1 oid: {mode 3 name: mode 3 value**,
+#                               mode 4 name: mode 4 value**,
 #                                ...}
 #                   ...},
 #               'components':
 #                  {psu 1 oid:
-#                       {acu 3 oid: {mode 1 name: context,
-#                                    mode 2 name: context,
+#                       {acu 3 oid: {mode 5 name: mode 5 value**,
+#                                    mode 6 name: mode 6 value**,
 #                                    ...},
-#                        acu 4 oid: {mode 1 name: context,
-#                                    mode 2 name: context,
+#                        acu 4 oid: {mode 7 name: mode 7 value**,
+#                                    mode 8 name: mode 8 value**,
 #                                    ...}
 #                        ...},
 #                   psu 2 oid:
@@ -2238,8 +2235,14 @@ def add_default_data_elements(obj, des=None):
 #               {...}
 #           }
 # ... where
-#   context:    None, "[computed]", or a ParameterContext id
-#   default:    context used if None is specified
+# * default context: to be used if None or empty dict is specified as context
+# ** mode n value: None (Off), "[computed]", or a dict of the format:
+#                {context 1: duty cycle,
+#                 context 2: duty cycle, ...
+#                 context n: duty cycle}
+#                where:
+#                   - context n is a ParameterContext id
+#                   - duty cycle is None (100%) or a float between 0 and 100
 mode_defz = {}
 
 def load_mode_defz(dir_path):

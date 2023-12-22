@@ -34,9 +34,9 @@ PGXN_REQD = dict(
     )
 
 # MAIN_VIEWS:  Class-specific default fields for the PgxnObject "main" tab and
-# ObjectTable.  This dictionary is intended to be added to and/or overridden by
-# app-specific settings defined in the 'pangalactic.config' module-level
-# dictionary.
+# "db" mode tables.  This dictionary is intended to be added to and/or
+# overridden by app-specific settings defined in the 'pangalactic.config'
+# module-level dictionary.
 # TODO:  support for field "aliases" (a.k.a. "display names")
 SYSTEM = ['version', 'version_sequence', 'iteration']
 MAIN_VIEWS = dict(
@@ -533,7 +533,6 @@ PGEF_COL_WIDTHS = {
             'comment': 200,
             'description': 200,
             'frozen': 50,
-            'id': 220,
             'id_ns': 100,
             'iteration': 50,
             'justification': 200,
