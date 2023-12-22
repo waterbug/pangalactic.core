@@ -2,7 +2,6 @@
 """
 Objects and services for handling identifiers, addresses, and namespaces.
 """
-import inflect
 import re
 import xml.etree.ElementTree as ET
 
@@ -18,8 +17,6 @@ from pangalactic.core.datastructures import OrderedSet
 from pangalactic.core.meta           import asciify
 from pangalactic.core.parametrics    import de_defz, mode_defz, parm_defz
 from pangalactic.core.units          import in_si
-
-_inf = inflect.engine()
 
 
 class NS(OrderedSet):
@@ -789,21 +786,6 @@ PLURALS = {
     'RoleAssignment'     : 'RoleAssignments',
     'Role'               : 'Roles'
     }
-
-def to_collection_name(cname):
-    """
-    Convert a standard metaobject (class, interface, or schema) camelcase name
-    into the name of an attribute that refers to a collection of that kind of
-    object -- e.g.: 'Class' -> 'classes', 'Person' -> 'people', etc.
-
-    @param cname: a camelcase metaobject name
-    @type  cname: L{str}
-
-    @return: a table name
-    @rtype:  L{str}
-    """
-    return str(to_table_name(PLURALS.get(
-               cname, _inf.plural(cname)))[:-1])
 
 def to_class_name(table_name):
     """
