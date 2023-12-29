@@ -57,12 +57,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
     (1.2) Install the following dependencies of pangalactic.core:
 
-    - inflect
-      Nuanced capitalization
-      * NOTE:  not in the default conda channel, use 'conda-forge' channel
-
-          Configuration:  'conda install inflect'
-
     - louie (latest released version -- "Louie-latest" on PyPI**)
       Python application event signals
       * NOTE: not in the default conda channel, use locally built conda pkg
