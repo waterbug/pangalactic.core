@@ -535,9 +535,13 @@ def save_parmz(dir_path):
         # NOTE: serialize_parms() uses deepcopy()
         stored_parameterz[oid] = serialize_parms(oid)
     fpath = os.path.join(dir_path, 'parameters.json')
-    with open(fpath, 'w') as f:
-        f.write(json.dumps(stored_parameterz, separators=(',', ':'),
-                           indent=4, sort_keys=True))
+    try:
+        with open(fpath, 'w') as f:
+            f.write(json.dumps(stored_parameterz, separators=(',', ':'),
+                               indent=4, sort_keys=True))
+        log.debug('  ... parameters.json file written.')
+    except:
+        log.debug('  ... writing parameters.json file failed!')
 
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
 # format:  {dimension : [ids of ParameterDefinitions having that dimension]}
