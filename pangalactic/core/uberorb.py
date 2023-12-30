@@ -52,9 +52,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           parmz_by_dimz, refresh_componentz,
                                           refresh_rqt_allocz, rqt_allocz,
                                           refresh_systemz,
-                                          save_systemz, systemz,
-                                          update_parm_defz,
-                                          update_parmz_by_dimz)
+                                          save_systemz, systemz)
 from pangalactic.core.serializers import (serialize, deserialize,
                                           uncook_datetime)
 from pangalactic.core.test        import data as test_data_mod
