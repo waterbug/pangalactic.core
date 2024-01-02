@@ -1640,7 +1640,7 @@
 
     <owl:DatatypeProperty rdf:about="&pgef;range_datatype">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The datatype of the range of a DataElementDefinition.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The name of the datatype of the range of a DataElementDefinition.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;DataElementDefinition"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
