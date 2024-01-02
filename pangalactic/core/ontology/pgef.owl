@@ -1636,11 +1636,22 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/domain_class -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;domain_class">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The name of the domain class of a DataElementDefinition.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;DataElementDefinition"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/range_datatype -->
 
     <owl:DatatypeProperty rdf:about="&pgef;range_datatype">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment rdf:datatype="&xsd;string">The name of the datatype of the range of a DataElementDefinition.</rdfs:comment>
+        <rdfs:comment rdf:datatype="&xsd;string">The name of the range datatype of a DataElementDefinition.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;DataElementDefinition"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
