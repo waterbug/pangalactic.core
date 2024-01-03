@@ -91,6 +91,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': '2021-09-22 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'str',
     'description': 'Entity from which a thing is procured.'},
 
@@ -106,6 +107,7 @@ deds = [
     'create_datetime': epoch,
     'mod_datetime': '2021-09-22 00:00:00',
     'dimensions': None,
+    'domain_class': 'Product',
     'range_datatype': 'int',
     'description': trl_desc},
 
@@ -120,6 +122,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': epoch,
     'mod_datetime': epoch,
+    'domain_class': 'Port',
     'range_datatype': 'str',
     'description': 'Whether a Port is "input", "output", or bidirectional.'},
 
@@ -134,6 +137,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'str',
     'description': '"Name"' + per_gsfc_mel_doc},
 
@@ -148,6 +152,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'str',
     'description': '"Level"' + per_gsfc_mel_doc},
 
@@ -162,6 +167,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': '"Unit Mass"' + per_gsfc_mel_doc},
 
@@ -176,6 +182,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'int',
     'description': '"Cold (Backup) Units"' + per_gsfc_mel_doc},
 
@@ -190,6 +197,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'int',
     'description': '"Hot (Primary) Units"' + per_gsfc_mel_doc},
 
@@ -204,6 +212,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'int',
     'description': '"Flight Units"' + per_gsfc_mel_doc},
 
@@ -218,6 +227,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'int',
     'description': '"Flight Spares"' + per_gsfc_mel_doc},
 
@@ -232,6 +242,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'int',
     'description': '"ETU/Qual Units"' + per_gsfc_mel_doc},
 
@@ -246,6 +257,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'int',
     'description': em_edu_prototype_units_desc + per_gsfc_mel_doc},
 
@@ -260,6 +272,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Total Mass (CBE)"' + per_gsfc_mel_doc},
 
@@ -274,6 +287,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Mass Congtingency"' + per_gsfc_mel_doc},
 
@@ -288,6 +302,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Total Mass (MEV)"' + per_gsfc_mel_doc},
 
@@ -302,6 +317,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Nominal Unit Power CBE"' + per_gsfc_mel_doc},
 
@@ -316,6 +332,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Nominal Total Power CBE"' + per_gsfc_mel_doc},
 
@@ -330,6 +347,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Total Power Contingency"' + per_gsfc_mel_doc},
 
@@ -344,6 +362,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Total Power MEV"' + per_gsfc_mel_doc},
 
@@ -358,6 +377,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Peak Unit Power CBE"' + per_gsfc_mel_doc},
 
@@ -372,6 +392,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Peak Total Power CBE"' + per_gsfc_mel_doc},
 
@@ -386,6 +407,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Peak Total Power Ctgcy"' + per_gsfc_mel_doc},
 
@@ -400,6 +422,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Peak Total Power MEV"' + per_gsfc_mel_doc},
 
@@ -414,6 +437,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'float',
     'description': '"Quiescent Total Power CBE"' + per_gsfc_mel_doc},
 
@@ -428,6 +452,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2021-09-21 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'float',
     'description': '"Quoted Unit Price"' + per_gsfc_mel_doc},
 
@@ -442,6 +467,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'text',
     'description': '"Composition"' + per_gsfc_mel_doc},
 
@@ -456,20 +482,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
-    'range_datatype': 'text',
-    'description': '"Additional Information"' + per_gsfc_mel_doc},
-
-{   '_cname': 'DataElementDefinition',
-    'oid': 'pgef:DataElementDefinition.additional_information',
-    'id': 'additional_information',
-    'id_ns': 'gsfc.mel',
-    'label': 'Additional Information',
-    'name': 'Additional Information',
-    'owner': 'pgefobjects:PGANA',
-    'creator': 'pgefobjects:admin',
-    'modifier': 'pgefobjects:admin',
-    'create_datetime': '2020-12-28 00:00:00',
-    'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'text',
     'description': '"Additional Information"' + per_gsfc_mel_doc},
 
@@ -484,6 +497,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Acu',
     'range_datatype': 'text',
     'description': '"Similarity to Existing"' + per_gsfc_mel_doc},
 
@@ -498,6 +512,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'text',
     'description': '"Heritage Design"' + per_gsfc_mel_doc},
 
@@ -512,6 +527,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'text',
     'description': '"Heritage Manufacture"' + per_gsfc_mel_doc},
 
@@ -526,6 +542,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'text',
     'description': '"Heritage Software"' + per_gsfc_mel_doc},
 
@@ -540,6 +557,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'text',
     'description': '"Heritage Provider"' + per_gsfc_mel_doc},
 
@@ -554,6 +572,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'text',
     'description': '"Heritage Use"' + per_gsfc_mel_doc},
 
@@ -568,6 +587,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'text',
     'description': '"Heritage Operating Environment"' + per_gsfc_mel_doc},
 
@@ -582,6 +602,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'text',
     'description': '"Heritage Ref Prior Use"' + per_gsfc_mel_doc},
 
@@ -596,6 +617,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'text',
     'description': '"Heritage Justification"' + per_gsfc_mel_doc},
 
@@ -610,6 +632,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'Product',
     'range_datatype': 'text',
     'description': 'Acronyms of the missions that have flown this element'},
 
@@ -624,6 +647,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': '"Cost Structure Mass"' + per_gsfc_mel_doc},
 
@@ -638,6 +662,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': '"Electronic Complexity Factor"' + per_gsfc_mel_doc},
 
@@ -652,6 +677,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': '"Structure Complexity Factor"' + per_gsfc_mel_doc},
 
@@ -666,6 +692,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': '"Electronic Remaining Design"' + per_gsfc_mel_doc},
 
@@ -680,6 +707,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': '"Structure Remaining Design"' + per_gsfc_mel_doc},
 
@@ -694,6 +722,7 @@ deds = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2020-12-28 00:00:00',
     'mod_datetime': '2020-12-28 00:00:00',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': '"Engineering Complexity Mod. Level"' + per_gsfc_mel_doc},
 
@@ -708,6 +737,7 @@ deds = [
     'create_datetime': '2022-12-03 00:00:00',
     'mod_datetime': '2022-12-03 00:00:00',
     'modifier': 'pgefobjects:admin',
+    'domain_class': 'Acu',
     'range_datatype': 'str',
     'description': 'FEM Vertex Grid ID'},
 
@@ -722,6 +752,7 @@ deds = [
     'create_datetime': '2022-12-03 00:00:00',
     'mod_datetime': '2022-12-03 00:00:00',
     'modifier': 'pgefobjects:admin',
+    'domain_class': 'Acu',
     'range_datatype': 'str',
     'description': 'FEM Surface Grid ID'},
 
@@ -736,6 +767,7 @@ deds = [
     'create_datetime': '2022-12-03 00:00:00',
     'mod_datetime': '2022-12-03 00:00:00',
     'modifier': 'pgefobjects:admin',
+    'domain_class': 'Acu',
     'range_datatype': 'int',
     'description': 'Position of a component in an optical path.'},
 
@@ -750,6 +782,7 @@ deds = [
     'create_datetime': '2023-07-03 00:00:00',
     'mod_datetime': '2023-07-03 00:00:00',
     'modifier': 'pgefobjects:admin',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': 'The fluid contained in a heat pipe.'},
 
@@ -764,6 +797,7 @@ deds = [
     'create_datetime': '2023-07-03 00:00:00',
     'mod_datetime': '2023-07-03 00:00:00',
     'modifier': 'pgefobjects:admin',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': 'The material extruded to create a heat pipe.'},
 
@@ -778,6 +812,7 @@ deds = [
     'create_datetime': '2023-07-03 00:00:00',
     'mod_datetime': '2023-07-03 00:00:00',
     'modifier': 'pgefobjects:admin',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': 'A relative, inexact quantity -- e.g. for multi-layer insulation: "small", "large", "cable wrap".'},
 
@@ -792,6 +827,7 @@ deds = [
     'create_datetime': '2023-07-03 00:00:00',
     'mod_datetime': '2023-07-03 00:00:00',
     'modifier': 'pgefobjects:admin',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': 'Qualitative description of the layers of multi-layer insulation.'},
 
@@ -806,6 +842,7 @@ deds = [
     'create_datetime': '2023-07-03 00:00:00',
     'mod_datetime': '2023-07-03 00:00:00',
     'modifier': 'pgefobjects:admin',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': 'Temperature range from when a louver is fully closed to when it is fully open.'},
 
@@ -820,6 +857,7 @@ deds = [
     'create_datetime': '2023-07-03 00:00:00',
     'mod_datetime': '2023-07-03 00:00:00',
     'modifier': 'pgefobjects:admin',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': 'Material used to mount an item.'},
 
@@ -834,8 +872,24 @@ deds = [
     'create_datetime': '2023-07-03 00:00:00',
     'mod_datetime': '2023-07-03 00:00:00',
     'modifier': 'pgefobjects:admin',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'str',
     'description': 'Substance from which an item is fabricated.'},
+
+{   '_cname': 'DataElementDefinition',
+    'oid': 'pgef:DataElementDefinition.associated_mode',
+    'id': 'associated_mode',
+    'id_ns': 'pgef',
+    'label': 'Mode',
+    'name': 'Associated Mode',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': '2024-01-01 00:00:00',
+    'mod_datetime': '2024-01-01 00:00:00',
+    'modifier': 'pgefobjects:admin',
+    'domain_class': 'Activity',
+    'range_datatype': 'str',
+    'description': 'Operational Mode associated with an Activity.'},
 
     ]
 
@@ -852,6 +906,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'mass',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Quantity of matter'
     },
@@ -867,6 +922,7 @@ pdc = [
     'create_datetime': '2023-07-03 00:00:00',
     'mod_datetime': '2023-07-03 00:00:00',
     'dimensions': 'density',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Mass per unit volume'
     },
@@ -882,6 +938,7 @@ pdc = [
     'create_datetime': '2023-07-26 00:00:00',
     'mod_datetime': '2023-07-26 00:00:00',
     'dimensions': 'areal density',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Mass per unit area'
     },
@@ -896,6 +953,7 @@ pdc = [
     'modifier': 'pgefobjects:admin',
     'create_datetime': '2023-07-26 00:00:00',
     'mod_datetime': '2023-07-26 00:00:00',
+    'domain_class': 'HardwareProduct',
     'dimensions': 'linear density',
     'range_datatype': 'float',
     'description': 'Mass per unit length'
@@ -912,6 +970,7 @@ pdc = [
     'create_datetime': '2023-07-03 00:00:00',
     'mod_datetime': '2023-07-03 00:00:00',
     'dimensions': 'power density',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Power per unit volume'
     },
@@ -927,6 +986,7 @@ pdc = [
     'create_datetime': '2023-07-03 00:00:00',
     'mod_datetime': '2023-07-03 00:00:00',
     'dimensions': 'surface power density',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Power per unit area'
     },
@@ -942,6 +1002,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Length in y direction'},
 
@@ -956,6 +1017,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Length in x direction'},
 
@@ -970,6 +1032,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Length in z direction'},
 
@@ -984,6 +1047,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': '2021-07-18 00:00:00',
     'dimensions': 'moment of inertia',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'array',
     'description': 'Moments of Inertia'},
 
@@ -998,6 +1062,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': '2021-07-18 00:00:00',
     'dimensions': 'moment of inertia',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Moment of Inertia about x axis'},
 
@@ -1012,6 +1077,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': '2021-07-18 00:00:00',
     'dimensions': 'moment of inertia',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Moment of Inertia about y axis'},
 
@@ -1026,6 +1092,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': '2021-07-18 00:00:00',
     'dimensions': 'moment of inertia',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Moment of Inertia about z axis'},
 
@@ -1040,6 +1107,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': '2021-07-18 00:00:00',
     'dimensions': 'moment of inertia',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Product of Inertia (xy)'},
 
@@ -1054,6 +1122,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': '2021-07-18 00:00:00',
     'dimensions': 'moment of inertia',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Product of Inertia (xz)'},
 
@@ -1068,6 +1137,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': '2021-07-18 00:00:00',
     'dimensions': 'moment of inertia',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Product of Inertia (yz)'},
 
@@ -1082,6 +1152,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'array',
     'description': 'Center of Mass coordinates (x, y, z)'},
 
@@ -1096,6 +1167,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'X coordinate of the Center of Mass'},
 
@@ -1110,6 +1182,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Y coordinate of the Center of Mass'},
 
@@ -1124,6 +1197,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'length',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Z coordinate of the Center of Mass'},
 
@@ -1138,6 +1212,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'money',
+    'domain_class': 'Product',
     'range_datatype': 'float',
     'description': 'Unit cost of an item'},
 
@@ -1152,6 +1227,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': '2019-10-12 00:00:00',
     'dimensions': 'data',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Data storage capacity'},
 
@@ -1167,6 +1243,7 @@ pdc = [
     'mod_datetime': '2019-10-12 00:00:00',
     'dimensions': 'bitrate',
     'port_type': 'pgefobjects:PortType.digital_data',
+    'domain_class': 'Port',
     'range_datatype': 'float',
     'description': 'Flow of bits per unit time through a data port.'},
 
@@ -1182,6 +1259,7 @@ pdc = [
     'mod_datetime': epoch,
     'dimensions': 'power',
     'port_type': 'pgefobjects:PortType.electrical_power',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Electrical power consumption.'},
 
@@ -1196,6 +1274,7 @@ pdc = [
     'create_datetime': '2021-07-27 01:00:00',
     'mod_datetime': '2021-07-27 01:00:00',
     'dimensions': 'decibels-isotropic',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Peak power gain of an antenna.'},
 
@@ -1210,6 +1289,7 @@ pdc = [
     'create_datetime': '2021-07-27 01:00:00',
     'mod_datetime': '2021-07-27 01:00:00',
     'dimensions': 'decibels',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Power gain of an amplifier.'},
 
@@ -1224,6 +1304,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': '2018-05-25 00:00:00',
     'dimensions': 'electrical potential',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Voltage'},
 
@@ -1252,6 +1333,7 @@ pdc = [
     'create_datetime': '2021-03-01 00:00:00',
     'mod_datetime': '2021-03-01 00:00:00',
     'dimensions': 'capacitance',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Capacity for electric charge'},
 
@@ -1308,6 +1390,7 @@ pdc = [
     'create_datetime': '2021-03-01 00:00:00',
     'mod_datetime': '2021-03-01 00:00:00',
     'dimensions': 'volume',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'The volume of a product.'},
 
@@ -1322,6 +1405,7 @@ pdc = [
     'create_datetime': '2021-03-01 00:00:00',
     'mod_datetime': '2021-03-01 00:00:00',
     'dimensions': 'area',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'The area of a product.'},
 
@@ -1336,6 +1420,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'area',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'The active area of a product, such as a solar panel, for which that is a well-defined functional property. For a solar panel, this is the exposed area that takes part in collecting energy from the Sun.  Generally it is the solar cell area though there is some top side conductor area that exists on each cell.'},
 
@@ -1350,6 +1435,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'area',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'On a solar panel, Substrate Area includes the Active Area plus the mounting substrate or mesh area, including all stiffeners, areas for mounting sensors, wiring harnesses (if on the top side, facing the Sun), expansion/contraction relief areas around the solar cells, hold down or pre-deployed clamping areas, and other top side mounted equipment areas.'},
 
@@ -1364,6 +1450,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'time',
+    'domain_class': 'Activity',
     'range_datatype': 'float',
     'description': 'Length of time during which an activity proceeds.'},
 
@@ -1378,6 +1465,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'time',
+    'domain_class': 'Activity',
     'range_datatype': 'float',
     'description': 'Time at which an activity begins.'},
 
@@ -1392,6 +1480,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'time',
+    'domain_class': 'Activity',
     'range_datatype': 'float',
     'description': 'Time at which an activity ceases.'},
 
@@ -1406,6 +1495,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'frequency',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Frequency of downlink signal'},
 
@@ -1420,6 +1510,7 @@ pdc = [
     'create_datetime': epoch,
     'mod_datetime': epoch,
     'dimensions': 'frequency',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float',
     'description': 'Frequency of uplink signal'},
 
@@ -1435,6 +1526,7 @@ pdc = [
     'name': 'Radius',
     'oid': 'pgef:ParameterDefinition.r',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1547,6 +1639,7 @@ pdc = [
     'name': 'Freezing Point',
     'oid': 'pgef:ParameterDefinition.FreezingPoint',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1561,6 +1654,7 @@ pdc = [
     'name': 'Heat Transport Capacity',
     'oid': 'pgef:ParameterDefinition.HeatTransportCapacity',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1603,6 +1697,7 @@ pdc = [
     'name': 'Conic Constant',
     'oid': 'pgef:ParameterDefinition.K',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1617,6 +1712,7 @@ pdc = [
     'name': 'X Coordinate of Optical Surface Vertex',
     'oid': 'pgef:ParameterDefinition.X_vertex',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1631,6 +1727,7 @@ pdc = [
     'name': 'Y Coordinate of Optical Surface Vertex',
     'oid': 'pgef:ParameterDefinition.Y_vertex',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1645,6 +1742,7 @@ pdc = [
     'name': 'Z Coordinate of Optical Surface Vertex',
     'oid': 'pgef:ParameterDefinition.Z_vertex',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1659,6 +1757,7 @@ pdc = [
     'name': 'X Orientation of Optical Surface Vertex',
     'oid': 'pgef:ParameterDefinition.RotX_vertex',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1673,6 +1772,7 @@ pdc = [
     'name': 'Y Orientation of Optical Surface Vertex',
     'oid': 'pgef:ParameterDefinition.RotY_vertex',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1687,6 +1787,7 @@ pdc = [
     'name': 'Z Orientation of Optical Surface Vertex',
     'oid': 'pgef:ParameterDefinition.RotZ_vertex',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1701,6 +1802,7 @@ pdc = [
     'name': 'X Component of Optical Surface Translational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dRMSWFE_dx',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1715,6 +1817,7 @@ pdc = [
     'name': 'Y Component of Optical Surface Translational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dRMSWFE_dy',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1729,6 +1832,7 @@ pdc = [
     'name': 'Z Component of Optical Surface Translational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dRMSWFE_dz',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1743,6 +1847,7 @@ pdc = [
     'name': 'X Component of Optical Surface Rotational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dRMSWFE_rx',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1757,6 +1862,7 @@ pdc = [
     'name': 'Y Component of Optical Surface Rotational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dRMSWFE_ry',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1771,6 +1877,7 @@ pdc = [
     'name': 'Z Component of Optical Surface Rotational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dRMSWFE_rz',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1785,6 +1892,7 @@ pdc = [
     'name': 'dLOSx/dx Component of Line of Sight Optical Surface Translational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSx_dx',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1799,6 +1907,7 @@ pdc = [
     'name': 'dLOSx/dy Component of Line of Sight Optical Surface Translational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSx_dy',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1813,6 +1922,7 @@ pdc = [
     'name': 'dLOSx/dz Component of Line of Sight Optical Surface Translational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSx_dz',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1827,6 +1937,7 @@ pdc = [
     'name': 'dLOSx/rx Component of Line of Sight Optical Surface Rotational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSx_rx',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1841,6 +1952,7 @@ pdc = [
     'name': 'dLOSx/ry Component of Line of Sight Optical Surface Rotational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSx_ry',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1855,6 +1967,7 @@ pdc = [
     'name': 'dLOSx/rz Component of Line of Sight Optical Surface Rotational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSx_rz',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1869,6 +1982,7 @@ pdc = [
     'name': 'dLOSy/dx Component of Line of Sight Optical Surface Translational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSy_dx',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1883,6 +1997,7 @@ pdc = [
     'name': 'dLOSy/dy Component of Line of Sight Optical Surface Translational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSy_dy',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1897,6 +2012,7 @@ pdc = [
     'name': 'dLOSy/dz Component of Line of Sight Optical Surface Translational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSy_dz',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1911,6 +2027,7 @@ pdc = [
     'name': 'dLOSy/rx Component of Line of Sight Optical Surface Rotational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSy_rx',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1925,6 +2042,7 @@ pdc = [
     'name': 'dLOSy/ry Component of Line of Sight Optical Surface Rotational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSy_ry',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1939,6 +2057,7 @@ pdc = [
     'name': 'dLOSy/rz Component of Line of Sight Optical Surface Rotational Sensitivity',
     'oid': 'pgef:ParameterDefinition.dLOSy_rz',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1953,6 +2072,7 @@ pdc = [
     'name': 'Emittance',
     'oid': 'pgef:ParameterDefinition.Emittance',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1967,6 +2087,7 @@ pdc = [
     'name': 'Absorptance',
     'oid': 'pgef:ParameterDefinition.Absorptance',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1981,6 +2102,7 @@ pdc = [
     'name': 'Effective Emittance when closed',
     'oid': 'pgef:ParameterDefinition.EffectiveEmittance_closed',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -1995,6 +2117,7 @@ pdc = [
     'name': 'Effective Emittance when open',
     'oid': 'pgef:ParameterDefinition.EffectiveEmittance_open',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -2009,6 +2132,7 @@ pdc = [
     'name': 'Thickness',
     'oid': 'pgef:ParameterDefinition.thickness',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'HardwareProduct',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -2023,6 +2147,7 @@ pdc = [
     'name': 'dRMS_dRBM_dx',
     'oid': 'pgef:ParameterDefinition.dRMS_dRBM_dx',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -2037,6 +2162,7 @@ pdc = [
     'name': 'dRMS_dRBM_dy',
     'oid': 'pgef:ParameterDefinition.dRMS_dRBM_dy',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -2051,6 +2177,7 @@ pdc = [
     'name': 'dRMS_dRBM_dz',
     'oid': 'pgef:ParameterDefinition.dRMS_dRBM_dz',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -2065,6 +2192,7 @@ pdc = [
     'name': 'dRMS_dRBM_rx',
     'oid': 'pgef:ParameterDefinition.dRMS_dRBM_rx',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -2079,6 +2207,7 @@ pdc = [
     'name': 'dRMS_dRBM_ry',
     'oid': 'pgef:ParameterDefinition.dRMS_dRBM_ry',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -2093,6 +2222,7 @@ pdc = [
     'name': 'dRMS_dRBM_rz',
     'oid': 'pgef:ParameterDefinition.dRMS_dRBM_rz',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -2107,6 +2237,7 @@ pdc = [
     'name': 'dRMS_dRoC',
     'oid': 'pgef:ParameterDefinition.dRMS_dRoC',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterDefinition',
@@ -2121,6 +2252,7 @@ pdc = [
     'name': 'dRMS_dK',
     'oid': 'pgef:ParameterDefinition.dRMS_dK',
     'owner': 'pgefobjects:PGANA',
+    'domain_class': 'Acu',
     'range_datatype': 'float'},
 
 {   '_cname': 'ParameterContext',
