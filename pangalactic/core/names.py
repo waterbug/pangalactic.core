@@ -451,6 +451,20 @@ EXT_NAMES_PLURAL = {
 #
 # TODO:  Add namespaces, to enable different "vocabularies" of standard names
 STD_VIEWS = dict(
+    Requirement=['id',
+                 'name',
+                 'rqt_level',
+                 'rqt_type',
+                 'rqt_compliance',
+                 'description',
+                 'rationale',
+                 'justification',
+                 'verification_method',
+                 'comment'
+                 ]
+    )
+
+STD_COL_SIZES = dict(
     Requirement={'id': 15,
                  'name': 30,
                  'rqt_level': 8,
