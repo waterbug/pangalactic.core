@@ -114,6 +114,7 @@
 
     `port:                  (str)  port to use for message bus host connection`
 
+    `self_signed_cert:      (bool) True -> a self-signed certificate is used`
 
     `tall_logo:             (str)  "tall" logo icon file name`
 
