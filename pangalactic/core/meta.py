@@ -533,6 +533,7 @@ PGEF_COL_WIDTHS = {
             'comment': 200,
             'description': 200,
             'frozen': 50,
+            'id': 200,
             'id_ns': 100,
             'iteration': 50,
             'justification': 200,
