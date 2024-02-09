@@ -1139,7 +1139,7 @@ class UberORB(object):
         self.log.debug('    deprecated items found, checking parameters ...')
         n_pds = 0
         n_pcs = 0
-        obj_oids = parameterz.keys()
+        obj_oids = [oid for oid in parameterz if parameterz.get(oid)]
         for oid in refdata.deprecated:
             if 'DataElementDefinition' in oid:
                 deid = oid.split('.')[-1]
