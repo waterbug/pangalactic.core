@@ -2220,7 +2220,8 @@ class UberORB(object):
             # for o in objs:
                 # self.log.debug('  - {}: {}'.format(
                                # o.__class__.__name__, o.id))
-        return list(objs)
+        # make sure not to return any None objects ...
+        return [obj for obj in objs if obj is not None]
 
     def get_reqts_for_project(self, project):
         """
