@@ -493,7 +493,8 @@ def write_component_rows_xlsx(sheet, level_fmts, name_fmts, data_fmts,
             sheet.write(row, i, val, dt_map.get(dtype, txt_fmt))
     real_comps = []
     component_acus = [orb.get(comp.usage_oid)
-                      for comp in componentz.get(component.oid, [])]
+                      for comp in componentz.get(component.oid, [])
+                      if orb.get(comp.usage_oid) is not None]
     if component_acus:
         real_comps = [acu for acu in component_acus
                       if hasattr(acu.component, 'oid') and
@@ -669,7 +670,8 @@ def get_item_data(item, cols, schema, level, summary=False, qty=1):
                                for comp in componentz[component.oid]
                                if comp.oid != 'pgefobjects:TBD'}
             qty_by_oid = {}
-            acus = [orb.get(c.usage_oid) for c in componentz[component.oid]]
+            acus = [orb.get(c.usage_oid) for c in componentz[component.oid]
+                    if orb.get(c.usage_oid) is not None]
             for acu in acus:
                 oid = acu.component.oid
                 if qty_by_oid.get(oid):
