@@ -233,9 +233,10 @@
     `    {project oid : (int) index in the "levels" combo (2 to 5 levels)`
                               for state of sys tree expansion in that project}`
 
-    `[6]: (server only) for vger, if "test" arg is true and`
-    `     state["test_project_loaded"] is false, the H2G2 test project and its`
-    `     data will be loaded; if true, H2G2 has already been loaded -- see`
+    `[6]: (only used in [1] server (vger module) and [2] client test scripts)`
+    `     If "test" arg is true and state["test_project_loaded"] is false,`
+    `     the H2G2 test project and its data will be loaded;`
+    `     if true, H2G2 has already been loaded -- see`
     `     pangalactic.vger.vger.RepositoryService.`
 
 ## Runtime Caches
