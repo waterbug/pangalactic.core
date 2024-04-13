@@ -38,7 +38,8 @@ from pangalactic.core.smerializers import serialize, deserialize
 # orb.start() and are usable by tests ...
 # =============================================================================
 home = 'marvin_test'
-os.makedirs(home, 0o775)
+if not os.path.exists(home):
+    os.makedirs(home, 0o775)
 parms_path = os.path.join(home, 'parameters.json')
 shutil.copyfile('parameters_test_fastorb.json', parms_path)  
 des_path = os.path.join(home, 'data_elements.json')
