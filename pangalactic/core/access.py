@@ -159,7 +159,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     if is_global_admin(user):
         # global admin is omnipotent, except for deleting projects ...
         # orb.log.debug('  ******* user is a global admin.')
-        perms = ['view']
+        perms = ['view', 'add docs', 'add models']
         # if (state.get('client') and
             # (state.get('connected') or
              # obj.oid not in state.get('synced_oids', []))):

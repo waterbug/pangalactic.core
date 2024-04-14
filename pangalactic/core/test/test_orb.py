@@ -66,6 +66,32 @@ prefs['default_parms'] = [
 
 class OrbTest(unittest.TestCase):
     maxDiff = None
+    # -----------------------------------------------------------------------------
+    # Set up global project objects used in tests 26_x:  role-based perms ...
+    # -----------------------------------------------------------------------------
+    # Steve has Administrator role on H2G2
+    steve = orb.get('test:steve')
+    # John Carefulwalker has Lead Engineer role on H2G2
+    carefulwalker = orb.get('test:carefulwalker')
+    # Zaphod Beeblebrox has Systems Engineer role on H2G2
+    zaphod = orb.get('test:zaphod')
+    # Buckaroo Banzai has Propulsion Engineer role on H2G2
+    buckaroo = orb.get('test:buckaroo')
+    sc = orb.get('test:spacecraft0')
+    # perms on Assembly Component Usages are based on owner of assembly,
+    # which determines the role context, and product type of the component
+    acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
+    acu2 = orb.get('test:H2G2:acu-2')  # SC/Infinite Improbability Drive acu
+    acu4 = orb.get('test:H2G2:acu-4')  # SC/Bambleweeny Sub-Meson Brain acu
+    acu6 = orb.get('test:H2G2:acu-6')  # SC/Instrument0 acu
+                                       # carefulwalker is LE in H2G2
+    acu7 = orb.get('test:H2G2:acu-7')  # Instrument0/Mr. Fusion acu **
+                                       # NOTE: Yoyodyne owns Instrument0
+                                       # carefulwalker not LE in Yoyodyne
+    # perms on ProjectSystemUsage are determined by project roles: only the
+    # Systems Engineer, Lead Engineer, and Administrator have full perms
+    psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+    req = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
 
     def test_00_home_dir_created(self):
         """
@@ -170,9 +196,9 @@ class OrbTest(unittest.TestCase):
         save_data_elementz('pangalaxian_test')
         value_oids = set(oids) - set([o.oid for o in new_objs])
         expected_oids = set()
-        req = orb.select('Requirement', id_ns='test')
+        test_req = orb.select('Requirement', id_ns='test')
         expected_rqt_oid = 'test:H2G2:Spacecraft-Mass'
-        value = [value_oids, new_objs, req.oid]
+        value = [value_oids, new_objs, test_req.oid]
         expected = [expected_oids, objs, expected_rqt_oid]
         self.assertEqual(expected, value)
 
@@ -180,9 +206,9 @@ class OrbTest(unittest.TestCase):
         """
         CASE:  verify that deserialized requirement has an allocation.
         """
-        req = orb.get('test:H2G2:Spacecraft-Mass')
-        alloc_oid = getattr(req.allocated_to, 'oid', '')
-        comp_form_oid = getattr(req.computable_form, 'oid', '')
+        test_req = orb.get('test:H2G2:Spacecraft-Mass')
+        alloc_oid = getattr(test_req.allocated_to, 'oid', '')
+        comp_form_oid = getattr(test_req.computable_form, 'oid', '')
         value = [alloc_oid, comp_form_oid]
         expected = ['test:H2G2:system-1',
                     'test:H2G2:Spacecraft-Mass-Computable-Form']
@@ -731,33 +757,10 @@ class OrbTest(unittest.TestCase):
         expected = ('test:OTHER:system-1', 'm', nte, perf_reqt.rqt_units, margin)
         self.assertEqual(expected, value)
 
-    def test_26_role_based_perms(self):
+    def test_26_1_role_based_perms(self):
         """
-        CASE:  test role-based permissions on project objects
+        CASE:  client, disconnected, admin, spacecraft
         """
-        # Steve has Administrator role on H2G2
-        steve = orb.get('test:steve')
-        # John Carefulwalker has Lead Engineer role on H2G2
-        carefulwalker = orb.get('test:carefulwalker')
-        # Zaphod Beeblebrox has Systems Engineer role on H2G2
-        zaphod = orb.get('test:zaphod')
-        # Buckaroo Banzai has Propulsion Engineer role on H2G2
-        buckaroo = orb.get('test:buckaroo')
-        sc = orb.get('test:spacecraft0')
-        # perms on Assembly Component Usages are based on owner of assembly,
-        # which determines the role context, and product type of the component
-        acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
-        acu2 = orb.get('test:H2G2:acu-2')  # SC/Infinite Improbability Drive acu
-        acu4 = orb.get('test:H2G2:acu-4')  # SC/Bambleweeny Sub-Meson Brain acu
-        acu6 = orb.get('test:H2G2:acu-6')  # SC/Instrument0 acu
-                                           # carefulwalker is an SE in H2G2
-        acu7 = orb.get('test:H2G2:acu-7')  # Instrument0/Mr. Fusion acu **
-                                           # NOTE: Yoyodyne owns Instrument0
-                                           # carefulwalker not SE in Yoyodyne
-        # perms on ProjectSystemUsage are determined by project roles: only the
-        # Systems Engineer, Lead Engineer, and Administrator have full perms
-        psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
-        req = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         # ***************************************************************
         # TODO: test for full perms when offline and object is not synced
         # ***************************************************************
@@ -769,70 +772,99 @@ class OrbTest(unittest.TestCase):
         # [1] tests for disconnected client
         state["client"] = True
         state["connected"] = False
+        steve = orb.get('test:steve')
+        sc = orb.get('test:spacecraft0')
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(sc, user=steve)), '1 Adm/sc:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '1 Adm/sc:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_role_based_perms(self):
+        """
+        CASE:  test role-based permissions on project objects
+        """
+        # ***************************************************************
+        # TODO: test for full perms when offline and object is not synced
+        # ***************************************************************
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        # [1] tests for disconnected client
+        state["client"] = True
+        state["connected"] = False
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
         value = [
-            (set(get_perms(sc, user=steve)),           ' 1 Adm/sc:  view only'),
-            (set(get_perms(sc, user=carefulwalker)),   ' 2 SE/sc:   view only'),
-            (set(get_perms(sc, user=zaphod)),          ' 3 LE/sc:   view only'),
-            (set(get_perms(sc, user=buckaroo)),        ' 4 PE/sc:   view only'),
-            (set(get_perms(acu1, user=steve)),         ' 5 Adm/acu: view only'),
-            (set(get_perms(acu1, user=carefulwalker)), ' 5a SE/acu: view only'),
+            (set(get_perms(sc, user=steve)),           ' 1 Adm/sc:  v/am/ad'),
+            (set(get_perms(sc, user=carefulwalker)),   ' 2 LE/sc:   v/am/ad'),
+            (set(get_perms(sc, user=zaphod)),          ' 3 SE/sc:   v/am/ad'),
+            (set(get_perms(sc, user=buckaroo)),        ' 4 PE/sc:   v/am/ad'),
+            (set(get_perms(acu1, user=steve)),         ' 5 Adm/acu: v/am/ad'),
+            (set(get_perms(acu1, user=carefulwalker)), ' 5a LE/acu: view only'),
             (set(get_perms(acu1, user=buckaroo)),      ' 6 PE/acu:  view only'),
             (set(get_perms(acu2, user=buckaroo)),      ' 7 PE/acu:  view only'),
             (set(get_perms(acu4, user=buckaroo)),      ' 8 PE/acu:  view only'),
-            (set(get_perms(acu6, user=carefulwalker)), ' 8a SE/acu: view only'),
-            (set(get_perms(acu7, user=carefulwalker)), ' 8b acu:    view only'),
-            (set(get_perms(psu, user=steve)),          ' 9 Adm/psu: view only'),
-            (set(get_perms(psu, user=carefulwalker)),  '10 SE/psu:  view only'),
-            (set(get_perms(psu, user=zaphod)),         '11 LE/psu:  view only'),
+            (set(get_perms(acu6, user=carefulwalker)), ' 8a LE/acu: view only'),
+            (set(get_perms(acu7, user=carefulwalker)), ' 8b LE/acu: view only'),
+            (set(get_perms(psu, user=steve)),          ' 9 Adm/psu: v/am/ad'),
+            (set(get_perms(psu, user=carefulwalker)),  '10 LE/psu:  view only'),
+            (set(get_perms(psu, user=zaphod)),         '11 SE/psu:  view only'),
             (set(get_perms(psu, user=buckaroo)),       '12 PE/psu:  view only'),
-            (set(get_perms(req, user=steve)),          '13 Adm/req: view only'),
-            (set(get_perms(req, user=carefulwalker)),  '14 SE/req:  view only'),
-            (set(get_perms(req, user=zaphod)),         '15 LE/req:  view only'),
+            (set(get_perms(req, user=steve)),          '13 Adm/req: v/am/ad'),
+            (set(get_perms(req, user=carefulwalker)),  '14 LE/req:  v/ad'),
+            (set(get_perms(req, user=zaphod)),         '15 SE/req:  v/ad'),
             (set(get_perms(req, user=buckaroo)),       '16 PE/req:  view only')
             ]
         # [2] tests for connected client
         state["connected"] = True
         value += [
             set(get_perms(sc, user=steve)),           #  1 Adm/sc:  full perms
-            set(get_perms(sc, user=carefulwalker)),   #  2 SE/sc:   full perms
-            set(get_perms(sc, user=zaphod)),          #  3 LE/sc:   full perms
+            set(get_perms(sc, user=carefulwalker)),   #  2 LE/sc:   full perms
+            set(get_perms(sc, user=zaphod)),          #  3 SE/sc:   full perms
             set(get_perms(sc, user=buckaroo)),        #  4 PE/sc:   view only
             set(get_perms(acu1, user=steve)),         #  5 Adm/acu: view only
-            set(get_perms(acu1, user=carefulwalker)), #  5a SE/acu: full perms
+            set(get_perms(acu1, user=carefulwalker)), #  5a LE/acu: full perms
             set(get_perms(acu1, user=buckaroo)),      #  6 PE/acu:  full perms
             set(get_perms(acu2, user=buckaroo)),      #  7 PE/acu:  full perms
             set(get_perms(acu4, user=buckaroo)),      #  8 PE/acu:  view only
-            set(get_perms(acu6, user=carefulwalker)), #  8a SE/acu: full perms
-            set(get_perms(acu7, user=carefulwalker)), #  8b acu: view only **
+            set(get_perms(acu6, user=carefulwalker)), #  8a LE/acu: full perms
+            set(get_perms(acu7, user=carefulwalker)), #  8b LE/acu: view only
             set(get_perms(psu, user=steve)),          #  9 Adm/psu: full perms
-            set(get_perms(psu, user=carefulwalker)),  # 10 SE/psu:  full perms
-            set(get_perms(psu, user=zaphod)),         # 11 LE/psu:  full perms
+            set(get_perms(psu, user=carefulwalker)),  # 10 LE/psu:  full perms
+            set(get_perms(psu, user=zaphod)),         # 11 SE/psu:  full perms
             set(get_perms(psu, user=buckaroo)),       # 12 PE/psu:  view only
             set(get_perms(req, user=steve)),          # 13 Adm/req: full perms
-            set(get_perms(req, user=carefulwalker)),  # 14 SE/req:  full perms
-            set(get_perms(req, user=zaphod)),         # 15 LE/req:  full perms
+            set(get_perms(req, user=carefulwalker)),  # 14 LE/req:  full perms
+            set(get_perms(req, user=zaphod)),         # 15 SE/req:  full perms
             set(get_perms(req, user=buckaroo))        # 16 PE/req:  view only
             ]
         expected = [
             # non-connected state
-            (set(['view']), ' 1 Adm/sc:  view only'),
-            (set(['view']), ' 2 SE/sc:   view only'),
-            (set(['view']), ' 3 LE/sc:   view only'),
-            (set(['view']), ' 4 PE/sc:   view only'),
-            (set(['view']), ' 5 Adm/acu: view only'),
-            (set(['view']), ' 5a SE/acu: view only'),
+            (set(['view', 'add models', 'add docs']), ' 1 Adm/sc:  v/am/ad'),
+            (set(['view', 'add models', 'add docs']), ' 2 LE/sc:   v/am/ad'),
+            (set(['view', 'add models', 'add docs']), ' 3 SE/sc:   v/am/ad'),
+            (set(['view', 'add models', 'add docs']), ' 4 PE/sc:   v/am/ad'),
+            (set(['view', 'add models', 'add docs']), ' 5 Adm/acu: v/am/ad'),
+            (set(['view']), ' 5a LE/acu: view only'),
             (set(['view']), ' 6 PE/acu:  view only'),
             (set(['view']), ' 7 PE/acu:  view only'),
             (set(['view']), ' 8 PE/acu:  view only'),
             (set(['view']), ' 8a SE/acu: view only'),
             (set(['view']), ' 8b acu:    view only'),
-            (set(['view']), ' 9 Adm/psu: view only'),
-            (set(['view']), '10 SE/psu:  view only'),
-            (set(['view']), '11 LE/psu:  view only'),
+            (set(['view', 'add models', 'add docs']), ' 9 Adm/psu: v/am/ad'),
+            (set(['view']), '10 LE/psu:  view only'),
+            (set(['view']), '11 SE/psu:  view only'),
             (set(['view']), '12 PE/psu:  view only'),
-            (set(['view']), '13 Adm/req: view only'),
-            (set(['view']), '14 SE/req:  view only'),
-            (set(['view']), '15 LE/req:  view only'),
+            (set(['view', 'add models', 'add docs']), '13 Adm/req: v/am/ad'),
+            (set(['view', 'add docs']), '14 LE/req:  v/ad'),
+            (set(['view', 'add docs']), '15 SE/req:  v/ad'),
             (set(['view']), '16 PE/req:  view only'),
             # connected state
             set(['view', 'modify', 'delete']), #  1
