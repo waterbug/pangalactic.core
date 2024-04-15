@@ -66,32 +66,6 @@ prefs['default_parms'] = [
 
 class OrbTest(unittest.TestCase):
     maxDiff = None
-    # -----------------------------------------------------------------------------
-    # Set up global project objects used in tests 26_x:  role-based perms ...
-    # -----------------------------------------------------------------------------
-    # Steve has Administrator role on H2G2
-    steve = orb.get('test:steve')
-    # John Carefulwalker has Lead Engineer role on H2G2
-    carefulwalker = orb.get('test:carefulwalker')
-    # Zaphod Beeblebrox has Systems Engineer role on H2G2
-    zaphod = orb.get('test:zaphod')
-    # Buckaroo Banzai has Propulsion Engineer role on H2G2
-    buckaroo = orb.get('test:buckaroo')
-    sc = orb.get('test:spacecraft0')
-    # perms on Assembly Component Usages are based on owner of assembly,
-    # which determines the role context, and product type of the component
-    acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
-    acu2 = orb.get('test:H2G2:acu-2')  # SC/Infinite Improbability Drive acu
-    acu4 = orb.get('test:H2G2:acu-4')  # SC/Bambleweeny Sub-Meson Brain acu
-    acu6 = orb.get('test:H2G2:acu-6')  # SC/Instrument0 acu
-                                       # carefulwalker is LE in H2G2
-    acu7 = orb.get('test:H2G2:acu-7')  # Instrument0/Mr. Fusion acu **
-                                       # NOTE: Yoyodyne owns Instrument0
-                                       # carefulwalker not LE in Yoyodyne
-    # perms on ProjectSystemUsage are determined by project roles: only the
-    # Systems Engineer, Lead Engineer, and Administrator have full perms
-    psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
-    req = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
 
     def test_00_home_dir_created(self):
         """
@@ -757,21 +731,45 @@ class OrbTest(unittest.TestCase):
         expected = ('test:OTHER:system-1', 'm', nte, perf_reqt.rqt_units, margin)
         self.assertEqual(expected, value)
 
-    def test_26_1_role_based_perms(self):
+    # =========================================================================
+    # tests for disconnected client
+    # =========================================================================
+    # Steve has Administrator role on H2G2
+    steve = orb.get('test:steve')
+    # John Carefulwalker has Lead Engineer role on H2G2
+    carefulwalker = orb.get('test:carefulwalker')
+    # Zaphod Beeblebrox has Systems Engineer role on H2G2
+    zaphod = orb.get('test:zaphod')
+    # Buckaroo Banzai has Propulsion Engineer role on H2G2
+    buckaroo = orb.get('test:buckaroo')
+    sc = orb.get('test:spacecraft0')
+    # perms on Assembly Component Usages are based on owner of assembly,
+    # which determines the role context, and product type of the component
+    acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
+    acu2 = orb.get('test:H2G2:acu-2')  # SC/Infinite Improbability Drive acu
+    acu4 = orb.get('test:H2G2:acu-4')  # SC/Bambleweeny Sub-Meson Brain acu
+    acu6 = orb.get('test:H2G2:acu-6')  # SC/Instrument0 acu
+                                       # carefulwalker is LE in H2G2
+    acu7 = orb.get('test:H2G2:acu-7')  # Instrument0/Mr. Fusion acu **
+                                       # NOTE: Yoyodyne owns Instrument0
+                                       # carefulwalker not LE in Yoyodyne
+    # perms on ProjectSystemUsage are determined by project roles: only the
+    # Systems Engineer, Lead Engineer, and Administrator have full perms
+    psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+    req = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
+
+    def test_26_01_perms_case_1(self):
         """
-        CASE:  client, disconnected, admin, spacecraft
+        CASE 1:  client, disconnected, admin, spacecraft
         """
-        # ***************************************************************
-        # TODO: test for full perms when offline and object is not synced
-        # ***************************************************************
         state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
                                 'test:H2G2:acu-2', 'test:H2G2:acu-4',
                                 'test:H2G2:acu-6', 'test:H2G2:acu-7',
                                 'test:H2G2:system-1',
                                 'test:H2G2:Spacecraft-Mass']
-        # [1] tests for disconnected client
         state["client"] = True
         state["connected"] = False
+        # Steve has Global Administrator role
         steve = orb.get('test:steve')
         sc = orb.get('test:spacecraft0')
         # NOTE:
@@ -782,112 +780,934 @@ class OrbTest(unittest.TestCase):
         expected = (set(['view', 'add models', 'add docs']), '1 Adm/sc:  v/am/ad')
         self.assertEqual(expected, value)
 
-    def test_26_role_based_perms(self):
+    def test_26_02_perms_case_2(self):
         """
-        CASE:  test role-based permissions on project objects
+        CASE 2:  client, disconnected, lead engineer, spacecraft
         """
-        # ***************************************************************
-        # TODO: test for full perms when offline and object is not synced
-        # ***************************************************************
         state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
                                 'test:H2G2:acu-2', 'test:H2G2:acu-4',
                                 'test:H2G2:acu-6', 'test:H2G2:acu-7',
                                 'test:H2G2:system-1',
                                 'test:H2G2:Spacecraft-Mass']
-        # [1] tests for disconnected client
         state["client"] = True
         state["connected"] = False
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        sc = orb.get('test:spacecraft0')
         # NOTE:
         #     v  -> view
         #     ad -> add docs
         #     am -> add models
-        value = [
-            (set(get_perms(sc, user=steve)),           ' 1 Adm/sc:  v/am/ad'),
-            (set(get_perms(sc, user=carefulwalker)),   ' 2 LE/sc:   v/am/ad'),
-            (set(get_perms(sc, user=zaphod)),          ' 3 SE/sc:   v/am/ad'),
-            (set(get_perms(sc, user=buckaroo)),        ' 4 PE/sc:   v/am/ad'),
-            (set(get_perms(acu1, user=steve)),         ' 5 Adm/acu: v/am/ad'),
-            (set(get_perms(acu1, user=carefulwalker)), ' 5a LE/acu: view only'),
-            (set(get_perms(acu1, user=buckaroo)),      ' 6 PE/acu:  view only'),
-            (set(get_perms(acu2, user=buckaroo)),      ' 7 PE/acu:  view only'),
-            (set(get_perms(acu4, user=buckaroo)),      ' 8 PE/acu:  view only'),
-            (set(get_perms(acu6, user=carefulwalker)), ' 8a LE/acu: view only'),
-            (set(get_perms(acu7, user=carefulwalker)), ' 8b LE/acu: view only'),
-            (set(get_perms(psu, user=steve)),          ' 9 Adm/psu: v/am/ad'),
-            (set(get_perms(psu, user=carefulwalker)),  '10 LE/psu:  view only'),
-            (set(get_perms(psu, user=zaphod)),         '11 SE/psu:  view only'),
-            (set(get_perms(psu, user=buckaroo)),       '12 PE/psu:  view only'),
-            (set(get_perms(req, user=steve)),          '13 Adm/req: v/am/ad'),
-            (set(get_perms(req, user=carefulwalker)),  '14 LE/req:  v/ad'),
-            (set(get_perms(req, user=zaphod)),         '15 SE/req:  v/ad'),
-            (set(get_perms(req, user=buckaroo)),       '16 PE/req:  view only')
-            ]
-        # [2] tests for connected client
-        state["connected"] = True
-        value += [
-            set(get_perms(sc, user=steve)),           #  1 Adm/sc:  full perms
-            set(get_perms(sc, user=carefulwalker)),   #  2 LE/sc:   full perms
-            set(get_perms(sc, user=zaphod)),          #  3 SE/sc:   full perms
-            set(get_perms(sc, user=buckaroo)),        #  4 PE/sc:   view only
-            set(get_perms(acu1, user=steve)),         #  5 Adm/acu: view only
-            set(get_perms(acu1, user=carefulwalker)), #  5a LE/acu: full perms
-            set(get_perms(acu1, user=buckaroo)),      #  6 PE/acu:  full perms
-            set(get_perms(acu2, user=buckaroo)),      #  7 PE/acu:  full perms
-            set(get_perms(acu4, user=buckaroo)),      #  8 PE/acu:  view only
-            set(get_perms(acu6, user=carefulwalker)), #  8a LE/acu: full perms
-            set(get_perms(acu7, user=carefulwalker)), #  8b LE/acu: view only
-            set(get_perms(psu, user=steve)),          #  9 Adm/psu: full perms
-            set(get_perms(psu, user=carefulwalker)),  # 10 LE/psu:  full perms
-            set(get_perms(psu, user=zaphod)),         # 11 SE/psu:  full perms
-            set(get_perms(psu, user=buckaroo)),       # 12 PE/psu:  view only
-            set(get_perms(req, user=steve)),          # 13 Adm/req: full perms
-            set(get_perms(req, user=carefulwalker)),  # 14 LE/req:  full perms
-            set(get_perms(req, user=zaphod)),         # 15 SE/req:  full perms
-            set(get_perms(req, user=buckaroo))        # 16 PE/req:  view only
-            ]
-        expected = [
-            # non-connected state
-            (set(['view', 'add models', 'add docs']), ' 1 Adm/sc:  v/am/ad'),
-            (set(['view', 'add models', 'add docs']), ' 2 LE/sc:   v/am/ad'),
-            (set(['view', 'add models', 'add docs']), ' 3 SE/sc:   v/am/ad'),
-            (set(['view', 'add models', 'add docs']), ' 4 PE/sc:   v/am/ad'),
-            (set(['view', 'add models', 'add docs']), ' 5 Adm/acu: v/am/ad'),
-            (set(['view']), ' 5a LE/acu: view only'),
-            (set(['view']), ' 6 PE/acu:  view only'),
-            (set(['view']), ' 7 PE/acu:  view only'),
-            (set(['view']), ' 8 PE/acu:  view only'),
-            (set(['view']), ' 8a SE/acu: view only'),
-            (set(['view']), ' 8b acu:    view only'),
-            (set(['view', 'add models', 'add docs']), ' 9 Adm/psu: v/am/ad'),
-            (set(['view']), '10 LE/psu:  view only'),
-            (set(['view']), '11 SE/psu:  view only'),
-            (set(['view']), '12 PE/psu:  view only'),
-            (set(['view', 'add models', 'add docs']), '13 Adm/req: v/am/ad'),
-            (set(['view', 'add docs']), '14 LE/req:  v/ad'),
-            (set(['view', 'add docs']), '15 SE/req:  v/ad'),
-            (set(['view']), '16 PE/req:  view only'),
-            # connected state
-            set(['view', 'modify', 'delete']), #  1
-            set(['view', 'modify', 'delete']), #  2
-            set(['view', 'modify', 'delete']), #  3
-            set(['view']),                     #  4
-            set(['view', 'modify', 'delete']), #  5
-            set(['view', 'modify', 'delete']), #  5a
-            set(['view', 'modify', 'delete']), #  6
-            set(['view', 'modify', 'delete']), #  7
-            set(['view']),                     #  8
-            set(['view', 'modify', 'delete']), #  8a
-            set(['view', 'modify', 'delete']), #  8b
-            set(['view', 'modify', 'delete']), #  9
-            set(['view', 'modify', 'delete']), # 10
-            set(['view', 'modify', 'delete']), # 11
-            set(['view']),                     # 12
-            set(['view', 'modify', 'delete']), # 13
-            set(['view', 'modify', 'delete']), # 14
-            set(['view', 'modify', 'delete']), # 15
-            set(['view'])                      # 16
-            ]
+        value = (set(get_perms(sc, user=carefulwalker)), '2 LE/sc:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '2 LE/sc:  v/am/ad')
         self.assertEqual(expected, value)
+
+    def test_26_03_perms_case_3(self):
+        """
+        CASE 3:  client, disconnected, systems engineer, spacecraft
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Zaphod Beeblebrox has Systems Engineer role on H2G2
+        zaphod = orb.get('test:zaphod')
+        sc = orb.get('test:spacecraft0')
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(sc, user=zaphod)), '3 SE/sc:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '3 SE/sc:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_04_perms_case_4(self):
+        """
+        CASE 4:  client, disconnected, propulsion engineer, spacecraft
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        sc = orb.get('test:spacecraft0')
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(sc, user=buckaroo)), '4 PE/sc:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '4 PE/sc:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_05_perms_case_5(self):
+        """
+        CASE 5:  client, disconnected, admin, acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Steve has Global Administrator role
+        steve = orb.get('test:steve')
+        acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu1, user=steve)), '5 Adm/acu:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '5 Adm/acu:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_05a_perms_case_5a(self):
+        """
+        CASE 5a:  client, disconnected, lead engineer, synced acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu1, user=carefulwalker)), '5a LE/acu:  v')
+        expected = (set(['view']), '5a LE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_06_perms_case_6(self):
+        """
+        CASE 6:  client, disconnected, propulsion engineer, acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu1, user=buckaroo)), '6 PE/acu:  v')
+        expected = (set(['view']), '6 PE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_07_perms_case_7(self):
+        """
+        CASE 7:  client, disconnected, propulsion engineer, synced acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        acu2 = orb.get('test:H2G2:acu-2')  # SC/Infinite Improbability Drive acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu2, user=buckaroo)), '7 PE/acu:  v')
+        expected = (set(['view']), '7 PE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_08_perms_case_8(self):
+        """
+        CASE 8:  client, disconnected, propulsion engineer, acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        acu4 = orb.get('test:H2G2:acu-4')  # SC/Bambleweeny Sub-Meson Brain acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu4, user=buckaroo)), '8 PE/acu:  v')
+        expected = (set(['view']), '8 PE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_08a_perms_case_8a(self):
+        """
+        CASE 8a:  client, disconnected, lead engineer, synced acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        acu6 = orb.get('test:H2G2:acu-6')  # SC/Instrument0 acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu6, user=carefulwalker)), '8a LE/acu:  v')
+        expected = (set(['view']), '8a LE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_08b_perms_case_8b(self):
+        """
+        CASE 8b:  client, disconnected, project lead engineer, synced acu for
+        an assembly owned by an organization in which the project lead engineer
+        does not have lead engineer role
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        acu7 = orb.get('test:H2G2:acu-7')  # Instrument0/Mr. Fusion acu **
+                                           # ** Yoyodyne owns Instrument0
+                                           # carefulwalker not LE in Yoyodyne
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu7, user=carefulwalker)), '8b LE/acu:  v')
+        expected = (set(['view']), '8b LE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_09_perms_case_9(self):
+        """
+        CASE 9:  client, disconnected, admin, psu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Steve has Global Administrator role
+        steve = orb.get('test:steve')
+        psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(psu, user=steve)), '9 Adm/psu:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '9 Adm/psu:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_10_perms_case_10(self):
+        """
+        CASE 10:  client, disconnected, lead engineer, synced psu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(psu, user=carefulwalker)), '10 LE/psu:  v')
+        expected = (set(['view']), '10 LE/psu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_11_perms_case_11(self):
+        """
+        CASE 11:  client, disconnected, systems engineer, synced psu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Zaphod Beeblebrox has Systems Engineer role on H2G2
+        zaphod = orb.get('test:zaphod')
+        psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(psu, user=zaphod)), '11 SE/psu:  v')
+        expected = (set(['view']), '11 SE/psu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_12_perms_case_12(self):
+        """
+        CASE 12:  client, disconnected, propulsion engineer, synced psu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(psu, user=buckaroo)), '12 PE/psu:  v')
+        expected = (set(['view']), '12 PE/psu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_13_perms_case_13(self):
+        """
+        CASE 13:  client, disconnected, admin, synced rqt
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Steve has Global Administrator role
+        steve = orb.get('test:steve')
+        rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(rqt, user=steve)), '13 Adm/rqt:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '13 Adm/rqt:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_14_perms_case_14(self):
+        """
+        CASE 14:  client, disconnected, lead engineer, synced rqt
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(rqt, user=carefulwalker)), '14 LE/rqt:  v/ad')
+        expected = (set(['view', 'add docs']), '14 LE/rqt:  v/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_15_perms_case_15(self):
+        """
+        CASE 15:  client, disconnected, systems engineer, synced rqt
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Zaphod Beeblebrox has Systems Engineer role on H2G2
+        zaphod = orb.get('test:zaphod')
+        rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(rqt, user=zaphod)), '15 SE/rqt:  v/ad')
+        expected = (set(['view', 'add docs']), '15 SE/rqt:  v/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_16_perms_case_16(self):
+        """
+        CASE 16:  client, disconnected, propulsion engineer, synced rqt
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = False
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(rqt, user=buckaroo)), '16 PE/rqt:  v')
+        expected = (set(['view']), '16 PE/rqt:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_21_perms_case_21(self):
+        """
+        CASE 21:  client, connected, admin, spacecraft
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Steve has Global Administrator role
+        steve = orb.get('test:steve')
+        sc = orb.get('test:spacecraft0')
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(sc, user=steve)), '1 Adm/sc:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '1 Adm/sc:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_22_perms_case_22(self):
+        """
+        CASE 22:  client, connected, lead engineer, spacecraft
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        sc = orb.get('test:spacecraft0')
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(sc, user=carefulwalker)), '2 LE/sc:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '2 LE/sc:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_23_perms_case_23(self):
+        """
+        CASE 23:  client, connected, systems engineer, spacecraft
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Zaphod Beeblebrox has Systems Engineer role on H2G2
+        zaphod = orb.get('test:zaphod')
+        sc = orb.get('test:spacecraft0')
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(sc, user=zaphod)), '3 SE/sc:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '3 SE/sc:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_24_perms_case_24(self):
+        """
+        CASE 24:  client, connected, propulsion engineer, spacecraft
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        sc = orb.get('test:spacecraft0')
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(sc, user=buckaroo)), '4 PE/sc:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '4 PE/sc:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_25_perms_case_25(self):
+        """
+        CASE 25:  client, connected, admin, acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Steve has Global Administrator role
+        steve = orb.get('test:steve')
+        acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu1, user=steve)), '5 Adm/acu:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '5 Adm/acu:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_25a_perms_case_25a(self):
+        """
+        CASE 25a:  client, connected, lead engineer, synced acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu1, user=carefulwalker)), '5a LE/acu:  v')
+        expected = (set(['view']), '5a LE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_26_perms_case_26(self):
+        """
+        CASE 26:  client, connected, propulsion engineer, acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu1, user=buckaroo)), '6 PE/acu:  v')
+        expected = (set(['view']), '6 PE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_27_perms_case_27(self):
+        """
+        CASE 27:  client, connected, propulsion engineer, synced acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        acu2 = orb.get('test:H2G2:acu-2')  # SC/Infinite Improbability Drive acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu2, user=buckaroo)), '7 PE/acu:  v')
+        expected = (set(['view']), '7 PE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_28_perms_case_28(self):
+        """
+        CASE 28:  client, connected, propulsion engineer, acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        acu4 = orb.get('test:H2G2:acu-4')  # SC/Bambleweeny Sub-Meson Brain acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu4, user=buckaroo)), '8 PE/acu:  v')
+        expected = (set(['view']), '8 PE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_28a_perms_case_28a(self):
+        """
+        CASE 28a:  client, connected, lead engineer, synced acu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        acu6 = orb.get('test:H2G2:acu-6')  # SC/Instrument0 acu
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu6, user=carefulwalker)), '8a LE/acu:  v')
+        expected = (set(['view']), '8a LE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_28b_perms_case_28b(self):
+        """
+        CASE 28b:  client, connected, project lead engineer, synced acu for
+        an assembly owned by an organization in which the project lead engineer
+        does not have lead engineer role
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        acu7 = orb.get('test:H2G2:acu-7')  # Instrument0/Mr. Fusion acu **
+                                           # ** Yoyodyne owns Instrument0
+                                           # carefulwalker not LE in Yoyodyne
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(acu7, user=carefulwalker)), '8b LE/acu:  v')
+        expected = (set(['view']), '8b LE/acu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_29_perms_case_29(self):
+        """
+        CASE 29:  client, connected, admin, psu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Steve has Global Administrator role
+        steve = orb.get('test:steve')
+        psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(psu, user=steve)), '9 Adm/psu:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '9 Adm/psu:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_30_perms_case_30(self):
+        """
+        CASE 30:  client, connected, lead engineer, synced psu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(psu, user=carefulwalker)), '10 LE/psu:  v')
+        expected = (set(['view']), '10 LE/psu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_31_perms_case_31(self):
+        """
+        CASE 31:  client, connected, systems engineer, synced psu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Zaphod Beeblebrox has Systems Engineer role on H2G2
+        zaphod = orb.get('test:zaphod')
+        psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(psu, user=zaphod)), '11 SE/psu:  v')
+        expected = (set(['view']), '11 SE/psu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_32_perms_case_32(self):
+        """
+        CASE 32:  client, connected, propulsion engineer, synced psu
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(psu, user=buckaroo)), '12 PE/psu:  v')
+        expected = (set(['view']), '12 PE/psu:  v')
+        self.assertEqual(expected, value)
+
+    def test_26_33_perms_case_33(self):
+        """
+        CASE 33:  client, connected, admin, synced rqt
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Steve has Global Administrator role
+        steve = orb.get('test:steve')
+        rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(rqt, user=steve)), '13 Adm/rqt:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']), '13 Adm/rqt:  v/am/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_34_perms_case_34(self):
+        """
+        CASE 34:  client, connected, lead engineer, synced rqt
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # John Carefulwalker has Lead Engineer role on H2G2
+        carefulwalker = orb.get('test:carefulwalker')
+        rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(rqt, user=carefulwalker)), '14 LE/rqt:  v/ad')
+        expected = (set(['view', 'add docs']), '14 LE/rqt:  v/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_35_perms_case_35(self):
+        """
+        CASE 35:  client, connected, systems engineer, synced rqt
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Zaphod Beeblebrox has Systems Engineer role on H2G2
+        zaphod = orb.get('test:zaphod')
+        rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(rqt, user=zaphod)), '15 SE/rqt:  v/ad')
+        expected = (set(['view', 'add docs']), '15 SE/rqt:  v/ad')
+        self.assertEqual(expected, value)
+
+    def test_26_36_perms_case_36(self):
+        """
+        CASE 36:  client, connected, propulsion engineer, synced rqt
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass']
+        state["client"] = True
+        state["connected"] = True
+        # Buckaroo Banzai has Propulsion Engineer role on H2G2
+        buckaroo = orb.get('test:buckaroo')
+        rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
+        # NOTE:
+        #     v  -> view
+        #     ad -> add docs
+        #     am -> add models
+        value = (set(get_perms(rqt, user=buckaroo)), '16 PE/rqt:  v')
+        expected = (set(['view']), '16 PE/rqt:  v')
+        self.assertEqual(expected, value)
+
+    # def test_26_role_based_perms(self):
+        # """
+        # CASE:  test role-based permissions on project objects
+        # """
+        # # ***************************************************************
+        # # TODO: test for full perms when offline and object is not synced
+        # # ***************************************************************
+        # state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                # 'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                # 'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                # 'test:H2G2:system-1',
+                                # 'test:H2G2:Spacecraft-Mass']
+        # # [1] tests for disconnected client
+        # state["client"] = True
+        # state["connected"] = False
+        # # NOTE:
+        # #     v  -> view
+        # #     ad -> add docs
+        # #     am -> add models
+        # value = [
+            # (set(get_perms(sc, user=steve)),           ' 1 Adm/sc:  v/am/ad'),
+            # (set(get_perms(sc, user=carefulwalker)),   ' 2 LE/sc:   v/am/ad'),
+            # (set(get_perms(sc, user=zaphod)),          ' 3 SE/sc:   v/am/ad'),
+            # (set(get_perms(sc, user=buckaroo)),        ' 4 PE/sc:   v/am/ad'),
+            # (set(get_perms(acu1, user=steve)),         ' 5 Adm/acu: v/am/ad'),
+            # (set(get_perms(acu1, user=carefulwalker)), ' 5a LE/acu: view only'),
+            # (set(get_perms(acu1, user=buckaroo)),      ' 6 PE/acu:  view only'),
+            # (set(get_perms(acu2, user=buckaroo)),      ' 7 PE/acu:  view only'),
+            # (set(get_perms(acu4, user=buckaroo)),      ' 8 PE/acu:  view only'),
+            # (set(get_perms(acu6, user=carefulwalker)), ' 8a LE/acu: view only'),
+            # (set(get_perms(acu7, user=carefulwalker)), ' 8b LE/acu: view only'),
+            # (set(get_perms(psu, user=steve)),          ' 9 Adm/psu: v/am/ad'),
+            # (set(get_perms(psu, user=carefulwalker)),  '10 LE/psu:  view only'),
+            # (set(get_perms(psu, user=zaphod)),         '11 SE/psu:  view only'),
+            # (set(get_perms(psu, user=buckaroo)),       '12 PE/psu:  view only'),
+            # (set(get_perms(req, user=steve)),          '13 Adm/req: v/am/ad'),
+            # (set(get_perms(req, user=carefulwalker)),  '14 LE/req:  v/ad'),
+            # (set(get_perms(req, user=zaphod)),         '15 SE/req:  v/ad'),
+            # (set(get_perms(req, user=buckaroo)),       '16 PE/req:  view only')
+            # ]
+        # # [2] tests for connected client
+        # state["connected"] = True
+        # value += [
+            # set(get_perms(sc, user=steve)),           # 21 Adm/sc:  full perms
+            # set(get_perms(sc, user=carefulwalker)),   # 22 LE/sc:   full perms
+            # set(get_perms(sc, user=zaphod)),          # 23 SE/sc:   full perms
+            # set(get_perms(sc, user=buckaroo)),        # 24 PE/sc:   view only
+            # set(get_perms(acu1, user=steve)),         # 25 Adm/acu: view only
+            # set(get_perms(acu1, user=carefulwalker)), # 25a LE/acu: full perms
+            # set(get_perms(acu1, user=buckaroo)),      # 26 PE/acu:  full perms
+            # set(get_perms(acu2, user=buckaroo)),      # 27 PE/acu:  full perms
+            # set(get_perms(acu4, user=buckaroo)),      # 28 PE/acu:  view only
+            # set(get_perms(acu6, user=carefulwalker)), # 28a LE/acu: full perms
+            # set(get_perms(acu7, user=carefulwalker)), # 28b LE/acu: view only
+            # set(get_perms(psu, user=steve)),          # 29 Adm/psu: full perms
+            # set(get_perms(psu, user=carefulwalker)),  # 30 LE/psu:  full perms
+            # set(get_perms(psu, user=zaphod)),         # 31 SE/psu:  full perms
+            # set(get_perms(psu, user=buckaroo)),       # 32 PE/psu:  view only
+            # set(get_perms(req, user=steve)),          # 33 Adm/req: full perms
+            # set(get_perms(req, user=carefulwalker)),  # 34 LE/req:  full perms
+            # set(get_perms(req, user=zaphod)),         # 35 SE/req:  full perms
+            # set(get_perms(req, user=buckaroo))        # 36 PE/req:  view only
+            # ]
+        # expected = [
+            # # non-connected state
+            # (set(['view', 'add models', 'add docs']), ' 1 Adm/sc:  v/am/ad'),
+            # (set(['view', 'add models', 'add docs']), ' 2 LE/sc:   v/am/ad'),
+            # (set(['view', 'add models', 'add docs']), ' 3 SE/sc:   v/am/ad'),
+            # (set(['view', 'add models', 'add docs']), ' 4 PE/sc:   v/am/ad'),
+            # (set(['view', 'add models', 'add docs']), ' 5 Adm/acu: v/am/ad'),
+            # (set(['view']), ' 5a LE/acu: view only'),
+            # (set(['view']), ' 6 PE/acu:  view only'),
+            # (set(['view']), ' 7 PE/acu:  view only'),
+            # (set(['view']), ' 8 PE/acu:  view only'),
+            # (set(['view']), ' 8a SE/acu: view only'),
+            # (set(['view']), ' 8b acu:    view only'),
+            # (set(['view', 'add models', 'add docs']), ' 9 Adm/psu: v/am/ad'),
+            # (set(['view']), '10 LE/psu:  view only'),
+            # (set(['view']), '11 SE/psu:  view only'),
+            # (set(['view']), '12 PE/psu:  view only'),
+            # (set(['view', 'add models', 'add docs']), '13 Adm/req: v/am/ad'),
+            # (set(['view', 'add docs']), '14 LE/req:  v/ad'),
+            # (set(['view', 'add docs']), '15 SE/req:  v/ad'),
+            # (set(['view']), '16 PE/req:  view only'),
+            # # connected state
+            # set(['view', 'modify', 'delete']), # 21
+            # set(['view', 'modify', 'delete']), # 22
+            # set(['view', 'modify', 'delete']), # 23
+            # set(['view']),                     # 24
+            # set(['view', 'modify', 'delete']), # 25
+            # set(['view', 'modify', 'delete']), # 25a
+            # set(['view', 'modify', 'delete']), # 26
+            # set(['view', 'modify', 'delete']), # 27
+            # set(['view']),                     # 28
+            # set(['view', 'modify', 'delete']), # 28a
+            # set(['view', 'modify', 'delete']), # 28b
+            # set(['view', 'modify', 'delete']), # 29
+            # set(['view', 'modify', 'delete']), # 30
+            # set(['view', 'modify', 'delete']), # 31
+            # set(['view']),                     # 32
+            # set(['view', 'modify', 'delete']), # 33
+            # set(['view', 'modify', 'delete']), # 34
+            # set(['view', 'modify', 'delete']), # 35
+            # set(['view'])                      # 36
+            # ]
+        # self.assertEqual(expected, value)
 
     # TODO:  revise this test!
     # def test_27_deserialize_object_with_modified_parameters(self):
