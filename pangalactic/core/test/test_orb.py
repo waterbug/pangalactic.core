@@ -774,6 +774,8 @@ class OrbTest(unittest.TestCase):
         sc = orb.get('test:spacecraft0')
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(sc, user=steve)), '1 Adm/sc:  v/am/ad')
@@ -796,6 +798,8 @@ class OrbTest(unittest.TestCase):
         sc = orb.get('test:spacecraft0')
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(sc, user=carefulwalker)), '2 LE/sc:  v/am/ad')
@@ -818,6 +822,8 @@ class OrbTest(unittest.TestCase):
         sc = orb.get('test:spacecraft0')
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(sc, user=zaphod)), '3 SE/sc:  v/am/ad')
@@ -840,6 +846,8 @@ class OrbTest(unittest.TestCase):
         sc = orb.get('test:spacecraft0')
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(sc, user=buckaroo)), '4 PE/sc:  v/am/ad')
@@ -862,6 +870,8 @@ class OrbTest(unittest.TestCase):
         acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(acu1, user=steve)), '5 Adm/acu:  v/am/ad')
@@ -884,6 +894,8 @@ class OrbTest(unittest.TestCase):
         acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(acu1, user=carefulwalker)), '5a LE/acu:  v')
@@ -906,6 +918,8 @@ class OrbTest(unittest.TestCase):
         acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(acu1, user=buckaroo)), '6 PE/acu:  v')
@@ -928,6 +942,8 @@ class OrbTest(unittest.TestCase):
         acu2 = orb.get('test:H2G2:acu-2')  # SC/Infinite Improbability Drive acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(acu2, user=buckaroo)), '7 PE/acu:  v')
@@ -950,6 +966,8 @@ class OrbTest(unittest.TestCase):
         acu4 = orb.get('test:H2G2:acu-4')  # SC/Bambleweeny Sub-Meson Brain acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(acu4, user=buckaroo)), '8 PE/acu:  v')
@@ -972,6 +990,8 @@ class OrbTest(unittest.TestCase):
         acu6 = orb.get('test:H2G2:acu-6')  # SC/Instrument0 acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(acu6, user=carefulwalker)), '8a LE/acu:  v')
@@ -981,8 +1001,7 @@ class OrbTest(unittest.TestCase):
     def test_26_08b_perms_case_8b(self):
         """
         CASE 8b:  client, disconnected, project lead engineer, synced acu for
-        an assembly owned by an organization in which the project lead engineer
-        does not have lead engineer role
+        an assembly owned by the H2G2 project.
         """
         state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
                                 'test:H2G2:acu-2', 'test:H2G2:acu-4',
@@ -998,6 +1017,8 @@ class OrbTest(unittest.TestCase):
                                            # carefulwalker not LE in Yoyodyne
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(acu7, user=carefulwalker)), '8b LE/acu:  v')
@@ -1020,6 +1041,8 @@ class OrbTest(unittest.TestCase):
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(psu, user=steve)), '9 Adm/psu:  v/am/ad')
@@ -1042,6 +1065,8 @@ class OrbTest(unittest.TestCase):
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(psu, user=carefulwalker)), '10 LE/psu:  v')
@@ -1064,6 +1089,8 @@ class OrbTest(unittest.TestCase):
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(psu, user=zaphod)), '11 SE/psu:  v')
@@ -1086,6 +1113,8 @@ class OrbTest(unittest.TestCase):
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(psu, user=buckaroo)), '12 PE/psu:  v')
@@ -1108,6 +1137,8 @@ class OrbTest(unittest.TestCase):
         rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(rqt, user=steve)), '13 Adm/rqt:  v/am/ad')
@@ -1130,6 +1161,8 @@ class OrbTest(unittest.TestCase):
         rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(rqt, user=carefulwalker)), '14 LE/rqt:  v/ad')
@@ -1152,6 +1185,8 @@ class OrbTest(unittest.TestCase):
         rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(rqt, user=zaphod)), '15 SE/rqt:  v/ad')
@@ -1174,6 +1209,8 @@ class OrbTest(unittest.TestCase):
         rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(rqt, user=buckaroo)), '16 PE/rqt:  v')
@@ -1196,10 +1233,14 @@ class OrbTest(unittest.TestCase):
         sc = orb.get('test:spacecraft0')
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(sc, user=steve)), '1 Adm/sc:  v/am/ad')
-        expected = (set(['view', 'add models', 'add docs']), '1 Adm/sc:  v/am/ad')
+        value = (set(get_perms(sc, user=steve)), '21 Adm/sc:  v/m/d/am/ad')
+        expected = (
+                set(['view', 'modify', 'delete', 'add models', 'add docs']),
+                                                '21 Adm/sc:  v/m/d/am/ad')
         self.assertEqual(expected, value)
 
     def test_26_22_perms_case_22(self):
@@ -1218,10 +1259,15 @@ class OrbTest(unittest.TestCase):
         sc = orb.get('test:spacecraft0')
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(sc, user=carefulwalker)), '2 LE/sc:  v/am/ad')
-        expected = (set(['view', 'add models', 'add docs']), '2 LE/sc:  v/am/ad')
+        value = (set(get_perms(sc, user=carefulwalker)),
+                                                '22 LE/sc:  v/m/d/am/ad')
+        expected = (
+                set(['view', 'modify', 'delete', 'add models', 'add docs']),
+                                                '22 LE/sc:  v/m/d/am/ad')
         self.assertEqual(expected, value)
 
     def test_26_23_perms_case_23(self):
@@ -1240,10 +1286,14 @@ class OrbTest(unittest.TestCase):
         sc = orb.get('test:spacecraft0')
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(sc, user=zaphod)), '3 SE/sc:  v/am/ad')
-        expected = (set(['view', 'add models', 'add docs']), '3 SE/sc:  v/am/ad')
+        value = (set(get_perms(sc, user=zaphod)), '23 SE/sc:  v/m/d/am/ad')
+        expected = (
+                set(['view', 'modify', 'delete', 'add models', 'add docs']),
+                                                '23 SE/sc:  v/m/d/am/ad')
         self.assertEqual(expected, value)
 
     def test_26_24_perms_case_24(self):
@@ -1262,10 +1312,13 @@ class OrbTest(unittest.TestCase):
         sc = orb.get('test:spacecraft0')
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(sc, user=buckaroo)), '4 PE/sc:  v/am/ad')
-        expected = (set(['view', 'add models', 'add docs']), '4 PE/sc:  v/am/ad')
+        value = (set(get_perms(sc, user=buckaroo)), '24 PE/sc:  v/am/ad')
+        expected = (set(['view', 'add models', 'add docs']),
+                                                    '24 PE/sc:  v/am/ad')
         self.assertEqual(expected, value)
 
     def test_26_25_perms_case_25(self):
@@ -1284,10 +1337,14 @@ class OrbTest(unittest.TestCase):
         acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(acu1, user=steve)), '5 Adm/acu:  v/am/ad')
-        expected = (set(['view', 'add models', 'add docs']), '5 Adm/acu:  v/am/ad')
+        value = (set(get_perms(acu1, user=steve)), '25 Adm/acu:  v/m/d/am/ad')
+        expected = (
+                set(['view', 'modify', 'delete', 'add models', 'add docs']),
+                                                '25 Adm/acu:  v/m/d/am/ad')
         self.assertEqual(expected, value)
 
     def test_26_25a_perms_case_25a(self):
@@ -1306,10 +1363,13 @@ class OrbTest(unittest.TestCase):
         acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(acu1, user=carefulwalker)), '5a LE/acu:  v')
-        expected = (set(['view']), '5a LE/acu:  v')
+        value = (set(get_perms(acu1, user=carefulwalker)),
+                                                       '25a LE/acu:  v/m/d')
+        expected = (set(['view', 'modify', 'delete']), '25a LE/acu:  v/m/d')
         self.assertEqual(expected, value)
 
     def test_26_26_perms_case_26(self):
@@ -1328,10 +1388,12 @@ class OrbTest(unittest.TestCase):
         acu1 = orb.get('test:H2G2:acu-1')  # SC/Oscillation Overthruster acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(acu1, user=buckaroo)), '6 PE/acu:  v')
-        expected = (set(['view']), '6 PE/acu:  v')
+        value = (set(get_perms(acu1, user=buckaroo)), '26 PE/acu:  v/m/d')
+        expected = (set(['view', 'modify', 'delete']), '26 PE/acu:  v/m/d')
         self.assertEqual(expected, value)
 
     def test_26_27_perms_case_27(self):
@@ -1350,10 +1412,12 @@ class OrbTest(unittest.TestCase):
         acu2 = orb.get('test:H2G2:acu-2')  # SC/Infinite Improbability Drive acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(acu2, user=buckaroo)), '7 PE/acu:  v')
-        expected = (set(['view']), '7 PE/acu:  v')
+        value = (set(get_perms(acu2, user=buckaroo)), '27 PE/acu:  v/m/d')
+        expected = (set(['view', 'modify', 'delete']), '27 PE/acu:  v/m/d')
         self.assertEqual(expected, value)
 
     def test_26_28_perms_case_28(self):
@@ -1372,6 +1436,8 @@ class OrbTest(unittest.TestCase):
         acu4 = orb.get('test:H2G2:acu-4')  # SC/Bambleweeny Sub-Meson Brain acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(acu4, user=buckaroo)), '8 PE/acu:  v')
@@ -1380,7 +1446,8 @@ class OrbTest(unittest.TestCase):
 
     def test_26_28a_perms_case_28a(self):
         """
-        CASE 28a:  client, connected, lead engineer, synced acu
+        CASE 28a:  client, connected, lead engineer, synced acu for
+        an assembly owned by the H2G2 project.
         """
         state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
                                 'test:H2G2:acu-2', 'test:H2G2:acu-4',
@@ -1394,17 +1461,19 @@ class OrbTest(unittest.TestCase):
         acu6 = orb.get('test:H2G2:acu-6')  # SC/Instrument0 acu
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(acu6, user=carefulwalker)), '8a LE/acu:  v')
-        expected = (set(['view']), '8a LE/acu:  v')
+        value = (set(get_perms(acu6, user=carefulwalker)),
+                                                       '28a LE/acu:  v/m/d')
+        expected = (set(['view', 'modify', 'delete']), '28a LE/acu:  v/m/d')
         self.assertEqual(expected, value)
 
     def test_26_28b_perms_case_28b(self):
         """
         CASE 28b:  client, connected, project lead engineer, synced acu for
-        an assembly owned by an organization in which the project lead engineer
-        does not have lead engineer role
+        an assembly owned by the H2G2 project.
         """
         state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
                                 'test:H2G2:acu-2', 'test:H2G2:acu-4',
@@ -1420,10 +1489,13 @@ class OrbTest(unittest.TestCase):
                                            # carefulwalker not LE in Yoyodyne
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(acu7, user=carefulwalker)), '8b LE/acu:  v')
-        expected = (set(['view']), '8b LE/acu:  v')
+        value = (set(get_perms(acu7, user=carefulwalker)),
+                                                       '28b LE/acu:  v/m/d')
+        expected = (set(['view', 'modify', 'delete']), '28b LE/acu:  v/m/d')
         self.assertEqual(expected, value)
 
     def test_26_29_perms_case_29(self):
@@ -1442,10 +1514,14 @@ class OrbTest(unittest.TestCase):
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(psu, user=steve)), '9 Adm/psu:  v/am/ad')
-        expected = (set(['view', 'add models', 'add docs']), '9 Adm/psu:  v/am/ad')
+        value = (set(get_perms(psu, user=steve)), '29 Adm/psu:  v/m/d/am/ad')
+        expected = (
+                set(['view', 'modify', 'delete', 'add models', 'add docs']),
+                                                '29 Adm/psu:  v/m/d/am/ad')
         self.assertEqual(expected, value)
 
     def test_26_30_perms_case_30(self):
@@ -1464,10 +1540,14 @@ class OrbTest(unittest.TestCase):
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(psu, user=carefulwalker)), '10 LE/psu:  v')
-        expected = (set(['view']), '10 LE/psu:  v')
+        value = (set(get_perms(psu, user=carefulwalker)), '30 LE/psu:  v/m/d/ad')
+        expected = (
+                set(['view', 'modify', 'delete', 'add docs']),
+                                                          '30 LE/psu:  v/m/d/ad') 
         self.assertEqual(expected, value)
 
     def test_26_31_perms_case_31(self):
@@ -1486,10 +1566,14 @@ class OrbTest(unittest.TestCase):
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(psu, user=zaphod)), '11 SE/psu:  v')
-        expected = (set(['view']), '11 SE/psu:  v')
+        value = (set(get_perms(psu, user=zaphod)), '31 SE/psu:  v/m/d/ad')
+        expected = (
+                set(['view', 'modify', 'delete', 'add docs']),
+                                                   '31 SE/psu:  v/m/d/ad') 
         self.assertEqual(expected, value)
 
     def test_26_32_perms_case_32(self):
@@ -1508,6 +1592,8 @@ class OrbTest(unittest.TestCase):
         psu = orb.get('test:H2G2:system-1') # Rocinante SC usage on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(psu, user=buckaroo)), '12 PE/psu:  v')
@@ -1530,10 +1616,14 @@ class OrbTest(unittest.TestCase):
         rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(rqt, user=steve)), '13 Adm/rqt:  v/am/ad')
-        expected = (set(['view', 'add models', 'add docs']), '13 Adm/rqt:  v/am/ad')
+        value = (set(get_perms(rqt, user=steve)), '33 Adm/rqt:  v/m/d/am/ad')
+        expected = (
+                set(['view', 'modify', 'delete', 'add models', 'add docs']),
+                                                  '33 Adm/rqt:  v/m/d/am/ad')
         self.assertEqual(expected, value)
 
     def test_26_34_perms_case_34(self):
@@ -1552,10 +1642,14 @@ class OrbTest(unittest.TestCase):
         rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(rqt, user=carefulwalker)), '14 LE/rqt:  v/ad')
-        expected = (set(['view', 'add docs']), '14 LE/rqt:  v/ad')
+        value = (set(get_perms(rqt, user=carefulwalker)), '34 LE/rqt:  v/m/d/ad')
+        expected = (
+                set(['view', 'modify', 'delete', 'add docs']),
+                                                          '34 LE/rqt:  v/m/d/ad') 
         self.assertEqual(expected, value)
 
     def test_26_35_perms_case_35(self):
@@ -1574,10 +1668,14 @@ class OrbTest(unittest.TestCase):
         rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
-        value = (set(get_perms(rqt, user=zaphod)), '15 SE/rqt:  v/ad')
-        expected = (set(['view', 'add docs']), '15 SE/rqt:  v/ad')
+        value = (set(get_perms(rqt, user=zaphod)), '35 SE/rqt:  v/m/d/ad')
+        expected = (
+                set(['view', 'modify', 'delete', 'add docs']),
+                                                   '35 SE/rqt:  v/m/d/ad') 
         self.assertEqual(expected, value)
 
     def test_26_36_perms_case_36(self):
@@ -1596,118 +1694,13 @@ class OrbTest(unittest.TestCase):
         rqt = orb.get('test:H2G2:Spacecraft-Mass') # Req for SC mass on H2G2
         # NOTE:
         #     v  -> view
+        #     m  -> modify
+        #     d  -> delete
         #     ad -> add docs
         #     am -> add models
         value = (set(get_perms(rqt, user=buckaroo)), '16 PE/rqt:  v')
         expected = (set(['view']), '16 PE/rqt:  v')
         self.assertEqual(expected, value)
-
-    # def test_26_role_based_perms(self):
-        # """
-        # CASE:  test role-based permissions on project objects
-        # """
-        # # ***************************************************************
-        # # TODO: test for full perms when offline and object is not synced
-        # # ***************************************************************
-        # state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                # 'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                # 'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                # 'test:H2G2:system-1',
-                                # 'test:H2G2:Spacecraft-Mass']
-        # # [1] tests for disconnected client
-        # state["client"] = True
-        # state["connected"] = False
-        # # NOTE:
-        # #     v  -> view
-        # #     ad -> add docs
-        # #     am -> add models
-        # value = [
-            # (set(get_perms(sc, user=steve)),           ' 1 Adm/sc:  v/am/ad'),
-            # (set(get_perms(sc, user=carefulwalker)),   ' 2 LE/sc:   v/am/ad'),
-            # (set(get_perms(sc, user=zaphod)),          ' 3 SE/sc:   v/am/ad'),
-            # (set(get_perms(sc, user=buckaroo)),        ' 4 PE/sc:   v/am/ad'),
-            # (set(get_perms(acu1, user=steve)),         ' 5 Adm/acu: v/am/ad'),
-            # (set(get_perms(acu1, user=carefulwalker)), ' 5a LE/acu: view only'),
-            # (set(get_perms(acu1, user=buckaroo)),      ' 6 PE/acu:  view only'),
-            # (set(get_perms(acu2, user=buckaroo)),      ' 7 PE/acu:  view only'),
-            # (set(get_perms(acu4, user=buckaroo)),      ' 8 PE/acu:  view only'),
-            # (set(get_perms(acu6, user=carefulwalker)), ' 8a LE/acu: view only'),
-            # (set(get_perms(acu7, user=carefulwalker)), ' 8b LE/acu: view only'),
-            # (set(get_perms(psu, user=steve)),          ' 9 Adm/psu: v/am/ad'),
-            # (set(get_perms(psu, user=carefulwalker)),  '10 LE/psu:  view only'),
-            # (set(get_perms(psu, user=zaphod)),         '11 SE/psu:  view only'),
-            # (set(get_perms(psu, user=buckaroo)),       '12 PE/psu:  view only'),
-            # (set(get_perms(req, user=steve)),          '13 Adm/req: v/am/ad'),
-            # (set(get_perms(req, user=carefulwalker)),  '14 LE/req:  v/ad'),
-            # (set(get_perms(req, user=zaphod)),         '15 SE/req:  v/ad'),
-            # (set(get_perms(req, user=buckaroo)),       '16 PE/req:  view only')
-            # ]
-        # # [2] tests for connected client
-        # state["connected"] = True
-        # value += [
-            # set(get_perms(sc, user=steve)),           # 21 Adm/sc:  full perms
-            # set(get_perms(sc, user=carefulwalker)),   # 22 LE/sc:   full perms
-            # set(get_perms(sc, user=zaphod)),          # 23 SE/sc:   full perms
-            # set(get_perms(sc, user=buckaroo)),        # 24 PE/sc:   view only
-            # set(get_perms(acu1, user=steve)),         # 25 Adm/acu: view only
-            # set(get_perms(acu1, user=carefulwalker)), # 25a LE/acu: full perms
-            # set(get_perms(acu1, user=buckaroo)),      # 26 PE/acu:  full perms
-            # set(get_perms(acu2, user=buckaroo)),      # 27 PE/acu:  full perms
-            # set(get_perms(acu4, user=buckaroo)),      # 28 PE/acu:  view only
-            # set(get_perms(acu6, user=carefulwalker)), # 28a LE/acu: full perms
-            # set(get_perms(acu7, user=carefulwalker)), # 28b LE/acu: view only
-            # set(get_perms(psu, user=steve)),          # 29 Adm/psu: full perms
-            # set(get_perms(psu, user=carefulwalker)),  # 30 LE/psu:  full perms
-            # set(get_perms(psu, user=zaphod)),         # 31 SE/psu:  full perms
-            # set(get_perms(psu, user=buckaroo)),       # 32 PE/psu:  view only
-            # set(get_perms(req, user=steve)),          # 33 Adm/req: full perms
-            # set(get_perms(req, user=carefulwalker)),  # 34 LE/req:  full perms
-            # set(get_perms(req, user=zaphod)),         # 35 SE/req:  full perms
-            # set(get_perms(req, user=buckaroo))        # 36 PE/req:  view only
-            # ]
-        # expected = [
-            # # non-connected state
-            # (set(['view', 'add models', 'add docs']), ' 1 Adm/sc:  v/am/ad'),
-            # (set(['view', 'add models', 'add docs']), ' 2 LE/sc:   v/am/ad'),
-            # (set(['view', 'add models', 'add docs']), ' 3 SE/sc:   v/am/ad'),
-            # (set(['view', 'add models', 'add docs']), ' 4 PE/sc:   v/am/ad'),
-            # (set(['view', 'add models', 'add docs']), ' 5 Adm/acu: v/am/ad'),
-            # (set(['view']), ' 5a LE/acu: view only'),
-            # (set(['view']), ' 6 PE/acu:  view only'),
-            # (set(['view']), ' 7 PE/acu:  view only'),
-            # (set(['view']), ' 8 PE/acu:  view only'),
-            # (set(['view']), ' 8a SE/acu: view only'),
-            # (set(['view']), ' 8b acu:    view only'),
-            # (set(['view', 'add models', 'add docs']), ' 9 Adm/psu: v/am/ad'),
-            # (set(['view']), '10 LE/psu:  view only'),
-            # (set(['view']), '11 SE/psu:  view only'),
-            # (set(['view']), '12 PE/psu:  view only'),
-            # (set(['view', 'add models', 'add docs']), '13 Adm/req: v/am/ad'),
-            # (set(['view', 'add docs']), '14 LE/req:  v/ad'),
-            # (set(['view', 'add docs']), '15 SE/req:  v/ad'),
-            # (set(['view']), '16 PE/req:  view only'),
-            # # connected state
-            # set(['view', 'modify', 'delete']), # 21
-            # set(['view', 'modify', 'delete']), # 22
-            # set(['view', 'modify', 'delete']), # 23
-            # set(['view']),                     # 24
-            # set(['view', 'modify', 'delete']), # 25
-            # set(['view', 'modify', 'delete']), # 25a
-            # set(['view', 'modify', 'delete']), # 26
-            # set(['view', 'modify', 'delete']), # 27
-            # set(['view']),                     # 28
-            # set(['view', 'modify', 'delete']), # 28a
-            # set(['view', 'modify', 'delete']), # 28b
-            # set(['view', 'modify', 'delete']), # 29
-            # set(['view', 'modify', 'delete']), # 30
-            # set(['view', 'modify', 'delete']), # 31
-            # set(['view']),                     # 32
-            # set(['view', 'modify', 'delete']), # 33
-            # set(['view', 'modify', 'delete']), # 34
-            # set(['view', 'modify', 'delete']), # 35
-            # set(['view'])                      # 36
-            # ]
-        # self.assertEqual(expected, value)
 
     # TODO:  revise this test!
     # def test_27_deserialize_object_with_modified_parameters(self):
