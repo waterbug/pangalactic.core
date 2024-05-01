@@ -184,10 +184,11 @@
 
     `sys_tree_expansion[5]: (dict) maps project oids to tree expansion level`
 
-    `system:           (str)  oid of currently selected system (Product or`
-    `                         Project) -- may be selected by clicking on an item`
-    `                         in the system tree or drilling down into`
-    `                         (double-clicking on) a block in the diagram`
+    `system:           (dict) maps oids of projects to their currently`
+    `                         selected system (Product or Project) -- may be`
+    `                         selected by clicking on an item in the system`
+    `                         tree or drilling down into (double-clicking on)`
+    `                         a block in the diagram`
 
     `test_project_loaded (bool) H2G2 test project loaded (server-side only) [6]`
 
@@ -244,16 +245,13 @@
 Certain data structures are maintained in python dictionaries at runtime to
 optimize performance.
 
-* `componentz` (defined in "parameters" module)
+* `componentz` (defined in "parametrics" module)
   - cache of assembly components:  
-* `data_elementz` (defined in "parameters" module)
-* `de_defz` (defined in "parameters" module)
-* `dmz` (defined in "entity" module)
-  - cache of DataMatrix instances:  {oid: DataMatrix}
-* `parameterz` (defined in "parameters" module)
-* `parm_defz` (defined in "parameters" module)
-* `schemaz` (defined in "entity" module)
-  - cache of schemas:  {schema name: [col1, col2, ...]}
+* `data_elementz` (defined in "parametrics" module)
+* `de_defz` (defined in "parametrics" module)
+* `mode_defz` (defined in "parametrics" module)
+* `parameterz` (defined in "parametrics" module)
+* `parm_defz` (defined in "parametrics" module)
 
 ## Modes and Views
 
@@ -284,17 +282,6 @@ optimize performance.
 ## Diagrams (used in "system" and "component" modes)
 
 * See `NOTES_ON_DIAGRAMS`
-
-## DEPRECATED: "louie" ("dispatcher") signals
-
-------------------------------------------------------------------------------
-
-"louie" (a.k.a. "dispatcher") signals are now deprecated in pangalactic because
-they can cause paint errors, crashes, and segfaults due to not playing nice
-with the underling Qt event loop -- they are being replaced by the Qt signals
-and slots mechanism (in pyqt, pyqtSignal and pyqtSlot).
-
-------------------------------------------------------------------------------
 
 ## Random notes on the orb
 
@@ -355,7 +342,7 @@ and slots mechanism (in pyqt, pyqtSignal and pyqtSlot).
 * The two 1-to-1 attributes are simply the two "sides" of the Acu relationship,
   its `assembly` and `component` properties.  The 1-to-many attributes are
   "computed attributes", which are automatically implemented using SqlAlchemy
-  when the `PanGalacticRegistry` and `KM` translate the ontology into runtime
+  when the `PanGalacticRegistry` and `KB` translate the ontology into runtime
   classes.
 
 * Only one of the 1-to-many attributes should be used to implement the user
@@ -366,23 +353,13 @@ and slots mechanism (in pyqt, pyqtSignal and pyqtSlot).
   elements.
 
 * Note that the 1-to-many attribute *itself* will not be editable -- it is
-  computed -- but rather the object editor will have a "drop zone" widget
-  associated with the 1-to-many attribute.  The default widget will be an
-  editable list widget (QListWidget) into which object instances can be
-  dropped, which triggers the creation of an instance of the m2m object that
-  links the object being edited to the object that was dropped onto it.
+  computed.
 
 ## Parameters / ParameterDefinitions
 
 The object dropped onto the `Parameters` list widget in the Component Modeler
-is a ParameterDefinition (not a Parameter), which will trigger the creation
-of a Parameter instance of the type specified by the ParameterDefinition,
-along with a ModelParameter object linking the Model with the new Parameter.
-The drop area will be a simple panel, on which the drop will trigger a data
-field widget to be created in which the Parameter value can be displayed and
-edited.  It will also be possible to remove the data field widget (which will
-destroy the associated Parameter and ModelParameter objects) by a right-click
-menu option (or something else TBD).
+is a ParameterDefinition object (not a parameter), which will trigger the
+creation of a parameter mapped to the object oid in the `parameterz` cache.
 
 ## Domain Objects
 
@@ -467,12 +444,13 @@ Object X:
 
   AND EITHER
 
-  * Person A is assigned the Administrator Role in Organization Z
+  * Person A is assigned the Administrator Role in Organization Z or is a
+    Global Administrator
 
   OR
 
   * Person A is assigned a Role in Organization Z that is associated
-    with Discipline D that uses Products having the Product Type of
+    with Discipline D that uses Products having the ProductType of
     Product X.
 
 ### Object Viewer / Editor:  PgxnObject
@@ -648,5 +626,4 @@ admin privileges.
         `./run_[app].exe`
 
 7. Use Inno Setup to build the "setup.exe" installer for Windows.
-
 
