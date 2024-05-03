@@ -26,6 +26,22 @@
   - `userdir.py ..... LDAP directory search interface`
   - `transform.py ... data migration script (for schema changes)`
 
+## Notes on Specific Modules and/or Features
+
+### Mode Definition Tool and Dashboard
+
+* Currently under active development
+
+* [list related modules / functions]
+
+* TODO:
+  - link power level selectors to their components
+  - add "Edit" and "Save" buttons to the dash
+  - i.e. have a "view" mode and an "edit" mode
+  - also have a real-time dashboard with data (derived from the "system" mode
+    dashboard) and real-time graph
+
+
 ## Contents of App Home Directory (`[app]_home`) created at start-up
 
 * holds configuration data (some of which may be user-specific) that
