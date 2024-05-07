@@ -981,7 +981,7 @@ def get_link_name(link):
         # link is an acu
         return '[' + link.reference_designator + '] ' + link.component.name
     else:
-        return '[unknown]'
+        return '[unspecified]'
 
 def get_link_object(link):
     """
