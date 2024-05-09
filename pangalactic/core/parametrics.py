@@ -1057,7 +1057,7 @@ def get_pval(oid, pid, units='', allow_nan=False):
     if not pdz:
         # log.debug('* get_pval: "{}" does not have a definition.'.format(
                                                                         # pid))
-        return
+        return 0.0
     if not parameterz.get(oid):
         parameterz[oid] = {}
     if not units:
@@ -2355,7 +2355,10 @@ def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
         # log.debug('* no systems have modes defined.')
         return
     if usage_oid in sys_dict:
-        context = sys_dict[usage_oid][mode]
+        context = sys_dict[usage_oid].get(mode)
+        if context is None:
+            context = "Off"
+            sys_dict[usage_oid][mode] = context
         return get_modal_power(project_oid, usage_oid, oid, mode, context,
                                units=units)
     else:
@@ -2363,7 +2366,10 @@ def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
         for sys_usage_oid in comp_dict:
             if usage_oid in comp_dict[sys_usage_oid]:
                 # get Power value specified for that context
-                context = comp_dict[sys_usage_oid][usage_oid][mode]
+                context = comp_dict[sys_usage_oid][usage_oid].get(mode)
+                if context is None:
+                    context = "Off"
+                    comp_dict[sys_usage_oid][usage_oid][mode] = context
                 return get_modal_power(project_oid, usage_oid, oid, mode,
                                        context, units=units)
         # not defined
