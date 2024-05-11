@@ -2324,6 +2324,21 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
         return get_pval(oid, 'P[CBE]', units=units)
     return get_pval(oid, get_parameter_id('P', modal_context), units=units)
 
+def get_power_contexts(obj):
+    """
+    Return the contexts of all power (P) parameters for an object, adding an
+    "Off" context.
+    """
+    pids = []
+    if obj.oid in parameterz:
+        pids = list(parameterz[obj.oid])
+    if pids:
+        ptups = [get_variable_and_context(pid) for pid in pids
+                 if pid.split('[')[0] == 'P']
+        return [ptup[1] for ptup in ptups
+                if ptup[1] and ptup[1] != 'Ctgcy'] + ['Off']
+    return ['Off']
+
 def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
                        allow_nan=False):
     """
