@@ -2197,7 +2197,7 @@ def add_default_data_elements(obj, des=None):
 #             consist of a set of systems (ProjectSystemUsages) and subsystems
 #             (Assembly Component Usages or Acus) and the applicable power
 #             states of each (i.e. of their "system" or "component",
-#             respectively) during a specified mode. The 'systems' sub-dict
+#             respectively) during a specified activity. The 'systems' sub-dict
 #             contains all items that have been explicitly added to the mode
 #             definitions.  If a 'system' has components, its components are
 #             added to the 'components' sub-dict and its modes' power values
@@ -2210,24 +2210,24 @@ def add_default_data_elements(obj, des=None):
 #             `save_mode_defz` and `load_mode_defz`
 #
 # format:  {project A oid:
-#               'modes': {mode 1 name: default context*,
-#                         mode 2 name: default context,
+#               'modes': {mode 1 act.oid: act.name,
+#                         mode 2 act.oid: act.name,
 #                         ...},
 #               'systems':
-#                  {psu 1 oid: {mode 1 name: mode 1 value**,
-#                               mode 2 name: mode 2 value**,
+#                  {psu 1 oid: {mode 1 act.oid: mode 1 value**,
+#                               mode 2 act.oid: mode 2 value**,
 #                                ...},
-#                   acu 1 oid: {mode 3 name: mode 3 value**,
-#                               mode 4 name: mode 4 value**,
+#                   acu 1 oid: {mode 3 act.oid: mode 3 value**,
+#                               mode 4 act.oid: mode 4 value**,
 #                                ...}
 #                   ...},
 #               'components':
 #                  {psu 1 oid:
-#                       {acu 3 oid: {mode 5 name: mode 5 value**,
-#                                    mode 6 name: mode 6 value**,
+#                       {acu 3 oid: {mode 5 act.oid: mode 5 value**,
+#                                    mode 6 act.oid: mode 6 value**,
 #                                    ...},
-#                        acu 4 oid: {mode 7 name: mode 7 value**,
-#                                    mode 8 name: mode 8 value**,
+#                        acu 4 oid: {mode 7 act.oid: mode 7 value**,
+#                                    mode 8 act.oid: mode 8 value**,
 #                                    ...}
 #                        ...},
 #                   psu 2 oid:
