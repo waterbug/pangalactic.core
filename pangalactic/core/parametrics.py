@@ -2326,7 +2326,7 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
             defined
         sys_usage_oid (str): the oid of the usage that has the mode
         oid (str): the oid of the product assembly containing the usage
-        mode (str): the name of the mode
+        mode (str): the oid of the mode (activity)
 
     Keyword Args:
         units (str):  units in which the return value should be expressed
@@ -2343,9 +2343,10 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
             summation = 0.0
             for c in cz:
                 if c.usage_oid in comp_dict[sys_usage_oid]:
-                    context = comp_dict[sys_usage_oid][c.usage_oid][mode]
+                    context = (comp_dict[sys_usage_oid][c.usage_oid].get(mode)
+                               or 'Off')
                 elif c.usage_oid in sys_dict:
-                    context = sys_dict[c.usage_oid][mode]
+                    context = sys_dict[c.usage_oid].get(mode) or 'Off'
                 else:
                     context = 'Off'
                 if context == 'Nominal':
