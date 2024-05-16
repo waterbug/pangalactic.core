@@ -2386,8 +2386,10 @@ def get_power_contexts(obj):
     if pids:
         ptups = [get_variable_and_context(pid) for pid in pids
                  if pid.split('[')[0] == 'P']
-        return [ptup[1] for ptup in ptups
-                if ptup[1] and ptup[1] not in ['MEV', 'Ctgcy']] + ['Off']
+        contexts = [ptup[1] for ptup in ptups
+                    if ptup[1] and ptup[1] not in ['MEV', 'Ctgcy']]
+        contexts.insert(0, 'Off')
+        return contexts
     return ['Off']
 
 def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
