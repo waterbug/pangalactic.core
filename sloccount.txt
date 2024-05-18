@@ -1,6 +1,43 @@
+Have a non-directory at the top, so creating directory top_dir
+Adding /home/waterbug/clones/pangalactic.core/./CHEAT_SHEET.html to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./CHEAT_SHEET.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./FAQ to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./INSTALL to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_FOR_DEVELOPERS.html to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_FOR_DEVELOPERS.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_FOR_DEVELOPERS_202201.html to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_ACTIVITIES.html to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_ACTIVITIES.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_COLLABORATION_ARCHITECTURE.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_CONOPS_AND_MODES.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_DATAGRID.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_NUITKA.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_ONTOLOGY_AND_DB.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_PARAMETERS.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_PYINSTALLER.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./README to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./RELEASE_NOTES.md to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./VERSION to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./bump_version.sh to top_dir
+Creating filelist for conda
+Creating filelist for dist
+Creating filelist for doc
+Adding /home/waterbug/clones/pangalactic.core/./htmlify.sh to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./pandoc.css to top_dir
+Creating filelist for pangalactic
+Creating filelist for pangalactic.core.egg-info
+Adding /home/waterbug/clones/pangalactic.core/./sedscr to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./setup.py to top_dir
+Adding /home/waterbug/clones/pangalactic.core/./sloccount.txt to top_dir
+Categorizing files.
+Finding a working MD5 command....
+Found a working MD5 command.
+Computing results.
+
+
 SLOC	Directory	SLOC-by-Language (Sorted)
-14859   pangalactic     python=14832,sh=21,xml=6
-36      top_dir         python=35,sh=1
+17618   pangalactic     python=17591,sh=27
+37      top_dir         python=35,sh=2
 1       conda           sh=1
 0       dist            (none)
 0       doc             (none)
@@ -8,20 +45,19 @@ SLOC	Directory	SLOC-by-Language (Sorted)
 
 
 Totals grouped by language (dominant language first):
-python:       14867 (99.81%)
-sh:              23 (0.15%)
-xml:              6 (0.04%)
+python:       17626 (99.83%)
+sh:              30 (0.17%)
 
 
 
 
-Total Physical Source Lines of Code (SLOC)                = 14,896
-Development Effort Estimate, Person-Years (Person-Months) = 3.41 (40.92)
+Total Physical Source Lines of Code (SLOC)                = 17,656
+Development Effort Estimate, Person-Years (Person-Months) = 4.08 (48.92)
  (Basic COCOMO model, Person-Months = 2.4 * (KSLOC**1.05))
-Schedule Estimate, Years (Months)                         = 0.85 (10.24)
+Schedule Estimate, Years (Months)                         = 0.91 (10.96)
  (Basic COCOMO model, Months = 2.5 * (person-months**0.38))
-Estimated Average Number of Developers (Effort/Schedule)  = 3.99
-Total Estimated Cost to Develop                           = $ 460,643
+Estimated Average Number of Developers (Effort/Schedule)  = 4.46
+Total Estimated Cost to Develop                           = $ 550,654
  (average salary = $56,286/year, overhead = 2.40).
 SLOCCount, Copyright (C) 2001-2004 David A. Wheeler
 SLOCCount is Open Source Software/Free Software, licensed under the GNU GPL.
@@ -29,4 +65,3 @@ SLOCCount comes with ABSOLUTELY NO WARRANTY, and you are welcome to
 redistribute it under certain conditions as specified by the GNU GPL license;
 see the documentation for details.
 Please credit this data as "generated using David A. Wheeler's 'SLOCCount'."
-
