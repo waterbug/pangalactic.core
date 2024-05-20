@@ -2310,6 +2310,33 @@ def get_modal_context(project_oid, usage_oid, mode_oid):
         else:
             return 'Off'
 
+def set_comp_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid,
+                           level):
+    """
+    Set the value of the modal_context (a.k.a. power level corresponding to a
+    mode) for a component of the specified system usage in the specified
+    project for the specified mode.
+
+    Args:
+        project_oid (str): the oid of the project within which the mode is
+            defined
+        sys_usage_oid (str): the oid of the usage that has the mode
+        usage_oid (str): the oid of the usage that has the mode
+        mode_oid (str): the oid of the mode (activity)
+    """
+    if not project_oid in mode_defz:
+        mode_defz[project_oid] = dict(modes={}, systems={}, components={})
+    sys_dict = mode_defz[project_oid]['systems']
+    comp_dict = mode_defz[project_oid]['components']
+    if sys_usage_oid not in sys_dict:
+        sys_dict[sys_usage_oid] = {}
+    sys_dict[sys_usage_oid][mode_oid] = '[computed]'
+    if sys_usage_oid not in comp_dict:
+        comp_dict[sys_usage_oid] = {}
+    if usage_oid not in comp_dict[sys_usage_oid]:
+        comp_dict[sys_usage_oid][usage_oid] = {}
+    comp_dict[sys_usage_oid][usage_oid][mode_oid] = level
+
 def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
                     units=None):
     """
