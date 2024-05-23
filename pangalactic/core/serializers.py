@@ -515,7 +515,6 @@ DESERIALIZATION_ORDER = [
                     'ProjectSystemUsage',
                     'Mission',
                     'Activity', # Activity references Acu, PSU, and Mission
-                    'ActCompRel',
                     'Model',
                     'Port',
                     'Flow',
