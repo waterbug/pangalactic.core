@@ -513,8 +513,8 @@ DESERIALIZATION_ORDER = [
                     'DocumentReference',
                     'Acu',
                     'ProjectSystemUsage',
-                    'Activity', # Activity references Acu and PSU
                     'Mission',
+                    'Activity', # Activity references Acu, PSU, and Mission
                     'ActCompRel',
                     'Model',
                     'Port',
