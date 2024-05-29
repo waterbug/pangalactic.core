@@ -1638,10 +1638,14 @@ class UberORB(object):
                          element)
             val (any): value to be set
         """
-        schema = self.schemas.get(obj.__class__.__name__)
+        cname = obj.__class__.__name__
+        schema = self.schemas.get(cname)
         field_names = []
         if schema:
             field_names = schema.get('field_names', [])
+        else:
+            error = 'object class "{cname}" is not a PGEF class.'
+            return f'failed: {error}'
         if field_names and pname in field_names:
             rng = schema['fields'][pname]['range']
             if rng in self.classes:
@@ -1688,6 +1692,9 @@ class UberORB(object):
             else:
                 error = 'value datatype "{rng}" not an accepted datatype'
                 return f'failed: {error}'
+        else:
+            error = 'property "{pname}" is undefined.'
+            return f'failed: {error}'
 
     def gen_product_id(self, obj):
         """
