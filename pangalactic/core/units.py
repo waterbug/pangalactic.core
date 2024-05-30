@@ -97,8 +97,8 @@ alt_units = dict([
     ('pressure', ['Pa', 'kPa', 'mPa', 'uPa', 'atm', 'psi']),
     ('radiation', ['rads', 'krads', 'Mrads', 'mrads', 'gray']),
     ('temperature', ['K', 'degC', 'degF']),
-    ('time', ['s', 'ms', 'us', 'ns', 'hr', 'day', 'week', 'fortnight', 'month',
-              'year']),
+    ('time', ['s', 'ms', 'us', 'ns', 'minute', 'hour', 'day', 'week',
+              'fortnight', 'month', 'year']),
     ('translational sensitivity', ['m/m', 'nm/nm']),
     ('volume', ['m^3', 'liter', 'cc']),
     ('velocity', ['m/s', 'kph', 'mph', 'mile/s', 'c', 'furlong/fortnight'])
