@@ -891,6 +891,21 @@ deds = [
     'range_datatype': 'str',
     'description': 'Operational Mode associated with an Activity.'},
 
+{   '_cname': 'DataElementDefinition',
+    'oid': 'pgef:DataElementDefinition.time_units',
+    'id': 'time_units',
+    'id_ns': 'pgef',
+    'label': 'Mode',
+    'name': 'Time Units',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'create_datetime': '2024-06-01 00:00:00',
+    'mod_datetime': '2024-06-01 00:00:00',
+    'modifier': 'pgefobjects:admin',
+    'domain_class': 'Activity',
+    'range_datatype': 'str',
+    'description': 'Preferred time units associated with an Activity.'},
+
     ]
 
 # parameter_definitions_and_contexts
