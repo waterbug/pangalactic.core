@@ -104,6 +104,20 @@ alt_units = dict([
     ('velocity', ['m/s', 'kph', 'mph', 'mile/s', 'c', 'furlong/fortnight'])
     ])
 
+# time unit names for use in user interfaces, mapped to their standard "ids"
+time_unit_names = {'seconds': 's',
+                   'minutes': 'minute',
+                   'hours': 'hour',
+                   'days': 'day',
+                   'weeks': 'week',
+                   'fortnights': 'fortnight',
+                   'months': 'month',
+                   'years': 'year',
+                   'milliseconds': 'ms',
+                   'microseconds': 'us',
+                   'nanoseconds': 'ns',
+                   }
+
 # prefixes maps SI decimal and binary prefixes to their definitions
 prefixes = dict(
     # decimal prefixes
