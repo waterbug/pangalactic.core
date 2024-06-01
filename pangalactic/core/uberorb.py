@@ -1577,7 +1577,7 @@ class UberORB(object):
         query = self.db.query(RepresentationFile.checksum)
         return [row[0] for row in query.all()]
 
-    def get_prop_val(self, obj, pname):
+    def get_prop_val(self, obj, pname, units=None):
         """
         Return the value of the specified property for the specified object.
 
@@ -1585,6 +1585,10 @@ class UberORB(object):
             obj (Identifiable): the object
             pname (str): name of the property (attr, parameter, or data
                 element)
+
+        Keyword Args:
+            units (str): id of the units in which 'val' is expressed (only
+                applicable to parameters)
         """
         schema = self.schemas.get(obj.__class__.__name__)
         field_names = []
@@ -1594,14 +1598,16 @@ class UberORB(object):
             return getattr(obj, pname, '') or ''
         elif pname in parm_defz:
             pd = parm_defz.get(pname)
-            units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
-                                                    pd['dimensions'], '')
+            if units is None:
+                # if units is unspecified, use either preferred or base units
+                units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                        pd['dimensions'], '')
             return get_pval(obj.oid, pname, units=units)
         elif pname in de_defz:
             return get_dval(obj.oid, pname)
         return ''
 
-    def get_prop_val_as_str(self, obj, pname):
+    def get_prop_val_as_str(self, obj, pname, units=None):
         """
         Return the string-cast value of the specified property for the
         specified object.
@@ -1610,6 +1616,10 @@ class UberORB(object):
             obj (Identifiable): the object
             pname (str): name of the property (attr, parameter, or data
                 element)
+
+        Keyword Args:
+            units (str): id of the units in which 'val' is expressed (only
+                applicable to parameters)
         """
         schema = orb.schemas.get(obj.__class__.__name__)
         field_names = []
@@ -1620,14 +1630,16 @@ class UberORB(object):
             return str(getattr(obj, pname, None) or NULL_VALUE.get(dtype))
         elif pname in parm_defz:
             pd = parm_defz.get(pname)
-            units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
-                                                    pd['dimensions'], '')
+            if units is None:
+                # if units is unspecified, use either preferred or base units
+                units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                        pd['dimensions'], '')
             return get_pval_as_str(obj.oid, pname, units=units)
         elif pname in de_defz:
             return get_dval_as_str(obj.oid, pname)
         return '[undefined]'
 
-    def set_prop_val(self, obj, pname, val):
+    def set_prop_val(self, obj, pname, val, units=None):
         """
         Set the value of the specified property for the specified object,
         casting the value to the correct datatype if necessary.
@@ -1637,6 +1649,10 @@ class UberORB(object):
             pname (str): name of the property (attr, parameter, or data
                          element)
             val (any): value to be set
+
+        Keyword Args:
+            units (str): id of the units in which 'val' is expressed (only
+                applicable to parameters)
         """
         cname = obj.__class__.__name__
         schema = self.schemas.get(cname)
@@ -1665,8 +1681,10 @@ class UberORB(object):
                         return f'failed: {error}'
         elif pname in parm_defz:
             pd = parm_defz[pname]
-            units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
-                                                    pd['dimensions'], '')
+            if units is None:
+                # if units is unspecified, use either preferred or base units
+                units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                        pd['dimensions'], '')
             rng = pd['range_datatype']
             if rng in dtypes:
                 try:
