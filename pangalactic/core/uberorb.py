@@ -1577,12 +1577,12 @@ class UberORB(object):
         query = self.db.query(RepresentationFile.checksum)
         return [row[0] for row in query.all()]
 
-    def get_prop_val(self, obj, pname, units=None):
+    def get_prop_val(self, oid, pname, units=None):
         """
         Return the value of the specified property for the specified object.
 
         Args:
-            obj (Identifiable): the object
+            oid (str): the object
             pname (str): name of the property (attr, parameter, or data
                 element)
 
@@ -1590,30 +1590,34 @@ class UberORB(object):
             units (str): id of the units in which 'val' is expressed (only
                 applicable to parameters)
         """
-        schema = self.schemas.get(obj.__class__.__name__)
-        field_names = []
-        if schema:
-            field_names = schema.get('field_names', [])
-        if field_names and pname in field_names:
-            return getattr(obj, pname, '') or ''
-        elif pname in parm_defz:
+        if pname in parm_defz:
             pd = parm_defz.get(pname)
             if units is None:
                 # if units is unspecified, use either preferred or base units
                 units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
                                                         pd['dimensions'], '')
-            return get_pval(obj.oid, pname, units=units)
+            return get_pval(oid, pname, units=units)
         elif pname in de_defz:
-            return get_dval(obj.oid, pname)
+            return get_dval(oid, pname)
+        obj = self.get(oid)
+        if not obj:
+            return 'failed: object not found.'
+        cname = obj.__class__.__name__
+        schema = self.schemas.get(cname)
+        field_names = []
+        if schema:
+            field_names = schema.get('field_names', [])
+        if field_names and pname in field_names:
+            return getattr(obj, pname, '') or ''
         return ''
 
-    def get_prop_val_as_str(self, obj, pname, units=None):
+    def get_prop_val_as_str(self, oid, pname, units=None):
         """
         Return the string-cast value of the specified property for the
         specified object.
 
         Args:
-            obj (Identifiable): the object
+            oid (str): oid of the object with the specified property
             pname (str): name of the property (attr, parameter, or data
                 element)
 
@@ -1621,22 +1625,26 @@ class UberORB(object):
             units (str): id of the units in which 'val' is expressed (only
                 applicable to parameters)
         """
-        schema = orb.schemas.get(obj.__class__.__name__)
+        if pname in parm_defz:
+            pd = parm_defz.get(pname)
+            if units is None:
+                # if units is unspecified, use either preferred or base units
+                units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
+                                                        pd['dimensions'], '')
+            return get_pval_as_str(oid, pname, units=units)
+        elif pname in de_defz:
+            return get_dval_as_str(oid, pname)
+        obj = self.get(oid)
+        if not obj:
+            return 'failed: object not found.'
+        cname = obj.__class__.__name__
+        schema = self.schemas.get(cname)
         field_names = []
         if schema:
             field_names = schema.get('field_names', [])
         if field_names and pname in field_names:
             dtype = schema['fields'][pname]['range']
             return str(getattr(obj, pname, None) or NULL_VALUE.get(dtype))
-        elif pname in parm_defz:
-            pd = parm_defz.get(pname)
-            if units is None:
-                # if units is unspecified, use either preferred or base units
-                units = prefs['units'].get(pd['dimensions'], '') or in_si.get(
-                                                        pd['dimensions'], '')
-            return get_pval_as_str(obj.oid, pname, units=units)
-        elif pname in de_defz:
-            return get_dval_as_str(obj.oid, pname)
         return '[undefined]'
 
     def set_prop_val(self, oid, pname, val, units=None):
@@ -1687,7 +1695,7 @@ class UberORB(object):
                 return f'failed: {error}'
         obj = self.get(oid)
         cname = obj.__class__.__name__
-        if cname not in orb.classes:
+        if cname not in self.classes:
             error = f'object class "{cname}" is not a PGEF class.'
             return f'failed: {error}'
         schema = self.schemas.get(cname)
@@ -1748,7 +1756,7 @@ class UberORB(object):
         # [owner.id or "Vendor"] + '-' + [product_type.abbrev.] + '-'
         # and last part (suffix) is unique
         owner_id = ''
-        if isinstance(obj.owner, orb.classes['Project']):
+        if isinstance(obj.owner, self.classes['Project']):
             owner_id = obj.owner.id
             # self.log.debug(f'  owner id: {owner_id}')
             if (len(current_id_parts) >= 3 and
@@ -1807,7 +1815,7 @@ class UberORB(object):
         prefix = current_id_parts[0]
         if prefix not in self.all_pt_abbrs:
             obj.id = '-'.join(current_id_parts[1:])
-            orb.db.commit()
+            self.db.commit()
             self.log.debug(f'* fixed id: {obj.id}')
 
     def gen_rqt_id(self, reqt):
@@ -1846,7 +1854,7 @@ class UberORB(object):
             level (int):  the level of the requirement
         """
         level = level or 0
-        reqs = orb.search_exact(cname='Requirement', level=level, owner=owner)
+        reqs = self.search_exact(cname='Requirement', level=level, owner=owner)
         seq = 0
         rqt_ids = [getattr(req, 'id', None) or 'unknown'
                    for req in reqs]
