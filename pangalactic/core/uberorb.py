@@ -1639,47 +1639,22 @@ class UberORB(object):
             return get_dval_as_str(obj.oid, pname)
         return '[undefined]'
 
-    def set_prop_val(self, obj, pname, val, units=None):
+    def set_prop_val(self, oid, pname, val, units=None):
         """
         Set the value of the specified property for the specified object,
         casting the value to the correct datatype if necessary.
 
         Args:
-            obj (Identifiable): the object
+            oid (str): the 'oid' of the object to which the properties apply
             pname (str): name of the property (attr, parameter, or data
                          element)
             val (any): value to be set
 
         Keyword Args:
             units (str): id of the units in which 'val' is expressed (only
-                applicable to parameters)
+                applies to parameters)
         """
-        cname = obj.__class__.__name__
-        schema = self.schemas.get(cname)
-        field_names = []
-        if schema:
-            field_names = schema.get('field_names', [])
-        else:
-            error = 'object class "{cname}" is not a PGEF class.'
-            return f'failed: {error}'
-        if field_names and pname in field_names:
-            rng = schema['fields'][pname]['range']
-            if rng in self.classes:
-                if isinstance(val, rng):
-                    setattr(obj, pname, val)
-                    return 'succeeded'
-                else:
-                    error = 'value is instance of incorrect class'
-                    return f'failed: {error}'
-            else:
-                if rng in dtypes:
-                    try:
-                        setattr(obj, pname, dtypes[rng](val))
-                        return 'succeeded'
-                    except:
-                        error = 'value could not be cast to correct datatype'
-                        return f'failed: {error}'
-        elif pname in parm_defz:
+        if pname in parm_defz:
             pd = parm_defz[pname]
             if units is None:
                 # if units is unspecified, use either preferred or base units
@@ -1689,29 +1664,53 @@ class UberORB(object):
             if rng in dtypes:
                 try:
                     v = dtypes[pd['range_datatype']](val)
-                    set_pval(obj.oid, pname, v, units=units)
+                    set_pval(oid, pname, v, units=units)
                     return 'succeeded'
                 except:
-                    error = 'value could not be cast to correct datatype'
+                    error = f'{val} could not be cast to correct datatype'
                     return f'failed: {error}'
             else:
-                error = 'value datatype "{rng}" not an accepted datatype'
+                error = f'datatype "{rng}" not an accepted datatype'
                 return f'failed: {error}'
         elif pname in de_defz:
             dedef = de_defz[pname]
             if dedef['range_datatype'] in dtypes:
                 try:
                     v = dtypes[dedef['range_datatype']](val)
-                    set_dval(obj.oid, pname, v)
+                    set_dval(oid, pname, v)
                     return 'succeeded'
                 except:
-                    error = 'value could not be cast to correct datatype'
+                    error = f'{val} could not be cast to correct datatype'
                     return f'failed: {error}'
             else:
-                error = 'value datatype "{rng}" not an accepted datatype'
+                error = f'datatype "{rng}" not an accepted datatype'
                 return f'failed: {error}'
+        obj = self.get(oid)
+        cname = obj.__class__.__name__
+        if cname not in orb.classes:
+            error = f'object class "{cname}" is not a PGEF class.'
+            return f'failed: {error}'
+        schema = self.schemas.get(cname)
+        field_names = schema.get('field_names') or []
+        if pname in field_names:
+            rng = schema['fields'][pname]['range']
+            if rng in self.classes:
+                if isinstance(val, rng):
+                    setattr(obj, pname, val)
+                    return 'succeeded'
+                else:
+                    error = f'{val} is instance of incorrect class'
+                    return f'failed: {error}'
+            else:
+                if rng in dtypes:
+                    try:
+                        setattr(obj, pname, dtypes[rng](val))
+                        return 'succeeded'
+                    except:
+                        error = f'{val} could not be cast to correct datatype'
+                        return f'failed: {error}'
         else:
-            error = 'property "{pname}" is undefined.'
+            error = f'property "{pname}" is undefined.'
             return f'failed: {error}'
 
     def gen_product_id(self, obj):
