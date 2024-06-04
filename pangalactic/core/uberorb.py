@@ -1599,6 +1599,12 @@ class UberORB(object):
             return get_pval(oid, pname, units=units)
         elif pname in de_defz:
             return get_dval(oid, pname)
+        else:
+            try:
+                obj = orb.get(oid)
+                return getattr(obj, pname, '')
+            except:
+                return ''
         return ''
 
     def get_prop_val_as_str(self, oid, pname, units=None):
@@ -1623,7 +1629,12 @@ class UberORB(object):
             return get_pval_as_str(oid, pname, units=units)
         elif pname in de_defz:
             return get_dval_as_str(oid, pname)
-        return '[undefined]'
+        else:
+            try:
+                obj = orb.get(oid)
+                return getattr(obj, pname, '') or '[undefined]'
+            except:
+                return '[undefined]'
 
     def set_prop_val(self, oid, pname, val, units=None):
         """
