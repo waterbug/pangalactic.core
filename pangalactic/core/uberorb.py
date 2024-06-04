@@ -1579,12 +1579,12 @@ class UberORB(object):
 
     def get_prop_val(self, oid, pname, units=None):
         """
-        Return the value of the specified property for the specified object.
+        Return the value of the specified property (parameter or data element)
+        for the specified object.
 
         Args:
             oid (str): the object
-            pname (str): name of the property (attr, parameter, or data
-                element)
+            pname (str): name of the property (parameter or data element)
 
         Keyword Args:
             units (str): id of the units in which 'val' is expressed (only
@@ -1599,27 +1599,16 @@ class UberORB(object):
             return get_pval(oid, pname, units=units)
         elif pname in de_defz:
             return get_dval(oid, pname)
-        obj = self.get(oid)
-        if not obj:
-            return 'failed: object not found.'
-        cname = obj.__class__.__name__
-        schema = self.schemas.get(cname)
-        field_names = []
-        if schema:
-            field_names = schema.get('field_names', [])
-        if field_names and pname in field_names:
-            return getattr(obj, pname, '') or ''
         return ''
 
     def get_prop_val_as_str(self, oid, pname, units=None):
         """
-        Return the string-cast value of the specified property for the
-        specified object.
+        Return the string-cast value of the specified property (parameter or
+        data element) for the specified object.
 
         Args:
             oid (str): oid of the object with the specified property
-            pname (str): name of the property (attr, parameter, or data
-                element)
+            pname (str): name of the property (parameter or data element)
 
         Keyword Args:
             units (str): id of the units in which 'val' is expressed (only
@@ -1634,28 +1623,17 @@ class UberORB(object):
             return get_pval_as_str(oid, pname, units=units)
         elif pname in de_defz:
             return get_dval_as_str(oid, pname)
-        obj = self.get(oid)
-        if not obj:
-            return 'failed: object not found.'
-        cname = obj.__class__.__name__
-        schema = self.schemas.get(cname)
-        field_names = []
-        if schema:
-            field_names = schema.get('field_names', [])
-        if field_names and pname in field_names:
-            dtype = schema['fields'][pname]['range']
-            return str(getattr(obj, pname, None) or NULL_VALUE.get(dtype))
         return '[undefined]'
 
     def set_prop_val(self, oid, pname, val, units=None):
         """
-        Set the value of the specified property for the specified object,
-        casting the value to the correct datatype if necessary.
+        Set the value of the specified property (parameter or data element) for
+        the specified object, casting the value to the correct datatype if
+        necessary.
 
         Args:
             oid (str): the 'oid' of the object to which the properties apply
-            pname (str): name of the property (attr, parameter, or data
-                         element)
+            pname (str): name of the property (parameter or data element)
             val (any): value to be set
 
         Keyword Args:
@@ -1693,30 +1671,6 @@ class UberORB(object):
             else:
                 error = f'datatype "{rng}" not an accepted datatype'
                 return f'failed: {error}'
-        obj = self.get(oid)
-        cname = obj.__class__.__name__
-        if cname not in self.classes:
-            error = f'object class "{cname}" is not a PGEF class.'
-            return f'failed: {error}'
-        schema = self.schemas.get(cname)
-        field_names = schema.get('field_names') or []
-        if pname in field_names:
-            rng = schema['fields'][pname]['range']
-            if rng in self.classes:
-                if isinstance(val, rng):
-                    setattr(obj, pname, val)
-                    return 'succeeded'
-                else:
-                    error = f'{val} is instance of incorrect class'
-                    return f'failed: {error}'
-            else:
-                if rng in dtypes:
-                    try:
-                        setattr(obj, pname, dtypes[rng](val))
-                        return 'succeeded'
-                    except:
-                        error = f'{val} could not be cast to correct datatype'
-                        return f'failed: {error}'
         else:
             error = f'property "{pname}" is undefined.'
             return f'failed: {error}'
