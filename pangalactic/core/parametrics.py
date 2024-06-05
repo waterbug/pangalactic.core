@@ -2279,7 +2279,7 @@ def save_mode_defz(dir_path):
 
 def get_modal_context(project_oid, usage_oid, mode_oid):
     """
-    Get the value of the modal_context (a.k.a. power level corresponding to a
+    Get the value of the modal_context (i.e. power level corresponding to a
     mode) for the specified mode of the specified project and usage.
 
     Args:
@@ -2289,26 +2289,26 @@ def get_modal_context(project_oid, usage_oid, mode_oid):
         mode_oid (str): the oid of the mode (activity)
     """
     if not project_oid in mode_defz:
-        return 'Off'
+        return ''
     sys_dict = mode_defz[project_oid].get('systems')
     if not sys_dict:
-        return 'Off'
+        return ''
     if usage_oid in sys_dict:
         if mode_oid in sys_dict[usage_oid]:
             return sys_dict[usage_oid][mode_oid]
         else:
-            return 'Off'
+            return ''
     else:
         comp_dict = mode_defz[project_oid].get('components')
         if comp_dict:
-            comp_mode = 'Off'
+            comp_mode = ''
             for sys_oid in comp_dict:
                 if usage_oid in list(comp_dict[sys_oid]):
                     comp_mode = comp_dict[sys_oid][usage_oid].get(mode_oid)
                     break
-            return comp_mode or 'Off'
+            return comp_mode or ''
         else:
-            return 'Off'
+            return ''
 
 def set_comp_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid,
                            level):
@@ -2320,7 +2320,8 @@ def set_comp_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid,
     Args:
         project_oid (str): the oid of the project within which the mode is
             defined
-        sys_usage_oid (str): the oid of the usage that has the mode
+        sys_usage_oid (str): the oid of the usage of the system that contains
+            the component that has the mode
         usage_oid (str): the oid of the usage that has the mode
         mode_oid (str): the oid of the mode (activity)
     """
