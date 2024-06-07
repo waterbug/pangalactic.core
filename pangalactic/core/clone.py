@@ -116,16 +116,7 @@ def clone(what, include_ports=True, include_components=True,
         newkw['oid'] = str(uuid4())
         # standard attributes of any Identifiable ...
         newkw['name'] = 'clone of ' + (obj.name or 'anonymous')
-        newkw['abbreviation'] = 'cloned-' + (obj.abbreviation or 'obj')
-        newkw['description'] = 'cloned description: ' + (obj.description
-                                                         or '[empty]')
-        clone_comment = 'cloned from ' + obj.id
-        if obj.comment:
-            new_comment = '\n'.join([clone_comment, '[original comment was:',
-                                     obj.comment + ']'])
-        else:
-            new_comment = clone_comment
-        newkw['comment'] = new_comment
+        newkw['description'] = obj.description
     # generate a unique oid if one is not provided
     if not newkw.get('oid'):
         newkw['oid'] = str(uuid4())
