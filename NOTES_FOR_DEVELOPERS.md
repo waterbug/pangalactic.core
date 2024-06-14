@@ -3,23 +3,71 @@
 ## Structure of the `pangalactic` Namespace Packages
 
 ### `core`: base pangalactic package: ontology, registry, orb, reference data
-  - `access.py ............ computes user permissions for objects`
-  - `datastructures.py .... some custom data structures`
-  - `entity.py ............ a data object for a collaborative spreadsheet`
-  - `kb.py ................ "knowledgebase" api: OWL ontology import/export`
-  - `log.py ............... loggers, used by the "orb"`
-  - `ontology ............. pgef.owl [file in OWL format]`
-  - `test ................. unit tests`
-    + `data ............... test data files`
-    + `vault .............. test data files [copied to app_home/vault]`
-  - `utils ................ general utility modules`
+  - `access ............ computes user permissions for domain objects`
+  - `clone ............. utility for creating copies of domain objects`
+  - `datastructures .... some custom data structures`
+  - `errbudget ......... utility for generating error budgets for optics`
+  - `fastorb ........... experimental caching (non-db) implemention of orb`
+  - `kb.py .............. "knowledgebase" api: OWL ontology import/export`
+  - `log.py ............. loggers, used by the "orb"`
+  - `mapping.py ......... schema-mapping utility`
+  - `meta.py ............ meta characteristics and utilities`
+  - `names.py ........... utilities related to object names and ids`
+  - `ontology ........... pgef.owl [file in OWL format]`
+  - `parametrics ........ run-time attributes (parameters and data elements)`
+  - `refdata ............ reference data for domain objects`
+  - `registry ........... derives domain (python) classes from the ontology`
+  - `serializers ........ marshalls/unmarshalls domain objects for uberorb`
+  - `set_fastorb ........ set the runtime orb to use "fastorb"`
+  - `set_uberorb ........ set the runtime orb to use "uberorb"`
+  - `smerializers ....... marshalls/unmarshalls domain objects for fastorb`
+  - `tachistry .......... converts ontology classes to fastorb classes`
+  - `test ............... unit tests`
+    + `data ............. test data files`
+    + `vault ............ test data files [copied to app_home/vault]`
+  - `uberorb ............ manages domain object APIs and db operations`
+  - `units .............. utility for standard units & conversions`
+  - `utils .............. general utility modules`
+  - `validation ......... utilities for validation of user-entered data`
 
 ### `node`: GUI client package
-  - `cad ........ CAD modules`
-  - `diagrams ... block diagram modules`
-  - `icons ...... app icons [copied to app_home/icons]`
-  - `images ..... app images [copied to app_home/images]`
-  - `test ....... GUI test client`
+  - `activities ......... management of activities in ConOps timelines`
+  - `admin .............. management of users and role assignments`
+  - `buttons ............ button-related widgets`
+  - `cad ................ CAD modules`
+    + `viewer ........... CAD viewer; reads STEP or STL files`
+  - `conops ............. modules related to mission Concept of Operations`
+  - `dashboards ......... "dashboard" widgets for main window (tree/table)`
+  - `diagrams ........... block diagram modules`
+    + `docs ............. diagram doc generator`
+    + `shapes ........... shapes and connectors for diagrams`
+    + `view ............. diagram scenes and views`
+  - `dialogs ............ pop-up widgets for specific tasks`
+  - `filters ............ table widgets that can filter by properties`
+  - `icons .............. app icons [copied to app_home/icons]`
+  - `images ............. app images [copied to app_home/images]`
+  - `interface42 ........ data input utilities for the "42" ACS simulator`
+  - `libraries .......... tables for various types of reusable domain objects`
+  - `message_bus ........ network interface for messaging server ("crossbar")`
+  - `modeler ............ block diagram models similar to SysML IBD models`
+  - `optics ............. API for Linear Optical Model (LOM)`
+  - `pangalaxian ........ main GUI client with message server rpc interfaces`
+  - `pgxnobject ......... domain object viewer/editor`
+  - `ref_db ............. reference database (initial local db at startup)`
+    + `local.db ......... sqlite database containing reference data`
+  - `rqtmanager ......... requirements manager`
+  - `rqtwizard .......... wizard for creating new requirements`
+  - `splash ............. splash screen for pangalaxian client`
+  - `strartup ........... startup functions for pangalaxian client`
+  - `systemtree ......... system assembly tree widget`
+  - `tablemodels ........ internal data models used in standard tables`
+  - `tablviews .......... external interfaces for standard tables`
+  - `test ............... GUI test client and related utilities`
+  - `threads ............ threading-related utilities`
+  - `trees .............. general tree-based interfaces`
+  - `utils .............. client-related utilities`
+  - `widgets ............ general GUI classes`
+  - `wizards ............ various types of "wizards"`
 
 ### `vger`: network repository service
   - `vger.py ........ repository service module`
@@ -164,6 +212,8 @@
 
     `connected:        (bool) true if logged in to message bus`
 
+    `conops usage oid: (str) oid of ConOps selected usage
+
     `current_cname:    (str)  name of currently selected db table class`
 
     `dashboard_name:   (str)  name of currently selected dashboard`
@@ -188,6 +238,8 @@
     `                         ('system', 'component', 'db', or 'data')`
 
     `mode_defz_dts:    (str)  last-synced-datetime str of the mode_defz cache`
+
+    `parmz_dts:        (str)  last-synced-datetime str of the parameterz cache`
 
     `product:          (str)  oid of currently selected Product -- refers to`
     `                         the product selected in 'product modeler'`

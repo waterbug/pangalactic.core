@@ -2337,6 +2337,7 @@ def set_comp_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid,
     if usage_oid not in comp_dict[sys_usage_oid]:
         comp_dict[sys_usage_oid][usage_oid] = {}
     comp_dict[sys_usage_oid][usage_oid][mode_oid] = level
+    dispatcher.send(signal="modes edited", oid=project_oid)
 
 def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
                     units=None):
@@ -2509,4 +2510,36 @@ def get_usage_mode_val_as_str(project_oid, usage_oid, oid, mode, units='',
         # log.debug(msg)
         # for production use, return '' if the value causes error
         return 'exception'
+
+def clone_mode_defs(act, act_clone):
+    """
+    Copy the power mode definitions for an activity (mode) to create an
+    identical set of definitions for a act_clone of that activity (mode).
+
+    Args:
+        act (Activity): the activity (mode) being cloned
+        act_clone (Activity): the clone
+    """
+    project_oid = act.owner.oid
+    modes_dict = mode_defz[project_oid].get('modes') or {}
+    sys_dict = mode_defz[project_oid].get('systems') or {}
+    comp_dict = mode_defz[project_oid].get('components') or {}
+    # TODO: use try/except in case something barfs ...
+    # try:
+    act_oid = act.oid
+    clone_oid = act_clone.oid
+    modes_dict[clone_oid] = act_clone.name
+    # repicate all occurrances in sys_dict
+    for usage_oid in sys_dict:
+        if act_oid in sys_dict[usage_oid]:
+            sys_dict[usage_oid][clone_oid] = sys_dict[usage_oid][act_oid]
+    # repicate all occurrances in comp_dict
+    for usage_oid in comp_dict:
+        for comp_oid in comp_dict[usage_oid]:
+            if act_oid in comp_dict[usage_oid][comp_oid]:
+                comp_dict[usage_oid][
+                        comp_oid][clone_oid] = comp_dict[usage_oid][
+                                                        comp_oid][act_oid]
+    dispatcher.send(signal="modes edited", oid=project_oid)
+
 
