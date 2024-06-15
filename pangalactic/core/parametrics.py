@@ -2542,4 +2542,18 @@ def clone_mode_defs(act, act_clone):
                                                         comp_oid][act_oid]
     dispatcher.send(signal="modes edited", oid=project_oid)
 
+def get_duration(act, units=None):
+    """
+    Get or compute the duration of an Activity.  If the Activity has
+    sub_activities, its duration should be the sum of the durations of its
+    sub_activities and, in the case of a Cycle, the number of its iterations,
+    although for Cycles their duration may be specified directly.
+    """
+    val = get_pval(act.oid, 'duration', units=units)
+    if val:
+        return val
+    elif act.sub_activities:
+        return sum([get_duration(a, units=units) for a in act.sub_activities])
+    else:
+        return 0.0
 
