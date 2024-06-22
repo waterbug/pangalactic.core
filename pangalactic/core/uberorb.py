@@ -744,24 +744,24 @@ class UberORB(object):
         Build the `componentz` cache (which maps Product oids to the oids of
         their components) at startup.
         """
-        self.log.debug('  + building componentz cache ...')
+        # self.log.debug('  + building componentz cache ...')
         for product in self.get_all_subtypes('Product'):
             if product.components:
                 refresh_componentz(product)
-        compz = len(componentz)
-        self.log.debug(f'    componentz cache has {compz} items.')
+        # compz = len(componentz)
+        # self.log.debug(f'    componentz cache has {compz} items.')
 
     def _build_systemz_cache(self):
         """
         Build the `systemz` cache (which maps Project oids to the oids of their
         top-level systems) at startup.
         """
-        self.log.debug('  + building systemz cache ...')
+        # self.log.debug('  + building systemz cache ...')
         for project in self.get_by_type('Project'):
             if project.systems:
                 refresh_systemz(project)
-        sys_len = len(systemz)
-        self.log.debug(f'    systemz cache has {sys_len} items.')
+        # sys_len = len(systemz)
+        # self.log.debug(f'    systemz cache has {sys_len} items.')
 
     def start_logging(self, home=None, console=False, debug=False):
         """
@@ -1129,14 +1129,14 @@ class UberORB(object):
                                                 # str(list(de_defz.keys()))))
 
     def remove_deprecated_data(self):
-        self.log.debug('  + checking for deprecated reference data ...')
+        # self.log.debug('  + checking for deprecated reference data ...')
         deprecated_objs = [self.get(oid) for oid in refdata.deprecated]
         to_delete = [obj for obj in deprecated_objs if obj is not None]
         if to_delete:
             self.delete(to_delete)
             # if a deprecated object was a ParameterDefinition or
             # ParameterContext, remove all related parameters
-        self.log.debug('    deprecated items found, checking parameters ...')
+        # self.log.debug('    deprecated items found, checking parameters ...')
         n_pds = 0
         n_pcs = 0
         obj_oids = [oid for oid in parameterz if parameterz.get(oid)]
@@ -1206,13 +1206,13 @@ class UberORB(object):
                     for pid in state_rm:
                         state['app_default_parms'].remove(pid)
                         self.log.debug(f'    {pid} removed from state.')
-        self.log.debug(f'    {len(obj_oids)} objects checked ...')
-        self.log.debug(f'    {n_pds} deprecated parameters removed.')
-        context_msg = 'parameters with deprecated contexts removed.'
-        self.log.debug(f'    {n_pcs} {context_msg}')
+        # self.log.debug(f'    {len(obj_oids)} objects checked ...')
+        # self.log.debug(f'    {n_pds} deprecated parameters removed.')
+        # context_msg = 'parameters with deprecated contexts removed.'
+        # self.log.debug(f'    {n_pcs} {context_msg}')
         # also remove any parameters that don't make sense from parameterz,
         # config, prefs, and state
-        self.log.debug('    removing other deprecated parameters ...')
+        # self.log.debug('    removing other deprecated parameters ...')
         for pid in DEPRECATED_PARAMETERS:
             for obj_oid in obj_oids:
                 if pid in parameterz[obj_oid]:
@@ -1228,7 +1228,7 @@ class UberORB(object):
             if pid in state.get('app_default_parms', []):
                 state['app_default_parms'].remove(pid)
                 self.log.debug(f'    {pid} removed from state.')
-        self.log.debug('  + all deprecated reference data removed.')
+        # self.log.debug('  + all deprecated reference data removed.')
 
     ##########################################################################
     # DB FUNCTIONS
