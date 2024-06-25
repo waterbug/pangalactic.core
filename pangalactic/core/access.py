@@ -6,7 +6,6 @@ from pangalactic.core import orb, state, config
 
 
 modifiables = [
-        'ActCompRel',
         'ParameterRelation',
         'Relation',
         'RepresentationFile',
