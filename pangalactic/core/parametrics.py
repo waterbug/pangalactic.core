@@ -2442,10 +2442,6 @@ def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
     if project_oid not in mode_defz:
         log.debug('* the specified project has no modes defined.')
         return 0.0
-    modes = mode_defz[project_oid].get('modes') or {}
-    if mode not in modes:
-        log.debug(f'* mode "{mode}" is not defined for the specified project.')
-        return 0.0
     sys_dict = mode_defz[project_oid].get('systems') or {}
     comp_dict = mode_defz[project_oid].get('components') or {}
     if not sys_dict:
