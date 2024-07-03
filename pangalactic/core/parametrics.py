@@ -2538,6 +2538,7 @@ def clone_mode_defs(act, act_clone):
                                                         comp_oid][act_oid]
     dispatcher.send(signal="modes edited", oid=project_oid)
 
+# NOTE: this is probably NOT the way to characterize duration for cycles
 def get_duration(act, units=None):
     """
     Get or compute the duration of an Activity.  If the Activity has

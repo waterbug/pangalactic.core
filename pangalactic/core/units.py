@@ -105,6 +105,7 @@ alt_units = dict([
     ])
 
 # time unit names for use in user interfaces, mapped to their standard "ids"
+# NOTE: this is completely unnecessary as all these "names" are in ureg ...
 time_unit_names = {'seconds': 's',
                    'minutes': 'minute',
                    'hours': 'hour',
