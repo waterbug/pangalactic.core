@@ -589,6 +589,10 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     hwproducts = []
     # requirements: list of deserialized objects that are Requirement instances
     requirements = []
+    # act_to_sao: mapping of Activity oids to oids of their "sub_activity_of"
+    # ... needed in case Activity instances get deserialized before their
+    # "sub_activity_of" has been deserialized.
+    act_to_sao = {}
     # created: list of all deserialized objects which are new
     created = []
     # updates: list of all deserialized objects which are updates
@@ -853,6 +857,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     update_parmz_by_dimz(obj)
                 elif cname == 'DataElementDefinition':
                     update_de_defz(obj)
+                elif cname == 'Activity':
+                    act_to_sao[d['oid']] = d.get('sub_activity_of', '')
                 orb.log.debug('* updated object: [{}] {}'.format(cname,
                                                       obj.id or '(no id)'))
             elif d['oid'] not in ignores:
@@ -926,6 +932,12 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     for req in requirements:
         # if there are any Requirement objects, refresh the rqt_allocz cache
         refresh_rqt_allocz(req)
+    for act_oid, sao_oid in act_to_sao.items():
+        act = orb.get(act_oid)
+        sao = orb.get(sao_oid)
+        if act and sao and not act.sub_activity_of:
+            act.sub_activity_of = sao
+            orb.db.commit()
     if dictify:
         return output
     else:
