@@ -40,7 +40,8 @@ PGXN_REQD = dict(
 # TODO:  support for field "aliases" (a.k.a. "display names")
 SYSTEM = ['version', 'version_sequence', 'iteration']
 MAIN_VIEWS = dict(
-    Activity=(IDENTITY + ['owner', 'activity_type', 'of_system']),
+    Activity=['name', 'description', 'owner', 'activity_type', 'of_system',
+              'sub_activity_of'],
     Acu=['id', 'assembly', 'component', 'quantity', 'reference_designator',
          'assembly_level', 'product_type_hint'],
     Discipline=IDENTITY,
