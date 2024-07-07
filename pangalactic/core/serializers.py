@@ -637,6 +637,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 loadable[so['_cname']] = [so]
         else:
             loadable['other'].append(so)
+        if so['_cname'] == 'Activity':
+            act_to_sao[so['oid']] = so.get('sub_activity_of', '')
     order = [c for c in DESERIALIZATION_ORDER if c in loadable]
     order.append('other')
     # NOTE: this `i` was part of a progress method that didn't work
@@ -857,8 +859,6 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     update_parmz_by_dimz(obj)
                 elif cname == 'DataElementDefinition':
                     update_de_defz(obj)
-                elif cname == 'Activity':
-                    act_to_sao[d['oid']] = d.get('sub_activity_of', '')
                 orb.log.debug('* updated object: [{}] {}'.format(cname,
                                                       obj.id or '(no id)'))
             elif d['oid'] not in ignores:
