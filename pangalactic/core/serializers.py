@@ -639,6 +639,9 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             loadable['other'].append(so)
         if so['_cname'] == 'Activity':
             act_to_sao[so['oid']] = so.get('sub_activity_of', '')
+    # if act_to_sao:
+        # n = len(act_to_sao)
+        # orb.log.debug(f'* deser: {n} activities with parents found.')
     order = [c for c in DESERIALIZATION_ORDER if c in loadable]
     order.append('other')
     # NOTE: this `i` was part of a progress method that didn't work
@@ -936,6 +939,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         act = orb.get(act_oid)
         sao = orb.get(sao_oid)
         if act and sao and not act.sub_activity_of:
+            # orb.log.debug(f'  deser: setting parent {sao.name} for {act.name}')
             act.sub_activity_of = sao
             orb.db.commit()
     if dictify:
