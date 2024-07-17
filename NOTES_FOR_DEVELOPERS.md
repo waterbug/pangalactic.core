@@ -327,7 +327,7 @@ optimize performance.
   main window
 * "mode" is a state of the main pangalaxian main window
 
-#### Modes:  "system" and "component"
+### Modes:  "system" and "component"
 
 * Component Modeler and System Modeler
 
@@ -339,32 +339,70 @@ optimize performance.
     - if > 1 model ... left:  tree structure + metadata of selected model,
                        center: diagram
 
-#### Mode:  "db"
-
-* View/edit objects in local db
-
-#### Mode: "data"
-
-* Main widget is DataGrid, which uses a "DataMatrix" as its underlying model
-
-## Diagrams (used in "system" and "component" modes)
+#### Diagrams (used in "system" and "component" modes)
 
 * See `NOTES_ON_DIAGRAMS`
 
-## Random notes on the orb
+#### System Tree (used in "system" mode)
 
-(0) the orb is used on both the client and server sides, so it must be kept
-    free of:
+The system tree represents the collective assembly tree for all systems of the
+current project.  Its class, SystemTreeView, is implemented as a subclass of
+QTreeView and its underlying model, SystemTreeModel, as a subclass of
+QAbstractItemModel.
+
+#### System Dashboard (used in "system" mode)
+
+The system dashboard (p.node.dashboards.SystemDashboard) is a subclass of
+QTreeView and uses the same model (SystemTreeModel instance) as the system
+tree. Its expansion levels are kept in sync with those of the system tree
+as well. The GUI code structure of the dashboard is as follows:
+
+------------------------------------------------------------------------------
+top_dock_widget (QDockWidget)
+    dashboard_panel (QWidget)
+    dashboard_panel_layout (QVBoxLayout)
+        dash_title (QLabel)
+            dashboard_title_layout (QHBoxLayout)
+        dash_select (DashSelectCombo)
+        dashboard (SystemDashboard)
+------------------------------------------------------------------------------
+
+
+### Mode:  "db"
+
+* View/search objects in the local db instance (sqlite)
+
+### Mode: "data"
+
+* Main widget is DataGrid, which uses a "DataMatrix" as its underlying model
+
+## Random notes on the "uberorb" orb
+
+(0) The "uberorb" orb is used on both the client and server sides -- the
+    'state' setting "client" is used to indicate whether the orb is operating
+    on the client side (True) or server side (False).
+
+(1) Because the orb is used on both client and server, it must be kept free of:
     * 'louie' events -- they are used *only* in the client gui environment
     * `local_user` -- exists solely in the client environment
     * any awareness of the network or network-related events
 
-(1) orb.save() *NEVER* sets the `mod_datetime` of objects, because it
+(2) orb.save() *NEVER* sets the `mod_datetime` of objects, because it
     saves both local objects and those received from remote sources --
     therefore, locally created or modified objects must be time-stamped
     *before* they are passed to orb.save().
 
-(2) orb.clone() *ALWAYS* sets the `mod_datetime` of the clone
+(3) clone() *ALWAYS* sets the `mod_datetime` attribute of the clone, but does
+    not commit, so orb.db.commit() or orb.save() should be called after using
+    clone().
+
+(4) An experimental implementation of the orb, "fastorb", uses a set of
+    dictionary caches instead of a relational database and object-relational
+    mapper (sqlalchemy). The fastorb implementation of the PGEF domain classes
+    (i.e. those defined in the Pan Galactic Engineering Framework Ontology) is,
+    of course, significantly different from those in the uberorb
+    implementation, which are explicitly tied to the database so that their
+    instances always exist in the context of a database transaction.
 
 ## Behavior of Project and System selection states
 
