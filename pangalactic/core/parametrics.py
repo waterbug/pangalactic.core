@@ -2466,9 +2466,8 @@ def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
                     comp_dict[sys_usage_oid][usage_oid][mode] = context
                 val = get_modal_power(project_oid, usage_oid, oid, mode,
                                       context, units=units)
-        if val == None:
-            # not defined
-            log.debug(f'* no modes defined for components of with oid "{oid}".')
+        if val is None:
+            # log.debug(f'* no modes defined for component with oid "{oid}".')
             val = 0.0
         return val
 

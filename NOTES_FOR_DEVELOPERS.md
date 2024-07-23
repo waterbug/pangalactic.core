@@ -234,6 +234,9 @@
 
     `local_user_oid:   (str)  oid of Person object for local user `
 
+    `mdd:              (dict)  maps project oid to oids of currently selected`
+    `                          activity ("act") and "usage"`
+
     `mode:             (str)  current Pangalaxian gui mode`
     `                         ('system', 'component', 'db', or 'data')`
 
@@ -254,7 +257,7 @@
 
     `system:           (dict) maps oids of projects to their currently`
     `                         selected system (Product or Project) -- may be`
-    `                         selected by clicking on an item in the system`
+    `                         set by clicking on an item in the system`
     `                         tree or drilling down into (double-clicking on)`
     `                         a block in the diagram`
 
