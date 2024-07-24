@@ -29,14 +29,14 @@
                 "ctgcy":30.0,
                 "mev":0.0
                 },
-            "Science Mode, Acquisition":{
+            "Science Data Acquisition":{
                 "value_type":"context",
                 "context":"Off",
                 "cbe":0.0,
                 "ctgcy":30.0,
                 "mev":0.0
                 },
-            "Science Mode, Transmitting":{
+            "Science Data Transmission":{
                 "value_type":"context",
                 "context":"Off",
                 "cbe":0.0,
@@ -81,14 +81,14 @@
                     "ctgcy":30.0,
                     "mev":0.0
                     },
-                "Science Mode, Acquisition":{
+                "Science Data Acquisition":{
                     "value_type":"[computed]",
                     "context":"",
                     "cbe":0.0,
                     "ctgcy":30.0,
                     "mev":0.0
                     },
-                "Science Mode, Transmitting":{
+                "Science Data Transmission":{
                     "value_type":"[computed]",
                     "context":"",
                     "cbe":0.0,
@@ -135,14 +135,14 @@
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Acquisition":{
+                    "Science Data Acquisition":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Transmitting":{
+                    "Science Data Transmission":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
@@ -186,14 +186,14 @@
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Acquisition":{
+                    "Science Data Acquisition":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Transmitting":{
+                    "Science Data Transmission":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
@@ -237,14 +237,14 @@
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Acquisition":{
+                    "Science Data Acquisition":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Transmitting":{
+                    "Science Data Transmission":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
@@ -288,14 +288,14 @@
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Acquisition":{
+                    "Science Data Acquisition":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Transmitting":{
+                    "Science Data Transmission":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
@@ -339,14 +339,14 @@
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Acquisition":{
+                    "Science Data Acquisition":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Transmitting":{
+                    "Science Data Transmission":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
@@ -390,14 +390,14 @@
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Acquisition":{
+                    "Science Data Acquisition":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
                         "ctgcy":30.0,
                         "mev":0.0
                         },
-                    "Science Mode, Transmitting":{
+                    "Science Data Transmission":{
                         "value_type":"context",
                         "context":"Off",
                         "cbe":0.0,
