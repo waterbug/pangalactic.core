@@ -212,7 +212,9 @@
 
     `connected:        (bool) true if logged in to message bus`
 
-    `conops usage oid: (str) oid of selected usage in ConOps
+    `conops:           (bool) true if ConOpsModeler window is open`
+
+    `conops usage oid: (str) oid of selected usage in ConOps`
 
     `current_cname:    (str)  name of currently selected db table class`
 

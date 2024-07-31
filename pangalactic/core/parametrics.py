@@ -2337,7 +2337,6 @@ def set_comp_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid,
     if usage_oid not in comp_dict[sys_usage_oid]:
         comp_dict[sys_usage_oid][usage_oid] = {}
     comp_dict[sys_usage_oid][usage_oid][mode_oid] = level
-    dispatcher.send(signal="modes edited", oid=project_oid)
 
 def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
                     units=None):
