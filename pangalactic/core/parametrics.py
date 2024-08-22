@@ -2354,6 +2354,7 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
             defined
         sys_usage_oid (str): the oid of the usage that has the mode
         oid (str): the oid of the product assembly containing the usage
+        modal_context (str): the power "level" or "[computed]"
         mode (str): the oid of the mode (activity)
 
     Keyword Args:
@@ -2362,10 +2363,10 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
     if modal_context == '[computed]':
         sys_dict = mode_defz[project_oid].get('systems') or {}
         comp_dict = mode_defz[project_oid].get('components') or {}
-        # log.debug('* computing modal power value ...')
+        log.debug('* computing modal power value ...')
         cz = componentz.get(oid)
         if (sys_usage_oid in comp_dict) and cz:
-            # log.debug(f'  - found {len(cz)} components ...')
+            log.debug(f'  - found {len(cz)} components ...')
             # dtype cast is used here in case some component didn't have this
             # parameter or didn't exist and we got a 0.0 value for it ...
             summation = 0.0
@@ -2388,9 +2389,9 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
                     else:
                         val = get_pval(c.oid, get_parameter_id('P', context),
                                        units=units)
-                # log.debug(f'    + {val} (context: {context})')
+                log.debug(f'    + {val} (context: {context})')
                 summation += (val or 0.0) * c.quantity
-            # log.debug(f'  total: {summation}')
+            log.debug(f'  total: {summation}')
             return round_to(summation)
         else:
             # if the product has no known components, return its specified
@@ -2419,91 +2420,6 @@ def get_power_contexts(obj):
         contexts.insert(0, 'Off')
         return contexts
     return ['Off']
-
-def get_usage_mode_val(project_oid, usage_oid, oid, mode, units='',
-                       allow_nan=False):
-    """
-    Return the power mode value for a usage in base units or in the units
-    specified.
-
-    Args:
-        project_oid (str): the oid of the project within which the mode is
-            defined
-        usage_oid (str): the oid of the usage that has the mode
-        oid (str): the oid of the product in the usage (system or component)
-        mode (str): the name of the mode
-
-    Keyword Args:
-        units (str):  units in which the return value should be expressed
-    """
-    # Too verbose -- only for extreme debugging ...
-    # log.debug('* get_usage_mode_val() ...')
-    if project_oid not in mode_defz:
-        log.debug('* the specified project has no modes defined.')
-        return 0.0
-    sys_dict = mode_defz[project_oid].get('systems') or {}
-    comp_dict = mode_defz[project_oid].get('components') or {}
-    if not sys_dict:
-        log.debug('* no systems in this project have modes defined.')
-        return 0.0
-    if usage_oid in sys_dict:
-        context = sys_dict[usage_oid].get(mode)
-        if context is None:
-            context = "Off"
-            sys_dict[usage_oid][mode] = context
-        return get_modal_power(project_oid, usage_oid, oid, mode, context,
-                               units=units)
-    else:
-        # not a system usage -- check if included as a component ...
-        val = None
-        for sys_usage_oid in comp_dict:
-            if usage_oid in comp_dict[sys_usage_oid]:
-                # get Power value specified for that context
-                context = comp_dict[sys_usage_oid][usage_oid].get(mode)
-                if context is None:
-                    context = "Off"
-                    comp_dict[sys_usage_oid][usage_oid][mode] = context
-                val = get_modal_power(project_oid, usage_oid, oid, mode,
-                                      context, units=units)
-        if val is None:
-            # log.debug(f'* no modes defined for component with oid "{oid}".')
-            val = 0.0
-        return val
-
-def get_usage_mode_val_as_str(project_oid, usage_oid, oid, mode, units='',
-                              allow_nan=False):
-    """
-    Return the power mode value for a usage in the specified units (or in base
-    units if not specified) as a formatted string, for display in UI.  (Used in
-    the dashboard.)
-
-    Args:
-        project_oid (str): the oid of the project within which the mode is
-            defined
-        usage_oid (str): the oid of the usage that has the mode
-        oid (str): the oid of the product in the usage (system or component)
-        mode (str): the name of the mode
-
-    Keyword Args:
-        units (str):  units in which the return value should be expressed
-        allow_nan (bool):  allow numpy NaN as a return value
-    """
-    # Too verbose -- only for extreme debugging ...
-    # log.debug('* get_usage_mode_val_as_str({}, {})'.format(oid, pid))
-    try:
-        val = get_usage_mode_val(project_oid, usage_oid, oid, mode,
-                                 units=units)
-        if val is None:
-            return ''
-        return str(val) or '-'
-    except:
-        # FOR EXTREME DEBUGGING ONLY:
-        # this logs an ERROR for every unpopulated parameter
-        # msg = '* get_usage_mode_val_as_str({}, {})'.format(oid, pid)
-        # msg += '  encountered an error.'
-        # log.debug(msg)
-        # for production use, return '' if the value causes error
-        return 'exception'
 
 def clone_mode_defs(act, act_clone):
     """
