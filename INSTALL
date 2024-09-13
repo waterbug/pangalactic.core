@@ -27,20 +27,19 @@ specifies the software required and where to obtain it.
 
 All of the following software is free and open source.
 
-NOTE:  Use of the "conda" package manager is *strongly* recommended.  Unless
-the full Anaconda distribution (https://www.continuum.io/downloads) is required
-for some other application or is already installed, the recommended practice is
-to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
-`conda` package manager and a minimal set of associated libraries, then use
-`conda` to install the dependencies listed below.
+NOTE:  Use of the "conda" package manager is *strongly* recommended.  The
+recommended practice is to install "Miniforge"
+(https://conda-forge.org/miniforge/), which will set up the `conda` package
+manager and a minimal set of associated libraries, then use `conda` to install
+the dependencies listed below.
 
 (0) Python requirements:
 
-    - Python 3.7 or 3.8
+    - Python 3.12 (3.9 - 3.11 *might* work but are not guaranteed)
 
           Configuration:  Python has binary installers for several platforms
           and can also be compiled and installed from source, but the
-          recommended practice is to use the Python binary that Miniconda
+          recommended practice is to use the Python binary that Miniforge
           installs.  Be sure to install it configured with SSL support, as this
           is used by pangalactic (see instructions included with the Python
           distribution -- if you install from source, OpenSSL is required).
@@ -53,15 +52,13 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           channels:
             - conda-forge
-            - defaults
+            - http://pangalactic.us:/conda_repo
 
     (1.2) Install the following dependencies of pangalactic.core:
 
-    - louie (latest released version -- "Louie-latest" on PyPI**)
+    - louie
       Python application event signals
-      * NOTE: not in the default conda channel, use locally built conda pkg
-      ** NOTE:  the name of the imported pkg is "louie", as is the
-                name of the locally-built conda package
+      * NOTE: locally built conda pkg is on pangalactic.us
 
           Configuration:  'conda install louie'
 
@@ -96,8 +93,9 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
     - SqlAlchemy
       <http://www.sqlalchemy.org>
+      NOTE: version 2.0 and later broke compatibility
 
-          Configuration:  'conda install sqlalchemy'
+          Configuration:  'conda install sqlalchemy=1.4'
 
     - tzlocal (latest released version)
       Local timezones implementation
@@ -130,20 +128,12 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
     *** NOTE for Linux (linux-64) *****************************************
     Use 'conda install pythonocc-core' to pull in pyqt5 and qt packages,
-    AND EXCLUDE the 'defaults' channel because otherwise conda will install
+    AND avoid the 'defaults' channel because otherwise conda will install
     incompatible pyqt5 from 'defaults' channel with qt from conda-forge
     channel.
     ***********************************************************************
 
-    (2.1) Put the following channels in your '.condarc' file to install
-          pangalactic.node:
-
-          channels:
-            - conda-forge
-            - dlr-sc
-            - defaults
-
-    (2.2) Install the following dependencies of pangalactic.node:
+    Install the following dependencies of pangalactic.node:
 
     - autobahn
       * NOTE: requires 'conda-forge' channel
@@ -180,11 +170,11 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration:  'conda install pyqt'
 
-    - pyqtgraph
+    - pythonqwt
       Graphing package for pyqt apps, used for the mission concept modeler
       module, 'conops'.  NOTE:  this adds numpy as a dependency.
 
-          Configuration:  'conda install pyqtgraph'
+          Configuration:  'conda install pythonqwt'
 
     - qt5reactor
       Integration of twisted reactor with PyQt5 event loop
@@ -197,6 +187,14 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
 
           Configuration: 'conda install pythonocc-core'
 
+    - Twisted
+      Asynchronous networking framework
+      <http://twistedmatrix.com>
+      NOTE:  autobahn can be used with asyncio or twisted -- pangalactic uses
+      it with twisted.
+
+          Configuration:  'conda install twisted'
+
     - websocket-client
       (Checks status of server when logging in to repository)
 
@@ -208,7 +206,6 @@ to install "Miniconda" (http://conda.io/miniconda.html), which will set up the
     The items in (1) *plus* the following packages ...
 
     - autobahn
-      * NOTE: requires 'conda-forge' channel
 
           Configuration:  'conda install autobahn'
 
