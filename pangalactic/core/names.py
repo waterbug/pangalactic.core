@@ -925,7 +925,7 @@ def get_next_ref_des(assembly, component, prefix=None, product_type=None):
                 refdes = f'{prefix}-{n:02}'
         return refdes
     else:
-        return prefix + '-01'
+        return prefix + '-001'
 
 def get_ra_name(ra_context_id, role_id, fname, mi, lname):
     """
