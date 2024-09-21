@@ -1643,7 +1643,7 @@ class UberORB(object):
         necessary.
 
         Args:
-            oid (str): the 'oid' of the object to which the properties apply
+            oid (str): the 'oid' of the object to which the property applies
             pname (str): name of the property (parameter or data element)
             val (any): value to be set
 
