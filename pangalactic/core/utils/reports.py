@@ -9,6 +9,8 @@ from pangalactic.core.meta         import MAIN_VIEWS
 from pangalactic.core.names        import (get_mel_item_name, pname_to_header,
                                            STD_VIEWS)
 from pangalactic.core.parametrics  import (componentz, systemz,
+                                           get_modal_context,
+                                           get_modal_power,
                                            get_pval, get_dval, de_defz,
                                            parm_defz, round_to)
 from pangalactic.core.units        import in_si
@@ -1157,5 +1159,183 @@ def get_item_data_tsv(item, schema, level, pref_units=False, summary=False,
             for item_name in item_names:
                 data += get_item_data_tsv(acus_by_item_name[item_name], schema,
                                           next_level)
+    return data
+
+
+def write_power_modes_to_xlsx(act, usage, pref_units=False,
+                              file_path='power_modes.xlsx'):
+    """
+    Output a System Power Modes report to Excel .xlsx format, including system
+    / subsystem / component names and assembly levels.  The output consists of
+    2 sheets:
+
+        1)  Similar to the "Modes Table" format previously used in MDL,
+            consisting of a column for each Activity (Power Mode), each
+            containing a set of 3 sub-columns:  Power (CBE), Congtingency, and
+            Power (MEV), with a row for each instrument and subsystem.
+
+        2)  A table showing the underlying mode definitions in terms of the
+            associated power levels at the system and component level,
+            summarizing the content of the ConOps "Mode Definition Dashboard".
+
+    Args:
+        act (Mission or Activity):  parent activity containing the
+            activities/modes being characterized
+        usage (Project, ProjectSystemUsage, or Acu):  the top-level system
+            usage of the assembly whose power modes are being described
+
+    Keyword Args:
+        pref_units (bool):  express values in the user's preferred units;
+            default is False (use mks units)
+        file_path (str):  path to output file
+    """
+    system_id = getattr(usage, 'id', None) or '[unknown id]'
+    orb.log.debug('* write_power_modes_to xlsx()')
+    orb.log.debug(f'  - subject: {act.id}')
+    orb.log.debug(f'  - system: {system_id}')
+    project = act.owner
+    if not project:
+        orb.log.debug('* Project not found, aborting.')
+    mission = orb.select('Mission', owner=project)
+    if not mission:
+        orb.log.debug('* Mission not found for project, aborting.')
+        return
+    if act.oid == mission.oid:
+        subject_label = mission.name
+    else:
+        subject_label = f'{mission.id}\n{act.name}'
+    headers = [subject_label]
+    subj_acts = []
+    subj_act_oids = []
+    for act in mission.sub_activities:
+        subj_acts.append(act)
+        subj_act_oids.append(act.oid)
+    headers += [act.name for act in subj_acts]
+    cycles = []
+    for act in subj_acts:
+        if act.activity_type.name == 'Cycle':
+            # for cycles, only show their sub_activities ...
+            # info about the cycle (Avg & Max Power) can be in a note
+            subj_acts.remove(act)
+            headers.remove(act.name)
+            subj_act_oids.remove(act.oid)
+            cycles.append(act)
+            sub_acts = act.sub_activities
+            for sub_act in sub_acts:
+                subj_acts.append(sub_act)
+                subj_act_oids.append(sub_act.oid)
+                sub_act_label = f'{act.name}\n{sub_act.name}'
+                headers.append(sub_act_label)
+    book = xlsxwriter.Workbook(file_path)
+    worksheet = book.add_worksheet()
+    # xlsxwriter specifies widths in "characters" (as does Excel)
+    col_widths = [10] * ((len(headers) - 1)*3 + 1)
+    col_widths[0] = 80    # Mission/System/Subsystem Name
+    orb.log.info('  - writing formatted column headers ...')
+    for i, width in enumerate(col_widths):
+        worksheet.set_column(i, i, width)
+
+    fmts = {name : book.add_format(style)
+            for name, style in xlsx_styles.items()}
+
+    # Set position of title
+    title_row = 0
+    # Set relative positions of header rows
+    hrow1 = title_row + 1
+    hrow2 = hrow1 + 1
+
+    # Title (row 0)
+    # set row 0 height to 12*2
+    worksheet.set_row(title_row, 12*2)
+    # set hrow2 height taller (activity sub-headers with units)
+    worksheet.set_row(hrow2, 42)
+    worksheet.merge_range(title_row, 0, title_row, len(col_widths)-1,
+                          f'  {mission.name} Power Modes',
+                          fmts['black_bg_18'])
+    header_style_names = [
+                          'ctr_turquoise_bold_12',
+                          'ctr_gray_bold_12',
+                          'ctr_lime_bold_12',
+                          'ctr_light_steel_blue_bold_12',
+                          'ctr_yellow_bold_12',
+                          'ctr_periwinkle_bold_12',
+                          'ctr_green_bold_12',
+                          'ctr_pale_blue_bold_12'
+                          ]
+    usages = [usage]
+    if isinstance(usage, orb.classes['ProjectSystemUsage']):
+        usages += list(usage.system.components)
+    elif isinstance(usage, orb.classes['Acu']):
+        usages += list(usage.component.components)
+    data = get_power_modes_data(project, subj_acts, usages)
+    p_cbe_header = 'Power\n(CBE)\nWatts'
+    ctgcy_header = 'Contin-\ngency\n   %'
+    p_mev_header = 'Power\n(MEV)\nWatts'
+    orb.log.debug(f'  - len(headers) = {len(headers)}')
+    orb.log.debug(f'  - len(subj_act_oids) = {len(subj_act_oids)}')
+    for i, h in enumerate(headers):
+        orb.log.debug(f'    + i = {i}')
+        orb.log.debug(f'      header = {h}')
+        if i == 0:
+            # subject name header uses only 1 column but spans rows 1 & 2
+            worksheet.merge_range(hrow1, 0, hrow2, 0, h,
+                                  fmts['ctr_pale_blue_bold_12'])
+            for j, usage in enumerate(usages):
+                if hasattr(usage, 'system'):
+                    comp = usage.system
+                    ref = usage.system_role
+                else:
+                    comp = usage.component
+                    ref = usage.reference_designator
+                if j == 0:
+                    name = f'{comp.name}'
+                else:
+                    name = f' -- {ref} {comp.name}'
+                worksheet.write(hrow2 + j + 1, 0, name, fmts['left_bold_12'])
+        else:
+            fmt = fmts[header_style_names[i % len(header_style_names)]]
+            # each activity header spans 3 columns
+            worksheet.merge_range(hrow1, i*3 - 2, hrow1, i*3, h, fmt)
+            # 2nd level headers (activity/mode sub-headers)
+            worksheet.write(hrow2, i*3 - 2, p_cbe_header, fmt)
+            for j, usage in enumerate(usages):
+                p_cbe = data[usage.oid][subj_act_oids[i-1]]['p_cbe']
+                worksheet.write(hrow2 + j + 1, i*3 - 2, p_cbe, fmt)
+            worksheet.write(hrow2, i*3 - 1, ctgcy_header, fmt)
+            for j, usage in enumerate(usages):
+                ctgcy = data[usage.oid][subj_act_oids[i-1]]['ctgcy']
+                ctgcy = ctgcy * 100
+                worksheet.write(hrow2 + j + 1, i*3 - 1, ctgcy, fmt)
+            worksheet.write(hrow2, i*3, p_mev_header, fmt)
+            for j, usage in enumerate(usages):
+                p_mev = data[usage.oid][subj_act_oids[i-1]]['p_mev']
+                worksheet.write(hrow2 + j + 1, i*3, p_mev, fmt)
+    book.close()
+
+
+def get_power_modes_data(project, acts, usages):
+    """
+    Get power modes data for the specified activities and usages.
+    """
+    data = {}
+    for usage in usages:
+        usage_data = {}
+        if hasattr(usage, 'system'):
+            comp = usage.system
+        else:
+            comp = usage.component
+        for act in acts:
+            act_data = {}
+            modal_context = get_modal_context(project.oid, usage.oid, act.oid)
+            p_cbe_val = get_modal_power(project.oid, usage.oid, comp.oid,
+                                        act.oid, modal_context)
+            act_data['p_cbe'] = p_cbe_val
+            ctgcy = get_pval(comp.oid, 'P[Ctgcy]')
+            act_data['ctgcy'] = ctgcy
+            factor = 1.0 + ctgcy
+            p_mev_val = round_to(p_cbe_val * factor)
+            act_data['p_mev'] = p_mev_val
+            usage_data[act.oid] = act_data
+        data[usage.oid] = usage_data
     return data
 
