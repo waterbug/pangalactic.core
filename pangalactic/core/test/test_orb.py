@@ -47,17 +47,26 @@ from pangalactic.core.utils.reports   import write_mel_xlsx_from_model
 orb.start(home='pangalaxian_test')
 serialized_test_objects = create_test_users()
 serialized_test_objects += create_test_project()
-prefs['default_data_elements'] = ['TRL', 'Vendor']
+prefs['default_data_elements'] = ['TRL', 'Vendor', 'reference_missions']
 prefs['default_parms'] = [
+    'm',
     'm[CBE]',
     'm[Ctgcy]',
     'm[MEV]',
+    'P',
     'P[CBE]',
     'P[Ctgcy]',
     'P[MEV]',
+    'P[peak]',
+    'P[survival]',
+    'R_D',
     'R_D[CBE]',
     'R_D[Ctgcy]',
     'R_D[MEV]',
+    'T[operational_max]',
+    'T[operational_min]',
+    'T[survival_max]',
+    'T[survival_min]',
     'Cost',
     'height',
     'width',
