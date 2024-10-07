@@ -2,7 +2,7 @@
 PGEF date-time convenience functions.
 """
 from time import strptime
-from datetime import timedelta, datetime, date, time
+from datetime import timedelta, datetime, date, time, UTC
 
 # pytz
 import pytz
@@ -22,7 +22,7 @@ def dtstamp():
     @return:  a datetime stamp for the current (UTC) date and time
     @rtype:   C{datetime}
     """
-    return datetime.utcnow()
+    return datetime.now(UTC)
 
 def file_dts():
     """
@@ -31,7 +31,7 @@ def file_dts():
     @return:  a datetime stamp string
     @rtype:   C{str}
     """
-    return datetime.utcnow().strftime(PGEF_FILE_DATETIME_FMT)
+    return datetime.now(UTC).strftime(PGEF_FILE_DATETIME_FMT)
 
 def file_date_stamp():
     """
