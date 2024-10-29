@@ -1854,9 +1854,9 @@ class UberORB(object):
         else:
             ident = self.classes['Identifiable'].__table__
             if not cname:
-                s = sql.select([ident])
+                s = sql.select(ident)
             elif cname:
-                s = sql.select([ident]).where(ident.c.pgef_type == cname)
+                s = sql.select(ident).where(ident.c.pgef_type == cname)
             return [(row['id'], '') for row in self.db.execute(s)]
 
     def get_mod_dts(self, cnames=None, oids=None, datetimes=False):
@@ -1881,14 +1881,14 @@ class UberORB(object):
         """
         ident = self.classes['Identifiable'].__table__
         if not cnames and not oids:
-            s = sql.select([ident]).where(ident.c.mod_datetime != None)
+            s = sql.select(ident).where(ident.c.mod_datetime != None)
         elif cnames:
-            s = sql.select([ident]).where(sql.and_(
+            s = sql.select(ident).where(sql.and_(
                                         ident.c.mod_datetime != None,
                                         ident.c.pgef_type.in_(cnames)
                                         ))
         elif oids:
-            s = sql.select([ident]).where(sql.and_(
+            s = sql.select(ident).where(sql.and_(
                                         ident.c.mod_datetime != None,
                                         ident.c.oid.in_(oids)
                                         ))
@@ -1911,9 +1911,9 @@ class UberORB(object):
         """
         ident = self.classes['Identifiable'].__table__
         if oids:
-            s = sql.select([ident]).where(ident.c.oid.in_(oids))
+            s = sql.select(ident).where(ident.c.oid.in_(oids))
         elif cname:
-            s = sql.select([ident]).where(sql.and_(
+            s = sql.select(ident).where(sql.and_(
                                         ident.c.oid.in_(oids),
                                         ident.c.pgef_type == cname
                                         ))
