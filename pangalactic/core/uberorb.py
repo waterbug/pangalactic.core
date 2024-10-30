@@ -1857,7 +1857,7 @@ class UberORB(object):
                 s = sql.select(ident)
             elif cname:
                 s = sql.select(ident).where(ident.c.pgef_type == cname)
-            return [(row['id'], '') for row in self.db.execute(s)]
+            return [(row._mapping['id'], '') for row in self.db.execute(s)]
 
     def get_mod_dts(self, cnames=None, oids=None, datetimes=False):
         """
@@ -1893,10 +1893,10 @@ class UberORB(object):
                                         ident.c.oid.in_(oids)
                                         ))
         if datetimes:
-            return {row['oid'] : row['mod_datetime']
+            return {row._mapping['oid'] : row._mapping['mod_datetime']
                     for row in self.db.execute(s)}
         else:
-            return {row['oid'] : str(row['mod_datetime'])
+            return {row._mapping['oid'] : str(row._mapping['mod_datetime'])
                     for row in self.db.execute(s)}
 
     def get_oid_cnames(self, oids=None, cname=None):
@@ -1919,7 +1919,7 @@ class UberORB(object):
                                         ))
         else:
             return {}
-        return {row['oid'] : str(row['pgef_type'])
+        return {row._mapping['oid'] : str(row._mapping['pgef_type'])
                 for row in self.db.execute(s)}
 
     def select(self, cname, **kw):
