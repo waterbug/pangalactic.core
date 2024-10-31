@@ -1,0 +1,32 @@
+package:
+  name: pangalactic.core
+  version: "4.2.dev0"
+
+source:
+  path: /home/waterbug/clones/pangalactic.core
+
+requirements:
+  build:
+    - python {{PY_VER}}
+    - setuptools
+
+  run:
+    - louie
+    - openpyxl
+    - pint
+    - python {{PY_VER}}
+    - python-dateutil
+    - pytz
+    - rdflib
+    - ruamel_yaml
+    - sqlalchemy
+    - tzlocal
+    - xlrd
+    - xlwt
+    - xlsxwriter
+
+about:
+  # home: https://pangalactic.us
+  license: NASA
+  # license_file: LICENSE
+
