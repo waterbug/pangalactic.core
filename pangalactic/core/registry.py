@@ -19,9 +19,7 @@ from collections import OrderedDict
 # SqlAlchemy
 from sqlalchemy                 import Column, create_engine
 from sqlalchemy                 import ForeignKey, String
-# declarative_base has been moved in sqlalchemy 2.0
-# from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm             import declarative_base, relationship
+from sqlalchemy.orm             import DeclarativeBase, relationship
 
 # PanGalactic
 from pangalactic.core.datastructures import OrderedSet
@@ -34,7 +32,8 @@ from pangalactic.core.names          import namespaces, to_table_name
 
 
 # create SqlAlchemy declarative 'Base' class for MetaObject classes
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
 class FakeLog(object):
     """
