@@ -36,7 +36,7 @@ Computing results.
 
 
 SLOC	Directory	SLOC-by-Language (Sorted)
-17618   pangalactic     python=17591,sh=27
+18937   pangalactic     python=18910,sh=27
 37      top_dir         python=35,sh=2
 1       conda           sh=1
 0       dist            (none)
@@ -45,19 +45,19 @@ SLOC	Directory	SLOC-by-Language (Sorted)
 
 
 Totals grouped by language (dominant language first):
-python:       17626 (99.83%)
-sh:              30 (0.17%)
+python:       18945 (99.84%)
+sh:              30 (0.16%)
 
 
 
 
-Total Physical Source Lines of Code (SLOC)                = 17,656
-Development Effort Estimate, Person-Years (Person-Months) = 4.08 (48.92)
+Total Physical Source Lines of Code (SLOC)                = 18,975
+Development Effort Estimate, Person-Years (Person-Months) = 4.40 (52.76)
  (Basic COCOMO model, Person-Months = 2.4 * (KSLOC**1.05))
-Schedule Estimate, Years (Months)                         = 0.91 (10.96)
+Schedule Estimate, Years (Months)                         = 0.94 (11.28)
  (Basic COCOMO model, Months = 2.5 * (person-months**0.38))
-Estimated Average Number of Developers (Effort/Schedule)  = 4.46
-Total Estimated Cost to Develop                           = $ 550,654
+Estimated Average Number of Developers (Effort/Schedule)  = 4.68
+Total Estimated Cost to Develop                           = $ 593,926
  (average salary = $56,286/year, overhead = 2.40).
 SLOCCount, Copyright (C) 2001-2004 David A. Wheeler
 SLOCCount is Open Source Software/Free Software, licensed under the GNU GPL.
