@@ -9,7 +9,7 @@ from string import ascii_letters, digits
 from pangalactic.core.meta import PGXN_REQD
 
 # dispatcher (Louie)
-from louie import dispatcher
+from pydispatch import dispatcher
 
 
 class logger:

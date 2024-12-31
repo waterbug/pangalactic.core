@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Optional
 
 # Louie: dispatcher
-from louie import dispatcher
+from pydispatch import dispatcher
 
 # ruamel_yaml
 import ruamel_yaml as yaml

@@ -6,7 +6,7 @@ from copy import deepcopy
 from uuid import uuid4
 
 # Louie
-from louie import dispatcher
+from pydispatch import dispatcher
 
 from pangalactic.core             import orb, state
 from pangalactic.core.names       import (get_acu_id, get_acu_name,

@@ -19,7 +19,7 @@ from pangalactic.core.units           import in_si, ureg
 from pangalactic.core.utils.datetimes import dtstamp
 
 # dispatcher (Louie)
-from louie import dispatcher
+from pydispatch import dispatcher
 
 Q_ = ureg.Quantity
 
@@ -2011,7 +2011,7 @@ def delete_data_element(oid, deid, local=True):
     Keyword Args:
         local (bool):  if True, originated locally
     """
-    # TODO: need to dispatch louie & pubsub messages!
+    # TODO: need to dispatch pydispatch & pubsub messages!
     if deid in (data_elementz.get(oid) or {}):
         del data_elementz[oid][deid]
         if local:
