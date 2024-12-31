@@ -11,9 +11,9 @@ requirements:
     - setuptools
 
   run:
-    - louie
     - openpyxl
     - pint
+    - pydispatch
     - python {{PY_VER}}
     - python-dateutil
     - pytz

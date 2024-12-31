@@ -232,14 +232,14 @@ DataSets        data                        DataSet
 
 * See `NOTES_ON_DIAGRAMS`
 
-## Application-level Signals (louie)
+## Application-level Signals (pydispatch)
 
-The `louie` package provides the capability to broadcast signals among any
+The `pydispatch` package provides the capability to broadcast signals among any
 objects active within a python application.  This mechanism can be used, e.g.,
 for propagating events related to context items [`mode`, `project`, `system`,
 etc.]
 
-Note that in pangalactic, `louie` is used *only* on the client side
+Note that in pangalactic, `pydispatch` is used *only* on the client side
 
 * define a signal:
     dispatcher.connect(handler, signal_name)`,
@@ -261,7 +261,7 @@ Note that in pangalactic, `louie` is used *only* on the client side
 
 (0) the orb is used on both the client and server sides, so it must be kept
     free of:
-    * 'louie' events -- they are used *only* in the client gui environment
+    * 'pydispatch' events -- they are used *only* in the client gui environment
     * `local_user` -- exists solely in the client environment
     * any awareness of the network or network-related events
 

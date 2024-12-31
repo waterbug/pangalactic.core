@@ -56,16 +56,15 @@ the dependencies listed below.
 
     (1.2) Install the following dependencies of pangalactic.core:
 
-    - louie
-      Python application event signals
-      * NOTE: locally built conda pkg is on pangalactic.us
-
-          Configuration:  'conda install louie'
-
     - pint
       Units and quantities
 
           Configuration:  'conda install pint'
+
+    - pydispatch
+      Python application event signals
+
+          Configuration:  'conda install pydispatch'
 
     - python-dateutil
       Date utilities

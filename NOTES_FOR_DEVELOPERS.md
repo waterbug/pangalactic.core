@@ -388,7 +388,7 @@ top_dock_widget (QDockWidget)
     on the client side (True) or server side (False).
 
 (1) Because the orb is used on both client and server, it must be kept free of:
-    * 'louie' events -- they are used *only* in the client gui environment
+    * 'pydispatch' events -- they are used *only* in the client gui environment
     * `local_user` -- exists solely in the client environment
     * any awareness of the network or network-related events
 
