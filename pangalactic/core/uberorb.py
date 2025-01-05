@@ -39,6 +39,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           compute_requirement_margin,
                                           data_elementz, de_defz,
                                           get_parameter_id,
+                                          get_duration,
                                           get_dval, get_pval,
                                           set_dval, set_pval,
                                           get_dval_as_str,
@@ -948,7 +949,7 @@ class UberORB(object):
         self._build_systemz_cache()
         # update the all_pt_abbrs cache, used in fix_hwproduct_id()
         self.all_pt_abbrs = [pt.abbreviation
-                             for pt in orb.get_by_type('ProductType')]
+                             for pt in self.get_by_type('ProductType')]
         # update the rqt_allocz runtime cache (used in computing margins)
         self.recompute_parmz()
         self.log.info('  + all reference data loaded.')
@@ -1590,7 +1591,13 @@ class UberORB(object):
             units (str): id of the units in which 'val' is expressed (only
                 applicable to parameters)
         """
-        if pname in parm_defz:
+        if pname == 'duration':
+            try:
+                obj = self.get(oid)
+                return get_duration(obj, units=units)
+            except:
+                return ''
+        elif pname in parm_defz:
             pd = parm_defz.get(pname)
             if units is None:
                 # if units is unspecified, use either preferred or base units
@@ -1601,7 +1608,7 @@ class UberORB(object):
             return get_dval(oid, pname)
         else:
             try:
-                obj = orb.get(oid)
+                obj = self.get(oid)
                 return getattr(obj, pname, '')
             except:
                 return ''
@@ -1620,7 +1627,13 @@ class UberORB(object):
             units (str): id of the units in which 'val' is expressed (only
                 applicable to parameters)
         """
-        if pname in parm_defz:
+        if pname == 'duration':
+            try:
+                obj = self.get(oid)
+                return str(get_duration(obj, units=units))
+            except:
+                return ''
+        elif pname in parm_defz:
             pd = parm_defz.get(pname)
             if units is None:
                 # if units is unspecified, use either preferred or base units
@@ -1631,7 +1644,7 @@ class UberORB(object):
             return get_dval_as_str(oid, pname)
         else:
             try:
-                obj = orb.get(oid)
+                obj = self.get(oid)
                 return getattr(obj, pname, '') or '[undefined]'
             except:
                 return '[undefined]'
