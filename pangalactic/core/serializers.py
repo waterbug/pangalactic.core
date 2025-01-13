@@ -742,7 +742,8 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 # the serialized object exists in the db
                 db_obj = orb.get(oid)
                 # check against db object's mod_datetime
-                so_datetime = uncook_datetime(d.get('mod_datetime'))
+                so_dt_str = d.get('mod_datetime')
+                so_datetime = uncook_datetime(so_dt_str)
                 if force_update and db_obj:
                     # orb.log.debug('    forcing update ... ')
                     updates[oid] = db_obj
@@ -751,8 +752,13 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                         output['modified'].append(db_obj)
                 elif not (so_datetime and db_obj and
                           earlier(db_obj.mod_datetime, so_datetime)):
-                    # txt = '    object "{}" has same or older'.format(oid)
-                    # orb.log.debug('{} mod_datetime, ignoring.'.format(txt))
+                    # ridiculously verbose debug logging! (was for earlier())
+                    # orb.log.debug(f'    serialized object with oid "{oid}"')
+                    # orb.log.debug(f'    has mod_datetime "{so_dt_str}"')
+                    # orb.log.debug('    but existing object')
+                    # obj_dts = str(db_obj.mod_datetime)
+                    # orb.log.debug(f'    has mod_datetime "{obj_dts}"')
+                    # orb.log.debug('    so ignoring submitted object.')
                     # if not, ignore it
                     ignores.append(oid)
                     # NOTE: do not return "ignored" objs SCW 2019-09-05

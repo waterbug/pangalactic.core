@@ -67,7 +67,7 @@ PGEF_FANCY_DATETIME_FMT_NO_TZ = '%a %d %b %Y %H:%M:%S'
 ZERO = timedelta(0)
 HOUR = timedelta(hours=1)
 EPOCH_DATE = date(1970, 1, 1)
-EPOCH = datetime(1970, 1, 1)
+EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
 
 def earlier(t1, t2):
     """
@@ -81,6 +81,7 @@ def earlier(t1, t2):
     """
     if t1 is None:
         return True
+        
     try:
         return t1 < t2
     except:
@@ -90,10 +91,21 @@ def earlier(t1, t2):
             except:
                 return False
         else:
+            if getattr(t1, 'tzinfo', None) is None:
+                t1_aware = to_local_tz(t1)
+            else:
+                t1_aware = t1
+            if getattr(t2, 'tzinfo', None) is None:
+                t2_aware = to_local_tz(t2)
+            else:
+                t2_aware = t2
             try:
-                return t1 < datetime.combine(t2, time(0, 0))
+                return t1_aware < t2_aware
             except:
-                return False
+                try:
+                    return t1 < datetime.combine(t2, time(0, 0))
+                except:
+                    return False
 
 def str2date(s):
     """
