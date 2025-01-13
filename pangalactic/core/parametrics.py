@@ -2205,47 +2205,82 @@ def add_default_data_elements(obj, des=None):
 #             each mode.  If a 'system' has no components, then its modes'
 #             power values have to be explicitly defined rather than computed.
 #
-#             ** persisted in the file 'mode_defs.json' in the
-#             application home directory -- see the functions
+#             A mode definition is specified by a "modal_context", which
+#             can have the following values:
+#
+#                 * "Off" or (equivalently) None
+#                 * "[computed]"
+#                 * a ParameterContext id
+#
+#             ... for which the power value is:
+#
+#                 * 0
+#                 * computed from the power values of components
+#                 * the spec power value of the system in that ParameterContext
+#
+#             ** the mode_defz cache is persisted in the file 'mode_defs.json'
+#             in the application home directory -- see the functions
 #             `save_mode_defz` and `load_mode_defz`
 #
-# format:  {project A oid:
-#               'modes': {mode 1 act.oid: act.name,
-#                         mode 2 act.oid: act.name,
-#                         ...},
-#               'systems':
-#                  {psu 1 oid: {mode 1 act.oid: mode 1 modal_context**,
-#                               mode 2 act.oid: mode 2 modal_context**,
-#                                ...},
-#                   acu 1 oid: {mode 3 act.oid: mode 3 modal_context**,
-#                               mode 4 act.oid: mode 4 modal_context**,
-#                                ...}
+# mode_defz data structure:
+#
+#    {project A oid:
+#         'modes': {mode 1 act.oid: act.name,
+#                   mode 2 act.oid: act.name,
 #                   ...},
-#               'components':
-#                  {psu 1 oid:
-#                       {acu 3 oid: {mode 5 act.oid: mode 5 modal_context**,
-#                                    mode 6 act.oid: mode 6 modal_context**,
-#                                    ...},
-#                        acu 4 oid: {mode 7 act.oid: mode 7 modal_context**,
-#                                    mode 8 act.oid: mode 8 modal_context**,
-#                                    ...}
-#                        ...},
-#                   psu 2 oid:
-#                       {acu 5 oid ...},
-#                   acu 1 oid:
-#                       {acu 6 oid ...}
-#                   ...},
-#           project B oid:
-#               {...}
-#           }
-# ... where
+#         'systems':
+#            {psu 1 oid: {mode 1 act.oid: mode 1 modal_context**,
+#                         mode 2 act.oid: mode 2 modal_context**,
+#                          ...},
+#             acu 1 oid: {mode 3 act.oid: mode 3 modal_context**,
+#                         mode 4 act.oid: mode 4 modal_context**,
+#                          ...}
+#             ...},
+#         'components':
+#            {psu 1 oid:
+#                 {acu 3 oid: {mode 5 act.oid: mode 5 modal_context**,
+#                              mode 6 act.oid: mode 6 modal_context**,
+#                              ...},
+#                  acu 4 oid: {mode 7 act.oid: mode 7 modal_context**,
+#                              mode 8 act.oid: mode 8 modal_context**,
+#                              ...}
+#                  ...},
+#             psu 2 oid:
+#                 {acu 5 oid ...},
+#             acu 1 oid:
+#                 {acu 6 oid ...}
+#             ...},
+#     project B oid:
+#         {...}
+#     }
+#
+# ... where:
+#
 # * default context: to be used if None or empty dict is specified as context
 # ** mode n modal_context: None (Off), "[computed]", or a ParameterContext id
+
 mode_defz = {}
+
+def init_mode_defz(project_oid):
+    """
+    Initialize the `mode_defz` cache for the specified project.
+
+    Args:
+        project_oid (str): oid of the project to initialize
+    """
+    log.debug('* init_mode_defz() ...')
+    if not mode_defz.get(project_oid):
+            mode_defz[project_oid] = dict(modes={},
+                                          systems={},
+                                          components={})
 
 def load_mode_defz(dir_path):
     """
     Load the `mode_defz` dict from file in cache format.
+
+    NOTE: this function will overwrite existing mode definitions if they are
+    found in the "mode_defs.json" file, so should only be used for initial
+    loading at startup!
     """
     log.debug('* load_mode_defz() ...')
     fpath = os.path.join(dir_path, 'mode_defs.json')
@@ -2407,7 +2442,7 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
 def get_power_contexts(obj):
     """
     Return the contexts of all power (P) parameters for an object, adding an
-    "Off" context.
+    "Off" context if it is not present.
     """
     pids = []
     if obj.oid in parameterz:
@@ -2417,7 +2452,8 @@ def get_power_contexts(obj):
                  if pid.split('[')[0] == 'P']
         contexts = [ptup[1] for ptup in ptups
                     if ptup[1] and ptup[1] not in ['MEV', 'Ctgcy']]
-        contexts.insert(0, 'Off')
+        if 'Off' not in contexts:
+            contexts.insert(0, 'Off')
         return contexts
     return ['Off']
 
@@ -2443,7 +2479,7 @@ def clone_mode_defs(act, act_clone):
     for usage_oid in sys_dict:
         if act_oid in sys_dict[usage_oid]:
             sys_dict[usage_oid][clone_oid] = sys_dict[usage_oid][act_oid]
-    # repicate all occurrances in comp_dict
+    # replicate all occurrances in comp_dict
     for usage_oid in comp_dict:
         for comp_oid in comp_dict[usage_oid]:
             if act_oid in comp_dict[usage_oid][comp_oid]:
@@ -2452,7 +2488,6 @@ def clone_mode_defs(act, act_clone):
                                                         comp_oid][act_oid]
     dispatcher.send(signal="modes edited", oid=project_oid)
 
-# NOTE: this is probably NOT the way to characterize duration for cycles
 def get_duration(act, units=None):
     """
     Get or compute the duration of an Activity.  If the Activity has
@@ -2460,11 +2495,7 @@ def get_duration(act, units=None):
     sub_activities and, in the case of a Cycle, the number of its iterations,
     although for Cycles their duration may be specified directly.
     """
-    val = get_pval(act.oid, 'duration', units=units)
-    if val:
-        return val
-    elif act.sub_activities:
+    if act.sub_activities:
         return sum([get_duration(a, units=units) for a in act.sub_activities])
-    else:
-        return 0.0
+    return get_pval(act.oid, 'duration', units=units)
 
