@@ -3,7 +3,7 @@
 Unit tests for orb
 """
 from math import fsum
-import os, shutil
+import json, os, shutil
 import unittest
 
 # yaml
@@ -23,12 +23,13 @@ from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
                                           deserialize_des,
                                           deserialize_parms,
+                                          # get_duration,
                                           get_dval, data_elementz,
                                           get_pval, parameterz,
                                           # get_modal_powerstate_value,
                                           load_parmz, load_data_elementz,
+                                          init_mode_defz, mode_defz,
                                           load_mode_defz, save_mode_defz,
-                                          mode_defz,
                                           # PowerState,
                                           rqt_allocz, round_to,
                                           serialize_des,
@@ -44,7 +45,8 @@ from pangalactic.core.test.utils  import (create_test_users,
                                           related_test_objects)
 from pangalactic.core.utils.reports   import write_mel_xlsx_from_model
 
-orb.start(home='pangalaxian_test')
+HOME = 'pangalaxian_test'
+orb.start(home=HOME)
 serialized_test_objects = create_test_users()
 serialized_test_objects += create_test_project()
 prefs['default_data_elements'] = ['TRL', 'Vendor', 'reference_missions']
@@ -175,8 +177,8 @@ class OrbTest(unittest.TestCase):
         # subsequent tests ...
         hw = orb.get_by_type('HardwareProduct')
         orb.assign_test_parameters(hw)
-        save_parmz('pangalaxian_test')
-        save_data_elementz('pangalaxian_test')
+        save_parmz(orb.home)
+        save_data_elementz(orb.home)
         value_oids = set(oids) - set([o.oid for o in new_objs])
         expected_oids = set()
         test_req = orb.select('Requirement', id_ns='test')
@@ -554,8 +556,8 @@ class OrbTest(unittest.TestCase):
         Tests ability of load_parms() to load parameters from a parameters.json
         file in the old format and convert them to the new format.
         """
-        parms_path = os.path.join('pangalaxian_test', 'parameters.json')
-        parms_bkup_path = os.path.join('pangalaxian_test',
+        parms_path = os.path.join(orb.home, 'parameters.json')
+        parms_bkup_path = os.path.join(orb.home,
                                        'parameters_backup.json')
         shutil.move(parms_path, parms_bkup_path)  
         shutil.copyfile('parameters_old_test.json', parms_path)  
@@ -578,9 +580,8 @@ class OrbTest(unittest.TestCase):
         Tests ability of load_parms() to load parameters from a parameters.json
         file in the old format and convert them to the new format.
         """
-        des_path = os.path.join('pangalaxian_test', 'data_elements.json')
-        des_bkup_path = os.path.join('pangalaxian_test',
-                                     'data_elements_backup.json')
+        des_path = os.path.join(orb.home, 'data_elements.json')
+        des_bkup_path = os.path.join(orb.home, 'data_elements_backup.json')
         shutil.move(des_path, des_bkup_path)  
         shutil.copyfile('data_elements_old_test.json', des_path)  
         load_data_elementz(orb.home)
@@ -741,8 +742,9 @@ class OrbTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
     # =========================================================================
-    # tests for disconnected client
+    # permissions tests for disconnected client
     # =========================================================================
+
     # Steve has Administrator role on H2G2
     steve = orb.get('test:steve')
     # John Carefulwalker has Lead Engineer role on H2G2
@@ -1225,6 +1227,10 @@ class OrbTest(unittest.TestCase):
         value = (set(get_perms(rqt, user=buckaroo)), '16 PE/rqt:  v')
         expected = (set(['view']), '16 PE/rqt:  v')
         self.assertEqual(expected, value)
+
+    # =========================================================================
+    # permissions tests for connected client
+    # =========================================================================
 
     def test_26_21_perms_case_21(self):
         """
@@ -1730,6 +1736,7 @@ class OrbTest(unittest.TestCase):
         # orb._save_parmz()
         # self.assertEqual(expected, value)
 
+    # DEACTIVATED (not sure if we are going to use PowerState)
     # def test_30_create_powerstates(self):
         # """
         # Create PowerState instances.
@@ -1740,18 +1747,32 @@ class OrbTest(unittest.TestCase):
                      # mev=0.0)
         # self.assertEqual(expected, value)
 
-    # def test_31_load_mode_defz(self):
-        # """
-        # Load Mode Definitions from a serialized file.
-        # """
-        # mode_defs_path = os.path.join('pangalaxian_test', 'mode_defs.json')
-        # shutil.copyfile('mode_defs.json', mode_defs_path)
-        # load_mode_defz(orb.home)
-        # expected = ['H2G2']
-        # value = list(mode_defz.keys())
-        # self.assertEqual(expected, value)
+    def test_31_save_mode_defz(self):
+        """
+        Save Mode Definitions to a serialized file, after initializing the
+        mode_defz cache.
+        """
+        # TODO: add more test data!  :P
+        init_mode_defz('H2G2')
+        save_mode_defz(orb.home)
+        with open(os.path.join(orb.home, 'mode_defs.json')) as f:
+            stored_mode_defz = json.loads(f.read())
+        value = list(stored_mode_defz.keys())
+        expected = ['H2G2']
+        self.assertEqual(expected, value)
 
-    # def test_32_get_modal_power_state(self):
+    def test_32_load_mode_defz(self):
+        """
+        Load Mode Definitions from a serialized file.
+        """
+        # mode_defs_path = os.path.join(orb.home, 'mode_defs.json')
+        # shutil.copyfile('mode_defs.json', mode_defs_path)
+        load_mode_defz(orb.home)
+        value = list(mode_defz.keys())
+        expected = ['H2G2']
+        self.assertEqual(expected, value)
+
+    # def test_33_get_modal_power_state(self):
         # """
         # Test get_modal_power_state().
         # """
