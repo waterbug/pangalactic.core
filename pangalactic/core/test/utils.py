@@ -992,8 +992,6 @@ def create_test_project():
             name='Science Data Acquisition',
             oid='test:SciDataAcq.H2G2',
             owner='H2G2',
-            parameters={
-              'duration': 6000.0},
             sub_activity_of='test:Orbit.H2G2',
             sub_activity_sequence=0),
         dict(
@@ -1010,6 +1008,36 @@ def create_test_project():
             parameters={
               'duration': 1200.0},
             sub_activity_of='test:Orbit.H2G2',
+            sub_activity_sequence=1),
+        dict(
+            _cname='Activity',
+            activity_type='pgefobjects:ActivityType.Operation',
+            create_datetime='2024-08-23 00:00:00',
+            creator='test:steve',
+            id='H2G2-Slew',
+            mod_datetime='2024-08-23 00:00:00',
+            modifier='test:steve',
+            name='Slew',
+            oid='test:Slew.H2G2',
+            owner='H2G2',
+            parameters={
+              'duration': 300.0},
+            sub_activity_of='test:SciDataAcq.H2G2',
+            sub_activity_sequence=0),
+        dict(
+            _cname='Activity',
+            activity_type='pgefobjects:ActivityType.Operation',
+            create_datetime='2024-08-23 00:00:00',
+            creator='test:steve',
+            id='H2G2-Stare',
+            mod_datetime='2024-08-23 00:00:00',
+            modifier='test:steve',
+            name='Stare',
+            oid='test:Stare.H2G2',
+            owner='H2G2',
+            parameters={
+              'duration': 5400.0},
+            sub_activity_of='test:SciDataAcq.H2G2',
             sub_activity_sequence=1),
         dict(
             _cname='ParameterRelation',
@@ -1151,6 +1179,9 @@ parametrized_summary_test_object = [
        version='4',
        version_sequence=4),
      ]
+
+test_mode_defz = {
+    }
 
 test_data_elements = dict(
     TRL=4,

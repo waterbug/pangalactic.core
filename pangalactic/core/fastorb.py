@@ -758,9 +758,11 @@ class FastOrb(object):
         """
         self.log.debug('* assign_test_parameters()')
         for o in objs:
-            add_default_data_elements(o, des=des)
+            cname = o.__class__.__name__
+            ptid = getattr(getattr(o, 'product_type', None), 'id', None)
+            add_default_data_elements(o.oid, cname, ptid=ptid, des=des)
             gen_test_dvals(data_elementz[o.oid])
-            add_default_parameters(o, parms=parms)
+            add_default_parameters(o.oid, cname, ptid=ptid, parms=parms)
             gen_test_pvals(parameterz[o.oid])
         self.log.debug('  ... done.')
 
@@ -1302,8 +1304,9 @@ class FastOrb(object):
                 # data elements
                 if oid not in parameterz:
                     parameterz[oid] = {}
-                add_default_parameters(obj)
-                add_default_data_elements(obj)
+                ptid = getattr(obj.product_type, 'id', None)
+                add_default_parameters(oid, cname, ptid=ptid)
+                add_default_data_elements(oid, cname, ptid=ptid)
             elif cname == 'Acu':
                 comp_oid = getattr(obj.component, 'oid', '') or ''
                 assembly_oid = getattr(obj.assembly, 'oid', '') or ''

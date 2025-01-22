@@ -991,38 +991,37 @@ def add_parameter(oid, pid):
     # log.debug(f'  "{pid}" added to obj with oid "{oid}"')
     return True
 
-def add_default_parameters(obj, parms=None):
+def add_default_parameters(oid, cname, ptid=None, parms=None):
     """
     Assign any specified, configured, or preferred default parameters that are
     missing from an object.
 
     Args:
-        obj (Identifiable):  the object to receive parameters
+        oid (str):    oid of the object to receive parameters
+        cname (str):  class name of the object to receive parameters
 
     Keyword Args:
-        parms (list):  (optional) list of parameter id's to add
+        ptid (str):    id of the object's product_type (if applicable)
+        parms (list):  (optional) list of additional parameter id's to add
     """
     pids = OrderedSet()
-    cname = obj.__class__.__name__
     pids |= OrderedSet(DEFAULT_CLASS_PARAMETERS.get(cname, []))
     if cname == 'HardwareProduct':
         # default for "default_parms":  mass, power, data rate
         # (state is read in p.node.gui.startup, and will be overridden by
         # prefs['default_parms'] if it is set
         pids |= OrderedSet(parms or prefs.get('default_parms') or [])
-        prod_type = obj.product_type
-        prod_type_id = getattr(prod_type, 'id', '')
-        if prod_type_id:
+        if ptid:
             def_pids = OrderedSet(DEFAULT_PRODUCT_TYPE_PARAMETERS.get(
-                                                       prod_type_id) or [])
+                                                       ptid) or [])
             # txt = '  - found default parameters'
-            # log.debug(f'{txt} for product type "{prod_type_id}": {def_pids}')
+            # log.debug(f'{txt} for product type "{ptid}": {def_pids}')
             pids |= def_pids
-    pids_to_add =  pids - set(parameterz.get(obj.oid) or [])
+    pids_to_add =  pids - set(parameterz.get(oid) or [])
     if pids_to_add:
         # log.debug(f'  - adding default parameters {pids_to_add} ...')
         for pid in pids_to_add:
-            add_parameter(obj.oid, pid)
+            add_parameter(oid, pid)
 
 def delete_parameter(oid, pid, local=True):
     """
@@ -1166,7 +1165,7 @@ def get_pval_as_str(oid, pid, units='', allow_nan=False):
 
 def _compute_pval(oid, variable, context_id, allow_nan=False):
     """
-    Get the value of a parameter of the specified object, computing it if it is
+    Get the value of a parameter of the specified oid, computing it if it is
     'computed' and caching the computed value in parameterz; otherwise,
     returning its value from parameterz.
 
@@ -1176,7 +1175,7 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
     will access the cached pre-computed parameter values).
 
     NOTE: this function will return 0.0 if the parameter is not a computed
-    parameter or is not defined for the specified object.
+    parameter or is not defined for the specified oid.
 
     Args:
         oid (str): the oid of the Identifiable that has the parameter
@@ -2152,40 +2151,38 @@ def set_dval_from_str(oid, deid, str_val, units='', local=True):
         # log.debug('  could not convert string "{}" ...'.format(str_val))
         pass
 
-def add_default_data_elements(obj, des=None):
+def add_default_data_elements(oid, cname, ptid=None, des=None):
     """
     Assign any configured or preferred default data elements that are missing
     from an object.
 
     Args:
-        obj (Identifiable):  the object to receive data elements
+        oid (str):    oid of the object to receive parameters
+        cname (str):  class name of the object to receive parameters
 
     Keyword Args:
+        ptid (str):  id of the object's product_type (if applicable)
         des (list):  list of data element id's to add
     """
-    # log.debug('* adding default data elements to object "{}"'.format(
-                                                                 # obj.id))
+    # log.debug('* adding default data elements to oid "{}"'.format(
+                                                                 # oid))
     deids = OrderedSet()
-    cname = obj.__class__.__name__
     deids |= OrderedSet(DEFAULT_CLASS_DATA_ELEMENTS.get(cname) or [])
     # TODO: let user set default data elements in their prefs
-    if not config.get('default_data_elements'):
-        config['default_data_elements'] = ['TRL', 'Vendor',
-                                           'reference_missions']
     if cname == 'HardwareProduct':
         # default for "default_data_elements":  Vendor
         # (state is read in p.node.gui.startup, and will be overridden by
         # prefs['default_data_elements'] if it is set
-        deids |= OrderedSet(des or config['default_data_elements'])
-        if obj.product_type:
+        deids |= OrderedSet(des or config.get('default_data_elements', []))
+        if ptid:
             deids |= OrderedSet(DEFAULT_PRODUCT_TYPE_DATA_ELMTS.get(
-                                obj.product_type.id) or [])
+                                ptid) or [])
     # log.debug('  - adding data elements {} ...'.format(str(deids)))
-    deids_to_add = deids - set(data_elementz.get(obj.oid) or [])
+    deids_to_add = deids - set(data_elementz.get(oid) or [])
     if deids_to_add:
         # log.debug(f'  - adding default data elements {deids_to_add} ...')
         for deid in deids_to_add:
-            add_data_element(obj.oid, deid)
+            add_data_element(oid, deid)
 
 ################################################
 # MODE SECTION

@@ -99,7 +99,8 @@ PGXN_PARAMETERS = ['m', 'P', 'R_D', 'Cost', 'height', 'width',
                    'depth', 'CoM_X', 'CoM_Y', 'CoM_Z']
 
 # DEFAULT_CLASS_DATA_ELEMENTS:  default data elements of objects by class
-DEFAULT_CLASS_DATA_ELEMENTS = {'HardwareProduct': ['Vendor', 'TRL']}
+DEFAULT_CLASS_DATA_ELEMENTS = {'HardwareProduct': ['Vendor', 'TRL',
+                                                   'reference_missions']}
 
 # DEFAULT_CLASS_PARAMETERS:  default parameters of objects by class
 DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start', 't_end'],

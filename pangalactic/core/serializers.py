@@ -922,8 +922,11 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     for hwproduct in hwproducts:
         acus.update(hwproduct.where_used)
         psus.update(hwproduct.projects_using_system)
-        add_default_parameters(hwproduct)
-        add_default_data_elements(hwproduct)
+        ptid = getattr(hwproduct.product_type, 'id', None)
+        add_default_parameters(hwproduct.oid, cname='HardwareProduct',
+                               ptid=ptid)
+        add_default_data_elements(hwproduct.oid, cname='HardwareProduct',
+                               ptid=ptid)
         # fix hwproduct id's to conform to new format (as of 3.2.dev9)
         orb.fix_hwproduct_id(hwproduct, all_proj_ids)
     for acu in acus:

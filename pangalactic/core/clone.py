@@ -311,8 +311,9 @@ def clone(what, include_ports=True, include_components=True,
         if save_hw:
             dispatcher.send(signal='new hardware clone', product=new_obj,
                             objs=new_objs)
-    add_default_data_elements(new_obj)
-    add_default_parameters(new_obj)
+    ptid = getattr(newkw.get('product_type'), 'id', None)
+    add_default_data_elements(newkw['oid'], cname, ptid=ptid)
+    add_default_parameters(newkw['oid'], cname, ptid=ptid)
     if recompute_needed:
         if state.get('connected'):
             dispatcher.send(signal='get parmz')

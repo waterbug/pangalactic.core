@@ -628,7 +628,7 @@ class UberORB(object):
         contexts.  This is required at startup or when a parameter is created,
         modified, or deleted, or in several other cases.
 
-        NOTE: recompute_parmz() be a no-op when running on client side and in
+        NOTE: recompute_parmz() is a no-op when running on client side and in
         "connected" state; instead, the client must call vger.get_parmz() to
         get the parameter cache data from the server rather than recomputing
         locally, which risks creating an out-of-sync condition.
@@ -640,8 +640,8 @@ class UberORB(object):
         # ********************************************************************
         # FIXME: The use of "d_contexts" (CBE, MEV) and the specified variables
         # (m, P, R_D) IMPLIES THAT THEY ARE THE ONLY COMPUTED PARAMETERS AND
-        # CONTEXTS ... THIS MAY NOT BE THE CASE IN THE FUTURE! -> "Cost" and
-        # other parameters may need to be rolled up ...
+        # CONTEXTS ... THIS MAY NOT BE THE CASE IN THE FUTURE! For example,
+        # "Cost" and other parameters may need to be rolled up ...
         # ********************************************************************
         # self.log.debug('* recompute_parmz()')
         # TODO:  preferred contexts should override defaults
@@ -733,9 +733,11 @@ class UberORB(object):
         """
         self.log.debug('* assign_test_parameters()')
         for o in objs:
-            add_default_data_elements(o, des=des)
+            cname = o.__class__.__name__
+            ptid = getattr(getattr(o, 'product_type', None), 'id', None)
+            add_default_data_elements(o.oid, cname, ptid=ptid, des=des)
             gen_test_dvals(data_elementz[o.oid])
-            add_default_parameters(o, parms=parms)
+            add_default_parameters(o.oid, cname, ptid=ptid, parms=parms)
             gen_test_pvals(parameterz[o.oid])
         self.recompute_parmz()
         self.log.debug('  ... done.')
@@ -1337,8 +1339,9 @@ class UberORB(object):
                 # data elements
                 if oid not in parameterz:
                     parameterz[oid] = {}
-                add_default_parameters(obj)
-                add_default_data_elements(obj)
+                ptid = getattr(obj.product_type, 'id', None)
+                add_default_parameters(oid, cname, ptid=ptid)
+                add_default_data_elements(oid, cname, ptid=ptid)
                 recompute_required = True
             elif cname == 'ProjectSystemUsage':
                 system_oid = getattr(obj.system, 'oid', None)
