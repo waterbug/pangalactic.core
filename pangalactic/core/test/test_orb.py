@@ -30,6 +30,7 @@ from pangalactic.core.parametrics import (compute_margin,
                                           load_parmz, load_data_elementz,
                                           init_mode_defz, mode_defz,
                                           load_mode_defz, save_mode_defz,
+                                          recompute_parmz,
                                           # PowerState,
                                           rqt_allocz, round_to,
                                           serialize_des,
@@ -212,7 +213,7 @@ class OrbTest(unittest.TestCase):
         # for debugging, write config and prefs files to home dir ...
         write_config(os.path.join(orb.home, 'config'))
         write_prefs(os.path.join(orb.home, 'prefs'))
-        orb.recompute_parmz()
+        recompute_parmz()
         self.test_hw = []
         hw = orb.get_by_type('HardwareProduct')
         for h in hw:
@@ -511,7 +512,7 @@ class OrbTest(unittest.TestCase):
             'm': 1000.0
             }
         deserialize_parms(test_oid, serialized_parms)
-        orb.recompute_parmz()
+        recompute_parmz()
         expected = [True, True, True, True, True, True,
                     100.0, 1000000.0, 1000.0, 100.0, 1000000.0, 1000.0]
         test_parms = parameterz.get(test_oid, {})
@@ -661,7 +662,7 @@ class OrbTest(unittest.TestCase):
         """
         CASE:  compute the mass CBE (Current Best Estimate)
         """
-        orb.recompute_parmz()
+        recompute_parmz()
         value = get_pval('test:spacecraft3', 'm[CBE]')
         sc = orb.get('test:spacecraft3')
         expected  = fsum([get_pval(acu.component.oid, 'm')
@@ -681,7 +682,7 @@ class OrbTest(unittest.TestCase):
         """
         CASE:  compute the mass CBE (Current Best Estimate)
         """
-        orb.recompute_parmz()
+        recompute_parmz()
         value = get_pval('test:spacecraft3', 'm[CBE]')
         sc = orb.get('test:spacecraft3')
         expected  = round_to(fsum([get_pval(acu.component.oid, 'm[CBE]')
@@ -695,7 +696,7 @@ class OrbTest(unittest.TestCase):
         attribute of any Acu).  Its CBE value ('m[CBE]') should be the same as
         its spec value ('m').
         """
-        orb.recompute_parmz()
+        recompute_parmz()
         # NOTE:  get_pval() for a computed parameter will fetch the cached
         # (pre-computed) value from the 'parameterz' cache (rather than
         # computing it)
@@ -707,7 +708,7 @@ class OrbTest(unittest.TestCase):
         """
         CASE:  compute the mass MEV (Maximum Estimated Value)
         """
-        orb.recompute_parmz()
+        recompute_parmz()
         value = get_pval('test:spacecraft3', 'm[MEV]')
         sc = orb.get('test:spacecraft3')
         expected = round_to(fsum([get_pval(acu.component.oid, 'm[MEV]')

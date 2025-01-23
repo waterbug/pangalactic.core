@@ -14,6 +14,7 @@ from pangalactic.core.parametrics import (add_default_parameters,
                                           add_default_data_elements,
                                           deserialize_des,
                                           deserialize_parms,
+                                          recompute_parmz,
                                           refresh_componentz,
                                           refresh_systemz,
                                           refresh_rqt_allocz,
@@ -939,7 +940,7 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
             rqt_oids.update([r.oid for r in psu.allocated_requirements])
     if recompute_parmz_required and not force_no_recompute:
         # orb.log.debug('  - deserialize recomputing parameters ...')
-        orb.recompute_parmz()
+        recompute_parmz()
         # orb.log.debug('    done.')
     for req in requirements:
         # if there are any Requirement objects, refresh the rqt_allocz cache

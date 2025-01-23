@@ -715,13 +715,13 @@ def round_to(x, n=4):
 def refresh_rqt_allocz(req):
     """
     Refresh the `rqt_allocz` cache for a Requirement instance.  This must be
-    called whenever a Requirement instance is created, modified, or deleted or
-    an Acu or ProjectSystemUsage is deleted or modified, which could affect the
-    'obj_oid' and/or 'alloc_ref' items.
+    called whenever a Requirement instance is modified or deleted or an Acu or
+    ProjectSystemUsage is modified or deleted, which could affect the 'obj_oid'
+    and/or 'alloc_ref' items.
 
     NOTE:  this function depends only on the database and does not use any
-    caches, nor does it update the parameterz cache, so it can be used by any
-    margin computation function.
+    other caches, nor does it update the parameterz cache, so it can be used by
+    any margin computation function.
 
     The 'rqt_allocz' dictionary has the form:
 
@@ -1222,6 +1222,64 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
         # log.debug(msg)
         val = parameterz[oid].get(pid) or 0.0
     return val
+
+def recompute_parmz():
+    """
+    Recompute any computed parameters for the configured variables and
+    contexts.  This is required at startup or when a parameter is created,
+    modified, or deleted, or in several other cases.
+
+    NOTE: recompute_parmz() is a no-op when running on client side and in
+    "connected" state; instead, the client must call vger.get_parmz() to
+    get the parameter cache data from the server rather than recomputing
+    locally, which risks creating an out-of-sync condition.
+    """
+    if state.get("client") and state.get("connected"):
+        return
+    # ********************************************************************
+    # NOTE: CAUTION CAUTION CAUTION !!!
+    # ********************************************************************
+    # FIXME: The use of "d_contexts" (CBE, MEV) and the specified variables
+    # (m, P, R_D) IMPLIES THAT THEY ARE THE ONLY COMPUTED PARAMETERS AND
+    # CONTEXTS ... THIS MAY NOT BE THE CASE IN THE FUTURE! For example,
+    # "Cost" and other parameters may need to be rolled up ...
+    # ********************************************************************
+    # log.debug('* recompute_parmz()')
+    # TODO:  preferred contexts should override defaults
+    # default descriptive contexts:  CBE, MEV
+    d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or [
+                                                            'CBE', 'MEV']
+    variables = config.get('variables', ['m', 'P', 'R_D']) or []
+    # NOTE: this iterates only over assembly oids (i.e., keys in the
+    # 'componentz' cache), because _compute_pval() is recursive and will
+    # recompute all lower-level component/subassembly values in each call
+    # NOTE: a further implication is that non-products (e.g. Port,
+    # PortTemplate, etc.) DO NOT HAVE COMPUTED PARAMETERS ...
+    for oid in parameterz:
+        for variable in variables:
+            if variable in parameterz[oid]:
+                for context in d_contexts:
+                    _compute_pval(oid, variable, context)
+    # Recompute Margins for all performance requirements
+    # [0] Remove any previously computed performance requirements (NTEs and
+    #     Margins) in case any requirements have been deleted or
+    #     re-allocated
+    pid_deletions = []
+    oid_deletions = set()
+    for oid in parameterz:
+        if parameterz[oid] is not None:
+            for pid in parameterz[oid]:
+                if 'Margin' in pid or 'NTE' in pid:
+                    pid_deletions.append((oid, pid))
+        else:
+            oid_deletions.add(oid)
+    for oid, pid in pid_deletions:
+        del parameterz[oid][pid]
+        if not parameterz[oid]:
+            oid_deletions.add(oid)
+    for oid in oid_deletions:
+        del parameterz[oid]
+    dispatcher.send('parameters recomputed')
 
 def set_pval(oid, pid, value, units='', local=True):
     """

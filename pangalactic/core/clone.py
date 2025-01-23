@@ -17,6 +17,7 @@ from pangalactic.core.parametrics import (add_default_data_elements,
                                           add_default_parameters,
                                           data_elementz, get_pval,
                                           parameterz, set_pval,
+                                          recompute_parmz,
                                           refresh_componentz)
 from pangalactic.core.utils.datetimes import dtstamp
 
@@ -318,6 +319,6 @@ def clone(what, include_ports=True, include_components=True,
         if state.get('connected'):
             dispatcher.send(signal='get parmz')
         elif not orb.is_fastorb:
-            orb.recompute_parmz()
+            recompute_parmz()
     return new_obj
 

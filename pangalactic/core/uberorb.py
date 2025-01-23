@@ -35,7 +35,7 @@ from pangalactic.core.meta        import TEXT_PROPERTIES
 from pangalactic.core.parametrics import (add_context_parm_def,
                                           add_default_parameters,
                                           add_default_data_elements,
-                                          componentz, _compute_pval,
+                                          componentz,
                                           compute_requirement_margin,
                                           data_elementz, de_defz,
                                           get_parameter_id,
@@ -53,6 +53,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           parmz_by_dimz, refresh_componentz,
                                           refresh_rqt_allocz, rqt_allocz,
                                           refresh_systemz,
+                                          recompute_parmz,
                                           save_systemz, systemz)
 from pangalactic.core.serializers import (serialize, deserialize,
                                           uncook_datetime)
@@ -622,52 +623,14 @@ class UberORB(object):
                                indent=4, sort_keys=True))
         # self.log.debug('  ... diagrams.json file written.')
 
-    def recompute_parmz(self):
+    def recompute_margins(self):
         """
-        Recompute any computed parameters for the configured variables and
-        contexts.  This is required at startup or when a parameter is created,
-        modified, or deleted, or in several other cases.
+        Recompute Margins for all performance requirements.
 
-        NOTE: recompute_parmz() is a no-op when running on client side and in
-        "connected" state; instead, the client must call vger.get_parmz() to
-        get the parameter cache data from the server rather than recomputing
-        locally, which risks creating an out-of-sync condition.
+        NOTE: currently this recomputes/refreshes the 'refresh_rqt_allocz'
+        cache -- the plan is to remove that cache and simply recompute margins
+        whenever their values are needed.
         """
-        if state.get("client") and state.get("connected"):
-            return
-        # ********************************************************************
-        # NOTE: CAUTION CAUTION CAUTION !!!
-        # ********************************************************************
-        # FIXME: The use of "d_contexts" (CBE, MEV) and the specified variables
-        # (m, P, R_D) IMPLIES THAT THEY ARE THE ONLY COMPUTED PARAMETERS AND
-        # CONTEXTS ... THIS MAY NOT BE THE CASE IN THE FUTURE! For example,
-        # "Cost" and other parameters may need to be rolled up ...
-        # ********************************************************************
-        # self.log.debug('* recompute_parmz()')
-        # TODO:  preferred contexts should override defaults
-        # default descriptive contexts:  CBE, MEV
-        d_contexts = config.get('descriptive_contexts', ['CBE', 'MEV']) or [
-                                                                'CBE', 'MEV']
-        variables = config.get('variables', ['m', 'P', 'R_D']) or []
-        # NOTE: this iterates only over assembly oids (i.e., keys in the
-        # 'componentz' cache), because _compute_pval() is recursive and will
-        # recompute all lower-level component/subassembly values in each call
-        # NOTE: a further implication is that non-products (e.g. Port,
-        # PortTemplate, etc.) DO NOT HAVE COMPUTED PARAMETERS ...
-        for context in d_contexts:
-            for variable in variables:
-                # slightly kludgy, but ALL HW (and ONLY HW) should have ALL
-                # these variables and context parameters, period!
-                for oid in self.get_oids(cname='HardwareProduct'):
-                    _compute_pval(oid, variable, context)
-                    # pid = get_parameter_id(variable, context)
-                    # val = _compute_pval(oid, variable, context)
-                    # NOTE: this should be superfluous: "_compute_pval" sets it
-                    # if oid not in parameterz:
-                        # parameterz[oid] = {}
-                    # if pid not in parameterz[oid]:
-                        # add_parameter(oid, pid)
-                    # parameterz[oid][pid]['value'] = val
         # Recompute Margins for all performance requirements
         # [0] Remove any previously computed performance requirements (NTEs and
         #     Margins) in case any requirements have been deleted or
@@ -720,7 +683,7 @@ class UberORB(object):
                 # self.log.debug('   "{}"'.format(rqt_oid))
                 # self.log.debug('   computation result: {}'.format(result))
                 pass
-        dispatcher.send('parameters recomputed')
+        dispatcher.send('margins recomputed')
 
     def assign_test_parameters(self, objs, parms=None, des=None):
         """
@@ -739,7 +702,7 @@ class UberORB(object):
             gen_test_dvals(data_elementz[o.oid])
             add_default_parameters(o.oid, cname, ptid=ptid, parms=parms)
             gen_test_pvals(parameterz[o.oid])
-        self.recompute_parmz()
+        recompute_parmz()
         self.log.debug('  ... done.')
 
     def _build_componentz_cache(self):
@@ -893,7 +856,7 @@ class UberORB(object):
         self.data_elementz_status = load_data_elementz(self.home)
         self.parmz_status = load_parmz(self.home)
         # self.log.debug('  dmz: {}'.format(str(dmz)))
-        self.recompute_parmz()
+        recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
         # self.log.debug('  + checking for updates to parameter definitions ...')
         all_pds = refdata.pdc
@@ -953,7 +916,7 @@ class UberORB(object):
         self.all_pt_abbrs = [pt.abbreviation
                              for pt in self.get_by_type('ProductType')]
         # update the rqt_allocz runtime cache (used in computing margins)
-        self.recompute_parmz()
+        recompute_parmz()
         self.log.info('  + all reference data loaded.')
 
     #########################################################################
@@ -1387,7 +1350,7 @@ class UberORB(object):
         # obj has already been "added" to the db (session) above, so commit ...
         self.db.commit()
         if recompute_required and recompute:
-            self.recompute_parmz()
+            recompute_parmz()
         return True
 
     def obj_view_to_dict(self, obj, view):
@@ -2536,7 +2499,7 @@ class UberORB(object):
             for project in refresh_systems:
                 refresh_systemz(project)
         if recompute_required:
-            self.recompute_parmz()
+            recompute_parmz()
 
     def is_versioned(self, obj):
         """
