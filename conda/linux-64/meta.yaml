@@ -13,7 +13,7 @@ requirements:
   run:
     - openpyxl
     - pint
-    - pydispatch
+    - pydispatcher
     - python {{PY_VER}}
     - python-dateutil
     - pytz
