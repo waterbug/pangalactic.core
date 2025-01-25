@@ -15,7 +15,7 @@ from rdflib.term import URIRef
 from pangalactic.core                import prefs
 from pangalactic.core.datastructures import OrderedSet
 from pangalactic.core.meta           import asciify
-from pangalactic.core.parametrics    import de_defz, mode_defz, parm_defz
+from pangalactic.core.parametrics    import de_defz, parm_defz
 from pangalactic.core.units          import in_si
 
 
@@ -685,14 +685,6 @@ def pname_to_header(pname, cname, headers_are_ids=False, project_oid=None,
             ext_name = get_attr_ext_name(cname, de_name)
             return '  \n  '.join(wrap(ext_name, width=width,
                                       break_long_words=False))
-    elif project_oid:
-        modes = (mode_defz.get(project_oid) or {}).get('modes')
-        if modes and pname in modes:
-            units = prefs.get('units', {}).get('power') or 'W'
-            if units:
-                units = '(' + units + ')'
-            return '  \n  '.join(wrap(pname, width=width,
-                                      break_long_words=False) + [units])
     # parts = ' '.join(pname.split('_'))
     ext_name = get_attr_ext_name(cname, pname)
     return ' \n '.join(wrap(ext_name, width=width, break_long_words=False))
@@ -731,14 +723,6 @@ def header_to_pname(header, cname='', headers_are_ids=False, project_oid=None):
         # else:
             # return '  \n  '.join(wrap(de_def['name'], width=7,
                                  # break_long_words=False))
-    # elif project_oid:
-        # modes = (mode_defz.get(project_oid) or {}).get('modes')
-        # if modes and pname in modes:
-            # units = prefs.get('units', {}).get('power') or 'W'
-            # if units:
-                # units = '(' + units + ')'
-            # return '  \n  '.join(wrap(pname, width=7,
-                                 # break_long_words=False) + [units])
     # # parts = ' '.join(pname.split('_'))
     # ext_name = get_attr_ext_name(cname, pname)
     return get_ext_name_attr(cname, header)

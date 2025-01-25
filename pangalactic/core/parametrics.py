@@ -2249,29 +2249,31 @@ def add_default_data_elements(oid, cname, ptid=None, des=None):
 # MODE CACHES ##########################################################
 
 # mode_defz:  persistent** cache of system power mode definitions, which
-#             consist of a set of systems (ProjectSystemUsages) and subsystems
-#             (Assembly Component Usages or Acus) and the applicable power
-#             states of each (i.e. of their "system" or "component",
-#             respectively) during a specified activity. The 'systems' sub-dict
+#             consist of a set of "systems", which may be either
+#             ProjectSystemUsage (PSU) or Acu instances, and "components",
+#             which are always Acu instances, and the applicable power states
+#             of each (i.e. of their "system" if a PSU or "component" if an
+#             Acu) during a specified activity. The "systems" dictionary
 #             contains all items that have been explicitly added to the mode
-#             definitions.  If a 'system' has components, its components are
-#             added to the 'components' sub-dict and its modes' power values
-#             will be computed from the sum of its components power values for
-#             each mode.  If a 'system' has no components, then its modes'
-#             power values have to be explicitly defined rather than computed.
+#             definitions.  If a "system" has components, its component Acu
+#             instances are added to the "components" sub-dict and its modes'
+#             power values will be computed from the sum of its components'
+#             power values for each mode.  If a "system" has no components,
+#             then its modes' power contexts have to be explicitly defined
+#             rather than computed.
 #
 #             A mode definition is specified by a "modal_context", which
 #             can have the following values:
 #
 #                 * "Off" or (equivalently) None
-#                 * "[computed]"
 #                 * a ParameterContext id
+#                 * "[computed]"
 #
 #             ... for which the power value is:
 #
 #                 * 0
-#                 * computed from the power values of components
 #                 * the spec power value of the system in that ParameterContext
+#                 * computed from the power values of the system's components
 #
 #             ** the mode_defz cache is persisted in the file 'mode_defs.json'
 #             in the application home directory -- see the functions
@@ -2280,9 +2282,6 @@ def add_default_data_elements(oid, cname, ptid=None, des=None):
 # mode_defz data structure:
 #
 #    {project A oid:
-#         'modes': {mode 1 act.oid: act.name,
-#                   mode 2 act.oid: act.name,
-#                   ...},
 #         'systems':
 #            {psu 1 oid: {mode 1 act.oid: mode 1 modal_context**,
 #                         mode 2 act.oid: mode 2 modal_context**,
@@ -2325,8 +2324,7 @@ def init_mode_defz(project_oid):
     """
     log.debug('* init_mode_defz() ...')
     if not mode_defz.get(project_oid):
-            mode_defz[project_oid] = dict(modes={},
-                                          systems={},
+            mode_defz[project_oid] = dict(systems={},
                                           components={})
 
 def load_mode_defz(dir_path):
@@ -2347,6 +2345,8 @@ def load_mode_defz(dir_path):
                 log.debug('  - reading of "mode_defs.json" failed.')
                 return 'fail'
         mode_defz.update(stored_mode_defz)
+        if mode_defz.get('modes'):
+            del mode_defz['modes']
         log.debug('  - mode_defz cache loaded.')
         return 'success'
     else:
@@ -2369,8 +2369,9 @@ def save_mode_defz(dir_path):
 
 def get_modal_context(project_oid, usage_oid, mode_oid):
     """
-    Get the value of the modal_context (i.e. power level corresponding to a
-    mode) for the specified mode of the specified project and usage.
+    Get the value of the modal_context (i.e. spec power level, e.g. "Nominal",
+    "Peak", "Standby", "Off", etc.) for the specified mode of the specified
+    project and usage.
 
     Args:
         project_oid (str): the oid of the project within which the mode is
@@ -2416,7 +2417,7 @@ def set_comp_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid,
         mode_oid (str): the oid of the mode (activity)
     """
     if not project_oid in mode_defz:
-        mode_defz[project_oid] = dict(modes={}, systems={}, components={})
+        mode_defz[project_oid] = dict(systems={}, components={})
     sys_dict = mode_defz[project_oid]['systems']
     comp_dict = mode_defz[project_oid]['components']
     if sys_usage_oid not in sys_dict:
@@ -2433,10 +2434,10 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
     """
     Get the numeric value of the modal power in the specified units for either
     (1) if the modal_context is "computed", the computed modal power in the
-    specified "mode" of the system with the specified oid which is in the
-    "assembly" attribute of the usage with the specified sys_usage_oid, or
-    (2) the spec value of the power for the product with the specified oid in
-    the specified modal_context (as the modal_context is either a known spec
+    specified "mode" (activity) of the system with the specified oid which is
+    in the "assembly" attribute of the usage with the specified sys_usage_oid,
+    or (2) the spec value of the power for the product with the specified oid
+    in the specified modal_context (as the modal_context is either a known spec
     power level or is mapped to a known spec power level).
 
     Args:
@@ -2515,21 +2516,19 @@ def get_power_contexts(obj):
 def clone_mode_defs(act, act_clone):
     """
     Copy the power mode definitions for an activity (mode) to create an
-    identical set of definitions for a act_clone of that activity (mode).
+    identical set of definitions for a clone of that activity (mode).
 
     Args:
         act (Activity): the activity (mode) being cloned
         act_clone (Activity): the clone
     """
     project_oid = act.owner.oid
-    modes_dict = mode_defz[project_oid].get('modes') or {}
     sys_dict = mode_defz[project_oid].get('systems') or {}
     comp_dict = mode_defz[project_oid].get('components') or {}
     # TODO: use try/except in case something barfs ...
     # try:
     act_oid = act.oid
     clone_oid = act_clone.oid
-    modes_dict[clone_oid] = act_clone.name
     # repicate all occurrances in sys_dict
     for usage_oid in sys_dict:
         if act_oid in sys_dict[usage_oid]:
@@ -2542,15 +2541,4 @@ def clone_mode_defs(act, act_clone):
                         comp_oid][clone_oid] = comp_dict[usage_oid][
                                                         comp_oid][act_oid]
     dispatcher.send(signal="modes edited", oid=project_oid)
-
-def get_duration(act, units=None):
-    """
-    Get or compute the duration of an Activity.  If the Activity has
-    sub_activities, its duration should be the sum of the durations of its
-    sub_activities and, in the case of a Cycle, the number of its iterations,
-    although for Cycles their duration may be specified directly.
-    """
-    if act.sub_activities:
-        return sum([get_duration(a, units=units) for a in act.sub_activities])
-    return get_pval(act.oid, 'duration', units=units)
 
