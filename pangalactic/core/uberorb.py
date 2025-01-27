@@ -69,7 +69,6 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           compute_requirement_margin,
                                           data_elementz, de_defz,
                                           get_parameter_id,
-                                          get_duration,
                                           get_dval, get_pval,
                                           set_dval, set_pval,
                                           get_dval_as_str,
@@ -1574,6 +1573,21 @@ class UberORB(object):
         query = self.db.query(RepresentationFile.checksum)
         return [row[0] for row in query.all()]
 
+    def get_duration(self, act, units=None):
+        """
+        Get or compute the duration of an Activity.  If the Activity has
+        sub_activities, its duration should be the sum of the durations of its
+        sub_activities and, in the case of a Cycle, the number of its iterations,
+        although for Cycles their duration may be specified directly.
+        """
+        # NOTE: this function has to be an orb member function because even though
+        # it does not reference the orb explicitly, the invocation of
+        # act.subactivities requires db access, so implicitly uses the orb
+        if act.sub_activities:
+            return sum([self.get_duration(a, units=units)
+                        for a in act.sub_activities])
+        return get_pval(act.oid, 'duration', units=units)
+
     def get_prop_val(self, oid, pname, units=None):
         """
         Return the value of the specified property (parameter or data element)
@@ -1590,7 +1604,7 @@ class UberORB(object):
         if pname == 'duration':
             try:
                 obj = self.get(oid)
-                return get_duration(obj, units=units)
+                return self.get_duration(obj, units=units)
             except:
                 return ''
         elif pname in parm_defz:
@@ -1626,7 +1640,7 @@ class UberORB(object):
         if pname == 'duration':
             try:
                 obj = self.get(oid)
-                return str(get_duration(obj, units=units))
+                return str(self.get_duration(obj, units=units))
             except:
                 return ''
         elif pname in parm_defz:
