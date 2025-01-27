@@ -2282,21 +2282,26 @@ def add_default_data_elements(oid, cname, ptid=None, des=None):
 # mode_defz data structure:
 #
 #    {project A oid:
+#         'modes':
+#            {mode 1 act oid: mode 1 act.name,
+#             mode 2 act oid: mode 2 act.name,
+#             mode 3 act oid: mode 3 act.name,
+#             mode 4 act oid: mode 4 act.name},
 #         'systems':
-#            {psu 1 oid: {mode 1 act.oid: mode 1 modal_context**,
-#                         mode 2 act.oid: mode 2 modal_context**,
+#            {psu 1 oid: {mode 1 act.oid: modal_context**,
+#                         mode 2 act.oid: modal_context**,
 #                          ...},
-#             acu 1 oid: {mode 3 act.oid: mode 3 modal_context**,
-#                         mode 4 act.oid: mode 4 modal_context**,
+#             acu 1 oid: {mode 3 act.oid: modal_context**,
+#                         mode 4 act.oid: modal_context**,
 #                          ...}
 #             ...},
 #         'components':
 #            {psu 1 oid:
-#                 {acu 3 oid: {mode 5 act.oid: mode 5 modal_context**,
-#                              mode 6 act.oid: mode 6 modal_context**,
+#                 {acu 3 oid: {mode 1 act.oid: modal_context**,
+#                              mode 2 act.oid: modal_context**,
 #                              ...},
-#                  acu 4 oid: {mode 7 act.oid: mode 7 modal_context**,
-#                              mode 8 act.oid: mode 8 modal_context**,
+#                  acu 4 oid: {mode 3 act.oid: modal_context**,
+#                              mode 4 act.oid: modal_context**,
 #                              ...}
 #                  ...},
 #             psu 2 oid:
@@ -2324,7 +2329,8 @@ def init_mode_defz(project_oid):
     """
     log.debug('* init_mode_defz() ...')
     if not mode_defz.get(project_oid):
-            mode_defz[project_oid] = dict(systems={},
+            mode_defz[project_oid] = dict(modes={},
+                                          systems={},
                                           components={})
 
 def load_mode_defz(dir_path):
@@ -2405,7 +2411,7 @@ def set_comp_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid,
                            level):
     """
     Set the value of the modal_context (a.k.a. power level corresponding to a
-    mode) for a component of the specified system usage in the specified
+    mode) for the component of the specified system usage in the specified
     project for the specified mode.
 
     Args:
@@ -2415,9 +2421,10 @@ def set_comp_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid,
             the component that has the mode
         usage_oid (str): the oid of the usage that has the mode
         mode_oid (str): the oid of the mode (activity)
+        level (str): the power context (e.g., 'Nominal', 'Peak', etc.)
     """
     if not project_oid in mode_defz:
-        mode_defz[project_oid] = dict(systems={}, components={})
+        mode_defz[project_oid] = dict(modes={}, systems={}, components={})
     sys_dict = mode_defz[project_oid]['systems']
     comp_dict = mode_defz[project_oid]['components']
     if sys_usage_oid not in sys_dict:
