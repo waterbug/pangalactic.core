@@ -2262,6 +2262,10 @@ def add_default_data_elements(oid, cname, ptid=None, des=None):
 #             then its modes' power contexts have to be explicitly defined
 #             rather than computed.
 #
+#             Once a project/mission conops has been defined in the ConOps
+#             tool, its peak and average power values (p_peak, p_average)
+#             can be added to that project's section in the cache.
+#
 #             A mode definition is specified by a "modal_context", which
 #             can have the following values:
 #
@@ -2308,7 +2312,9 @@ def add_default_data_elements(oid, cname, ptid=None, des=None):
 #                 {acu 5 oid ...},
 #             acu 1 oid:
 #                 {acu 6 oid ...}
-#             ...},
+#             ...
+#         'p_peak': value,
+#         'p_average': value},
 #     project B oid:
 #         {...}
 #     }
