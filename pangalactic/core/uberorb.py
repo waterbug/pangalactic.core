@@ -758,6 +758,32 @@ class UberORB(object):
         # sys_len = len(systemz)
         # self.log.debug(f'    systemz cache has {sys_len} items.')
 
+    def get_all_usage_paths(self, product):
+        """
+        Find the path to the specified product in all assemblies in which it
+        occurs as a component, where the path is specified as a list of usage
+        oids.
+
+        Args:
+            product (Product):  a Product instance
+        """
+        acus = product.where_used
+        if not acus:
+            # product does not occur as a component in any assemblies
+            return []
+        usage_paths = []
+        for acu in acus:
+            assembly = acu.assembly
+            if assembly.where_used:
+                assembly_paths = self.get_all_usage_paths(assembly)
+                for path in assembly_paths:
+                    path.append(acu.oid)
+                    usage_paths.append(path)
+            else:
+                # the assembly does not occur as a component in any assemblies
+                usage_paths.append([acu.oid])
+        return usage_paths
+
     def start_logging(self, home=None, console=False, debug=False):
         """
         Create a pangalaxian orb (`pgorb`) log and begin writing to it.

@@ -1791,9 +1791,12 @@ class OrbTest(unittest.TestCase):
         Get all assembly paths to the occurances of a specified product as a
         component.
         """
+        # Mr. Fusion is a component in both the Gigawatt Magic Twanger and
+        # Instrument, which are components of the Rocinante Spacecraft
         mr_fusion = orb.get('test:mr_fusion')
-        value = list(mode_defz.keys())
-        expected = ['H2G2']
+        value = orb.get_all_usage_paths(mr_fusion)
+        expected = [['test:H2G2:acu-5', 'test:BOZO:acu-2'],
+                    ['test:H2G2:acu-6', 'test:H2G2:acu-7']]
         self.assertEqual(expected, value)
 
     def test_50_write_mel(self):
