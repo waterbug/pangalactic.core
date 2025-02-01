@@ -398,7 +398,7 @@ class OrbTest(unittest.TestCase):
             'version': obj.version,
             'version_sequence': obj.version_sequence
             },
-            7, 6)
+            5, 4)
         self.assertEqual(expected, value)
 
     def test_15_deserialize_simple(self):
@@ -1785,6 +1785,16 @@ class OrbTest(unittest.TestCase):
         # expected = powerstate.cbe
         # value = 25.0
         # self.assertEqual(expected, value)
+
+    def test_34_get_all_usage_paths(self):
+        """
+        Get all assembly paths to the occurances of a specified product as a
+        component.
+        """
+        mr_fusion = orb.get('test:mr_fusion')
+        value = list(mode_defz.keys())
+        expected = ['H2G2']
+        self.assertEqual(expected, value)
 
     def test_50_write_mel(self):
         """

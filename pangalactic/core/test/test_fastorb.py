@@ -376,7 +376,7 @@ class OrbTest(unittest.TestCase):
             'version': obj.version,
             'version_sequence': obj.version_sequence
             },
-            7, 6)
+            5, 4)
         self.assertEqual(expected, value)
 
     def test_15_deserialize_simple(self):
