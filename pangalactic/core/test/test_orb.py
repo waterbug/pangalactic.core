@@ -1792,11 +1792,14 @@ class OrbTest(unittest.TestCase):
         component.
         """
         # Mr. Fusion is a component in both the Gigawatt Magic Twanger and
-        # Instrument, which are components of the Rocinante Spacecraft
+        # Instrument, which are components of the Rocinante Spacecraft; and the
+        # Twanger is also a component of the Other Spacecraft.
         mr_fusion = orb.get('test:mr_fusion')
-        value = orb.get_all_usage_paths(mr_fusion)
-        expected = [['test:H2G2:acu-5', 'test:BOZO:acu-2'],
-                    ['test:H2G2:acu-6', 'test:H2G2:acu-7']]
+        value = set([tuple(acu.oid for acu in path)
+                     for path in orb.get_all_usage_paths(mr_fusion)])
+        expected = set([('test:H2G2:acu-5', 'test:BOZO:acu-2'),
+                        ('test:H2G2:acu-6', 'test:H2G2:acu-7'),
+                        ('test:spacecraft3-acu-5', 'test:BOZO:acu-2')])
         self.assertEqual(expected, value)
 
     def test_50_write_mel(self):

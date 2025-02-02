@@ -761,27 +761,35 @@ class UberORB(object):
     def get_all_usage_paths(self, product):
         """
         Find the path to the specified product in all assemblies in which it
-        occurs as a component, where the path is specified as a list of usage
-        oids.
+        occurs as a component, where the path is specified as a tuple of Acu
+        instances ordered from the highest assembly level to the lowest, which
+        has the product as its "component" attribute.
 
         Args:
             product (Product):  a Product instance
+
+        Returns:
+            paths (set):  the set of all usage paths (where each usage path is
+                a tuple of Acu instances)
         """
+        # NOTE: paths must be tuples because the return value needs to be a set
+        # (since order cannot be guaranteed) and sets can only contain hashable
+        # objects (tuples are hashable; lists are not).
         acus = product.where_used
         if not acus:
             # product does not occur as a component in any assemblies
-            return []
-        usage_paths = []
+            return set()
+        usage_paths = set()
         for acu in acus:
             assembly = acu.assembly
             if assembly.where_used:
                 assembly_paths = self.get_all_usage_paths(assembly)
                 for path in assembly_paths:
-                    path.append(acu.oid)
-                    usage_paths.append(path)
+                    path += (acu,)
+                    usage_paths.add(path)
             else:
                 # the assembly does not occur as a component in any assemblies
-                usage_paths.append([acu.oid])
+                usage_paths.add((acu,))
         return usage_paths
 
     def start_logging(self, home=None, console=False, debug=False):
