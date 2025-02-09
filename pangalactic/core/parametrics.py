@@ -2257,11 +2257,11 @@ def add_default_data_elements(oid, cname, ptid=None, des=None):
 #             Acu) during a specified activity. The "systems" dictionary
 #             contains all items that have been explicitly added to the mode
 #             definitions.  If a "system" has components, its component Acu
-#             instances are added to the "components" sub-dict and its modes'
-#             power values will be computed from the sum of its components'
-#             power values for each mode.  If a "system" has no components,
-#             then its modes' power contexts have to be explicitly defined
-#             rather than computed.
+#             instances are added to the "components" sub-dict and its oid is
+#             added to the "computed" list, so that its modal power values will
+#             be computed from the sum of its components' power values for each
+#             mode.  If a "system" has no components, then its modes' power
+#             contexts have to be explicitly defined rather than computed.
 #
 #             Once a project/mission conops has been defined in the ConOps
 #             tool, its peak and average power values (p_peak, p_average)
@@ -2272,7 +2272,6 @@ def add_default_data_elements(oid, cname, ptid=None, des=None):
 #
 #                 * "Off" or (equivalently) None
 #                 * a ParameterContext id
-#                 * "[computed]"
 #
 #             ... for which the power value is:
 #
@@ -2292,6 +2291,8 @@ def add_default_data_elements(oid, cname, ptid=None, des=None):
 #             mode 2 act oid: mode 2 act.name,
 #             mode 3 act oid: mode 3 act.name,
 #             mode 4 act oid: mode 4 act.name},
+#         'computed':
+#            [psu m oid, acu n oid, ...],
 #         'systems':
 #            {psu 1 oid: {mode 1 act.oid: modal_context**,
 #                         mode 2 act.oid: modal_context**,
@@ -2337,6 +2338,7 @@ def init_mode_defz(project_oid):
     log.debug('* init_mode_defz() ...')
     if not mode_defz.get(project_oid):
             mode_defz[project_oid] = dict(modes={},
+                                          computed=[],
                                           systems={},
                                           components={})
 
@@ -2392,16 +2394,21 @@ def get_modal_context(project_oid, usage_oid, mode_oid):
         usage_oid (str): the oid of the usage that has the mode
         mode_oid (str): the oid of the mode (activity)
     """
+    # FIXME: instead of a usage_oid, should use a usage path, since a given
+    #        usage might possibly occur more than once within a project
     # log.debug(f'* get_modal_context(project_oid: {project_oid},')
     # log.debug(f'                    usage_oid: {usage_oid},')
     # log.debug(f'                    mode_oid: {mode_oid},')
     if not project_oid in mode_defz:
         # log.debug('  project_oid was not in mode_defz -- return empty')
-        return ''
+        init_mode_defz(project_oid)
+    # deal with old versions of mode_defz that had no "computed" item ...
+    if mode_defz[project_oid].get('computed') is None:
+        mode_defz[project_oid]['computed'] = []
+    computed_list = mode_defz[project_oid]['computed']
+    if usage_oid in computed_list:
+        return '[computed]'
     sys_dict = mode_defz[project_oid].get('systems')
-    if not sys_dict:
-        # log.debug('  no project "systems" found in mode_defz -- return empty')
-        return ''
     if usage_oid in sys_dict:
         if mode_oid in sys_dict[usage_oid]:
             modal_context = sys_dict[usage_oid][mode_oid]
@@ -2409,7 +2416,7 @@ def get_modal_context(project_oid, usage_oid, mode_oid):
             return modal_context
         else:
             # log.debug('  usage_oid in "systems" dict but no mode_oid')
-            return ''
+            return 'Off'
     else:
         comp_dict = mode_defz[project_oid].get('components')
         if comp_dict:
@@ -2421,16 +2428,16 @@ def get_modal_context(project_oid, usage_oid, mode_oid):
                     break
             # if not comp_mode:
                 # log.debug('  component mode not found: return empty')
-            return comp_mode or ''
+            return comp_mode or 'Off'
         else:
             # log.debug('  no project "components" found -- return empty')
-            return ''
+            return 'Off'
 
 def set_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid, level):
     """
     Set the value of the modal_context (a.k.a. power level corresponding to a
-    mode) for the component of the specified system usage in the specified
-    project for the specified mode.
+    mode) for the specified component usage within the specified system usage
+    in the specified project for the specified mode.
 
     Args:
         project_oid (str): the oid of the project within which the mode is
@@ -2442,28 +2449,41 @@ def set_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid, level):
         level (str): the power context (e.g., 'Nominal', 'Peak', etc.)
     """
     if not project_oid in mode_defz:
-        mode_defz[project_oid] = dict(modes={}, systems={}, components={})
+        init_mode_defz(project_oid)
+    # deal with old versions of mode_defz that had no "computed" item ...
+    if mode_defz[project_oid].get('computed') is None:
+        mode_defz[project_oid]['computed'] = []
+    computed_list = mode_defz[project_oid]['computed']
+    computed_list = mode_defz[project_oid]['computed']
     sys_dict = mode_defz[project_oid]['systems']
     comp_dict = mode_defz[project_oid]['components']
     if sys_usage_oid not in sys_dict:
         sys_dict[sys_usage_oid] = {}
-    sys_dict[sys_usage_oid][mode_oid] = '[computed]'
     if sys_usage_oid not in comp_dict:
         comp_dict[sys_usage_oid] = {}
     if usage_oid not in comp_dict[sys_usage_oid]:
         comp_dict[sys_usage_oid][usage_oid] = {}
-    comp_dict[sys_usage_oid][usage_oid][mode_oid] = level
+    if level == '[computed]':
+        if usage_oid not in computed_list:
+            computed_list.append(usage_oid)
+        # the system mode context is forced to be '[computed]' if any of its
+        # component mode contexts are '[computed]'
+        if sys_usage_oid not in computed_list:
+            computed_list.append(sys_usage_oid)
+    else:
+        comp_dict[sys_usage_oid][usage_oid][mode_oid] = level
 
 def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
                     units=None):
     """
     Get the power value in the specified mode in the specified units for either
-    (1) if the modal_context is "computed", the computed power in the specified
-    "mode" (activity) of the system with the specified oid which is in the
-    "assembly" attribute of the usage (Acu) with the specified sys_usage_oid,
-    or (2) the spec value of the power for the product with the specified oid
-    in the specified modal_context (as the modal_context is either a known spec
-    power level or is mapped to a known spec power level).
+    (1) if the sys_usage_oid is in the mode_defz[project_oid]["computed"] list,
+    return the computed power in the specified "mode" (activity) of the system
+    with the specified oid which is in the "assembly" attribute of the usage
+    (Acu) with the specified sys_usage_oid, or (2) the spec value of the power
+    for the product with the specified oid in the specified modal_context (as
+    the modal_context is either a known spec power level or is mapped to a
+    known spec power level).
 
     Args:
         project_oid (str): the oid of the project within which the mode is
@@ -2476,24 +2496,27 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
     Keyword Args:
         units (str):  units in which the return value should be expressed
     """
+    modal_context = get_modal_context(project_oid, sys_usage_oid, mode)
     if modal_context == '[computed]':
-        sys_dict = mode_defz[project_oid].get('systems') or {}
-        comp_dict = mode_defz[project_oid].get('components') or {}
         log.debug('  computing modal power value ...')
+        # sys_dict = mode_defz[project_oid].get('systems') or {}
+        # comp_dict = mode_defz[project_oid].get('components') or {}
         cz = componentz.get(oid)
-        if (sys_usage_oid in comp_dict) and cz:
+        # if (sys_usage_oid in comp_dict) and cz:
+        if cz:
             log.debug(f'  - found {len(cz)} components ...')
             # dtype cast is used here in case some component didn't have this
             # parameter or didn't exist and we got a 0.0 value for it ...
             summation = 0.0
             for c in cz:
-                if c.usage_oid in comp_dict[sys_usage_oid]:
-                    context = (comp_dict[sys_usage_oid][c.usage_oid].get(mode)
-                               or 'Off')
-                elif c.usage_oid in sys_dict:
-                    context = sys_dict[c.usage_oid].get(mode) or 'Off'
-                else:
-                    context = 'Off'
+                context = get_modal_context(project_oid, c.usage_oid, mode)
+                # if c.usage_oid in comp_dict[sys_usage_oid]:
+                    # context = (comp_dict[sys_usage_oid][c.usage_oid].get(mode)
+                               # or 'Off')
+                # elif c.usage_oid in sys_dict:
+                    # context = sys_dict[c.usage_oid].get(mode) or 'Off'
+                # else:
+                    # context = 'Off'
                 if context == 'Nominal':
                     context = 'CBE'
                 if context == 'Off':
