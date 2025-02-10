@@ -2454,14 +2454,16 @@ def set_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid, level):
     if mode_defz[project_oid].get('computed') is None:
         mode_defz[project_oid]['computed'] = []
     computed_list = mode_defz[project_oid]['computed']
-    computed_list = mode_defz[project_oid]['computed']
     sys_dict = mode_defz[project_oid]['systems']
     comp_dict = mode_defz[project_oid]['components']
     if sys_usage_oid not in sys_dict:
         sys_dict[sys_usage_oid] = {}
     if sys_usage_oid not in comp_dict:
         comp_dict[sys_usage_oid] = {}
-    if usage_oid not in comp_dict[sys_usage_oid]:
+    if usage_oid in sys_dict:
+        if usage_oid not in computed_list:
+            sys_dict[usage_oid][mode_oid] = level
+    elif usage_oid not in comp_dict[sys_usage_oid]:
         comp_dict[sys_usage_oid][usage_oid] = {}
     if level == '[computed]':
         if usage_oid not in computed_list:
@@ -2471,6 +2473,8 @@ def set_modal_context(project_oid, sys_usage_oid, usage_oid, mode_oid, level):
         if sys_usage_oid not in computed_list:
             computed_list.append(sys_usage_oid)
     else:
+        if usage_oid not in comp_dict[sys_usage_oid]:
+            comp_dict[sys_usage_oid][usage_oid] = {}
         comp_dict[sys_usage_oid][usage_oid][mode_oid] = level
 
 def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
