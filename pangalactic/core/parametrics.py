@@ -2502,13 +2502,13 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
     """
     modal_context = get_modal_context(project_oid, sys_usage_oid, mode)
     if modal_context == '[computed]':
-        log.debug('  computing modal power value ...')
+        # log.debug('  computing modal power value ...')
         # sys_dict = mode_defz[project_oid].get('systems') or {}
         # comp_dict = mode_defz[project_oid].get('components') or {}
         cz = componentz.get(oid)
         # if (sys_usage_oid in comp_dict) and cz:
         if cz:
-            log.debug(f'  - found {len(cz)} components ...')
+            # log.debug(f'  - found {len(cz)} components ...')
             # dtype cast is used here in case some component didn't have this
             # parameter or didn't exist and we got a 0.0 value for it ...
             summation = 0.0
@@ -2532,9 +2532,9 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
                     else:
                         val = get_pval(c.oid, get_parameter_id('P', context),
                                        units=units)
-                log.debug(f'    + {val} (context: {context})')
+                # log.debug(f'    + {val} (context: {context})')
                 summation += (val or 0.0) * c.quantity
-            log.debug(f'  total: {summation}')
+            # log.debug(f'  total: {summation}')
             return round_to(summation)
         else:
             # if the product has no known components, return its specified
