@@ -2346,8 +2346,8 @@ class UberORB(object):
         # are the parent or child are also deleted
         info = []
         recompute_required = False
-        refresh_assemblies = []
-        refresh_systems = []
+        assemblies_to_refresh = []
+        systems_to_refresh = []
         local_user_obj = self.get(state.get('local_user_oid', 'me'))
         for obj in objs:
             delete_not_allowed = False
@@ -2528,11 +2528,11 @@ class UberORB(object):
                 recompute_required = True
             elif isinstance(obj, self.classes['Acu']):
                 if getattr(obj.assembly, 'oid', None) in componentz:
-                    refresh_assemblies.append(obj.assembly)
+                    assemblies_to_refresh.append(obj.assembly)
                 recompute_required = True
             elif isinstance(obj, self.classes['ProjectSystemUsage']):
                 if getattr(obj.project, 'oid', None) in systemz:
-                    refresh_systems.append(obj.project)
+                    systems_to_refresh.append(obj.project)
             creator = getattr(obj, 'creator', None)
             obj_id = getattr(obj, 'id', 'no id')
             obj_name = getattr(obj, 'name', 'no name')
@@ -2570,11 +2570,11 @@ class UberORB(object):
                     # info.append('     ... delete failed, rolled back.')
         for text in info:
             self.log.debug(text)
-        if refresh_assemblies:
-            for assembly in refresh_assemblies:
+        if assemblies_to_refresh:
+            for assembly in assemblies_to_refresh:
                 refresh_componentz(assembly)
-        if refresh_systems:
-            for project in refresh_systems:
+        if systems_to_refresh:
+            for project in systems_to_refresh:
                 refresh_systemz(project)
         if recompute_required:
             recompute_parmz()
