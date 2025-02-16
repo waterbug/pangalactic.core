@@ -917,7 +917,7 @@ def create_test_project():
         dict(
             _cname='Acu',
             oid='test:BOZO:acu-1',
-            id='acu-5',
+            id='flux_capacitor_in_twanger',
             id_ns='test',
             name='Flux Capacitor in Magic Twanger',
             assembly='test:twanger',
@@ -932,7 +932,7 @@ def create_test_project():
         dict(
             _cname='Acu',
             oid='test:BOZO:acu-2',
-            id='acu-6',
+            id='mr_fusion_in_twanger',
             id_ns='test',
             name='Fusion energy source in Magic Twanger',
             assembly='test:twanger',
