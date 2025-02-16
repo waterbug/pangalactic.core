@@ -655,10 +655,6 @@ class UberORB(object):
     def recompute_margins(self):
         """
         Recompute Margins for all performance requirements.
-
-        NOTE: currently this recomputes/refreshes the 'refresh_rqt_allocz'
-        cache -- the plan is to remove that cache and simply recompute margins
-        whenever their values are needed.
         """
         # Recompute Margins for all performance requirements
         # [0] Remove any previously computed performance requirements (NTEs and
@@ -731,7 +727,8 @@ class UberORB(object):
             gen_test_dvals(data_elementz[o.oid])
             add_default_parameters(o.oid, cname, ptid=ptid, parms=parms)
             gen_test_pvals(parameterz[o.oid])
-        recompute_parmz()
+        if not state.get('connected'):
+            recompute_parmz()
         self.log.debug('  ... done.')
 
     def _build_componentz_cache(self):
@@ -919,7 +916,8 @@ class UberORB(object):
         self.data_elementz_status = load_data_elementz(self.home)
         self.parmz_status = load_parmz(self.home)
         # self.log.debug('  dmz: {}'.format(str(dmz)))
-        recompute_parmz()
+        if not state.get('connected'):
+            recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
         # self.log.debug('  + checking for updates to parameter definitions ...')
         all_pds = refdata.pdc
@@ -978,8 +976,8 @@ class UberORB(object):
         # update the all_pt_abbrs cache, used in fix_hwproduct_id()
         self.all_pt_abbrs = [pt.abbreviation
                              for pt in self.get_by_type('ProductType')]
-        # update the rqt_allocz runtime cache (used in computing margins)
-        recompute_parmz()
+        if not state.get('connected'):
+            recompute_parmz()
         self.log.info('  + all reference data loaded.')
 
     #########################################################################
@@ -1334,31 +1332,6 @@ class UberORB(object):
                     comp_changed = True
                 # after checking for a changed component, refresh 'componentz'
                 refresh_componentz(obj.assembly)
-                if not new:
-                    # NOTE: when an existing Acu is modified and the component
-                    # is changed, the associated Flows must be deleted first,
-                    # so it is assumed that has been done ...
-                    if comp_changed:
-                        # find all req allocations to this Acu ...
-                        msg = 'component was changed, checking for '
-                        msg += 'allocated requirements ...'
-                        self.log.debug(f'   {msg}')
-                        alloc_reqs = [rqt_oid for rqt_oid in rqt_allocz
-                                      if rqt_allocz[rqt_oid][0] == oid]
-                        if alloc_reqs:
-                            for rqt_oid in alloc_reqs:
-                                req = self.get(rqt_oid)
-                                if req:
-                                    self.log.debug('   alloc reqts found ...')
-                                    recompute_required = True
-                                    self.log.debug('   recompute will be done')
-                                else:
-                                    # if requirement not there, remove alloc
-                                    del alloc_reqs[rqt_oid]
-                        else:
-                            self.log.debug('   no allocated reqts found.')
-                    else:
-                        self.log.debug('   component not changed.')
                 recompute_required = True
             elif cname == 'HardwareProduct':
                 # make sure all HW Products have their default parameters and
@@ -1370,49 +1343,14 @@ class UberORB(object):
                 add_default_data_elements(oid, cname, ptid=ptid)
                 recompute_required = True
             elif cname == 'ProjectSystemUsage':
-                system_oid = getattr(obj.system, 'oid', None)
-                # use 'systemz' cache to determine whether the PSU's
-                # system has changed
-                cur_project_psu_systems = []
-                if obj.project.oid in systemz:
-                    cur_project_psu_systems = [(s.usage_oid, s.oid) for s
-                                                in systemz[obj.project.oid]]
-                if (oid, system_oid) in cur_project_psu_systems:
-                    system_changed = False
-                else:
-                    system_changed = True
-                # after checking for a changed system, refresh 'systemz'
                 refresh_systemz(obj.project)
-                if not new:
-                    if system_changed:
-                        # find all req allocations to this PSU ...
-                        msg = 'system was changed, checking for '
-                        msg += 'allocated requirements ...'
-                        self.log.debug(f'   {msg}')
-                        alloc_reqs = [rqt_oid for rqt_oid in rqt_allocz
-                                      if rqt_allocz[rqt_oid][0] == oid]
-                        if alloc_reqs:
-                            for rqt_oid in alloc_reqs:
-                                req = self.get(rqt_oid)
-                                if req:
-                                    self.log.debug('   alloc reqts found ...')
-                                    recompute_required = True
-                                    self.log.debug('   recompute will be done')
-                                else:
-                                    # if requirement not there, remove alloc
-                                    del alloc_reqs[rqt_oid]
-                        else:
-                            self.log.debug('   no allocated reqts found.')
-                    else:
-                        self.log.debug('   system not changed.')
                 recompute_required = True
             elif cname == 'Requirement':
-                # in the future, functional reqts. can be allocated
-                recompute_required = True
+                refresh_rqt_alloc(obj)
         # self.log.debug('  orb.save:  committing db session.')
         # obj has already been "added" to the db (session) above, so commit ...
         self.db.commit()
-        if recompute_required and recompute:
+        if recompute_required and recompute and not state.get('connected'):
             recompute_parmz()
         return True
 
@@ -2576,7 +2514,7 @@ class UberORB(object):
         if systems_to_refresh:
             for project in systems_to_refresh:
                 refresh_systemz(project)
-        if recompute_required:
+        if recompute_required and not state.get('connected'):
             recompute_parmz()
 
     def is_versioned(self, obj):
