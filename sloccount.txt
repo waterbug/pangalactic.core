@@ -1,34 +1,4 @@
-Have a non-directory at the top, so creating directory top_dir
-Adding /home/waterbug/clones/pangalactic.core/./CHEAT_SHEET.html to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./CHEAT_SHEET.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./FAQ to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./INSTALL to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_FOR_DEVELOPERS.html to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_FOR_DEVELOPERS.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_FOR_DEVELOPERS_202201.html to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_ACTIVITIES.html to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_ACTIVITIES.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_COLLABORATION_ARCHITECTURE.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_CONOPS_AND_MODES.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_DATAGRID.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_NUITKA.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_ONTOLOGY_AND_DB.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_PARAMETERS.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./NOTES_ON_PYINSTALLER.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./README to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./RELEASE_NOTES.md to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./VERSION to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./bump_version.sh to top_dir
-Creating filelist for conda
-Creating filelist for dist
-Creating filelist for doc
-Adding /home/waterbug/clones/pangalactic.core/./htmlify.sh to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./pandoc.css to top_dir
 Creating filelist for pangalactic
-Creating filelist for pangalactic.core.egg-info
-Adding /home/waterbug/clones/pangalactic.core/./sedscr to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./setup.py to top_dir
-Adding /home/waterbug/clones/pangalactic.core/./sloccount.txt to top_dir
 Categorizing files.
 Finding a working MD5 command....
 Found a working MD5 command.
@@ -36,28 +6,23 @@ Computing results.
 
 
 SLOC	Directory	SLOC-by-Language (Sorted)
-18937   pangalactic     python=18910,sh=27
-37      top_dir         python=35,sh=2
-1       conda           sh=1
-0       dist            (none)
-0       doc             (none)
-0       pangalactic.core.egg-info (none)
+18071   pangalactic     python=18044,sh=27
 
 
 Totals grouped by language (dominant language first):
-python:       18945 (99.84%)
-sh:              30 (0.16%)
+python:       18044 (99.85%)
+sh:              27 (0.15%)
 
 
 
 
-Total Physical Source Lines of Code (SLOC)                = 18,975
-Development Effort Estimate, Person-Years (Person-Months) = 4.40 (52.76)
+Total Physical Source Lines of Code (SLOC)                = 18,071
+Development Effort Estimate, Person-Years (Person-Months) = 4.18 (50.12)
  (Basic COCOMO model, Person-Months = 2.4 * (KSLOC**1.05))
-Schedule Estimate, Years (Months)                         = 0.94 (11.28)
+Schedule Estimate, Years (Months)                         = 0.92 (11.07)
  (Basic COCOMO model, Months = 2.5 * (person-months**0.38))
-Estimated Average Number of Developers (Effort/Schedule)  = 4.68
-Total Estimated Cost to Develop                           = $ 593,926
+Estimated Average Number of Developers (Effort/Schedule)  = 4.53
+Total Estimated Cost to Develop                           = $ 564,252
  (average salary = $56,286/year, overhead = 2.40).
 SLOCCount, Copyright (C) 2001-2004 David A. Wheeler
 SLOCCount is Open Source Software/Free Software, licensed under the GNU GPL.
