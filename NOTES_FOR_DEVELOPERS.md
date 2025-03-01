@@ -182,6 +182,9 @@
 
     `tall_logo:             (str)  "tall" logo icon file name`
 
+    `test:                  (bool) vger: if true, load test data at startup
+                                   pgxn: if true, enable "Delete Test Data"
+
     `units:                 (str)  unit system (default: 'mks')`
 
 * **prefs**
