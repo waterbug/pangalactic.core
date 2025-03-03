@@ -1346,7 +1346,7 @@ class UberORB(object):
                 refresh_systemz(obj.project)
                 recompute_required = True
             elif cname == 'Requirement':
-                refresh_rqt_alloc(obj)
+                refresh_rqt_allocz(obj)
         # self.log.debug('  orb.save:  committing db session.')
         # obj has already been "added" to the db (session) above, so commit ...
         self.db.commit()
