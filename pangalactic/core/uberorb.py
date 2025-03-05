@@ -2007,23 +2007,24 @@ class UberORB(object):
         vault_fname = self.get_vault_fname(rep_file)
         return os.path.join(self.vault, vault_fname)
 
-    def get_step_file_path(self, model):
+    def get_mcad_model_file_path(self, model):
         """
-        Find the path of a STEP file for a model.
+        Find the path of a STEP, STL, or BREP file for an MCAD model.
 
         Args:
-            model (Model):  the Model instance for which the STEP file is sought
+            model (Model):  the Model instance for which the CAD file is sought
 
         Returns:
-            the path to the model's STEP file in the orb's "vault"
+            the path to the CAD model's file in the orb's "vault"
         """
         # self.log.debug('* get_step_model_path(model with oid "{}")'.format(
                       # getattr(model, 'oid', 'None')))
         vault_fpath = ''
+        suffixes = ('.stp', '.STP', '.step', '.STEP', '.p21', '.P21', '.stl',
+                    '.STL', '.brep', '.BREP')
         if (model.has_files and model.type_of_model.id == "MCAD"):
             for rep_file in model.has_files:
-                if rep_file.user_file_name.endswith(
-                        ('.stp', '.STP', '.step', '.STEP', '.p21', '.P21')):
+                if rep_file.user_file_name.endswith(suffixes):
                     fpath = self.get_vault_fpath(rep_file)
                     if os.path.exists(fpath):
                         vault_fpath = fpath
