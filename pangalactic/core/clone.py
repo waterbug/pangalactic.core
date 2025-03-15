@@ -143,7 +143,7 @@ def clone(what, include_ports=True, include_components=True,
         if owner:
             owner_id = getattr(owner, 'id', '')
         if owner_id:
-            newkw['id'] = '-'.join([owner.id, cname, newkw['oid'][:5]])
+            newkw['id'] = '-'.join([owner_id, cname, newkw['oid'][:5]])
         else:
             newkw['id'] = '-'.join([cname, newkw['oid'][:5]])
         orb.log.info('  id: "{}"'.format(newkw['id']))
