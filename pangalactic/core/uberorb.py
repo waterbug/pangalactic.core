@@ -77,6 +77,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           save_data_elementz,
                                           load_mode_defz, save_mode_defz,
                                           load_parmz, save_parmz,
+                                          mode_defz,
                                           save_compz, save_parmz_by_dimz,
                                           parameterz, parm_defz,
                                           parmz_by_dimz, refresh_componentz,
@@ -2267,6 +2268,49 @@ class UberORB(object):
                                                         owner=project).count()
         self.log.debug('  - reqts count: {n}')
         return n
+
+    def get_project_parameters(self, project):
+        """
+        Get the critical parameters of the specified project.  Currently these
+        are defined as:
+
+            * System Mass(es): a dict mapping system name to mass for
+                               project observatory(ies) and top-level systems
+            * Peak power: highest value of power over the mission
+            * Average power: average power level over the mission (or orbit)
+
+        Args:
+            project (Project):  the specified project
+
+        Returns:
+            data (dict) in the format:
+                {'masses': {system1 name: m[CBE] in kg,
+                            system2 name: ...}
+                 'p_peak': value in Watts,
+                 'p_average': value in Watts}
+        """
+        self.log.debug('* get_project_parameters({})'.format(
+                                        getattr(project, 'id', '[None]')))
+        data = {}
+        masses = {}
+        observ_pt = self.select('ProductType', name='Observatory')
+        observatories = self.search_exact(cname='HardwareProduct',
+                                          owner=project,
+                                          product_type=observ_pt)
+        if observatories:
+            # include masses of all project observatories
+            for obs in observatories:
+                masses[obs.name] = get_pval(obs.oid, 'm[CBE]')
+        if project.systems:
+            # include masses of all other top-level non-observatory items
+            for system in [psu.system for psu in project.systems]:
+                if system.product_type is not observ_pt:
+                    masses[system.name] = get_pval(system.oid, 'm[CBE]')
+        data['masses'] = masses
+        proj_modes_dict = mode_defz.get(project.oid, {})
+        data['p_peak'] = proj_modes_dict.get('p_peak')
+        data['p_average'] = proj_modes_dict.get('p_average')
+        return data
 
     def delete(self, objs):
         """
