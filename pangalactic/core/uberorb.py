@@ -1553,8 +1553,8 @@ class UberORB(object):
         sub_activities and, in the case of a Cycle, the number of its iterations,
         although for Cycles their duration may be specified directly.
         """
-        # NOTE: this function has to be an orb member function because even though
-        # it does not reference the orb explicitly, the invocation of
+        # NOTE: this function has to be an orb member function because even
+        # though it does not reference the orb explicitly, the invocation of
         # act.subactivities requires db access, so implicitly uses the orb
         if act.sub_activities:
             return sum([self.get_duration(a, units=units)
@@ -2271,11 +2271,10 @@ class UberORB(object):
 
     def get_project_parameters(self, project):
         """
-        Get the critical parameters of the specified project.  Currently these
-        are defined as:
+        Get the critical parameters of the specified project's "observatory".
+        Currently these are defined as:
 
-            * System Mass(es): a dict mapping system name to mass for
-                               project observatory(ies) and top-level systems
+            * Mass:  mass of the project observatory
             * Peak power: highest value of power over the mission
             * Average power: average power level over the mission (or orbit)
 
@@ -2284,29 +2283,29 @@ class UberORB(object):
 
         Returns:
             data (dict) in the format:
-                {'masses': {system1 name: m[CBE] in kg,
-                            system2 name: ...}
+                {'mass': m[CBE] in kg,
                  'p_peak': value in Watts,
                  'p_average': value in Watts}
         """
+        # TODO: adapt for multi-spacecraft (observatory) missions
         self.log.debug('* get_project_parameters({})'.format(
                                         getattr(project, 'id', '[None]')))
         data = {}
         masses = {}
         observ_pt = self.select('ProductType', name='Observatory')
-        observatories = self.search_exact(cname='HardwareProduct',
-                                          owner=project,
-                                          product_type=observ_pt)
-        if observatories:
-            # include masses of all project observatories
-            for obs in observatories:
-                masses[obs.name] = get_pval(obs.oid, 'm[CBE]')
-        if project.systems:
-            # include masses of all other top-level non-observatory items
-            for system in [psu.system for psu in project.systems]:
-                if system.product_type is not observ_pt:
-                    masses[system.name] = get_pval(system.oid, 'm[CBE]')
-        data['masses'] = masses
+        observatory = self.select('HardwareProduct',
+                                  owner=project,
+                                  product_type=observ_pt)
+        mass = 0
+        if observatory:
+            mass = get_pval(observatory.oid, 'm[CBE]')
+        # NOTE: more mass info that may be relevant ... TBD whether needed
+        # if project.systems:
+            # # include masses of all other top-level non-observatory items
+            # for system in [psu.system for psu in project.systems]:
+                # if system.product_type is not observ_pt:
+                    # masses[system.name] = get_pval(system.oid, 'm[CBE]')
+        data['mass'] = mass
         proj_modes_dict = mode_defz.get(project.oid, {})
         data['p_peak'] = proj_modes_dict.get('p_peak')
         data['p_average'] = proj_modes_dict.get('p_average')
