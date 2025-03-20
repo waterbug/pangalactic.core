@@ -15,6 +15,10 @@ vault_mod_path = os.path.join('pangalactic', 'core', 'test', 'vault')
 vault_data_paths = [os.path.join(vault_mod_path, p)
                    for p in os.listdir(vault_mod_path)
                    if not p.startswith('__init__')]
+ref_db_mod_path = os.path.join('pangalactic', 'core', 'ref_db')
+ref_db_paths = [os.path.join(ref_db_mod_path, p)
+               for p in os.listdir(ref_db_mod_path)
+               if not p.startswith('__init__')]
 sitepkg_dir = [p for p in site.getsitepackages()
                if p.endswith('site-packages')][0]
 
@@ -43,7 +47,9 @@ setup(
         # test data files
         (os.path.join(sitepkg_dir, test_mod_path), test_data_paths),
         # test vault files
-        (os.path.join(sitepkg_dir, vault_mod_path), vault_data_paths)
+        (os.path.join(sitepkg_dir, vault_mod_path), vault_data_paths),
+        # ref db files
+        (os.path.join(sitepkg_dir, ref_db_mod_path), ref_db_paths)
         ],
     zip_safe=False
 )

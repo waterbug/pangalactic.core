@@ -176,6 +176,8 @@ class UberORB(object):
         if self.started:
             return ''
         self.log_msgs = log_msgs or []
+        # if using sqlite, begin with a db file that is pre-populated with ref
+        # data -- this saves a minute or so of startup time ...
         if not db_url or db_url.startswith('sqlite'):
             self.setup_ref_db_and_version(home, __version__)
         # set home directory -- in order of precedence (A, B, C):
