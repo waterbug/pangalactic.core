@@ -2300,11 +2300,22 @@ class UberORB(object):
         if observatory:
             mass = get_pval(observatory.oid, 'm[CBE]')
         # NOTE: more mass info that may be relevant ... TBD whether needed
-        # if project.systems:
-            # # include masses of all other top-level non-observatory items
-            # for system in [psu.system for psu in project.systems]:
-                # if system.product_type is not observ_pt:
-                    # masses[system.name] = get_pval(system.oid, 'm[CBE]')
+        if project.systems:
+            # include masses of all other top-level non-observatory items
+            top_level_systems = [psu.system for psu in project.systems
+                                 if psu.system is not None]
+            if top_level_systems:
+                masses = [get_pval(sys.oid, 'm[CBE]')
+                          for sys in top_level_systems
+                          if get_pval(sys.oid, 'm[CBE]')]
+                if masses:
+                    mass = masses[0]
+                else:
+                    mass = 'unspecified'
+            else:
+                mass = 'unspecified'
+        else:
+            mass = 'unspecified'
         data['mass'] = mass
         proj_modes_dict = mode_defz.get(project.oid, {})
         data['p_peak'] = proj_modes_dict.get('p_peak')
