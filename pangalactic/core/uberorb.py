@@ -58,7 +58,7 @@ from pangalactic.core             import config, read_config
 from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
-from pangalactic.core             import refdata
+from pangalactic.core             import refdata, ref_db
 from pangalactic.core.registry    import PanGalacticRegistry
 from pangalactic.core.mapping     import schema_maps, schema_version
 from pangalactic.core.meta        import TEXT_PROPERTIES
@@ -176,6 +176,8 @@ class UberORB(object):
         if self.started:
             return ''
         self.log_msgs = log_msgs or []
+        if not db_url or db_url.startswith('sqlite'):
+            self.setup_ref_db_and_version(home, __version__)
         # set home directory -- in order of precedence (A, B, C):
         # [A] 'home' kw arg (this should be set by the application, if any)
         pgx_home: str = ''
@@ -468,6 +470,30 @@ class UberORB(object):
         save_data_elementz(self.home)
         save_parmz(self.home)
         return self.home
+
+    def setup_ref_db_and_version(self, home, version):
+        """
+        Add a local sqlite "local.db" file that is pre-populated with all data from
+        the "refdata" module, and add a "VERSION" file.
+
+        Args:
+            home (str): path to the home directory
+            version (str): current version
+        """
+        # copy sqlite `local.db` file containing pgef ref data to home
+        if not os.path.exists(os.path.join(home, 'local.db')):
+            ref_db_mod_path = ref_db.__path__[0]
+            ref_db_files = set([s for s in os.listdir(ref_db_mod_path)
+                                if (not s.startswith('__init__')
+                                and not s.startswith('__pycache__'))
+                                ])
+            if ref_db_files:
+                # print('  - copying db file into home dir ...')
+                for p in ref_db_files:
+                    shutil.copy(os.path.join(ref_db_mod_path, p), home)
+                    # print('  - ref db installed: {p}')
+        with open(os.path.join(home, 'VERSION'), 'w') as f:
+            f.write(version)
 
     def init_registry(self, home, db_url, force_new_core=False, version='',
                       log=None, debug=False, console=False):
