@@ -84,6 +84,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           refresh_rqt_allocz, rqt_allocz,
                                           refresh_systemz,
                                           recompute_parmz,
+                                          round_to,
                                           save_systemz, systemz)
 from pangalactic.core.serializers import (serialize, deserialize,
                                           uncook_datetime)
@@ -2302,49 +2303,90 @@ class UberORB(object):
         Get the critical parameters of the specified project's "observatory".
         Currently these are defined as:
 
-            * Mass:  mass of the project observatory
-            * Peak power: highest value of power over the mission
-            * Average power: average power level over the mission (or orbit)
+            * dry_mass:  dry mass of the project observatory
+            * fuel_mass:  mass of the fuel used by the observatory
+            * wet_mass: fuel_mass + dry_mass
+            * p_peak: highest value of power over the mission
+            * p_average: average power level over the mission (or orbit)
 
         Args:
             project (Project):  the specified project
 
         Returns:
             data (dict) in the format:
-                {'mass': m[CBE] in kg,
-                 'p_peak': value in Watts,
-                 'p_average': value in Watts}
+                {parameter id: value of parameter in mks units,
+                 ... for each parameter ...}
         """
         # TODO: adapt for multi-spacecraft (observatory) missions
         self.log.debug('* get_project_parameters({})'.format(
                                         getattr(project, 'id', '[None]')))
         data = {}
-        masses = {}
         observ_pt = self.select('ProductType', name='Observatory')
-        observatory = self.select('HardwareProduct',
-                                  owner=project,
-                                  product_type=observ_pt)
-        mass = 0
-        if observatory:
-            mass = get_pval(observatory.oid, 'm[CBE]')
-        # NOTE: more mass info that may be relevant ... TBD whether needed
-        if project.systems:
-            # include masses of all other top-level non-observatory items
-            top_level_systems = [psu.system for psu in project.systems
-                                 if psu.system is not None]
-            if top_level_systems:
-                masses = [get_pval(sys.oid, 'm[CBE]')
-                          for sys in top_level_systems
-                          if get_pval(sys.oid, 'm[CBE]')]
-                if masses:
-                    mass = masses[0]
-                else:
-                    mass = 'unspecified'
-            else:
-                mass = 'unspecified'
+        observatories = self.search_exact(cname='HardwareProduct',
+                                          product_type=observ_pt,
+                                          owner=project)
+        system_mass = 0
+        system = None
+        if observatories:
+            # pick first observatory ... adapt to multiples later ...
+            obs = sorted(observatories, key=lambda x: x.name)
+            system = obs[0]
+            system_mass = get_pval(system.oid, 'm[CBE]')
+            name = system.name
+            self.log.debug(f'  observatory found: "{name}", using its mass')
         else:
-            mass = 'unspecified'
-        data['mass'] = mass
+            # if no observatories, look for spacecraft items ...
+            self.log.debug('  no observatories, looking for spacecraft ...')
+            sc_pt = self.select('ProductType', name='Spacecraft')
+            scs = self.search_exact(cname='HardwareProduct',
+                                    product_type=sc_pt,
+                                    owner=project)
+            if scs:
+                # pick first sc ... adapt to multiples later ...
+                scs_sorted = sorted(scs, key=lambda x: x.name)
+                system = scs_sorted[0]
+                system_mass = get_pval(system.oid, 'm[CBE]')
+                name = system.name
+                self.log.debug(f'  spacecraft found: "{name}", using its mass')
+            elif project.systems:
+                self.log.debug('  no observatories or spacecraft --')
+                self.log.debug('  checking other top-level systems ...')
+                # check for top-level non-observatory, non-spacecraft items
+                top_level_systems = [psu.system for psu in project.systems
+                                     if psu.system is not None]
+                if top_level_systems:
+                    tl_systems = sorted(top_level_systems,
+                                        key=lambda x: x.name)
+                    for tl_system in tl_systems:
+                        mass = get_pval(system.oid, 'm[CBE]')
+                        if mass:
+                            system = tl_system
+                            name = system.name
+                            self.log.debug(f'  using mass of system "{name}"')
+                            break
+                    if mass:
+                        system_mass = mass
+        included_fuel_mass = 0
+        external_fuel_mass = 0
+        assembly_items = get_assembly(system)
+        fuel_pt = self.select('ProductType', name='Fuel')
+        fuel_items = self.search_exact(cname='HardwareProduct',
+                                       product_type=fuel_pt,
+                                       owner=project)
+        if fuel_items:
+            for fuel_item in fuel_items:
+                fid = getattr(fuel_item, 'id', 'no id')
+                if fuel_item in assembly_items:
+                    self.log.debug(f'  adding mass of included fuel "{fid}"')
+                    included_fuel_mass += get_pval(fuel_item.oid, 'm[CBE]')
+                else:
+                    self.log.debug(f'  adding mass of external fuel "{fid}"')
+                    external_fuel_mass += get_pval(fuel_item.oid, 'm[CBE]')
+        else:
+            self.log.debug('  no fuel was found.')
+        data['fuel_mass'] = round_to(included_fuel_mass + external_fuel_mass)
+        data['wet_mass'] = round_to(system_mass + external_fuel_mass)
+        data['dry_mass'] = round_to(system_mass - included_fuel_mass)
         proj_modes_dict = mode_defz.get(project.oid, {})
         data['p_peak'] = proj_modes_dict.get('p_peak')
         data['p_average'] = proj_modes_dict.get('p_average')
