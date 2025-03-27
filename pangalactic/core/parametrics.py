@@ -2549,15 +2549,16 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
 
 def get_power_contexts(obj):
     """
-    Return the contexts of all power (P) parameters for an object, adding an
-    "Off" context if it is not present.
+    Return the contexts of all non-zero power (P) parameters for an object,
+    adding an "Off" context if it is not present.
     """
     pids = []
     if obj.oid in parameterz:
         pids = list(parameterz[obj.oid])
     if pids:
         ptups = [get_variable_and_context(pid) for pid in pids
-                 if pid.split('[')[0] == 'P']
+                 if (pid.split('[')[0] == 'P'
+                     and get_pval(obj.oid, pid) > 0)]
         contexts = [ptup[1] for ptup in ptups
                     if ptup[1] and ptup[1] not in ['MEV', 'Ctgcy']]
         if 'Off' not in contexts:
