@@ -2326,6 +2326,8 @@ class UberORB(object):
                                           product_type=observ_pt,
                                           owner=project)
         system_mass = 0
+        top_level_systems = [psu.system for psu in project.systems
+                             if psu.system is not None]
         system = None
         if observatories:
             # pick first observatory ... adapt to multiples later ...
@@ -2348,40 +2350,63 @@ class UberORB(object):
                 system_mass = get_pval(system.oid, 'm[CBE]')
                 name = system.name
                 self.log.debug(f'  spacecraft found: "{name}", using its mass')
-            elif project.systems:
+            else:
                 self.log.debug('  no observatories or spacecraft --')
-                self.log.debug('  checking other top-level systems ...')
-                # check for top-level non-observatory, non-spacecraft items
-                top_level_systems = [psu.system for psu in project.systems
-                                     if psu.system is not None]
-                if top_level_systems:
-                    tl_systems = sorted(top_level_systems,
-                                        key=lambda x: x.name)
-                    for tl_system in tl_systems:
-                        mass = get_pval(system.oid, 'm[CBE]')
-                        if mass:
-                            system = tl_system
-                            name = system.name
-                            self.log.debug(f'  using mass of system "{name}"')
-                            break
+                self.log.debug('  looking for launch vehicles ...')
+                lv_pt = self.select('ProductType', name='Launch Vehicle')
+                lvs = self.search_exact(cname='HardwareProduct',
+                                        product_type=lv_pt,
+                                        owner=project)
+                for lv in lvs:
+                    mass = get_pval(lv.oid, 'm[CBE]')
                     if mass:
-                        system_mass = mass
+                        system = lv
+                        name = system.name
+                        self.log.debug(f'  using mass of lv "{name}"')
+                        break
+                if mass:
+                    system_mass = mass
         included_fuel_mass = 0
         external_fuel_mass = 0
-        assembly_items = get_assembly(system)
+        system_assembly_items = get_assembly(system)
+        # look for the top-level project system containing the selected system
+        for a_system in top_level_systems:
+            assembly_items = get_assembly(a_system)
+            if system in assembly_items:
+                project_assembly_items = assembly_items
+                break
         fuel_pt = self.select('ProductType', name='Fuel')
-        fuel_items = self.search_exact(cname='HardwareProduct',
-                                       product_type=fuel_pt,
-                                       owner=project)
-        if fuel_items:
-            for fuel_item in fuel_items:
+        # all fuel being used internal to the system
+        system_fuel_usages = [item for item in system_assembly_items
+                              if (isinstance(item, self.classes['Acu'])
+                                  and item.component.product_type is fuel_pt)]
+        project_fuel_usages = [item for item in project_assembly_items
+                               if (
+                          (isinstance(item, self.classes['Acu'])
+                           and item.component.product_type is fuel_pt)
+                           or
+                          (isinstance(item, self.classes['ProjectSystemUsage'])
+                            and item.system.product_type is fuel_pt)
+                            )]
+        if project_fuel_usages:
+            for fuel_usage in project_fuel_usages:
+                quantity = 1
+                if hasattr(fuel_usage, 'component'):
+                    fuel_item = fuel_usage.component
+                    quantity = fuel_usage.quantity or 1
+                elif hasattr(fuel_usage, 'system'):
+                    fuel_item = fuel_usage.system
                 fid = getattr(fuel_item, 'id', 'no id')
-                if fuel_item in assembly_items:
+                if fuel_usage in system_fuel_usages:
                     self.log.debug(f'  adding mass of included fuel "{fid}"')
-                    included_fuel_mass += get_pval(fuel_item.oid, 'm[CBE]')
+                    mass = get_pval(fuel_item.oid, 'm[CBE]')
+                    total_usage_mass = round_to(quantity * mass)
+                    included_fuel_mass += total_usage_mass
                 else:
                     self.log.debug(f'  adding mass of external fuel "{fid}"')
-                    external_fuel_mass += get_pval(fuel_item.oid, 'm[CBE]')
+                    mass = get_pval(fuel_item.oid, 'm[CBE]')
+                    total_usage_mass = round_to(quantity * mass)
+                    external_fuel_mass += total_usage_mass
         else:
             self.log.debug('  no fuel was found.')
         data['fuel_mass'] = round_to(included_fuel_mass + external_fuel_mass)
