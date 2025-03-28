@@ -1,6 +1,6 @@
 package:
   name: pangalactic.core
-  version: "4.3.dev8"
+  version: "4.3.dev9"
 
 source:
   path: /home/waterbug/clones/pangalactic.core
