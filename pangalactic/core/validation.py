@@ -217,10 +217,7 @@ def get_level_count(product):
         product (Product): the Product
     """
     log.debug('* get_level_count()')
-    if product:
-        log.debug(f'  product id: "{product.id}")')
-        levels = 1
-    else:
+    if not product:
         log.debug('  got null product.')
         return 0
     if product.components:
@@ -271,6 +268,8 @@ def get_level_count(product):
             levels += 1
         log.debug(f'  - {levels} levels')
         return levels
+    else:
+        return 1
 
 
 def get_bom(product):
