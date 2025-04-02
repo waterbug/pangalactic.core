@@ -160,21 +160,24 @@ DEFAULT_PRODUCT_TYPE_PARAMETERS = {
     'receiver': ['f_downlink', 'f_uplink']
     }
 
+DEFAULT_EDITABLE_POWER_CONTEXTS = ['nominal', 'peak', 'standby', 'survival']
+
 # NOTE: these parameters go into the Acu that connects an optical component to
 # an optical system -- for now, just keep them handy ...
 
-# 'X_vertex',
-# 'Y_vertex',
-# 'Z_vertex',
-# 'RotX_vertex',
-# 'RotY_vertex',
-# 'RotZ_vertex',
-# 'dRMSWFE_dx', 'dRMSWFE_dy', 'dRMSWFE_dz',
-# 'dRMSWFE_rx', 'dRMSWFE_ry', 'dRMSWFE_rz',
-# 'dLOSx_dx', 'dLOSx_dy', 'dLOSx_dz',
-# 'dLOSx_rx', 'dLOSx_ry', 'dLOSx_rz',
-# 'dLOSy_dx', 'dLOSy_dy', 'dLOSy_dz',
-# 'dLOSy_rx', 'dLOSy_ry', 'dLOSy_rz',
+OPTICAL_SYSTEM_PARAMETERS = [
+    'X_vertex',
+    'Y_vertex',
+    'Z_vertex',
+    'RotX_vertex',
+    'RotY_vertex',
+    'RotZ_vertex',
+    'dRMSWFE_dx', 'dRMSWFE_dy', 'dRMSWFE_dz',
+    'dRMSWFE_rx', 'dRMSWFE_ry', 'dRMSWFE_rz',
+    'dLOSx_dx', 'dLOSx_dy', 'dLOSx_dz',
+    'dLOSx_rx', 'dLOSx_ry', 'dLOSx_rz',
+    'dLOSy_dx', 'dLOSy_dy', 'dLOSy_dz',
+    'dLOSy_rx', 'dLOSy_ry', 'dLOSy_rz']
 
 # PGXN_PLACEHOLDERS:  Placeholder text for fields in PgxnObject forms
 PGXN_PLACEHOLDERS = {'id': 'unique identifier; no spaces',
