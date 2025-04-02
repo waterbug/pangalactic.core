@@ -2230,7 +2230,7 @@ def add_default_data_elements(oid, cname, ptid=None, des=None):
     # TODO: let user set default data elements in their prefs
     if cname == 'HardwareProduct':
         # default for "default_data_elements":  Vendor
-        # (state is read in p.node.gui.startup, and will be overridden by
+        # (state is read in p.node.startup, and will be overridden by
         # prefs['default_data_elements'] if it is set
         deids |= OrderedSet(des or config.get('default_data_elements', []))
         if ptid:
