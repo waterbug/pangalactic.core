@@ -946,8 +946,6 @@ class UberORB(object):
         self.data_elementz_status = load_data_elementz(self.home)
         self.parmz_status = load_parmz(self.home)
         # self.log.debug('  dmz: {}'.format(str(dmz)))
-        if not state.get('connected'):
-            recompute_parmz()
         # [4] check for updates to parameter definitions and contexts
         # self.log.debug('  + checking for updates to parameter definitions ...')
         all_pds = refdata.pdc

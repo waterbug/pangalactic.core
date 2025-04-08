@@ -227,6 +227,8 @@
 
     `datasets:         (list) names of currently stored datasets`
 
+    `dez_dts:          (str)  last-mod-datetime str of the data_elementz cache`
+
     `diagram needs refresh: (bool) block diagram needs to be refreshed`
 
     `disabled:         (bool) true if user has Disabled role (global)`
@@ -245,9 +247,9 @@
     `mode:             (str)  current Pangalaxian gui mode`
     `                         ('system', 'component', 'db', or 'data')`
 
-    `mode_defz_dts:    (str)  last-synced-datetime str of the mode_defz cache`
+    `mode_defz_dts:    (str)  last-mod-datetime str of the mode_defz cache`
 
-    `parmz_dts:        (str)  last-synced-datetime str of the parameterz cache`
+    `parmz_dts:        (str)  last-mod-datetime str of the parameterz cache`
 
     `product:          (str)  oid of currently selected Product -- refers to`
     `                         the product selected in 'product modeler'`

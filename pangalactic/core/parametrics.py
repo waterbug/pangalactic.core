@@ -14,7 +14,8 @@ from pangalactic.core.meta            import (SELECTABLE_VALUES,
                                               DEFAULT_CLASS_DATA_ELEMENTS,
                                               DEFAULT_CLASS_PARAMETERS,
                                               DEFAULT_PRODUCT_TYPE_DATA_ELMTS,
-                                              DEFAULT_PRODUCT_TYPE_PARAMETERS)
+                                              DEFAULT_PRODUCT_TYPE_PARAMETERS,
+                                              intconv)
 from pangalactic.core.units           import in_si, ureg
 from pangalactic.core.utils.datetimes import dtstamp
 
@@ -122,9 +123,9 @@ Comp = namedtuple('Comp', 'oid usage_oid quantity reference_designator')
 def refresh_componentz(product):
     """
     Refresh the `componentz` cache for a Product instance. This must be called
-    before calling orb.recompute_parmz() whenever a new Acu that references
-    that Product instance as its assembly is created, deleted, or modified.
-    The 'componentz' dictionary has the form
+    before calling recompute_parmz() whenever a new Acu that references that
+    Product instance as its assembly is created, deleted, or modified.  The
+    'componentz' dictionary has the form
 
         {product.oid :
           list of Comp('oid', 'usage_oid', 'quantity', 'reference_designator')}
@@ -1169,10 +1170,10 @@ def _compute_pval(oid, variable, context_id, allow_nan=False):
     'computed' and caching the computed value in parameterz; otherwise,
     returning its value from parameterz.
 
-    NOTE: this function is intended to be private, called only by the orb's
-    `recompute_parmz` method or within `parametrics` module itself.  The
-    "public" `get_pval` function should always be used by other modules (which
-    will access the cached pre-computed parameter values).
+    NOTE: this function is intended to be private, called only by
+    recompute_parmz() or within `parametrics` module itself.  The "public"
+    `get_pval` function should always be used by other modules (which will
+    access the cached pre-computed parameter values).
 
     NOTE: this function will return 0.0 if the parameter is not a computed
     parameter or is not defined for the specified oid.
@@ -1229,7 +1230,7 @@ def recompute_parmz():
     contexts.  This is required at startup or when a parameter is created,
     modified, or deleted, or in several other cases.
 
-    NOTE: recompute_parmz() is a no-op when running on client side and in
+    NOTE: recompute_parmz() is a no-op when running on client side in
     "connected" state; instead, the client must call vger.get_parmz() to
     get the parameter cache data from the server rather than recomputing
     locally, which risks creating an out-of-sync condition.
