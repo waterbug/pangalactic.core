@@ -143,8 +143,47 @@ class UberORB(object):
         role_product_types: cache that maps Role ids to corresponding
             ProductType ids (used by the 'access' module, which determines user
             permissions relative to domain objects
-        schemas (dict):  see definition in
-            p.core.registry._update_schemas_from_extracts
+        schemas (dict):  a dict containing the equivalent of the ontology
+            content -- the structure of the dict is defined in
+            p.core.registry._update_schemas_from_extracts ...
+            the dictionary maps each class name to a dict of the form:
+
+            {'field_names'    : [field names in the order defined in the model],
+             'base_names'     : [names of immediate superclasses for the schema],
+             'definition'     : [ontological class definition],
+             'pk_name'        : [name of the primary key field for this model],
+             'fields' : {
+                field-1-name  : { [field-1-attrs] },
+                field-2-name  : { [field-2-attrs] },
+                ...
+                field-n-name  : { [field-n-attrs] }
+                }
+            }
+
+            ... where the "field-n-attrs" dicts have the following form:
+
+           {
+            'id'             : identifier (synonymous with 'field_name'
+            'id_ns'          : identifier namespace
+            'definition'     : definition
+            'functional'     : maps to a single value
+            'range'          : name of the datatype or class of its value
+            'editable'       : [not used -- depends on context]
+            'external_name'  : name shown in UIs
+            ------------------------------------------------------------------
+            'is_datatype'    : true -> property is a "Datatype Property"
+                               and has the following attributes:
+                'field_type' : datatype, depends on 'range' & 'functional'
+                'is_inverse' : false (a datatype field can't be an inverse)
+                'inverse_of' : ''
+                'max_length' : integer (default is 80)
+            ------------------------------------------------------------------
+            'is_datatype'    : false -> property is an "Object Property"
+                              and has the following attributes:
+                'field_type' : 'object'
+                'related_cname' : == 'range' for Object Properties
+                'is_inverse' : true if inverse of another property
+                'inverse_of' : if is_inverse, name of its inverse property
     """
     is_fastorb = False
     started: bool = False
@@ -318,8 +357,9 @@ class UberORB(object):
             dump_path = os.path.join(pgx_home, 'db.yaml')
             # [1] remove .json caches and "cache" directory:
             self.log.debug('  [1] removing caches ...')
-            for prefix in ['data_elements', 'diagrams', 'dms', 'ent_hists',
-                           'parameters', 'schemas']:
+            for prefix in ['data_elements', 'diagrams', 'parameters',
+                           'mode_defs', 'parms_by_dims', 'systems',
+                           'components']:
                 fpath = os.path.join(pgx_home, prefix + '.json')
                 if os.path.exists(fpath):
                     os.remove(fpath)
@@ -1347,18 +1387,6 @@ class UberORB(object):
                     # ultimate fallback:  owner is PGANA
                     obj.owner = self.get('pgefobjects:PGANA')
             if cname == 'Acu':
-                comp_oid = getattr(obj.component, 'oid', None)
-                # use 'componentz' cache to determine whether the Acu's
-                # component has changed
-                cur_assembly_acu_comps = []
-                if obj.assembly.oid in componentz:
-                    cur_assembly_acu_comps = [(c.usage_oid, c.oid) for c
-                                              in componentz[obj.assembly.oid]]
-                if (oid, comp_oid) in cur_assembly_acu_comps:
-                    comp_changed = False
-                else:
-                    comp_changed = True
-                # after checking for a changed component, refresh 'componentz'
                 refresh_componentz(obj.assembly)
                 recompute_required = True
             elif cname == 'HardwareProduct':
@@ -1616,13 +1644,7 @@ class UberORB(object):
             return get_pval(oid, pname, units=units)
         elif pname in de_defz:
             return get_dval(oid, pname)
-        else:
-            try:
-                obj = self.get(oid)
-                return getattr(obj, pname, '')
-            except:
-                return ''
-        return ''
+        return '[undefined]'
 
     def get_prop_val_as_str(self, oid, pname, units=None):
         """
@@ -1652,18 +1674,13 @@ class UberORB(object):
             return get_pval_as_str(oid, pname, units=units)
         elif pname in de_defz:
             return get_dval_as_str(oid, pname)
-        else:
-            try:
-                obj = self.get(oid)
-                return getattr(obj, pname, '') or '[undefined]'
-            except:
-                return '[undefined]'
+        return '[undefined]'
 
     def set_prop_val(self, oid, pname, val, units=None):
         """
-        Set the value of the specified property (parameter or data element) for
-        the specified object, casting the value to the correct datatype if
-        necessary.
+        Set the value of the specified property (field, parameter or data
+        element) for the specified object, casting the value to the correct
+        datatype if necessary.
 
         Args:
             oid (str): the 'oid' of the object to which the property applies
@@ -1706,7 +1723,7 @@ class UberORB(object):
                 error = f'datatype "{rng}" not an accepted datatype'
                 return f'failed: {error}'
         else:
-            error = f'property "{pname}" is undefined.'
+            error = f'"{pname}" is undefined as a parameter or data element.'
             return f'failed: {error}'
 
     def gen_product_id(self, obj):
