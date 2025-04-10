@@ -1387,6 +1387,18 @@ class UberORB(object):
                     # ultimate fallback:  owner is PGANA
                     obj.owner = self.get('pgefobjects:PGANA')
             if cname == 'Acu':
+                comp_oid = getattr(obj.component, 'oid', None)
+                # use 'componentz' cache to determine whether the Acu's
+                # component has changed
+                cur_assembly_acu_comps = []
+                if obj.assembly.oid in componentz:
+                    cur_assembly_acu_comps = [(c.usage_oid, c.oid) for c
+                                              in componentz[obj.assembly.oid]]
+                if (oid, comp_oid) in cur_assembly_acu_comps:
+                    comp_changed = False
+                else:
+                    comp_changed = True
+                # after checking for a changed component, refresh 'componentz'
                 refresh_componentz(obj.assembly)
                 recompute_required = True
             elif cname == 'HardwareProduct':
@@ -1644,7 +1656,13 @@ class UberORB(object):
             return get_pval(oid, pname, units=units)
         elif pname in de_defz:
             return get_dval(oid, pname)
-        return '[undefined]'
+        else:
+            try:
+                obj = self.get(oid)
+                return getattr(obj, pname, '')
+            except:
+                return ''
+        return ''
 
     def get_prop_val_as_str(self, oid, pname, units=None):
         """
@@ -1674,7 +1692,12 @@ class UberORB(object):
             return get_pval_as_str(oid, pname, units=units)
         elif pname in de_defz:
             return get_dval_as_str(oid, pname)
-        return '[undefined]'
+        else:
+            try:
+                obj = self.get(oid)
+                return str(getattr(obj, pname, '')) or '[undefined]'
+            except:
+                return '[undefined]'
 
     def set_prop_val(self, oid, pname, val, units=None):
         """
@@ -1723,8 +1746,19 @@ class UberORB(object):
                 error = f'datatype "{rng}" not an accepted datatype'
                 return f'failed: {error}'
         else:
-            error = f'"{pname}" is undefined as a parameter or data element.'
-            return f'failed: {error}'
+            try:
+                obj = self.get(oid)
+                schema = self.schemas[obj.__class__.__name__]
+                if schema['fields'][pname]['is_datatype']:
+                    rng = schema['fields'][pname]['range']
+                if rng in dtypes:
+                    dtype = dtypes[rng]
+                    setattr(obj, pname, dtype(val))
+                else:
+                    setattr(obj, pname, val)
+            except:
+                error = f'property "{pname}" is undefined.'
+                return f'failed: {error}'
 
     def gen_product_id(self, obj):
         """
