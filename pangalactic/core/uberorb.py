@@ -1754,11 +1754,12 @@ class UberORB(object):
                 if rng in dtypes:
                     dtype = dtypes[rng]
                     setattr(obj, pname, dtype(val))
+                    return 'succeeded'
                 else:
-                    setattr(obj, pname, val)
+                    error = f'datatype "{rng}" not an accepted datatype'
+                    return f'failed: {error}'
             except:
-                error = f'property "{pname}" is undefined.'
-                return f'failed: {error}'
+                return 'failed: exception encountered.'
 
     def gen_product_id(self, obj):
         """
