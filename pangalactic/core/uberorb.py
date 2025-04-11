@@ -171,19 +171,18 @@ class UberORB(object):
             'editable'       : [not used -- depends on context]
             'external_name'  : name shown in UIs
             ------------------------------------------------------------------
-            'is_datatype'    : true -> property is a "Datatype Property"
-                               and has the following attributes:
-                'field_type' : datatype, depends on 'range' & 'functional'
+            if an ontology "Datatype Property", the following are populated:
+                'field_type' : a sqlalchemy datatype class
                 'is_inverse' : false (a datatype field can't be an inverse)
                 'inverse_of' : ''
                 'max_length' : integer (default is 80)
             ------------------------------------------------------------------
-            'is_datatype'    : false -> property is an "Object Property"
-                              and has the following attributes:
+            if an ontology "Object Property", the following are populated:
                 'field_type' : 'object'
                 'related_cname' : == 'range' for Object Properties
                 'is_inverse' : true if inverse of another property
                 'inverse_of' : if is_inverse, name of its inverse property
+            ------------------------------------------------------------------
     """
     is_fastorb = False
     started: bool = False
@@ -1749,8 +1748,7 @@ class UberORB(object):
             try:
                 obj = self.get(oid)
                 schema = self.schemas[obj.__class__.__name__]
-                if schema['fields'][pname]['is_datatype']:
-                    rng = schema['fields'][pname]['range']
+                rng = schema['fields'][pname]['range']
                 if rng in dtypes:
                     dtype = dtypes[rng]
                     setattr(obj, pname, dtype(val))
