@@ -1412,8 +1412,9 @@ class UberORB(object):
             elif cname == 'ProjectSystemUsage':
                 refresh_systemz(obj.project)
                 recompute_required = True
-            elif cname == 'Requirement':
-                refresh_rqt_allocz(obj)
+            # rqt_allocz is refreshed whenever margins are computed anyway
+            # elif cname == 'Requirement':
+                # refresh_rqt_allocz(obj)
         # self.log.debug('  orb.save:  committing db session.')
         # obj has already been "added" to the db (session) above, so commit ...
         self.db.commit()
