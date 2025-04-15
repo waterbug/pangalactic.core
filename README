@@ -55,6 +55,7 @@ Python ...... http://www.python.org    (Python Labs and Zope Corporation)
 PyQt ........ https://www.riverbankcomputing.com/software/pyqt/intro
 Twisted ..... http://twistedmatrix.com (Twisted Matrix Laboratories)
 Autobahn .... http://autobahn.ws/python/index.html
+PythonOCC ... https://github.com/tpaviot/pythonocc-core
 
 Thanks to all the talented and dedicated folks who have developed and
 continue to maintain those packages and others in the formidable open
