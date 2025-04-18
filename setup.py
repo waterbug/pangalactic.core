@@ -4,7 +4,7 @@ Setup script for pangalactic.core
 import os, site
 from setuptools import setup, find_packages
 
-VERSION = open('VERSION').read()[:-1]
+VERSION = '4.3'
 
 onto_mod_path = os.path.join('pangalactic', 'core', 'ontology')
 test_mod_path = os.path.join('pangalactic', 'core', 'test', 'data')
@@ -40,6 +40,20 @@ setup(
     maintainer_email='waterbug@pangalactic.us',
     license='TBD',
     packages=find_packages(),
+    install_requires=[
+        'openpyxl',
+        'pint',
+        'pydispatcher',
+        'python-dateutil',
+        'pytz',
+        'rdflib',
+        'ruamel_yaml',
+        'sqlalchemy',
+        'tzlocal',
+        'xlrd',
+        'xlwt',
+        'xlsxwriter'
+        ]
     data_files=[
         # ontology (OWL file)
         (os.path.join(sitepkg_dir, onto_mod_path),

@@ -19,7 +19,6 @@ syntax: glob
 *.pprj
 *.build
 build
-bump_version.sh
 ipython.*
 key.priv
 key.pub
@@ -29,5 +28,4 @@ node.pid
 pangalaxian/*
 pangalaxian_test/*
 *.pickle
-sedscr
 _trial_temp
