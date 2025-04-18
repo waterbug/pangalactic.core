@@ -53,7 +53,7 @@ setup(
         'xlrd',
         'xlwt',
         'xlsxwriter'
-        ]
+        ],
     data_files=[
         # ontology (OWL file)
         (os.path.join(sitepkg_dir, onto_mod_path),
