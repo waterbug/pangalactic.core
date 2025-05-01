@@ -73,10 +73,10 @@ def clone(what, include_ports=True, include_components=True,
             Mass, Power, and Data Rate parameters with the corresponding 'CBE'
             parameter values from the original object
         save_hw (bool): applies to clones of HardwareProduct -- if True, the
-            dispatcher "new hardware clone" is sent, which triggers pangalaxian
-            to switch to Component Mode and send the "vger.save()" rpc;
-            if False, that will not be done, so the clone must be explicitly
-            saved.
+            dispatcher signal "new hardware clone" is sent, which triggers
+            pangalaxian to switch to Component Mode and send the "vger.save()"
+            rpc; if False, that will not be done, so the clone must be
+            explicitly saved.
     Mode and to send the "vger.save()" rpc
         kw (dict):  attributes for the clone
     """

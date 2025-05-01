@@ -17,8 +17,8 @@ import ruamel_yaml as yaml
 # pangalactic version
 __version__ = '4.3'
 
-# `diagramz` is a module-level variable for the diagram cache
-# (see pangalactic.node.gui.diagrams.view for more detail)
+# `diagramz` is a module-level dict that contains the data structure of the
+# diagram cache (see pangalactic.node.gui.diagrams.view for more detail)
 diagramz = {}
 
 datatypes = {
