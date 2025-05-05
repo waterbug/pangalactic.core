@@ -95,6 +95,7 @@ from pangalactic.core.units       import in_si
 from pangalactic.core.utils.datetimes import (dtstamp, file_dts,
                                               file_date_stamp, dt2local_tz_str)
 from pangalactic.core.log         import get_loggers
+# from pangalactic.core.validation  import check_for_cycles
 from pangalactic.core.validation  import get_assembly
 
 DEPRECATED_PARAMETERS = ['P[max]', 'P[min]',

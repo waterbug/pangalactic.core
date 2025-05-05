@@ -48,8 +48,8 @@ def check_for_cycles(product):
                       product.oid, product.id or 'no id', txt)
             log.debug(msg)
             return msg
-        else:
-            log.debug('  - level 1 components ok.')
+        # else:
+            # log.debug('  - level 1 components ok.')
         comps1 = []
         acus1_by_comp_oid = {}
         for comp in comps:
@@ -62,7 +62,7 @@ def check_for_cycles(product):
         if comps1:
             comps += comps1
         else:
-            log.debug('  - no more levels.')
+            # log.debug('  - no more levels.')
             return
         if product.oid in [c.oid for c in comps1]:
             txt = 'is a 2nd-level component of itself.'
@@ -90,8 +90,8 @@ def check_for_cycles(product):
             log.debug(msg5)
             # acu = acus_by_comp_oid[assy1.oid]
             return '<br>'.join(msgs)
-        else:
-            log.debug('  - level 2 components ok.')
+        # else:
+            # log.debug('  - level 2 components ok.')
         comps2 = []
         for comp in comps1:
             comps2 += [acu.component for acu in comp.components
@@ -99,7 +99,7 @@ def check_for_cycles(product):
         if comps2:
             comps += comps2
         else:
-            log.debug('  - no more levels.')
+            # log.debug('  - no more levels.')
             return
         if product.oid in [c.oid for c in comps2]:
             txt = 'is a 3nd-level component of itself.'
@@ -107,8 +107,8 @@ def check_for_cycles(product):
                       product.oid, product.id or 'no id', txt)
             log.debug(msg)
             return msg
-        else:
-            log.debug('  - level 3 components ok.')
+        # else:
+            # log.debug('  - level 3 components ok.')
         comps3 = []
         for comp in comps2:
             comps3 += [acu.component for acu in comp.components
@@ -116,7 +116,7 @@ def check_for_cycles(product):
         if comps3:
             comps += comps3
         else:
-            log.debug('  - no more levels.')
+            # log.debug('  - no more levels.')
             return
         if product.oid in [c.oid for c in comps3]:
             txt = 'is a 4th-level component of itself.'
@@ -125,7 +125,7 @@ def check_for_cycles(product):
             log.debug(msg)
             return msg
         else:
-            log.debug('no cycles')
+            # log.debug('no cycles')
             return
     # log.debug('no cycles')
 
@@ -216,9 +216,9 @@ def get_level_count(product):
     Args:
         product (Product): the Product
     """
-    log.debug('* get_level_count()')
+    # log.debug('* get_level_count()')
     if not product:
-        log.debug('  got null product.')
+        # log.debug('  got null product.')
         return 0
     if product.components:
         levels = 2
@@ -266,7 +266,7 @@ def get_level_count(product):
                            if acu.component]
         if comps6:
             levels += 1
-        log.debug(f'  - {levels} levels')
+        # log.debug(f'  - {levels} levels')
         return levels
     else:
         return 1
