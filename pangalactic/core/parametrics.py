@@ -2494,7 +2494,7 @@ def get_modal_power(project_oid, sys_usage_oid, oid, mode, modal_context,
         project_oid (str): the oid of the project within which the mode is
             defined
         sys_usage_oid (str): the oid of the usage that has the mode
-        oid (str): the oid of the product (assembly) containing the usage
+        oid (str): the oid of the product used in the usage ("component")
         modal_context (str): the power "level" or "[computed]"
         mode (str): the oid of the mode (activity)
 

@@ -114,6 +114,33 @@ DEFAULT_CLASS_PARAMETERS = {'Activity': ['duration', 't_start', 't_end'],
                                 'R_D', 'R_D[CBE]', 'R_D[Ctgcy]',
                                 'R_D[MEV]', 'height', 'width', 'depth', 'Cost']}
 
+# DEFAULT_DASHBOARD_SCHEMAS:  default sets of parameters shown in dashboards
+DEFAULT_DASHBOARD_SCHEMAS = {
+        'MEL' :
+            ['m[CBE]', 'm[Ctgcy]', 'm[MEV]',
+             'P[CBE]', 'P[Ctgcy]', 'P[MEV]', 'P[peak]',
+             'R_D[CBE]', 'R_D[Ctgcy]', 'R_D[MEV]',
+             'Vendor', 'Cost', 'TRL'],
+        'Mass':
+            ['m[CBE]', 'm[Ctgcy]', 'm[MEV]'],
+        'Power':
+            ['P[CBE]', 'P[Ctgcy]', 'P[MEV]', 'P[peak]', 'P[standby]',
+             'P[survival]', 'Area_active', 'Area_substrate'],
+        'Data Rates':
+            ['R_D[CBE]', 'R_D[Ctgcy]', 'R_D[MEV]'],
+        'Mechanical':
+            ['m[CBE]', 'm[Ctgcy]', 'm[MEV]', 'height', 'width', 'depth'],
+        'Thermal':
+            ['T[operational_max]', 'T[operational_min]', 'T[survival_max]',
+             'T[survival_min]', 'P[CBE]', 'P[Ctgcy]', 'P[MEV]', 'P[peak]',
+             'P[survival]'],
+        'System Resources':
+            ['m[CBE]', 'm[Ctgcy]', 'm[MEV]', 'm[NTE]', 'm[Margin]',
+             'P[CBE]', 'P[Ctgcy]', 'P[MEV]', 'P[peak]', 'P[NTE]',
+             'P[Margin]', 'R_D[CBE]', 'R_D[Ctgcy]', 'R_D[MEV]',
+             'R_D[NTE]', 'R_D[Margin]']
+        }
+
 # DEFAULT_PRODUCT_TYPE_DATA_ELMTS:  default data elements by ProductType id
 DEFAULT_PRODUCT_TYPE_DATA_ELMTS = {
     'heater':
