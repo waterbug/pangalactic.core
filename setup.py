@@ -4,7 +4,7 @@ Setup script for pangalactic.core
 import os, site
 from setuptools import setup, find_packages
 
-VERSION = '4.3'
+VERSION = '4.4.dev0'
 
 onto_mod_path = os.path.join('pangalactic', 'core', 'ontology')
 test_mod_path = os.path.join('pangalactic', 'core', 'test', 'data')
