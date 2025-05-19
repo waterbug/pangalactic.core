@@ -100,13 +100,13 @@
 
     `cache/ ........... internal metadata structures derived from the ontology, and used by the "registry" module to generate the domain classes and properties that sqlalchemy uses to define the database structure`
 
-    `config ..........  config file (yaml) -- see *Settings* section below`
+    `components.json .. persistent form of "componentz" cache`
+
+    `config ........... config file (yaml) -- see *Settings* section below`
 
     `data_elements.json ... persistent form of "data_elementz" runtime cache -- see p.core.parametrics module`
 
-    `diagrams.json .... diagram geometry storage`
-
-    `dms.json ......... persistent form of "dmz" cache of DataMatrix instances`
+    `diagrams.json .... diagram geometry cache`
 
     `icons/ ........... "built-in" icons (icons generated at runtime are saved in vault/icons; all other data files are simply added to the "vault" directory)`
 
@@ -116,17 +116,15 @@
 
     `log/ ............. logs`
 
-    `modes.yaml ....... persistent form of "modez" runtime cache -- see p.core.parametrics module`
+    `mode_defs.json ... persistent form of "mode_defz" runtime cache -- see p.core.parametrics module`
 
-    `mode_defs.yaml ... persistent form of "mode_defz" runtime cache -- see p.core.parametrics module`
-
-    `onto/ ............ contains pgef.owl (OWL ontology file)`
+    `onto/ ............ contains pgef.owl (OWL file for the "Pan Galactic Engineering Framework ontology)`
 
     `parameters.json .. persistent form of "parameterz" runtime cache -- see p.core.parametrics module`
 
     `prefs ............ saved preferences (yaml) -- see *Settings* section below`
 
-    `schemas.json ..... persistent form of "schemaz" cache, used by DataMatrix`
+    `systems.json ..... persistent form of "systemz" cache`
 
     `server_cert.pem .. certificate for message bus host (enables TLS connection)`
 
@@ -142,19 +140,7 @@
 
 * **config**
 
-    `admin_package_name:    (str)  name of admin package`
-
-    `admin_script_name:     (str)  name of admin script`
-
-    `app_channel:           (str)  app channel url or name`
-
     `app_name:              (str)  app name`
-
-    `app_package_name:      (str)  app package name`
-
-    `dashboards:            (dict) named dashboards (lists of parameter ids)`
-
-    `dashboard_names:       (list) ordering of keys in "dashboards"`
 
     `db_url:                (str)  sqlalchemy-style db url (only used by vger)`
 
@@ -205,8 +191,6 @@
 
 * **state**
 
-    `admin_of:         (list) oids of Projects in which user has admin role`
-
     `active_users:     (list) ids of users that have registered public keys`
 
     `client:           (bool) whether running as client (True) or server`
@@ -248,6 +232,8 @@
     `                         ('system', 'component', 'db', or 'data')`
 
     `mode_defz_dts:    (str)  last-mod-datetime str of the mode_defz cache`
+
+    `model_window_size: (list) width, height of current model window`
 
     `parmz_dts:        (str)  last-mod-datetime str of the parameterz cache`
 

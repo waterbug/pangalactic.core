@@ -46,45 +46,47 @@
 * note that if schemas change between versions, some of this data may need
   to be modified to conform to the new schemas
 ```
-    cache/ ............ internal metadata structures (used by registry)
-    config ............ config file (yaml) -- see *settings* section below
-    diagrams.json ..... diagram geometry storage
-    icons/ ............ "built-in" icons (icons generated at runtime are saved
-                         in vault/icons; all other data files are simply
-                         added to the "vault" directory`)
-    images/ ........... images  (application-specific images)
-    local.db .......... node local object store (sqlite db)
-    log/ .............. logs
-    onto/ ............. contains pgef.owl (OWL ontology file)
-    parameters.json ... parameter storage
-    prefs ............. saved preferences (yaml) -- see *settings* section below
-    server_cert.pem ... certificate for message bus host (enables TLS connection)
-    state ............. saved state (yaml) -- see *settings* section below
-    test_data/ ........ files for user access in testing of data importing, etc.
-    trash ............. trash file (yaml) containing serialized deleted objects
-                         {obj.oid : orb.serialize([obj]), ...}
-   vault/ ............. files created/accessed internally by pangalactic
-                        applications (includes icons generated at runtime and
-                        files referenced by the database, e.g. files
-                        corresponding to DigitalFile objects)
+    cache/ .............. internal metadata structures (used by registry)
+    components.json ..... persistent form of "componentz" cache
+    config .............. config file (yaml) -- see *settings* section below
+    data_elements.json .. persistent form of "data_elementz" runtime cache
+    diagrams.json ....... diagram geometry cache
+    icons/ .............. "built-in" icons (icons generated at runtime are saved
+                           in vault/icons; all other data files are simply
+                           added to the "vault" directory`)
+    images/ ............. images  (application-specific images)
+    local.db ............ node local object store (sqlite db)
+    log/ ................ logs
+    mode_defs.json ...... persistent form of "mode_defz" runtime cache
+    onto/ ............... contains pgef.owl (OWL ontology file)
+    parameters.json ..... parameter storage
+    prefs ............... saved preferences (yaml) -- see *settings* section below
+    server_cert.pem ..... certificate for server host if self-signed
+    state ............... saved state (yaml) -- see *settings* section below
+    test_data/ .......... files for user access in testing of data importing, etc.
+    trash ............... trash file (yaml) containing serialized deleted objects
+                           {obj.oid : orb.serialize([obj]), ...}
+    vault/ .............. files created/accessed internally by pangalactic
+                          applications (includes icons generated at runtime and
+                          files referenced by the database, e.g. files
+                          corresponding to DigitalFile objects)
 ```
 
 ## settings -- contents of the files 'config', 'prefs', and 'state'
 
 * config: these settings can be edited by the user or local administrator
 ```
-    app_name:           (str)  app name
-    dashboards:         (dict) named dashboards (lists of parameter ids)
-    dashboard_names:    (list) ordering of keys in `dashboards`
-    db_url:             (str)  sqlalchemy-style db url (only used by vger)
-    default_parms:      (list) ids of default parameters to assign to objects
-    host:               (list) fqdn of message bus host
-    local_admin:        (bool) if `true`, user can edit any item locally
-    logo:               (str)  logo icon file name
-    p_defaults:         (dict) default parameter values {id: val (string)}
-    port:               (str)  port to use for message bus host connection
-    tall_logo:          (str)  "tall" logo icon file name
-    units:              (str)  unit system (default: 'mks')
+    app_name:              (str)  app name
+    db_url:                (str)  sqlalchemy-style db url (only used by vger)
+    default_data_elements: (list) ids of default data elements
+    default_parms:         (list) ids of default parameters
+    host:                  (list) fqdn of message bus host
+    local_admin:           (bool) if `true`, user can edit any item locally
+    logo:                  (str)  logo icon file name
+    p_defaults:            (dict) default parameter values {id: val (string)}
+    port:                  (str)  port to use for message bus host connection
+    tall_logo:             (str)  "tall" logo icon file name
+    units:                 (str)  unit system (default: 'mks')
 ```
 
 * prefs: these settings are written by the application 'preferences' dialog
@@ -95,25 +97,29 @@
     editor:
         parameters:     (list) [ids] order of parameters in pgxnobject panels
     model_types:        (list) oids of ModelTypes that pangalaxian can "render"
+    views:              (dict) preferred ordering of table columns by class
 ```
 
 * state: these settings are written by the application (user edits will be
   ignored and overwritten)
 ```
+    active_users:     (list) ids of users that have registered public keys
+    client:           (bool) whether running as client (True) or server
     cloaked:          (list) oids of local cloaked objects
     connected:        (bool) true if logged in to message bus
     current_cname:    (str)  name of currently selected db table class
     dashboard_name:   (str)  name of currently selected dashboard
+    dataset:          (str)  name of currently selected dataset (data_wizard)
     height:           (int)  pixel height of pangalaxian gui
-    width:            (int)  pixel width of pangalaxian gui
-    height:           (int)  current pixel height of pangalaxian gui
     icon_dir:         (str)  path to the "icons" directory
     icon_type:        (str)  suffix for platform-specific icons [e.g., '.ico']
     last_path:        (str)  most recent path in file selections
     local_user_oid:   (str)  oid of Person object for local user 
+    mdd:              (dict) maps project oid to oids of currently selected
+                             activity ("act") and "usage"
     mode:             (str)  current Pangalaxian gui mode (e.g. 'system')
-    model_window_size:(list) width, height of current model window
-    product:          (str)  oid of currently selected Product
+    model_window_size: (list) width, height of current model window
+    product:          (str)  oid of currently selected Product (component mode)
     project:          (str)  oid of currently selected Project
     role_oids:        (dict) maps names of Roles to their oids
                              {role name : role oid}
@@ -130,14 +136,7 @@
                              because it may be used in an assembly by another
                              user and deleting it before removing it from the
                              assembly would break referential integrity.
-    sys_trees:        (dict) maps project ids to system tree attributes:
-                             {project id :
-                                 {nodes : (int) # of nodes in sys tree
-                                          (used in calculating progress
-                                          bar for tree rebuilds),
-                                  expanded : (list) indexes of expanded nodes
-                                             in sys tree (used in restoring
-                                             state when tree is rebuilt)}}
+    sys_tree_expansion: (dict) maps project oid to tree expansion level
     userid:           (str)  most recent userid used in login
     version:          (str)  version of client
     width:            (int)  current pixel width of pangalaxian gui
