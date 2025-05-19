@@ -11,7 +11,7 @@ Documentation
 -------------
 Developer documentation is in the NOTES_FOR_DEVELOPERS.md and other "NOTES"
 files in this directory. The "doc" directory contains documentation of the
-underlying "PGEF" ontology, which is in the pangalactic/core/ontology/pgef.owl
+underlying PGEF ontology, which is in the pangalactic/core/ontology/pgef.owl
 file.
 
 Installation
