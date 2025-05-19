@@ -9,12 +9,14 @@ integration, synthesis, and transformation.
 
 Documentation
 -------------
-The documentation available as of the date of this release is in the doc
-directory.
+Developer documentation is in the NOTES_FOR_DEVELOPERS.md and other "NOTES"
+files in this directory. The "doc" directory contains documentation of the
+underlying "PGEF" ontology, which is in the pangalactic/core/ontology/pgef.owl
+file.
 
 Installation
 ------------
-For detailed instructions see the file INSTALL in this directory.
+See the file INSTALL in this directory.
 
 Acknowledgments
 ---------------
