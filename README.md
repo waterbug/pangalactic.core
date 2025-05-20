@@ -20,18 +20,20 @@ See the file INSTALL in this directory.
 
 Acknowledgments
 ---------------
-Pangalactic depends on several excellent open source libraries,
-applications, and frameworks, most notably:
+pangalactic.core depends on several excellent open source libraries,
+most notably:
 
-Python ...... http://www.python.org
-PyQt ........ https://www.riverbankcomputing.com/software/pyqt/intro
-Twisted ..... http://twistedmatrix.com (Twisted Matrix Laboratories)
-Autobahn .... https://pypi.org/project/autobahn
+  - Python ...... http://www.python.org
+  - rdflib ...... https://rdflib.readthedocs.io/en/stable/
+  - sqlalchemy .. https://pypi.org/project/SQLAlchemy/
+  - pint ........ https://pypi.org/project/Pint/
 
 Thanks to all the talented and dedicated folks who have developed and
 continue to maintain those packages and others in the formidable open
 source code base that makes the Pan Galactic Engineering Framework
 possible!
+
+----------------------------------------------------------------------------
 
 NOTICE:
 Copyright 2022 United States Government as represented by the Administrator
