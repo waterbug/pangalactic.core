@@ -27,7 +27,6 @@ Python ...... http://www.python.org
 PyQt ........ https://www.riverbankcomputing.com/software/pyqt/intro
 Twisted ..... http://twistedmatrix.com (Twisted Matrix Laboratories)
 Autobahn .... https://pypi.org/project/autobahn
-PythonOCC ... https://github.com/tpaviot/pythonocc-core
 
 Thanks to all the talented and dedicated folks who have developed and
 continue to maintain those packages and others in the formidable open
