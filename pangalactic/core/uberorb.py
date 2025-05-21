@@ -2419,6 +2419,7 @@ class UberORB(object):
         included_fuel_mass = 0
         external_fuel_mass = 0
         system_assembly_items = get_assembly(system)
+        project_assembly_items = []
         # look for the top-level project system containing the selected system
         for a_system in top_level_systems:
             assembly_items = get_assembly(a_system)
