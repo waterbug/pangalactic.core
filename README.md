@@ -1,11 +1,26 @@
-What is it?
------------
+What is the Pan Galactic Engineering Framework?
+-----------------------------------------------
 The Pan Galactic Engineering Framework (pangalactic) is an open-architecture,
 standards-based software framework for engineering applications such as systems
 engineering data and tool integration, product lifecycle management (PLM),
 computer-aided tools (CAX) integration, collaborative systems engineering,
 design, and analysis, and multi-disciplinary product model capture,
 integration, synthesis, and transformation.
+
+The framework consists of 3 Python "namespace packages":
+
+  - **`pangalactic.core`** (this package) contains the [ontology](https://pangalactic.us/pgef_ontology.html), a sqlalchemy-based object-relational api (the "uberorb"), and various utility functions, reference data, and metadata definitions.
+  - **`pangalactic.node`** contains the pyqt-based GUI client, "pangalaxian".
+  - **`pangalactic.vger`** contains the repository service.
+
+As you might guess, **`pangalactic.node`** and **`pangalactic.vger`** both depend on
+**`pangalactic.core`** for their infrastructure. The client and repository service
+both have databases with the same schema, although the client uses sqlite and
+the repository uses postgresql.
+
+Installation
+------------
+See the INSTALL file in this directory.
 
 Documentation
 -------------
@@ -14,19 +29,15 @@ files in this directory. The "doc" directory contains documentation of the
 underlying PGEF ontology, which is in the pangalactic/core/ontology/pgef.owl
 file.
 
-Installation
-------------
-See the file INSTALL in this directory.
-
 Acknowledgments
 ---------------
-pangalactic.core depends on several excellent open source libraries,
+**`pangalactic.core`** depends on several excellent open source libraries,
 most notably:
 
-  - Python ...... http://www.python.org
-  - rdflib ...... https://rdflib.readthedocs.io/en/stable/
-  - sqlalchemy .. https://pypi.org/project/SQLAlchemy/
-  - pint ........ https://pypi.org/project/Pint/
+  - **[Python](http://www.python.org)**
+  - **[Rdflib](https://rdflib.readthedocs.io/en/stable/)**
+  - **[SQLAlchemy](https://pypi.org/project/SQLAlchemy/)**
+  - **[Pint](https://pypi.org/project/Pint/)**
 
 Thanks to all the talented and dedicated folks who have developed and
 continue to maintain those packages and others in the formidable open
