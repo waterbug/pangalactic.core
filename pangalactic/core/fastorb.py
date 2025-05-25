@@ -363,12 +363,6 @@ class FastOrb(object):
         for deid in app_data_elements:
             if deid not in state['default_data_elements']:
                 state['default_data_elements'].append(deid)
-        # check for default_schema_name
-        app_schema_name = 'MEL'
-        if app_state and app_state.get('default_schema_name'):
-            app_schema_name = app_state['default_schema_name']
-        if not state.get('default_schema_name'):
-            state['default_schema_name'] = app_schema_name
         # check for p_defaults (default parameter values)
         app_p_defaults = {}
         if app_state and app_state.get('p_defaults'):

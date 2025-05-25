@@ -3,7 +3,7 @@ package:
   version: "4.4.dev0"
 
 source:
-  path: /home/waterbug/clones/pangalactic.core
+  path: {{path-to-source}}
 
 requirements:
   build:
