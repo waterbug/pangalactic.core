@@ -46,13 +46,11 @@ the dependencies listed below.
 
 (1) pangalactic.core (base package of pangalactic)
 
-    (1.1) Put the following channels in your '.condarc' file to install
-          pangalactic.core (pangalactic.node will require more channels -- see
-          below):
+    (1.1) Put the following channels in your '.condarc' file
+          (NOTE: DO *NOT* use the "default" channel):
 
           channels:
             - conda-forge
-            - http://pangalactic.us:/conda_repo
 
     (1.2) Install the following dependencies of pangalactic.core:
 
@@ -73,13 +71,11 @@ the dependencies listed below.
 
     - pytz (latest released version)
       Correct timezones implementation
-      * NOTE: is in the 'default' conda channel
 
           Configuration:  'conda install pytz'
 
     - rdflib (version 3.0.0 or greater)
       <http://rdflib.net/>
-      * NOTE:  not in the default conda channel, use 'conda-forge' channel
 
           Configuration:  'conda install rdflib'
 
@@ -125,19 +121,9 @@ the dependencies listed below.
 
 (2) pangalactic.node (the pangalactic GUI client package):
 
-    *** NOTE for Linux (linux-64) *****************************************
-    Use 'conda install pythonocc-core' to pull in pyqt5 and qt packages,
-    AND avoid the 'defaults' channel because otherwise conda will install
-    incompatible pyqt5 from 'defaults' channel with qt from conda-forge
-    channel.
-    ***********************************************************************
-
     Install the following dependencies of pangalactic.node:
 
     - autobahn
-      * NOTE: requires 'conda-forge' channel
-        **IMPORTANT**:  minimum autobahn version is 20.7.1 (client fails to
-                        connect to crossbar with earlier versions)
 
           Configuration:  'conda install autobahn'
 
@@ -161,23 +147,19 @@ the dependencies listed below.
           Configuration:  'conda install binaryornot'
 
     - pyqt
-      * NOTE: use the 'default' conda channel -- this is especially important
-        on Windows, where the 'conda-forge' channel versions of 'sip' do not
-        work with the default channel versions and will cause failures (this
-        may require commenting out the conda-forge channel in your .condarc
-        while installing pyqt)
+      * NOTE: this will install PyQt5 (pangalactic.node is not yet compatible
+        with PyQt6)
 
           Configuration:  'conda install pyqt'
 
     - pythonqwt
       Graphing package for pyqt apps, used for the mission concept modeler
-      module, 'conops'.  NOTE:  this adds numpy as a dependency.
+      module, 'conops'.
 
           Configuration:  'conda install pythonqwt'
 
     - qt5reactor
       Integration of twisted reactor with PyQt5 event loop
-      * NOTE: not in the default conda channel, use locally built conda pkg
 
           Configuration:  'conda install qt5reactor'
 
@@ -222,9 +204,8 @@ the dependencies listed below.
 
           Configuration:  'conda install pynacl'
 
-    - PostgreSQL 7.4.x or later (8.x is recommended)
+    - PostgreSQL 7.4.x or later
       <http://www.ca.postgresql.org>
-      * NOTE: is in the 'default' conda channel
 
           Configuration:  'conda install postgresql'
 
@@ -241,8 +222,7 @@ the dependencies listed below.
 
     - psycopg2 (latest version)
       <http://initd.org/pub/software/psycopg/>
-      (Note:  current development is using psycopg2-2.0.6)
-      * NOTE: is in the 'default' conda channel
+      (Note:  current development is using psycopg2-2.9.9)
 
           Configuration:  'conda install psycopg2'
 
@@ -251,17 +231,6 @@ the dependencies listed below.
       administration of users]
 
         Configuration: 'conda install python-ldap'
-
-(4) Optional
-
-    - pyparsing
-      * NOTE:  pyparsing is a dependency of rdflib and will be installed by it
-
-      Used in p.utils.io.part21, a STEP Part 21 file parser that is not
-      currently referenced by any active modules.  (May be replaced by
-      'parsley' at some point)
-
-          Configuration:  'pip install pyparsing'
 
 ---------------------------------------------------------------------------
 
