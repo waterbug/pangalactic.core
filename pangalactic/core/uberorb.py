@@ -487,8 +487,15 @@ class UberORB(object):
 
     def setup_ref_db_and_version(self, home, version):
         """
-        Add a local sqlite "local.db" file that is pre-populated with all data from
-        the "refdata" module, and add a "VERSION" file.
+        Add a local sqlite "local.db" file that is pre-populated with
+
+            [1] all data from the "refdata" module
+            [2] all "commodity" data for the HW library
+            [3] a "VERSION" file.
+
+        ... and add data_elements.json and parameters.json for the data
+        elements and parameters of the HW library components (copied from the
+        ref_db module along with the local.db file).
 
         Args:
             home (str): path to the home directory
