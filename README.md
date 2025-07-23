@@ -35,7 +35,7 @@ There are several installation options:
   - for testing and experimentation, the packages can be installed in
     **development mode** using conda:
 
-        1. create a .condarc file with these contents:
+        0. create a .condarc file with these contents:
 
             --------------------------------------
             channel_priority: strict
@@ -46,6 +46,12 @@ There are several installation options:
             report_errors: true
             --------------------------------------
 
+        1. clone the client constituent packages:
+
+            * pangalactic.core
+            * pangalactic.node
+            * marvin
+
         2. execute the following:
 
             cd [directory in which the packages have been cloned]
@@ -54,7 +60,7 @@ There are several installation options:
             conda install --only-deps pangalactic.core
             conda develop pangalactic.core
             conda develop pangalactic.node
-            conda develop pangalactic.vger
+            conda develop marvin
 
         3. to run the client:
 
@@ -63,10 +69,13 @@ There are several installation options:
 
             (basic help is available using `./pangalaxian.py --help`)
 
-        4. to start the server, see instructions in the pangalactic.vger
-           package -- it can be run interactively (for debugging), as a
-           stand-alone process, or in a Docker container -- but in any mode,
-           it requires a 'crossbar' message server to be running.
+        4. to start the server, clone the pangalactic.vger package and
+           see the instructions contained in the pangalactic.vger package -- it
+           can be run interactively (for debugging), as a stand-alone process,
+           or in a Docker container (see the "docker" directory inside the
+           package). The vger server requires a 'crossbar' message server
+           to be running -- instructions on how to get and configure crossbar
+           are in the vger package.
 
   - the conda packages themselves can be installed:
 
@@ -84,18 +93,22 @@ There are several installation options:
         2. execute the following:
 
             (to install the client)
-            conda install pangalactic.node
+            conda install marvin
+            (this will install pangalactic.core and pangalactic.node)
 
             (to install the server)
             conda install pangalactic.vger
-
-            (it is not necessary to explicitly install pangalactic.core -- both
-            pangalactic.node and pangalactic.vger depend on it so conda will
-            automatically install it when either of those is installed.)
+            (this will install pangalactic.core)
 
     - the server (pangalactic.vger) can be deployed in a Docker container --
       see documentation in the pangalactic.vger/pangalactic/vger/docker
       directory.
+
+  - for the **Marvin** client, there is a self-contained Windows installer that
+    can be downloaded from **[pangalactic.us](https://pangalactic.us)** ... its
+    **[user guide](https://pangalactic.us/pgxn_doc/user_guide.html)** and
+    **[reference](https://pangalactic.us/pgxn_doc/reference.html)** can also be
+    found there (they are also included in the "marvin" repository).
 
 
 Developer Documentation
