@@ -50,7 +50,7 @@ There are several installation options:
 
             * pangalactic.core
             * pangalactic.node
-            * marvin
+            * gargleblaster
 
         2. execute the following:
 
@@ -60,7 +60,7 @@ There are several installation options:
             conda install --only-deps pangalactic.core
             conda develop pangalactic.core
             conda develop pangalactic.node
-            conda develop marvin
+            conda develop gargleblaster
 
         3. to run the client:
 
@@ -93,7 +93,7 @@ There are several installation options:
         2. execute the following:
 
             (to install the client)
-            conda install marvin
+            conda install gargleblaster
             (this will install pangalactic.core and pangalactic.node)
 
             (to install the server)
@@ -104,11 +104,12 @@ There are several installation options:
       see documentation in the pangalactic.vger/pangalactic/vger/docker
       directory.
 
-  - for the **Marvin** client, there is a self-contained Windows installer that
-    can be downloaded from **[pangalactic.us](https://pangalactic.us)** ... its
-    **[user guide](https://pangalactic.us/pgxn_doc/user_guide.html)** and
+  - for the **Gargleblaster** client, there is a self-contained Windows
+    installer that can be downloaded from
+    **[pangalactic.us](https://pangalactic.us)** ... its **[user
+    guide](https://pangalactic.us/pgxn_doc/user_guide.html)** and
     **[reference](https://pangalactic.us/pgxn_doc/reference.html)** can also be
-    found there (they are also included in the "marvin" repository).
+    found there (they are also included in the "gargleblaster" repository).
 
 
 Developer Documentation
