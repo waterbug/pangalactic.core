@@ -583,7 +583,7 @@ def save_parmz_by_dimz(dir_path):
 #       which the requirement is allocated
 #   obj_oid (str):  the oid of the component or system of the usage
 #   alloc_ref (str):  the reference_designator or system_role of the usage
-#   pid (str):  the parameter base id
+#   pid (str):  base id of the parameter constrained by the requirement
 #   constraint (NamedTuple): a named tuple of the form:
 #   -----------------------------------------------------------------------
 #   (units, target, max, min, tol, upper, lower, constraint_type, tol_type)
@@ -595,8 +595,8 @@ def save_parmz_by_dimz(dir_path):
 #   max (float): maximum value
 #   min (float): minimum value
 #   tol (float): symmetric tolerance
-#   upper (float): upper tolerance if asymmetrical
-#   lower (float): lower tolerance if asymmetrical
+#   upper (float): upper tolerance if asymmetric
+#   lower (float): lower tolerance if asymmetric
 #   constraint_type (str): name of constraint type, one of:
 #       ['single_value' | 'maximum' | 'minimum' ]
 #   tol_type (str): name of tolerance type, one of:
@@ -747,8 +747,8 @@ def refresh_rqt_allocz(req):
       max (float): maximum value
       min (float): minimum value
       tol (float): symmetric tolerance
-      upper (float): upper tolerance if asymmetrical
-      lower (float): lower tolerance if asymmetrical
+      upper (float): upper tolerance if asymmetric
+      lower (float): lower tolerance if asymmetric
       constraint_type (str): name of constraint type, one of:
           ['single_value' | 'maximum' | 'minimum' ]
       tol_type (str): name of tolerance type, one of:
