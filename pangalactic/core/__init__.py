@@ -11,7 +11,7 @@ from rdflib import URIRef
 from sqlalchemy import (Boolean, Date, DateTime, Float, Integer, LargeBinary,
                         String, Time)
 
-# ruamel_yaml
+# ruamel yaml
 import ruamel_yaml as yaml
 
 # pangalactic version

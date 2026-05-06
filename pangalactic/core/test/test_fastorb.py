@@ -6,9 +6,6 @@ Unit tests for pangalactic.core.fastorb.orb
 import os, shutil
 import unittest
 
-# yaml
-# import ruamel_yaml as yaml
-
 # pangalactic
 
 # set the orb
@@ -273,23 +270,21 @@ class OrbTest(unittest.TestCase):
                     h2g2.name]
         self.assertEqual(expected, value)
 
-    def test_12_yaml_dump_and_load_numeric_string_attr(self):
+    def test_12_dump_and_load_numeric_string_attr(self):
         """
-        CASE:  Use yaml to dump and load a serialized object that has an
+        CASE:  Dump and load a serialized object that has an
         attribute whose value is a string consisting of all numeric characters
         with a leading zero (0).  This case is needed to test the dump and load
         of Person instances for which the 'oid' attribute is a string that is
         sometimes required to have that format (numeric characters with a
         leading zero) and retain its leading zero in the dump/load round trip
-        -- in the field, this has caused errors when the yaml dump does not
+        -- in the field, this has caused errors when a yaml dump does not
         quote the string and it is then loaded by yaml as an integer rather
-        than a string.
+        than a string ... tested here even though yaml is not being used.
         """
         obj = orb.create_or_update_thing('Person', oid='0123456789',
                                          name='John Icecicleboy')
         res = serialize(orb, [obj])
-        # data = yaml.safe_dump(res)
-        # out_data = yaml.safe_load(data)
         out_objs = deserialize(orb, res)
         # serialized form includes only the original object
         out_obj = out_objs[0]
