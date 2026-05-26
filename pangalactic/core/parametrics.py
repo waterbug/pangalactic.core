@@ -14,8 +14,7 @@ from pangalactic.core.meta            import (SELECTABLE_VALUES,
                                               DEFAULT_CLASS_DATA_ELEMENTS,
                                               DEFAULT_CLASS_PARAMETERS,
                                               DEFAULT_PRODUCT_TYPE_DATA_ELMTS,
-                                              DEFAULT_PRODUCT_TYPE_PARAMETERS,
-                                              intconv)
+                                              DEFAULT_PRODUCT_TYPE_PARAMETERS)
 from pangalactic.core.units           import in_si, ureg
 from pangalactic.core.utils.datetimes import dtstamp
 
@@ -480,45 +479,6 @@ def load_parmz(dir_path):
             except:
                 log.debug('  - json decoding of "parameters.json" failed.')
                 return 'fail'
-            # first check for old format and convert if necessary
-            old_format = False
-            oids = list(stored_parameterz)
-            if oids:
-                # find first non-empty data element dict
-                n = 0
-                while 1:
-                    test_oid = oids[n]
-                    test_dict = stored_parameterz[test_oid]
-                    if test_dict:
-                        # test_dict is non-empty
-                        pids = list(test_dict)
-                        if pids:
-                            for parm_val in test_dict.values():
-                                if parm_val and isinstance(parm_val, dict):
-                                    # if the value is a dict, format is old
-                                    old_format = True
-                    if old_format:
-                        break
-                    else:
-                        n += 1
-                        if n == len(oids):
-                            break
-            if old_format:
-                # convert to new format
-                ser_parms_old = deepcopy(stored_parameterz)
-                stored_parameterz = {}
-                for oid, old_parms_dict in ser_parms_old.items():
-                    new_parms_dict = {}
-                    for pid in old_parms_dict:
-                        if old_parms_dict:
-                            new_parms_dict[pid] = old_parms_dict[pid]['value']
-                        else:
-                            dtype = (parm_defz.get(
-                                     pid, 'range_datatype', 'float')
-                                     or 'float')
-                            new_parms_dict[pid] = NULL.get(dtype, '') or ''
-                    stored_parameterz[oid] = new_parms_dict
-                log.debug('  - parameterz cache converted from old format.')
         for oid, parms in stored_parameterz.items():
             deserialize_parms(oid, parms)
         log.debug('  - parameterz cache loaded.')
