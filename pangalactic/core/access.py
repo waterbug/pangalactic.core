@@ -201,6 +201,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         # only users with an appropriate discipline role assigned in the
         # context of the project (obj.owner) have "modify" permission
         # --------------------------------------------------------------------
+        role_ids = set()
         if isinstance(obj, orb.classes['ManagedObject']):
             ras = orb.search_exact(cname='RoleAssignment',
                                    assigned_to=user,
@@ -393,7 +394,8 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         # [4] is it a Port?
         elif cname == 'Port':
             # access will depend on the user's permissions on 'of_product'
-            perms = get_perms(obj.of_product, user=user)
+            perms = get_perms(obj.of_product, user=user,
+                              permissive=permissive, debugging=debugging)
             if debugging:
                 perms.append('[4] role-based perms (Port)')
             return perms
@@ -404,16 +406,20 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             # Flow will have the superset of those permissions
             perms = []
             try:
-                s = set(get_perms(obj.start_port_context, user=user))
-                s |= set(get_perms(obj.end_port_context, user=user))
-                s |= set(get_perms(obj.end_port.of_product, user=user))
-                s |= set(get_perms(obj.start_port.of_product, user=user))
+                s = set(get_perms(obj.start_port_context, user=user,
+                                  permissive=permissive, debugging=debugging))
+                s |= set(get_perms(obj.end_port_context, user=user,
+                                   permissive=permissive, debugging=debugging))
+                s |= set(get_perms(obj.end_port.of_product, user=user,
+                                   permissive=permissive, debugging=debugging))
+                s |= set(get_perms(obj.start_port.of_product, user=user,
+                                   permissive=permissive, debugging=debugging))
                 perms = list(s)
                 # orb.log.debug(f'  perms: {perms}')
-            except:
+            except Exception:
                 # perms could not be determined
                 orb.log.debug('* get_perms() encountered an exception:')
-                orb.log.debug(f'  {traceback.format_exc}')
+                orb.log.debug(f'  {traceback.format_exc()}')
                 perms = []
             if debugging:
                 perms.append('[5] role-based perms (Flow)')
@@ -438,19 +444,11 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 return perms
             # otherwise, perms are those of the "of_system"
             elif getattr(obj, 'of_system', None):
-                return get_perms(getattr(obj, 'of_system', None))
-        # [7] if none of the above, log the relevant info for debugging ...
+                return get_perms(obj.of_system, user=user,
+                                 permissive=permissive, debugging=debugging)
+        # [7] if none of the above, return whatever perms have accumulated
         else:
             return list(perms)
-            # orb.log.debug('  - object type: {}'.format(obj.__class__.__name__))
-            # creator_id = '[undefined]'
-            # if hasattr(obj, 'creator'):
-                # creator_id = getattr(obj.creator, 'id', None) or '[unknown]'
-            # orb.log.debug('  - object creator: {}'.format(creator_id))
-            # owner_id = '[undefined]'
-            # if hasattr(obj, 'owner'):
-                # owner_id = getattr(obj.owner, 'id', None) or '[unknown]'
-            # orb.log.debug('  - object owner: {}'.format(owner_id))
         # TODO:  more possible permissions for Administrators
     # orb.log.info('  perms: {}'.format(perms))
     return list(perms)
