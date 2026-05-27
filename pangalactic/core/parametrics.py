@@ -1890,44 +1890,6 @@ def load_data_elementz(dir_path):
             except:
                 log.debug('  - json decoding of "data_elements.json" failed.')
                 return 'fail'
-            # first check for old format and convert if necessary
-            old_format = False
-            oids = list(serialized_des)
-            if oids:
-                # find first non-empty data element dict
-                n = 0
-                while 1:
-                    test_oid = oids[n]
-                    test_dict = serialized_des[test_oid]
-                    if test_dict:
-                        # test_dict is non-empty
-                        deids = list(test_dict)
-                        if deids:
-                            for deid, de_val in test_dict.items():
-                                if de_val and isinstance(de_val, dict):
-                                    # if the value is a dict, format is old
-                                    old_format = True
-                    if old_format:
-                        break
-                    else:
-                        n += 1
-                        if n == len(oids):
-                            break
-            if old_format:
-                # convert to new format
-                ser_des_old = deepcopy(serialized_des)
-                serialized_des = {}
-                for oid, old_de_dict in ser_des_old.items():
-                    new_de_dict = {}
-                    for deid in (old_de_dict or {}):
-                        if old_de_dict[deid]:
-                            new_de_dict[deid] = old_de_dict[deid]['value']
-                        else:
-                            dtype = (de_defz.get(deid, 'range_datatype', 'str')
-                                     or 'str')
-                            new_de_dict[deid] = NULL.get(dtype, '') or ''
-                    serialized_des[oid] = new_de_dict
-                log.debug('  - data_elementz cache converted from old format.')
         for oid, ser_des in serialized_des.items():
             deserialize_des(oid, ser_des)
         log.debug('  - data_elementz cache loaded.')
