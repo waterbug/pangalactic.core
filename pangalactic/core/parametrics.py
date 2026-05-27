@@ -216,6 +216,7 @@ def load_compz(dir_path):
                 stored_componentz = json.loads(f.read())
             except:
                 return 'fail'
+        componentz.clear()
         componentz.update(deserialize_compz(stored_componentz))
         return 'success'
     else:
@@ -761,6 +762,7 @@ def refresh_rqt_allocz(req):
         # log.debug('  functional req (no parameter or constraint).')
         if usage_oid:
             rqt_allocz[req.oid] = [usage_oid, obj_oid, alloc_ref, None, None]
+            return
     relation = req.computable_form
     pid = None
     if relation:
@@ -1630,10 +1632,6 @@ def compute_margin(usage_oid, pid, default=0):
     if constraint.constraint_type == 'maximum':
         nte = constraint.max
         nte_units = constraint.units
-        # convert NTE value to base units, if necessary
-        quan = nte * ureg.parse_expression(nte_units)
-        quan_base = quan.to_base_units()
-        converted_nte = quan_base.magnitude
     else:
         # txt = 'constraint_type is "{}"; ignored (for now).'
         # log.debug('  {}'.format(txt.format(constraint.constraint_type)))
@@ -2303,7 +2301,7 @@ def save_mode_defz(dir_path):
                                indent=4))
         log.debug(f'  ... mode_defs.json file written to {dir_path}.')
     except:
-        log.debug('  ... writing data_elements.json file failed!')
+        log.debug('  ... writing mode_defs.json file failed!')
 
 def get_modal_context(project_oid, usage_oid, mode_oid):
     """
