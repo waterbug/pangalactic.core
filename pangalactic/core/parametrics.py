@@ -216,6 +216,7 @@ def load_compz(dir_path):
                 stored_componentz = json.loads(f.read())
             except:
                 return 'fail'
+        # use clear() first in case any stale entries
         componentz.clear()
         componentz.update(deserialize_compz(stored_componentz))
         return 'success'
@@ -510,30 +511,24 @@ def save_parmz(dir_path):
 # NOTE:  see orb function 'create_parmz_by_dimz'
 parmz_by_dimz = {}
 
-def load_parmz_by_dimz(dir_path):
+def update_parmz_by_dimz(pd):
     """
-    Load the `parmz_by_dimz` dict from json file in cache format.
-    """
-    fpath = os.path.join(dir_path, 'parms_by_dims.json')
-    if os.path.exists(fpath):
-        try:
-            with open(fpath) as f:
-                stored_parmz_by_dimz = json.loads(f.read())
-        except:
-            return 'fail'
-        parmz_by_dimz.update(stored_parmz_by_dimz)
-        return 'success'
-    else:
-        return 'not found'
+    Refresh the `parmz_by_dimz` cache when a ParameterDefinition is created or
+    modified.  The cache has the form
 
-def save_parmz_by_dimz(dir_path):
+        {dimension : [ids of ParameterDefinitions having that dimension]}
+
+    NOTE:  see also the orb function 'create_parmz_by_dimz' ... it may move
+    here in the future.
+
+    Args:
+        pd (ParameterDefinition):  ParameterDefinition being added or modified
     """
-    Save `parmz_by_dimz` dict to a json file in cache format.
-    """
-    fpath = os.path.join(dir_path, 'parms_by_dims.json')
-    with open(fpath, 'w') as f:
-        f.write(json.dumps(parmz_by_dimz, separators=(',', ':'),
-                           indent=4, sort_keys=True))
+    # log.debug('* refresh_parmz_by_dimz')
+    if pd.dimensions in parmz_by_dimz:
+        parmz_by_dimz[pd.dimensions].append(pd.id)
+    else:
+        parmz_by_dimz[pd.dimensions] = [pd.id]
 
 # rqt_allocz:  runtime requirement allocations cache
 # purpose:  optimize performance of margin calculations
@@ -892,25 +887,6 @@ def update_parm_defz(pd):
         'range_datatype': pd.range_datatype,
         'computed': False,
         'mod_datetime': str(dtstamp())}
-
-def update_parmz_by_dimz(pd):
-    """
-    Refresh the `parmz_by_dimz` cache when a ParameterDefinition is created or
-    modified.  The cache has the form
-
-        {dimension : [ids of ParameterDefinitions having that dimension]}
-
-    NOTE:  see also the orb function 'create_parmz_by_dimz' ... it may move
-    here in the future.
-
-    Args:
-        pd (ParameterDefinition):  ParameterDefinition being added or modified
-    """
-    # log.debug('* refresh_parmz_by_dimz')
-    if pd.dimensions in parmz_by_dimz:
-        parmz_by_dimz[pd.dimensions].append(pd.id)
-    else:
-        parmz_by_dimz[pd.dimensions] = [pd.id]
 
 def add_parameter(oid, pid):
     """
