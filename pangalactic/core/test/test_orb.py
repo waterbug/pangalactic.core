@@ -44,6 +44,7 @@ from pangalactic.core.test.utils  import (create_test_users,
                                           locally_owned_test_objects,
                                           owned_test_objects,
                                           related_test_objects)
+from pangalactic.core.utils.datetimes import dtstamp
 from pangalactic.core.utils.reports   import write_mel_xlsx_from_model
 
 HOME = 'pangalaxian_test'
@@ -1800,6 +1801,118 @@ class OrbTest(unittest.TestCase):
         expected = set([('test:H2G2:acu-5', 'test:BOZO:acu-2'),
                         ('test:H2G2:acu-6', 'test:H2G2:acu-7'),
                         ('test:spacecraft3-acu-5', 'test:BOZO:acu-2')])
+        self.assertEqual(expected, value)
+
+    def test_35_get_next_rqt_seq(self):
+        """
+        CASE:  get the next sequence number for a project + requirement level.
+        """
+        project = orb.get('H2G2')
+        # CASE 1:  a level with no existing requirements at all returns 0
+        # (regression test for the UnboundLocalError bug fixed in commit
+        # c65d365 -- previously this raised an exception)
+        value = orb.get_next_rqt_seq(project, 97)
+        expected = 0
+        self.assertEqual(expected, value)
+        # CASE 2:  the fixture requirement 'test:H2G2:Spacecraft-Mass' has no
+        # 'rqt_level' set (None), so it does NOT match an exact rqt_level=0
+        # query -- level 0 is therefore *also* an "empty" level and returns 0
+        # (this is also a regression check for the "rqt_level" field-name
+        # bug fixed in c65d365: before that fix, the level filter was
+        # silently ignored and this fixture requirement -- along with
+        # everything else owned by the project -- was always included)
+        value = orb.get_next_rqt_seq(project, 0)
+        expected = 0
+        self.assertEqual(expected, value)
+        # CASE 3:  create 2 requirements with numeric id suffixes at level 7
+        # and verify the next seq is computed correctly
+        rqt_dicts = [
+            dict(_cname='Requirement', oid=f'test:rqt-seq-L7-{i}',
+                 id=f'H2G2-7.{i}', id_ns='test', name=f'Test Rqt L7 {i}',
+                 owner='H2G2', rqt_level=7,
+                 creator='test:steve', modifier='test:steve',
+                 create_datetime=str(dtstamp()), mod_datetime=str(dtstamp()))
+            for i in range(2)]
+        deserialize(orb, rqt_dicts, dictify=True)
+        orb.db.commit()
+        value = orb.get_next_rqt_seq(project, 7)
+        expected = 2
+        self.assertEqual(expected, value)
+        # CASE 4:  a requirement at a *different* level with a higher
+        # numeric id suffix must not affect level 7's sequence (regression
+        # test for the "rqt_level" field-name bug also fixed in c65d365,
+        # which caused the level filter to be silently ignored)
+        rqt_dict_l8 = dict(_cname='Requirement', oid='test:rqt-seq-L8-0',
+                           id='H2G2-8.5', id_ns='test', name='Test Rqt L8',
+                           owner='H2G2', rqt_level=8,
+                           creator='test:steve', modifier='test:steve',
+                           create_datetime=str(dtstamp()),
+                           mod_datetime=str(dtstamp()))
+        deserialize(orb, [rqt_dict_l8], dictify=True)
+        orb.db.commit()
+        value = orb.get_next_rqt_seq(project, 7)
+        expected = 2   # unaffected by level 8's higher-numbered requirement
+        self.assertEqual(expected, value)
+        value = orb.get_next_rqt_seq(project, 8)
+        expected = 6
+        self.assertEqual(expected, value)
+
+    def test_36_gen_rqt_id(self):
+        """
+        CASE:  generate the `id` attribute for a requirement.
+        """
+        # NOTE:  gen_rqt_id()'s docstring specifies that it assumes the
+        # requirement has already been saved (so it is included in the
+        # count used by get_next_rqt_seq()) -- at that point it has not yet
+        # been assigned its real 'id', so (matching real usage) these test
+        # requirements are created with no 'id' at all (None), which
+        # get_next_rqt_seq() correctly excludes from the sequence count.
+        # CASE 1:  a level-0 requirement gets a "[project_id]-0.[seq]" id
+        rqt_dict_l0 = dict(_cname='Requirement', oid='test:rqt-genid-L0',
+                           id_ns='test', name='Test Rqt Gen Id L0',
+                           owner='H2G2', rqt_level=0,
+                           creator='test:steve', modifier='test:steve',
+                           create_datetime=str(dtstamp()),
+                           mod_datetime=str(dtstamp()))
+        deserialize(orb, [rqt_dict_l0], dictify=True)
+        orb.db.commit()
+        rqt_l0 = orb.get('test:rqt-genid-L0')
+        value = orb.gen_rqt_id(rqt_l0)
+        expected = 'H2G2-0.0'
+        self.assertEqual(expected, value)
+        # CASE 2:  a requirement at a non-zero level gets an id reflecting
+        # its *actual* level (regression test for the bug fixed in commit
+        # d9d280d, where gen_rqt_id read the nonexistent attribute "level"
+        # instead of "rqt_level" and so always generated level-0 ids)
+        rqt_dict_l3 = dict(_cname='Requirement', oid='test:rqt-genid-L3',
+                           id_ns='test', name='Test Rqt Gen Id L3',
+                           owner='H2G2', rqt_level=3,
+                           creator='test:steve', modifier='test:steve',
+                           create_datetime=str(dtstamp()),
+                           mod_datetime=str(dtstamp()))
+        deserialize(orb, [rqt_dict_l3], dictify=True)
+        orb.db.commit()
+        rqt_l3 = orb.get('test:rqt-genid-L3')
+        value = orb.gen_rqt_id(rqt_l3)
+        expected = 'H2G2-3.0'
+        self.assertEqual(expected, value)
+        # simulate the normal workflow of assigning the generated id back to
+        # the requirement and saving it, so it is counted in the next call
+        rqt_l3.id = value
+        orb.db.commit()
+        # CASE 3:  a second requirement at the same non-zero level gets the
+        # next sequence number at *that* level
+        rqt_dict_l3_2 = dict(_cname='Requirement', oid='test:rqt-genid-L3-2',
+                             id_ns='test', name='Test Rqt Gen Id L3 #2',
+                             owner='H2G2', rqt_level=3,
+                             creator='test:steve', modifier='test:steve',
+                             create_datetime=str(dtstamp()),
+                             mod_datetime=str(dtstamp()))
+        deserialize(orb, [rqt_dict_l3_2], dictify=True)
+        orb.db.commit()
+        rqt_l3_2 = orb.get('test:rqt-genid-L3-2')
+        value = orb.gen_rqt_id(rqt_l3_2)
+        expected = 'H2G2-3.1'
         self.assertEqual(expected, value)
 
     def test_50_write_mel(self):
