@@ -1871,7 +1871,7 @@ class UberORB(object):
             level (int):  the level of the requirement
         """
         level = level or 0
-        reqs = self.search_exact(cname='Requirement', level=level, owner=owner)
+        reqs = self.search_exact(cname='Requirement', rqt_level=level, owner=owner)
         seq = 0
         rqt_ids = [getattr(req, 'id', None) or 'unknown'
                    for req in reqs]
@@ -1889,7 +1889,8 @@ class UberORB(object):
                     if n > seq:
                         break
                     n += 1
-        return n
+            seq = n
+        return seq
 
     def get_idvs(self, cname=None):
         """
