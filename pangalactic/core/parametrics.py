@@ -195,35 +195,6 @@ def deserialize_compz(ser_compz):
     log.debug(f'  - componentz deserialized ({n} product assemblies).')
     return deser_compz
 
-def save_compz(dir_path):
-    """
-    Save the `componentz` cache to a json file.
-    """
-    fpath = os.path.join(dir_path, 'components.json')
-    ser_compz = serialize_compz(componentz)
-    with open(fpath, 'w') as f:
-        f.write(json.dumps(ser_compz, separators=(',', ':'),
-                           indent=4, sort_keys=True))
-
-def load_compz(dir_path):
-    """
-    Load the `componentz` cache from a json file.
-    """
-    fpath = os.path.join(dir_path, 'components.json')
-    if os.path.exists(fpath):
-        with open(fpath) as f:
-            try:
-                stored_componentz = json.loads(f.read())
-            except:
-                return 'fail'
-        # use clear() first in case any stale entries
-        componentz.clear()
-        componentz.update(deserialize_compz(stored_componentz))
-        return 'success'
-    else:
-        log.debug('  - "components.json" was not found.')
-        return 'not found'
-
 # systemz cache **********************************************************
 
 # systemz:  runtime project systems cache

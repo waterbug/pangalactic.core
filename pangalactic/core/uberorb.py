@@ -78,7 +78,6 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           load_mode_defz, save_mode_defz,
                                           load_parmz, save_parmz,
                                           mode_defz,
-                                          save_compz,
                                           parameterz, parm_defz,
                                           parmz_by_dimz, refresh_componentz,
                                           refresh_rqt_allocz, rqt_allocz,
@@ -603,7 +602,6 @@ class UberORB(object):
         save_data_elementz(self.home)
         save_parmz(self.home)
         save_mode_defz(self.home)
-        save_compz(self.home)
         save_systemz(self.home)
         self.log.info('  cache saves completed ...')
         # [2] save all caches to backup dir

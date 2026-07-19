@@ -41,8 +41,8 @@ from pangalactic.core.parametrics import (add_default_parameters,
                                           load_rqt_allocz, load_data_elementz,
                                           load_parmz,
                                           parameterz, parm_defz, parmz_by_dimz,
-                                          rqt_allocz, save_allocz,
-                                          save_rqt_allocz,
+                                          refresh_rqt_allocz, rqt_allocz,
+                                          save_allocz, save_rqt_allocz,
                                           save_data_elementz, save_parmz)
 from pangalactic.core.smerializers import (DESERIALIZATION_ORDER,
                                            serialize, deserialize)
@@ -1358,9 +1358,8 @@ class FastOrb(object):
                         if alloc_reqs:
                             for rqt_oid in alloc_reqs:
                                 req = self.get(rqt_oid)
-                                if not req:
-                                    # if requirement not there, remove alloc
-                                    del alloc_reqs[rqt_oid]
+                                if req:
+                                    refresh_rqt_allocz(req)
                         # else:
                             # self.log.debug('   no allocated reqts found.')
                     # else:
