@@ -2385,6 +2385,9 @@ class UberORB(object):
                 lvs = self.search_exact(cname='HardwareProduct',
                                         product_type=lv_pt,
                                         owner=project)
+                if not lvs:
+                    self.log.debug('  no launch vehicles -- no data!')
+                    return data
                 for lv in lvs:
                     mass = get_pval(lv.oid, 'm[CBE]')
                     if mass:
