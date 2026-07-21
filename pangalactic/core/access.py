@@ -127,6 +127,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     # implicitly included here.
     unmodifiables = (
         orb.classes['ActivityType'],
+        orb.classes['ContinuousProductType'],
         orb.classes['DataElementDefinition'],
         orb.classes['Discipline'],
         orb.classes['DisciplineProductType'],
@@ -136,6 +137,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
         orb.classes['PortTemplate'],
         orb.classes['PortType'],
         orb.classes['ProductType'],
+        orb.classes['PropertyDefinition'],
         orb.classes['Role'])
     if isinstance(obj, unmodifiables):
         # orb.log.debug('  *** reference data cannot be modified or deleted.')
