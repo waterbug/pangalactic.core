@@ -13,7 +13,7 @@ The Pan Galactic Meta Object Registry
 # [DONE] generate registry schemas from kb classes + properties
 
 # Python
-import glob, os, pkgutil, shutil
+import os, pkgutil, shutil
 from collections import OrderedDict
 
 # SqlAlchemy
@@ -64,8 +64,6 @@ class PanGalacticRegistry(object):
         schemas (dict):  see definition in _update_schemas_from_extracts
         cache_path (str):  directory in which serialized schemas will be cached
         onto_path (str):  directory containing app ontology OWL files
-            [default: `apps` -- other values are used only for testing]
-        apps (list of str):  list of loaded apps (app ontology prefixes)
         classes (dict):  A mapping of `meta_id`s to runtime app classes.
         persistables (set):  The names of schemas for which there are db tables
         kb (p.meta.kb.KB):  An RDF graph containing the app ontology
@@ -74,8 +72,8 @@ class PanGalacticRegistry(object):
         nses (dict):  A mapping of namespace prefixes to namespace extracts
     """
     def __init__(self, home=None, db_url=None, cache_path='cache',
-                 onto_path='onto', apps=None, log=None, version='',
-                 debug=False, console=False, force_new_core=False):
+                 onto_path='onto', log=None, version='', debug=False,
+                 console=False, force_new_core=False):
         """
         Initialize the registry.
 
@@ -104,7 +102,6 @@ class PanGalacticRegistry(object):
         # print '  home           =', str(home)
         # print '  cache_path     =', str(cache_path)
         # print '  onto_path      =', str(onto_path)
-        # print '  apps           =', str(apps)
         # print '  debug          =', str(debug)
         # print '  console        =', str(console)
         # print '  force_new_core =', str(force_new_core)
@@ -148,8 +145,6 @@ class PanGalacticRegistry(object):
                                      'pgef.owl').decode('utf-8')))
         f.close()
         # self.log.debug('* not installed; using pgef.owl in home dir.')
-        self.apps_dict = {}   # not currently used
-        self.apps = []
         self.schemas = {}
         self.classes = {}
         self.ces = {}
@@ -580,32 +575,6 @@ class PanGalacticRegistry(object):
         # generate all tables ...
         Base.metadata.create_all(self.db_engine)
 
-    def find_app_ontologies(self):
-        """
-        Find all app ontology source files in `self.onto_path` and populate
-        the self.apps_dict dictionary that maps nsprefixes to source file paths.
-        """
-        # TODO:  check the cache, too, and give user the option of restoring
-        # what's in cache or re-building the cache from the source OWL files --
-        # also, detect whether the OWL files have changed since the cached
-        # version was built.
-        self.apps_dict = {} # clear it, in case it needs refreshing
-        # self.log.debug('* looking for app ontologies')
-        app_owl_file_paths = glob.glob(os.path.join(self.onto_path, '*.owl'))
-        if 'pgef.owl' in app_owl_file_paths:
-            app_owl_file_paths.remove('pgef.owl')
-        if app_owl_file_paths:
-            # NOTE:  if OWL file(s) other than 'pgef.owl' are found in the
-            # ontologies directory, the domain schemas will always be rebuilt.
-            # (TODO:  make this user-selectable.)
-            for owl_file in app_owl_file_paths:
-                nsprefix = get_ontology_prefix(owl_file)
-                self.apps_dict[nsprefix] = owl_file
-                # self.log.debug('   + found:  %s in %s' % (nsprefix, owl_file))
-        else:
-            # self.log.debug('   + no application OWL files found.')
-            pass
-
     def build_app_classes_from_ontology(self, source, use_cache=True):
         """
         Build a dictionary of application schemas and classes based on an
@@ -661,7 +630,6 @@ class PanGalacticRegistry(object):
         self._update_schemas_from_extracts()
         # [3] create pgef core metaobjects in order from the schemas
         self._update_classes_from_schemas()
-        self.apps += app_prefix
 
     #######################################################################
     #  property:  'persistables'
@@ -1016,7 +984,6 @@ class PanGalacticRegistry(object):
             # # them again unless requested to do so
             # self._create_extracts_from_source(source)
         # (2) create metaobjects from the extracts
-        #     (metaobjects can be modified to create new apps)
         # FIXME (what was here was broken and has been gutted ... use
         # techniques from _create_pgef_core_meta_objects
         # ** OLD CODE for caching metaobjects -- to be replaced by meta_db
