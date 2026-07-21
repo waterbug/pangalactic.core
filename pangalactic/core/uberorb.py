@@ -1441,22 +1441,6 @@ class UberORB(object):
                 d[a] = get_dval_as_str(obj.oid, a)
         return d
 
-    def rebuild_de_defz(self):
-        """
-        Update the `de_defz` cache when a new DataElementDefinition is created,
-        modified, or deleted.
-        """
-        # self.log.debug('* rebuilding de_defz ...')
-        de_defz = {}
-        for de_def_obj in self.get_by_type('DataElementDefinition'):
-            de_defz[de_def_obj.id] = {
-                'name': de_def_obj.name,
-                'description': de_def_obj.description,
-                'range_datatype': de_def_obj.range_datatype,
-                'label': de_def_obj.label or '',
-                'mod_datetime': str(dtstamp())}
-        # self.log.debug('  done.')
-
     def get(self, *oid, **kw):
         """
         Get an object or objects from the db:
