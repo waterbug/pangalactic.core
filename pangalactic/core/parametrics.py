@@ -1536,8 +1536,8 @@ def get_flight_units(product_oid, assembly_oid, default=1):
     """
     if assembly_oid in componentz:
         for component in componentz[assembly_oid]:
-            if component['oid'] == product_oid:
-                return component['quantity']
+            if component.oid == product_oid:
+                return component.quantity
     return default
 
 def compute_margin(usage_oid, pid, default=0):
