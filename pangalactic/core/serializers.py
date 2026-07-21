@@ -838,14 +838,36 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                             orb.log.debug('        is missing of_product;')
                             orb.log.debug('        will be ignored.')
                             ignores.append(oid)
-                        # a Flow MUST have "start_port" and "end_port",
-                        # objects
+                        # a Flow MUST have "start_port" and "end_port" objects
                         if fk in ["start_port", "end_port"]:
                             orb.log.debug('      invalid Flow instance:')
                             oid = d['oid']
                             orb.log.debug(f'      - oid: "{oid}"')
                             orb.log.debug('        is missing start_port')
                             orb.log.debug('        or end_port;')
+                            orb.log.debug('        will be ignored.')
+                            ignores.append(oid)
+                        # an Acu MUST have non-null "assembly" and "component"
+                        # objects
+                        if ((fk == 'assembly') or (fk == 'component') and
+                            cname == 'Acu'):
+                            orb.log.debug('      invalid Acu instance:')
+                            oid = d['oid']
+                            orb.log.debug(f'      - oid: "{oid}"')
+                            orb.log.debug('        is missing an assembly')
+                            orb.log.debug('        or component;')
+                            orb.log.debug('        will be ignored.')
+                            ignores.append(oid)
+                        # a ProjectSystemUsage MUST have non-null "project" and
+                        # "system" objects
+                        if ((fk == 'project') or (fk == 'system') and
+                            cname == 'ProjectSystemUsage'):
+                            orb.log.debug('      invalid ProjectSystemUsage')
+                            orb.log.debug('      instance:')
+                            oid = d['oid']
+                            orb.log.debug(f'      - oid: "{oid}"')
+                            orb.log.debug('        is missing a project')
+                            orb.log.debug('        or system;')
                             orb.log.debug('        will be ignored.')
                             ignores.append(oid)
             # else:
