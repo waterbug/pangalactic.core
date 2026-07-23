@@ -885,14 +885,13 @@ def get_next_ref_des(assembly, component, prefix=None, product_type=None):
         product_type (ProductType): a product type to use if component is None
             or does not have a product_type
     """
-    prefix = ''
     if getattr(component, 'product_type', None):
         prefix = (component.product_type.abbreviation or
                   component.product_type.name)
-    if not prefix and product_type:
+    elif not prefix and product_type:
         prefix = product_type.abbreviation or product_type.name
-    if not prefix:
-        prefix = 'Generic'
+    elif not prefix:
+        prefix = 'Component'
     acus = assembly.components
     if acus:
         rds = [acu.reference_designator for acu in acus]
@@ -906,7 +905,7 @@ def get_next_ref_des(assembly, component, prefix=None, product_type=None):
                 break
             else:
                 n += 1
-                refdes = f'{prefix}-{n:02}'
+                refdes = f'{prefix}-{n:03}'
         return refdes
     else:
         return prefix + '-001'
