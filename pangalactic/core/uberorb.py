@@ -83,8 +83,7 @@ from pangalactic.core.parametrics import (add_context_parm_def,
                                           refresh_rqt_allocz, rqt_allocz,
                                           refresh_systemz,
                                           recompute_parmz,
-                                          round_to,
-                                          save_systemz, systemz)
+                                          round_to, systemz)
 from pangalactic.core.serializers import (serialize, deserialize,
                                           uncook_datetime)
 from pangalactic.core.test        import data as test_data_mod
@@ -602,7 +601,6 @@ class UberORB(object):
         save_data_elementz(self.home)
         save_parmz(self.home)
         save_mode_defz(self.home)
-        save_systemz(self.home)
         self.log.info('  cache saves completed ...')
         # [2] save all caches to backup dir
         if not dir_path:

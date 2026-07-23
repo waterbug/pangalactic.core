@@ -283,35 +283,6 @@ def deserialize_systemz(ser_systemz):
     log.debug(f'  - systemz deserialized ({n} project assemblies).')
     return deser_systemz
 
-def save_systemz(dir_path):
-    """
-    Save the `systemz` cache to a json file.
-    """
-    fpath = os.path.join(dir_path, 'systems.json')
-    ser_systemz = serialize_systemz(systemz)
-    with open(fpath, 'w') as f:
-        f.write(json.dumps(ser_systemz, separators=(',', ':'),
-                           indent=4, sort_keys=True))
-
-def load_systemz(dir_path):
-    """
-    Load the `systemz` cache from a json file.
-    """
-    fpath = os.path.join(dir_path, 'systems.json')
-    if os.path.exists(fpath):
-        with open(fpath) as f:
-            try:
-                stored_systemz = json.loads(f.read())
-            except:
-                return 'fail'
-        # use clear() first in case any stale entries
-        systemz.clear()
-        systemz.update(deserialize_systemz(stored_systemz))
-        return 'success'
-    else:
-        log.debug('  - "systems.json" was not found.')
-        return 'not found'
-
 # ***************************************************************************
 
 # NOTE #####################################################################
