@@ -635,9 +635,6 @@ def asciify(u):
     purpose is to convert things that might be used in Python identifiers so
     they can be typed on an en-us encoded keyboard!
 
-    Credit: http://code.activestate.com/recipes/251871/ (this is not that
-    recipe but an elegant one-liner from one of the comments on the recipe).
-
     Args:
         u (str or bytes): input value
 
@@ -651,9 +648,7 @@ def asciify(u):
     elif isinstance(u, bytes):
         return u.decode('utf-8')
     # allow only printable chars
-    printable = set(string.printable)
-    clean = filter(lambda x: x in printable, str(u))
-    return clean
+    return ascii(u)
 
 
 def property_to_field(name, pe):

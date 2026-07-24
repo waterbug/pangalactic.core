@@ -1946,6 +1946,7 @@ class UberORB(object):
         if oids:
             s = sql.select(ident).where(ident.c.oid.in_(oids))
         elif cname:
+            oids = oids or []
             s = sql.select(ident).where(sql.and_(
                                         ident.c.oid.in_(oids),
                                         ident.c.pgef_type == cname
