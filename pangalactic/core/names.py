@@ -160,16 +160,7 @@ def namify(s):
         else:
             return '_'.join(s.split(' '))
     except:
-        # Python 3: str IS unicode
-        s = asciify(s)
-        if s.istitle():
-            return ''.join(s.split(' '))
-        else:
-            return '_'.join(s.split(' '))
-    else:
-        # if it's not unicode, just return it as a str
-        # (python2 str=bytes or python3 unicode)
-        return str(s)
+        return ascii(s)
 
 
 def register_namespaces(rdfdataset):
