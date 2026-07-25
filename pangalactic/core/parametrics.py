@@ -1,7 +1,7 @@
 """
 Functions to support Parameters, Relations, and Data Elements
 """
-import json, os
+import json, os, traceback
 from collections import namedtuple
 from copy        import deepcopy
 from decimal     import Decimal
@@ -30,6 +30,33 @@ class logger:
         dispatcher.send(signal='log debug msg', msg=s)
 
 log = logger()
+
+
+def log_error(fn_name, msg):
+    """
+    Log an error encountered in this module: a one-line breadcrumb to the main
+    log (at "info" level, so it is visible without debug logging) plus the
+    traceback to the orb's error log.
+
+    NOTE: `orb` is imported inside the function rather than at module level
+    because `uberorb` imports this module, so a module-level import would be
+    circular. The error logging is wrapped in try/except because it must never
+    itself break the operation that failed (these are called from the cache
+    save functions, whose failure modes are the ones worth recovering from).
+
+    Args:
+        fn_name (str):  name of the function in which the error occurred
+        msg (str):  description of the error
+    """
+    log.info(f'  *** ERROR: {msg} ***')
+    try:
+        from pangalactic.core import orb
+        orb.error_log.info(f'* error in {fn_name}():')
+        orb.error_log.info(traceback.format_exc())
+    except:
+        # orb (or its error_log) not available -- main log breadcrumb stands
+        pass
+
 
 DATATYPES = SELECTABLE_VALUES['range_datatype']
 # NULL values by dtype:
@@ -440,13 +467,23 @@ def save_parmz(dir_path):
         # NOTE: serialize_parms() uses deepcopy()
         stored_parameterz[oid] = serialize_parms(oid)
     fpath = os.path.join(dir_path, 'parameters.json')
+    # NOTE: serialize *before* opening the file -- opening in 'w' mode
+    # truncates it, so a json exception here would destroy the previous
+    # contents, which for this cache are the only copy of the data (the
+    # `parameterz` cache is not derivable from the database).
+    try:
+        data = json.dumps(stored_parameterz, separators=(',', ':'),
+                          indent=4, sort_keys=True)
+    except:
+        log_error('save_parmz', 'serializing parameters failed; '
+                  'parameters.json NOT written (previous file kept).')
+        return
     try:
         with open(fpath, 'w') as f:
-            f.write(json.dumps(stored_parameterz, separators=(',', ':'),
-                               indent=4, sort_keys=True))
+            f.write(data)
         log.debug('  ... parameters.json file written.')
     except:
-        log.debug('  ... writing parameters.json file failed!')
+        log_error('save_parmz', 'writing parameters.json file failed!')
 
 # parmz_by_dimz:  runtime cache that maps dimensions to parameter definitions
 # format:  {dimension : [ids of ParameterDefinitions having that dimension]}
@@ -1784,19 +1821,29 @@ def save_data_elementz(dir_path):
     Save `data_elementz` dict to a json file.
     """
     log.debug('* save_data_elementz() ...')
+    fpath = os.path.join(dir_path, 'data_elements.json')
+    # NOTE: serialize *before* opening the file (see save_parmz) -- the
+    # `data_elementz` cache is not derivable from the database, so a failed
+    # write that truncated this file would lose the only copy of the data.
     serialized_data_elementz = {}
     try:
         for oid, obj_des in data_elementz.items():
             # NOTE: serialize_des() uses deepcopy()
             serialized_data_elementz[oid] = serialize_des(oid)
-        fpath = os.path.join(dir_path, 'data_elements.json')
+        data = json.dumps(serialized_data_elementz,
+                          separators=(',', ':'),
+                          indent=4, sort_keys=True)
+    except:
+        log_error('save_data_elementz', 'serializing data elements failed; '
+                  'data_elements.json NOT written (previous file kept).')
+        return
+    try:
         with open(fpath, 'w') as f:
-            f.write(json.dumps(serialized_data_elementz,
-                               separators=(',', ':'),
-                               indent=4, sort_keys=True))
+            f.write(data)
         log.debug('  ... data_elements.json file written.')
     except:
-        log.debug('  ... writing data_elements.json file failed!')
+        log_error('save_data_elementz',
+                  'writing data_elements.json file failed!')
 
 def update_de_defz(de_def_obj):
     """
@@ -2177,14 +2224,22 @@ def save_mode_defz(dir_path):
     Save `mode_defz` dict to a file in cache format.
     """
     log.debug('* save_mode_defz() ...')
+    fpath = os.path.join(dir_path, 'mode_defs.json')
+    # NOTE: serialize *before* opening the file (see save_parmz) -- the
+    # `mode_defz` cache is not derivable from the database, so a failed
+    # write that truncated this file would lose the only copy of the data.
     try:
-        fpath = os.path.join(dir_path, 'mode_defs.json')
+        data = json.dumps(mode_defz, separators=(',', ':'), indent=4)
+    except:
+        log_error('save_mode_defz', 'serializing mode defs failed; '
+                  'mode_defs.json NOT written (previous file kept).')
+        return
+    try:
         with open(fpath, 'w') as f:
-            f.write(json.dumps(mode_defz, separators=(',', ':'),
-                               indent=4))
+            f.write(data)
         log.debug(f'  ... mode_defs.json file written to {dir_path}.')
     except:
-        log.debug('  ... writing mode_defs.json file failed!')
+        log_error('save_mode_defz', 'writing mode_defs.json file failed!')
 
 def get_modal_context(project_oid, usage_oid, mode_oid):
     """
