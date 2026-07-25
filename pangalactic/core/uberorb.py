@@ -951,7 +951,7 @@ class UberORB(object):
         self.create_parm_defz()
         self.create_parmz_by_dimz()
         # *** NOTE ***********************************************************
-        # [3] run _load_parmz() and _load_data_elementz() before checking for
+        # [3] run load_parmz() and load_data_elementz() before checking for
         # updates to data element definitions and parameter definitions and
         # contexts, since updated ref data may update data element and
         # parameter data that was loaded from the parameters cache

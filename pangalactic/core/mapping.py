@@ -16,8 +16,6 @@ Examples of schema mods that require a conversion function include:
 * Removing a populated class
 * Adding an attribute with a non-null default value
 
-`schema_mods`:  a list of the releases that include schema modifications
-
 `schema_maps`: a dictionary that maps release numbers to the data conversion
                functions they require
 """
@@ -102,8 +100,6 @@ Examples of schema mods that require a conversion function include:
 #     because they will always be created by a global admin.
 
 from copy import deepcopy
-
-schema_mods = ['1.0.4', '1.5.0', '2.0', '3.0', '3.1.0', '3.2.0']
 
 schema_version = '3.3.0'
 
