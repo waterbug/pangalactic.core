@@ -141,24 +141,23 @@ def read_config(configpath):
     """
     # TODO:  add checksum check for security
     if os.path.exists(configpath):
-        f = open(configpath)
-        data = f.read()
+        with open(configpath) as f:
+            data = f.read()
         if data:
             config.update(yaml.safe_load(data))
-        f.close()
 
 def write_config(configpath):
     """
     Write node config to the config file.
     """
     # TODO:  create checksum for security
-    # try:
-    f = open(configpath, 'w')
-    f.write(yaml.safe_dump(config, allow_unicode=True,
-                           default_flow_style=False))
-    f.close()
-    # except:
-    # raise ValueError, 'Could not write config.'
+    # NOTE: serialize *before* opening the file -- opening in 'w' mode
+    # truncates it, so a yaml exception here would destroy the previous
+    # contents.
+    data = yaml.safe_dump(config, allow_unicode=True,
+                          default_flow_style=False)
+    with open(configpath, 'w') as f:
+        f.write(data)
 
 def read_deleted(deletedpath):
     """
@@ -167,11 +166,10 @@ def read_deleted(deletedpath):
     """
     # TODO:  add checksum check for security
     if os.path.exists(deletedpath):
-        f = open(deletedpath)
-        data = f.read()
+        with open(deletedpath) as f:
+            data = f.read()
         if data:
             deleted.update(yaml.safe_load(data))
-        f.close()
 
 def write_deleted(deletedpath):
     """
@@ -179,13 +177,11 @@ def write_deleted(deletedpath):
     the server side (vger), where it is used to ensure permanence of deletions.
     """
     # TODO:  create checksum for security
-    # try:
-    f = open(deletedpath, 'w')
-    f.write(yaml.safe_dump(deleted, allow_unicode=True,
-                           default_flow_style=False))
-    f.close()
-    # except:
-    # raise ValueError, 'Could not write deleted.'
+    # NOTE: serialize *before* opening the file (see write_config).
+    data = yaml.safe_dump(deleted, allow_unicode=True,
+                          default_flow_style=False)
+    with open(deletedpath, 'w') as f:
+        f.write(data)
 
 def read_prefs(prefspath):
     """
@@ -193,23 +189,20 @@ def read_prefs(prefspath):
     """
     # TODO:  add checksum check for security
     if os.path.exists(prefspath):
-        f = open(prefspath)
-        data = f.read()
+        with open(prefspath) as f:
+            data = f.read()
         if data:
             prefs.update(yaml.safe_load(data))
-        f.close()
 
 def write_prefs(prefspath):
     """
     Write user preferences to the prefs file.
     """
-    # try:
-    f = open(prefspath, 'w')
-    f.write(yaml.safe_dump(prefs, allow_unicode=True,
-                           default_flow_style=False))
-    f.close()
-    # except:
-    # raise ValueError, 'Could not write prefs.'
+    # NOTE: serialize *before* opening the file (see write_config).
+    data = yaml.safe_dump(prefs, allow_unicode=True,
+                          default_flow_style=False)
+    with open(prefspath, 'w') as f:
+        f.write(data)
 
 def read_state(statepath):
     """
@@ -217,8 +210,8 @@ def read_state(statepath):
     """
     # TODO:  add checksum check for security
     if os.path.exists(statepath):
-        f = open(statepath)
-        data = f.read()
+        with open(statepath) as f:
+            data = f.read()
         if data:
             saved_state = yaml.safe_load(data)
             # do not use saved 'app_' items -- may be modified in a new release
@@ -229,24 +222,21 @@ def read_state(statepath):
             for item in app_items:
                 del saved_state[item]
             state.update(saved_state)
-        f.close()
 
 def write_state(statepath):
     """
     Write node state to the state file.
     """
     # TODO:  create checksum for security
-    # try:
-    f = open(statepath, 'w')
     # remove "sys_trees" item from state before writing (it contains binary
     # data this is not supported by yaml)
     if state.get('sys_trees'):
         del state['sys_trees']
-    f.write(yaml.safe_dump(state, allow_unicode=True,
-                           default_flow_style=False))
-    f.close()
-    # except:
-    # raise ValueError, 'Could not write state.'
+    # NOTE: serialize *before* opening the file (see write_config).
+    data = yaml.safe_dump(state, allow_unicode=True,
+                          default_flow_style=False)
+    with open(statepath, 'w') as f:
+        f.write(data)
 
 def read_trash(trashpath):
     """
@@ -254,21 +244,18 @@ def read_trash(trashpath):
     """
     # TODO:  add checksum check for security
     if os.path.exists(trashpath):
-        f = open(trashpath)
-        data = f.read()
+        with open(trashpath) as f:
+            data = f.read()
         if data:
             trash.update(yaml.safe_load(data))
-        f.close()
 
 def write_trash(trashpath):
     """
     Write `trash` dictionary to the trash file.
     """
-    # try:
-    f = open(trashpath, 'w')
-    f.write(yaml.safe_dump(trash, allow_unicode=True,
-                           default_flow_style=False))
-    f.close()
-    # except:
-    # raise ValueError, 'Could not write trash.'
+    # NOTE: serialize *before* opening the file (see write_config).
+    data = yaml.safe_dump(trash, allow_unicode=True,
+                          default_flow_style=False)
+    with open(trashpath, 'w') as f:
+        f.write(data)
 
