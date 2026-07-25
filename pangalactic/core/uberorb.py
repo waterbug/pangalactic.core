@@ -569,12 +569,14 @@ class UberORB(object):
         self.log.info('  dumping database to yaml ...')
         s_objs = serialize(self, self.get_all_subtypes('Identifiable'),
                            include_refdata=True)
-        f = open(os.path.join(dir_path, fname), 'w')
-        f.write(yaml.safe_dump(s_objs, default_flow_style=False))
-        f.close()
-        self.log.info('  dump to yaml completed.')
-        self.log.debug('  {} db objects written.'.format(len(s_objs)))
-        self.db_dump_complete = True
+        try:
+            with open(os.path.join(dir_path, fname), 'w') as f:
+                f.write(yaml.safe_dump(s_objs, default_flow_style=False))
+                self.log.info('  dump to yaml completed.')
+                self.log.debug('  {} db objects written.'.format(len(s_objs)))
+                self.db_dump_complete = True
+        except:
+            self.log.info(f'  error writing to file "{fname}".')
 
     def save_caches(self, dir_path=None):
         """
@@ -870,14 +872,14 @@ class UberORB(object):
         sdata = ''
         if os.path.exists(data_path):
             try:
-                f = open(data_path)
-                sdata = yaml.safe_load(f.read())
-                if __version__ in schema_maps:
-                    map_fn = schema_maps[__version__]
-                    sdata = map_fn(sdata)
-                    self.log.debug('  - data loaded and transformed.')
-                else:
-                    self.log.debug('  - data loaded (transformation unnec.).')
+                with open(data_path) as f:
+                    sdata = yaml.safe_load(f.read())
+                    if __version__ in schema_maps:
+                        map_fn = schema_maps[__version__]
+                        sdata = map_fn(sdata)
+                        self.log.debug('  - data loaded and transformed.')
+                    else:
+                        self.log.debug('  - data loaded (transformation unnec.).')
             except:
                 self.log.debug('  - an error ocurred (see error log).')
                 self.error_log.info('* error in load_and_transform_data():')
