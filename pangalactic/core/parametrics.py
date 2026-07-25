@@ -1670,44 +1670,9 @@ COMPUTES = {
 # NOTE:  although "label" (a formatted label to use as a column header) is not
 # an attribute of DataElementDefinition, the label item can be set from a data
 # element structure that is set in the application's "config" file, which
-# create_de_defz() will use to update de_defz after populating it from the db
-# DataElementDefinition objects.
+# orb.create_de_defz() will use to update de_defz after populating it from the
+# db DataElementDefinition objects.
 de_defz = {}
-
-def load_de_defz(dir_path):
-    """
-    Load the `de_defz` cache from a json file.
-    """
-    log.debug('* load_de_defz() ...')
-    fpath = os.path.join(dir_path, 'de_defs.json')
-    if os.path.exists(fpath):
-        with open(fpath) as f:
-            try:
-                stored_de_defz = json.loads(f.read())
-            except:
-                log.debug('  - reading of "de_defs.json" failed.')
-                return 'fail'
-        de_defz.update(stored_de_defz)
-        log.debug('  - de_defz cache loaded.')
-        return 'success'
-    else:
-        log.debug('  - "de_defs.json" was not found.')
-        return 'not found'
-
-def save_de_defz(dir_path):
-    """
-    Save `de_defz` cache to a json file.
-    """
-    log.debug('* save_de_defz() ...')
-    try:
-        fpath = os.path.join(dir_path, 'de_defs.json')
-        with open(fpath, 'w') as f:
-            f.write(json.dumps(de_defz,
-                               separators=(',', ':'),
-                               indent=4, sort_keys=True))
-        log.debug('  ... de_defs.json file written.')
-    except:
-        log.debug('  ... writing de_defs.json file failed!')
 
 # data_elementz:  persistent** cache of assigned data element values
 #              ** persisted in the file 'data_elements.json' in the
