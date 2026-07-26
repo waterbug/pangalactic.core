@@ -259,6 +259,50 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/checked_out_item -->
+
+    <owl:ObjectProperty rdf:about="&pgef;checked_out_item">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The object claimed by a CheckOut. NOTE: the range is Identifiable rather than Modelable so that the check_out_ table has only one foreign key to its own inherited table (modelable_); ranging it on Modelable makes the inheritance join ambiguous.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;CheckOut"/>
+        <rdfs:range rdf:resource="&pgef;Identifiable"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/check_outs -->
+
+    <owl:ObjectProperty rdf:about="&pgef;check_outs">
+        <owl:inverseOf rdf:resource="&pgef;checked_out_item"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The CheckOut claims on an object (at most one un-expired claim at a time).</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Identifiable"/>
+        <rdfs:range rdf:resource="&pgef;CheckOut"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/checked_out_by -->
+
+    <owl:ObjectProperty rdf:about="&pgef;checked_out_by">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The Person holding a CheckOut claim.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;CheckOut"/>
+        <rdfs:range rdf:resource="&pgef;Person"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/check_outs_held -->
+
+    <owl:ObjectProperty rdf:about="&pgef;check_outs_held">
+        <owl:inverseOf rdf:resource="&pgef;checked_out_by"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The CheckOut claims currently held by a Person.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Person"/>
+        <rdfs:range rdf:resource="&pgef;CheckOut"/>
+    </owl:ObjectProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/assigned_to -->
 
     <owl:ObjectProperty rdf:about="&pgef;assigned_to">
@@ -1115,6 +1159,17 @@
         <rdfs:comment rdf:datatype="&xsd;string">The country in which an organization or facility is located.</rdfs:comment>
         <rdfs:domain rdf:resource="&pgef;Organization"/>
         <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/expiry_datetime -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;expiry_datetime">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The date and time at which a CheckOut claim lapses, after which the repository may release it.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;CheckOut"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
 
 
@@ -2447,6 +2502,17 @@ Model in the engineering domain generally maps to step:product_definition, but t
         <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A RoleAssignment is the relationship between a role and a person to which the role has been assigned. RoleAssignment is a many-to-many relationship in that a role may be assigned to multiple persons and a person may have several roles assigned to them.</rdfs:comment>
     </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/CheckOut -->
+
+    <owl:Class rdf:about="&pgef;CheckOut">
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A CheckOut is a claim, recorded in the repository, that a Person intends to make changes to an object and that no one else may change it until the claim is released. Its purpose is to make offline editing safe: an object checked out to a user can be edited by that user while disconnected, without the risk that someone else changes it in the meantime (in which case the offline edit would be silently discarded as stale). A CheckOut is time-bounded via expiry_datetime, so that a forgotten claim cannot block a project indefinitely, and its release is represented by deletion of the CheckOut instance. The Person holding the claim is given by checked_out_by; the time it was made is the inherited create_datetime, and its stated purpose is the inherited description.</rdfs:comment>
+    </owl:Class>
+
+
 
 
 
