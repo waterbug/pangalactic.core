@@ -1,0 +1,91 @@
+[build-system]
+# >= 77.0 is required for PEP 639 support: the "license" SPDX expression and
+# the "license-files" key in [project]. Earlier setuptools (e.g. 75.8.2)
+# rejects them with:
+#   configuration error: `project` must not contain {'license-files'} properties
+requires = ["setuptools >= 77.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pangalactic.core"
+version = "4.4.dev3"
+description = "The Pan Galactic Engineering Framework Core Package"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "NASA-1.3"
+license-files = ["NOSA_18985_Pan_Galactic_Engineering_Framework_3.0.pdf"]
+authors = [
+    {name = "Stephen Waterbury", email = "waterbug81@gmail.com"},
+]
+maintainers = [
+    {name = "Stephen Waterbury", email = "waterbug@pangalactic.us"},
+]
+# NOTE: the "License :: OSI Approved :: ..." classifier that used to be here
+# is deliberately gone -- PEP 639 deprecates license classifiers in favour of
+# the "license" SPDX expression above, and setuptools >= 77 warns if both are
+# given. Python-version classifiers are also dropped: requires-python already
+# states the supported range, and the classifier list has to be edited every
+# time a new Python is supported.
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+# NOTE: transposed as-is from setup.py's install_requires. Some of these are
+# *conda* names rather than PyPI names, which is fine for this project --
+# packages are built and installed with conda, and the authoritative runtime
+# dependencies are the "run:" section of the conda recipe's meta.yaml -- but
+# they would not all resolve on PyPI.
+# ("python >= 3.9" was removed from this list: Python is not a dependency,
+#  and requires-python above is what states that constraint.)
+dependencies = [
+    "openpyxl",
+    "pint",
+    "pydispatcher",
+    "python-dateutil",
+    "pytz",
+    "rdflib",
+    "ruamel_yaml",
+    "sqlalchemy",
+    "tzlocal",
+    "xlrd",
+    "xlwt",
+    "xlsxwriter",
+]
+
+[project.urls]
+documentation = "https://github.com/waterbug/pangalactic.core/NOTES_FOR_DEVELOPERS.md"
+repository = "https://github.com/waterbug/pangalactic.core"
+
+# equivalent of setup.py's find_packages()
+[tool.setuptools.packages.find]
+include = ["pangalactic*"]
+
+# ---------------------------------------------------------------------------
+# This replaces setup.py's "data_files" argument.
+#
+# The old data_files entries installed into
+#     site.getsitepackages()[0] + "pangalactic/core/<subdir>"
+# i.e. they computed, at build time, an absolute path to a location *inside
+# the installed package* -- which is what package-data does declaratively.
+# That worked only because conda-build's $PYTHON is the target environment's
+# python, so site.getsitepackages()[0] happened to be the right prefix; the
+# same setup.py run against a different interpreter would install elsewhere.
+#
+# package-data is the right mechanism here because every one of these files is
+# located package-relative at runtime:
+#     pkgutil.get_data('pangalactic.core.ontology', 'pgef.owl')  [registry.py,
+#                                                                 tachistry.py]
+#     ref_db.__path__[0]                                         [uberorb.py]
+#     pangalactic.core.test.data / .vault                        [tests]
+#
+# The os.listdir() calls in setup.py existed only to enumerate files for
+# data_files; package-data takes globs, so they are no longer needed.
+# ---------------------------------------------------------------------------
+[tool.setuptools.package-data]
+"pangalactic.core.ontology"   = ["*.owl"]
+"pangalactic.core.ref_db"     = ["*"]
+"pangalactic.core.test.data"  = ["*"]
+"pangalactic.core.test.vault" = ["*"]
