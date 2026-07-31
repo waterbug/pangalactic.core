@@ -104,9 +104,101 @@ selection to the working set — the product, its `Acu`s, and those
 components the user is entitled to edit — and requests them as one batch.
 Partial grants are reported per-oid so the user knows exactly what they got.
 
-Two things travel implicitly with an object and need no separate treatment,
-because both caches are keyed by object oid: its **parameters**
-(`parameterz`) and its **data elements** (`data_elementz`).
+Two things belong to an object rather than standing alone, and both caches
+are keyed by object oid: its **parameters** (`parameterz`) and its **data
+elements** (`data_elementz`).
+
+**Why they are caches rather than ontology properties** (author, 2026-07-31):
+this is deliberate and load-bearing. There are — conservatively — an order of
+magnitude more parameters than there are properties (attributes) in the
+ontology, so representing each as an ontology property would make the
+ontology explode, and every addition would be a database schema change.
+Keeping them in oid-keyed caches means new parameters and data elements can
+be introduced in a new release **without touching the ontology or the
+database schema**. They cannot be added at runtime (that was contemplated
+once, but is not supported), so the set is fixed per release.
+
+The consequence for check-out is that parameters and data elements are *not*
+a side channel to be treated loosely — they are the bulk of the engineering
+content, and they need the same rigour as attribute edits.
+
+**Correction to an earlier draft of this section.** It previously said these
+two "travel implicitly with an object and need no separate treatment". That
+is true of the *serialization* — `serialize()` emits `d['parameters']` and
+`d['data_elements']` with every `Modelable`, and `deserialize()` applies them
+— but **not of the edit path**, and the difference is where offline work
+breaks. Measured (see `pangalactic.node/pangalaxian_handlers_review.md` #2):
+a parameter-only edit in `pgxnobject` returns before stamping
+`mod_datetime`, so the object never enters the sync's "needs pushing" set;
+`on_parms_set` is connectivity-gated and queues nothing; and on reconnect
+`parameterz.update(<entire server cache>)` replaces each per-oid dict
+wholesale. Net effect: **an offline parameter edit is silently reverted, and
+a parameter added offline is silently dropped.** Data elements happen to
+survive only because the code paths that change them do stamp and save the
+object.
+
+### 4a. Requirement: parameter and data-element edits are governed by the claim
+
+Author's decision (2026-07-31): **offline parameter and data-element adds,
+modifications and deletions must be permitted only for checked-out
+("locked") objects, and must behave exactly as regular attribute editing
+does.** Both are edited only through the `pgxnobject` editor, so there is a
+single place to enforce it.
+
+That gives three concrete requirements:
+
+1. **Permission** — the same `access.py` test that governs attribute editing
+   governs parameter and data-element editing. Under the §5 shape, offline
+   that means the object is in `checked_out_oids` (or
+   `locally_created_oids`); there is no separate, looser rule for
+   parameters. `pgxnobject` should decline to offer editable parameter
+   widgets when the object is not editable, exactly as it declines to create
+   the Edit button today.
+2. **Persistence — DONE.** A parameter or data-element change must mark the
+   object as needing to be pushed, the same way an attribute change does.
+   `pgxnobject.on_save`'s parameter-only branch now sets `modifier` and
+   `mod_datetime` and calls `orb.save([self.obj])` before sending
+   `"parms set"` — the same three assignments the general path makes further
+   down. **Decision (author, 2026-07-31): stamp always, not only while
+   disconnected** — simpler and more honest, since the object genuinely did
+   change; the cost is some additional sync churn while connected, where
+   `vger.set_parameters` already handles the change live.
+
+   This is sufficient on its own, because `serialize()` already carries
+   `d['parameters']` and `d['data_elements']` with the object: once the
+   object is classified as newer than the server's copy, it enters
+   `objs_to_save` and the values travel with it. **Verified by execution:**
+
+   | | newer than server? | m after reconnect |
+   |---|---|---|
+   | before stamping | no — never pushed | 0.46 (edit lost) |
+   | after stamping | yes | 999.0 (edit survived) |
+3. **Reconciliation** — on check-in, parameter and data-element changes are
+   part of what is applied and reported, not a side channel. The rule is
+   **push before pull**: any replay of queued parameter changes must be
+   sequenced *before* `get_parmz()`, exactly as the offline deletion queue
+   must be replayed before `sync_project`/`sync_library_objects`.
+
+   **`on_vger_get_parmz_result`'s wholesale `parameterz.update()` must be
+   left alone.** An earlier draft of this section proposed merging per-oid
+   instead, to protect un-pushed local values. That is wrong (author,
+   2026-07-31): merging *was* implemented at one point, and in highly active
+   collaborative use clients drifted out of sync; full replacement fixed it.
+   It is inefficient but sufficiently performant, and since the server's copy
+   is authoritative, replacement is what guarantees the client converges on a
+   correct version.
+
+   The replacement is a **convergence mechanism**, not a naive overwrite: any
+   local drift — a failed push, a race, a partially applied update — is
+   corrected on the next sync, whereas a merge lets a divergent local entry
+   survive indefinitely with nothing able to remove it. This is also why
+   `get_parmz` sits at the *tail* of the save chain: the local changes have
+   already landed on the server before the pull replaces the cache. Protect
+   offline work by guaranteeing the push, never by weakening the pull.
+
+With (1) in place, the loss path closes at the source for everything else:
+an object that is not checked out is not editable offline, so there are no
+orphaned offline parameter edits to lose.
 
 **`mode_defz` is the exception and needs a decision.** It is project-scoped
 shared state, not object-scoped, and `vger.update_mode_defs` currently
@@ -246,6 +338,9 @@ Server-side expiry sweep releases lapsed claims and publishes the release.
    as with `thaw`. Should the holder be notified?
 4. **`mode_defz`** (§4) — project-level check-out, connected-only editing,
    or accept last-write-wins.
+4a. ~~**Stamping** (§4a (2)) — always, or only while disconnected?~~
+   **DECIDED (2026-07-31): always.** Simpler and more honest. Applied and
+   verified; see §4a (2).
 5. **Audit trail** — delete `CheckOut` records on release, or retain them.
 6. **Scope limits** — should checking out an entire project be permitted,
    rate-limited, or require an administrator?
@@ -259,12 +354,22 @@ Server-side expiry sweep releases lapsed claims and publishes the release.
    at low risk.
 2. **Enforce server-side**, wire `checked_out_oids` into `access.py`,
    introduce `locally_created_oids`, and fix/retire `synced_oids`. This is
-   the step that repairs the offline permission model. Note the
-   dependent-object requirement in §7: the check must resolve an object's
-   owning item rather than testing the object's own oid, or claims will
-   protect a Product while leaving its Ports editable by others.
+   the step that repairs the offline permission model. Two requirements
+   attach here:
+   - the dependent-object requirement in §7 — the check must resolve an
+     object's owning item rather than testing the object's own oid, or claims
+     will protect a Product while leaving its Ports editable by others;
+   - the parameter/data-element requirement in §4a — the same permission test
+     must gate parameter and data-element editing in `pgxnobject`, so that
+     offline parameter work is confined to claimed objects rather than being
+     allowed and then silently lost.
 3. **Offline deletion queue**, replayed at check-in, plus the full
-   reconciliation report.
+   reconciliation report. The parameter/data-element persistence and
+   reconciliation items from §4a (2) and (3) belong here too: they share the
+   queue-and-replay machinery, and the same ordering constraint — replay
+   before the pull that would otherwise overwrite the replayed values
+   (`vger.delete` before `sync_project`/`sync_library_objects`; queued
+   parameter changes before `get_parmz`).
 
 Phase 1 is deliberately reversible: if the model turns out not to fit how
 teams actually work, nothing in `access.py` has been disturbed.
