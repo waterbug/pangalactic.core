@@ -55,6 +55,7 @@ from sqlalchemy.orm import sessionmaker, with_polymorphic
 from pangalactic.core             import __version__
 from pangalactic.core             import diagramz
 from pangalactic.core             import config, read_config
+from pangalactic.core             import get_user_home
 from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
@@ -228,18 +229,16 @@ class UberORB(object):
             pgx_home = os.environ.get('PANGALACTIC_HOME', '')
         # [C] create a 'pangalaxian' directory in the user's home dir
         else:
-            if sys.platform == 'win32':
-                default_home = os.path.join(os.environ.get('USERPROFILE'))
-                if os.path.exists(default_home):
-                    pgx_home = os.path.join(default_home, 'pangalaxian')
+            # NOTE: the platform branch that used to be inlined here now lives
+            # in p.core.get_user_home(), which is shared with pangalaxian.run()
+            # and gargleblaster -- see the note there.
+            user_home: str = get_user_home()
+            if user_home:
+                pgx_home = os.path.join(user_home, 'pangalaxian')
             else:
-                user_home: str = os.environ.get('HOME', '') or ''
-                if user_home:
-                    pgx_home = os.path.join(user_home, 'pangalaxian')
-                else:
-                    # TODO:  a first-time dialog/wizard to set pgx_home ...
-                    # current fallback is just to use the current directory
-                    pgx_home = os.path.join(os.getcwd(), 'pangalaxian')
+                # TODO:  a first-time dialog/wizard to set pgx_home ...
+                # current fallback is just to use the current directory
+                pgx_home = os.path.join(os.getcwd(), 'pangalaxian')
         if not os.path.exists(pgx_home):
             os.makedirs(pgx_home, mode=0o755)
         pgx_home = os.path.abspath(pgx_home)

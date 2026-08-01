@@ -3,6 +3,7 @@
 The Pan Galactic Engineering Framework (PGEF) core package.
 """
 import os
+import sys
 
 # RDFLib
 from rdflib import URIRef
@@ -134,6 +135,30 @@ def my_unicode_repr(self, data):
     return self.represent_str(data.encode('utf-8'))
 
 yaml.representer.Representer.add_representer(str, my_unicode_repr)
+
+def get_user_home():
+    """
+    Get the path of the user's home directory.
+
+    NOTE: this exists so that the platform branch lives in exactly one place.
+    It was previously copy-pasted into uberorb.start(), pangalaxian.run(), and
+    gargleblaster's __main__ (plus a fourth copy in the experimental
+    fastorb.py), each carrying the same latent bug: the win32 branch did
+    "os.path.join(os.environ.get('USERPROFILE'))" -- a single-argument join,
+    which raises TypeError when the variable is unset instead of yielding a
+    falsy value the surrounding guard could catch.  In gargleblaster that made
+    the "if all else fails" fallback unreachable, because the TypeError was
+    raised before it.
+
+    Returns:
+        str:  path to the user's home directory, or '' if it cannot be
+            determined -- callers are expected to fall back (typically to the
+            current working directory)
+    """
+    if sys.platform == 'win32':
+        return os.environ.get('USERPROFILE', '') or ''
+    # Linux, macOS, and anything else posix-ish
+    return os.environ.get('HOME', '') or ''
 
 def read_config(configpath):
     """
