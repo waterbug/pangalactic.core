@@ -60,6 +60,7 @@ from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
 from pangalactic.core             import read_deletion_queue
+from pangalactic.core             import read_parm_del_queue
 from pangalactic.core             import refdata, ref_db
 from pangalactic.core.registry    import PanGalacticRegistry
 from pangalactic.core.mapping     import schema_maps, schema_version
@@ -268,6 +269,9 @@ class UberORB(object):
         # read here so that they survive a restart (offline work can span
         # sessions).  See NOTES_ON_OFFLINE_AND_SYNC.md section 3.2.
         read_deletion_queue(os.path.join(pgx_home, 'deletion_queue'))
+        # ... and likewise for parameter / data element deletions, which
+        # cannot ride along with the object because deserialize_parms() merges.
+        read_parm_del_queue(os.path.join(pgx_home, 'parm_del_queue'))
         # create "file vault"
         self.vault = os.path.join(pgx_home, 'vault')
         if not os.path.exists(self.vault):
@@ -503,6 +507,15 @@ class UberORB(object):
             home (str): path to the home directory
             version (str): current version
         """
+        # NOTE: this runs *before* start() creates the home directory, so make
+        # sure it exists first.  Without this, shutil.copy() below sees a
+        # destination path that does not exist and interprets it as a *file*
+        # name -- silently creating a file called e.g. "pangalaxian_test",
+        # each ref_db file overwriting the previous one -- and the VERSION
+        # write then dies with "NotADirectoryError".  This is why the test
+        # suite could only be run once until the stray file was deleted.
+        if home and not os.path.isdir(home):
+            os.makedirs(home, mode=0o755, exist_ok=True)
         # copy sqlite `local.db` file containing pgef ref data to home
         if not os.path.exists(os.path.join(home, 'local.db')):
             ref_db_mod_path = ref_db.__path__[0]

@@ -149,6 +149,25 @@ trash = {}
 # left to report the deletion with.
 deletion_queue = {}
 
+# `parm_del_queue` is the same idea for parameter and data element deletions:
+#
+#     {key: {'kind': 'parm'|'de', 'oid': str, 'id': str, 'datetime': str}}
+#
+# where `key` is 'kind|oid|id', which makes the queue self-deduplicating.
+#
+# Parameter and data element *additions and modifications* need no queue: they
+# are carried in the object's serialization ('parameters' / 'data_elements'),
+# so they reach the repository whenever the object itself is pushed.  Deletions
+# cannot travel that way, because deserialize_parms() *merges* -- it assigns
+# each pid present in the incoming dict and never removes one that is absent,
+# so "this pid is gone" is indistinguishable from "this pid was not mentioned".
+# A parameter deleted offline therefore survives on the server and is handed
+# straight back at the next get_parmz(), undoing the deletion.
+#
+# Like `deletion_queue` this is client-side, lives in its own file, and is
+# written as soon as an item is queued rather than at shutdown.
+parm_del_queue = {}
+
 def my_unicode_repr(self, data):
     """
     Encode dumped unicode as utf-8.
@@ -254,6 +273,33 @@ def write_deletion_queue(queuepath):
     """
     # TODO:  create checksum for security
     data = yaml.safe_dump(deletion_queue, allow_unicode=True,
+                          default_flow_style=False)
+    with open(queuepath, 'w') as f:
+        f.write(data)
+
+def read_parm_del_queue(queuepath):
+    """
+    Read the offline parameter / data element deletion queue from its file.
+
+    NOTE: client-side only -- see the `parm_del_queue` comment above.
+    """
+    # TODO:  add checksum check for security
+    if os.path.exists(queuepath):
+        with open(queuepath) as f:
+            data = f.read()
+        if data:
+            parm_del_queue.update(yaml.safe_load(data))
+
+def write_parm_del_queue(queuepath):
+    """
+    Write the offline parameter / data element deletion queue to its file.
+
+    Called as soon as an item is queued or cleared (see write_deletion_queue).
+
+    NOTE: serialize *before* opening the file (see write_config).
+    """
+    # TODO:  create checksum for security
+    data = yaml.safe_dump(parm_del_queue, allow_unicode=True,
                           default_flow_style=False)
     with open(queuepath, 'w') as f:
         f.write(data)
