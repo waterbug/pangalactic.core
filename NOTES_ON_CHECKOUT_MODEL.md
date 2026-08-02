@@ -580,10 +580,32 @@ identifying fields. Full reasoning in `NOTES_FOR_DEVELOPERS.md` under
 
 ### 12.6 Still open after phase 3
 
-- **`synced_oids`** is still maintained by live code (one assignment, two
-  removals in `pangalaxian.py`) and consulted by nothing. Retiring it also
-  touches ~40 fixture lines in `test_orb.py`, so it is a decision about the
-  test suite as much as about the code.
+- **`synced_oids`** is still maintained by live code and consulted by nothing.
+  Surveyed 2026-08-02; the production footprint is exactly three sites in
+  `pangalaxian.py`:
+
+  | line | what |
+  |---|---|
+  | 1493-1498 | the only assignment, in the `user_objs_sync` branch |
+  | 4737-4738 | remove settled oids, in `on_rpc_vger_delete_result` |
+  | 6572-6573 | remove deleted oids, in the project-deletion path |
+
+  The two "reads" are the `if oid in ...` guards immediately before those
+  removals — i.e. the list is only ever consulted in order to maintain
+  itself. Nothing consumes it for behaviour, in any of the four repos.
+
+  Note the comment at 1493 says it is kept "because other code still reads
+  it", which is no longer true and should go with it.
+
+  What makes this a decision rather than a chore is the **test suite**: ~40
+  fixture lines in `test_orb.py` set `state["synced_oids"]`, and
+  `_checkout_state()` takes a `synced` keyword argument that would become
+  meaningless. Those lines are assignments rather than assertions, so
+  removing them cannot change what the tests prove — but it is a large
+  mechanical diff through the author's permission tests, and case 40 is
+  currently *described* in terms of absence from `synced_oids` (its actual
+  content — offline, unclaimed, not locally created — is unaffected and
+  remains the important branch).
 - **§9 decisions 4, 5 and 6** — `mode_defz` scope, audit trail on release,
   and check-out scope limits — are untouched and remain prerequisites for
   calling the model finished.
