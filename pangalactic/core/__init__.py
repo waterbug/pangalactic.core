@@ -128,6 +128,27 @@ prefs = {}
 state = {}
 trash = {}
 
+# `deletion_queue` holds deletions made on a client while it was offline, so
+# they can be replayed to the repository at the next sync:
+#
+#     {oid: {'cname': str, 'datetime': str}}
+#
+# Without it a deletion made offline is simply undone -- both sync paths treat
+# "the client did not report this oid" as "the client needs it", so the server
+# sends the object back and the client deserializes it again.  See
+# pangalactic.node/NOTES_ON_OFFLINE_AND_SYNC.md section 3.2.
+#
+# NOTE: this is a *client-side* cache, and is deliberately a separate file
+# rather than an item in `state`.  state is only written at shutdown, so a
+# crash would lose the queued deletion and the object would quietly come back
+# -- which is the failure this exists to prevent.  write_deletion_queue() is
+# therefore called as soon as a deletion is queued, not at exit.
+#
+# The class name is kept alongside the oid because the object is already gone
+# from the local db by the time the queue is read, so it is the only thing
+# left to report the deletion with.
+deletion_queue = {}
+
 def my_unicode_repr(self, data):
     """
     Encode dumped unicode as utf-8.
@@ -206,6 +227,35 @@ def write_deleted(deletedpath):
     data = yaml.safe_dump(deleted, allow_unicode=True,
                           default_flow_style=False)
     with open(deletedpath, 'w') as f:
+        f.write(data)
+
+def read_deletion_queue(queuepath):
+    """
+    Read the offline deletion queue from its file.
+
+    NOTE: client-side only -- see the `deletion_queue` comment above.
+    """
+    # TODO:  add checksum check for security
+    if os.path.exists(queuepath):
+        with open(queuepath) as f:
+            data = f.read()
+        if data:
+            deletion_queue.update(yaml.safe_load(data))
+
+def write_deletion_queue(queuepath):
+    """
+    Write the offline deletion queue to its file.
+
+    Called as soon as a deletion is queued or cleared, rather than only at
+    shutdown:  a deletion that is lost in a crash reappears at the next sync,
+    silently, which is precisely what the queue exists to prevent.
+
+    NOTE: serialize *before* opening the file (see write_config).
+    """
+    # TODO:  create checksum for security
+    data = yaml.safe_dump(deletion_queue, allow_unicode=True,
+                          default_flow_style=False)
+    with open(queuepath, 'w') as f:
         f.write(data)
 
 def read_prefs(prefspath):

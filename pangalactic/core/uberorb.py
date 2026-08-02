@@ -59,6 +59,7 @@ from pangalactic.core             import get_user_home
 from pangalactic.core             import prefs, read_prefs
 from pangalactic.core             import state, read_state, write_state
 from pangalactic.core             import trash, read_trash
+from pangalactic.core             import read_deletion_queue
 from pangalactic.core             import refdata, ref_db
 from pangalactic.core.registry    import PanGalacticRegistry
 from pangalactic.core.mapping     import schema_maps, schema_version
@@ -263,6 +264,10 @@ class UberORB(object):
         # any new prefs and trash set at runtime.
         read_prefs(os.path.join(pgx_home, 'prefs'))
         read_trash(os.path.join(pgx_home, 'trash'))
+        # deletions made while offline, to be replayed at the next sync --
+        # read here so that they survive a restart (offline work can span
+        # sessions).  See NOTES_ON_OFFLINE_AND_SYNC.md section 3.2.
+        read_deletion_queue(os.path.join(pgx_home, 'deletion_queue'))
         # create "file vault"
         self.vault = os.path.join(pgx_home, 'vault')
         if not os.path.exists(self.vault):
