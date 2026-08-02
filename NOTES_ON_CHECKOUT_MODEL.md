@@ -352,7 +352,9 @@ Server-side expiry sweep releases lapsed claims and publishes the release.
 1. **`CheckOut` class + RPCs + display, advisory only.** No enforcement, no
    `access.py` change. Gains real usage data on how people would use it,
    at low risk.
-2. **Enforce server-side**, wire `checked_out_oids` into `access.py`,
+2. **DONE (2026-08-02).** See "Phase 2 as built" below.
+
+   **Enforce server-side**, wire `checked_out_oids` into `access.py`,
    introduce `locally_created_oids`, and fix/retire `synced_oids`. This is
    the step that repairs the offline permission model. Two requirements
    attach here:
@@ -373,3 +375,106 @@ Server-side expiry sweep releases lapsed claims and publishes the release.
 
 Phase 1 is deliberately reversible: if the model turns out not to fit how
 teams actually work, nothing in `access.py` has been disturbed.
+
+---
+
+## 11. Phase 2 as built (2026-08-02)
+
+Four differences from the sketch in sections 5 and 7, each of which turned
+out to matter.
+
+### 11.1 `state['checkouts']`, not `checked_out_oids`
+
+Section 5 proposed `obj.oid in state['checked_out_oids']`. Phase 1 had
+already built `state['checkouts']` as a **dict carrying the holder**:
+
+    {oid: {'userid': str, 'expiry_datetime': str, 'purpose': str}}
+
+which is the right shape, because a client's mirror contains **other
+people's** claims too. The test is therefore "checked out *by me*", not
+merely "checked out" — `access.get_checkout_holder()` returns the holder and
+`is_writable_now()` compares it to the user.
+
+### 11.2 Claims are expanded at check-out time, not resolved dynamically
+
+Section 7 says the `access.py` check "needs to resolve an object's *owning*
+item first and test the claim on that". It does not — resolution happens
+once, server-side, when the claim is granted:
+
+- `meta.CHECKOUT_EXPANSION` declares, per class, which attributes a claim
+  extends along;
+- `orb.get_checkout_set(obj)` walks them (MRO-aware, so `Model` inherits
+  both `DigitalProduct`'s `has_files` and `Product`'s list);
+- `vger.expand_checkout_oids()` applies it in `check_out`, `check_in` **and**
+  `release`, so the set released is always the set claimed.
+
+Two reasons. `get_perms()` is called in tight loops — every object in a save
+batch, every row of a library refresh — so walking relationships per call
+would be costly, whereas explicit records make it a dict lookup. And
+`get_checkouts` and the pub/sub announcement then report the *true* claimed
+set, so other clients grey out exactly the right things.
+
+**The expansion rules** (author, 2026-08-02), which differ from section 7's
+dependent-object list:
+
+- one hop only — a checked-out assembly does **not** claim its components'
+  own components;
+- `components`/`q_components` expand to the **Acu**/**Qacu**, *not* to the
+  component Products. A component is usually somebody else's part; what the
+  holder needs is the ability to change the *usage* — which component, its
+  reference designator, its quantity — and that is the Acu.
+
+Measured: checking out one assembly granted 6 claims (the assembly, its 4
+Acus, its Model), with the 4 component Products correctly unclaimed.
+
+### 11.3 The server keeps a mirror too
+
+`access.py` is shared, and the claim data otherwise lives in two places (db
+on the server, mirror on the client). vger now maintains `state['checkouts']`
+in the same shape — primed at startup, refreshed after every claim mutation
+and on `get_checkouts` — so `get_perms()` has one code path on both sides and
+does not query the db per call.
+
+Without this the server's mirror would be empty and **every claim would be
+invisible to `vger.save()`**, i.e. enforcement would be inert.
+
+### 11.4 Section 4a(1) needed no code
+
+The requirement that parameter and data-element editing be governed by the
+same permission test turned out to be satisfied by the `access.py` change
+alone. `pgxnobject` already gates parameter widgets on `self.edit_mode`,
+which derives from `'modify' in get_perms(obj)`. Verified:
+
+| state | `edit_mode` | editable parameter widgets |
+|---|---|---|
+| online, unclaimed | True | 2 |
+| online, claimed by someone else | False | 0 |
+| offline, unclaimed | False | 0 |
+| offline, claimed by me | True | 2 |
+
+### 11.5 What `synced_oids` became
+
+It is no longer consulted for permissions. `state['locally_created_oids']`
+replaces it, maintained precisely: objects are added when created locally
+(`on_mod_object_signal`, `new=True`) and removed only when the repository
+confirms them (`on_vger_save_result`, from `new_obj_dts`/`mod_obj_dts`).
+
+Deliberately **not** cleared wholesale at sync: an object whose save was
+*refused* must stay locally created, and therefore still editable offline,
+rather than being forgotten because a sync happened to run.
+
+`synced_oids` is still maintained by existing code and can be retired
+separately.
+
+### 11.6 Tests
+
+Six cases added to `test_orb.py` (37-42), in the existing style. Against the
+**old** `access.py`, five of the six fail — so they discriminate the change
+rather than merely describing it. Case 42 passes both ways by design: it
+asserts that a claim is *necessary but not sufficient*, since entitlement is
+unchanged.
+
+Case 40 is the one worth keeping in view: it covers **offline with the object
+absent from `synced_oids`**, which no existing case reached — every case from
+1-36 puts its object *in* `synced_oids`. That absence is exactly the branch
+that used to grant full permissions on objects the user had not created.

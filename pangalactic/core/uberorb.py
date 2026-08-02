@@ -62,7 +62,7 @@ from pangalactic.core             import trash, read_trash
 from pangalactic.core             import refdata, ref_db
 from pangalactic.core.registry    import PanGalacticRegistry
 from pangalactic.core.mapping     import schema_maps, schema_version
-from pangalactic.core.meta        import TEXT_PROPERTIES
+from pangalactic.core.meta        import CHECKOUT_EXPANSION, TEXT_PROPERTIES
 from pangalactic.core.parametrics import (add_context_parm_def,
                                           add_default_parameters,
                                           add_default_data_elements,
@@ -798,6 +798,55 @@ class UberORB(object):
                 refresh_systemz(project)
         # sys_len = len(systemz)
         # self.log.debug(f'    systemz cache has {sys_len} items.')
+
+    def get_checkout_set(self, obj):
+        """
+        Get the full set of objects that a check-out claim on 'obj' extends
+        to:  the object itself plus its *directly* related objects, as
+        declared per class in meta.CHECKOUT_EXPANSION.
+
+        The rationale is that these are the things one actually edits while
+        working on the claimed object -- checking out a Product and then being
+        unable to change its Acus or Ports would be useless.
+
+        NOTE: expansion is deliberately **one hop only** -- it is not applied
+        recursively.  If a checked-out Product has a component that is itself
+        an assembly, that component's own components are not claimed.  Note
+        also that 'components' expands to the **Acu** instances, not to the
+        component Products:  a component is often somebody else's part, and
+        claiming an assembly should not lock it.  What the holder needs is the
+        ability to change the *usage*, which is the Acu.
+        See NOTES_ON_CHECKOUT_MODEL.md sections 4 and 7.
+
+        Args:
+            obj (Identifiable):  the object being claimed
+
+        Returns:
+            list:  obj first, followed by its directly related objects; an
+                empty list if obj is None
+        """
+        if obj is None:
+            return []
+        # a subclass inherits its bases' expansion (e.g. Model gets both
+        # DigitalProduct's 'has_files' and Product's 'components' etc.)
+        attrs = []
+        for base in obj.__class__.__mro__:
+            for a in CHECKOUT_EXPANSION.get(base.__name__, []):
+                if a not in attrs:
+                    attrs.append(a)
+        items = [obj]
+        seen = set([obj.oid])
+        for a in attrs:
+            related = getattr(obj, a, None) or []
+            if not isinstance(related, (list, tuple, set)):
+                # tolerate a scalar relationship
+                related = [related]
+            for r in related:
+                r_oid = getattr(r, 'oid', None)
+                if r_oid and r_oid not in seen:
+                    seen.add(r_oid)
+                    items.append(r)
+        return items
 
     def get_all_usage_paths(self, product):
         """

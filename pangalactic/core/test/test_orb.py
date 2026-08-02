@@ -1719,6 +1719,165 @@ class OrbTest(unittest.TestCase):
         expected = (set(['view']), '16 PE/rqt:  v')
         self.assertEqual(expected, value)
 
+    # =====================================================================
+    # CHECK-OUT CASES (phase 2 exclusivity)
+    # ---------------------------------------------------------------------
+    # These extend the cases above to the question check-out answers:  not
+    # "may this user ever edit this object" (entitlement, cases 1-36, which
+    # is unchanged) but "may they edit it *right now*" (exclusivity).
+    #
+    # state['checkouts'] mirrors the repository's active claims, in the form
+    #     {oid: {'userid': str, 'expiry_datetime': str, 'purpose': str}}
+    # and state['locally_created_oids'] lists objects this client created
+    # that the repository has never seen.
+    #
+    # NOTE on what these cover that the cases above do not:  every case from
+    # 1-36 puts its object *in* synced_oids, so the old "object_not_synced"
+    # branch -- the one that granted full offline permissions on precisely
+    # the objects the user had not created -- was never exercised by a test.
+    # Case 40 below is that scenario.
+    # See pangalactic.core/NOTES_ON_CHECKOUT_MODEL.md section 5.
+    # =====================================================================
+
+    def _checkout_state(self, connected=False, checkouts=None,
+                        locally_created=None, synced=True):
+        """
+        Set up client state for a check-out case (helper, not a test).
+
+        Keyword Args:
+            synced (bool):  if False, synced_oids is left empty, which is
+                what triggered the old (defective) offline branch -- see
+                case 40
+        """
+        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
+                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
+                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
+                                'test:H2G2:system-1',
+                                'test:H2G2:Spacecraft-Mass'] if synced else []
+        state["client"] = True
+        state["connected"] = connected
+        state["checkouts"] = checkouts or {}
+        state["locally_created_oids"] = locally_created or []
+
+    def test_26_37_checkout_case_37(self):
+        """
+        CASE 37:  client, disconnected, systems engineer, spacecraft
+                  checked out BY THAT USER -> full perms
+
+        This is the point of check-out:  the claim is what makes offline
+        editing possible at all.
+        """
+        self._checkout_state(connected=False,
+                checkouts={'test:spacecraft0': {'userid': 'zaphod'}})
+        zaphod = orb.get('test:zaphod')
+        sc = orb.get('test:spacecraft0')
+        value = (set(get_perms(sc, user=zaphod)), '37 SE/sc claimed by me')
+        expected = (set(['view', 'modify', 'delete', 'add docs',
+                         'add models']), '37 SE/sc claimed by me')
+        self.assertEqual(expected, value)
+
+    def test_26_38_checkout_case_38(self):
+        """
+        CASE 38:  client, CONNECTED, systems engineer, spacecraft checked
+                  out BY SOMEONE ELSE -> view only
+
+        A claim is exclusive:  it withholds write access even from a user
+        who is entitled and online.
+
+        NOTE: 'add docs' / 'add models' are deliberately still granted --
+        they are not write access to the object itself, and the role
+        branches grant them independently of connectivity.  What the claim
+        withholds is modify/delete.
+        """
+        self._checkout_state(connected=True,
+                checkouts={'test:spacecraft0': {'userid': 'buckaroo'}})
+        zaphod = orb.get('test:zaphod')
+        sc = orb.get('test:spacecraft0')
+        value = (set(get_perms(sc, user=zaphod)), '38 SE/sc claimed by other')
+        expected = (set(['view', 'add models', 'add docs']),
+                    '38 SE/sc claimed by other')
+        self.assertEqual(expected, value)
+
+    def test_26_39_checkout_case_39(self):
+        """
+        CASE 39:  client, connected, GLOBAL ADMIN, spacecraft checked out
+                  by someone else -> view only
+
+        A global admin is no longer omnipotent at this layer:  a claim binds
+        them too, exactly as a freeze does.  The remedy is vger.release(),
+        the counterpart of thaw.  Compare case 1/2, where steve gets the
+        admin grant on the same object.
+        """
+        self._checkout_state(connected=True,
+                checkouts={'test:spacecraft0': {'userid': 'buckaroo'}})
+        steve = orb.get('test:steve')
+        sc = orb.get('test:spacecraft0')
+        value = (set(get_perms(sc, user=steve)), '39 GA/sc claimed by other')
+        expected = (set(['view', 'add docs', 'add models']),
+                    '39 GA/sc claimed by other')
+        self.assertEqual(expected, value)
+
+    def test_26_40_checkout_case_40(self):
+        """
+        CASE 40:  client, disconnected, systems engineer, spacecraft that is
+                  NOT in synced_oids, not claimed, not locally created
+                  -> no modify/delete
+
+        **This is the case the old implementation got backwards, and the one
+        no existing test covered.**  synced_oids held only the user's *own*
+        objects, so an object absent from it was usually one the user had
+        NOT created -- and the old offline branch granted full permissions
+        on exactly those.  (Case 3 looks similar but puts the object *in*
+        synced_oids, so it never reached that branch.)
+
+        Under the old code this returned view/modify/delete/add docs/add
+        models.  It now returns view/add docs/add models:  offline and
+        unclaimed means no write access, whoever created it.
+        """
+        self._checkout_state(connected=False, synced=False)
+        zaphod = orb.get('test:zaphod')
+        sc = orb.get('test:spacecraft0')
+        value = (set(get_perms(sc, user=zaphod)), '40 SE/sc offline unsynced')
+        expected = (set(['view', 'add models', 'add docs']),
+                    '40 SE/sc offline unsynced')
+        self.assertEqual(expected, value)
+
+    def test_26_41_checkout_case_41(self):
+        """
+        CASE 41:  client, disconnected, systems engineer, object the client
+                  created and the repository has never seen -> full perms
+
+        The legitimate case the old "object_not_synced" test was reaching
+        for, now expressed precisely.
+        """
+        self._checkout_state(connected=False,
+                             locally_created=['test:spacecraft0'])
+        zaphod = orb.get('test:zaphod')
+        sc = orb.get('test:spacecraft0')
+        value = (set(get_perms(sc, user=zaphod)), '41 SE/sc locally created')
+        expected = (set(['view', 'modify', 'delete', 'add docs',
+                         'add models']), '41 SE/sc locally created')
+        self.assertEqual(expected, value)
+
+    def test_26_42_checkout_case_42(self):
+        """
+        CASE 42:  client, disconnected, propulsion engineer, requirement
+                  checked out BY THAT USER -> still view only
+
+        A claim is *necessary* but not *sufficient*:  it answers the
+        exclusivity question only.  Entitlement is unchanged, so a user who
+        could not edit the object online cannot edit it by claiming it.
+        Compare case 36, where the same user gets view only while connected.
+        """
+        self._checkout_state(connected=False,
+                checkouts={'test:H2G2:Spacecraft-Mass': {'userid':
+                                                         'buckaroo'}})
+        buckaroo = orb.get('test:buckaroo')
+        rqt = orb.get('test:H2G2:Spacecraft-Mass')
+        value = (set(get_perms(rqt, user=buckaroo)), '42 PE/rqt claimed by me')
+        expected = (set(['view']), '42 PE/rqt claimed by me')
+        self.assertEqual(expected, value)
+
     # TODO:  revise this test!
     # def test_27_deserialize_object_with_modified_parameters(self):
         # """

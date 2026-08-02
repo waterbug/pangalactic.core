@@ -397,6 +397,49 @@ ONE2M = {
          }
 
 
+# ---------------------------------------------------------------------------
+# CHECKOUT_EXPANSION:  when an object is checked out for offline work, the
+# claim automatically extends to a set of *directly* related objects, since
+# they are the things one actually edits while working on the claimed object.
+#
+# Format is {class name : [attribute names to expand]}, where each attribute
+# holds the related object(s).  Resolution walks the class's MRO, so a
+# subclass inherits its base class's expansion.
+#
+# NOTE, and this is the important part (author, 2026-08-02):
+#
+#   [1] ONLY DIRECTLY RELATED OBJECTS.  Expansion is one hop -- it is not
+#       applied recursively.  If a checked-out Product has a component that is
+#       itself an assembly, that component's own components are NOT claimed.
+#
+#   [2] For 'components' and 'q_components' the claimed objects are the *Acu*
+#       (and Qacu) instances, NOT the component Products they point to.  A
+#       component is very often somebody else's part -- a vendor's, say -- and
+#       the fact that the holder may happen to have edit permission on it
+#       while online does not mean checking out an assembly should lock it.
+#       What the holder needs is the ability to change the *usage*:  which
+#       component is used, its reference designator, its quantity.  That is
+#       the Acu.
+#
+# Checking out Product instances is by far the most common case.
+# See pangalactic.core/NOTES_ON_CHECKOUT_MODEL.md sections 4 and 7.
+# ---------------------------------------------------------------------------
+CHECKOUT_EXPANSION = {
+    # a Product's usages, interfaces, activities and models -- note
+    # 'components'/'q_components' expand to the Acu/Qacu, not to the
+    # component Product (see [2] above)
+    'Product' : ['components',              # Acu
+                 'q_components',            # Qacu (not yet in use)
+                 'ports',                   # Port
+                 'activities',              # Activity
+                 'allocated_requirements',  # Requirement
+                 'has_models',              # Model
+                 ],
+    # a Model or Document carries its file payload with it
+    'DigitalProduct' : ['has_files'],       # RepresentationFile
+    }
+
+
 # PGXN_HIDE:  Fields not to be shown for any object
 # [TODO:  implement support for these in PgxnObject editor]
 PGXN_HIDE = list(ONE2M.keys()) + list(M2M.keys())

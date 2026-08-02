@@ -12,6 +12,96 @@ modifiables = [
         'RequirementAncestry']
 
 
+def get_checkout_holder(obj):
+    """
+    Get the userid of the user currently holding a check-out claim on an
+    object, or '' if it is not claimed.
+
+    Reads state['checkouts'], which mirrors the repository's active CheckOut
+    records in the form {oid: {'userid': str, 'expiry_datetime': str,
+    'purpose': str}}.  Both ends maintain it:  the client refreshes it from
+    vger.get_checkouts() at sync and updates it from the "checked out" /
+    "checked in" pubsub messages; vger maintains its own copy as claims are
+    granted and released.  Keeping one shape means this function -- and
+    therefore get_perms() -- has a single code path on both sides.
+
+    Args:
+        obj (Identifiable):  the object
+
+    Returns:
+        str:  the holder's userid, or '' if unclaimed
+    """
+    oid = getattr(obj, 'oid', '')
+    if not oid:
+        return ''
+    return ((state.get('checkouts') or {}).get(oid) or {}).get('userid', '')
+
+
+def is_writable_now(obj, user):
+    """
+    Answer the *exclusivity* question:  may this user write to this object
+    right now?
+
+    This is deliberately separate from *entitlement* -- whether the user may
+    ever edit the object at all, which is a matter of creator/role/ownership
+    and is decided by the rest of get_perms().  Connectivity and check-out
+    claims have nothing to say about entitlement; they say only whether it is
+    safe to exercise it at this moment.  See
+    pangalactic.core/NOTES_ON_CHECKOUT_MODEL.md section 5, which describes the
+    conflation of these two questions as the source of the offline permission
+    defects this replaces.
+
+    The rules:
+
+      [1] A claim is **exclusive**.  While an object is checked out, only the
+          holder may write to it -- online or offline, and **including a
+          Global Administrator**.  This is a deliberate change from the
+          previous "global admin is omnipotent at the data-access layer"
+          stance (author, 2026-08-02):  it parallels the frozen-object rule,
+          where even a GA gets no Edit button.  The difference is that freeze
+          can be enforced in the object editor, because that is the only way
+          in, whereas a claim must also hold against vger.save() -- so it has
+          to be enforced here.  A GA who needs the object force-releases it
+          with vger.release() and then edits it, exactly as they would thaw a
+          frozen object first.
+
+      [2] The server may always write to an unclaimed object;  it is applying
+          changes on behalf of callers whose own permissions were already
+          checked.
+
+      [3] A connected client may write to an unclaimed object, as before.
+
+      [4] A disconnected client may write only to objects it created itself
+          and the repository has never seen (state['locally_created_oids']).
+          This replaces the old "object_not_synced" test, which was derived
+          from state['synced_oids'] -- a list of only the user's *own*
+          objects -- and so granted offline write access to precisely the
+          objects the user had NOT created.  See NOTES_ON_OFFLINE_AND_SYNC.md
+          section 2.
+
+    Args:
+        obj (Identifiable):  the object
+        user (Person):  the user
+
+    Returns:
+        bool:  True if the user may write to the object at this moment
+    """
+    holder = get_checkout_holder(obj)
+    if holder:
+        # [1] claimed: the holder, and only the holder
+        return holder == getattr(user, 'id', '')
+    server = not state.get('client')
+    if server:
+        # [2]
+        return True
+    if state.get('connected'):
+        # [3]
+        return True
+    # [4] disconnected client, unclaimed object
+    oid = getattr(obj, 'oid', '')
+    return bool(oid) and oid in (state.get('locally_created_oids') or [])
+
+
 def get_perms(obj, user=None, permissive=False, debugging=False):
     """
     Get the permissions of the specified user relative to the specified object.
@@ -155,30 +245,29 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     server = not state.get('client')
     client = state.get('client')
     connected = state.get('connected')
-    server_or_connected_client = server or (client and connected)
-    object_not_synced = obj.oid not in state.get('synced_oids', [])
+    # ------------------------------------------------------------------
+    # NOTE: "server_or_connected_client" (and the "object_not_synced" test
+    # derived from state['synced_oids']) used to gate every grant of
+    # modify/delete below.  Both are replaced by is_writable_now(), which
+    # answers the same question -- may this user write *right now* -- but
+    # takes check-out claims into account and fixes the inverted offline
+    # test.  Entitlement (creator / admin / role+product_type) is unchanged
+    # and is still decided by the branches below.
+    # See NOTES_ON_CHECKOUT_MODEL.md section 5.
+    # ------------------------------------------------------------------
+    writable_now = is_writable_now(obj, user)
     if is_global_admin(user):
-        # global admin is omnipotent, except for deleting projects ...
-        # orb.log.debug('  ******* user is a global admin.')
+        # NOTE: a global admin is no longer omnipotent here.  They remain
+        # entitled to everything, but a check-out claim held by someone else
+        # withholds write access from them too, exactly as a freeze does --
+        # see is_writable_now() [1].  The remedy is vger.release(), the
+        # counterpart of thaw.
         perms = ['view', 'add docs', 'add models']
-        # if (state.get('client') and
-            # (state.get('connected') or
-             # obj.oid not in state.get('synced_oids', []))):
-        if server or (client and (connected or object_not_synced)):
-            # deletions and mods are only allowed on the client if connected or
-            # object has not been synced to the server
+        if writable_now:
             perms += ['modify', 'add docs', 'add models', 'delete']
         # orb.log.debug('  perms: {}'.format(perms))
         if debugging:
             perms.append('global admin perms')
-        return perms
-    if client and not connected and object_not_synced:
-        # client user always has full perms when not connected AND the object
-        # has not been synced to the repo (which implies that the user created
-        # the object)
-        # orb.log.debug('  full perms: offline & object not synced.')
-        perms = ['view', 'modify', 'add docs', 'add models', 'delete',
-                 'offline & object not synced']
         return perms
     else:
         # -------------------------------------------------------------------
@@ -192,7 +281,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             not isinstance(obj, orb.classes['Person'])):
             # orb.log.debug('  user is object creator.')
             perms = ['view']
-            if server_or_connected_client:
+            if writable_now:
                 perms += ['delete', 'add docs', 'add models', 'modify']
             # orb.log.debug('  perms: {}'.format(perms))
             if debugging:
@@ -251,7 +340,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                     if frozen:
                         # orb.log.debug(f'* object {obj.oid} is frozen.')
                         return perms
-                    if server_or_connected_client:
+                    if writable_now:
                         # mods and deletions are only allowed on the server or
                         # a connected client
                         perms += ['modify', 'delete']
@@ -278,7 +367,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                             'lead_engineer'])
             if rqt_mgrs & role_ids:
                 perms = ['view', 'add docs']
-                if server_or_connected_client:
+                if writable_now:
                     # mods and deletions are only allowed on server or a
                     # connected client
                     perms += ['modify', 'delete']
@@ -329,7 +418,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
             if assembly_type in subsystem_types:
                 # orb.log.debug('  - assembly product_type is relevant.')
                 perms = ['view']
-                if server_or_connected_client:
+                if writable_now:
                     # mods and deletions are only allowed on server or a
                     # connected client
                     perms += ['modify', 'delete']
@@ -342,7 +431,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                   in subsystem_types):
                 # orb.log.debug('  - component product_type is relevant.')
                 perms = ['view']
-                if server_or_connected_client:
+                if writable_now:
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 if debugging:
@@ -354,7 +443,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 if pt in subsystem_types:
                     # orb.log.debug('  - TBD product_type_hint is relevant.')
                     perms = ['view']
-                    if server_or_connected_client:
+                    if writable_now:
                         perms += ['modify', 'delete']
                     # orb.log.debug('    perms: {}'.format(perms))
                     if debugging:
@@ -387,7 +476,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 # orb.log.debug('  - user is authorized by role(s) ...')
                 # orb.log.debug('    {}'.format(list(roles & auth_roles)))
                 perms = ['view']
-                if server_or_connected_client:
+                if writable_now:
                     perms += ['modify', 'add docs', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 if debugging:
@@ -438,7 +527,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                 # orb.log.debug('  - user is authorized by role(s) ...')
                 # orb.log.debug('    {}'.format(list(roles & auth_roles)))
                 perms = ['view', 'add docs']
-                if server_or_connected_client:
+                if writable_now:
                     perms += ['modify', 'delete']
                 # orb.log.debug('    perms: {}'.format(perms))
                 if debugging:
