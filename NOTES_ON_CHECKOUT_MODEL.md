@@ -365,13 +365,19 @@ Server-side expiry sweep releases lapsed claims and publishes the release.
      must gate parameter and data-element editing in `pgxnobject`, so that
      offline parameter work is confined to claimed objects rather than being
      allowed and then silently lost.
-3. **Offline deletion queue**, replayed at check-in, plus the full
+3. **DONE (2026-08-02).** See "Phase 3 as built" below.
+
+   **Offline deletion queue**, replayed at check-in, plus the full
    reconciliation report. The parameter/data-element persistence and
    reconciliation items from §4a (2) and (3) belong here too: they share the
    queue-and-replay machinery, and the same ordering constraint — replay
    before the pull that would otherwise overwrite the replayed values
    (`vger.delete` before `sync_project`/`sync_library_objects`; queued
    parameter changes before `get_parmz`).
+
+   Built as **two** queues rather than one, and the replay is chained inside
+   `get_parmz()` rather than placed early in the sync chain — see §12.1 and
+   §12.2 for why neither followed from the sketch above.
 
 Phase 1 is deliberately reversible: if the model turns out not to fit how
 teams actually work, nothing in `access.py` has been disturbed.
@@ -478,3 +484,108 @@ Case 40 is the one worth keeping in view: it covers **offline with the object
 absent from `synced_oids`**, which no existing case reached — every case from
 1-36 puts its object *in* `synced_oids`. That absence is exactly the branch
 that used to grant full permissions on objects the user had not created.
+
+---
+
+## 12. Phase 3 as built (2026-08-02)
+
+Phase 3 (§10 item 3) is complete: the offline deletion queue, the full
+reconciliation report, and the parameter/data-element items from §4a (2)
+and (3). Four things are worth recording, because in each case what was
+built differs from what §10 anticipated.
+
+### 12.1 Two queues, not one — and for different reasons
+
+§10 treats "queued parameter changes" as the same machinery as the object
+deletion queue. It is the same *machinery*, but it turned out not to be
+needed for the same *things*, and the asymmetry is not obvious:
+
+- **Parameter and data-element additions and modifications need no queue at
+  all.** They are carried in the object's own serialization (`parameters` /
+  `data_elements`), so they reach the repository whenever the object is
+  pushed. What was actually missing was the push — the parameter drop
+  handlers in `pgxnobject` did not stamp `mod_datetime`, so the object was
+  never classified as modified. The data-element drop handler beside them
+  *did* stamp; the two paths had simply drifted apart. This is §4a (2)
+  applied to the one path it had not yet reached.
+- **Deletions cannot travel that way and do need a queue.**
+  `deserialize_parms()` *merges*: it assigns each pid present in the incoming
+  dict and never removes one that is absent, so "this pid is gone" and "this
+  pid was not mentioned" are indistinguishable to the server. Note this is
+  **not** a defect to fix in `deserialize_parms` — merge-on-deserialize is
+  what makes a partial push safe. The deletion needs its own explicit signal.
+
+So `p.core.parm_del_queue` records only deletions, keyed `kind|oid|id` so it
+is self-deduplicating, written to its own file the moment an item is queued,
+and re-read in `orb.start()` because offline work spans sessions. Both halves
+of the asymmetry were verified by execution rather than by reading, since the
+whole design rests on them.
+
+### 12.2 Ordering is enforced where the hazard is, not early in the chain
+
+§10 says the replay must be sequenced before `get_parmz()`, and the obvious
+reading is "put it early in the sync chain", which is what the object
+deletion queue does (`replay_deletion_queue` is first, before
+`sync_project`/`sync_library_objects`).
+
+That is not sufficient for parameters. `get_parmz()` is *also* reached
+directly from the "parameters set" pubsub handler, which can arrive at any
+moment after reconnecting — so early placement would have made the ordering
+incidental rather than guaranteed. `replay_parm_del_queue()` therefore
+returns a `DeferredList` and is chained ahead of the rpc **inside**
+`get_parmz()` itself, so the pull genuinely waits on the push. It is a no-op
+when the queue is empty, which is the usual case.
+
+### 12.3 Refusals are settled, not retried — and are reported
+
+Neither §10 nor §4a says what happens when the repository *refuses* a
+replayed operation. The rule adopted, for both queues:
+
+**settle the entry, and report it.** Retrying is pointless — the user will
+not acquire the permission by trying again, and an entry that can never
+succeed would replay on every sync forever. But the local state is about to
+be corrected by the authoritative server copy, and that correction must not
+be silent. This is the §3.4 principle of the companion note applied to
+replay.
+
+Refusals are reported on the *live* path too, not only the queued one: a
+connected user whose deletion is refused has already had it applied locally
+and would otherwise watch it revert at the next sync with no explanation.
+
+### 12.4 Phase 3 forced an authorization fix that phase 2 had missed
+
+`vger.add_parm()`, `del_parm()`, `add_de()` and `del_de()` performed **no
+authorization check at all** — any user could add or remove any parameter or
+data element on any object, and all four always reported success. Their batch
+equivalents `set_parameters()`/`set_data_elements()` had always checked
+`"modify"`; these four had simply been missed.
+
+This matters more than a routine gap, because §4a's whole premise is that
+parameter editing is governed by the claim. Phase 2 put `is_writable_now()`
+inside `get_perms()`, but these four never called `get_perms()`, so the claim
+did not reach them. Routing them through it closed both holes at once. Until
+that landed, a claim protected an object's attributes while leaving its
+parameters editable by anyone — and parameters are the bulk of engineering
+content (§4).
+
+### 12.5 What is deliberately *not* enforced
+
+Read access is not applied to the parameter caches: `vger.get_parmz()`
+returns the whole `parameterz` cache to any caller and does not take
+`cb_details` at all. Decided and left as-is (2026-08-02) — the per-oid filter
+costs ~45 ms per oid and does not warm up, which is minutes-to-an-hour on a
+call made every sync, and the caches are keyed by opaque oid with no
+identifying fields. Full reasoning in `NOTES_FOR_DEVELOPERS.md` under
+"Read access is NOT applied to the parameter caches".
+
+### 12.6 Still open after phase 3
+
+- **`synced_oids`** is still maintained by live code (one assignment, two
+  removals in `pangalaxian.py`) and consulted by nothing. Retiring it also
+  touches ~40 fixture lines in `test_orb.py`, so it is a decision about the
+  test suite as much as about the code.
+- **§9 decisions 4, 5 and 6** — `mode_defz` scope, audit trail on release,
+  and check-out scope limits — are untouched and remain prerequisites for
+  calling the model finished.
+- **`vger.update_mode_defs`** still allows any user with project access to
+  replace a project's mode definitions wholesale (§4a), which is decision 4.
