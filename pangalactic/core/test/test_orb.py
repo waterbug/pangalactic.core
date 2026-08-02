@@ -507,7 +507,7 @@ class OrbTest(unittest.TestCase):
         Tests parameter deserialization.
         """
         test_oid = 'test:iidrive'
-        serialized_parms= {
+        serialized_parms = {
             'P': 100.0,
             'R_D': 1000000.0,
             'm': 1000.0
@@ -538,7 +538,7 @@ class OrbTest(unittest.TestCase):
         Tests data element deserialization.
         """
         test_oid = 'test:iidrive'
-        serialized_des= {
+        serialized_des = {
             'TRL': 3,
             'Vendor': 'Yoyodyne'
             }
