@@ -212,6 +212,8 @@
     `datasets:         (list) names of currently stored datasets`
 
     `dez_dts:          (str)  last-mod-datetime str of the data_elementz cache`
+    `                         -- diagnostic only: deliberately written and`
+    `                         never read (see the note below this list)`
 
     `diagram needs refresh: (bool) block diagram needs to be refreshed`
 
@@ -236,6 +238,8 @@
     `model_window_size: (list) width, height of current model window`
 
     `parmz_dts:        (str)  last-mod-datetime str of the parameterz cache`
+    `                         -- diagnostic only: deliberately written and`
+    `                         never read (see the note below this list)`
 
     `product:          (str)  oid of currently selected Product -- refers to`
     `                         the product selected in 'product modeler'`
@@ -303,6 +307,41 @@
     `     the H2G2 test project and its data will be loaded;`
     `     if true, H2G2 has already been loaded -- see`
     `     pangalactic.vger.vger.RepositoryService.`
+
+### Note on "parmz_dts" and "dez_dts" (2026-08-02)
+
+These two are **deliberately written and never read**, on either the client
+or the server. They are kept as a diagnostic record of when the `parameterz`
+and `data_elementz` caches last changed — useful when reading a log or a
+dumped `state` file — and should not be mistaken for an unfinished feature.
+
+That distinction matters because the third member of the family,
+`mode_defz_dts`, *is* fully wired: the server ships it in the
+`sync_project`/`get_..._data` payload and the client compares it before
+updating `mode_defz`. The natural instinct is to "finish the job" and give
+`parmz_dts`/`dez_dts` the same conditional treatment. **Do not.** Two
+separate reasons:
+
+- **Where it would be cheap, it buys nothing.** In the sync path the
+  parameter data is already in the payload by the time such a check would
+  run, so guarding `parameterz.update(...)` would save a dict update, not a
+  transfer.
+- **Where it would be valuable, it is unsafe.** The only place a stamp could
+  avoid real traffic is `vger.get_parmz()`, which returns the whole cache.
+  But the client's cache is "the server's copy plus whatever local drift has
+  accumulated," and the server's stamp says nothing about that drift.
+  Skipping the pull because the server has not changed would let the drift
+  persist — which is exactly the failure that made per-oid merging unworkable
+  and that unconditional full replacement fixed. The replacement is a
+  convergence mechanism, not just a data transfer. See
+  `pangalactic.node/NOTES_ON_OFFLINE_AND_SYNC.md` §3.5: protect offline work
+  by guaranteeing the push, never by weakening the pull.
+
+The values themselves are not dead — `parmz_dts` is the return value of
+`vger.set_parameters()` and doubles as its success indicator (the client
+tests `msg.startswith('failure')`), and `dez_dts` is carried in the
+`'data elements set'` pubsub message. Only the `state[...]` entries are
+unread.
 
 ## Runtime Caches
 
