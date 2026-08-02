@@ -572,6 +572,50 @@ the administrative service.  Therefore, because operations to sync such data
 are expensive, the data are cached in `state` variables rather than stored in
 the local db.
 
+##### Read access is NOT applied to the parameter caches (decided 2026-08-02)
+
+`vger.get_parmz()` returns the whole `parameterz` cache to any caller, and
+does not take `cb_details` at all, so it does not know who is asking.
+`vger.sync_objects()` likewise echoes back parameter and data element entries
+for whatever oids the client sends, without a view check.  Both are
+**deliberate**, and should not be "fixed" without revisiting this note.
+
+The asymmetry is conspicuous — `vger.get_object()` a few hundred lines away
+does check `'view' in get_perms(obj, user=user)` for non-public objects — so
+the natural reaction on first reading is that these are oversights.  They were
+examined and left as they are, for two reasons.
+
+**It is not affordable.** The obvious filter is, per oid, `orb.get(oid)` then
+`getattr(obj, 'public', True) or 'view' in get_perms(obj, user=user)`.
+Measured against the local test data, that costs **~45 ms per oid and does not
+warm up** — 20 s for the 448 oids in the test set, which extrapolates to about
+7.5 minutes at 10,000 oids and over half an hour at 50,000.  `get_parmz()` is
+called on *every* sync, so this is not a tuning problem; it is the wrong shape
+of solution.  (Note also that the cheap-looking variant is a trap: a "public
+first" shortcut is not an approximation of the view rule but exactly what
+`get_perms` computes for `'view'`, since non-Products and public Products are
+granted `'view'` unconditionally — yet it still pays the per-oid `orb.get()`,
+which is where most of the 45 ms goes.)
+
+The remaining way to make it affordable would be to reimplement the view rule
+inline in vger, against bulk queries, instead of calling `get_perms()`.  That
+means a second copy of the authorization logic, which is precisely how the two
+copies drift apart and one of them quietly stops matching the other.
+
+**And the exposure is small.** The caches are keyed by object oid and contain
+nothing else — no name, no id, no class.  An oid the caller has no access to
+is opaque to them, so what leaks is an unlabelled number attached to an
+unresolvable key.
+
+Note what is *not* affected: `sync_project()` is gated on the caller holding a
+role in the project (or being a global admin), and `sync_library_objects()`
+builds its payload from `public_lib_oids` only.  Those two paths are
+authorized already.
+
+If the sensitivity calculation ever changes — for example if the caches grow
+fields that identify their object — the thing to revisit first is the cost of
+`orb.get()` per oid, not the filter itself.
+
 #### Write (Edit) Access
 
 The following conditions must be met for Person A to have permission to edit
