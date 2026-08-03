@@ -1885,10 +1885,19 @@ class UberORB(object):
 
     def gen_rqt_id(self, reqt):
         """
-        Generate the `id` attribute for a requirement. (NOTE:  this function
-        assumes that the requirement has already been saved and is therefore
-        included in the count of requirements for the project). The format of
-        the returned `id` is as follows:
+        Generate the `id` attribute for a requirement.
+
+        NOTE: this used to say it assumed the requirement "has already been
+        saved and is therefore included in the count", which described the
+        opposite of both the call order and what the code needed:  callers
+        generate the id *before* saving, and with the caller's placeholder id
+        ("<project>-TBD") in the count, get_next_rqt_seq() used to return 1
+        and the first requirement in a project came out as "-0.1".  That is
+        fixed in get_next_rqt_seq(), which now ignores ids with no numeric
+        sequence, so this may be called either before or after the save and
+        gives the same answer.  See rqtwizard_review.md #2.
+
+        The format of the returned `id` is as follows:
 
             [project_id]-[level].[seq]
 
@@ -1920,25 +1929,27 @@ class UberORB(object):
         """
         level = level or 0
         reqs = self.search_exact(cname='Requirement', rqt_level=level, owner=owner)
-        seq = 0
         rqt_ids = [getattr(req, 'id', None) or 'unknown'
                    for req in reqs]
         real_ids = [rid for rid in rqt_ids if rid != 'unknown']
-        prev_seqs = [rqt_id.split('.')[-1] for rqt_id in real_ids]
-        if prev_seqs:
-            n = 1
-            prev_seqs.reverse()
-            for seq in prev_seqs:
-                try:
-                    seq = int(seq)
-                except:
-                    continue
-                while 1:
-                    if n > seq:
-                        break
-                    n += 1
-            seq = n
-        return seq
+        # NOTE: ids whose trailing segment is not a number are skipped -- the
+        # requirement wizard creates its object with a placeholder id of
+        # "<project>-TBD" before generating the real one, and that has no
+        # sequence number to contribute.
+        #
+        # The previous version guarded on "if prev_seqs:" -- *any* ids at all
+        # -- but derived the number only from the parseable ones, so a list
+        # containing nothing but unparseable ids still took the branch and
+        # returned the initial value 1 instead of 0.  With the placeholder in
+        # the result set, the first requirement in a project was therefore
+        # numbered "-0.1".  See rqtwizard_review.md #2.
+        prev_seqs = []
+        for rqt_id in real_ids:
+            try:
+                prev_seqs.append(int(rqt_id.split('.')[-1]))
+            except ValueError:
+                continue
+        return max(prev_seqs) + 1 if prev_seqs else 0
 
     def get_idvs(self, cname=None):
         """

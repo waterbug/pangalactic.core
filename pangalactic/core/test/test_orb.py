@@ -2015,17 +2015,57 @@ class OrbTest(unittest.TestCase):
         value = orb.get_next_rqt_seq(project, 8)
         expected = 6
         self.assertEqual(expected, value)
+        # CASE 5:  an id whose trailing segment is not a number contributes
+        # no sequence, and does not by its mere presence push the sequence
+        # off 0.  The requirement wizard creates its object with a
+        # placeholder id of "[project_id]-TBD" before generating the real
+        # one, so this is the state the very first requirement in a project
+        # is numbered in.
+        #
+        # Regression test: the guard used to be "if prev_seqs:" -- any ids at
+        # all -- while the loop that derived the number skipped exactly the
+        # unparseable ones, so a level containing only a placeholder returned
+        # the initial value 1 and the first requirement came out "-9.1".
+        # See pangalactic.node/rqtwizard_review.md #2.
+        rqt_dict_tbd = dict(_cname='Requirement', oid='test:rqt-seq-L9-tbd',
+                            id='H2G2-TBD', id_ns='test',
+                            name='Test Rqt L9 placeholder',
+                            owner='H2G2', rqt_level=9,
+                            creator='test:steve', modifier='test:steve',
+                            create_datetime=str(dtstamp()),
+                            mod_datetime=str(dtstamp()))
+        deserialize(orb, [rqt_dict_tbd], dictify=True)
+        orb.db.commit()
+        value = orb.get_next_rqt_seq(project, 9)
+        expected = 0
+        self.assertEqual(expected, value)
+        # CASE 6:  ... and once a real one exists alongside the placeholder,
+        # the placeholder still contributes nothing
+        rqt_dict_l9 = dict(_cname='Requirement', oid='test:rqt-seq-L9-0',
+                           id='H2G2-9.0', id_ns='test', name='Test Rqt L9',
+                           owner='H2G2', rqt_level=9,
+                           creator='test:steve', modifier='test:steve',
+                           create_datetime=str(dtstamp()),
+                           mod_datetime=str(dtstamp()))
+        deserialize(orb, [rqt_dict_l9], dictify=True)
+        orb.db.commit()
+        value = orb.get_next_rqt_seq(project, 9)
+        expected = 1
+        self.assertEqual(expected, value)
 
     def test_36_gen_rqt_id(self):
         """
         CASE:  generate the `id` attribute for a requirement.
         """
-        # NOTE:  gen_rqt_id()'s docstring specifies that it assumes the
-        # requirement has already been saved (so it is included in the
-        # count used by get_next_rqt_seq()) -- at that point it has not yet
-        # been assigned its real 'id', so (matching real usage) these test
-        # requirements are created with no 'id' at all (None), which
-        # get_next_rqt_seq() correctly excludes from the sequence count.
+        # NOTE:  gen_rqt_id() used to claim it assumed the requirement had
+        # already been saved and was therefore included in the count used by
+        # get_next_rqt_seq().  That described neither the call order (callers
+        # generate the id *before* saving) nor what the code needed; it is
+        # corrected in the docstring, and get_next_rqt_seq() now ignores ids
+        # with no numeric sequence, so either order gives the same answer.
+        # See test_35 CASE 5 and pangalactic.node/rqtwizard_review.md #2.
+        # These test requirements are created with no 'id' at all (None),
+        # which get_next_rqt_seq() excludes from the count.
         # CASE 1:  a level-0 requirement gets a "[project_id]-0.[seq]" id
         rqt_dict_l0 = dict(_cname='Requirement', oid='test:rqt-genid-L0',
                            id_ns='test', name='Test Rqt Gen Id L0',
