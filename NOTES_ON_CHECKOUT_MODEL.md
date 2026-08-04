@@ -327,6 +327,25 @@ Server-side expiry sweep releases lapsed claims and publishes the release.
 
 ## 9. Decisions required
 
+**All settled as of 2026-08-04.** 4, 5 and 6 were decided explicitly and are
+struck through below. 1, 2 and 3 were settled in the course of building
+phases 1 and 2 rather than as separate decisions; they are left un-struck
+because the text still describes the reasoning, but here is where each landed:
+
+- **1 (exclusive or advisory)** — exclusive. Phase 2 enforces claims in
+  `access.py` via `is_writable_now()`; see §11.
+- **2 (default expiry, and lapsed claims)** — 7 days, from `config`
+  `checkout_days` (`DEFAULT_CHECKOUT_DAYS` in `vger.py`). On a claim lapsing
+  while the user is still offline, the author's decision was *keep editing,
+  reconcile at check-in*, which is what the reconciliation report in phase 3
+  provides.
+- **3 (admin override)** — implemented: `vger.release()` is restricted to a
+  Global Administrator or the holder. The sub-question *"should the holder be
+  notified?"* is the one piece never explicitly decided; today the release is
+  published as `'checked in'` on the public channel, so the holder's client
+  learns of it the same way every other client does, but there is no
+  targeted notification.
+
 1. **Exclusive or advisory?** This note assumes exclusive. Advisory
    (record and display, do not block) is less disruptive and could be
    phase 1, but does not eliminate conflicts.
@@ -336,14 +355,56 @@ Server-side expiry sweep releases lapsed claims and publishes the release.
    the reconciliation report a prerequisite.
 3. **Admin override.** Presumably a Global Administrator may force-release,
    as with `thaw`. Should the holder be notified?
-4. **`mode_defz`** (§4) — project-level check-out, connected-only editing,
-   or accept last-write-wins.
+4. ~~**`mode_defz`** (§4) — project-level check-out, connected-only editing,
+   or accept last-write-wins.~~
+   **DECIDED (2026-08-04): accept last-write-wins, and fix the
+   authorization gap.** Object check-out cannot cover project-scoped shared
+   state, and a project-level claim type would be a new claim kind, new RPCs
+   and new UI for one cache. Mode editing is a specialised, low-concurrency
+   activity, and the client already guards its own copy by comparing
+   `mode_defz_dts` before applying an incoming update.
+
+   **The gap was worse than this note described.** It said
+   `vger.update_mode_defs` "allows any user with project access to replace a
+   project's mode definitions wholesale". In fact nothing tested for project
+   access at all: `userid` was read and then used only in the published
+   message, so *any authenticated user* could replace *any* project's mode
+   definitions. The handler's own comment ("all users with access to the
+   project are authorized") described an intent the code did not implement.
+   The client had already been written for the refusal — it tests the result
+   against `'unauthorized'` — so only the server half was missing.
+
+   Now any role in the project authorizes, or global admin. Deliberately
+   *any* role, not an admin one: discipline engineers add subsystems to
+   `mode_defz` when defining modes at component level. The update remains a
+   wholesale replacement with no server-side dts comparison, which is the
+   accepted last-write-wins behaviour, and both facts are marked at the site.
+   Tests: `test_sync.py` cases 11-13; the two refusal cases fail against the
+   pre-fix code.
 4a. ~~**Stamping** (§4a (2)) — always, or only while disconnected?~~
    **DECIDED (2026-07-31): always.** Simpler and more honest. Applied and
    verified; see §4a (2).
-5. **Audit trail** — delete `CheckOut` records on release, or retain them.
-6. **Scope limits** — should checking out an entire project be permitted,
-   rate-limited, or require an administrator?
+5. ~~**Audit trail** — delete `CheckOut` records on release, or retain
+   them.~~
+   **DECIDED (2026-08-04): keep deleting.** This is the status quo —
+   `check_in()` and `release()` both `orb.delete()` the records — and it
+   matches how `RoleAssignment` revocation already works, per §3. It keeps
+   "is there an active claim?" a simple existence query; retaining would mean
+   a `released` flag and updating every such query
+   (`get_active_checkout`, `refresh_checkouts_state`, `check_out`'s
+   already-held test), plus unbounded table growth. If history is wanted
+   later, the `'checked in'` message already published on the public channel
+   is a live record that can be logged without changing the model.
+6. ~~**Scope limits** — should checking out an entire project be permitted,
+   rate-limited, or require an administrator?~~
+   **DECIDED (2026-08-04): leave as-is, no explicit limit.** The structural
+   limits already bite, and are stronger than they look: expansion is one hop
+   (§11.2), and **`Project` is not in `CHECKOUT_EXPANSION` at all**, so
+   checking out a project claims only the Project object — not its systems.
+   "Check out an entire project" is therefore not expressible in one call; a
+   client would have to enumerate the oids itself. An arbitrary cap can be
+   added later if real usage shows a need; adding one now would be a number
+   chosen without evidence.
 
 ## 10. Suggested phasing
 
