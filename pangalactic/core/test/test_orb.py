@@ -775,11 +775,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 1:  client, disconnected, admin, spacecraft
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Steve has Global Administrator role
@@ -799,11 +794,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 2:  client, disconnected, lead engineer, spacecraft
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -823,11 +813,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 3:  client, disconnected, systems engineer, spacecraft
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Zaphod Beeblebrox has Systems Engineer role on H2G2
@@ -847,11 +832,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 4:  client, disconnected, propulsion engineer, spacecraft
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -871,11 +851,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 5:  client, disconnected, admin, acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Steve has Global Administrator role
@@ -895,11 +870,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 5a:  client, disconnected, lead engineer, synced acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -919,11 +889,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 6:  client, disconnected, propulsion engineer, acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -943,11 +908,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 7:  client, disconnected, propulsion engineer, synced acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -967,11 +927,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 8:  client, disconnected, propulsion engineer, acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -991,11 +946,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 8a:  client, disconnected, lead engineer, synced acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -1016,11 +966,6 @@ class OrbTest(unittest.TestCase):
         CASE 8b:  client, disconnected, project lead engineer, synced acu for
         an assembly owned by the H2G2 project.
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -1042,11 +987,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 9:  client, disconnected, admin, psu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Steve has Global Administrator role
@@ -1066,11 +1006,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 10:  client, disconnected, lead engineer, synced psu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -1090,11 +1025,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 11:  client, disconnected, systems engineer, synced psu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Zaphod Beeblebrox has Systems Engineer role on H2G2
@@ -1114,11 +1044,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 12:  client, disconnected, propulsion engineer, synced psu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -1138,11 +1063,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 13:  client, disconnected, admin, synced rqt
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Steve has Global Administrator role
@@ -1162,11 +1082,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 14:  client, disconnected, lead engineer, synced rqt
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -1186,11 +1101,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 15:  client, disconnected, systems engineer, synced rqt
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Zaphod Beeblebrox has Systems Engineer role on H2G2
@@ -1210,11 +1120,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 16:  client, disconnected, propulsion engineer, synced rqt
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = False
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -1238,11 +1143,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 21:  client, connected, admin, spacecraft
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Steve has Global Administrator role
@@ -1264,11 +1164,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 22:  client, connected, lead engineer, spacecraft
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -1291,11 +1186,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 23:  client, connected, systems engineer, spacecraft
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Zaphod Beeblebrox has Systems Engineer role on H2G2
@@ -1317,11 +1207,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 24:  client, connected, propulsion engineer, spacecraft
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -1342,11 +1227,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 25:  client, connected, admin, acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Steve has Global Administrator role
@@ -1368,11 +1248,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 25a:  client, connected, lead engineer, synced acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -1393,11 +1268,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 26:  client, connected, propulsion engineer, acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -1417,11 +1287,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 27:  client, connected, propulsion engineer, synced acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -1441,11 +1306,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 28:  client, connected, propulsion engineer, acu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -1466,11 +1326,6 @@ class OrbTest(unittest.TestCase):
         CASE 28a:  client, connected, lead engineer, synced acu for
         an assembly owned by the H2G2 project.
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -1492,11 +1347,6 @@ class OrbTest(unittest.TestCase):
         CASE 28b:  client, connected, project lead engineer, synced acu for
         an assembly owned by the H2G2 project.
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -1519,11 +1369,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 29:  client, connected, admin, psu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Steve has Global Administrator role
@@ -1545,11 +1390,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 30:  client, connected, lead engineer, synced psu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -1571,11 +1411,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 31:  client, connected, systems engineer, synced psu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Zaphod Beeblebrox has Systems Engineer role on H2G2
@@ -1597,11 +1432,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 32:  client, connected, propulsion engineer, synced psu
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -1621,11 +1451,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 33:  client, connected, admin, synced rqt
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Steve has Global Administrator role
@@ -1647,11 +1472,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 34:  client, connected, lead engineer, synced rqt
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # John Carefulwalker has Lead Engineer role on H2G2
@@ -1673,11 +1493,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 35:  client, connected, systems engineer, synced rqt
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Zaphod Beeblebrox has Systems Engineer role on H2G2
@@ -1699,11 +1514,6 @@ class OrbTest(unittest.TestCase):
         """
         CASE 36:  client, connected, propulsion engineer, synced rqt
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass']
         state["client"] = True
         state["connected"] = True
         # Buckaroo Banzai has Propulsion Engineer role on H2G2
@@ -1731,29 +1541,26 @@ class OrbTest(unittest.TestCase):
     # and state['locally_created_oids'] lists objects this client created
     # that the repository has never seen.
     #
-    # NOTE on what these cover that the cases above do not:  every case from
-    # 1-36 puts its object *in* synced_oids, so the old "object_not_synced"
-    # branch -- the one that granted full offline permissions on precisely
-    # the objects the user had not created -- was never exercised by a test.
-    # Case 40 below is that scenario.
-    # See pangalactic.core/NOTES_ON_CHECKOUT_MODEL.md section 5.
+    # NOTE on what these cover that the cases above do not:  cases 1-36 were
+    # written before the check-out model and set only "client" and
+    # "connected", so none of them pins the state that now decides offline
+    # write access -- an explicit absence of both a claim and a
+    # locally-created record.  Case 40 below is that baseline.
+    # (Historically these cases were distinguished by state["synced_oids"],
+    # retired 2026-08-04; see NOTES_ON_CHECKOUT_MODEL.md sections 5 and 11.5.)
     # =====================================================================
 
     def _checkout_state(self, connected=False, checkouts=None,
-                        locally_created=None, synced=True):
+                        locally_created=None):
         """
         Set up client state for a check-out case (helper, not a test).
 
-        Keyword Args:
-            synced (bool):  if False, synced_oids is left empty, which is
-                what triggered the old (defective) offline branch -- see
-                case 40
+        NOTE: this used to take a "synced" keyword that populated
+        state["synced_oids"].  That key was retired on 2026-08-04 -- it had
+        stopped being consulted for anything once access.py moved to
+        state["locally_created_oids"] -- so the three inputs that actually
+        decide offline write access are the three below.
         """
-        state["synced_oids"] = ['test:spacecraft0', 'test:H2G2:acu-1',
-                                'test:H2G2:acu-2', 'test:H2G2:acu-4',
-                                'test:H2G2:acu-6', 'test:H2G2:acu-7',
-                                'test:H2G2:system-1',
-                                'test:H2G2:Spacecraft-Mass'] if synced else []
         state["client"] = True
         state["connected"] = connected
         state["checkouts"] = checkouts or {}
@@ -1820,21 +1627,23 @@ class OrbTest(unittest.TestCase):
     def test_26_40_checkout_case_40(self):
         """
         CASE 40:  client, disconnected, systems engineer, spacecraft that is
-                  NOT in synced_oids, not claimed, not locally created
-                  -> no modify/delete
+                  neither claimed nor locally created -> no modify/delete
 
-        **This is the case the old implementation got backwards, and the one
-        no existing test covered.**  synced_oids held only the user's *own*
-        objects, so an object absent from it was usually one the user had
-        NOT created -- and the old offline branch granted full permissions
-        on exactly those.  (Case 3 looks similar but puts the object *in*
-        synced_oids, so it never reached that branch.)
+        The negative baseline of this series:  it is what makes cases 37 and
+        41 mean something, by pinning the state in which neither a claim nor
+        a locally-created record exists.  Case 3 asserts the same permissions
+        but predates the check-out model and does not set either, so it
+        happens to be right rather than being written to be.
 
-        Under the old code this returned view/modify/delete/add docs/add
-        models.  It now returns view/add docs/add models:  offline and
-        unclaimed means no write access, whoever created it.
+        **This is also the case the old implementation got backwards.**  The
+        offline branch keyed on absence from state["synced_oids"], which held
+        only the user's *own* objects -- so "absent" meant, in practice,
+        "somebody else created this", and it granted full permissions on
+        exactly those.  It returned view/modify/delete/add docs/add models
+        where it now returns view/add docs/add models.  (synced_oids itself
+        was retired on 2026-08-04, having become write-only.)
         """
-        self._checkout_state(connected=False, synced=False)
+        self._checkout_state(connected=False)
         zaphod = orb.get('test:zaphod')
         sc = orb.get('test:spacecraft0')
         value = (set(get_perms(sc, user=zaphod)), '40 SE/sc offline unsynced')

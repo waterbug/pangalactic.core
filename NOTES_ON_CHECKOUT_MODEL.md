@@ -469,8 +469,14 @@ Deliberately **not** cleared wholesale at sync: an object whose save was
 *refused* must stay locally created, and therefore still editable offline,
 rather than being forgotten because a sync happened to run.
 
-`synced_oids` is still maintained by existing code and can be retired
-separately.
+**`synced_oids` was retired on 2026-08-04.** It had become write-only:
+maintained in three places, consulted by nothing. Removed were the single
+assignment in `pangalaxian.on_sync_result`, the two per-oid removals (in
+`on_rpc_vger_delete_result` and the project-deletion path), the state-key
+entry and footnote in `NOTES_FOR_DEVELOPERS.md`, and 38 fixture assignments
+in `test_orb.py`. The `_checkout_state` helper lost its `synced` keyword.
+Nothing else changed: the key was already inert, so all 87 core tests pass
+before and after.
 
 ### 11.6 Tests
 
@@ -580,32 +586,14 @@ identifying fields. Full reasoning in `NOTES_FOR_DEVELOPERS.md` under
 
 ### 12.6 Still open after phase 3
 
-- **`synced_oids`** is still maintained by live code and consulted by nothing.
-  Surveyed 2026-08-02; the production footprint is exactly three sites in
-  `pangalaxian.py`:
-
-  | line | what |
-  |---|---|
-  | 1493-1498 | the only assignment, in the `user_objs_sync` branch |
-  | 4737-4738 | remove settled oids, in `on_rpc_vger_delete_result` |
-  | 6572-6573 | remove deleted oids, in the project-deletion path |
-
-  The two "reads" are the `if oid in ...` guards immediately before those
-  removals — i.e. the list is only ever consulted in order to maintain
-  itself. Nothing consumes it for behaviour, in any of the four repos.
-
-  Note the comment at 1493 says it is kept "because other code still reads
-  it", which is no longer true and should go with it.
-
-  What makes this a decision rather than a chore is the **test suite**: ~40
-  fixture lines in `test_orb.py` set `state["synced_oids"]`, and
-  `_checkout_state()` takes a `synced` keyword argument that would become
-  meaningless. Those lines are assignments rather than assertions, so
-  removing them cannot change what the tests prove — but it is a large
-  mechanical diff through the author's permission tests, and case 40 is
-  currently *described* in terms of absence from `synced_oids` (its actual
-  content — offline, unclaimed, not locally created — is unaffected and
-  remains the important branch).
+- ~~**`synced_oids`**~~ — **RETIRED 2026-08-04.** See §11.5. The test-suite
+  question that made it a decision rather than a chore turned out to be
+  answerable: the ~38 fixture lines were assignments, not assertions, so
+  removing them could not change what the tests prove, and the one case whose
+  *description* depended on the key (case 40) was reframed rather than
+  deleted — it is still the negative baseline of the check-out series, now
+  pinned on the absence of a claim and of a locally-created record, which is
+  what actually decides the outcome.
 - **§9 decisions 4, 5 and 6** — `mode_defz` scope, audit trail on release,
   and check-out scope limits — are untouched and remain prerequisites for
   calling the model finished.

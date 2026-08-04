@@ -246,8 +246,6 @@
 
     `project:          (str)  oid of currently selected Project`
 
-    `synced_oids[3]:   (list) oids of user-created objects that have been synced`
-
     `synced_projects[4]: (list) oids of projects that have been synced`
 
     `sys_tree_expansion[5]: (dict) maps project oids to tree expansion level`
@@ -279,11 +277,14 @@
     `    NOTE:  for project-independent role assignments, 'global' is used in`
     `    place of a project oid.`
 
-    `[3]: the "synced_oids" list is used in determining whether an object may`
-    `     be modified or deleted while the client is offline (not connected to`
-    `     the repository): any object that has been synced to the repository`
-    `     *cannot* be modified or deleted while offline, because it may be`
-    `     used in an assembly by another user.`
+    `[3]: RETIRED 2026-08-04.  "synced_oids" is gone.  It was described as`
+    `     determining whether an object may be modified or deleted while`
+    `     offline, but it held only the user's *own* created objects, so`
+    `     "absent from synced_oids" meant in practice "somebody else created`
+    `     this" -- the inverse of what the offline permission test wanted.`
+    `     That test now uses "locally_created_oids" plus the check-out claim;`
+    `     see NOTES_ON_CHECKOUT_MODEL.md.  The footnote number is kept so the`
+    `     remaining references ([4] etc.) do not shift.`
 
     `[4]: Projects only need to be synced when a project is first used during`
     `     an online session because objects may have been added, deleted, or`
