@@ -365,15 +365,23 @@ def serialize_parms(oid):
 
 def deserialize_parms(oid, ser_parms, cname=None):
     """
-    Output the serialized format for parameters. Note that the values are
-    *always* expressed in base units and the 'units' field contains the
-    preferred units to be used when displaying the value in the user interface
-    (i.e., the value must be converted to those units for display).
+    Update the parameterz cache from an object's set of parameters in
+    serialized format. Note that the values are *always* expressed in base
+    units.
+
+    ***************************************************************************
+    CAVEAT: a primary purpose of this function is to validate parameter data as
+    it is added to the cache, verifying that for each parameter there exists a
+    ParameterDefinition, and that verification process depends on the
+    'parm_defz' cache that is built when the orb starts; therefore, this
+    function depends on the orb having been started before it is called;
+    otherwise its output is meaningless.
+    ***************************************************************************
 
     [NOTE: for backwards compatibility, detection of data elements in a
     `parameters` section has been added, because some data elements (such as
     TRL and Vendor) were previously defined as parameters.  Any data elements
-    found will be deserialized and added to the `data_elementz` cache.
+    found will be added to the `data_elementz` cache.
     - SCW 2020-04-09.]
 
     Args:
@@ -1736,7 +1744,16 @@ def serialize_des(oid):
 
 def deserialize_des(oid, ser_des, cname=None):
     """
-    Deserialize a serialized object's `data_elements` dictionary.
+    Deserialize an object's serialized `data_elements` dictionary.
+
+    ***************************************************************************
+    CAVEAT: a primary purpose of this function is to validate data element data as
+    it is added to the cache, verifying that for each data element there exists a
+    DataElementDefinition, and that verification process depends on the
+    'de_defz' cache that is built when the orb starts; therefore, this
+    function depends on the orb having been started before it is called;
+    otherwise its output is meaningless.
+    ***************************************************************************
 
     Args:
         oid (str):  oid attr of the object to which the data elements are
