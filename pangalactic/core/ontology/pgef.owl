@@ -94,6 +94,50 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/represented_usage -->
+
+    <owl:ObjectProperty rdf:about="&pgef;represented_usage">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The assembly component usage (Acu) whose shape this context dependent shape representation represents.  In STEP this association is made indirectly, by way of the product_definition_shape of the next_assembly_usage_occurrence; here it is direct, since PGEF has no separate product_definition_shape concept.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ContextDependentShapeRepresentation"/>
+        <rdfs:range rdf:resource="&pgef;Acu"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/shape_representations -->
+
+    <owl:ObjectProperty rdf:about="&pgef;shape_representations">
+        <owl:inverseOf rdf:resource="&pgef;represented_usage"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The context dependent shape representations that position this assembly component usage (Acu) within its assembly.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Acu"/>
+        <rdfs:range rdf:resource="&pgef;ContextDependentShapeRepresentation"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/placement -->
+
+    <owl:ObjectProperty rdf:about="&pgef;placement">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The placement of the component&apos;s coordinate frame within the coordinate frame of the assembly.  In STEP the equivalent is carried by an item_defined_transformation, which holds two axis2_placement_3d items (transform_item_1, in the component&apos;s own representation, and transform_item_2, in the assembly&apos;s); this property holds the net placement of the component in the assembly, i.e. it assumes transform_item_1 is the identity placement.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;ContextDependentShapeRepresentation"/>
+        <rdfs:range rdf:resource="&pgef;Axis2Placement3D"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/placement_of -->
+
+    <owl:ObjectProperty rdf:about="&pgef;placement_of">
+        <owl:inverseOf rdf:resource="&pgef;placement"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The context dependent shape representations that use this placement.  A placement is meaningless on its own -- this is what makes it possible to find the assembly, and therefore the project, that a placement belongs to.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Axis2Placement3D"/>
+        <rdfs:range rdf:resource="&pgef;ContextDependentShapeRepresentation"/>
+    </owl:ObjectProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/q_assembly -->
 
     <owl:ObjectProperty rdf:about="&pgef;q_assembly">
@@ -2065,13 +2109,130 @@
 
 
 
-    <!-- 
+    <!-- http://pangalactic.us/pgef/location_x -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;location_x">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The x coordinate of the origin of the placement&apos;s coordinate frame, in metres.  Together with location_y and location_z this is the &quot;location&quot; attribute of a STEP axis2_placement_3d, which is a cartesian_point.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Axis2Placement3D"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/location_y -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;location_y">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The y coordinate of the origin of the placement&apos;s coordinate frame, in metres.  See location_x.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Axis2Placement3D"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/location_z -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;location_z">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The z coordinate of the origin of the placement&apos;s coordinate frame, in metres.  See location_x.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Axis2Placement3D"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/axis_x -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;axis_x">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The x component of the direction of the placement&apos;s local z axis.  Together with axis_y and axis_z this is the &quot;axis&quot; attribute of a STEP axis2_placement_3d, which is a direction; the three components are its direction_ratios and need not be normalized.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Axis2Placement3D"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/axis_y -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;axis_y">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The y component of the direction of the placement&apos;s local z axis.  See axis_x.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Axis2Placement3D"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/axis_z -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;axis_z">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The z component of the direction of the placement&apos;s local z axis.  See axis_x.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Axis2Placement3D"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/ref_direction_x -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;ref_direction_x">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The x component of the direction of the placement&apos;s local x axis.  Together with ref_direction_y and ref_direction_z this is the &quot;ref_direction&quot; attribute of a STEP axis2_placement_3d, which is a direction; the three components are its direction_ratios and need not be normalized.  The local y axis is implied, being the cross product of the local z and x axes.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Axis2Placement3D"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/ref_direction_y -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;ref_direction_y">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The y component of the direction of the placement&apos;s local x axis.  See ref_direction_x.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Axis2Placement3D"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/ref_direction_z -->
+
+    <owl:DatatypeProperty rdf:about="&pgef;ref_direction_z">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The z component of the direction of the placement&apos;s local x axis.  See ref_direction_x.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;Axis2Placement3D"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!--
     ///////////////////////////////////////////////////////////////////////////////////////
     //
     // Classes
     //
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
+
+
+
+    <!-- http://pangalactic.us/pgef/Axis2Placement3D -->
+
+    <owl:Class rdf:about="&pgef;Axis2Placement3D">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The location and orientation of a coordinate frame in three dimensional space, corresponding to the STEP axis2_placement_3d:  a location (the origin of the frame), an axis (the direction of its local z axis) and a ref_direction (the direction of its local x axis).  The local y axis is implied, being the cross product of the other two.  Orientation is expressed as direction cosines rather than as angles, so no rotation sequence convention is implied.  N.B.:  STEP represents the location as a cartesian_point and each direction as a direction, all of which are separate entities; here they are held as coordinates on the placement itself, since PGEF has no need of independently identified points and directions.</rdfs:comment>
+    </owl:Class>
+
+
+
+    <!-- http://pangalactic.us/pgef/ContextDependentShapeRepresentation -->
+
+    <owl:Class rdf:about="&pgef;ContextDependentShapeRepresentation">
+        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:comment rdf:datatype="&xsd;string">A shape representation whose meaning depends on the assembly context in which it occurs:  it positions the component of an assembly component usage (Acu) within the coordinate frame of that usage&apos;s assembly.  Corresponds to the STEP context_dependent_shape_representation, which is the entity that makes the shape of an occurrence dependent on its context, and is why placement is a property of the usage rather than of the component product -- the same product used at several places in an assembly has a different placement at each.</rdfs:comment>
+    </owl:Class>
 
 
 

@@ -21,6 +21,29 @@ Examples of schema mods that require a conversion function include:
 """
 # NOTES:
 
+# version 3.5.0:
+#   * mods:
+#       + added class "Axis2Placement3D" (subclass of Identifiable), the
+#         location and orientation of a coordinate frame:  location_[xyz],
+#         axis_[xyz] (local z direction) and ref_direction_[xyz] (local x
+#         direction).  Corresponds to the STEP axis2_placement_3d.
+#       + added class "ContextDependentShapeRepresentation" (subclass of
+#         Identifiable), which positions the component of an Acu within the
+#         frame of that Acu's assembly:  "represented_usage" -> Acu,
+#         "placement" -> Axis2Placement3D.  Corresponds to the STEP
+#         context_dependent_shape_representation.
+#       + added inverse attribute "shape_representations" on Acu.
+#   * reason:
+#     PGEF had nowhere to record where a component sits within its assembly,
+#     which is needed to generate 42 ACS simulation input and, more generally,
+#     to import assembly geometry from CAD.  Placement belongs to the usage
+#     rather than to the component product, since one product used at several
+#     places in an assembly has a different placement at each -- which is
+#     also how STEP models it, by way of the NAUO.  See
+#     pangalactic.node/NOTES_ON_STEP_IMPORT.md.
+#   * no conversion function is required:  both classes are new and
+#     unpopulated, and the new Acu attribute is an inverse (no column).
+
 # version 3.3.0:
 #   * mods:
 #       + removed attribute "of_function", which specifically referenced Acu;
@@ -101,7 +124,7 @@ Examples of schema mods that require a conversion function include:
 
 from copy import deepcopy
 
-schema_version = '3.4.0'
+schema_version = '3.5.0'
 
 
 def to_x_x_x(sos):

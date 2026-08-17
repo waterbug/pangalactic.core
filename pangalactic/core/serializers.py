@@ -513,6 +513,10 @@ DESERIALIZATION_ORDER = [
                     'Document',
                     'DocumentReference',
                     'Acu',
+                    'Axis2Placement3D',
+                    # ContextDependentShapeRepresentation references both Acu
+                    # and Axis2Placement3D, so it must follow both
+                    'ContextDependentShapeRepresentation',
                     'ProjectSystemUsage',
                     'Mission',
                     'Activity', # Activity references Acu, PSU, and Mission

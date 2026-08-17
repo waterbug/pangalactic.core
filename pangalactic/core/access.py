@@ -6,6 +6,8 @@ from pangalactic.core import orb, state, config
 
 
 modifiables = [
+        'Axis2Placement3D',
+        'ContextDependentShapeRepresentation',
         'ParameterRelation',
         'Relation',
         'RepresentationFile',
@@ -576,6 +578,42 @@ def is_global_admin(user):
     return bool(global_admin)
 
 
+def get_owner_id(obj):
+    """
+    Get the id of the organization or project that owns an object, following
+    the same delegation `is_cloaked()` uses:  objects that are not themselves
+    owned take their owner from the object they are subsidiary to.
+
+    Used by the repository service to decide which project channel an object's
+    "new" or "modified" notification should be published on.  An object whose
+    owner cannot be resolved is not published to any project channel, so a
+    class that reaches this function and falls through will sync only on the
+    next full sync, not in real time.
+
+    Args:
+        obj (Identifiable):  the object
+
+    Returns:
+        str:  the owner's id, or '' if none could be resolved
+    """
+    if obj is None:
+        return ''
+    if hasattr(obj, 'owner'):
+        return getattr(obj.owner, 'id', '') or ''
+    elif isinstance(obj, orb.classes['ProjectSystemUsage']):
+        return get_owner_id(getattr(obj, 'system', None))
+    elif isinstance(obj, orb.classes['Acu']):
+        return get_owner_id(getattr(obj, 'assembly', None))
+    elif isinstance(obj, orb.classes['ContextDependentShapeRepresentation']):
+        return get_owner_id(obj.represented_usage)
+    elif isinstance(obj, orb.classes['Axis2Placement3D']):
+        for cdsr in (obj.placement_of or []):
+            owner_id = get_owner_id(cdsr)
+            if owner_id:
+                return owner_id
+    return ''
+
+
 def is_cloaked(obj):
     """
     Return the cloaking status of an object.
@@ -610,6 +648,15 @@ def is_cloaked(obj):
         else:
             # otherwise, cloaking for PSU is determined by system cloaking
             return is_cloaked(obj.system)
+    elif isinstance(obj, orb.classes['ContextDependentShapeRepresentation']):
+        # cloaking for a shape representation is determined by the usage it
+        # positions -- the geometry of a cloaked assembly is as proprietary
+        # as the assembly is
+        return is_cloaked(obj.represented_usage)
+    elif isinstance(obj, orb.classes['Axis2Placement3D']):
+        # a placement has meaning only through the representations that use
+        # it; it is cloaked if any of them is
+        return any(is_cloaked(cdsr) for cdsr in (obj.placement_of or []))
     elif hasattr(obj, 'public') and not obj.public:
         return True
     else:

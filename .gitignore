@@ -27,5 +27,10 @@ node.pid
 .pythonscope*
 pangalaxian/*
 pangalaxian_test/*
+# test home directories, wherever the suite is run from -- test_kb.py needs
+# cwd to be the test directory, so they do not always land at the repo root
+**/marvin_test/
+**/pangalaxian_test/
+**/placement_test/
 *.pickle
 _trial_temp

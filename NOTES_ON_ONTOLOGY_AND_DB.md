@@ -2,6 +2,11 @@
 
 ### Mods
 
+* 2026-08-16 (schema version 3.5.0)
+  - Added `Axis2Placement3D` and `ContextDependentShapeRepresentation`, both
+    `Identifiable` subclasses, which record where a component sits within its
+    assembly.  See "Component placement" below.
+
 * 2018-03-21
   - Classes that were `Identifiable` subclasses, now `Modelable` subclasses:
     [Acu, ParameterRelation, PortType, ProductRequirement,
@@ -176,6 +181,99 @@
     Transformers      5950 
     Transistors       5961 
     Wire and Cable      6145
+
+### Component placement
+
+Added at schema version 3.5.0, so that a project assembly can be used as
+input to a 42 ACS simulation and, more generally, so that assembly geometry
+can be imported from CAD.  Two classes, both `Identifiable` subclasses:
+
+* `Axis2Placement3D` -- the location and orientation of a coordinate frame:
+  `location_[xyz]`, `axis_[xyz]` (the direction of the local z axis) and
+  `ref_direction_[xyz]` (the direction of the local x axis).  The local y
+  axis is implied.  Orientation is held as direction cosines, so **no
+  rotation sequence convention is implied** and none has to be agreed.
+
+* `ContextDependentShapeRepresentation` -- `represented_usage` -> `Acu`,
+  `placement` -> `Axis2Placement3D`, with inverses `Acu.shape_representations`
+  and `Axis2Placement3D.placement_of`.
+
+**Placement belongs to the usage, not to the product.**  A product used at
+several places in an assembly has a different placement at each, which is why
+this hangs off the `Acu` -- and it is how STEP models it too, by way of the
+`next_assembly_usage_occurrence` that the `Acu` corresponds to.  The `Acu`
+definition has said as much since long before these classes existed:  a
+conceptual product "can be used at multiple locations (distinguished by
+reference designator, a property of the Acu)".
+
+#### Mapping to STEP [1]
+
+| PGEF | STEP |
+|---|---|
+| `Acu` | `next_assembly_usage_occurrence` |
+| `ContextDependentShapeRepresentation` | `context_dependent_shape_representation` |
+| `Axis2Placement3D` | `axis2_placement_3d` |
+| `location_[xyz]` | `axis2_placement_3d.location` (a `cartesian_point`) |
+| `axis_[xyz]` | `axis2_placement_3d.axis` (a `direction`) |
+| `ref_direction_[xyz]` | `axis2_placement_3d.ref_direction` (a `direction`) |
+
+Two deliberate simplifications, both recoverable on export:
+
+1. STEP associates the `context_dependent_shape_representation` with the NAUO
+   indirectly, through the NAUO's `product_definition_shape`.  PGEF has no
+   `product_definition_shape` concept, so `represented_usage` points at the
+   `Acu` directly.
+2. STEP carries the transform in an `item_defined_transformation`, which has
+   two `axis2_placement_3d` items -- `transform_item_1` in the component's own
+   representation and `transform_item_2` in the assembly's.  `placement`
+   holds the *net* placement of the component in the assembly, i.e. it takes
+   `transform_item_1` to be the identity.  This is what pythonocc's
+   `XCAFDoc_ShapeTool.GetLocation()` returns for a component occurrence, so
+   nothing is lost on import.
+
+Also, STEP makes the location a `cartesian_point` and each direction a
+`direction`, all independently identified entities.  Here they are plain
+coordinates on the placement, since PGEF has no use for separately identified
+points and directions -- and doing otherwise would mean four objects per
+placement.
+
+#### What a new class costs
+
+Recorded here because it generalizes.  The registry builds SQLAlchemy classes
+and tables from the ontology and calls `Base.metadata.create_all()`, so a new
+class needs **no hand-written table or migration**; bumping
+`mapping.schema_version` makes each install dump its db, rebuild the classes
+from the ontology and reload.  Per `mapping.py`, adding an unpopulated class
+needs no conversion function.  But four places do not follow automatically:
+
+* `serializers.DESERIALIZATION_ORDER` -- a class missing from it lands in the
+  unordered "other" bucket, so an object can be deserialized before something
+  it references.  That is a foreign key violation whose appearance depends on
+  dict ordering, i.e. an intermittent failure.
+* `access.modifiables` -- objects that are only ever reached through a parent
+  object need to be listed, or no user can modify them.
+* `access.is_cloaked()` -- anything that falls through its branches is treated
+  as **public**.  A placement on a cloaked assembly leaking is a real
+  disclosure, so subsidiary classes must delegate to their parent.
+* `access.get_owner_id()` -- resolves the project channel that vger publishes
+  an object's "new"/"modified" notification on.  A class that resolves to `''`
+  is not broken, but it syncs only at the next full sync rather than in real
+  time.
+
+The last two both delegate the same way, which is why `get_owner_id()` was
+factored out of `vger.save()`, where the owner / PSU / Acu chain had been
+inlined twice.
+
+#### Not yet done
+
+* `clone.py` copies an assembly's `Acu`s attribute by attribute and does not
+  copy their shape representations, so a cloned assembly loses its component
+  placements.  Harmless until something populates them; must be fixed before
+  it is.
+* No UI.  These objects are reachable only through an `Acu`, and nothing
+  routes one to `PgxnObject` yet.
+* Nothing populates them.  The STEP importer is the next piece --
+  see `pangalactic.node/NOTES_ON_STEP_IMPORT.md`.
 
 ---------------
 References:
