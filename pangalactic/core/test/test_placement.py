@@ -15,6 +15,7 @@ import pangalactic.core.set_uberorb
 
 from pangalactic.core             import orb
 from pangalactic.core.access      import get_owner_id, get_perms, is_cloaked
+from pangalactic.core.clone       import clone, PLACEMENT_COORDS
 from pangalactic.core.serializers import (DESERIALIZATION_ORDER, deserialize,
                                           serialize)
 from pangalactic.core.test.utils  import create_test_users, create_test_project
@@ -254,6 +255,91 @@ class PlacementTest(unittest.TestCase):
         # whatever the assembly's cloaking is, all three agree
         expected = [(False, False, False), (True, True, True)]
         self.assertEqual(expected, results)
+
+
+    def test_14_clone_copies_shape_representations(self):
+        """
+        CASE:  cloning an assembly gives the clone's Acus copies of the
+        placements the original's Acus had
+        """
+        deserialize(orb, SERIALIZED_PLACEMENT)
+        acu = orb.get(TEST_ACU_OID)
+        assembly = acu.assembly
+        new_obj = clone(assembly, save_hw=False)
+        orb.db.commit()
+        # find the cloned Acu for the same component
+        cloned = [a for a in new_obj.components
+                  if a.component is acu.component]
+        self.assertEqual(1, len(cloned))
+        reps = list(cloned[0].shape_representations)
+        self.assertEqual(1, len(reps))
+        p = reps[0].placement
+        expected = [0.125, 0.125, 0.08, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0]
+        value = [p.location_x, p.location_y, p.location_z,
+                 p.axis_x, p.axis_y, p.axis_z,
+                 p.ref_direction_x, p.ref_direction_y, p.ref_direction_z]
+        self.assertEqual(expected, value)
+
+    def test_15_cloned_placement_is_a_copy_not_a_reference(self):
+        """
+        CASE:  moving a component in the clone does not move it in the
+        original.
+
+        A placement is reachable from every representation that uses it, so
+        sharing one between the original and the clone would couple them.
+        """
+        deserialize(orb, SERIALIZED_PLACEMENT)
+        acu = orb.get(TEST_ACU_OID)
+        original = orb.get(CDSR_OID).placement
+        new_obj = clone(acu.assembly, save_hw=False)
+        orb.db.commit()
+        cloned = [a for a in new_obj.components
+                  if a.component is acu.component][0]
+        copy = list(cloned.shape_representations)[0].placement
+        # distinct objects ...
+        self.assertNotEqual(original.oid, copy.oid)
+        # ... and moving the clone leaves the original where it was
+        copy.location_x = 99.0
+        expected = [99.0, 0.125]
+        value = [copy.location_x, original.location_x]
+        self.assertEqual(expected, value)
+
+
+    def test_16_clone_copies_every_coordinate(self):
+        """
+        CASE:  the coordinates clone.py copies are exactly the ones the
+        ontology defines.
+
+        clone_shape_representations() copies a fixed tuple of field names, so
+        a coordinate added to the ontology and not to that tuple would be
+        silently dropped by every clone.
+        """
+        fields = orb.schemas['Axis2Placement3D']['field_names']
+        expected = sorted([f for f in fields
+                           if f.startswith(('location_', 'axis_',
+                                            'ref_direction_'))])
+        value = sorted(PLACEMENT_COORDS)
+        self.assertEqual(expected, value)
+
+    def test_17_partial_clone_copies_shape_representations(self):
+        """
+        CASE:  a clone of only some of an assembly's components still carries
+        the placements of the components it does include.
+
+        clone() has two separate blocks that create Acus -- one for
+        include_specified_components and one for include_components -- so
+        both need covering.
+        """
+        deserialize(orb, SERIALIZED_PLACEMENT)
+        acu = orb.get(TEST_ACU_OID)
+        new_obj = clone(acu.assembly, include_specified_components=[acu],
+                        save_hw=False)
+        orb.db.commit()
+        expected = [1, 1]
+        acus = list(new_obj.components)
+        reps = list(acus[0].shape_representations) if acus else []
+        value = [len(acus), len(reps)]
+        self.assertEqual(expected, value)
 
 
 if __name__ == '__main__':

@@ -264,12 +264,35 @@ The last two both delegate the same way, which is why `get_owner_id()` was
 factored out of `vger.save()`, where the owner / PSU / Acu chain had been
 inlined twice.
 
+#### Cloning
+
+`clone()` builds an assembly's new `Acu`s attribute by attribute, so shape
+representations had to be copied explicitly:
+`clone_shape_representations()` does it for both of the blocks that create
+`Acu`s -- the `include_specified_components` one and the
+`include_components` one -- and the new objects join `new_objs`, so they are
+saved and synced with the rest of the clone.
+
+The placement is **copied, not shared**.  A placement is reachable from every
+representation that uses it (`placement_of`), so sharing one between an
+assembly and its clone would mean that moving a component in the clone moved
+it in the original.
+
+Note that in both blocks the loop variable was being shadowed by the new
+`Acu` it created, so the source `Acu` was no longer reachable by the end of
+the iteration; it is now bound as `src_acu`.
+
+**Coverage caveat:** like the rest of `clone()`, this has a `fastorb` branch
+and an `uberorb` branch, and the tests exercise the `uberorb` one.  `clone()`
+has no `fastorb` coverage at all -- `test_fastorb.py` does not call it -- so
+the `fastorb` branch here is only as good as its following the same pattern
+the surrounding `Acu` creation already uses (passing objects rather than oids
+to `create_or_update_thing`).  Deliberately left there for now:  `fastorb` is
+known to need substantial work of its own, so it is not worth special
+attention from this change.
+
 #### Not yet done
 
-* `clone.py` copies an assembly's `Acu`s attribute by attribute and does not
-  copy their shape representations, so a cloned assembly loses its component
-  placements.  Harmless until something populates them; must be fixed before
-  it is.
 * No UI.  These objects are reachable only through an `Acu`, and nothing
   routes one to `PgxnObject` yet.
 * Nothing populates them.  The STEP importer is the next piece --

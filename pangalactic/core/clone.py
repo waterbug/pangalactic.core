@@ -22,6 +22,78 @@ from pangalactic.core.parametrics import (add_default_data_elements,
 from pangalactic.core.utils.datetimes import dtstamp
 
 
+# the coordinates that make up an Axis2Placement3D -- see
+# NOTES_ON_ONTOLOGY_AND_DB.md, "Component placement"
+PLACEMENT_COORDS = ('location_x', 'location_y', 'location_z',
+                    'axis_x', 'axis_y', 'axis_z',
+                    'ref_direction_x', 'ref_direction_y', 'ref_direction_z')
+
+
+def clone_shape_representations(src_acu, new_acu, NOW):
+    """
+    Give a newly cloned Acu copies of the shape representations of the Acu it
+    was cloned from, so that a cloned assembly keeps its components where the
+    original had them.
+
+    The placement is **copied, not shared**:  a placement is reachable from
+    every representation that uses it, so sharing one would mean that moving
+    a component in the clone moved it in the original too.
+
+    Args:
+        src_acu (Acu):  the Acu being cloned from
+        new_acu (Acu):  the newly created Acu
+        NOW (datetime):  timestamp to use for the new objects
+
+    Returns:
+        list:  the newly created objects, which the caller must include in the
+            objects it saves
+    """
+    new_objs = []
+    reps = getattr(src_acu, 'shape_representations', None) or []
+    for i, cdsr in enumerate(reps):
+        # an Acu can have more than one representation, so the ids are
+        # suffixed -- only oids have to be unique, but colliding ids are
+        # confusing to look at
+        sfx = f'-{i}' if len(reps) > 1 else ''
+        new_placement = None
+        placement = getattr(cdsr, 'placement', None)
+        if placement is not None:
+            coords = {name: getattr(placement, name, None)
+                      for name in PLACEMENT_COORDS}
+            new_placement = _new_thing('Axis2Placement3D',
+                                       id=f'{new_acu.id}-placement{sfx}',
+                                       name=f'{new_acu.name} Placement',
+                                       NOW=NOW, **coords)
+            new_objs.append(new_placement)
+        new_objs.append(_new_thing('ContextDependentShapeRepresentation',
+                                   id=f'{new_acu.id}-shape-rep{sfx}',
+                                   name=f'{new_acu.name} Shape Representation',
+                                   NOW=NOW, represented_usage=new_acu,
+                                   placement=new_placement))
+    return new_objs
+
+
+def _new_thing(cname, NOW=None, **kw):
+    """
+    Create a new instance of `cname` with a fresh oid, by whichever route the
+    orb in use requires.  Note that neither of the placement classes is a
+    Modelable, so neither has creator or modifier.
+
+    Args:
+        cname (str):  name of the class to instantiate
+
+    Keyword Args:
+        NOW (datetime):  timestamp for create_datetime and mod_datetime
+        kw (dict):  attributes of the new object
+    """
+    kw.update(oid=str(uuid4()), create_datetime=NOW, mod_datetime=NOW)
+    if orb.is_fastorb:
+        return orb.create_or_update_thing(cname, **kw)
+    obj = orb.classes[cname](**kw)
+    orb.db.add(obj)
+    return obj
+
+
 def clone(what, include_ports=True, include_components=True,
           include_specified_components=None, generate_id=False,
           flatten=False, save_hw=True, **kw):
@@ -194,6 +266,9 @@ def clone(what, include_ports=True, include_components=True,
     if isinstance(new_obj, orb.classes['HardwareProduct']):
         new_ports = []
         new_acus = []
+        # shape representations and their placements, cloned along with the
+        # Acus they belong to
+        new_placements = []
         recompute_needed = True
         if from_object:
             # DO NOT use "derived_from"!  It creates an FK relationship that
@@ -240,19 +315,19 @@ def clone(what, include_ports=True, include_components=True,
                 isinstance(include_specified_components, list)):
                 orb.log.debug('  - include_specified_components ...')
                 Acu = orb.classes['Acu']
-                for acu in include_specified_components:
-                    if not isinstance(acu, orb.classes['Acu']):
-                        orb.log.debug(f'    non-Acu skipped: {acu.id}')
+                for src_acu in include_specified_components:
+                    if not isinstance(src_acu, orb.classes['Acu']):
+                        orb.log.debug(f'    non-Acu skipped: {src_acu.id}')
                         continue
                     acu_oid = str(uuid4())
-                    ref_des = get_next_ref_des(new_obj, acu.component)
+                    ref_des = get_next_ref_des(new_obj, src_acu.component)
                     if orb.is_fastorb:
                         acu = orb.create_or_update_thing('Acu',
                                   oid=acu_oid, id=get_acu_id(new_obj.id,
                                   ref_des), name=get_acu_name(new_obj.name,
                                   ref_des), assembly=new_obj,
-                                  component=acu.component,
-                                  product_type_hint=acu.product_type_hint,
+                                  component=src_acu.component,
+                                  product_type_hint=src_acu.product_type_hint,
                                   reference_designator=ref_des,
                                   creator=new_obj.creator,
                                   modifier=new_obj.creator,
@@ -261,30 +336,32 @@ def clone(what, include_ports=True, include_components=True,
                         acu = Acu(oid=acu_oid,
                                   id=get_acu_id(new_obj.id, ref_des),
                                   name=get_acu_name(new_obj.name, ref_des),
-                                  assembly=new_obj, component=acu.component,
-                                  product_type_hint=acu.product_type_hint,
+                                  assembly=new_obj, component=src_acu.component,
+                                  product_type_hint=src_acu.product_type_hint,
                                   reference_designator=ref_des,
                                   creator=new_obj.creator,
                                   modifier=new_obj.creator, create_datetime=NOW,
                                   mod_datetime=NOW)
                         orb.db.add(acu)
                     new_acus.append(acu)
+                    new_placements += clone_shape_representations(src_acu, acu,
+                                                                  NOW)
                 if orb.is_fastorb:
                     orb.adjust_componentz()
                 else:
                     refresh_componentz(new_obj)
             elif include_components and getattr(obj, 'components', None):
                 Acu = orb.classes['Acu']
-                for acu in obj.components:
+                for src_acu in obj.components:
                     acu_oid = str(uuid4())
-                    ref_des = get_next_ref_des(new_obj, acu.component)
+                    ref_des = get_next_ref_des(new_obj, src_acu.component)
                     if orb.is_fastorb:
                         acu = orb.create_or_update_thing('Acu',
                                   oid=acu_oid, id=get_acu_id(new_obj.id,
                                   ref_des), name=get_acu_name(new_obj.name,
                                   ref_des), assembly=new_obj,
-                                  component=acu.component,
-                                  product_type_hint=acu.product_type_hint,
+                                  component=src_acu.component,
+                                  product_type_hint=src_acu.product_type_hint,
                                   reference_designator=ref_des,
                                   creator=new_obj.creator,
                                   modifier=new_obj.creator,
@@ -293,14 +370,16 @@ def clone(what, include_ports=True, include_components=True,
                         acu = Acu(oid=acu_oid,
                                   id=get_acu_id(new_obj.id, ref_des),
                                   name=get_acu_name(new_obj.name, ref_des),
-                                  assembly=new_obj, component=acu.component,
-                                  product_type_hint=acu.product_type_hint,
+                                  assembly=new_obj, component=src_acu.component,
+                                  product_type_hint=src_acu.product_type_hint,
                                   reference_designator=ref_des,
                                   creator=new_obj.creator,
                                   modifier=new_obj.creator,
                                   create_datetime=NOW, mod_datetime=NOW)
                         orb.db.add(acu)
                     new_acus.append(acu)
+                    new_placements += clone_shape_representations(src_acu, acu,
+                                                                  NOW)
                 refresh_componentz(new_obj)
             elif (not include_components and not include_specified_components
                   and flatten):
@@ -314,6 +393,7 @@ def clone(what, include_ports=True, include_components=True,
         new_objs = []
         new_objs += new_ports
         new_objs += new_acus
+        new_objs += new_placements
         # the "new hardware clone" signal causes pangalaxian to switch to
         # Component Mode
         if save_hw:
