@@ -264,6 +264,19 @@ The last two both delegate the same way, which is why `get_owner_id()` was
 factored out of `vger.save()`, where the owner / PSU / Acu chain had been
 inlined twice.
 
+And one step that is not code at all: **regenerate the ontology
+documentation**.  `doc/pgef_ontology.html` is generated from the registry and
+committed, so it goes stale silently:
+
+```python
+orb.start(home=...)
+open('doc/pgef_ontology.html', 'w').write(orb.registry.report_html())
+```
+
+It had missed `CheckOut` from schema version 3.4.0 until 3.5.0 regenerated
+it.  `test_registry.test_99_ontology_doc_is_current` now fails when a class
+is missing from it, so this cannot be forgotten twice.
+
 #### Cloning
 
 `clone()` builds an assembly's new `Acu`s attribute by attribute, so shape
