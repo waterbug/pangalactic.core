@@ -4427,6 +4427,22 @@ dict(
     'mod_datetime': '2023-07-01 00:00:00'
     },
 
+{   '_cname': 'ProductType',
+    'oid': 'pgefobjects:ProductType.unclassified',
+    'id': 'unclassified',
+    'name': 'Unclassified',
+    'abbreviation': 'Unclassified',
+    'description': ('Placeholder type for a product specification that has '
+                    'not yet been classified -- e.g. one created by '
+                    'importing a STEP assembly file, which carries no '
+                    'notion of product type.'),
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
+    'create_datetime': '2026-08-19 00:00:00',
+    'mod_datetime': '2026-08-19 00:00:00'
+    },
+
 {   '_cname': 'ModelType',
     'oid': 'pgefobjects:ModelType.42',
     'id': '42',
