@@ -406,6 +406,37 @@ class PlacementTest(unittest.TestCase):
         value = sorted(PLACEMENT_COORDS)
         self.assertEqual(expected, value)
 
+    def test_23_new_thing_registers_as_new_for_orb_save(self):
+        """
+        CASE:  an object created by new_thing() is classified as new when it
+        later passes through orb.save(), not as "existing".
+
+        orb.save() decides new-vs-existing by `oid in orb.new_oids or not
+        orb.get(oid)`.  SQLAlchemy's autoflush means a plain `orb.get(oid)`
+        query silently flushes a pending `db.add()` first, so an object added
+        to the session by new_thing() looks like an existing row by the time
+        orb.save() gets to it -- unless its oid was registered in
+        orb.new_oids first, which is what clone() does for the objects it
+        creates and what new_thing() must do too.
+
+        Found by running a real import through the running app:  every
+        direct-commit test (this file included, elsewhere) uses
+        orb.db.commit() rather than orb.save(), so none of them exercised the
+        code path where this actually went wrong.
+        """
+        acu = orb.get(self.BARE_ACU_OID)
+        p = Placement((0.3, 0.3, 0.3), (0.0, 0.0, 1.0), (1.0, 0.0, 0.0))
+        touched = set_placement(acu, p)
+        results = []
+        for obj in touched:
+            new = bool(obj.oid in orb.new_oids) or not orb.get(obj.oid)
+            results.append(new)
+        orb.save(touched)
+        clear_placement(acu)
+        orb.db.commit()
+        expected = [True, True]
+        self.assertEqual(expected, results)
+
 
 if __name__ == '__main__':
     unittest.main()

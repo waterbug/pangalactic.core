@@ -39,6 +39,19 @@ def new_thing(cname, NOW=None, **kw):
     Create a new instance of `cname` with a fresh oid, by whichever route the
     orb in use requires.
 
+    Registers the oid in `orb.new_oids`, as `clone()` does, before adding the
+    object to the session.  Without that, a later `orb.save()` call on this
+    same object misclassifies it as pre-existing:  `orb.save()` decides "new"
+    by `oid in self.new_oids or not self.get(oid)`, and SQLAlchemy's
+    autoflush means `self.get(oid)` -- a plain query -- silently flushes the
+    pending `add()` first, so the object is already a persisted row by the
+    time it is checked.  It is then routed through `self.db.merge()` and
+    logged as "is existing X, updating", which is misleading (nothing was
+    updated, it is genuinely new) though not destructive for these classes,
+    since neither is versioned.  Found by running a real import through the
+    app rather than through direct-commit tests, which never exercise
+    `orb.save()` at all.
+
     Args:
         cname (str):  name of the class to instantiate
 
@@ -50,6 +63,7 @@ def new_thing(cname, NOW=None, **kw):
     kw.update(oid=str(uuid4()), create_datetime=NOW, mod_datetime=NOW)
     if orb.is_fastorb:
         return orb.create_or_update_thing(cname, **kw)
+    orb.new_oids.append(kw['oid'])
     obj = orb.classes[cname](**kw)
     orb.db.add(obj)
     return obj
