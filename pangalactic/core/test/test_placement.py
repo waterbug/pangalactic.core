@@ -15,7 +15,10 @@ import pangalactic.core.set_uberorb
 
 from pangalactic.core             import orb
 from pangalactic.core.access      import get_owner_id, get_perms, is_cloaked
-from pangalactic.core.clone       import clone, PLACEMENT_COORDS
+from pangalactic.core.clone       import clone
+from pangalactic.core.placements  import (get_placement, set_placement,
+                                          clear_placement, Placement,
+                                          PLACEMENT_COORDS)
 from pangalactic.core.serializers import (DESERIALIZATION_ORDER, deserialize,
                                           serialize)
 from pangalactic.core.test.utils  import create_test_users, create_test_project
@@ -305,23 +308,7 @@ class PlacementTest(unittest.TestCase):
         self.assertEqual(expected, value)
 
 
-    def test_16_clone_copies_every_coordinate(self):
-        """
-        CASE:  the coordinates clone.py copies are exactly the ones the
-        ontology defines.
-
-        clone_shape_representations() copies a fixed tuple of field names, so
-        a coordinate added to the ontology and not to that tuple would be
-        silently dropped by every clone.
-        """
-        fields = orb.schemas['Axis2Placement3D']['field_names']
-        expected = sorted([f for f in fields
-                           if f.startswith(('location_', 'axis_',
-                                            'ref_direction_'))])
-        value = sorted(PLACEMENT_COORDS)
-        self.assertEqual(expected, value)
-
-    def test_17_partial_clone_copies_shape_representations(self):
+    def test_16_partial_clone_copies_shape_representations(self):
         """
         CASE:  a clone of only some of an assembly's components still carries
         the placements of the components it does include.
@@ -339,6 +326,84 @@ class PlacementTest(unittest.TestCase):
         acus = list(new_obj.components)
         reps = list(acus[0].shape_representations) if acus else []
         value = [len(acus), len(reps)]
+        self.assertEqual(expected, value)
+
+    # ---- the placements API (pangalactic.core.placements) ----------------
+
+    # an Acu of the same test project that no test gives a placement to
+    BARE_ACU_OID = 'test:H2G2:acu-3'
+
+    def test_18_get_placement_is_none_when_unplaced(self):
+        """
+        CASE:  an Acu whose geometry has not been imported has no placement.
+
+        None and the identity placement are different statements -- "we do
+        not know where this sits" versus "this sits at the origin" -- and
+        only the second is a placement.
+        """
+        expected = None
+        value = get_placement(orb.get(self.BARE_ACU_OID))
+        self.assertEqual(expected, value)
+
+    def test_19_set_placement_creates_and_reads_back(self):
+        """
+        CASE:  set_placement() gives an unplaced Acu a placement, and
+        get_placement() returns what was set
+        """
+        acu = orb.get(self.BARE_ACU_OID)
+        p = Placement(location=(0.1, 0.2, 0.3), axis=(0.0, 0.0, 1.0),
+                      ref_direction=(0.0, 1.0, 0.0))
+        touched = set_placement(acu, p)
+        orb.db.commit()
+        expected = [2, p]
+        value = [len(touched), get_placement(acu)]
+        self.assertEqual(expected, value)
+        clear_placement(acu)
+        orb.db.commit()
+
+    def test_20_set_placement_moves_rather_than_accumulates(self):
+        """
+        CASE:  placing an Acu that is already placed moves it, rather than
+        leaving it with two placements
+        """
+        acu = orb.get(self.BARE_ACU_OID)
+        set_placement(acu, Placement((0.1, 0.2, 0.3), (0, 0, 1), (0, 1, 0)))
+        orb.db.commit()
+        moved = Placement((9.0, 9.0, 9.0), (0.0, 1.0, 0.0), (1.0, 0.0, 0.0))
+        set_placement(acu, moved)
+        orb.db.commit()
+        expected = [1, moved]
+        value = [len(list(acu.shape_representations)), get_placement(acu)]
+        self.assertEqual(expected, value)
+        clear_placement(acu)
+        orb.db.commit()
+
+    def test_21_clear_placement_removes_both_objects(self):
+        """
+        CASE:  clearing a placement deletes the representation and the
+        placement, leaving the Acu unplaced
+        """
+        acu = orb.get(self.BARE_ACU_OID)
+        set_placement(acu, Placement((1.0, 0.0, 0.0), (0, 0, 1), (1, 0, 0)))
+        orb.db.commit()
+        deleted = clear_placement(acu)
+        orb.db.commit()
+        expected = [2, None, 0]
+        value = [len(deleted), get_placement(acu),
+                 len(list(acu.shape_representations))]
+        self.assertEqual(expected, value)
+
+    def test_22_placement_coords_cover_the_ontology(self):
+        """
+        CASE:  the coordinate tuple the placements module writes is exactly
+        what the ontology defines, so a coordinate added to one and not the
+        other cannot be silently dropped
+        """
+        fields = orb.schemas['Axis2Placement3D']['field_names']
+        expected = sorted([f for f in fields
+                           if f.startswith(('location_', 'axis_',
+                                            'ref_direction_'))])
+        value = sorted(PLACEMENT_COORDS)
         self.assertEqual(expected, value)
 
 

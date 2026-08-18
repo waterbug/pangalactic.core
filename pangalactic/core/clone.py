@@ -13,6 +13,7 @@ from pangalactic.core.names       import (get_acu_id, get_acu_name,
                                           get_next_port_seq, get_next_ref_des,
                                           get_port_abbr, get_port_id,
                                           get_port_name)
+from pangalactic.core.placements  import (new_thing, PLACEMENT_COORDS)
 from pangalactic.core.parametrics import (add_default_data_elements,
                                           add_default_parameters,
                                           data_elementz, get_pval,
@@ -20,13 +21,6 @@ from pangalactic.core.parametrics import (add_default_data_elements,
                                           recompute_parmz,
                                           refresh_componentz)
 from pangalactic.core.utils.datetimes import dtstamp
-
-
-# the coordinates that make up an Axis2Placement3D -- see
-# NOTES_ON_ONTOLOGY_AND_DB.md, "Component placement"
-PLACEMENT_COORDS = ('location_x', 'location_y', 'location_z',
-                    'axis_x', 'axis_y', 'axis_z',
-                    'ref_direction_x', 'ref_direction_y', 'ref_direction_z')
 
 
 def clone_shape_representations(src_acu, new_acu, NOW):
@@ -60,38 +54,17 @@ def clone_shape_representations(src_acu, new_acu, NOW):
         if placement is not None:
             coords = {name: getattr(placement, name, None)
                       for name in PLACEMENT_COORDS}
-            new_placement = _new_thing('Axis2Placement3D',
-                                       id=f'{new_acu.id}-placement{sfx}',
-                                       name=f'{new_acu.name} Placement',
-                                       NOW=NOW, **coords)
+            new_placement = new_thing('Axis2Placement3D',
+                                      id=f'{new_acu.id}-placement{sfx}',
+                                      name=f'{new_acu.name} Placement',
+                                      NOW=NOW, **coords)
             new_objs.append(new_placement)
-        new_objs.append(_new_thing('ContextDependentShapeRepresentation',
-                                   id=f'{new_acu.id}-shape-rep{sfx}',
-                                   name=f'{new_acu.name} Shape Representation',
-                                   NOW=NOW, represented_usage=new_acu,
-                                   placement=new_placement))
+        new_objs.append(new_thing('ContextDependentShapeRepresentation',
+                                  id=f'{new_acu.id}-shape-rep{sfx}',
+                                  name=f'{new_acu.name} Shape Representation',
+                                  NOW=NOW, represented_usage=new_acu,
+                                  placement=new_placement))
     return new_objs
-
-
-def _new_thing(cname, NOW=None, **kw):
-    """
-    Create a new instance of `cname` with a fresh oid, by whichever route the
-    orb in use requires.  Note that neither of the placement classes is a
-    Modelable, so neither has creator or modifier.
-
-    Args:
-        cname (str):  name of the class to instantiate
-
-    Keyword Args:
-        NOW (datetime):  timestamp for create_datetime and mod_datetime
-        kw (dict):  attributes of the new object
-    """
-    kw.update(oid=str(uuid4()), create_datetime=NOW, mod_datetime=NOW)
-    if orb.is_fastorb:
-        return orb.create_or_update_thing(cname, **kw)
-    obj = orb.classes[cname](**kw)
-    orb.db.add(obj)
-    return obj
 
 
 def clone(what, include_ports=True, include_components=True,
