@@ -79,6 +79,18 @@ per_gsfc_mel_doc += '"GSFC Common MEL Guidance" June 9 2017, with Heritage.'
 em_edu_prototype_units_desc = '"Engineering Model (EM) / Engineering '
 em_edu_prototype_units_desc += ' Demonstration Units (EDU) / Prototype"'
 
+step_correspondence_desc = (
+    'The correspondence between the occurrences of an imported STEP assembly '
+    'file and the objects created or placed from it, as JSON:  a "map" of '
+    'occurrence path to object oid, plus the import "mode", the time it was '
+    '"imported" and the file "checksum" it was read from.  Keyed on the '
+    'occurrence path rather than on any identifier internal to the file, '
+    'because those are assigned in the order the exporting tool happened to '
+    'write the file and are renumbered by a re-export.  Kept so that a later '
+    'export can write changes back to the right place, and so that '
+    're-importing a changed file can be recognised as such rather than '
+    'silently re-placing components.')
+
 deds = [
 {   '_cname': 'DataElementDefinition',
     'oid': 'pgef:DataElementDefinition.Vendor',
@@ -905,6 +917,21 @@ deds = [
     'domain_class': 'Activity',
     'range_datatype': 'str',
     'description': 'Preferred time units associated with an Activity.'},
+
+{   '_cname': 'DataElementDefinition',
+    'oid': 'pgef:DataElementDefinition.step_correspondence',
+    'id': 'step_correspondence',
+    'id_ns': 'pgef',
+    'label': 'STEP Correspondence',
+    'name': 'STEP Correspondence',
+    'owner': 'pgefobjects:PGANA',
+    'creator': 'pgefobjects:admin',
+    'modifier': 'pgefobjects:admin',
+    'create_datetime': '2026-08-17 00:00:00',
+    'mod_datetime': '2026-08-17 00:00:00',
+    'domain_class': 'RepresentationFile',
+    'range_datatype': 'text',
+    'description': step_correspondence_desc},
 
     ]
 
