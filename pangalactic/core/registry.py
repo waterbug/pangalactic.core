@@ -191,6 +191,16 @@ class PanGalacticRegistry(object):
             if self.got_pgef_cache:
                 # self.log.debug('  - restoring meta objects from cache.')
                 self._get_extracts_from_cache()
+                if self._cache_is_stale():
+                    # NOTE: the cache is otherwise only rebuilt by the
+                    # schema_version migration, which does not run when the
+                    # home has no schema_version recorded -- so a home
+                    # predating an ontology change would keep loading the old
+                    # classes, and any code doing orb.classes['NewClass']
+                    # would raise KeyError.
+                    self.log.info('  - cached ontology extracts are stale; '
+                                  'rebuilding from pgef.owl ...')
+                    self._create_extracts_from_source()
             else:
                 # self.log.debug('  - pgef cache needs rebuilding.')
                 # TODO:  display a "processing" message to user with "Building
@@ -204,6 +214,30 @@ class PanGalacticRegistry(object):
         self._update_schemas_from_extracts()
         # [3] create pgef core metaobjects in order from the schemas
         self._update_classes_from_schemas()
+
+    def _cache_is_stale(self):
+        """
+        Say whether the cached extracts are missing anything the ontology
+        defines.
+
+        Only additions are checked.  A class or property removed from the
+        ontology while objects of it remain in the database is the business
+        of the schema_version migration, which drops and rebuilds; a class
+        *added* is what breaks a running client, because code that looks it
+        up in `orb.classes` raises KeyError.
+
+        Returns:
+            bool:  True if the ontology has classes or properties the cache
+            does not
+        """
+        try:
+            cnames = set(self.kb.get_class_names('pgef'))
+            pnames = set(self.kb.get_property_names('pgef'))
+        except Exception:
+            # an unreadable ontology is not evidence of a stale cache, and
+            # start-up should not fail here
+            return False
+        return bool((cnames - set(self.ces)) or (pnames - set(self.pes)))
 
     def _create_extracts_from_source(self, source=None):
         """

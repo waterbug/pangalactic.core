@@ -170,3 +170,24 @@ class RegistryTests(unittest.TestCase):
         value = sorted(cname for cname in r.classes
                        if f'<a name="{cname}"' not in doc)
         self.assertEqual(expected, value)
+
+    def test_98_stale_cache_is_detected(self):
+        """
+        CASE:  a cached set of extracts that is missing a class the ontology
+        defines is reported as stale.
+
+        The cache is otherwise only rebuilt by the schema_version migration,
+        which does not run when a home has no schema_version recorded.  A
+        home predating an ontology change would then keep loading the old
+        classes, and any code doing orb.classes['NewClass'] would raise
+        KeyError -- which is what happened to is_cloaked() for cloaked
+        products when the placement classes were added.
+        """
+        dropped = r.ces.pop('Acu')
+        try:
+            stale = r._cache_is_stale()
+        finally:
+            r.ces['Acu'] = dropped
+        expected = [True, False]
+        value = [stale, r._cache_is_stale()]
+        self.assertEqual(expected, value)
