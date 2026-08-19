@@ -13,7 +13,7 @@ import unittest
 # set the orb
 import pangalactic.core.set_uberorb
 
-from pangalactic.core             import orb
+from pangalactic.core             import orb, state
 from pangalactic.core.access      import get_owner_id, get_perms, is_cloaked
 from pangalactic.core.clone       import clone
 from pangalactic.core.placements  import (get_placement, set_placement,
@@ -436,6 +436,66 @@ class PlacementTest(unittest.TestCase):
         orb.db.commit()
         expected = [True, True]
         self.assertEqual(expected, results)
+
+    def test_24_placements_are_modelable_and_have_a_creator(self):
+        """
+        CASE:  both placement classes are Modelable subclasses, and an object
+        created by new_thing() is stamped with the local user as creator.
+
+        This is what lets the sync find them.
+        sync_user_created_objs_to_repo() pushes local_user.created_objects,
+        which is the inverse of "creator" -- so an Identifiable, having no
+        creator, can never appear in it.  Its only route to the repository
+        would be the direct vger.save() in on_mod_objects_signal(), which is
+        skipped while disconnected, so an import performed offline would
+        strand its placements permanently with nothing to retry them.
+
+        Observed before the fix:  an import of 49 objects made while the
+        client was still connecting synced 10 and silently left 39 behind,
+        with no error and an empty "unauth" list.
+        """
+        was = state.get('local_user_oid')
+        state['local_user_oid'] = 'test:zaphod'
+        try:
+            acu = orb.get(self.BARE_ACU_OID)
+            touched = set_placement(acu, Placement((0.1, 0.2, 0.3),
+                                                   (0.0, 0.0, 1.0),
+                                                   (1.0, 0.0, 0.0)))
+            orb.db.commit()
+            modelable = orb.classes['Modelable']
+            expected = [True, True, ['zaphod', 'zaphod']]
+            value = [all(isinstance(o, modelable) for o in touched),
+                     len(touched) == 2,
+                     [getattr(o.creator, 'id', None) for o in touched]]
+            self.assertEqual(expected, value)
+        finally:
+            clear_placement(acu)
+            orb.db.commit()
+            state['local_user_oid'] = was
+
+    def test_25_created_placements_reach_created_objects(self):
+        """
+        CASE:  a placement created by the local user turns up in that user's
+        created_objects, which is the collection the sync pushes.
+        """
+        was = state.get('local_user_oid')
+        state['local_user_oid'] = 'test:zaphod'
+        try:
+            acu = orb.get(self.BARE_ACU_OID)
+            touched = set_placement(acu, Placement((0.4, 0.5, 0.6),
+                                                   (0.0, 0.0, 1.0),
+                                                   (1.0, 0.0, 0.0)))
+            orb.save(touched)
+            orb.db.commit()
+            created = {o.oid for o in orb.get('test:zaphod').created_objects}
+            expected = [True, True]
+            value = [bool(touched),
+                     all(o.oid in created for o in touched)]
+            self.assertEqual(expected, value)
+        finally:
+            clear_placement(acu)
+            orb.db.commit()
+            state['local_user_oid'] = was
 
 
 if __name__ == '__main__':

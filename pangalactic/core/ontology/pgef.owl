@@ -2221,7 +2221,7 @@
     <!-- http://pangalactic.us/pgef/Axis2Placement3D -->
 
     <owl:Class rdf:about="&pgef;Axis2Placement3D">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">The location and orientation of a coordinate frame in three dimensional space, corresponding to the STEP axis2_placement_3d:  a location (the origin of the frame), an axis (the direction of its local z axis) and a ref_direction (the direction of its local x axis).  The local y axis is implied, being the cross product of the other two.  Orientation is expressed as direction cosines rather than as angles, so no rotation sequence convention is implied.  N.B.:  STEP represents the location as a cartesian_point and each direction as a direction, all of which are separate entities; here they are held as coordinates on the placement itself, since PGEF has no need of independently identified points and directions.</rdfs:comment>
     </owl:Class>
 
@@ -2230,7 +2230,7 @@
     <!-- http://pangalactic.us/pgef/ContextDependentShapeRepresentation -->
 
     <owl:Class rdf:about="&pgef;ContextDependentShapeRepresentation">
-        <rdfs:subClassOf rdf:resource="&pgef;Identifiable"/>
+        <rdfs:subClassOf rdf:resource="&pgef;Modelable"/>
         <rdfs:comment rdf:datatype="&xsd;string">A shape representation whose meaning depends on the assembly context in which it occurs:  it positions the component of an assembly component usage (Acu) within the coordinate frame of that usage&apos;s assembly.  Corresponds to the STEP context_dependent_shape_representation, which is the entity that makes the shape of an occurrence dependent on its context, and is why placement is a property of the usage rather than of the component product -- the same product used at several places in an assembly has a different placement at each.</rdfs:comment>
     </owl:Class>
 

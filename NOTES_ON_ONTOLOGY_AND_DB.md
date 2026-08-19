@@ -2,6 +2,11 @@
 
 ### Mods
 
+* 2026-08-19 (schema version 3.6.0)
+  - `Axis2Placement3D` and `ContextDependentShapeRepresentation` were
+    `Identifiable` subclasses; now `Modelable` subclasses, so that they have
+    `creator` and `modifier`.  See "Why they are Modelable" below.
+
 * 2026-08-16 (schema version 3.5.0)
   - Added `Axis2Placement3D` and `ContextDependentShapeRepresentation`, both
     `Identifiable` subclasses, which record where a component sits within its
@@ -186,7 +191,7 @@
 
 Added at schema version 3.5.0, so that a project assembly can be used as
 input to a 42 ACS simulation and, more generally, so that assembly geometry
-can be imported from CAD.  Two classes, both `Identifiable` subclasses:
+can be imported from CAD.  Two classes, both `Modelable` subclasses:
 
 * `Axis2Placement3D` -- the location and orientation of a coordinate frame:
   `location_[xyz]`, `axis_[xyz]` (the direction of the local z axis) and
@@ -205,6 +210,53 @@ this hangs off the `Acu` -- and it is how STEP models it too, by way of the
 definition has said as much since long before these classes existed:  a
 conceptual product "can be used at multiple locations (distinguished by
 reference designator, a property of the Acu)".
+
+#### Why they are Modelable
+
+Both classes began as `Identifiable` subclasses, on the grounds that a
+placement is not modelled, has no documents and needs no parameters.
+
+The better argument runs the other way, and is semantic rather than
+pragmatic (author, 2026-08-19):  an `axis2_placement_3d` and a
+`context_dependent_shape_representation` are, strictly, *modelable* things --
+in STEP they are representation entities, which is precisely what `Modelable`
+is for.  So this is not a concession; it is where they belonged.
+
+What forced the question was a defect that only appeared when an import was
+run against a real repository.
+
+`Identifiable` has no `creator`.  `sync_user_created_objs_to_repo()` pushes
+`local_user.created_objects`, which is the inverse of `creator` -- so an
+object without one **cannot appear in it at all**.  The only other route to
+the repository is the direct `vger.save()` in `on_mod_objects_signal()`,
+which is guarded by `if state.get('connected')`.  Import while disconnected
+and the placements were stranded permanently:  no push at the time, and
+nothing that could ever retry them.
+
+Observed rather than reasoned:  an import of 49 objects made while the client
+was still connecting synced 10 of them -- the 9 products and the PSU, which
+`clone()` stamps with a creator -- and silently left the 13 Acus, 13
+placements and 13 shape representations behind.  Nothing errored; `unauth`
+and `no_owners` both came back empty, because the objects were never sent.
+
+As `Modelable` subclasses they have `creator`, so they are caught by the sync
+like anything else a user makes.  `new_thing()` stamps the local user.
+
+Two consequences worth knowing:
+
+* `serialize()` emits `parameters` and `data_elements` for every `Modelable`,
+  so placements now carry two empty dicts apiece.  Harmless -- nothing adds
+  default parameters for these classes -- but it is why they are listed in
+  `meta.PGXN_HIDE_PARMS`, which suppresses the parameter and data panels the
+  object editor would otherwise offer for a `Modelable`.
+* `Modelable` does *not* provide `public`, so the cloaking delegation in
+  `is_cloaked()` is still required and unchanged.
+
+Checked before committing to it:  `registry.py` warns that sqlalchemy's
+joined table inheritance cannot cope with a class having a foreign key to its
+*immediate* superclass.  Neither class does -- `represented_usage` points at
+`Acu` and `placement` at `Axis2Placement3D` -- and a full build plus a
+round-trip with both relationships populated confirmed it.
 
 #### Mapping to STEP [1]
 

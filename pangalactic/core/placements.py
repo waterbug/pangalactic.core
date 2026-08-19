@@ -15,7 +15,7 @@ from uuid import uuid4
 
 from collections import namedtuple
 
-from pangalactic.core import orb
+from pangalactic.core import orb, state
 from pangalactic.core.utils.datetimes import dtstamp
 
 # the coordinates that make up an Axis2Placement3D
@@ -61,6 +61,19 @@ def new_thing(cname, NOW=None, **kw):
     """
     NOW = NOW or dtstamp()
     kw.update(oid=str(uuid4()), create_datetime=NOW, mod_datetime=NOW)
+    # Modelable subclasses carry creator/modifier, and the local user must be
+    # stamped as creator or the object can never appear in
+    # local_user.created_objects -- which is what
+    # sync_user_created_objs_to_repo() pushes.  Without it, an object created
+    # while disconnected has no route to the repository at all:  the direct
+    # vger.save() in on_mod_objects_signal() is skipped when offline, and
+    # nothing retries it.  See mapping.py, version 3.6.0.
+    local_user = orb.get(state.get('local_user_oid') or '')
+    if local_user is not None:
+        schema = orb.schemas.get(cname) or {}
+        for attr in ('creator', 'modifier'):
+            if attr in schema.get('field_names', []) and attr not in kw:
+                kw[attr] = local_user
     if orb.is_fastorb:
         return orb.create_or_update_thing(cname, **kw)
     orb.new_oids.append(kw['oid'])

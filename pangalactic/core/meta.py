@@ -469,9 +469,11 @@ PGXN_DATA_VIEW = [
 PGXN_HIDE_PARMS = [
                    'Actor',
                    'Acu',
+                   'Axis2Placement3D',
                    'DataElementDefinition',
                    'Organization',
                    'ParameterDefinition',
+                   'ContextDependentShapeRepresentation',
                    'ParameterRelation',
                    'Person',
                    'ProductRequirement',

@@ -21,6 +21,24 @@ Examples of schema mods that require a conversion function include:
 """
 # NOTES:
 
+# version 3.6.0:
+#   * mods:
+#       + "Axis2Placement3D" and "ContextDependentShapeRepresentation" were
+#         Identifiable subclasses; they are now Modelable subclasses, which
+#         gives them "creator" and "modifier".
+#   * reason:
+#     Without a creator they could never appear in
+#     local_user.created_objects, which is what
+#     sync_user_created_objs_to_repo() pushes.  Their only route to the
+#     repository was therefore the direct vger.save() in
+#     on_mod_objects_signal(), which is skipped when the client is
+#     disconnected -- so a STEP import performed offline stranded its
+#     placements permanently, with nothing to retry them.  Observed:  an
+#     import of 49 objects while disconnected synced 10 (the products and
+#     the PSU, which clone() gives a creator) and silently left 39 behind.
+#   * no conversion function is required:  the attributes are new and
+#     unpopulated, and the classes keep their oids.
+
 # version 3.5.0:
 #   * mods:
 #       + added class "Axis2Placement3D" (subclass of Identifiable), the
@@ -124,7 +142,7 @@ Examples of schema mods that require a conversion function include:
 
 from copy import deepcopy
 
-schema_version = '3.5.0'
+schema_version = '3.6.0'
 
 
 def to_x_x_x(sos):
