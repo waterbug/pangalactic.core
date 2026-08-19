@@ -13,6 +13,46 @@ modifiables = [
         'RepresentationFile',
         'RequirementAncestry']
 
+# Instances of these classes are reference data:  they are created on both the
+# client and the server by load_reference_data() from refdata.py, and are
+# never authored by a user.  Held as class *names* rather than classes because
+# orb.classes is not populated when this module is imported.
+# NOTE that ParameterDefinition is a subclass of DataElementDefinition, so is
+# implicitly included -- which is why is_reference_data() tests by isinstance
+# rather than by class name.
+unmodifiables = [
+        'ActivityType',
+        'ContinuousProductType',
+        'DataElementDefinition',
+        'Discipline',
+        'DisciplineProductType',
+        'DisciplineRole',
+        'ModelType',
+        'ParameterContext',
+        'PortTemplate',
+        'PortType',
+        'ProductType',
+        'PropertyDefinition',
+        'Role']
+
+
+def is_reference_data(obj):
+    """
+    Say whether an object is reference data -- created from refdata.py at
+    start-up rather than authored by a user, and therefore never modifiable
+    and never worth pushing to the repository, which generates its own copy
+    the same way.
+
+    Args:
+        obj (Identifiable):  the object
+
+    Returns:
+        bool:  True if the object is an instance of a reference data class
+    """
+    classes = tuple(orb.classes[cname] for cname in unmodifiables
+                    if cname in orb.classes)
+    return bool(classes) and isinstance(obj, classes)
+
 
 def get_checkout_holder(obj):
     """
@@ -217,21 +257,7 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
     # Instances of these classes are refdata and cannot be modified or deleted.
     # NOTE that ParameterDefinition is a subclass of DataElementDefinition, so is
     # implicitly included here.
-    unmodifiables = (
-        orb.classes['ActivityType'],
-        orb.classes['ContinuousProductType'],
-        orb.classes['DataElementDefinition'],
-        orb.classes['Discipline'],
-        orb.classes['DisciplineProductType'],
-        orb.classes['DisciplineRole'],
-        orb.classes['ModelType'],
-        orb.classes['ParameterContext'],
-        orb.classes['PortTemplate'],
-        orb.classes['PortType'],
-        orb.classes['ProductType'],
-        orb.classes['PropertyDefinition'],
-        orb.classes['Role'])
-    if isinstance(obj, unmodifiables):
+    if is_reference_data(obj):
         # orb.log.debug('  *** reference data cannot be modified or deleted.')
         perms = ['view', 'ref data: view only']
         return perms

@@ -237,6 +237,40 @@ coordinates on the placement, since PGEF has no use for separately identified
 points and directions -- and doing otherwise would mean four objects per
 placement.
 
+#### What new reference data costs
+
+Adding to `refdata.py` -- a `ProductType`, a `DataElementDefinition`, a
+`ParameterDefinition` -- looks free:  `load_reference_data()` creates
+whatever is missing by oid at every start-up, so a new entry appears without
+a schema bump or a migration.  **But it appears on whichever end has the
+newer `refdata.py`, and only there.**  Until both ends have it:
+
+* the client creates the object locally and, if the user is logged in as
+  `admin`, finds it in `local_user.created_objects` -- reference data is
+  stamped with `admin` as its creator -- so it tries to push it;
+* the repository refuses it, because `get_perms()` gives reference data
+  `['view', 'ref data: view only']` and `vger.save()` authorizes an existing
+  object only when `'modify' in perms`;
+* anything referring to it is worse off than the reference object itself.  A
+  `HardwareProduct` whose `product_type` is a `ProductType` the server does
+  not have cannot resolve that foreign key, so it is dropped or lands with a
+  null type -- and the import that created it looks like it synced.
+
+`sync_user_created_objs_to_repo()` now filters reference data out of the push
+with `access.is_reference_data()`, so the rejection no longer happens at all;
+for an admin user that also removes 292 objects from the comparison the
+client sends on every sync.  The dependent-object problem is not solved by
+that filter, though, and cannot be:  **a refdata addition requires both ends
+to be updated before anything depends on it.**  This is the same lesson as an
+ontology change, one level down and rather easier to miss, since nothing
+about adding a dict entry to `refdata.py` suggests a deployment step.
+
+`access.unmodifiables` is the list of reference-data classes.  It is held as
+class *names* rather than classes because `orb.classes` is not populated when
+`access` is imported, and `is_reference_data()` tests by `isinstance` rather
+than by name so that subclasses are caught -- `ParameterDefinition` is a
+`DataElementDefinition`, and a name comparison would miss all 91 of them.
+
 #### What a new class costs
 
 Recorded here because it generalizes.  The registry builds SQLAlchemy classes
