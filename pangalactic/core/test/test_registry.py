@@ -9,6 +9,7 @@ from functools import reduce
 
 # PanGalactic
 import pangalactic.core
+from pangalactic.core.meta import M2M, ONE2M
 from pangalactic.core.registry import PanGalacticRegistry
 
 r = PanGalacticRegistry(home='pangalaxian_test', force_new_core=1)
@@ -191,3 +192,28 @@ class RegistryTests(unittest.TestCase):
         expected = [True, False]
         value = [stale, r._cache_is_stale()]
         self.assertEqual(expected, value)
+
+    def test_09_every_one_to_many_is_declared_in_ONE2M_or_M2M(self):
+        """
+        CASE:  every non-functional inverse attribute in the ontology appears
+        in ONE2M or M2M.
+
+        Those two dicts are how the rest of the system recognizes a
+        one-to-many:  PGXN_HIDE is built from their keys, so an attribute
+        missing from both is offered as a displayable field by PgxnObject,
+        and deserialize() filters them out of the kwargs it passes to a class
+        constructor, so a missing one would be passed in.
+
+        Nothing enforced this, and adding an inverse to the ontology does not
+        add it here -- eight had accumulated by 2026-08-21, including
+        "check_outs", whose domain is Identifiable and which was therefore
+        offered on every class in the system.
+        """
+        known = set(ONE2M) | set(M2M)
+        missing = set()
+        for cname, schema in r.schemas.items():
+            for name, field in schema['fields'].items():
+                if field.get('is_inverse') and not field.get('functional'):
+                    if name not in known:
+                        missing.add(name)
+        self.assertEqual(set(), missing)

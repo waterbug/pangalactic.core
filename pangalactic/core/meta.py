@@ -405,7 +405,32 @@ ONE2M = {
                                    'range'  : 'PartsListItem'},
          # inverse of 'parent_organization'
          'sub_organizations' :    {'domain' : 'Organization',
-                                   'range'  : 'Organization'}
+                                   'range'  : 'Organization'},
+         # inverse of 'checked_out_item' -- the check-out claims on an
+         # object.  Domain is Identifiable, so this one is declared on every
+         # class:  without it here, PgxnObject offered it on all of them.
+         'check_outs' :           {'domain' : 'Identifiable',
+                                   'range'  : 'CheckOut'},
+         # inverse of 'checked_out_by'
+         'check_outs_held' :      {'domain' : 'Person',
+                                   'range'  : 'CheckOut'},
+         # inverse of 'activity_type'
+         'activities_of_type' :   {'domain' : 'ActivityType',
+                                   'range'  : 'Activity'},
+         # inverse of 'represented_usage' -- the shape representations that
+         # position the component of an Acu within its assembly
+         'shape_representations' : {'domain' : 'Acu',
+                                    'range'  : 'ContextDependentShapeRepresentation'},
+         # inverse of 'placement'
+         'placement_of' :         {'domain' : 'Axis2Placement3D',
+                                   'range'  :
+                                       'ContextDependentShapeRepresentation'},
+         # inverse of 'related_to_discipline'
+         'related_roles' :        {'domain' : 'Discipline',
+                                   'range'  : 'DisciplineRole'},
+         # inverse of 'related_role'
+         'related_to_disciplines' : {'domain' : 'Role',
+                                     'range'  : 'DisciplineRole'}
          }
 
 
