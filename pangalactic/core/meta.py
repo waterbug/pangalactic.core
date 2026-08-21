@@ -359,6 +359,14 @@ ONE2M = {
          # inverse of 'of_system'
          'activities' :           {'domain' : 'Modelable',
                                    'range'  : 'Activity'},
+         # inverse of 'sub_activity_of' -- the sub-activities of an Activity.
+         # Being here also keeps it out of PgxnObject (PGXN_HIDE is built
+         # from ONE2M and M2M), which is what the model requires:
+         # sub-activities are created exclusively in the ConOps / timeline
+         # modeler, in the context of their parent, and are never re-parented
+         # -- see pangalactic.core/NOTES_ON_ACTIVITIES.md.
+         'sub_activities' :       {'domain' : 'Activity',
+                                   'range'  : 'Activity'},
          # inverse of 'creator'
          'created_objects' :      {'domain' : 'Actor',
                                    'range'  : 'Modelable'},
