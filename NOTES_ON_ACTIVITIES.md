@@ -68,17 +68,43 @@ for act_oid, sao_oid in act_to_sao.items():
         orb.db.commit()
 ```
 
-**There is no test coverage of any of this** -- searching all three repos for
-`sub_activity_of` or `act_to_sao` in test modules returns nothing (2026-08-21).
-It is worth writing, because reading the fix-up pass suggests several
-behaviours that may or may not be intended, and nothing currently
-distinguishes them:
+**This had no test coverage at all** -- searching all three repos for
+`sub_activity_of` or `act_to_sao` in test modules returned nothing
+(2026-08-21). Reading the fix-up pass raised several questions about
+behaviours that might or might not be intended, and nothing distinguished
+them. Those are settled below, and `p.core.test.test_activity_deser` now
+covers the answers: the two orders (child before parent, parent already in
+the db), the top-level case, and the unresolvable case.
 
-* **A parent outside the batch is silently dropped.** If `sao_oid` names an
-  Activity that is neither in the batch nor already in the database,
-  `orb.get()` returns None and the link is simply not made -- no warning, no
-  record that a parent was expected. That is the same shape of silent loss
-  that the `db.yaml` and STEP external-reference bugs turned out to be.
+* **A parent outside the batch was silently dropped.** *(Fixed 2026-08-21.)*
+  If `sao_oid` named an Activity that was neither in the batch nor already in
+  the database, `orb.get()` returned None and the link was simply not made --
+  no warning, no record that a parent was expected. That is the same shape of
+  silent loss that the `db.yaml` and STEP external-reference bugs turned out
+  to be.
+
+  Such an activity is now collected and reported on the
+  `'unresolved activity parents'` dispatcher signal. It is *not* discarded --
+  it is still deserialized, just without its parent -- because throwing away
+  received data would be a worse answer than keeping it where it can be seen.
+
+  Both sides listen, because the signal means something different on each:
+
+  - **Client** (`pangalaxian.on_unresolved_activity_parents`): a message box
+    naming the affected activities and saying they cannot be shown in their
+    timeline. The client is where a user can notice.
+  - **Server** (`vger.on_unresolved_activity_parents`): a loud log entry.
+    There is no user to notify, but it matters more here -- the repository is
+    the authority, and anything incomplete that it stores will make every
+    client that receives it report the same thing.
+
+  How likely is this in practice? On the client, unlikely, which is what
+  makes it worth reporting rather than tolerating. `vger.sync_project()`
+  returns objects that are either newer than the client's copy *or* absent
+  from the oid/mod_datetime map the client sent -- so a parent the client
+  does not have is always included in the response. A child arriving without
+  a resolvable parent therefore means the parent is missing from the
+  repository too, not that the sync elided it.
 * **`not act.sub_activity_of` means a parent is never *changed* -- and that
   is correct.** *(Answered by the author, 2026-08-21.)* Sub-activities are
   intended to be created **exclusively** in the ConOps / timeline modeller,
@@ -97,10 +123,13 @@ distinguishes them:
   parent cannot be resolved, that is not a routine ordering artefact but a
   sign that something is wrong, since in normal use the parent is created
   before the child and travels with it.
-* **An empty string is a legitimate value here.** `so.get('sub_activity_of',
-  '')` yields `''` for a top-level Activity, which then makes a pointless
-  `orb.get('')` call per top-level Activity. Harmless, but it means the map
-  does not distinguish "no parent" from "parent not yet resolved".
+* **An empty string is a legitimate value here.** *(Handled 2026-08-21.)*
+  `so.get('sub_activity_of', '')` yields `''` for a top-level Activity, which
+  used to make a pointless `orb.get('')` call per top-level Activity. That
+  did not matter while the outcome was the same either way, but it does now:
+  reporting unresolvable parents means "no parent" and "parent not found"
+  must be told apart, or every top-level Activity would be reported as an
+  orphan. The loop skips an empty `sao_oid` before looking anything up.
 * **`orb.db.commit()` is inside the loop**, so a batch of *n* re-parented
   Activities costs *n* commits.
 

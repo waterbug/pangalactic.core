@@ -7,6 +7,9 @@ from datetime import date, datetime
 # python-dateutil
 import dateutil.parser as dtparser
 
+# dispatcher (Louie)
+from pydispatch import dispatcher
+
 from pangalactic.core.meta import asciify, M2M, ONE2M
 from pangalactic.core.refdata     import ref_oids
 from pangalactic.core.utils.datetimes import earlier, EPOCH, EPOCH_DATE
@@ -971,13 +974,33 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     for req in requirements:
         # if there are any Requirement objects, refresh the rqt_allocz cache
         refresh_rqt_allocz(req)
+    # NOTE: an empty sao_oid is normal -- it means a top-level Activity, which
+    # has no parent.  A *non-empty* sao_oid that cannot be resolved is not
+    # normal:  sub-activities are only ever created in the ConOps / timeline
+    # modeler, in the context of their parent, and are never re-parented (see
+    # NOTES_ON_ACTIVITIES.md), so the parent is always created before the child
+    # and always travels with it.  If it is missing, the data is incomplete --
+    # so collect those and report them rather than dropping them silently.
+    orphans = []
     for act_oid, sao_oid in act_to_sao.items():
+        if not sao_oid:
+            continue
         act = orb.get(act_oid)
         sao = orb.get(sao_oid)
-        if act and sao and not act.sub_activity_of:
-            # orb.log.debug(f'  deser: setting parent {sao.name} for {act.name}')
-            act.sub_activity_of = sao
-            orb.db.commit()
+        if act and sao:
+            if not act.sub_activity_of:
+                # orb.log.debug(f'  deser: setting parent {sao.name} for '
+                              # f'{act.name}')
+                act.sub_activity_of = sao
+                orb.db.commit()
+        elif act and not sao:
+            orphans.append(act)
+    if orphans:
+        names = [(getattr(a, 'name', '') or a.oid) for a in orphans]
+        orb.log.debug(f'* deser: {len(orphans)} activities have a parent that '
+                      f'could not be found: {names}')
+        dispatcher.send(signal='unresolved activity parents',
+                        activities=orphans)
     if dictify:
         return output
     else:

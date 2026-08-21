@@ -32,5 +32,6 @@ pangalaxian_test/*
 **/marvin_test/
 **/pangalaxian_test/
 **/placement_test/
+**/activity_deser_test/
 *.pickle
 _trial_temp
