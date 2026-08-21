@@ -1941,3 +1941,45 @@ class OrbTest(unittest.TestCase):
     # def test_get_files(self, ...):
         # pass
 
+    def test_98_dump_db_to_the_migration_path_round_trips(self):
+        """
+        CASE:  a db dumped to the path the schema migration reads can be
+        loaded back from it.
+
+        orb.start() reloads from home/db.yaml after dropping and recreating
+        the database on a schema change, so that file has to be written by
+        the version being replaced, at shutdown.  It was not:  pangalaxian's
+        call sat behind a hardcoded "mods = False", and the bare dump_db()
+        would have written backup/db-dump-<dts>.yaml rather than db.yaml
+        anyway.  load_and_transform_data() treats an absent file as "no
+        data", so the migration emptied the database instead of migrating
+        it, silently.
+        """
+        dump_path = os.path.join(orb.home, 'db.yaml')
+        if os.path.exists(dump_path):
+            os.remove(dump_path)
+        orb.dump_db(fpath=dump_path)
+        loaded = orb.load_and_transform_data(dump_path)
+        products = len([so for so in (loaded or [])
+                        if so.get('_cname') == 'HardwareProduct'])
+        expected = [True, True, True]
+        value = [os.path.exists(dump_path),
+                 bool(loaded) and len(loaded) > 0,
+                 products > 0]
+        self.assertEqual(expected, value)
+
+    def test_99_absent_dump_loads_as_nothing(self):
+        """
+        CASE:  load_and_transform_data() on a missing file returns no data
+        rather than raising.
+
+        This is the behaviour that made the above failure silent, so it is
+        pinned deliberately:  the fix is to ensure the file exists, not to
+        make its absence throw.
+        """
+        missing = os.path.join(orb.home, 'no_such_dump.yaml')
+        if os.path.exists(missing):
+            os.remove(missing)
+        expected = True
+        value = not orb.load_and_transform_data(missing)
+        self.assertEqual(expected, value)
