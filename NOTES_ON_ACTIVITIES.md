@@ -28,6 +28,19 @@ Any `Activity` instance can be decomposed into a set of sequential subsidiary
 activity and is the inverse property of `sub_activities`, which points to the
 list of children of the parent activity.
 
+### How Activities are created
+
+Activities are not created or edited like other objects.  `p.node.timeline`
+provides a timeline widget that accepts a block dragged from a palette,
+creating an Activity at the position it is dropped; double-clicking an
+existing Activity opens *its* timeline, and blocks dropped there become its
+sub-activities.  The user guide (`p.node.docs/user_guide.md`) describes the
+workflow.
+
+The consequence for this module:  **sub-activities are created exclusively in
+that context, are never re-parented, and are not to be edited through the
+`PgxnObject` editor.**
+
 ### Deserializing the parent link -- `act_to_sao`, and what is untested
 
 `sub_activity_of` is the one *self-referential* link among Activities, and
@@ -66,11 +79,24 @@ distinguishes them:
   `orb.get()` returns None and the link is simply not made -- no warning, no
   record that a parent was expected. That is the same shape of silent loss
   that the `db.yaml` and STEP external-reference bugs turned out to be.
-* **`not act.sub_activity_of` means a parent is never *changed*.** An
-  Activity that already has a parent keeps it, even if the incoming
-  serialization names a different one. If that is deliberate -- a guard
-  against clobbering -- it should be stated; if not, reparenting silently
-  does not sync.
+* **`not act.sub_activity_of` means a parent is never *changed* -- and that
+  is correct.** *(Answered by the author, 2026-08-21.)* Sub-activities are
+  intended to be created **exclusively** in the ConOps / timeline modeller,
+  by double-clicking an existing Activity to open its timeline and dropping
+  a block from the palette onto it; they are **never re-parented**, and are
+  never to be edited through the `PgxnObject` editor. So the guard is not
+  defensive, it is the model: a parent is assigned once, at creation.
+
+  The code bears this out. Every assignment of `sub_activity_of` outside the
+  fix-up pass is a *constructor argument* at creation time, all of them in
+  `p.node.timeline` (`clone(..., sub_activity_of=...)` at three sites). The
+  only other write anywhere is `orb.delete()`, which sets it to `None` on the
+  children of an Activity being deleted -- i.e. orphaning, not re-parenting.
+
+  Note that this makes the *first* bullet sharper rather than softer: if a
+  parent cannot be resolved, that is not a routine ordering artefact but a
+  sign that something is wrong, since in normal use the parent is created
+  before the child and travels with it.
 * **An empty string is a legitimate value here.** `so.get('sub_activity_of',
   '')` yields `''` for a top-level Activity, which then makes a pointless
   `orb.get('')` call per top-level Activity. Harmless, but it means the map
