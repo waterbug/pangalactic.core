@@ -599,6 +599,28 @@
 
 
 
+    <!-- http://pangalactic.us/pgef/component_file_of -->
+
+    <owl:ObjectProperty rdf:about="&pgef;component_file_of">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The representation file that references this one.  A model may be exported as a set of files rather than as one, the assembly file naming its subassembly and part files -- in STEP, by an external_source whose identifier is the referenced file&apos;s name.  No separate attribute is needed for that identifier:  it is the referenced file&apos;s own user_file_name, which is how a reader finds it, and is therefore the name a client must use when writing its local copy.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RepresentationFile"/>
+        <rdfs:range rdf:resource="&pgef;RepresentationFile"/>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://pangalactic.us/pgef/component_files -->
+
+    <owl:ObjectProperty rdf:about="&pgef;component_files">
+        <owl:inverseOf rdf:resource="&pgef;component_file_of"/>
+        <rdfs:comment rdf:datatype="&xsd;string">The representation files that this one references, and which must accompany it for it to be read.  Note that these are the files referenced *directly*:  a referenced file may itself reference others, so the set a reader needs is the transitive closure.</rdfs:comment>
+        <rdfs:domain rdf:resource="&pgef;RepresentationFile"/>
+        <rdfs:range rdf:resource="&pgef;RepresentationFile"/>
+    </owl:ObjectProperty>
+
+
+
     <!-- http://pangalactic.us/pgef/of_thing -->
 
     <owl:ObjectProperty rdf:about="&pgef;of_thing">

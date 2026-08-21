@@ -368,6 +368,10 @@ ONE2M = {
          # inverse of 'of_object'
          'has_files' :            {'domain' : 'DigitalProduct',
                                    'range'  : 'RepresentationFile'},
+         # inverse of 'component_file_of' -- the files a representation file
+         # references, which must accompany it for it to be read
+         'component_files' :      {'domain' : 'RepresentationFile',
+                                   'range'  : 'RepresentationFile'},
          # DEPRECATED:  inverse of 'allocated_to_function'
          # NEW:  inverse of 'allocated_to'
          'allocated_requirements' : {'domain' : 'Modelable',

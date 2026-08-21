@@ -21,6 +21,49 @@ Examples of schema mods that require a conversion function include:
 """
 # NOTES:
 
+# version 3.7.0:
+#   * mods:
+#       + added self-referential attribute "component_file_of" on
+#         RepresentationFile (functional), with inverse "component_files":
+#         the files a representation file references and which must
+#         accompany it for it to be read.
+#   * reason:
+#     A model may be exported as a set of files rather than as one -- a STEP
+#     assembly naming its subassembly and part files through an
+#     external_source.  There was no way to record that one file needs
+#     another, so such a set could not be transferred:  only the file the
+#     user selected was uploaded, and the repository's copy could not be
+#     rendered.  No attribute is needed for the name a file is referenced
+#     under, because that is its own user_file_name (author's observation),
+#     so this is a property pair rather than a relationship class.
+#   * NOTE: adding an *attribute* reaches an installation differently from
+#     adding a *class*, and this cost more than expected to establish.
+#     create_all() creates missing tables but never ALTERs an existing one,
+#     so a new column does not appear merely by starting up.  Which path
+#     delivers it depends on the home:
+#       - home with a recorded schema_version that differs:  the migration
+#         branch drops and recreates the db, so the column appears.  (But
+#         see the caveat below.)
+#       - home with schema_version *unset*:  start-up takes the "nothing to
+#         migrate" branch, so the column never appears and every query on
+#         RepresentationFile fails.  Such a home needs the ALTER applied by
+#         hand, or to be discarded.
+#       - a brand-new home:  copies the pre-built ref_db/local.db, which has
+#         the *old* schema -- so a clean slate fails too.  ref_db/local.db
+#         was therefore patched with
+#             ALTER TABLE representation_file_
+#             ADD COLUMN component_file_of_oid VARCHAR
+#             REFERENCES representation_file_(oid);
+#         rather than regenerated:  regenerating it from a fresh orb start
+#         yields refdata only and would lose its ~427-product commodity
+#         hardware library.
+#     CAVEAT on the migration branch:  it reloads from home/db.yaml, and
+#     nothing writes that file -- pangalaxian's orb.dump_db() call sits
+#     behind a hardcoded "mods = False".  So that branch currently empties
+#     the database rather than migrating it.  Not addressed here.
+#   * no conversion function is required:  the attribute is new and
+#     unpopulated.
+
 # version 3.6.0:
 #   * mods:
 #       + "Axis2Placement3D" and "ContextDependentShapeRepresentation" were
@@ -142,7 +185,7 @@ Examples of schema mods that require a conversion function include:
 
 from copy import deepcopy
 
-schema_version = '3.6.0'
+schema_version = '3.7.0'
 
 
 def to_x_x_x(sos):
