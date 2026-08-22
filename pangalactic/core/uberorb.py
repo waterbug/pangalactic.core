@@ -2196,6 +2196,88 @@ class UberORB(object):
         vault_fname = self.get_vault_fname(rep_file)
         return os.path.join(self.vault, vault_fname)
 
+    def get_file_closure(self, rep_file):
+        """
+        A RepresentationFile and every file it references, transitively.
+
+        Args:
+            rep_file (RepresentationFile):  the file at the root
+
+        Returns:
+            list:  the root first, then its referenced files.  A file reached
+            twice appears once.
+        """
+        closure, seen = [], set()
+
+        def walk(rf):
+            oid = getattr(rf, 'oid', None)
+            if not oid or oid in seen:
+                return
+            seen.add(oid)
+            closure.append(rf)
+            for child in (getattr(rf, 'component_files', None) or []):
+                walk(child)
+
+        walk(rep_file)
+        return closure
+
+    def stage_file_closure(self, rep_file, dir_path=''):
+        """
+        Write a file and everything it references into one directory, each
+        under its own `user_file_name`.
+
+        A CAD assembly exported as a set of files refers to the others by
+        name, and resolves each relative to its own directory.  The vault
+        cannot serve that:  a vault file is named `<oid>_<user_file_name>`,
+        so an assembly opened from there finds none of its references even
+        when every one of them has been downloaded.  Staging is what turns a
+        vault full of correctly-named-for-the-vault files back into a
+        directory a STEP reader can read.
+
+        Args:
+            rep_file (RepresentationFile):  the file wanted
+
+        Keyword Args:
+            dir_path (str):  where to stage.  Defaults to a directory per
+                root file under `<home>/staged`, so that two assemblies
+                sharing a part file name do not overwrite each other.
+
+        Returns:
+            str:  path of the staged root file, or '' if its own vault file
+            is absent -- there is nothing to open in that case, and the
+            caller should download it first.
+        """
+        root_vault_fpath = self.get_vault_fpath(rep_file)
+        if not os.path.exists(root_vault_fpath):
+            return ''
+        closure = self.get_file_closure(rep_file)
+        if len(closure) == 1:
+            # nothing references anything;  the vault file is readable where
+            # it is, and staging would only copy it
+            return root_vault_fpath
+        dir_path = dir_path or os.path.join(self.home, 'staged',
+                                            rep_file.oid)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        staged_root = ''
+        for rf in closure:
+            vault_fpath = self.get_vault_fpath(rf)
+            if not os.path.exists(vault_fpath):
+                # not downloaded.  Staged anyway-as-far-as-possible rather
+                # than refused:  a reader given a partial set renders what it
+                # can, which is more useful than nothing, and the caller
+                # cannot always tell in advance what is present.
+                self.log.debug(f'  - not in vault: "{rf.user_file_name}"')
+                continue
+            dest = os.path.join(dir_path, rf.user_file_name)
+            # copy every time:  the vault copy is the authority, and a file
+            # replaced by a new version must not be shadowed by a stale
+            # staged one
+            shutil.copy(vault_fpath, dest)
+            if rf.oid == rep_file.oid:
+                staged_root = dest
+        return staged_root
+
     def get_mcad_model_file_path(self, model):
         """
         Find the path of a STEP, STL, or BREP file for an MCAD model.
@@ -2213,12 +2295,23 @@ class UberORB(object):
                     '.STL', '.brep', '.BREP')
         if (model.has_files and model.type_of_model.id == "MCAD"):
             for rep_file in model.has_files:
-                if rep_file.user_file_name.endswith(suffixes):
-                    fpath = self.get_vault_fpath(rep_file)
-                    if os.path.exists(fpath):
-                        vault_fpath = fpath
-                else:
+                if not rep_file.user_file_name.endswith(suffixes):
                     continue
+                if getattr(rep_file, 'component_file_of', None):
+                    # not a file of this model in its own right -- it is one
+                    # the model's own file references, and opening it alone
+                    # would render a component instead of the assembly
+                    continue
+                fpath = self.get_vault_fpath(rep_file)
+                if os.path.exists(fpath):
+                    # a file that references others cannot be read from the
+                    # vault, where nothing is under the name it is referenced
+                    # by;  stage the set and return the staged root
+                    if getattr(rep_file, 'component_files', None):
+                        staged = self.stage_file_closure(rep_file)
+                        vault_fpath = staged or fpath
+                    else:
+                        vault_fpath = fpath
         return vault_fpath
 
     def get_internal_flows_of(self, product):

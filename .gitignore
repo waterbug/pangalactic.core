@@ -34,5 +34,6 @@ pangalaxian_test/*
 **/placement_test/
 **/activity_deser_test/
 **/dbdump_test/
+**/closure_test/
 *.pickle
 _trial_temp
