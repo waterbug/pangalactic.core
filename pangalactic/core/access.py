@@ -121,6 +121,24 @@ def is_writable_now(obj, user):
           objects the user had NOT created.  See NOTES_ON_OFFLINE_AND_SYNC.md
           section 2.
 
+      [5] **Activities are never writable while disconnected** -- not even a
+          locally created one, and not on the strength of a claim (author,
+          2026-08-21).  An Activity is not an independent thing:  its
+          duration and its start and stop times are interrelated with those
+          of every other Activity in its timeline, so editing one offline
+          means the whole timeline would have to be locked, and locking a
+          timeline is a different and much larger design than claiming an
+          object.  Rather than support that badly, Activities are excluded
+          from offline work altogether:  they can be edited only while
+          connected.  PrepareForOfflineDialog therefore does not offer them.
+
+          Covers Mission and Test as well, which are Activity subclasses.
+          Does NOT cover ActivityControl and its subclasses (Decision,
+          Merge), which are also timeline furniture but are not Activities;
+          whether they should follow is open.
+
+          Revisit if a priority use case for offline timeline work appears.
+
     Args:
         obj (Identifiable):  the object
         user (Person):  the user
@@ -128,13 +146,19 @@ def is_writable_now(obj, user):
     Returns:
         bool:  True if the user may write to the object at this moment
     """
+    client = bool(state.get('client'))
+    if (client and not state.get('connected')
+            and isinstance(obj, orb.classes['Activity'])):
+        # [5] first, and unconditionally:  an Activity cannot be edited
+        # offline whatever else is true of it, including a claim that
+        # predates this rule
+        return False
     holder = get_checkout_holder(obj)
     if holder:
         # [1] claimed: the holder, and only the holder
         return holder == getattr(user, 'id', '')
-    server = not state.get('client')
-    if server:
-        # [2]
+    if not client:
+        # [2] server
         return True
     if state.get('connected'):
         # [3]

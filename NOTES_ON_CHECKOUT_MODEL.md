@@ -660,3 +660,60 @@ identifying fields. Full reasoning in `NOTES_FOR_DEVELOPERS.md` under
   calling the model finished.
 - **`vger.update_mode_defs`** still allows any user with project access to
   replace a project's mode definitions wholesale (§4a), which is decision 4.
+
+## 13. Activities are excluded from offline work (2026-08-21)
+
+**Decision (author):** Activities can be edited only while connected. They
+are not offered for check-out, and cannot be written while disconnected —
+not by a holder, not even by the client that created them.
+
+**Why.** §4 chose the granularity of a claim by asking what a user actually
+edits while working on an object. An Activity does not answer that question
+the way a Product does. Its `duration` and its start and stop times are
+interrelated with those of every other Activity in its timeline, and the
+ConOps modeler adjusts the others as one is changed — so an edit to one
+activity is an edit to the timeline. A claim on a single activity therefore
+does not cover the work it enables, which is the one property a claim has to
+have.
+
+Claiming the whole timeline would fix that, and is a coherent idea, but it is
+a different and larger one than claiming an object: what counts as the
+timeline, what happens to a claim on a Mission versus one of its
+sub-activities, and how it interacts with the modeler's own editing model are
+all open. The timeline widget is also still evolving and has not yet been
+used in the field (author, 2026-08-21), which is a poor moment to fix a
+locking design around it.
+
+So rather than support offline timeline work badly, it is excluded. This is
+reversible: nothing here forecloses a timeline-level claim later, and the
+exclusion is expressed in four places that would each be removed.
+
+**Where it is enforced.**
+
+1. `access.is_writable_now()` rule [5] — the substantive one. Placed *ahead*
+   of the holder test, not after it, so that a claim predating this rule
+   cannot grant offline write access to an activity. Tested by `isinstance`
+   against `orb.classes['Activity']`, so Mission and Test go with it.
+2. `PrepareForOfflineDialog.classify()` — activities are not offered, since
+   offering a claim that access.py will not honour would promise something
+   that does not work.
+3. `vger.check_out()` — refuses them with `not_offline_editable`. The server
+   decides, so a client that asks anyway has to get the same answer.
+4. `meta.CHECKOUT_EXPANSION` — `'activities'` was removed from the `Product`
+   expansion. Left there, every check-out of a product with activities would
+   have reported denials the user never asked for.
+
+**Consequences in the interface.** `timeline.set_table()` now composes the
+role test (entitlement) with `is_writable_now()` (exclusivity), exactly as
+`get_perms()` does, so the Mission Details table is read-only while
+disconnected — that table is where durations are edited, and editing one
+adjusts the rest, which is the whole hazard. The two drop guards in
+`timeline.py` already consulted `get_perms()` and so needed no change, but
+their popup said the user's *roles* did not permit the operation, which for a
+disconnected user is both wrong and a waste of their time; `not_permitted()`
+now distinguishes the two causes.
+
+**Not covered, and open:** `ActivityControl` and its subclasses (`Decision`,
+`Merge`) are timeline furniture too, but are not Activities, so none of the
+above touches them. Whether they should follow is undecided.
+

@@ -1687,6 +1687,105 @@ class OrbTest(unittest.TestCase):
         expected = (set(['view']), '42 PE/rqt claimed by me')
         self.assertEqual(expected, value)
 
+    # ---------------------------------------------------------------------
+    # ACTIVITIES ARE EXCLUDED FROM OFFLINE WORK  (is_writable_now rule [5])
+    #
+    # An Activity's duration and start/stop times are interrelated with those
+    # of every other Activity in its timeline -- editing one adjusts the
+    # others -- so a claim on a single activity does not cover the work, and
+    # locking a whole timeline is a different design.  Rather than support it
+    # badly, activities are simply not editable offline (author,
+    # 2026-08-21).  These pin that against the three ways an object can
+    # otherwise be writable while disconnected.
+    # ---------------------------------------------------------------------
+
+    def test_26_43_activity_not_editable_offline(self):
+        """
+        CASE 43:  client, disconnected, systems engineer, activity -> no
+                  modify or delete, where the same user editing the same
+                  activity while connected has both (case 44).
+
+        As in case 38, 'add docs' / 'add models' are unaffected:  they are
+        not write access to the object itself.  What the rule withholds is
+        modify/delete, so that is what these assert.
+        """
+        self._checkout_state(connected=False)
+        zaphod = orb.get('test:zaphod')
+        act = orb.get('test:Launch.H2G2')
+        perms = set(get_perms(act, user=zaphod))
+        value = (perms & set(['modify', 'delete']), '43 SE/activity offline')
+        expected = (set(), '43 SE/activity offline')
+        self.assertEqual(expected, value)
+
+    def test_26_44_activity_editable_when_connected(self):
+        """
+        CASE 44:  client, CONNECTED, systems engineer, activity -> full
+                  perms.  The exclusion is about connectivity and nothing
+                  else;  entitlement is untouched.
+        """
+        self._checkout_state(connected=True)
+        zaphod = orb.get('test:zaphod')
+        act = orb.get('test:Launch.H2G2')
+        value = ('modify' in get_perms(act, user=zaphod),
+                 '44 SE/activity online')
+        expected = (True, '44 SE/activity online')
+        self.assertEqual(expected, value)
+
+    def test_26_45_locally_created_activity_not_editable_offline(self):
+        """
+        CASE 45:  client, disconnected, activity the client created and the
+                  repository has never seen -> still no modify or delete.
+
+        Rule [4] would otherwise grant this:  a locally created object is
+        writable offline precisely because no one else can have touched it.
+        That reasoning does not carry to an activity, whose edit reaches the
+        rest of its timeline.
+        """
+        self._checkout_state(connected=False,
+                             locally_created=['test:Launch.H2G2'])
+        zaphod = orb.get('test:zaphod')
+        act = orb.get('test:Launch.H2G2')
+        perms = set(get_perms(act, user=zaphod))
+        value = (perms & set(['modify', 'delete']),
+                 '45 SE/activity offline, locally created')
+        expected = (set(), '45 SE/activity offline, locally created')
+        self.assertEqual(expected, value)
+
+    def test_26_46_claimed_activity_not_editable_offline(self):
+        """
+        CASE 46:  client, disconnected, activity checked out BY THAT USER ->
+                  still no modify or delete.
+
+        Activities can no longer be claimed -- the dialog does not offer them
+        and vger.check_out refuses them -- but a claim made before that rule
+        existed could still be in the mirror, so the rule is applied ahead of
+        the holder test rather than after it.  Contrast case 37, where the
+        claim is exactly what makes offline editing possible.
+        """
+        self._checkout_state(connected=False,
+                checkouts={'test:Launch.H2G2': {'userid': 'zaphod'}})
+        zaphod = orb.get('test:zaphod')
+        act = orb.get('test:Launch.H2G2')
+        perms = set(get_perms(act, user=zaphod))
+        value = (perms & set(['modify', 'delete']),
+                 '46 SE/activity offline, claimed by me')
+        expected = (set(), '46 SE/activity offline, claimed by me')
+        self.assertEqual(expected, value)
+
+    def test_26_47_non_activity_still_editable_offline(self):
+        """
+        CASE 47:  the rule is confined to activities.  A claimed product is
+                  still editable while disconnected, as case 37 has it.
+        """
+        self._checkout_state(connected=False,
+                checkouts={'test:spacecraft0': {'userid': 'zaphod'}})
+        zaphod = orb.get('test:zaphod')
+        sc = orb.get('test:spacecraft0')
+        value = ('modify' in get_perms(sc, user=zaphod),
+                 '47 SE/product offline, claimed by me')
+        expected = (True, '47 SE/product offline, claimed by me')
+        self.assertEqual(expected, value)
+
     # TODO:  revise this test!
     # def test_27_deserialize_object_with_modified_parameters(self):
         # """

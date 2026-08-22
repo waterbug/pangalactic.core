@@ -465,10 +465,16 @@ CHECKOUT_EXPANSION = {
     # a Product's usages, interfaces, activities and models -- note
     # 'components'/'q_components' expand to the Acu/Qacu, not to the
     # component Product (see [2] above)
+    # NOTE: 'activities' was here and has been removed (author,
+    # 2026-08-21).  Activities are excluded from offline work altogether --
+    # editing one adjusts the times of the others in its timeline, so a claim
+    # on a single activity does not cover the work -- and both access.py
+    # (is_writable_now rule [5]) and vger.check_out refuse them.  Left in the
+    # expansion, every check-out of a product with activities would have
+    # reported them as denials the user never asked for.
     'Product' : ['components',              # Acu
                  'q_components',            # Qacu (not yet in use)
                  'ports',                   # Port
-                 'activities',              # Activity
                  'allocated_requirements',  # Requirement
                  'has_models',              # Model
                  ],
