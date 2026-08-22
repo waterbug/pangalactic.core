@@ -154,6 +154,23 @@ class DbDumpTest(unittest.TestCase):
         self.assertEqual(set(self.by_oid),
                          set(so['oid'] for so in loaded))
 
+    def test_08b_a_home_with_no_schema_version_gets_one(self):
+        """
+        CASE:  starting on a home that records no schema version records the
+        current one.
+
+        Until 2026-08-22 the version was written only by the migration
+        branch -- and an *unset* version takes the matching branch, not that
+        one.  So a home that had never migrated never got a version, and
+        every later schema change went undetected:  start-up failed with "no
+        such column" on the first query touching a new attribute, and no
+        migration could ever run to fix it.  This home was started fresh at
+        module load, so it is exactly that case.
+        """
+        from pangalactic.core import state
+        from pangalactic.core.mapping import schema_version
+        self.assertEqual(schema_version, state.get('schema_version'))
+
     def test_09_missing_caches_are_not_an_error(self):
         """
         CASE:  a home with no parameter cache.  A home that has never had a

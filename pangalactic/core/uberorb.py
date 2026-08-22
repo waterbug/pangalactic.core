@@ -201,6 +201,7 @@ class UberORB(object):
 
     def start(self, home: str = '', db_url: str = '',
               console: bool = False, debug: bool = False,
+              force_migration: bool = False,
               log_msgs: Optional[list[str]] = None, **kw) -> str:
         """
         Initialization logic.
@@ -212,6 +213,10 @@ class UberORB(object):
             console (bool):  (default: False)
                 if True: send output to console
                 if False: redirect stdout/stderr to log file
+            force_migration (bool):  migrate the schema whatever the home's
+                recorded schema version says.  For a caller that can tell the
+                home is on an older schema by other means -- the client can,
+                from the "VERSION" file, which every home has.
             debug (bool):  (default: False) log in debug mode
             log_msgs (list of str):  initial log message(s)
         """
@@ -315,21 +320,53 @@ class UberORB(object):
             db_url = 'sqlite:///{}'.format(local_db_path)
         state['db_url'] = db_url
         home_schema_version = state.get('schema_version')
-        if (home_schema_version is None or
-            home_schema_version == schema_version):
+        # A recorded schema version is not the only way to know a migration
+        # is due, and for a long time it was not a working way at all:  it
+        # was written only by the migration branch below, and an *unset* one
+        # takes the branch above -- so a home that had never migrated could
+        # never detect that it needed to (fixed 2026-08-22, but only for
+        # homes started from that release onwards).
+        #
+        # `force_migration` is how a caller that knows better says so.  The
+        # client knows from the "VERSION" file, which every home has, whether
+        # the release that wrote it shares this one's schema;  see
+        # pangalaxian's `compat_versions`.
+        needs_migration = force_migration or (
+                            home_schema_version is not None and
+                            home_schema_version != schema_version)
+        if not needs_migration:
             # if home_schema_version is None or matches the app schema_version,
             # just initialize the registry.
             # NOTE:  registry 'debug' is set to False regardless of the
             # client's log level because its debug logging is INSANELY verbose
             # ...  if the registry needs debugging, just hack this and set
             # debug=True.
-            self.log.debug(f'* schema version {schema_version} matches ...')
+            self.log.debug(f'* schema version {schema_version} is current; '
+                           'no migration ...')
             self.init_registry(pgx_home, db_url, version=schema_version,
                                log=self.log, debug=False, console=console)
+            if home_schema_version is None:
+                # Record it.  Until 2026-08-22 this only ever happened in the
+                # migration branch below, so a home that had never migrated
+                # had no schema_version -- and an *unset* one takes this
+                # branch, not that one.  A home therefore stayed unmigratable
+                # for good:  every schema change after it was created went
+                # undetected, and start-up failed with "no such column" on
+                # the first query touching a new attribute.
+                #
+                # Writing it here closes that.  A fresh home gets the version
+                # of the schema its pre-built db actually has, so the next
+                # change to it migrates properly.
+                self.log.debug(f'  recording schema version {schema_version} '
+                               '(home had none) ...')
+                state['schema_version'] = schema_version
+                write_state(os.path.join(pgx_home, 'state'))
         else:
-            self.log.debug('* schema versions do not match:')
+            self.log.debug('* schema migration required:')
             self.log.debug(f'    app schema version =  {schema_version}')
             self.log.debug(f'    home schema version = {home_schema_version}')
+            if force_migration:
+                self.log.debug('    (requested by the caller)')
             # if the state 'schema_version' does not match the current
             # package's schema_version:
             dump_path = os.path.join(pgx_home, 'db.yaml')
