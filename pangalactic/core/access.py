@@ -54,6 +54,44 @@ def is_reference_data(obj):
     return bool(classes) and isinstance(obj, classes)
 
 
+# Instances of these classes cannot be edited while disconnected, and cannot
+# be checked out.  They are the objects a timeline is made of, and a timeline
+# does not decompose into independently editable parts:  an Activity's
+# duration and start/stop times are interrelated with those of every other
+# Activity in the timeline, and the ActivityControls sequence them, so an
+# edit to any one of them is an edit to the timeline.  A claim on a single
+# one would not cover the work it enables, and claiming a whole timeline is a
+# different and larger design.  See NOTES_ON_CHECKOUT_MODEL.md section 13.
+#
+# Held as class *names* rather than classes because orb.classes is not
+# populated when this module is imported;  is_offline_excluded() tests by
+# isinstance, so the subclasses come with them -- Mission and Test with
+# Activity, Decision and Merge with ActivityControl.
+#
+# This is the single definition of the rule:  the offline dialog and
+# vger.check_out() both consult it, so it cannot be extended in one place and
+# missed in another.
+offline_excluded = [
+        'Activity',
+        'ActivityControl']
+
+
+def is_offline_excluded(obj):
+    """
+    Say whether an object is excluded from offline work -- neither editable
+    while disconnected nor available to be checked out.
+
+    Args:
+        obj (Identifiable):  the object
+
+    Returns:
+        bool:  True if the object is an instance of an excluded class
+    """
+    classes = tuple(orb.classes[cname] for cname in offline_excluded
+                    if cname in orb.classes)
+    return bool(classes) and isinstance(obj, classes)
+
+
 def get_checkout_holder(obj):
     """
     Get the userid of the user currently holding a check-out claim on an
@@ -121,21 +159,14 @@ def is_writable_now(obj, user):
           objects the user had NOT created.  See NOTES_ON_OFFLINE_AND_SYNC.md
           section 2.
 
-      [5] **Activities are never writable while disconnected** -- not even a
-          locally created one, and not on the strength of a claim (author,
-          2026-08-21).  An Activity is not an independent thing:  its
-          duration and its start and stop times are interrelated with those
-          of every other Activity in its timeline, so editing one offline
-          means the whole timeline would have to be locked, and locking a
-          timeline is a different and much larger design than claiming an
-          object.  Rather than support that badly, Activities are excluded
-          from offline work altogether:  they can be edited only while
-          connected.  PrepareForOfflineDialog therefore does not offer them.
-
-          Covers Mission and Test as well, which are Activity subclasses.
-          Does NOT cover ActivityControl and its subclasses (Decision,
-          Merge), which are also timeline furniture but are not Activities;
-          whether they should follow is open.
+      [5] **The objects a timeline is made of are never writable while
+          disconnected** -- not even a locally created one, and not on the
+          strength of a claim (author, 2026-08-21).  See
+          `offline_excluded` above for which classes and why:  in short, a
+          timeline does not decompose into independently editable parts, so a
+          claim on one of them would not cover the work it enables.
+          PrepareForOfflineDialog does not offer them and vger.check_out()
+          refuses them, both by way of is_offline_excluded().
 
           Revisit if a priority use case for offline timeline work appears.
 
@@ -147,9 +178,8 @@ def is_writable_now(obj, user):
         bool:  True if the user may write to the object at this moment
     """
     client = bool(state.get('client'))
-    if (client and not state.get('connected')
-            and isinstance(obj, orb.classes['Activity'])):
-        # [5] first, and unconditionally:  an Activity cannot be edited
+    if client and not state.get('connected') and is_offline_excluded(obj):
+        # [5] first, and unconditionally:  a timeline object cannot be edited
         # offline whatever else is true of it, including a claim that
         # predates this rule
         return False

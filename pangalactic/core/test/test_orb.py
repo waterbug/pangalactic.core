@@ -18,7 +18,9 @@ import pangalactic.core.set_uberorb
 # pangalactic
 from pangalactic.core             import (orb, refdata, state, prefs,
                                           write_config, write_prefs)
-from pangalactic.core.access      import get_perms
+from pangalactic.core.access      import (get_perms,
+                                         is_offline_excluded,
+                                         is_writable_now)
 from pangalactic.core.parametrics import (compute_margin,
                                           compute_requirement_margin,
                                           deserialize_des,
@@ -1770,6 +1772,47 @@ class OrbTest(unittest.TestCase):
         value = (perms & set(['modify', 'delete']),
                  '46 SE/activity offline, claimed by me')
         expected = (set(), '46 SE/activity offline, claimed by me')
+        self.assertEqual(expected, value)
+
+    def test_26_48_activity_controls_not_editable_offline(self):
+        """
+        CASE 48:  client, disconnected, an ActivityControl -> not writable.
+
+        A Decision or a Merge is not an Activity, but it is part of the same
+        timeline and sequences the activities in it, so the same reasoning
+        applies (author, 2026-08-21).
+
+        is_writable_now() is asked directly rather than through get_perms():
+        these are constructed in memory rather than taken from the fixtures,
+        which have none, and an unsaved object has no owner for the
+        entitlement branches to reason about.  The rule under test is the
+        exclusivity one either way.
+        """
+        self._checkout_state(connected=False)
+        zaphod = orb.get('test:zaphod')
+        value = [is_writable_now(orb.classes[cname](oid=f'test:{cname}-48'),
+                                 zaphod)
+                 for cname in ('ActivityControl', 'Decision', 'Merge')]
+        expected = [False, False, False]
+        self.assertEqual(expected, value)
+
+    def test_26_49_timeline_objects_are_excluded_by_class(self):
+        """
+        CASE 49:  is_offline_excluded() covers the whole of both hierarchies
+        and nothing else.
+
+        The rule has one definition, which the offline dialog and
+        vger.check_out() both consult, so what it covers is worth pinning
+        here rather than in three places.
+        """
+        excluded = ['Activity', 'Mission', 'Test',
+                    'ActivityControl', 'Decision', 'Merge']
+        included = ['HardwareProduct', 'Acu', 'Project', 'Requirement']
+        value = ([is_offline_excluded(orb.classes[c](oid=f'test:{c}-49'))
+                  for c in excluded],
+                 [is_offline_excluded(orb.classes[c](oid=f'test:{c}-49x'))
+                  for c in included])
+        expected = ([True] * len(excluded), [False] * len(included))
         self.assertEqual(expected, value)
 
     def test_26_47_non_activity_still_editable_offline(self):

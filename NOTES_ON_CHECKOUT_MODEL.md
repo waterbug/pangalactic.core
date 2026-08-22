@@ -661,20 +661,28 @@ identifying fields. Full reasoning in `NOTES_FOR_DEVELOPERS.md` under
 - **`vger.update_mode_defs`** still allows any user with project access to
   replace a project's mode definitions wholesale (§4a), which is decision 4.
 
-## 13. Activities are excluded from offline work (2026-08-21)
+## 13. Timeline objects are excluded from offline work (2026-08-21)
 
-**Decision (author):** Activities can be edited only while connected. They
-are not offered for check-out, and cannot be written while disconnected —
-not by a holder, not even by the client that created them.
+**Decision (author):** Activities and ActivityControls can be edited only
+while connected. They are not offered for check-out, and cannot be written
+while disconnected — not by a holder, not even by the client that created
+them.
+
+(Activities were excluded first, with the controls left open; the author
+extended it to them the same day. The reasoning below is what covers both.)
 
 **Why.** §4 chose the granularity of a claim by asking what a user actually
-edits while working on an object. An Activity does not answer that question
-the way a Product does. Its `duration` and its start and stop times are
-interrelated with those of every other Activity in its timeline, and the
-ConOps modeler adjusts the others as one is changed — so an edit to one
-activity is an edit to the timeline. A claim on a single activity therefore
-does not cover the work it enables, which is the one property a claim has to
-have.
+edits while working on an object. A timeline object does not answer that
+question the way a Product does. An Activity's `duration` and its start and
+stop times are interrelated with those of every other Activity in its
+timeline, and the ConOps modeler adjusts the others as one is changed — so an
+edit to one activity is an edit to the timeline. A claim on a single activity
+therefore does not cover the work it enables, which is the one property a
+claim has to have.
+
+`ActivityControl` and its subclasses (`Decision`, `Merge`) are not
+Activities, but they sequence the activities in a timeline, so the same
+reasoning reaches them.
 
 Claiming the whole timeline would fix that, and is a coherent idea, but it is
 a different and larger one than claiming an object: what counts as the
@@ -690,18 +698,32 @@ exclusion is expressed in four places that would each be removed.
 
 **Where it is enforced.**
 
+The rule itself is **one definition**: `access.offline_excluded`, a list of
+class names, and `access.is_offline_excluded()`, which tests an object
+against them by `isinstance` — so the subclasses come along (Mission and Test
+with Activity, Decision and Merge with ActivityControl) and extending the
+rule is a one-line edit in one file. Three of the four enforcement points
+below consult it rather than repeating the class list, which is what
+extending it from Activities to the controls made obviously necessary: the
+first version had the same `isinstance` written out in three repos.
+
 1. `access.is_writable_now()` rule [5] — the substantive one. Placed *ahead*
    of the holder test, not after it, so that a claim predating this rule
-   cannot grant offline write access to an activity. Tested by `isinstance`
-   against `orb.classes['Activity']`, so Mission and Test go with it.
-2. `PrepareForOfflineDialog.classify()` — activities are not offered, since
+   cannot grant offline write access.
+2. `PrepareForOfflineDialog.classify()` — they are not offered, since
    offering a claim that access.py will not honour would promise something
    that does not work.
 3. `vger.check_out()` — refuses them with `not_offline_editable`. The server
    decides, so a client that asks anyway has to get the same answer.
 4. `meta.CHECKOUT_EXPANSION` — `'activities'` was removed from the `Product`
    expansion. Left there, every check-out of a product with activities would
-   have reported denials the user never asked for.
+   have reported denials the user never asked for. (Nothing expands to an
+   ActivityControl, so there was nothing to remove for them.)
+
+**One consequence for testing.** Because the rule resolves its class names
+through the *access* module's orb, a test that stubs `vger.orb` has to stub
+`access.orb` as well — `test_vger.CheckOutRpcTests` does, with a note saying
+why.
 
 **Consequences in the interface.** `timeline.set_table()` now composes the
 role test (entitlement) with `is_writable_now()` (exclusivity), exactly as
@@ -713,7 +735,9 @@ their popup said the user's *roles* did not permit the operation, which for a
 disconnected user is both wrong and a waste of their time; `not_permitted()`
 now distinguishes the two causes.
 
-**Not covered, and open:** `ActivityControl` and its subclasses (`Decision`,
-`Merge`) are timeline furniture too, but are not Activities, so none of the
-above touches them. Whether they should follow is undecided.
+**Still not covered:** nothing else in a timeline is a distinct persisted
+object — `Flow` was already excluded from claims by §4's independent-existence
+rule, and the timeline's structure otherwise lives in the activities' own
+attributes. If a new timeline class is ever added, it belongs in
+`access.offline_excluded`.
 
