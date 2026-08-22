@@ -63,6 +63,7 @@ from pangalactic.core             import read_deletion_queue
 from pangalactic.core             import read_parm_del_queue
 from pangalactic.core             import refdata, ref_db
 from pangalactic.core.registry    import PanGalacticRegistry
+from pangalactic.core.dbdump      import dump_db_to_yaml
 from pangalactic.core.mapping     import schema_maps, schema_version
 from pangalactic.core.meta        import CHECKOUT_EXPANSION, TEXT_PROPERTIES
 from pangalactic.core.parametrics import (add_context_parm_def,
@@ -332,6 +333,39 @@ class UberORB(object):
             # if the state 'schema_version' does not match the current
             # package's schema_version:
             dump_path = os.path.join(pgx_home, 'db.yaml')
+            # [0] dump the existing database, BEFORE anything is destroyed.
+            #
+            # This used to be written at shutdown by the version being
+            # replaced, which made every shutdown pay for a migration that
+            # almost never happens (author, 2026-08-22).  Doing it here is
+            # both faster and safer:  the dump is taken from the database
+            # actually about to be migrated, so it cannot be stale, and a
+            # home whose last shutdown was a crash still migrates.
+            #
+            # It cannot use orb.dump_db():  that goes through the ORM, and
+            # the ORM here is the *new* schema -- there is one declarative
+            # Base per process, so the old classes cannot be built alongside
+            # it.  See pangalactic/core/dbdump.py.
+            #
+            # NOTE the ordering:  before [1], which removes the parameter and
+            # data element caches the dump needs, and before [2], which drops
+            # the database.
+            self.log.debug('  [0] dumping db for migration ...')
+            try:
+                n = dump_db_to_yaml(db_url, dump_path, home=pgx_home,
+                                    log=self.log)
+                self.log.debug(f'      + {n} objects dumped.')
+            except Exception as e:
+                # Refuse to go on.  The next steps drop the database, and a
+                # migration that proceeds without a dump destroys exactly the
+                # data it exists to preserve -- which is what the old
+                # "mods = False" bug did, silently, for as long as it was
+                # there.  Better a client that will not start.
+                self.log.error(f'  ** db dump for migration FAILED: {e}')
+                self.error_log.info('* migration dump failed; aborting so '
+                                    'the database is not dropped:')
+                self.error_log.info(traceback.format_exc())
+                raise
             # [1] remove .json caches and "cache" directory:
             self.log.debug('  [1] removing caches ...')
             for prefix in ['data_elements', 'diagrams', 'parameters',

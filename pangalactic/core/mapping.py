@@ -57,10 +57,13 @@ Examples of schema mods that require a conversion function include:
 #         rather than regenerated:  regenerating it from a fresh orb start
 #         yields refdata only and would lose its ~427-product commodity
 #         hardware library.
-#     CAVEAT on the migration branch:  it reloads from home/db.yaml, and
-#     nothing writes that file -- pangalaxian's orb.dump_db() call sits
-#     behind a hardcoded "mods = False".  So that branch currently empties
-#     the database rather than migrating it.  Not addressed here.
+#     CAVEAT on the migration branch (resolved 2026-08-22):  it reloads
+#     from home/db.yaml, and at the time nothing wrote that file --
+#     pangalaxian's orb.dump_db() call sat behind a hardcoded
+#     "mods = False", so the branch emptied the database rather than
+#     migrating it.  The dump was first fixed at shutdown, and then moved
+#     into the migration branch itself, which now writes db.yaml from the
+#     database it is about to drop.  See pangalactic/core/dbdump.py.
 #   * no conversion function is required:  the attribute is new and
 #     unpopulated.
 

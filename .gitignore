@@ -33,5 +33,6 @@ pangalaxian_test/*
 **/pangalaxian_test/
 **/placement_test/
 **/activity_deser_test/
+**/dbdump_test/
 *.pickle
 _trial_temp
