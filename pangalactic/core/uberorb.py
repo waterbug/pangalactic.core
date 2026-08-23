@@ -2294,12 +2294,25 @@ class UberORB(object):
         suffixes = ('.stp', '.STP', '.step', '.STEP', '.p21', '.P21', '.stl',
                     '.STL', '.brep', '.BREP')
         if (model.has_files and model.type_of_model.id == "MCAD"):
+            # Which of the model's files is *the* file?  The one no other
+            # file of the same model references.
+            #
+            # This is not always the same as "the one that references nothing
+            # else":  a file in an export set is component_file_of the file
+            # that names it, and when each file has a Model of its own -- so
+            # that a subassembly can be opened by itself -- the subassembly's
+            # file is referenced by its parent, which belongs to a *different*
+            # model.  Testing component_file_of alone would skip it and the
+            # model would have no file at all.  Testing it against this
+            # model's own files gets both cases right:  this one, and the
+            # older shape where every file of a set hung off one model.
+            own = set(f.oid for f in model.has_files)
             for rep_file in model.has_files:
                 if not rep_file.user_file_name.endswith(suffixes):
                     continue
-                if getattr(rep_file, 'component_file_of', None):
-                    # not a file of this model in its own right -- it is one
-                    # the model's own file references, and opening it alone
+                referrer = getattr(rep_file, 'component_file_of', None)
+                if referrer is not None and referrer.oid in own:
+                    # a file this model's own file references:  opening it
                     # would render a component instead of the assembly
                     continue
                 fpath = self.get_vault_fpath(rep_file)

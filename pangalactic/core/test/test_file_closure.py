@@ -175,6 +175,64 @@ if __name__ == '__main__':
     unittest.main()
 
 
+class McadModelFileTest(unittest.TestCase):
+    """
+    Which of a Model's files is *the* file to open.
+
+    Two shapes have to work.  In one, every file of an export set hangs off
+    the assembly's Model, and the file to open is the one the others are
+    referenced by.  In the other -- what an import produces now -- each file
+    is the Model of its own product, so a subassembly can be opened by
+    itself, and that file *is* referenced by its parent, which belongs to a
+    different model.
+    """
+
+    def mcad_model(self, id_):
+        mtype = orb.get('pgefobjects:ModelType.MCAD')
+        product = orb.get('test:spacecraft0')
+        m = clone('Model', of_thing=product, type_of_model=mtype,
+                  id=id_, name=id_)
+        orb.save([m])
+        return m
+
+    def test_20_the_assembly_file_is_chosen_over_its_components(self):
+        """
+        CASE:  one Model holding a whole export set.  The assembly file is
+        returned, not one of the parts -- opening a part would render a
+        component instead of the assembly.
+        """
+        model = self.mcad_model('one-model-set')
+        master = make_rep_file('whole_asm.stp')
+        part = make_rep_file('whole_part.stp', parent=master)
+        master.of_object = model
+        part.of_object = model
+        orb.save([master, part])
+        got = orb.get_mcad_model_file_path(model)
+        self.assertTrue(got.endswith('whole_asm.stp'), got)
+
+    def test_21_a_subassembly_model_returns_its_own_file(self):
+        """
+        CASE:  a Model of a subassembly, whose single file is referenced by
+        the parent assembly's file -- which belongs to a different Model.
+
+        Testing component_file_of alone would skip it and leave the model
+        with no file at all, which is exactly what "open this subassembly in
+        the viewer" needs to work.
+        """
+        parent_model = self.mcad_model('parent-model')
+        parent_file = make_rep_file('parent_asm.stp')
+        parent_file.of_object = parent_model
+        sub_model = self.mcad_model('sub-model')
+        sub_file = make_rep_file('sub_asm.stp', parent=parent_file)
+        sub_file.of_object = sub_model
+        orb.save([parent_file, sub_file])
+        got = orb.get_mcad_model_file_path(sub_model)
+        self.assertTrue(got.endswith('sub_asm.stp'), got)
+        # ... and the parent still returns its own
+        got_parent = orb.get_mcad_model_file_path(parent_model)
+        self.assertTrue(got_parent.endswith('parent_asm.stp'), got_parent)
+
+
 class SerializeModelsTest(unittest.TestCase):
     """
     A product sent to a client must carry what the server knows about it.
