@@ -118,6 +118,35 @@ NULL_VALUE = {'str' : '',
 
 
 
+# File formats the built-in CAD viewer can render.  A RepresentationFile in
+# one of these is fetched to the vault automatically when its Model arrives,
+# because the vault copy is what the viewer opens -- the user should not have
+# to save a local copy by hand just to look at a model (author, 2026-08-26).
+#
+# Anything else is fetched on demand:  "Models and Docs" -> save a local copy
+# is the right route for a file the client cannot display itself, and that is
+# what it is for.
+#
+# Both cases are listed because a file name's suffix is whatever the exporter
+# wrote.
+VIEWABLE_FILE_SUFFIXES = ('.stp', '.STP', '.step', '.STEP', '.p21', '.P21',
+                          '.stl', '.STL', '.brep', '.BREP')
+
+
+def is_viewable_file(rep_file):
+    """
+    Can the built-in CAD viewer render this file?
+
+    Args:
+        rep_file (RepresentationFile):  the file
+
+    Returns:
+        bool:  True if its name ends in a format the viewer handles
+    """
+    name = getattr(rep_file, 'user_file_name', '') or ''
+    return name.endswith(VIEWABLE_FILE_SUFFIXES)
+
+
 class UberORB(object):
     """
     The UberORB mediates all communications with local objects, local storage,
@@ -2291,8 +2320,7 @@ class UberORB(object):
         # self.log.debug('* get_step_model_path(model with oid "{}")'.format(
                       # getattr(model, 'oid', 'None')))
         vault_fpath = ''
-        suffixes = ('.stp', '.STP', '.step', '.STEP', '.p21', '.P21', '.stl',
-                    '.STL', '.brep', '.BREP')
+        suffixes = VIEWABLE_FILE_SUFFIXES
         if (model.has_files and model.type_of_model.id == "MCAD"):
             # Which of the model's files is *the* file?  The one no other
             # file of the same model references.
