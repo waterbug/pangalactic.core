@@ -173,3 +173,78 @@ class FileClosureTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class SerializeModelsTest(unittest.TestCase):
+    """
+    A product sent to a client must carry what the server knows about it.
+
+    A product whose model is a STEP assembly is incomplete without that model
+    and its files -- there is nothing to render and nothing to compute mass
+    properties from -- so `include_models` exists and the server turns it on
+    whenever it sends a product.  It is off by default because a client
+    saving a product has no reason to send the models back.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        from pangalactic.core.serializers import serialize
+        cls.serialize = staticmethod(serialize)
+        cls.product = orb.get('test:spacecraft0')
+        assert cls.product is not None
+        mtype = orb.get('pgefobjects:ModelType.MCAD')
+        cls.model = clone('Model', of_thing=cls.product, type_of_model=mtype,
+                          id='sc0-mcad', name='sc0 mcad model')
+        orb.save([cls.model])
+        cls.master = make_rep_file('sc0_asm.stp')
+        cls.master.of_object = cls.model
+        cls.part = make_rep_file('sc0_part.stp', parent=cls.master)
+        cls.part.of_object = cls.model
+        orb.save([cls.master, cls.part])
+
+    def oids(self, **kw):
+        return set(so['oid'] for so in
+                   self.serialize(orb, [self.product], **kw))
+
+    def test_10_models_are_left_out_by_default(self):
+        """
+        CASE:  an ordinary serialization.  No models -- this is the direction
+        a client saves in, and the models would be freight.
+        """
+        self.assertNotIn(self.model.oid, self.oids())
+
+    def test_11_models_come_when_asked_for(self):
+        """
+        CASE:  include_models.  The model travels with its product.
+        """
+        self.assertIn(self.model.oid, self.oids(include_models=True))
+
+    def test_12_the_model_brings_its_files(self):
+        """
+        CASE:  the files come too, without being asked for separately -- a
+        Model always carries its has_files, which is why the component-file
+        work needed no further plumbing to reach the client.
+        """
+        oids = self.oids(include_models=True)
+        self.assertIn(self.master.oid, oids)
+        self.assertIn(self.part.oid, oids)
+
+    def test_13_component_models_come_too(self):
+        """
+        CASE:  an assembly's components have models of their own.
+
+        They travel as well:  a component's model is as much part of what the
+        client should hold as the assembly's own, and for a STEP assembly it
+        is where that component's geometry is.
+        """
+        acus = self.product.components
+        self.assertTrue(acus, 'test assembly has no components')
+        component = acus[0].component
+        mtype = orb.get('pgefobjects:ModelType.MCAD')
+        comp_model = clone('Model', of_thing=component, type_of_model=mtype,
+                           id='comp-mcad', name='component mcad model')
+        orb.save([comp_model])
+        oids = self.oids(include_components=True, include_models=True)
+        self.assertIn(comp_model.oid, oids)
+        # ... and not when models were not asked for
+        self.assertNotIn(comp_model.oid, self.oids(include_components=True))

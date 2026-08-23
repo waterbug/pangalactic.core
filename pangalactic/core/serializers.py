@@ -263,7 +263,7 @@ uncookers = {
              }
 
 
-def serialize(orb, objs, include_components=False,
+def serialize(orb, objs, include_components=False, include_models=False,
               include_sub_activities=False, include_refdata=False,
               include_inverse_attrs=False):
     """
@@ -290,6 +290,16 @@ def serialize(orb, objs, include_components=False,
             * 'assigned_to' (Person) object will always be included
             * 'role_assignment_context' (Org) object will always be included
             ******************************************************************
+        include_models (bool):  [default: False] if True, a Product's Models
+            and DocumentReferences are included -- and, by way of the Model
+            case below, each Model's RepresentationFiles.
+
+            Off by default because this is not wanted in every direction:  a
+            client saving a product to the repository has no reason to send
+            the models back with it, and an export would grow a copy of every
+            file record.  The server turns it on when *sending* a product to
+            a client, where the opposite is true (see below).
+
         include_refdata (bool):  [default: False] if True, serialize
             reference data -- in general, it is not necessary to include
             reference data, since it is known to both client and server; it is
@@ -420,8 +430,12 @@ def serialize(orb, objs, include_components=False,
         if include_components and getattr(obj, 'components', None):
             sacus = serialize(orb, obj.components)
             serialized += sacus
+            # include_models carries down:  a component's model is as much
+            # part of what the client should hold as the assembly's own, and
+            # for a STEP assembly it is where the component's geometry is
             scomps = serialize(orb, [acu.component
-                                     for acu in obj.components])
+                                     for acu in obj.components],
+                               include_models=include_models)
             serialized += scomps
         # 'include_sub_activities' only applies to Activities ... and only
         # "direct sub_activities" will be included (not recursive)
@@ -436,10 +450,30 @@ def serialize(orb, objs, include_components=False,
         # 'product_definition' attribute that can be white or black box ...
         if isinstance(obj, orb.classes['Product']):
             # ---------------------------------------------------------------
-            # + NOTE: Models and RepresentationFiles are NOT included by
-            # default with the Products they represent because they may have
-            # different "owners" and access controls
+            # + Models and RepresentationFiles are not included by *default*,
+            #   because a client saving a product has no reason to send them
+            #   back and an export would grow a copy of every file record.
+            #
+            #   They ARE included when the caller asks, and the server asks
+            #   whenever it sends a product to a client.  A product whose
+            #   model is a STEP assembly is *incomplete* without that model
+            #   and its files -- there is nothing to render and nothing to
+            #   compute mass properties from -- and PGEF's master-model
+            #   paradigm says the client should hold everything the server
+            #   knows about a product (author, 2026-08-25).
+            #
+            #   The earlier note here gave differing "owners" and access
+            #   controls as the reason for withholding them.  That concern is
+            #   answered structurally rather than by withholding:  a
+            #   project-owned object can only be built from objects that are
+            #   public or owned by that project, so a requester entitled to
+            #   the product is entitled to what it is made of (author).
             # ---------------------------------------------------------------
+            if include_models:
+                if getattr(obj, 'has_models', None):
+                    serialized += serialize(orb, obj.has_models)
+                if getattr(obj, 'doc_references', None):
+                    serialized += serialize(orb, obj.doc_references)
             # + ALWAYS include ports (white box)
             if obj.ports:
                 s_ports = serialize(orb, obj.ports)
