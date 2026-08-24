@@ -631,6 +631,10 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     hwproducts = []
     # requirements: list of deserialized objects that are Requirement instances
     requirements = []
+    # deferred_fks: (oid, attribute, target oid) for object-valued attributes
+    # whose target was not in the database when the object was created.  Set
+    # after the batch, when it may well be.
+    deferred_fks = []
     # act_to_sao: mapping of Activity oids to oids of their "sub_activity_of"
     # ... needed in case Activity instances get deserialized before their
     # "sub_activity_of" has been deserialized.
@@ -868,6 +872,29 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     if d.get(fk):
                         # orb.log.debug('      rel obj found.')
                         kw[fk] = orb.get(d[fk])
+                        if kw[fk] is None:
+                            # The named object is not here *yet*.  It may be
+                            # later in this very batch:  DESERIALIZATION_ORDER
+                            # orders the classes but not the objects within a
+                            # class, so a self-referential attribute --
+                            # RepresentationFile.component_file_of, for one --
+                            # is decided by which of the two happens to come
+                            # first in the list.
+                            #
+                            # Setting it to None here and moving on loses the
+                            # link silently.  That is what emptied
+                            # "component_files" on a client syncing an
+                            # imported STEP assembly:  with no component
+                            # files, nothing staged the set under the names
+                            # its references use, and only the files that
+                            # happened to already sit in the vault under
+                            # plain names resolved (author, 2026-08-26).
+                            #
+                            # So remember it and try again when the batch is
+                            # done.  This is the general form of the
+                            # "act_to_sao" pass below, which does the same
+                            # thing for one attribute of one class.
+                            deferred_fks.append((oid, fk, d[fk]))
                     else:
                         # orb.log.debug('      rel obj NOT found.')
                         # "of_product" is REQUIRED for a Port (it is NOT
@@ -1015,6 +1042,25 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
     # NOTES_ON_ACTIVITIES.md), so the parent is always created before the child
     # and always travels with it.  If it is missing, the data is incomplete --
     # so collect those and report them rather than dropping them silently.
+    # Set the links whose targets were missing when their objects were made.
+    # Ordered before the act_to_sao pass so that it sees the result:  an
+    # Activity's parent may equally have been later in the batch, and there
+    # is no reason for the two passes to disagree.
+    if deferred_fks:
+        resolved = 0
+        for obj_oid, fk, target_oid in deferred_fks:
+            obj = orb.get(obj_oid)
+            target = orb.get(target_oid)
+            if obj is None or target is None:
+                continue
+            if getattr(obj, fk, None) is None:
+                setattr(obj, fk, target)
+                resolved += 1
+        if resolved:
+            orb.db.commit()
+            n = len(deferred_fks)
+            orb.log.debug(f'* deser: {resolved} of {n} deferred reference(s) '
+                          'resolved after the batch.')
     orphans = []
     for act_oid, sao_oid in act_to_sao.items():
         if not sao_oid:
