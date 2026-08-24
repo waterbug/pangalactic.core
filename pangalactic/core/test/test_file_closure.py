@@ -175,6 +175,75 @@ if __name__ == '__main__':
     unittest.main()
 
 
+class StagedCleanupTest(unittest.TestCase):
+    """
+    Staging leaves a copy of every viewable file of every assembly looked at.
+    Nothing removed them, so they accumulated for the life of the home.
+    """
+
+    def test_15_restaging_clears_what_was_there(self):
+        """
+        CASE:  an assembly restaged after losing a component -- someone
+        swapped a part, which is a thing people do.
+
+        The directory is cleared, not added to.  A STEP reader resolves by
+        name, so a stale file left behind would be found and the wrong
+        assembly rendered, without complaint.
+        """
+        top = make_rep_file('swap_asm.stp')
+        old_part = make_rep_file('old_part.stp', parent=top)
+        directory = os.path.dirname(orb.stage_file_closure(top))
+        self.assertTrue(os.path.exists(os.path.join(directory,
+                                                    'old_part.stp')))
+        # the component is replaced
+        old_part.component_file_of = None
+        make_rep_file('new_part.stp', parent=top)
+        orb.save([old_part])
+        orb.stage_file_closure(top)
+        self.assertFalse(os.path.exists(os.path.join(directory,
+                                                     'old_part.stp')),
+                         'a file no longer in the set was left staged')
+        self.assertTrue(os.path.exists(os.path.join(directory,
+                                                    'new_part.stp')))
+
+    def test_16_pruning_removes_orphaned_directories(self):
+        """
+        CASE:  a staged directory whose RepresentationFile is gone.  It can
+        never be wanted again.
+        """
+        staged = os.path.join(orb.home, 'staged')
+        orphan = os.path.join(staged, 'no-such-rep-file-oid')
+        os.makedirs(orphan, exist_ok=True)
+        with open(os.path.join(orphan, 'x.stp'), 'w') as f:
+            f.write('x')
+        removed = orb.prune_staged_files()
+        self.assertTrue(removed >= 1)
+        self.assertFalse(os.path.exists(orphan))
+
+    def test_17_pruning_keeps_live_directories(self):
+        """
+        CASE:  a staged directory whose file is still here.  Kept -- it is
+        the cache for an assembly that can still be viewed, and rebuilding it
+        costs a copy of every file in the set.
+        """
+        top = make_rep_file('live_asm.stp')
+        make_rep_file('live_part.stp', parent=top)
+        directory = os.path.dirname(orb.stage_file_closure(top))
+        orb.prune_staged_files()
+        self.assertTrue(os.path.exists(directory))
+
+    def test_18_pruning_a_home_that_has_staged_nothing(self):
+        """
+        CASE:  no staged directory at all.  Start-up calls this, so it has to
+        cope with a home that has never viewed a model.
+        """
+        import shutil as _shutil
+        staged = os.path.join(orb.home, 'staged')
+        if os.path.exists(staged):
+            _shutil.rmtree(staged)
+        self.assertEqual(0, orb.prune_staged_files())
+
+
 class McadModelFileTest(unittest.TestCase):
     """
     Which of a Model's files is *the* file to open.

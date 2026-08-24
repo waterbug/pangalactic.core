@@ -2286,8 +2286,15 @@ class UberORB(object):
             return root_vault_fpath
         dir_path = dir_path or os.path.join(self.home, 'staged',
                                             rep_file.oid)
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+        # Cleared rather than added to.  A set that has lost a file -- a
+        # component swapped for another, which is a thing people do -- would
+        # otherwise keep the old one here, and a STEP reader resolving by
+        # name would find it and render the wrong assembly without
+        # complaining.  Staging is a cache of the vault, so rebuilding it
+        # costs a copy and nothing else.
+        if os.path.exists(dir_path):
+            shutil.rmtree(dir_path, ignore_errors=True)
+        os.makedirs(dir_path)
         staged_root = ''
         for rf in closure:
             vault_fpath = self.get_vault_fpath(rf)
@@ -2306,6 +2313,37 @@ class UberORB(object):
             if rf.oid == rep_file.oid:
                 staged_root = dest
         return staged_root
+
+    def prune_staged_files(self):
+        """
+        Remove staged directories for files that no longer exist.
+
+        Staging leaves a copy of every viewable file of every assembly that
+        has been looked at, under `<home>/staged/<rep file oid>/`.  Nothing
+        removed them, so they accumulated for the lifetime of the home.
+
+        A directory whose RepresentationFile is still here is kept:  it is
+        the cache for an assembly that can still be viewed, and rebuilding it
+        costs a copy of every file in the set.  One whose RepresentationFile
+        is gone can never be wanted again.
+
+        Returns:
+            int:  the number of directories removed
+        """
+        staged = os.path.join(self.home, 'staged')
+        if not os.path.isdir(staged):
+            return 0
+        removed = 0
+        for name in os.listdir(staged):
+            path = os.path.join(staged, name)
+            if not os.path.isdir(path):
+                continue
+            if self.get(name) is None:
+                shutil.rmtree(path, ignore_errors=True)
+                removed += 1
+        if removed:
+            self.log.info(f'* pruned {removed} staged file directory(s).')
+        return removed
 
     def get_mcad_model_file_path(self, model):
         """
