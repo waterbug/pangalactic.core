@@ -5,9 +5,21 @@ import traceback
 from pangalactic.core import orb, state, config
 
 
+# Instances of these classes are modifiable by any user.  They are created
+# only in association with another object and are reachable only through it,
+# so the permission that matters is the one on that object.
+#
+# NOTE on DocumentReference (2026-08-29):  it is here because it is also the
+# only way the repository can accept one.  vger.save() authorizes a new object
+# by "the caller is its creator", and a DocumentReference has no creator --
+# it is an Identifiable, and it cannot be made a Modelable, because
+# `related_item` points at Modelable and sqlalchemy's joined table
+# inheritance cannot then tell that foreign key from the inheritance one.
+# See pangalactic.core.digital_files.new_doc_with_file().
 modifiables = [
         'Axis2Placement3D',
         'ContextDependentShapeRepresentation',
+        'DocumentReference',
         'ParameterRelation',
         'Relation',
         'RepresentationFile',
@@ -691,6 +703,12 @@ def get_owner_id(obj):
             owner_id = get_owner_id(cdsr)
             if owner_id:
                 return owner_id
+    elif isinstance(obj, orb.classes['RepresentationFile']):
+        # a file takes its owner from what it is a representation of.
+        # RepresentationFile descends from DigitalFile, not ManagedObject, so
+        # it has no owner of its own -- and without this it fell through to
+        # '' and was published on no project channel at all.
+        return get_owner_id(getattr(obj, 'of_object', None))
     return ''
 
 
@@ -737,6 +755,25 @@ def is_cloaked(obj):
         # a placement has meaning only through the representations that use
         # it; it is cloaked if any of them is
         return any(is_cloaked(cdsr) for cdsr in (obj.placement_of or []))
+    elif isinstance(obj, orb.classes['RepresentationFile']):
+        # cloaking for a file is determined by what it represents:  the CAD
+        # file of a cloaked assembly is as proprietary as the assembly.
+        #
+        # Without this branch a RepresentationFile fell through to the final
+        # "not a ManagedObject, so public" case, because `public` is declared
+        # on ManagedObject and DigitalFile is not one.  That did not matter
+        # while these objects were only ever created by
+        # vger.add_update_model(), which publishes on the owner's channel
+        # directly;  it matters as soon as they arrive through vger.save(),
+        # which asks this.
+        #
+        # It mattered more when this was written:  vger.download_chunk()
+        # authorized nothing, so the oid of a file *was* access to the file,
+        # and publishing a cloaked file's oid on the public channel handed it
+        # out.  That rpc now gates on 'view' for the file's `of_object`
+        # (2026-08-29), so this branch is no longer the only thing standing
+        # in the way -- but it is still right on its own terms.
+        return is_cloaked(getattr(obj, 'of_object', None))
     elif hasattr(obj, 'public') and not obj.public:
         return True
     else:

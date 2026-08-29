@@ -258,6 +258,28 @@ joined table inheritance cannot cope with a class having a foreign key to its
 `Acu` and `placement` at `Axis2Placement3D` -- and a full build plus a
 round-trip with both relationships populated confirmed it.
 
+#### `DocumentReference` cannot follow them (2026-08-29)
+
+It has the same defect for the same reason -- an `Identifiable`, so no
+`creator`, so invisible to `sync_user_created_objs_to_repo()` -- and the same
+remedy suggests itself.  **It does not work.**  `related_item` points at
+`Modelable`, which would become `DocumentReference`'s own superclass, so the
+warning above applies to it exactly.
+
+Verified rather than assumed:  with `DocumentReference` declared a `Modelable`
+subclass the orb does not start at all --
+
+    sqlalchemy.exc.AmbiguousForeignKeysError: Can't determine the inherit
+    condition between inherited table 'modelable_' and inheriting table
+    'document_reference_'; tables have more than one foreign key
+    relationship established.
+
+Narrowing `related_item`'s range to escape it would be ontology damage in
+service of a mapping-layer limitation:  a `DocumentReference` genuinely does
+relate a `Document` to *any* `Modelable`, which is what its comment in the owl
+has always said.  So the class stays as it is, and the sync carries it as a
+dependent of its `Document` instead -- see NOTES_ON_OFFLINE_AND_SYNC.md §3.9.
+
 #### Mapping to STEP [1]
 
 | PGEF | STEP |
