@@ -529,17 +529,16 @@ class DigitalFilesTest(unittest.TestCase):
             assembly.public = was
             orb.db.commit()
 
-    def test_20b_the_models_perms_would_authorize_almost_no_one(self):
+    def test_20b_a_member_may_see_the_projects_models(self):
         """
-        CASE:  the other wrong gate, and the defect it caused.
+        CASE:  an ordinary member of the owning project, who created nothing,
+        and a cloaked Model.
 
         Model and Document are Product subclasses but not HardwareProducts,
-        and the Product branch of get_perms() handles only HardwareProduct.
-        A cloaked Model therefore matches no branch and falls through to an
-        empty set:  an ordinary member of the owning project has no 'view' on
-        it.  A gate built on this refuses the file to everyone but the
-        creator -- which is what happened, and is why may_fetch_file() does
-        not ask.
+        and until 2026-08-29 the Product branch of get_perms() handled only
+        HardwareProduct -- so a cloaked one matched nothing and answered the
+        empty set to every member of its own project.  Product type has
+        nothing to say about a model or a document;  ownership does.
         """
         fpath = self.a_file('perms-model.stp')
         assembly = orb.get(ASSEMBLY_OID)
@@ -550,11 +549,68 @@ class DigitalFilesTest(unittest.TestCase):
             model, rep_file = new_model_with_file(MCAD, fpath,
                                                   parms_for(fpath))
             orb.db.commit()
-            member = orb.get(self.MEMBER)
-            creator = orb.get(USER_OID)
-            expected = [[], True]
-            value = [get_perms(model, user=member),
-                     'view' in get_perms(model, user=creator)]
+            expected = ['view', 'add docs', 'add models']
+            value = get_perms(model, user=orb.get(self.MEMBER))
+            self.assertEqual(expected, value)
+        finally:
+            assembly.public = was
+            orb.db.commit()
+
+    def test_20b1_a_member_may_see_the_projects_documents(self):
+        """
+        CASE:  the same rule for a Document, which reaches the same branch.
+        """
+        fpath = self.a_file('perms-doc.pdf', b'%PDF-1.4')
+        doc, ref, rep_file = new_doc_with_file(fpath, self.doc_parms(fpath))
+        orb.db.commit()
+        expected = ['view', 'add docs', 'add models']
+        value = get_perms(doc, user=orb.get(self.MEMBER))
+        self.assertEqual(expected, value)
+
+    def test_20b2_membership_does_not_confer_modify(self):
+        """
+        CASE:  the deliberate limit of the rule.  Seeing another user's model
+        is implied by membership of the project;  changing it is not.  The
+        creator keeps modify by an earlier branch.
+        """
+        fpath = self.a_file('perms-modify.stp')
+        assembly = orb.get(ASSEMBLY_OID)
+        was = assembly.public
+        try:
+            assembly.public = False
+            orb.db.commit()
+            model, rep_file = new_model_with_file(MCAD, fpath,
+                                                  parms_for(fpath))
+            orb.db.commit()
+            member_perms = get_perms(model, user=orb.get(self.MEMBER))
+            creator_perms = get_perms(model, user=orb.get(USER_OID))
+            expected = [False, False, True]
+            value = ['modify' in member_perms,
+                     'delete' in member_perms,
+                     'modify' in creator_perms]
+            self.assertEqual(expected, value)
+        finally:
+            assembly.public = was
+            orb.db.commit()
+
+    def test_20b3_an_outsider_sees_nothing_of_a_cloaked_model(self):
+        """
+        CASE:  a user with no role in the owning organization.  The branch
+        grants on role, so without one it falls through to the accumulated
+        perms -- which for a Product are empty unless it is public.
+        """
+        fpath = self.a_file('perms-outsider.stp')
+        assembly = orb.get(ASSEMBLY_OID)
+        was = assembly.public
+        try:
+            assembly.public = False
+            orb.db.commit()
+            model, rep_file = new_model_with_file(MCAD, fpath,
+                                                  parms_for(fpath))
+            orb.db.commit()
+            outsider = orb.get(self.OUTSIDER)
+            expected = [True, []]
+            value = [outsider is not None, get_perms(model, user=outsider)]
             self.assertEqual(expected, value)
         finally:
             assembly.public = was

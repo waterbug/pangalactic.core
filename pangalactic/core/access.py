@@ -455,6 +455,43 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                     if debugging:
                         perms.append('role-based product type perms (HW)')
                     return perms
+            else:
+                # ------------------------------------------------------------
+                # A Product that is NOT a HardwareProduct:  a Model, a
+                # Document, a Template.  Product type has nothing to say
+                # about these -- the discipline logic above is about who may
+                # engineer a subsystem -- so access follows ownership alone:
+                # ANY user with a role in the organization that owns the
+                # object may see it, and may attach documents and models to
+                # it.
+                #
+                # There was no branch here at all until 2026-08-29 (author's
+                # rule).  A cloaked Model or Document therefore matched
+                # nothing in this block and fell through to [7], which
+                # returns the accumulated perms -- and 'view' is seeded above
+                # only for a Product that is public.  So no member of the
+                # owning project had even 'view' on their own project's
+                # models and documents;  only the creator, by the branch
+                # above, and a global admin.
+                #
+                # Nothing depended on that until vger.download_chunk() began
+                # asking, and then a project's files were withheld from the
+                # project:  a STEP import synced its products to the other
+                # members and its files reached none of them.
+                #
+                # 'modify' and 'delete' are deliberately not granted.  The
+                # creator keeps them by the branch above;  for anyone else,
+                # changing another user's model or document is not implied by
+                # membership of the project.
+                # ------------------------------------------------------------
+                if role_ids:
+                    perms = ['view', 'add docs', 'add models']
+                    if debugging:
+                        perms.append('role-based owner perms (non-HW Product)')
+                    # orb.log.debug('  perms: {}'.format(perms))
+                    return perms
+                # no role in the owner:  fall through to [7], which answers
+                # 'view' if the object is public and nothing if it is not
         if isinstance(obj, orb.classes['Requirement']):
             # Requirements (subclass of ManagedObject) are a special case
             rqt_mgrs = set(['Administrator', 'systems_engineer',
@@ -716,31 +753,21 @@ def may_fetch_file(rep_file, user):
     """
     Say whether a user may be given the bytes of a file.
 
-    The rule is the one that already decides who is *told* about an object.
-    A client subscribes to "vger.channel.<org id>" for every organization it
-    has a role in, so a cloaked object reaches exactly the people with a role
-    in its owner, and a public one reaches everybody.  Fetching the bytes
-    follows the same line:  **you may fetch what you would have been sent.**
+    **The file's own permissions cannot answer this.**  RepresentationFile is
+    in `modifiables`, so every user has view, modify and delete on one;  a
+    gate built on that would authorize everybody.  What decides is the object
+    the file represents -- "authorization is the model's, since that is what
+    gains a file", as vger.add_component_file() puts it -- so this asks
+    get_perms() about `of_object`.
 
-    Deliberately not get_perms(), in either of the two forms that suggest
-    themselves -- both are wrong, in opposite directions:
-
-    * on the file:  a RepresentationFile is in `modifiables`, so its own
-      perms grant view, modify and delete to every user.  That authorizes
-      everybody.
-    * on the Model or Document it belongs to:  those are `Product`
-      subclasses but not `HardwareProduct`s, and the Product branch of
-      get_perms() handles only HardwareProduct.  A cloaked one therefore
-      matches no branch and falls through to an empty set, so *nobody* has
-      view on it -- not even a member of the owning project.  Only its
-      creator and a global admin get through, by earlier branches.  That
-      authorizes almost nobody, which is how this was found:  a STEP import
-      synced its products to the rest of the project and its files reached
-      no one (author, observed 2026-08-29).
-
-    Nor on the thing modelled:  get_perms() returns ['view'] on a cloaked
-    HardwareProduct to any user at all, role or no role, so delegating there
-    would be no gate.
+    That is only a sound question because a Product which is not a
+    HardwareProduct now has a role-based branch in get_perms().  Until
+    2026-08-29 it had none, so a cloaked Model or Document answered the empty
+    set to everyone but its creator, and this gate -- which did ask
+    get_perms() -- withheld a project's own files from the project.  The
+    first repair was to reimplement the rule here, in terms of is_cloaked()
+    and a role lookup;  the author's is better, and this defers to it:  one
+    definition of who may see an object, which the bytes then follow.
 
     Args:
         rep_file (RepresentationFile):  the file whose bytes are wanted
@@ -756,15 +783,7 @@ def may_fetch_file(rep_file, user):
         # a file that represents nothing has nothing to inherit access from,
         # and nothing in the application makes one
         return False
-    if not is_cloaked(subject):
-        return True
-    if is_global_admin(user):
-        return True
-    owner = getattr(subject, 'owner', None)
-    if owner is None:
-        return False
-    return bool(orb.search_exact(cname='RoleAssignment', assigned_to=user,
-                                 role_assignment_context=owner))
+    return 'view' in get_perms(subject, user=user)
 
 
 def is_cloaked(obj):
