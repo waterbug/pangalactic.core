@@ -712,6 +712,61 @@ def get_owner_id(obj):
     return ''
 
 
+def may_fetch_file(rep_file, user):
+    """
+    Say whether a user may be given the bytes of a file.
+
+    The rule is the one that already decides who is *told* about an object.
+    A client subscribes to "vger.channel.<org id>" for every organization it
+    has a role in, so a cloaked object reaches exactly the people with a role
+    in its owner, and a public one reaches everybody.  Fetching the bytes
+    follows the same line:  **you may fetch what you would have been sent.**
+
+    Deliberately not get_perms(), in either of the two forms that suggest
+    themselves -- both are wrong, in opposite directions:
+
+    * on the file:  a RepresentationFile is in `modifiables`, so its own
+      perms grant view, modify and delete to every user.  That authorizes
+      everybody.
+    * on the Model or Document it belongs to:  those are `Product`
+      subclasses but not `HardwareProduct`s, and the Product branch of
+      get_perms() handles only HardwareProduct.  A cloaked one therefore
+      matches no branch and falls through to an empty set, so *nobody* has
+      view on it -- not even a member of the owning project.  Only its
+      creator and a global admin get through, by earlier branches.  That
+      authorizes almost nobody, which is how this was found:  a STEP import
+      synced its products to the rest of the project and its files reached
+      no one (author, observed 2026-08-29).
+
+    Nor on the thing modelled:  get_perms() returns ['view'] on a cloaked
+    HardwareProduct to any user at all, role or no role, so delegating there
+    would be no gate.
+
+    Args:
+        rep_file (RepresentationFile):  the file whose bytes are wanted
+        user (Person):  the user asking
+
+    Returns:
+        bool:  True if the user may be given the file
+    """
+    if user is None or rep_file is None:
+        return False
+    subject = getattr(rep_file, 'of_object', None)
+    if subject is None:
+        # a file that represents nothing has nothing to inherit access from,
+        # and nothing in the application makes one
+        return False
+    if not is_cloaked(subject):
+        return True
+    if is_global_admin(user):
+        return True
+    owner = getattr(subject, 'owner', None)
+    if owner is None:
+        return False
+    return bool(orb.search_exact(cname='RoleAssignment', assigned_to=user,
+                                 role_assignment_context=owner))
+
+
 def is_cloaked(obj):
     """
     Return the cloaking status of an object.
@@ -770,9 +825,10 @@ def is_cloaked(obj):
         # It mattered more when this was written:  vger.download_chunk()
         # authorized nothing, so the oid of a file *was* access to the file,
         # and publishing a cloaked file's oid on the public channel handed it
-        # out.  That rpc now gates on 'view' for the file's `of_object`
-        # (2026-08-29), so this branch is no longer the only thing standing
-        # in the way -- but it is still right on its own terms.
+        # out.  That rpc now asks may_fetch_file() (2026-08-29), which asks
+        # this -- so the two agree by construction:  the channel an object is
+        # published on and the people who may fetch its bytes are decided by
+        # the same answer.
         return is_cloaked(getattr(obj, 'of_object', None))
     elif hasattr(obj, 'public') and not obj.public:
         return True

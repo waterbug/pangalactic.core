@@ -18,7 +18,7 @@ import pangalactic.core.set_uberorb
 
 from pangalactic.core               import orb, state
 from pangalactic.core.access        import (get_owner_id, get_perms,
-                                            is_cloaked)
+                                            is_cloaked, may_fetch_file)
 from pangalactic.core.serializers   import deserialize
 from pangalactic.core.test.utils    import (create_test_users,
                                             create_test_project)
@@ -66,6 +66,16 @@ class DigitalFilesTest(unittest.TestCase):
         self.tmpdir = os.path.join(orb.home, 'df_test_files')
         if not os.path.exists(self.tmpdir):
             os.makedirs(self.tmpdir)
+        # Every Person in the test data has a role in H2G2, so there is
+        # nobody to test a refusal against;  the first version of the
+        # download gate looked correct because what it took for an outsider
+        # was in fact a member with an unmatching product type.
+        if orb.get('test:outsider') is None:
+            from pangalactic.core.clone import clone
+            clone('Person', oid='test:outsider', id='outsider',
+                  name='An Outsider', first_name='An', last_name='Outsider',
+                  org=orb.get('test:yoyodyne'))
+            orb.db.commit()
 
     def tearDown(self):
         state['local_user_oid'] = self.was_user
@@ -476,20 +486,30 @@ class DigitalFilesTest(unittest.TestCase):
 
     # ---- who may fetch a file's bytes ------------------------------------
     #
-    # vger.download_chunk() gates on 'view' for what the file represents.
-    # The policy is here, where it lives;  that the rpc applies it is in
+    # vger.download_chunk() asks access.may_fetch_file().  The policy is
+    # here, where it lives;  that the rpc applies it is in
     # pangalactic.vger/test/test_vger.py.
+    #
+    # NOTE the users these use.  "zaphod" is the local user and therefore the
+    # *creator* of everything created here, and "steve" is an Administrator
+    # -- both get through by branches that have nothing to do with the
+    # project.  "buckaroo" is the one that matters:  an ordinary member of
+    # H2G2 who created nothing.  Testing with a creator is how the first
+    # version of this gate passed while refusing the file to every other
+    # member of the project.
+
+    MEMBER = 'test:buckaroo'      # propulsion_engineer on H2G2, creator of
+                                  # nothing
+    OUTSIDER = 'test:outsider'    # no role anywhere -- made below, because
+                                  # every Person in the test data has one
 
     def test_20a_the_files_own_perms_would_authorize_everyone(self):
         """
-        CASE:  the reason the download gate asks about `of_object` and not
-        about the file.
+        CASE:  one of the two wrong gates.
 
         RepresentationFile is in access.modifiables, which grants every user
-        view/modify/delete -- so a gate on the file itself would be no gate
-        at all.  Asserted rather than assumed, because "check the perms of
-        the thing being fetched" is the obvious simplification and it is
-        wrong.
+        view/modify/delete -- so a gate on the file's own perms would be no
+        gate at all.
         """
         fpath = self.a_file('perms-own.stp')
         assembly = orb.get(ASSEMBLY_OID)
@@ -500,7 +520,7 @@ class DigitalFilesTest(unittest.TestCase):
             model, rep_file = new_model_with_file(MCAD, fpath,
                                                   parms_for(fpath))
             orb.db.commit()
-            outsider = orb.get('test:whorfin')
+            outsider = orb.get(self.OUTSIDER)
             expected = [True, True]
             value = ['view' in get_perms(rep_file, user=outsider),
                      'modify' in get_perms(rep_file, user=outsider)]
@@ -509,13 +529,19 @@ class DigitalFilesTest(unittest.TestCase):
             assembly.public = was
             orb.db.commit()
 
-    def test_20b_a_cloaked_models_file_is_for_the_project_only(self):
+    def test_20b_the_models_perms_would_authorize_almost_no_one(self):
         """
-        CASE:  a model of a cloaked assembly.  A user with a role in the
-        owning project may view it;  one with no role there may not, and so
-        cannot fetch the bytes.
+        CASE:  the other wrong gate, and the defect it caused.
+
+        Model and Document are Product subclasses but not HardwareProducts,
+        and the Product branch of get_perms() handles only HardwareProduct.
+        A cloaked Model therefore matches no branch and falls through to an
+        empty set:  an ordinary member of the owning project has no 'view' on
+        it.  A gate built on this refuses the file to everyone but the
+        creator -- which is what happened, and is why may_fetch_file() does
+        not ask.
         """
-        fpath = self.a_file('perms-cloaked.stp')
+        fpath = self.a_file('perms-model.stp')
         assembly = orb.get(ASSEMBLY_OID)
         was = assembly.public
         try:
@@ -524,23 +550,72 @@ class DigitalFilesTest(unittest.TestCase):
             model, rep_file = new_model_with_file(MCAD, fpath,
                                                   parms_for(fpath))
             orb.db.commit()
-            member = orb.get(USER_OID)          # systems_engineer on H2G2
-            outsider = orb.get('test:whorfin')  # no role on H2G2
-            expected = [True, False]
-            value = ['view' in get_perms(model, user=member),
-                     'view' in get_perms(model, user=outsider)]
+            member = orb.get(self.MEMBER)
+            creator = orb.get(USER_OID)
+            expected = [[], True]
+            value = [get_perms(model, user=member),
+                     'view' in get_perms(model, user=creator)]
             self.assertEqual(expected, value)
         finally:
             assembly.public = was
             orb.db.commit()
 
-    def test_20c_a_public_models_file_is_for_everyone(self):
+    def test_20c_a_project_member_may_fetch_a_cloaked_file(self):
         """
-        CASE:  a model of a public library product.  Anyone may view it, so
-        the gate must not shut the library away -- the failure this could
-        most easily cause.
+        CASE:  the case that was broken.  An ordinary member of the owning
+        project, who created nothing, may fetch the file -- they would have
+        been sent the object, since a cloaked object is published on the
+        owner's channel and they subscribe to it.
         """
-        fpath = self.a_file('perms-public.stp')
+        fpath = self.a_file('fetch-member.stp')
+        assembly = orb.get(ASSEMBLY_OID)
+        was = assembly.public
+        try:
+            assembly.public = False
+            orb.db.commit()
+            model, rep_file = new_model_with_file(MCAD, fpath,
+                                                  parms_for(fpath))
+            orb.db.commit()
+            expected = True
+            value = may_fetch_file(rep_file, orb.get(self.MEMBER))
+            self.assertEqual(expected, value)
+        finally:
+            assembly.public = was
+            orb.db.commit()
+
+    def test_20d_someone_outside_the_project_may_not(self):
+        """
+        CASE:  a user with no role in the owning organization.  The object
+        would never have been published to them, so neither are its bytes.
+        """
+        fpath = self.a_file('fetch-outsider.stp')
+        assembly = orb.get(ASSEMBLY_OID)
+        was = assembly.public
+        try:
+            assembly.public = False
+            orb.db.commit()
+            model, rep_file = new_model_with_file(MCAD, fpath,
+                                                  parms_for(fpath))
+            orb.db.commit()
+            outsider = orb.get(self.OUTSIDER)
+            # asserted, because may_fetch_file(rep_file, None) is also False
+            # -- without this the test would pass for the wrong reason if the
+            # outsider were never created
+            expected = [True, False]
+            value = [outsider is not None,
+                     may_fetch_file(rep_file, outsider)]
+            self.assertEqual(expected, value)
+        finally:
+            assembly.public = was
+            orb.db.commit()
+
+    def test_20e_a_public_products_file_is_for_everyone(self):
+        """
+        CASE:  a model of a public library product.  Anyone may fetch it --
+        shutting the library away is the failure this gate could most easily
+        cause.
+        """
+        fpath = self.a_file('fetch-public.stp')
         assembly = orb.get(ASSEMBLY_OID)
         was = assembly.public
         try:
@@ -549,13 +624,46 @@ class DigitalFilesTest(unittest.TestCase):
             model, rep_file = new_model_with_file(MCAD, fpath,
                                                   parms_for(fpath))
             orb.db.commit()
-            outsider = orb.get('test:whorfin')
             expected = True
-            value = 'view' in get_perms(model, user=outsider)
+            value = may_fetch_file(rep_file, orb.get(self.OUTSIDER))
             self.assertEqual(expected, value)
         finally:
             assembly.public = was
             orb.db.commit()
+
+    def test_20f_a_global_admin_may_fetch_anything(self):
+        """
+        CASE:  a global admin and a cloaked file of a project they have no
+        role in.
+        """
+        fpath = self.a_file('fetch-admin.stp')
+        assembly = orb.get(ASSEMBLY_OID)
+        was = assembly.public
+        try:
+            assembly.public = False
+            orb.db.commit()
+            model, rep_file = new_model_with_file(MCAD, fpath,
+                                                  parms_for(fpath))
+            orb.db.commit()
+            expected = True
+            value = may_fetch_file(rep_file, orb.get('test:steve'))
+            self.assertEqual(expected, value)
+        finally:
+            assembly.public = was
+            orb.db.commit()
+
+    def test_20g_a_file_representing_nothing_is_refused(self):
+        """
+        CASE:  a file with no of_object.  Nothing to inherit access from.
+        """
+        from pangalactic.core.placements import new_thing
+        orphan = new_thing('RepresentationFile', id='fetch-orphan',
+                           name='orphan', user_file_name='orphan.stp')
+        orb.db.commit()
+        expected = [False, False]
+        value = [may_fetch_file(orphan, orb.get(USER_OID)),
+                 may_fetch_file(None, orb.get(USER_OID))]
+        self.assertEqual(expected, value)
 
     # ---- documents -------------------------------------------------------
     #
