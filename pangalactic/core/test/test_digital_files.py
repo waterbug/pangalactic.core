@@ -19,7 +19,7 @@ import pangalactic.core.set_uberorb
 from pangalactic.core               import orb, state
 from pangalactic.core.access        import (get_owner_id, get_perms,
                                             is_cloaked, may_fetch_file)
-from pangalactic.core.serializers   import deserialize
+from pangalactic.core.serializers   import deserialize, serialize
 from pangalactic.core.test.utils    import (create_test_users,
                                             create_test_project)
 
@@ -257,6 +257,27 @@ class DigitalFilesTest(unittest.TestCase):
             assembly.public = was
             orb.db.commit()
 
+    def test_10c_a_file_representing_nothing_is_cloaked(self):
+        """
+        CASE:  a RepresentationFile whose "of_object" is null -- what the
+        repository stores when the file's serialization arrives one message
+        ahead of its Model's, so the oid it names resolves to nothing.
+
+        This used to fall through to is_cloaked(None) -> False, i.e.
+        "public", and vger.save() then announced the file on the public
+        channel:  a cloaked project's file, named to every user of the
+        repository, and fetchable by none of them, since may_fetch_file()
+        refuses a file with no subject (test_20g).  Nobody needs to hear
+        about a file they cannot fetch.
+        """
+        from pangalactic.core.placements import new_thing
+        orphan = new_thing('RepresentationFile', id='cloak-orphan',
+                           name='orphan', user_file_name='orphan.stp')
+        orb.db.commit()
+        expected = [True, '']
+        value = [is_cloaked(orphan), get_owner_id(orphan)]
+        self.assertEqual(expected, value)
+
     def test_10b_a_public_products_file_stays_public(self):
         """
         CASE:  a model of a public library product.  Delegation must not
@@ -281,6 +302,75 @@ class DigitalFilesTest(unittest.TestCase):
             orb.db.commit()
 
     # ---- staging the bytes -----------------------------------------------
+
+    # ---- a file's serialization carries its subject -----------------------
+    #
+    # DESERIALIZATION_ORDER puts Model before RepresentationFile, which is
+    # worth nothing if the Model is not in the batch.  Every other reference
+    # an object cannot exist without is carried with it -- an Acu brings its
+    # assembly and component, a RoleAssignment its role, person and context,
+    # a Model its files.  This relationship was carried downward only, so a
+    # RepresentationFile sent by itself named a Model that was not there and
+    # was stored with of_object = None.
+
+    def test_10d_a_lone_file_carries_the_model_it_represents(self):
+        """
+        CASE:  one RepresentationFile, serialized by itself -- what the
+        "modified object" signal does with the object it is given.  The
+        batch has to be able to stand on its own.
+        """
+        fpath = self.a_file('lone-file.stp')
+        model, rep_file = new_model_with_file(MCAD, fpath, parms_for(fpath))
+        orb.db.commit()
+        sobjs = serialize(orb, [rep_file], include_components=True)
+        expected = [model.oid, rep_file.oid]
+        value = sorted(so['oid'] for so in sobjs)
+        self.assertEqual(sorted(expected), value)
+
+    def test_10e_a_lone_document_file_carries_its_document(self):
+        """
+        CASE:  the same for a Document's file.  "of_object" is a
+        DigitalProduct, and a Document is one.
+        """
+        fpath = self.a_file('lone-doc-file.pdf')
+        document, doc_ref, rep_file = new_doc_with_file(fpath,
+                                                        self.doc_parms(fpath))
+        orb.db.commit()
+        sobjs = serialize(orb, [rep_file])
+        value = sorted(so['oid'] for so in sobjs)
+        self.assertEqual(sorted([document.oid, rep_file.oid]), value)
+
+    def test_10f_the_two_directions_do_not_recur(self):
+        """
+        CASE:  a Model carries its files and a file carries its Model --
+        the two directions of one relationship.  Serializing from either end
+        must terminate, and must give the same set.
+        """
+        fpath = self.a_file('both-ways.stp')
+        model, rep_file = new_model_with_file(MCAD, fpath, parms_for(fpath))
+        orb.db.commit()
+        from_file = sorted(so['oid'] for so in serialize(orb, [rep_file]))
+        from_model = sorted(so['oid'] for so in serialize(orb, [model]))
+        expected = [sorted([model.oid, rep_file.oid])] * 2
+        value = [from_file, from_model]
+        self.assertEqual(expected, value)
+
+    def test_10g_a_model_with_several_files_carries_all_of_them(self):
+        """
+        CASE:  an export set -- one Model, several files.  The cycle guard
+        must not stop the Model's *other* files from being included when the
+        serialization starts at one of them.
+        """
+        fpath = self.a_file('set-top.stp')
+        model, top_file = new_model_with_file(MCAD, fpath, parms_for(fpath))
+        part = self.a_file('set-part.stp')
+        _, part_file = new_component_file(top_file, part,
+                                          self.component_parms(part))
+        orb.db.commit()
+        sobjs = serialize(orb, [top_file])
+        expected = sorted([model.oid, top_file.oid, part_file.oid])
+        value = sorted(so['oid'] for so in sobjs)
+        self.assertEqual(expected, value)
 
     def test_11_the_bytes_are_copied_into_the_local_vault(self):
         """

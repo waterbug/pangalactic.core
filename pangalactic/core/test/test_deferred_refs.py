@@ -28,18 +28,33 @@ orb.start(home=HOME)
 NOW = '2026-08-26 12:00:00'
 
 
-def rep_file(oid, name, parent=None):
+# Every RepresentationFile here needs an "of_object":  it is in
+# REQUIRED_REFS, so one without it is not deserialized at all.  A single
+# Model stands in for the object they all represent -- what these tests are
+# about is "component_file_of", which is not required and is the reference
+# that arrives out of order.
+A_MODEL = dict(_cname='Model', oid='a-model', id='a-model', name='a model',
+               create_datetime=NOW, mod_datetime=NOW)
+
+
+def rep_file(oid, name, parent=None, of_object='a-model'):
     """
     A serialized RepresentationFile, optionally referencing another.
     """
     d = dict(_cname='RepresentationFile', oid=oid, id=oid, name=name,
              user_file_name=name, create_datetime=NOW, mod_datetime=NOW)
+    if of_object:
+        d['of_object'] = of_object
     if parent:
         d['component_file_of'] = parent
     return d
 
 
 class DeferredRefsTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        deserialize(orb, [A_MODEL])
 
     def test_01_parent_first(self):
         """
@@ -121,6 +136,131 @@ class DeferredRefsTest(unittest.TestCase):
         deserialize(orb, sobjs)
         children = set(f.oid for f in orb.get('root7').component_files)
         self.assertEqual(set(f'f{i}' for i in range(6)), children)
+
+    # ---- a target that arrives in a *later* batch -------------------------
+    #
+    # The deferred pass reaches the end of the batch that created the object
+    # and no further, so a target sent in a later message left the link null
+    # for good.  Two messages is not exotic:  a STEP import sent its
+    # RepresentationFile in one vger.save() and the Model it belongs to in
+    # the next, and the repository stored the file with no "of_object" --
+    # which made it a file nothing cloaked and nobody could fetch (observed
+    # 2026-09-03, "download not authorized").
+    #
+    # What repairs it is the object being sent again, which is ordinary:
+    # the objects that travel together carry each other's oids, so the
+    # serialization that names the target is in hand.  See
+    # serializers.repair_null_fks().
+
+    def test_08_a_target_that_arrives_in_a_later_batch(self):
+        """
+        CASE:  the link could not be made when the object arrived, and the
+        object arrives again -- unchanged -- once its target is here.
+        """
+        deserialize(orb, [rep_file('c8', 'part.stp', parent='p8')])
+        self.assertIsNone(orb.get('c8').component_file_of)
+        deserialize(orb, [rep_file('p8', 'asm.stp'),
+                          rep_file('c8', 'part.stp', parent='p8')])
+        self.assertEqual('p8', orb.get('c8').component_file_of.oid)
+
+    def test_09_the_repair_needs_the_target_to_be_here(self):
+        """
+        CASE:  the object is sent again and its target is still nowhere.
+        Nothing to set, and nothing raised.
+        """
+        deserialize(orb, [rep_file('c9', 'part.stp', parent='nonesuch9')])
+        deserialize(orb, [rep_file('c9', 'part.stp', parent='nonesuch9')])
+        self.assertIsNone(orb.get('c9').component_file_of)
+
+    # ---- references an object cannot exist without ------------------------
+    #
+    # A RepresentationFile connects a file to the object it represents.  One
+    # with no "of_object" is not a RepresentationFile:  nothing can say who
+    # may fetch it, what cloaks it, or who owns it, because "of_object"
+    # answers all three.  It must therefore never be created -- and the
+    # deserializer was the only thing that ever created one, by resolving
+    # the oid it was given to nothing and carrying on.  See REQUIRED_REFS.
+
+    def test_10_a_file_whose_model_is_not_here_is_not_created(self):
+        """
+        CASE:  the real one.  A RepresentationFile arrives one message ahead
+        of its Model -- the attribute is there and names the Model
+        correctly, the Model just is not here yet.
+
+        This used to be stored with of_object = None.  The file is now not
+        created at all, which is what lets the sender's retry produce a
+        whole one.
+        """
+        model = dict(_cname='Model', oid='m10', id='m10', name='a model',
+                     create_datetime=NOW, mod_datetime=NOW)
+        the_file = rep_file('rf10', 'asm.stp', of_object='m10')
+        deserialize(orb, [the_file])
+        self.assertIsNone(orb.get('rf10'))
+
+    def test_11_the_pair_sent_again_creates_it_whole(self):
+        """
+        CASE:  the retry.  The Model and the file arrive together, which is
+        how they are sent, and the file is created with its subject.
+        """
+        model = dict(_cname='Model', oid='m11', id='m11', name='a model',
+                     create_datetime=NOW, mod_datetime=NOW)
+        the_file = rep_file('rf11', 'asm.stp', of_object='m11')
+        deserialize(orb, [the_file])
+        self.assertIsNone(orb.get('rf11'))
+        deserialize(orb, [model, the_file])
+        self.assertEqual('m11', orb.get('rf11').of_object.oid)
+
+    def test_12_a_file_with_no_of_object_at_all_is_not_created(self):
+        """
+        CASE:  the attribute is not in the serialization.  Same answer:
+        there is no such thing as a RepresentationFile of nothing.
+        """
+        deserialize(orb, [rep_file('rf12', 'orphan.stp', of_object=None)])
+        self.assertIsNone(orb.get('rf12'))
+
+    def test_13_a_required_ref_is_not_erased_by_an_update(self):
+        """
+        CASE:  an update to an existing object names a target this database
+        does not have.  The update is refused rather than applied, because
+        applying it set the attribute to None -- destroying a link that was
+        right, on the strength of a serialization that could not be
+        understood.
+        """
+        model = dict(_cname='Model', oid='m13', id='m13', name='a model',
+                     create_datetime=NOW, mod_datetime=NOW)
+        the_file = rep_file('rf13', 'asm.stp', of_object='m13')
+        deserialize(orb, [model, the_file])
+        later = dict(the_file, of_object='nonesuch13',
+                     mod_datetime='2026-09-03 12:00:00')
+        deserialize(orb, [later])
+        self.assertEqual('m13', orb.get('rf13').of_object.oid)
+
+    def test_14_an_optional_ref_is_not_erased_by_an_update(self):
+        """
+        CASE:  the same for a reference that is *not* required.  "Not
+        resolvable here" is not "null", so an update naming a target this
+        database has never heard of leaves the link alone rather than
+        clearing it.
+        """
+        deserialize(orb, [rep_file('p14', 'asm.stp'),
+                          rep_file('c14', 'part.stp', parent='p14')])
+        later = rep_file('c14', 'part.stp', parent='nonesuch14')
+        later['mod_datetime'] = '2026-09-03 12:00:00'
+        deserialize(orb, [later])
+        self.assertEqual('p14', orb.get('c14').component_file_of.oid)
+
+    def test_15_an_acu_needs_both_of_its_ends(self):
+        """
+        CASE:  the precedence bug.  "if ((fk == 'assembly') or (fk ==
+        'component') and cname == 'Acu')" binds as "or (... and ...)", so
+        the Acu branch fired for any class with an "assembly" attribute and
+        an Acu missing only its component was created regardless.
+        """
+        acu = dict(_cname='Acu', oid='acu15', id='acu15', name='an acu',
+                   assembly='nonesuch15a', component='nonesuch15b',
+                   create_datetime=NOW, mod_datetime=NOW)
+        deserialize(orb, [acu])
+        self.assertIsNone(orb.get('acu15'))
 
 
 if __name__ == '__main__':

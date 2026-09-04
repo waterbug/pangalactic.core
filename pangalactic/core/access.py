@@ -848,7 +848,19 @@ def is_cloaked(obj):
         # this -- so the two agree by construction:  the channel an object is
         # published on and the people who may fetch its bytes are decided by
         # the same answer.
-        return is_cloaked(getattr(obj, 'of_object', None))
+        #
+        # A file that represents nothing is cloaked, not public.  Falling
+        # through to is_cloaked(None) -> False said "public", which is the
+        # worst available answer:  may_fetch_file() refuses a file with no
+        # "of_object" to everybody, so the record was announced to every
+        # user and served to none -- and the announcement is of a file whose
+        # subject may well be cloaked, since the usual way to have no
+        # subject is a subject that has not arrived yet.  Nobody needs to
+        # hear about a file they cannot fetch.
+        subject = getattr(obj, 'of_object', None)
+        if subject is None:
+            return True
+        return is_cloaked(subject)
     elif hasattr(obj, 'public') and not obj.public:
         return True
     else:

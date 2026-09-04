@@ -265,7 +265,7 @@ uncookers = {
 
 def serialize(orb, objs, include_components=False, include_models=False,
               include_sub_activities=False, include_refdata=False,
-              include_inverse_attrs=False):
+              include_inverse_attrs=False, _seen=None):
     """
     Args:
         orb (UberORB): the (singleton) `orb` instance
@@ -306,6 +306,17 @@ def serialize(orb, objs, include_components=False, include_models=False,
             only desirable to include reference data when data is to be
             exchanged with an external application, in which case a standard
             data exchange format would be preferable.
+
+        _seen (frozenset):  **internal.**  The oids already being serialized
+            on the way down to this call, used only to break the one cycle
+            in the "always include" rules:  a Model carries its
+            RepresentationFiles and a RepresentationFile carries its Model,
+            which are the two directions of the same relationship.  It
+            accumulates along a single descent and is never shared between
+            branches, so it is a recursion guard and not a deduplication --
+            objects reached by two different routes are still serialized
+            twice and reconciled by oid at the end, which is what lets the
+            richer serialization of an object win over a plainer one.
 
     Serialize a collection or iterable of objects into a data structure
     consisting of primitive types; specifically, into a list of canonical
@@ -366,6 +377,7 @@ def serialize(orb, objs, include_components=False, include_models=False,
     # orb.log.info('* serializing objects ...')
     if not objs:
         return []
+    _seen = _seen if _seen is not None else frozenset()
     serialized = []
     # NOTE [SCW 2020-05-22]:  previously, the Person and Organization objects
     # for the creator, modifier, owner attributes were all included in
@@ -488,9 +500,41 @@ def serialize(orb, objs, include_components=False, include_models=False,
         ###################################################################
         if isinstance(obj, orb.classes['Model']):
             # + ALWAYS include related RepresentationFile instances
-            if obj.has_files:
-                s_rfiles = serialize(orb, obj.has_files)
+            #   (skipping any this descent is already inside of -- see the
+            #   RepresentationFile case below, which is the other direction
+            #   of this same relationship)
+            files = [f for f in (obj.has_files or []) if f.oid not in _seen]
+            if files:
+                s_rfiles = serialize(orb, files, _seen=_seen | {obj.oid})
                 serialized += s_rfiles
+        ###################################################################
+        if isinstance(obj, orb.classes['RepresentationFile']):
+            # + ALWAYS include the object the file represents.
+            #
+            # Every other reference an object cannot exist without is
+            # carried with it -- an Acu brings its assembly and component, a
+            # RoleAssignment its role, person and context, a Model its files
+            # -- so that a batch can be deserialized on its own:
+            # DESERIALIZATION_ORDER puts the classes in dependency order, and
+            # that is worth nothing if the object depended on is not in the
+            # set.  This one relationship was carried downward (Model ->
+            # has_files) and never upward, so a RepresentationFile
+            # serialized by itself named a Model that was not there.
+            #
+            # It is not hypothetical:  a "modified object" signal serializes
+            # the one object it is given, and one sent for a newly imported
+            # STEP file reached the repository with no Model in the batch.
+            # The file was stored with of_object = None -- a file nothing
+            # cloaks and nobody may fetch ("download not authorized",
+            # 2026-09-03).  REQUIRED_REFS now refuses to build that object;
+            # this makes it unnecessary to, by making the batch complete.
+            #
+            # "_seen" is what keeps this from recurring forever against the
+            # Model case above:  the Model that sent us here is in it.
+            subject = getattr(obj, 'of_object', None)
+            if subject is not None and subject.oid not in _seen:
+                serialized += serialize(orb, [subject],
+                                        _seen=_seen | {obj.oid})
         ###################################################################
         if isinstance(obj, orb.classes['RoleAssignment']):
             # include Role object
@@ -565,6 +609,99 @@ DESERIALIZATION_ORDER = [
                     ]
 
 
+# REQUIRED_REFS:  object-valued attributes without which an instance of the
+# class is not a thing.  A RepresentationFile with no "of_object" is the
+# example that prompted this list:  its whole purpose is to connect a file to
+# the object it represents, so one without that connection is not a degraded
+# RepresentationFile, it is not a RepresentationFile at all -- nothing can
+# say who may fetch it (access.may_fetch_file), what cloaks it
+# (access.is_cloaked), or which project owns it (access.get_owner_id),
+# because every one of those questions is answered by "of_object".
+#
+# **The deserializer is the only thing that ever made one.**  Nothing in the
+# application does:  the three creation sites (digital_files.py) all pass
+# "of_object", and there is nowhere else to make one.  But deserialize()
+# builds every class the same way -- cls(**kwargs) -- and an object-valued
+# attribute whose target was not in the database yet simply became None.
+#
+# Refusing them here is not new;  it is what the deserializer already did
+# for a Port with no of_product, a Flow with no ports, an Acu with no
+# assembly or component and a PSU with no project or system.  That was an
+# if-chain of special cases which (a) omitted RepresentationFile, (b) fired
+# only when the attribute was *absent* from the serialization and not when
+# it named an object that could not be found -- which is the case that
+# actually occurs, and the one that produced the null -- and (c) had a
+# precedence bug: "if ((fk == 'assembly') or (fk == 'component') and cname
+# == 'Acu')" binds as "or (... and ...)", so any class with an "assembly"
+# attribute took the Acu branch.  Declaring the invariant instead of coding
+# it four times fixes all three.
+#
+# Keyed on the exact class name, not by isinstance:  "of_product" is
+# required for a Port and NOT for a PortTemplate, which is a Port subclass.
+# PortTemplate is the only subclass any of these classes has.
+#
+# NOTE: this belongs in the ontology, as a cardinality restriction on the
+# property.  It cannot live there yet:  meta.property_to_field() documents a
+# "null" key in its docstring and never sets one, and registry.py builds
+# every foreign key as a bare Column(ForeignKey(...)), so "required" is not
+# expressible in the schema or enforceable in the database.  Until it is,
+# this is the one place that knows.
+REQUIRED_REFS = {
+    'Acu':                ('assembly', 'component'),
+    'Flow':               ('start_port', 'end_port'),
+    'Port':               ('of_product',),
+    'ProjectSystemUsage': ('project', 'system'),
+    'RepresentationFile': ('of_object',),
+    }
+
+
+def repair_null_fks(orb, obj, so, schema):
+    """
+    Fill in an existing object's object-valued attributes that are null and
+    that this serialization can now resolve.
+
+    An object already in the database is not necessarily *whole*.  A
+    reference whose target had not arrived when the object was created was
+    left null -- `deserialize()` remembers those in `deferred_fks` and tries
+    again at the end of the batch, but a target that came in a *later*
+    message is past the end of that batch, and nothing ever set it.  A
+    RepresentationFile sent one message ahead of its Model is the case this
+    was written for:  it was stored with no `of_object`, which makes it a
+    file that nobody may fetch (`access.may_fetch_file`) and that nothing
+    cloaks (`access.is_cloaked`).
+
+    The repair is deliberately one-directional:  **only attributes that are
+    still null are set.**  This runs on objects the deserializer is
+    otherwise ignoring, whose incoming mod_datetime is no later than the one
+    held -- so the serialization is not authority for anything, and the one
+    thing it can safely do is supply a link that is missing altogether.
+    Overwriting a link that exists would let a stale copy of an object
+    re-point a reference that someone else has since changed.
+
+    Args:
+        orb (UberORB):  the (singleton) `orb` instance
+        obj (Identifiable):  the object in the database
+        so (dict):  its serialization, as received
+        schema (dict):  the schema of its class
+
+    Returns:
+        list of str:  names of the attributes that were set
+    """
+    repaired = []
+    one2m_or_m2m = list(ONE2M) + list(M2M)
+    for name, field in schema['fields'].items():
+        if (field['is_inverse'] or name in one2m_or_m2m
+            or field.get('range') not in orb.classes):
+            continue
+        if not so.get(name) or getattr(obj, name, None) is not None:
+            continue
+        target = orb.get(so[name])
+        if target is not None:
+            setattr(obj, name, target)
+            repaired.append(name)
+    return repaired
+
+
 def deserialize(orb, serialized, include_refdata=False, dictify=False,
                 force_no_recompute=False, force_update=False):
     """
@@ -604,6 +741,11 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
         (1) Include all datatype properties
         (2) Other object properties will be deserialized only if
             they are direct (not inverse) properties
+        (3) An object missing a reference it cannot exist without is not
+            deserialized at all -- see REQUIRED_REFS.  A reference that is
+            not required and cannot be resolved is left unset and retried
+            when the batch is done (deferred_fks), or when the object is
+            sent again (repair_null_fks).
     """
     # orb.log.debug('* deserializing ...')
     if not serialized:
@@ -811,6 +953,20 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                     # objs.append(db_obj)
                     if dictify:
                         output['unmodified'].append(db_obj)
+                    # "unmodified" is not the same as "complete":  a link
+                    # whose target had not arrived when this object was
+                    # created is still null, and the deferred pass below
+                    # only reaches the end of the batch that created it.
+                    # The serialization naming that target is in hand right
+                    # now, so fill in what is still missing -- and only what
+                    # is still missing.  See repair_null_fks().
+                    if db_obj is not None:
+                        repaired = repair_null_fks(orb, db_obj, d, schema)
+                        if repaired:
+                            obj_id = getattr(db_obj, 'id', '') or oid
+                            orb.log.debug(f'* deser: "{obj_id}" was missing '
+                                          f'{repaired}; set from the '
+                                          'serialization received.')
                     continue
                 else:
                     # orb.log.debug('    object has later '
@@ -863,81 +1019,81 @@ def deserialize(orb, serialized, include_refdata=False, dictify=False,
                    if ((not schema['fields'][a]['is_inverse'])
                         and (schema['fields'][a].get('range')
                              in orb.classes))]
+            required = REQUIRED_REFS.get(cname, ())
             if fks:
                 # orb.log.debug(f'    fk fields found: {fks}')
                 for fk in fks:
                     # get the related object by its oid (i.e. d[fk])
                     # orb.log.debug('    * rel obj oid: "{}"'.format(
                                    # d.get(fk)))
-                    if d.get(fk):
+                    target = orb.get(d[fk]) if d.get(fk) else None
+                    if target is not None:
                         # orb.log.debug('      rel obj found.')
-                        kw[fk] = orb.get(d[fk])
-                        if kw[fk] is None:
-                            # The named object is not here *yet*.  It may be
-                            # later in this very batch:  DESERIALIZATION_ORDER
-                            # orders the classes but not the objects within a
-                            # class, so a self-referential attribute --
-                            # RepresentationFile.component_file_of, for one --
-                            # is decided by which of the two happens to come
-                            # first in the list.
-                            #
-                            # Setting it to None here and moving on loses the
-                            # link silently.  That is what emptied
-                            # "component_files" on a client syncing an
-                            # imported STEP assembly:  with no component
-                            # files, nothing staged the set under the names
-                            # its references use, and only the files that
-                            # happened to already sit in the vault under
-                            # plain names resolved (author, 2026-08-26).
-                            #
-                            # So remember it and try again when the batch is
-                            # done.  This is the general form of the
-                            # "act_to_sao" pass below, which does the same
-                            # thing for one attribute of one class.
-                            deferred_fks.append((oid, fk, d[fk]))
-                    else:
-                        # orb.log.debug('      rel obj NOT found.')
-                        # "of_product" is REQUIRED for a Port (it is NOT
-                        # required for a PortTemplate, a subtype of Port)
-                        if fk == 'of_product' and cname == 'Port':
-                            orb.log.debug('      invalid Port instance:')
-                            oid = d['oid']
-                            orb.log.debug(f'      - oid: "{oid}"')
-                            orb.log.debug('        is missing of_product;')
-                            orb.log.debug('        will be ignored.')
+                        kw[fk] = target
+                    elif fk in required:
+                        # The object cannot exist without this, so it is not
+                        # created (or, if it is an update, not applied).  Two
+                        # ways to get here and both are refused:  the
+                        # attribute was not sent at all, or it named an
+                        # object that is not here.
+                        #
+                        # The second is what happened to a RepresentationFile
+                        # sent one vger.save() ahead of its Model:  the
+                        # attribute was there and named the Model correctly,
+                        # the Model just had not arrived, so the file was
+                        # created with of_object = None and nothing ever
+                        # repaired it -- a file record that nothing cloaked
+                        # and nobody could fetch, "download not authorized"
+                        # to its own project (observed 2026-09-03).
+                        #
+                        # Refusing it is what makes that self-correcting.
+                        # The repository does not report a refused object in
+                        # "new_obj_dts", so the client leaves it in
+                        # "locally_created_oids" and sends it again at the
+                        # next sync -- by which time its Model is here.  A
+                        # client refusing one off the pubsub gets it from
+                        # the next sync of the project, with its Model.
+                        # Half an object, stored, corrects itself never.
+                        named = d.get(fk)
+                        why = (f'"{fk}" names "{named}", which is not here'
+                               if named else f'no "{fk}"')
+                        obj_id = d.get('id') or '[no id]'
+                        orb.log.debug(f'      invalid {cname} instance:')
+                        orb.log.debug(f'      - oid: "{oid}"')
+                        orb.log.debug(f'        id:  "{obj_id}"')
+                        orb.log.debug(f'        {why};')
+                        orb.log.debug('        will be ignored.')
+                        if oid not in ignores:
                             ignores.append(oid)
-                        # a Flow MUST have "start_port" and "end_port" objects
-                        if fk in ["start_port", "end_port"]:
-                            orb.log.debug('      invalid Flow instance:')
-                            oid = d['oid']
-                            orb.log.debug(f'      - oid: "{oid}"')
-                            orb.log.debug('        is missing start_port')
-                            orb.log.debug('        or end_port;')
-                            orb.log.debug('        will be ignored.')
-                            ignores.append(oid)
-                        # an Acu MUST have non-null "assembly" and "component"
-                        # objects
-                        if ((fk == 'assembly') or (fk == 'component') and
-                            cname == 'Acu'):
-                            orb.log.debug('      invalid Acu instance:')
-                            oid = d['oid']
-                            orb.log.debug(f'      - oid: "{oid}"')
-                            orb.log.debug('        is missing an assembly')
-                            orb.log.debug('        or component;')
-                            orb.log.debug('        will be ignored.')
-                            ignores.append(oid)
-                        # a ProjectSystemUsage MUST have non-null "project" and
-                        # "system" objects
-                        if ((fk == 'project') or (fk == 'system') and
-                            cname == 'ProjectSystemUsage'):
-                            orb.log.debug('      invalid ProjectSystemUsage')
-                            orb.log.debug('      instance:')
-                            oid = d['oid']
-                            orb.log.debug(f'      - oid: "{oid}"')
-                            orb.log.debug('        is missing a project')
-                            orb.log.debug('        or system;')
-                            orb.log.debug('        will be ignored.')
-                            ignores.append(oid)
+                    elif d.get(fk):
+                        # The named object is not here *yet*.  It may be
+                        # later in this very batch:  DESERIALIZATION_ORDER
+                        # orders the classes but not the objects within a
+                        # class, so a self-referential attribute --
+                        # RepresentationFile.component_file_of, for one --
+                        # is decided by which of the two happens to come
+                        # first in the list.
+                        #
+                        # Setting it to None here and moving on loses the
+                        # link silently.  That is what emptied
+                        # "component_files" on a client syncing an
+                        # imported STEP assembly:  with no component
+                        # files, nothing staged the set under the names
+                        # its references use, and only the files that
+                        # happened to already sit in the vault under
+                        # plain names resolved (author, 2026-08-26).
+                        #
+                        # So remember it and try again when the batch is
+                        # done.  This is the general form of the
+                        # "act_to_sao" pass below, which does the same
+                        # thing for one attribute of one class.
+                        #
+                        # "kw" is left without the key rather than carrying
+                        # None:  on an update, every key in "kw" is
+                        # setattr()ed, so a None here would erase a link
+                        # that is currently right because the object naming
+                        # it happens to be unknown to this database.
+                        deferred_fks.append((oid, fk, d[fk]))
             # else:
                 # orb.log.debug('    no fk fields found.')
             cls = orb.classes[cname]
