@@ -601,7 +601,14 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                                        assigned_to=user,
                                        role_assignment_context=obj)
             roles = set([ra.assigned_role.id for ra in ras])
-            auth_roles = set(['administrator', 'lead_engineer',
+            # NOTE: 'Administrator' is capitalised because that is the Role's
+            # id (pgefobjects:Role.Administrator).  It was 'administrator'
+            # here, which matched nothing, so an Administrator of a project
+            # was never granted 'modify' on the project or its systems by
+            # this branch -- only by being a global admin or the creator.
+            # Found when may_add_system() was made to defer to this rule
+            # (2026-09-07).
+            auth_roles = set(['Administrator', 'lead_engineer',
                               'systems_engineer'])
             if roles & auth_roles:
                 # orb.log.debug('  - user is authorized by role(s) ...')
@@ -652,7 +659,14 @@ def get_perms(obj, user=None, permissive=False, debugging=False):
                                    assigned_to=user,
                                    role_assignment_context=obj.owner)
             roles = set([ra.assigned_role.id for ra in ras])
-            auth_roles = set(['administrator', 'lead_engineer',
+            # NOTE: 'Administrator' is capitalised because that is the Role's
+            # id (pgefobjects:Role.Administrator).  It was 'administrator'
+            # here, which matched nothing, so an Administrator of a project
+            # was never granted 'modify' on the project or its systems by
+            # this branch -- only by being a global admin or the creator.
+            # Found when may_add_system() was made to defer to this rule
+            # (2026-09-07).
+            auth_roles = set(['Administrator', 'lead_engineer',
                               'systems_engineer'])
             if roles & auth_roles:
                 # orb.log.debug('  - user is authorized by role(s) ...')
