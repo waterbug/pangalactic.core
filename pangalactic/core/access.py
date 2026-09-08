@@ -721,6 +721,45 @@ def is_global_admin(user):
     return bool(global_admin)
 
 
+def may_add_system(project, user=None):
+    """
+    Say whether a user may add a system to a project -- i.e. create a
+    ProjectSystemUsage in it.
+
+    Adding a system modifies the project, so this is 'modify' on the Project
+    and nothing new:  get_perms() branch [3] already decides it, by the roles
+    {'Administrator', 'lead_engineer', 'systems_engineer'} held in the
+    project's context.  This is a name for that question, so that a dialog
+    asking it does not have to know which object to ask about, and so that
+    there is one definition of the rule rather than two (author, 2026-09-07).
+
+    NOTE on being offline:  the answer is False on a disconnected client,
+    even for a systems engineer, and there is no way around it.
+    is_writable_now() lets a disconnected client write to an object it
+    created (rule [4]) or holds a check-out claim on (rule [1], which is
+    tested first) -- and a Project is neither:  it is not created locally,
+    and PrepareForOfflineDialog.classify() deliberately does not offer
+    Projects for check-out, on the grounds that they "are not work items".
+    So the option is not shown during an offline import.  Left as it is
+    rather than special-cased:  the client is where these rules are applied,
+    and a PSU that could not be created here is one the repository will
+    never be asked to accept.
+
+    Args:
+        project (Project):  the project a system would be added to
+
+    Keyword Args:
+        user (Person):  the user asking (None -> the local user, as
+            get_perms() does)
+
+    Returns:
+        bool:  True if the user may add a system to the project
+    """
+    if project is None:
+        return False
+    return 'modify' in get_perms(project, user=user)
+
+
 def get_owner_id(obj):
     """
     Get the id of the organization or project that owns an object, following
