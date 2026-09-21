@@ -36,5 +36,6 @@ pangalaxian_test/*
 **/dbdump_test/
 **/closure_test/
 **/deferred_test/
+**/delete_cascade_test/
 *.pickle
 _trial_temp

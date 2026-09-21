@@ -35,7 +35,7 @@ intended to be a singleton).
 # ANY SUCH MATTER SHALL BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS
 # AGREEMENT.
 
-import json, os, shutil, sys, traceback
+import glob, json, os, shutil, sys, traceback
 from copy import deepcopy
 from functools import reduce
 from pathlib import Path
@@ -2225,6 +2225,60 @@ class UberORB(object):
         vault_fname = self.get_vault_fname(rep_file)
         return os.path.join(self.vault, vault_fname)
 
+    def remove_vault_file(self, rep_file):
+        """
+        Remove the bytes a RepresentationFile stands for, and the chunks cut
+        from them.
+
+        A RepresentationFile without its file is a lie -- it says a file is
+        available and every reader of it is wrong (see
+        pangalactic.core.digital_files) -- and the converse is just as true
+        the other way round:  bytes with no object to name them are
+        unreachable, since the only way to a vault file is the oid in its
+        name.  Nothing would ever look at them again, and nothing would ever
+        remove them either.
+
+        The chunk files go with it.  vger.download_chunk() cuts a file into
+        "<vault name>_0", "_1" and so on the first time it is fetched and
+        leaves them beside it as a cache;  they are as unreachable as the
+        file once its object is gone.
+
+        Failure is logged, not raised.  The object is going whatever happens
+        to the bytes, and refusing to delete an object because a file could
+        not be removed would leave the database wrong to keep the vault
+        tidy, which is the wrong way round.
+
+        Args:
+            rep_file (RepresentationFile):  the file object being deleted
+
+        Returns:
+            list of str:  the paths that were removed
+        """
+        try:
+            fpath = self.get_vault_fpath(rep_file)
+        except Exception:
+            # a file object with no user_file_name has no vault name;  there
+            # is nothing to remove and nothing to say about it
+            return []
+        removed = []
+        # the file, then anything download_chunk() cut from it
+        candidates = [fpath] + glob.glob(fpath + '_[0-9]*')
+        for path in candidates:
+            if not os.path.exists(path):
+                continue
+            try:
+                os.remove(path)
+                removed.append(path)
+            except OSError as e:
+                self.log.error(f'  ** could not remove vault file "{path}": '
+                               f'{e}')
+        if removed:
+            n = len(removed)
+            fname = os.path.basename(fpath)
+            self.log.debug(f'  - vault: removed "{fname}"'
+                           + (f' and {n - 1} chunk file(s)' if n > 1 else ''))
+        return removed
+
     def get_file_closure(self, rep_file):
         """
         A RepresentationFile and every file it references, transitively.
@@ -2763,8 +2817,17 @@ class UberORB(object):
 
         Args:
             objs (Iterable of Identifiable or subtype): objects in the local db
+
+        Returns:
+            list of str:  the oids actually removed, the objects deleted
+            along with them included.  A deletion cascades -- a Product takes
+            its Models, their files and the bytes of those -- and the caller
+            cannot work out what went from what it asked for.  vger.delete()
+            needs it to tell the other clients, and to record the whole set
+            as deleted so that none of it can be pushed back.
         """
         self.log.debug('* orb.delete() called ...')
+        deleted_oids = []
         # TODO: make sure appropriate relationships in which these objects
         # are the parent or child are also deleted
         info = []
@@ -2803,7 +2866,7 @@ class UberORB(object):
                 if obj.systems:
                     txt = 'attempting to delete PSUs from project '
                     info.append('   - {} "{}" ...'.format(txt, obj.id))
-                    self.delete(obj.systems)
+                    deleted_oids += self.delete(obj.systems)
                 if obj.oid in systemz:
                     del systemz[obj.oid]
             elif isinstance(obj, self.classes['Person']):
@@ -2886,15 +2949,68 @@ class UberORB(object):
                     self.log.debug('     no flows found.')
                 ports = obj.ports
                 if ports:
-                    self.delete(ports)
+                    deleted_oids += self.delete(ports)
                 psus = obj.projects_using_system
                 if psus:
-                    self.delete(psus)
+                    deleted_oids += self.delete(psus)
                 comp_acus = obj.components
                 if comp_acus:
-                    self.delete(comp_acus)
+                    deleted_oids += self.delete(comp_acus)
+                # The things that model it go with it.  A Model exists to
+                # describe one object ("of_thing") and a RepresentationFile
+                # to carry one Model's file, so neither has any meaning once
+                # that object is gone:  what is left is a Model of nothing,
+                # a file record nobody may fetch (access.may_fetch_file
+                # answers on "of_object"), and bytes in the vault that
+                # nothing can name.  Deleting the Product used to leave all
+                # three (author, 2026-09-15).
+                models = list(getattr(obj, 'has_models', None) or [])
+                if models:
+                    info.append(f'   - deleting {len(models)} model(s) of '
+                                f'"{obj.id}" ...')
+                    deleted_oids += self.delete(models)
+                doc_refs = list(getattr(obj, 'doc_references', None) or [])
+                if doc_refs:
+                    info.append(f'   - deleting {len(doc_refs)} document '
+                                f'reference(s) of "{obj.id}" ...')
+                    deleted_oids += self.delete(doc_refs)
+                # A Model or a Document is itself a Product -- DigitalProduct
+                # is a Product subclass -- so it arrives here rather than at
+                # any branch of its own, and its files have no existence
+                # apart from it.  "has_files" is declared on DigitalProduct,
+                # so this is None for every other kind of Product.  One rule,
+                # wherever the deletion starts:  with the product a Model
+                # describes, or with the Model itself.
+                rep_files = list(getattr(obj, 'has_files', None) or [])
+                if rep_files:
+                    info.append(f'   - deleting {len(rep_files)} file(s) of '
+                                f'"{obj.id}" ...')
+                    deleted_oids += self.delete(rep_files)
                 if obj.oid in componentz:
                     del componentz[obj.oid]
+            elif isinstance(obj, self.classes['RepresentationFile']):
+                # the object is the only way to the bytes:  a vault file is
+                # named for the oid of the object that describes it, so
+                # bytes whose object is gone can never be found again
+                self.remove_vault_file(obj)
+            elif isinstance(obj, self.classes['DocumentReference']):
+                # A reference is the attachment, not the document.  Deleting
+                # the product it was attached to removes the attachment;  the
+                # Document itself stays unless nothing else refers to it,
+                # since one document may be attached to several items and is
+                # not the property of any of them.
+                doc = getattr(obj, 'document', None)
+                others = [r for r in (getattr(doc, 'item_relationships',
+                                              None) or [])
+                          if r.oid != obj.oid]
+                if doc is not None and not others:
+                    info.append(f'   - "{doc.id}" is referenced by nothing '
+                                'else; deleting it too ...')
+                    self.db.delete(obj)
+                    self.db.commit()
+                    deleted_oids.append(obj.oid)
+                    deleted_oids += self.delete([doc])
+                    continue
             elif isinstance(obj, self.classes['Port']):
                 # for Ports, first delete all related Flows, both outgoing and
                 # incoming (in which it is the start or end)
@@ -2979,9 +3095,11 @@ class UberORB(object):
                 if isinstance(obj, self.classes['Product']):
                     # if a Product instance, add its oid to deleted_oids ...
                     product_oid = obj.oid
+                obj_oid = obj.oid
                 self.db.delete(obj)
                 try:
                     self.db.commit()
+                    deleted_oids.append(obj_oid)
                     # info.append('     ... deleted.')
                     if product_oid:
                         if state.get('deleted_oids'):
@@ -3001,6 +3119,7 @@ class UberORB(object):
                 refresh_systemz(project)
         if recompute_required and not state.get('connected'):
             recompute_parmz()
+        return deleted_oids
 
     def is_versioned(self, obj):
         """
