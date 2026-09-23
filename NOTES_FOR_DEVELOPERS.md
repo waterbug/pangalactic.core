@@ -231,7 +231,7 @@
     `                          activity ("act") and "usage"`
 
     `mode:             (str)  current Pangalaxian gui mode`
-    `                         ('system', 'component', 'db', or 'data')`
+    `                         ('system', 'component', or 'db')`
 
     `mode_defz_dts:    (str)  last-mod-datetime str of the mode_defz cache`
 
@@ -241,8 +241,8 @@
     `                         -- diagnostic only: deliberately written and`
     `                         never read (see the note below this list)`
 
-    `product:          (str)  oid of currently selected Product -- refers to`
-    `                         the product selected in 'product modeler'`
+    `product:          (str)  oid of currently selected Product `
+    `                         when in 'Component Modeler' mode`
 
     `project:          (str)  oid of currently selected Project`
 
