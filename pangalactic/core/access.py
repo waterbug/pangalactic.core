@@ -799,6 +799,10 @@ def get_owner_id(obj):
         # it has no owner of its own -- and without this it fell through to
         # '' and was published on no project channel at all.
         return get_owner_id(getattr(obj, 'of_object', None))
+    elif isinstance(obj, orb.classes['DocumentReference']):
+        # takes its owner from its document, so that it is published in the
+        # same message as the document (see is_cloaked())
+        return get_owner_id(getattr(obj, 'document', None))
     return ''
 
 
@@ -914,6 +918,23 @@ def is_cloaked(obj):
         if subject is None:
             return True
         return is_cloaked(subject)
+    elif isinstance(obj, orb.classes['DocumentReference']):
+        # cloaking for a document reference is determined by its document.
+        # Like RepresentationFile it is not a ManagedObject, so it used to
+        # fall through to "public":  vger.save() then published it on the
+        # public channel while its cloaked Document went out on the owner's
+        # channel, in a separate message.  The public message was sent
+        # first, so every receiving client deserialized the reference before
+        # the Document existed and stored it with document=None -- and the
+        # Document arriving afterwards does not go back and fix it
+        # (observed by the author, 2026-09-29).  It also announced the
+        # document's name to users who may not see the document.  A
+        # reference with no document is cloaked, for the reason given above
+        # for a file with no subject.
+        document = getattr(obj, 'document', None)
+        if document is None:
+            return True
+        return is_cloaked(document)
     elif hasattr(obj, 'public') and not obj.public:
         return True
     else:

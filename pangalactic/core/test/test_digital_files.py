@@ -948,6 +948,22 @@ class DigitalFilesTest(unittest.TestCase):
                  new_doc_with_file(fpath, no_owner)]
         self.assertEqual(expected, value)
 
+    def test_28_the_reference_is_published_with_its_document(self):
+        """
+        CASE:  the channel vger.save() publishes a reference on.  It must be
+        the document's, so the two travel in one message and the receiver
+        deserializes the Document first.  The reference used to count as
+        public, went out alone ahead of its cloaked Document, and every
+        other client stored it with document=None (author, 2026-09-29).
+        """
+        fpath = self.a_file('channel-doc.pdf', b'%PDF-1.4 channel')
+        doc, ref, rep_file = new_doc_with_file(fpath, self.doc_parms(fpath))
+        orb.db.commit()
+        expected = [(True, 'H2G2')] * 3
+        value = [(is_cloaked(o), get_owner_id(o))
+                 for o in (doc, ref, rep_file)]
+        self.assertEqual(expected, value)
+
 
 if __name__ == '__main__':
     unittest.main()
