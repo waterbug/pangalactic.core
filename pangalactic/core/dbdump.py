@@ -44,7 +44,7 @@ objects, same oids, and identical field sets once the caches are attached.
 """
 import os
 
-import yaml
+import ruamel_yaml as yaml
 
 from sqlalchemy import create_engine, MetaData, select
 
