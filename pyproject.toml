@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pangalactic.core"
-version = "4.4.dev3"
+version = "4.4.dev4"
 description = "The Pan Galactic Engineering Framework Core Package"
 readme = "README.md"
 requires-python = ">=3.9"
