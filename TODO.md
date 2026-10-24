@@ -3,13 +3,24 @@
 Highest priority development items.  The list is in approximate priority order,
 but priorities are subject to change.
 
+* Release 4.4.dev4 and (production) 4.4
+  - Finish edits to user guide (including screenshots)
+  - Put user guide into release and onto pangalactic.us web site
+  - Update online ontology documentation
+  - Build conda packages
+  - Build installers
+
 * Tutorial videos
   - a basic training video
   - a set of focused videos for various aspects and processes
 
+In next release cycles:
+-----------------------
+
 * Interface to 42 (ACS simulation tool)
   - maintain ACS system component models in 42-compatible formats
   - create .stl from STEP using pythonocc, then use meshio to gen .obj
+  - use 42 socket-based interface to communicate with a running simulation
 
 * Hardware Library:
   - Add "Only Non-Project Specs" filter to HW library (filters out

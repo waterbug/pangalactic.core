@@ -5,38 +5,42 @@
 #################################################################
 # export SQLALCHEMY_WARN_20=1
 
-for x in \
-test_datetimes.py \
-test_cook.py \
-test_uncook.py \
-test_names.py \
-test_kb.py \
-test_registry.py \
-test_orb.py \
-test_tachistry.py \
-test_fastorb.py
+# Runs every test_*.py module in this directory, one module per process.
+# To deactivate a module, rename it so it doesn't match test_*.py
+# (e.g. test_foo.py -> inactive_test_foo.py).
+#
+# One process per module is required: registry.py has a single
+# module-level declarative Base, so two registries in one process collide.
+# Some tests (e.g. test_kb.py) also depend on running from this directory.
+
+cd "$(dirname "$0")" || exit 1
+
+# remove the test home directories (pangalaxian_test, marvin_test,
+# placement_test, etc.) -- some modules are not idempotent against an
+# existing home, so this is done before each module
+clean_homes () {
+    for h in ./*_test; do
+        if [ -d "$h" ]; then
+            rm -r "$h"
+        fi
+    done
+}
+
+for x in test_*.py
 do
     echo
     echo -n "run $x ? (y/n) [y]"
     response=y
     read response
     if [ "$response" != 'n' ]; then
+        clean_homes
         pytest -v $x;
     fi
 done
 
 # clean up home directories used in tests
 
-if [ -d pangalaxian_test ]; then
-    # echo '\npreserving test home dir (pangalaxian_test) ...\n'
-    echo '\nremoving test home dir (pangalaxian_test) ...\n'
-    rm -r ./pangalaxian_test
-fi
-
-if [ -d marvin_test ]; then
-    # echo '\npreserving test home dir (marvin_test) ...\n'
-    echo '\nremoving test home dir (marvin_test) ...\n'
-    rm -r ./marvin_test
-fi
+echo '\nremoving test home dirs ...\n'
+clean_homes
 
 # SQLALCHEMY_WARN_20=0

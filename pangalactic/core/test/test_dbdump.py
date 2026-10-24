@@ -19,7 +19,7 @@ from pangalactic.core.serializers import serialize
 from pangalactic.core.test.utils  import create_test_users, create_test_project
 from pangalactic.core.serializers import deserialize
 
-import yaml
+import ruamel_yaml as yaml
 
 HOME = 'dbdump_test'
 orb.start(home=HOME)
