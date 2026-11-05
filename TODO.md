@@ -3,7 +3,7 @@
 Highest priority development items.  The list is in approximate priority order,
 but priorities are subject to change.
 
-* Release 4.4.dev4 and (production) 4.4
+* Release (production) 4.4
   - Finish edits to user guide (including screenshots)
   - Put user guide into release and onto pangalactic.us web site
   - Update online ontology documentation

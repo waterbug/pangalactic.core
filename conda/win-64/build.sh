@@ -1,9 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-$PYTHON setup.py install 
+# stop the script if any command fails
+set -ex
 
-# Add more build steps here, if they are necessary.
+# install using pip into the conda build environment prefix
+$PYTHON -m pip install . --no-deps --no-build-isolation -vv
 
-# See
-# http://docs.continuum.io/conda/build.html
-# for a list of environment variables that are set during the build process.

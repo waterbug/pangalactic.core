@@ -8,7 +8,9 @@ source:
 requirements:
   build:
     - python {{PY_VER}}
-    - setuptools
+    - pip
+    - setuptools >=61.0.0
+    - wheel
 
   run:
     - openpyxl
@@ -17,6 +19,7 @@ requirements:
     - python {{PY_VER}}
     - python-dateutil
     - pytz
+    - rdflib
     - ruamel_yaml
     - sqlalchemy
     - tzlocal
@@ -24,8 +27,6 @@ requirements:
     - xlrd
     - xlwt
     - xlsxwriter
-    # locally created conda packages
-    - rdflib
 
 about:
   # home: https://pangalactic.us
